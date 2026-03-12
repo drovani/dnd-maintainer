@@ -276,7 +276,7 @@ export default function CharacterSheet() {
                   <div key={ability}>
                     <div className="text-slate-500 font-semibold mt-2 mb-1">{ability}</div>
                     {skills.map((skill) => {
-                      const skillData = character.skills[skill.id]
+                      const skillData = character.skills?.[skill.id] ?? { proficient: false, expertise: false }
                       const abilityMod = getAbilityModifier(
                         character.abilities[skill.ability.toLowerCase() as keyof typeof character.abilities]
                       )

@@ -41,7 +41,7 @@ export default function NotesPage() {
   const [sortBy, setSortBy] = useState<'recent' | 'pinned' | 'alphabetical'>('recent')
   const [showNewNoteModal, setShowNewNoteModal] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
-  const autoSaveTimer = useRef<NodeJS.Timeout>()
+  const autoSaveTimer = useRef<NodeJS.Timeout>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   const [formData, setFormData] = useState({

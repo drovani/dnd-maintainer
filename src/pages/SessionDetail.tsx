@@ -31,7 +31,7 @@ export default function SessionDetail() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isSaving, setIsSaving] = useState(false)
-  const autoSaveTimer = useRef<NodeJS.Timeout>()
+  const autoSaveTimer = useRef<NodeJS.Timeout>(null)
 
   const [formData, setFormData] = useState<Partial<Session>>({
     name: '',
