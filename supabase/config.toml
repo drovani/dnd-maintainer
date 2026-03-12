@@ -1,0 +1,36 @@
+# Supabase Local Configuration
+# Generated for D&D 5e Campaign Manager
+
+project_id = "dnd-maintainer"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "realtime"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[db.seed]
+sql_paths = ["seed.sql"]
+
+[realtime]
+enabled = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/auth/callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+
+[analytics]
+enabled = false

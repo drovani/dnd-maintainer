@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  /* D&D Themed Colors */
+  --color-parchment: #f4e4c1;
+  --color-dark-parchment: #d4a574;
+  --color-ink: #2c1810;
+  --color-gold: #d4af37;
+  --color-blood-red: #8b0000;
+  --color-forest-green: #1b4332;
+  --color-deep-purple: #3a0066;
+  --color-stone-gray: #4a4a4a;
+  --color-shadow: #1a1a1a;
+}
+
+* {
+  @apply transition-colors duration-200;
+}
+
+html,
+body,
+#root {
+  @apply h-full w-full;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 font-sans;
+  background-color: var(--color-shadow);
+}
+
+a {
+  @apply text-amber-500 hover:text-amber-400 underline;
+}
+
+button {
+  @apply font-medium;
+}
+
+/* Utility Classes */
+@layer components {
+  .page-container {
+    @apply p-6 max-w-7xl mx-auto;
+  }
+
+  .page-header {
+    @apply mb-8;
+  }
+
+  .page-title {
+    @apply text-3xl font-bold text-amber-400 mb-2;
+  }
+
+  .page-subtitle {
+    @apply text-slate-400 text-lg;
+  }
+
+  .grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .grid-4 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  .form-group {
+    @apply mb-4;
+  }
+
+  .form-label {
+    @apply block text-sm font-semibold text-amber-400 mb-2;
+  }
+
+  .divider {
+    @apply border-t border-amber-900/20;
+  }
+
+  .hover-lift {
+    @apply hover:-translate-y-1 hover:shadow-lg transition-all duration-200;
+  }
+
+  .glass-effect {
+    @apply bg-slate-900/80 backdrop-blur-sm border border-amber-900/20;
+  }
+
+  .gradient-gold {
+    @apply bg-linear-to-r from-amber-600 to-amber-500;
+  }
+}
