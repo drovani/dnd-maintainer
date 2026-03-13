@@ -169,6 +169,11 @@ export function generateSeedSql(data: ExportData): string {
   const lines: string[] = [
     '-- D&D Campaign Manager - Seed Data Export',
     `-- Generated at: ${new Date().toISOString()}`,
+    '-- WARNING: This file uses ON CONFLICT (id) DO NOTHING. It is designed for',
+    '-- restoring into a clean database. Partial restores into an existing database',
+    '-- may fail if parent records (campaigns) are missing.',
+    '',
+    'SET standard_conforming_strings = ON;',
     '',
     'BEGIN;',
     '',
@@ -197,14 +202,11 @@ export function generateSeedSql(data: ExportData): string {
 export function downloadFile(content: string, filename: string): void {
   const blob = new Blob([content], { type: 'application/sql' });
   const url = URL.createObjectURL(blob);
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  } finally {
-    URL.revokeObjectURL(url);
-  }
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }

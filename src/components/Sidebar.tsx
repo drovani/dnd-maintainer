@@ -220,7 +220,7 @@ export function Sidebar({
             }
             title="Export Data"
           >
-            <Download className="w-5 h-5 shrink-0" />
+            <Download className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && <span className="font-medium text-sm">Export Data</span>}
           </NavLink>
           {!isCollapsed && (
