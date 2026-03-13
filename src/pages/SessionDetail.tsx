@@ -34,7 +34,7 @@ export default function SessionDetail() {
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
 
   const [formData, setFormData] = useState<Partial<Session>>({
-    name: '',
+    title: '',
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
     summary: '',
@@ -342,7 +342,7 @@ export default function SessionDetail() {
             Back to Sessions
           </button>
           <h1 className="text-4xl font-bold text-stone-100">
-            Session {formData.session_number}: {formData.name}
+            Session {formData.session_number}: {formData.title}
           </h1>
           <p className="text-stone-400 mt-2">{formatDate(formData.date || '')}</p>
         </div>
@@ -372,8 +372,8 @@ export default function SessionDetail() {
               </label>
               <input
                 type="text"
-                value={formData.name || ''}
-                onChange={(e) => handleFieldChange('name', e.target.value)}
+                value={formData.title || ''}
+                onChange={(e) => handleFieldChange('title', e.target.value)}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                 placeholder="Session title"
               />

@@ -167,7 +167,7 @@ export default function CharacterList() {
                 }`}
             >
               <Users size={16} />
-              NPCs
+              <span className="uppercase">npc</span>s
             </button>
           </div>
 
@@ -227,7 +227,7 @@ export default function CharacterList() {
                     )}
                   </div>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${character.character_type === 'pc'
+                    className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${character.character_type === 'pc'
                       ? 'bg-blue-900 text-blue-200'
                       : 'bg-purple-900 text-purple-200'
                       }`}

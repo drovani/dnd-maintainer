@@ -312,8 +312,8 @@ export default function CharacterBuilder() {
             onChange={(e) => updateBasics({ character_type: e.target.value as 'pc' | 'npc' })}
             className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-amber-500"
           >
-            <option value="PC">Player Character</option>
-            <option value="NPC">Non-Player Character</option>
+            <option value="pc">Player Character</option>
+            <option value="npc">Non-Player Character</option>
           </select>
         </div>
 

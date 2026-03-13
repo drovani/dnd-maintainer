@@ -342,8 +342,8 @@ export default function CampaignDashboard() {
                     />
                   </div>
                   <div className="flex justify-between text-xs text-stone-400">
-                    <span>{pcCount} PCs</span>
-                    <span>{npcCount} NPCs</span>
+                    <span>{pcCount} <span className="uppercase">pc</span>s</span>
+                    <span>{npcCount} <span className="uppercase">npc</span>s</span>
                   </div>
                 </div>
               </div>
@@ -404,7 +404,7 @@ export default function CampaignDashboard() {
                       Last Session Played
                     </p>
                     <p className="text-amber-400 font-bold text-lg mt-1">
-                      Session {lastSession.session_number}: {lastSession.name}
+                      Session {lastSession.session_number}: {lastSession.title}
                     </p>
                     <p className="text-stone-400 text-sm mt-2">
                       {new Date(lastSession.date).toLocaleDateString('en-US', {

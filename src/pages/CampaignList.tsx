@@ -364,12 +364,12 @@ export default function CampaignList() {
                     <div className="mt-3 pt-3 border-t border-slate-800 flex gap-4 text-xs">
                       {charCount.pc > 0 && (
                         <span className="text-stone-400">
-                          {charCount.pc} PCs
+                          {charCount.pc} <span className="uppercase">pc</span>s
                         </span>
                       )}
                       {charCount.npc > 0 && (
                         <span className="text-stone-400">
-                          {charCount.npc} NPCs
+                          {charCount.npc} <span className="uppercase">npc</span>s
                         </span>
                       )}
                     </div>

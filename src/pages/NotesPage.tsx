@@ -20,15 +20,15 @@ import {
 import { useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-type NoteCategory = 'plot' | 'npc' | 'location' | 'loot' | 'rules' | 'other'
+type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 
 const CATEGORIES: { value: NoteCategory; label: string; icon: React.ReactNode }[] = [
-  { value: 'plot', label: 'Lore', icon: <Scroll className="w-4 h-4" /> },
+  { value: 'lore', label: 'Lore', icon: <Scroll className="w-4 h-4" /> },
   { value: 'npc', label: 'NPCs', icon: <Users className="w-4 h-4" /> },
   { value: 'location', label: 'Locations', icon: <MapPin className="w-4 h-4" /> },
-  { value: 'loot', label: 'Items', icon: <Wand2 className="w-4 h-4" /> },
-  { value: 'rules', label: 'Rules', icon: <BookOpen className="w-4 h-4" /> },
-  { value: 'other', label: 'General', icon: <Tag className="w-4 h-4" /> },
+  { value: 'item', label: 'Items', icon: <Wand2 className="w-4 h-4" /> },
+  { value: 'quest', label: 'Quests', icon: <BookOpen className="w-4 h-4" /> },
+  { value: 'general', label: 'General', icon: <Tag className="w-4 h-4" /> },
 ]
 
 export default function NotesPage() {
@@ -47,7 +47,7 @@ export default function NotesPage() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: 'other' as NoteCategory,
+    category: 'general' as NoteCategory,
     tags: '' as string,
     pinned: false,
   })
@@ -182,7 +182,7 @@ export default function NotesPage() {
     setFormData({
       title: '',
       content: '',
-      category: 'other',
+      category: 'general',
       tags: '',
       pinned: false,
     })

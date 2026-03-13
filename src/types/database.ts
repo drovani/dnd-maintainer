@@ -142,7 +142,7 @@ export interface Session {
   updated_at: string;
   campaign_id: string;
   session_number: number;
-  name: string;
+  title: string;
   description?: string;
   date: string;
   duration_minutes?: number;
@@ -162,7 +162,7 @@ export interface Note {
   campaign_id: string;
   title: string;
   content: string;
-  category: "plot" | "NPC" | "location" | "loot" | "rules" | "other";
+  category: "lore" | "npc" | "location" | "quest" | "item" | "general";
   tags?: string[];
   pinned?: boolean;
 }

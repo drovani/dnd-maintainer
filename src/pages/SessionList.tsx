@@ -20,7 +20,7 @@ export default function SessionList() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showNewSessionForm, setShowNewSessionForm] = useState(false)
   const [newSession, setNewSession] = useState({
-    name: '',
+    title: '',
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
   })
@@ -68,7 +68,7 @@ export default function SessionList() {
         .insert([
           {
             campaign_id: campaignId,
-            name: session.name,
+            title: session.title,
             session_number: session.session_number,
             date: session.date,
             status: 'planned',
@@ -83,7 +83,7 @@ export default function SessionList() {
       queryClient.invalidateQueries({ queryKey: ['sessions', campaignId] })
       setShowNewSessionForm(false)
       setNewSession({
-        name: '',
+        title: '',
         session_number: Math.max(...sessions.map(s => s.session_number), 0) + 1,
         date: new Date().toISOString().split('T')[0],
       })
@@ -93,13 +93,14 @@ export default function SessionList() {
 
   const handleCreateSession = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newSession.name.trim()) {
+    if (newSession.title.trim()) {
       createSessionMutation.mutate(newSession)
     }
   }
 
   const filteredSessions = sessions.filter((session) =>
-    session.name.toLowerCase().includes(searchTerm.toLowerCase())
+    searchTerm.trim() === '' ? true :
+      session.title.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const formatDate = (dateString: string) => {
@@ -180,9 +181,9 @@ export default function SessionList() {
                 </label>
                 <input
                   type="text"
-                  value={newSession.name}
+                  value={newSession.title}
                   onChange={(e) =>
-                    setNewSession({ ...newSession, name: e.target.value })
+                    setNewSession({ ...newSession, title: e.target.value })
                   }
                   placeholder="e.g., The Goblin Ambush"
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -306,7 +307,7 @@ export default function SessionList() {
                             Session {session.session_number}
                           </span>
                           <h3 className="text-xl font-bold text-stone-100 group-hover:text-amber-400 transition-colors">
-                            {session.name}
+                            {session.title}
                           </h3>
                         </div>
                         <p className="text-sm text-stone-400 flex items-center gap-2">
@@ -336,10 +337,10 @@ export default function SessionList() {
                       )}
                       <span
                         className={`text-xs font-semibold px-2 py-1 rounded ${session.status === 'completed'
-                            ? 'bg-green-900/30 text-green-400'
-                            : session.status === 'in-progress'
-                              ? 'bg-blue-900/30 text-blue-400'
-                              : 'bg-slate-800 text-stone-400'
+                          ? 'bg-green-900/30 text-green-400'
+                          : session.status === 'in-progress'
+                            ? 'bg-blue-900/30 text-blue-400'
+                            : 'bg-slate-800 text-stone-400'
                           }`}
                       >
                         {session.status === 'completed'
