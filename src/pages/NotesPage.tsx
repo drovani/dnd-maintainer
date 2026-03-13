@@ -333,8 +333,8 @@ export default function NotesPage() {
               <button
                 onClick={() => setSelectedCategory('all')}
                 className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap ${selectedCategory === 'all'
-                    ? 'bg-amber-600 text-slate-950'
-                    : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
+                  ? 'bg-amber-600 text-slate-950'
+                  : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
                   }`}
               >
                 All
@@ -344,8 +344,8 @@ export default function NotesPage() {
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap ${selectedCategory === cat.value
-                      ? 'bg-amber-600 text-slate-950'
-                      : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
+                    ? 'bg-amber-600 text-slate-950'
+                    : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
                     }`}
                 >
                   {cat.icon}
@@ -381,8 +381,8 @@ export default function NotesPage() {
                     }
                   }}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${selectedTags.includes(tag)
-                      ? 'bg-amber-600 text-slate-950'
-                      : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
+                    ? 'bg-amber-600 text-slate-950'
+                    : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
                     }`}
                 >
                   {tag}
@@ -457,8 +457,8 @@ export default function NotesPage() {
                   <button
                     onClick={() => handleTogglePinned(note)}
                     className={`ml-2 transition-colors ${note.pinned
-                        ? 'text-amber-400'
-                        : 'text-slate-400 hover:text-amber-400'
+                      ? 'text-amber-400'
+                      : 'text-slate-400 hover:text-amber-400'
                       }`}
                   >
                     <Pin className="w-5 h-5" />

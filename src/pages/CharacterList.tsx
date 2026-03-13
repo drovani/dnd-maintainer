@@ -1,15 +1,15 @@
-import { useState, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Plus, Users, User, Search } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Plus, Search, User, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 interface Character {
   id: string
   campaign_id: string
   name: string
   player_name: string | null
-  character_type: 'PC' | 'NPC'
+  character_type: 'pc' | 'npc'
   race: string
   class: string
   level: number
@@ -49,9 +49,9 @@ export default function CharacterList() {
 
     // Filter by type
     if (filterType === 'pc') {
-      result = result.filter((c) => c.character_type === 'PC')
+      result = result.filter((c) => c.character_type === 'pc')
     } else if (filterType === 'npc') {
-      result = result.filter((c) => c.character_type === 'NPC')
+      result = result.filter((c) => c.character_type === 'npc')
     }
 
     // Filter by search query
@@ -86,8 +86,8 @@ export default function CharacterList() {
     return sorted
   }, [characters, filterType, searchQuery, sortBy])
 
-  const pcCount = characters.filter((c) => c.character_type === 'PC').length
-  const npcCount = characters.filter((c) => c.character_type === 'NPC').length
+  const pcCount = characters.filter((c) => c.character_type === 'pc').length
+  const npcCount = characters.filter((c) => c.character_type === 'npc').length
 
   if (error) {
     return (
@@ -142,32 +142,29 @@ export default function CharacterList() {
           <div className="flex gap-2">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                filterType === 'all'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-              }`}
+              className={`px-4 py-2 rounded-lg transition-colors ${filterType === 'all'
+                ? 'bg-amber-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
             >
               All Characters
             </button>
             <button
               onClick={() => setFilterType('pc')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                filterType === 'pc'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${filterType === 'pc'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
             >
               <User size={16} />
               Player Characters
             </button>
             <button
               onClick={() => setFilterType('npc')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                filterType === 'npc'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${filterType === 'npc'
+                ? 'bg-purple-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
             >
               <Users size={16} />
               NPCs
@@ -213,11 +210,10 @@ export default function CharacterList() {
                     `/campaign/${campaignId}/character/${character.id}`
                   )
                 }
-                className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${
-                  character.character_type === 'PC'
-                    ? 'bg-slate-800 border-blue-500/50 hover:border-blue-400'
-                    : 'bg-slate-800/50 border-purple-500/30 hover:border-purple-400'
-                }`}
+                className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${character.character_type === 'pc'
+                  ? 'bg-slate-800 border-blue-500/50 hover:border-blue-400'
+                  : 'bg-slate-800/50 border-purple-500/30 hover:border-purple-400'
+                  }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -231,11 +227,10 @@ export default function CharacterList() {
                     )}
                   </div>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      character.character_type === 'PC'
-                        ? 'bg-blue-900 text-blue-200'
-                        : 'bg-purple-900 text-purple-200'
-                    }`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${character.character_type === 'pc'
+                      ? 'bg-blue-900 text-blue-200'
+                      : 'bg-purple-900 text-purple-200'
+                      }`}
                   >
                     {character.character_type}
                   </span>

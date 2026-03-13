@@ -40,7 +40,7 @@ export interface EquipmentItem {
   weight?: number;
   value?: {
     amount: number;
-    currency: 'cp' | 'sp' | 'ep' | 'gp' | 'pp';
+    currency: "cp" | "sp" | "ep" | "gp" | "pp";
   };
   description?: string;
   equipped?: boolean;
@@ -69,7 +69,7 @@ export interface Campaign {
   name: string;
   description?: string;
   setting?: string;
-  status: 'active' | 'paused' | 'completed' | 'planning';
+  status: "active" | "paused" | "completed" | "planning";
   image_url?: string;
   dm_notes?: string;
 }
@@ -111,11 +111,11 @@ export interface Character {
 export interface Combatant {
   id: string;
   name: string;
-  type: 'character' | 'enemy' | 'ally';
+  type: "character" | "enemy" | "ally";
   initiative: number;
   hit_points: number;
   armor_class: number;
-  status: 'healthy' | 'injured' | 'unconscious' | 'dead';
+  status: "healthy" | "injured" | "unconscious" | "dead";
   conditions: string[];
 }
 
@@ -129,9 +129,9 @@ export interface Encounter {
   name: string;
   description?: string;
   location?: string;
-  difficulty: 'trivial' | 'easy' | 'medium' | 'hard' | 'deadly';
+  difficulty: "trivial" | "easy" | "medium" | "hard" | "deadly";
   combatants: Combatant[];
-  status: 'planning' | 'active' | 'completed';
+  status: "planning" | "active" | "completed";
   notes?: string;
 }
 
@@ -151,7 +151,7 @@ export interface Session {
   xp_awarded?: number;
   encounters?: Encounter[];
   image_url?: string;
-  status: 'planned' | 'in-progress' | 'completed';
+  status: "planned" | "in-progress" | "completed";
 }
 
 // DM Notes
@@ -162,7 +162,7 @@ export interface Note {
   campaign_id: string;
   title: string;
   content: string;
-  category: 'plot' | 'npc' | 'location' | 'loot' | 'rules' | 'other';
+  category: "plot" | "NPC" | "location" | "loot" | "rules" | "other";
   tags?: string[];
   pinned?: boolean;
 }
@@ -172,7 +172,7 @@ export interface LootItem {
   id: string;
   name: string;
   type: string; // weapon, armor, potion, scroll, treasure, etc.
-  rarity: 'common' | 'uncommon' | 'rare' | 'very-rare' | 'legendary' | 'artifact';
+  rarity: "common" | "uncommon" | "rare" | "very-rare" | "legendary" | "artifact";
   quantity: number;
   description?: string;
   gold_value?: number;
@@ -203,5 +203,5 @@ export interface HouseRule {
   campaign_id: string;
   title: string;
   description: string;
-  category: 'combat' | 'spells' | 'magic-items' | 'rules' | 'other';
+  category: "combat" | "spells" | "magic-items" | "rules" | "other";
 }

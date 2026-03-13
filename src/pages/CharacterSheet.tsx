@@ -15,7 +15,7 @@ interface Character {
   campaign_id: string
   name: string
   player_name: string | null
-  character_type: 'PC' | 'NPC'
+  character_type: 'pc' | 'npc'
   race: string
   class: string
   subclass: string
@@ -350,10 +350,10 @@ export default function CharacterSheet() {
                 <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
                   <div
                     className={`h-full transition-all ${character.hp_current > character.hp_max * 0.5
-                        ? 'bg-green-600'
-                        : character.hp_current > character.hp_max * 0.25
-                          ? 'bg-yellow-600'
-                          : 'bg-red-600'
+                      ? 'bg-green-600'
+                      : character.hp_current > character.hp_max * 0.25
+                        ? 'bg-yellow-600'
+                        : 'bg-red-600'
                       }`}
                     style={{
                       width: `${(character.hp_current / character.hp_max) * 100}%`,

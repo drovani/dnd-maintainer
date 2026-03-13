@@ -24,8 +24,10 @@ export default function CampaignDashboard() {
 
   const [isEditingName, setIsEditingName] = useState(false)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [isEditingSetting, setIsEditingSetting] = useState(false)
   const [editedName, setEditedName] = useState('')
   const [editedDescription, setEditedDescription] = useState('')
+  const [editedSetting, setEditedSetting] = useState('')
 
   if (!id) {
     return (
@@ -95,6 +97,7 @@ export default function CampaignDashboard() {
       queryClient.setQueryData(['campaign', id], data)
       setIsEditingName(false)
       setIsEditingDescription(false)
+      setIsEditingSetting(false)
     },
   })
 
@@ -106,6 +109,10 @@ export default function CampaignDashboard() {
 
   const handleUpdateDescription = () => {
     updateCampaignMutation.mutate({ description: editedDescription })
+  }
+
+  const handleUpdateSetting = () => {
+    updateCampaignMutation.mutate({ setting: editedSetting })
   }
 
   const pcCount = characters.filter((c) => !c.is_npc).length
@@ -189,8 +196,46 @@ export default function CampaignDashboard() {
                   <Edit2 className="w-5 h-5 text-stone-500 group-hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100" />
                 </div>
               )}
-              {campaign.setting && (
-                <p className="text-amber-400/70 mt-2">{campaign.setting}</p>
+              {isEditingSetting ? (
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={editedSetting}
+                    onChange={(e) => setEditedSetting(e.target.value)}
+                    className="text-sm bg-slate-800 border border-amber-500 rounded px-3 py-1 text-amber-400/70 focus:outline-none flex-1"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleUpdateSetting}
+                    disabled={updateCampaignMutation.isPending}
+                    className="text-amber-400 hover:text-amber-300 p-1"
+                  >
+                    <Save className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsEditingSetting(false)}
+                    className="text-stone-400 hover:text-stone-300 p-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="flex items-center gap-2 group/setting cursor-pointer mt-2"
+                  onClick={() => {
+                    setEditedSetting(campaign.setting || '')
+                    setIsEditingSetting(true)
+                  }}
+                >
+                  <p className="text-amber-400/70 group-hover/setting:text-amber-400 transition-colors">
+                    {campaign.setting || (
+                      <span className="italic text-stone-500">
+                        Click to add setting...
+                      </span>
+                    )}
+                  </p>
+                  <Edit2 className="w-3.5 h-3.5 text-stone-500 group-hover/setting:text-amber-400 transition-colors opacity-0 group-hover/setting:opacity-100" />
+                </div>
               )}
             </div>
 

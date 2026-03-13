@@ -1,22 +1,22 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
 import {
-  DND_RACES,
-  DND_CLASSES,
-  DND_SKILLS,
-  DND_BACKGROUNDS,
   DND_ALIGNMENTS,
+  DND_BACKGROUNDS,
+  DND_CLASSES,
+  DND_RACES,
+  DND_SKILLS,
   getAbilityModifier,
 } from '@/lib/dnd-helpers'
+import { supabase } from '@/lib/supabase'
+import { useMutation } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 interface CharacterData {
   // Basics
   name: string
   player_name: string
-  character_type: 'PC' | 'NPC'
+  character_type: 'pc' | 'npc'
   race: string
   class: string
   subclass: string
@@ -91,7 +91,7 @@ export default function CharacterBuilder() {
   const [characterData, setCharacterData] = useState<CharacterData>({
     name: '',
     player_name: '',
-    character_type: 'PC',
+    character_type: 'pc',
     race: DND_RACES[0].id,
     class: DND_CLASSES[0].id,
     subclass: '',
@@ -309,7 +309,7 @@ export default function CharacterBuilder() {
           </label>
           <select
             value={characterData.character_type}
-            onChange={(e) => updateBasics({ character_type: e.target.value as 'PC' | 'NPC' })}
+            onChange={(e) => updateBasics({ character_type: e.target.value as 'pc' | 'npc' })}
             className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-amber-500"
           >
             <option value="PC">Player Character</option>
@@ -786,21 +786,19 @@ export default function CharacterBuilder() {
               <div key={step.id} className="flex items-center flex-1">
                 <button
                   onClick={() => goToStep(step.id)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-                    index === currentStepIndex
-                      ? 'bg-amber-600 text-white'
-                      : index < currentStepIndex
-                        ? 'bg-green-600 text-white'
-                        : 'bg-slate-700 text-slate-400'
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${index === currentStepIndex
+                    ? 'bg-amber-600 text-white'
+                    : index < currentStepIndex
+                      ? 'bg-green-600 text-white'
+                      : 'bg-slate-700 text-slate-400'
+                    }`}
                 >
                   {index + 1}
                 </button>
                 {index < STEPS.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 ${
-                      index < currentStepIndex ? 'bg-green-600' : 'bg-slate-700'
-                    }`}
+                    className={`flex-1 h-1 mx-2 ${index < currentStepIndex ? 'bg-green-600' : 'bg-slate-700'
+                      }`}
                   />
                 )}
               </div>
