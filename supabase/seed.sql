@@ -9,7 +9,7 @@ INSERT INTO campaigns (id, name, description, setting) VALUES
 (
     '550e8400-e29b-41d4-a716-446655440000'::uuid,
     'The Accidental Vanguard',
-    "Three unlikely heroes stumble into a crisis larger than any single world: the dimensional fabric is fraying. Ancient arcane reagents — scattered across a dozen realms by a forgotten catastrophe — are the only materials that can stabilize the weave before it collapses entirely. Armed with a battered compass that points not north but elsewhere, the party must slide between worlds, navigate each realm's unique dangers, and gather what they need before the windows between worlds close forever.",
+    'Three unlikely heroes stumble into a crisis larger than any single world: the dimensional fabric is fraying. Ancient arcane reagents — scattered across a dozen realms by a forgotten catastrophe — are the only materials that can stabilize the weave before it collapses entirely. Armed with a battered compass that points not north but elsewhere, the party must slide between worlds, navigate each realm''s unique dangers, and gather what they need before the windows between worlds close forever.',
     'Inter-dimensional (D&D 5e)'
 );
 
