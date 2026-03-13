@@ -9,6 +9,7 @@ import SessionList from '@/pages/SessionList'
 import SessionDetail from '@/pages/SessionDetail'
 import NotesPage from '@/pages/NotesPage'
 import DmToolkit from '@/pages/DmToolkit'
+import ExportData from '@/pages/ExportData'
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/campaign/:id/session/:sessionId" element={<SessionDetail />} />
         <Route path="/campaign/:id/notes" element={<NotesPage />} />
         <Route path="/campaign/:id/toolkit" element={<DmToolkit />} />
+        <Route path="/export" element={<ExportData />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

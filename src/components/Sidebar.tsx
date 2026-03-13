@@ -10,6 +10,7 @@ import {
   Wand2,
   ChevronDown,
   Shield,
+  Download,
 } from 'lucide-react';
 import { Campaign } from '@/types/database';
 import { Button } from './ui/Button';
@@ -198,9 +199,32 @@ export function Sidebar({
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-4 border-t border-amber-900/20 text-xs text-slate-500">
+        <div className="px-2 py-4 border-t border-amber-900/20">
+          <NavLink
+            to="/export"
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                onToggleCollapse(true);
+              }
+            }}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 px-3 py-3 rounded-lg
+                transition-colors duration-200 group
+                ${
+                  isActive
+                    ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
+                    : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                }
+              `
+            }
+            title="Export Data"
+          >
+            <Download className="w-5 h-5 shrink-0" />
+            {!isCollapsed && <span className="font-medium text-sm">Export Data</span>}
+          </NavLink>
           {!isCollapsed && (
-            <p>
+            <p className="text-xs text-slate-500 px-3 mt-3">
               Campaign Manager v1.0<br />
               For D&D 5e
             </p>
