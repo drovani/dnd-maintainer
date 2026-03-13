@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Download, CheckSquare, Square, AlertCircle, Loader2 } from 'lucide-react';
 import { useCampaigns } from '@/hooks/useCampaigns';
-import { supabase } from '@/lib/supabase';
-import { generateSeedSql, downloadFile } from '@/lib/export-sql';
 import type { ExportData as ExportDataType } from '@/lib/export-sql';
+import { downloadFile, generateSeedSql } from '@/lib/export-sql';
+import { supabase } from '@/lib/supabase';
+import { AlertCircle, CheckSquare, Download, Loader2, Square } from 'lucide-react';
+import { useState } from 'react';
 
 export default function ExportData() {
   const { data: campaigns = [], isLoading: isCampaignsLoading, isError: isCampaignsError, error: campaignsError } = useCampaigns();
@@ -140,7 +140,7 @@ export default function ExportData() {
         {/* Error banner */}
         {errorMessage && (
           <div className="mb-6 flex items-start gap-3 bg-red-900/30 border border-red-500/30 rounded-lg p-4">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-red-300 font-semibold">Export failed</p>
               <p className="text-red-400 text-sm mt-1 whitespace-pre-line">{errorMessage}</p>
@@ -188,17 +188,16 @@ export default function ExportData() {
                     className={`
                       w-full flex items-center gap-3 px-4 py-3 rounded-lg
                       text-left transition-all
-                      ${
-                        isSelected
-                          ? 'bg-amber-900/20 border border-amber-600/30 text-amber-400'
-                          : 'bg-slate-900 border border-slate-800 text-stone-300 hover:border-slate-700'
+                      ${isSelected
+                        ? 'bg-amber-900/20 border border-amber-600/30 text-amber-400'
+                        : 'bg-slate-900 border border-slate-800 text-stone-300 hover:border-slate-700'
                       }
                     `}
                   >
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                      <CheckSquare className="w-5 h-5 text-amber-400 shrink-0" />
                     ) : (
-                      <Square className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                      <Square className="w-5 h-5 text-slate-500 shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{campaign.name}</p>
