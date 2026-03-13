@@ -102,6 +102,16 @@ supabase/
 
 All data stays on your machine. The local Supabase instance runs entirely in Docker on your host — nothing is sent to external servers.
 
+## Backup & Restore
+
+The **Export Data** page (accessible from the sidebar) lets you select one or more campaigns and download all associated data (characters, sessions, encounters, and notes) as a `seed.sql` file. The downloaded filename includes a timestamp (e.g., `seed-2026-03-13T12-00-00.sql`). The file uses `INSERT ... ON CONFLICT DO NOTHING` statements wrapped in a transaction, so it is safe to run against an existing database.
+
+To restore a backup into your local Supabase instance:
+
+```bash
+psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f seed.sql
+```
+
 ## License
 
 This project is not yet licensed. If you'd like to use or contribute, please open an issue.

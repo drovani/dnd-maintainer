@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { Campaign } from '@/types/database';
 import {
+  BookOpen,
+  ChevronDown,
+  Download,
   Menu,
-  X,
+  ScrollText,
+  Shield,
   Sword,
   Users,
-  BookOpen,
-  ScrollText,
   Wand2,
-  ChevronDown,
-  Shield,
+  X,
 } from 'lucide-react';
-import { Campaign } from '@/types/database';
+import { useState } from 'react';
+import { NavLink, useParams } from 'react-router-dom';
 import { Button } from './ui/Button';
 
 export interface SidebarProps {
@@ -68,7 +69,7 @@ export function Sidebar({
       <aside
         className={`
           fixed top-0 left-0 h-screen z-40
-          bg-gradient-to-b from-slate-950 to-slate-900
+          bg-linear-to-b from-slate-950 to-slate-900
           border-r border-amber-900/20
           transition-all duration-300
           md:relative md:translate-x-0
@@ -79,7 +80,7 @@ export function Sidebar({
       >
         {/* Logo/Title */}
         <div className="px-4 py-6 border-b border-amber-900/20 flex items-center gap-3">
-          <Sword className="w-8 h-8 text-amber-500 flex-shrink-0" />
+          <Sword className="w-8 h-8 text-amber-500 shrink-0" />
           {!isCollapsed && (
             <div>
               <h1 className="text-lg font-bold text-amber-400">D&D Keeper</h1>
@@ -122,9 +123,8 @@ export function Sidebar({
               </span>
               {!isCollapsed && (
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    showCampaignDropdown ? 'rotate-180' : ''
-                  }`}
+                  className={`w-4 h-4 transition-transform ${showCampaignDropdown ? 'rotate-180' : ''
+                    }`}
                 />
               )}
             </button>
@@ -164,15 +164,29 @@ export function Sidebar({
         <nav className="flex-1 px-2 py-4">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
-            const basePath = currentCampaign ? `/campaign/${currentCampaign.id}` : '/';
-            const fullPath = basePath + item.path;
+            const disabled = !currentCampaign;
+            const fullPath = currentCampaign
+              ? `/campaign/${currentCampaign.id}${item.path}`
+              : '#';
+
+            if (disabled) {
+              return (
+                <span
+                  key={item.label}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 cursor-not-allowed"
+                  title={`${item.label} (select a campaign first)`}
+                >
+                  <Icon className="w-5 h-5 shrink-0" />
+                  {!isCollapsed && <span className="font-medium text-sm">{item.label}</span>}
+                </span>
+              );
+            }
 
             return (
               <NavLink
                 key={item.label}
                 to={fullPath}
                 onClick={() => {
-                  // Auto-collapse on mobile when navigating
                   if (window.innerWidth < 768) {
                     onToggleCollapse(true);
                   }
@@ -181,16 +195,15 @@ export function Sidebar({
                   `
                     flex items-center gap-3 px-3 py-3 rounded-lg
                     transition-colors duration-200 group
-                    ${
-                      isActive
-                        ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
-                        : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
-                    }
+                    ${isActive
+                    ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
+                    : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                  }
                   `
                 }
                 title={item.label}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-5 h-5 shrink-0" />
                 {!isCollapsed && <span className="font-medium text-sm">{item.label}</span>}
               </NavLink>
             );
@@ -198,9 +211,31 @@ export function Sidebar({
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-4 border-t border-amber-900/20 text-xs text-slate-500">
+        <div className="px-2 py-4 border-t border-amber-900/20">
+          <NavLink
+            to="/export"
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                onToggleCollapse(true);
+              }
+            }}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 px-3 py-3 rounded-lg
+                transition-colors duration-200 group
+                ${isActive
+                ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
+                : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+              }
+              `
+            }
+            title="Export Data"
+          >
+            <Download className="w-5 h-5 shrink-0" />
+            {!isCollapsed && <span className="font-medium text-sm">Export Data</span>}
+          </NavLink>
           {!isCollapsed && (
-            <p>
+            <p className="text-xs text-slate-500 px-3 mt-3">
               Campaign Manager v1.0<br />
               For D&D 5e
             </p>
