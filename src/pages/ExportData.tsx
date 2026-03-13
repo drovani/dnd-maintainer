@@ -6,7 +6,7 @@ import { generateSeedSql, downloadFile } from '@/lib/export-sql';
 import type { ExportData as ExportDataType } from '@/lib/export-sql';
 
 export default function ExportData() {
-  const { data: campaigns = [], isLoading: isCampaignsLoading } = useCampaigns();
+  const { data: campaigns = [], isLoading: isCampaignsLoading, isError: isCampaignsError, error: campaignsError } = useCampaigns();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -50,14 +50,28 @@ export default function ExportData() {
         supabase.from('notes').select('*').in('campaign_id', ids),
       ]);
 
-      for (const res of [campaignsRes, charactersRes, sessionsRes, encountersRes, notesRes]) {
-        if (res.error) {
-          throw res.error;
-        }
+      const namedResults = [
+        { table: 'campaigns', ...campaignsRes },
+        { table: 'characters', ...charactersRes },
+        { table: 'sessions', ...sessionsRes },
+        { table: 'encounters', ...encountersRes },
+        { table: 'notes', ...notesRes },
+      ] as const;
+
+      const failures = namedResults
+        .filter((r) => r.error)
+        .map((r) => `${r.table}: ${r.error?.message ?? 'unknown error'}`);
+
+      if (failures.length > 0) {
+        throw new Error(`Failed to fetch data:\n${failures.join('\n')}`);
+      }
+
+      if (!campaignsRes.data || campaignsRes.data.length === 0) {
+        throw new Error('No campaign data returned. This may be a permissions issue — check that RLS policies allow read access.');
       }
 
       const data: ExportDataType = {
-        campaigns: campaignsRes.data ?? [],
+        campaigns: campaignsRes.data,
         characters: charactersRes.data ?? [],
         sessions: sessionsRes.data ?? [],
         encounters: encountersRes.data ?? [],
@@ -66,7 +80,13 @@ export default function ExportData() {
 
       const sql = generateSeedSql(data);
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      downloadFile(sql, `seed-${timestamp}.sql`);
+
+      try {
+        downloadFile(sql, `seed-${timestamp}.sql`);
+      } catch (downloadErr: unknown) {
+        const msg = downloadErr instanceof Error ? downloadErr.message : 'Unknown download error';
+        throw new Error(`Data was generated successfully but the download failed: ${msg}`);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred during export.';
       setErrorMessage(message);
@@ -81,6 +101,20 @@ export default function ExportData() {
         <div className="max-w-3xl mx-auto text-center py-12">
           <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
           <p className="text-stone-300 mt-4">Loading campaigns...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isCampaignsError) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-8">
+        <div className="max-w-3xl mx-auto text-center py-12">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
+          <p className="text-red-300 font-semibold mt-4">Failed to load campaigns</p>
+          <p className="text-red-400 text-sm mt-2">
+            {campaignsError instanceof Error ? campaignsError.message : 'An unexpected error occurred.'}
+          </p>
         </div>
       </div>
     );
@@ -109,7 +143,7 @@ export default function ExportData() {
             <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-red-300 font-semibold">Export failed</p>
-              <p className="text-red-400 text-sm mt-1">{errorMessage}</p>
+              <p className="text-red-400 text-sm mt-1 whitespace-pre-line">{errorMessage}</p>
             </div>
           </div>
         )}
@@ -191,7 +225,7 @@ export default function ExportData() {
               ) : (
                 <>
                   <Download className="w-5 h-5" />
-                  Export as seed.sql
+                  Export SQL Backup
                 </>
               )}
             </button>

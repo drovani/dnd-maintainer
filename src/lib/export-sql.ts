@@ -1,18 +1,28 @@
 export type ColumnType = 'text' | 'jsonb' | 'text[]' | 'boolean' | 'integer' | 'timestamptz' | 'uuid' | 'date';
 
-export type ExportData = Readonly<Record<string, readonly Record<string, unknown>[]>>;
+export type ExportData = Readonly<{
+  campaigns: readonly Record<string, unknown>[];
+  characters: readonly Record<string, unknown>[];
+  sessions: readonly Record<string, unknown>[];
+  encounters: readonly Record<string, unknown>[];
+  notes: readonly Record<string, unknown>[];
+}>;
 
 interface ColumnDef {
   readonly name: string;
   readonly type: ColumnType;
 }
 
-export const TABLE_COLUMNS: Readonly<Record<string, readonly ColumnDef[]>> = {
+// Must match database schema in supabase/migrations/. Update when schema changes.
+const TABLE_COLUMNS = {
   campaigns: [
     { name: 'id', type: 'uuid' },
     { name: 'name', type: 'text' },
     { name: 'description', type: 'text' },
     { name: 'setting', type: 'text' },
+    { name: 'status', type: 'text' },
+    { name: 'image_url', type: 'text' },
+    { name: 'dm_notes', type: 'text' },
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],
@@ -51,6 +61,7 @@ export const TABLE_COLUMNS: Readonly<Record<string, readonly ColumnDef[]>> = {
     { name: 'backstory', type: 'text' },
     { name: 'portrait_url', type: 'text' },
     { name: 'is_active', type: 'boolean' },
+    // is_npc is a GENERATED ALWAYS column and must not appear in INSERT statements
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],
@@ -91,12 +102,15 @@ export const TABLE_COLUMNS: Readonly<Record<string, readonly ColumnDef[]>> = {
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],
-} as const;
+} as const satisfies Readonly<Record<string, readonly ColumnDef[]>>;
 
-const TABLE_ORDER: readonly string[] = ['campaigns', 'characters', 'sessions', 'encounters', 'notes'] as const;
+type TableName = keyof typeof TABLE_COLUMNS;
+
+// Order matters: parent tables before children for foreign key constraints
+const TABLE_ORDER: readonly TableName[] = ['campaigns', 'characters', 'sessions', 'encounters', 'notes'] as const satisfies readonly TableName[];
 
 export function escapeSqlString(value: string): string {
-  return value.replace(/'/g, "''");
+  return value.replace(/\0/g, '').replace(/'/g, "''");
 }
 
 export function escapeSqlValue(value: unknown, type: ColumnType): string {
@@ -113,10 +127,8 @@ export function escapeSqlValue(value: unknown, type: ColumnType): string {
 
     case 'integer': {
       const num = Number(value);
-      if (Number.isNaN(num)) {
-        return 'NULL';
-      }
-      return String(num);
+      if (!Number.isFinite(num)) return 'NULL';
+      return String(Math.trunc(num));
     }
 
     case 'boolean':
@@ -136,8 +148,10 @@ export function escapeSqlValue(value: unknown, type: ColumnType): string {
       return `ARRAY[${elements.join(', ')}]::text[]`;
     }
 
-    default:
-      return 'NULL';
+    default: {
+      const _exhaustive: never = type;
+      throw new Error(`Unhandled column type: ${_exhaustive}`);
+    }
   }
 }
 
@@ -183,11 +197,14 @@ export function generateSeedSql(data: ExportData): string {
 export function downloadFile(content: string, filename: string): void {
   const blob = new Blob([content], { type: 'application/sql' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
