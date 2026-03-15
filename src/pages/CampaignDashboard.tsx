@@ -167,6 +167,10 @@ export default function CampaignDashboard() {
                     onChange={(e) => setEditedName(e.target.value)}
                     className="text-3xl font-bold bg-slate-800 border border-amber-500 rounded px-3 py-1 text-stone-100 focus:outline-none"
                     autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setIsEditingName(false)
+                      if (e.key === 'Enter') handleUpdateName()
+                    }}
                   />
                   <button
                     onClick={handleUpdateName}
@@ -183,17 +187,19 @@ export default function CampaignDashboard() {
                   </button>
                 </div>
               ) : (
-                <div
-                  className="flex items-center gap-4 group cursor-pointer"
-                  onClick={() => {
-                    setEditedName(campaign.name)
-                    setIsEditingName(true)
-                  }}
-                >
-                  <h1 className="text-3xl font-bold text-stone-100 group-hover:text-amber-400 transition-colors">
+                <div className="flex items-center gap-4 group">
+                  <h1 className="text-3xl font-bold text-stone-100">
                     {campaign.name}
                   </h1>
-                  <Edit2 className="w-5 h-5 text-stone-500 group-hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100" />
+                  <button
+                    onClick={() => {
+                      setEditedName(campaign.name)
+                      setIsEditingName(true)
+                    }}
+                    className="text-stone-500 hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                  </button>
                 </div>
               )}
               {isEditingSetting ? (
@@ -204,6 +210,10 @@ export default function CampaignDashboard() {
                     onChange={(e) => setEditedSetting(e.target.value)}
                     className="text-sm bg-slate-800 border border-amber-500 rounded px-3 py-1 text-amber-400/70 focus:outline-none flex-1"
                     autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setIsEditingSetting(false)
+                      if (e.key === 'Enter') handleUpdateSetting()
+                    }}
                   />
                   <button
                     onClick={handleUpdateSetting}
@@ -220,21 +230,23 @@ export default function CampaignDashboard() {
                   </button>
                 </div>
               ) : (
-                <div
-                  className="flex items-center gap-2 group/setting cursor-pointer mt-2"
-                  onClick={() => {
-                    setEditedSetting(campaign.setting || '')
-                    setIsEditingSetting(true)
-                  }}
-                >
-                  <p className="text-amber-400/70 group-hover/setting:text-amber-400 transition-colors">
+                <div className="flex items-center gap-2 group/setting mt-2">
+                  <p className="text-amber-400/70">
                     {campaign.setting || (
                       <span className="italic text-stone-500">
-                        Click to add setting...
+                        No setting specified
                       </span>
                     )}
                   </p>
-                  <Edit2 className="w-3.5 h-3.5 text-stone-500 group-hover/setting:text-amber-400 transition-colors opacity-0 group-hover/setting:opacity-100" />
+                  <button
+                    onClick={() => {
+                      setEditedSetting(campaign.setting || '')
+                      setIsEditingSetting(true)
+                    }}
+                    className="text-stone-500 hover:text-amber-400 transition-colors opacity-0 group-hover/setting:opacity-100"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
             </div>
@@ -261,6 +273,9 @@ export default function CampaignDashboard() {
               onChange={(e) => setEditedDescription(e.target.value)}
               className="bg-slate-900 border border-amber-500 rounded-lg p-4 text-stone-200 focus:outline-none min-h-24 resize-none"
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setIsEditingDescription(false)
+              }}
             />
             <div className="flex gap-2">
               <button
@@ -281,21 +296,23 @@ export default function CampaignDashboard() {
             </div>
           </div>
         ) : (
-          <div
-            className="group cursor-pointer"
-            onClick={() => {
-              setEditedDescription(campaign.description || '')
-              setIsEditingDescription(true)
-            }}
-          >
+          <div className="group">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-stone-200 font-semibold">Campaign Overview</h3>
-              <Edit2 className="w-4 h-4 text-stone-500 group-hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100" />
+              <button
+                onClick={() => {
+                  setEditedDescription(campaign.description || '')
+                  setIsEditingDescription(true)
+                }}
+                className="text-stone-500 hover:text-amber-400 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
             </div>
             <p className="text-stone-400">
               {campaign.description || (
                 <span className="italic text-stone-500">
-                  Click to add campaign description...
+                  No campaign description
                 </span>
               )}
             </p>
