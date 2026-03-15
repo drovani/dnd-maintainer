@@ -1,12 +1,13 @@
+import { Modal } from '@/components/ui/Modal'
 import { supabase } from '@/lib/supabase'
 import { Campaign } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Archive,
   BookOpen,
   Plus,
   Search,
   Swords,
-  Trash2,
   Users,
   Zap,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ export default function CampaignList() {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [showNewCampaignForm, setShowNewCampaignForm] = useState(false)
+  const [campaignToArchive, setCampaignToArchive] = useState<Campaign | null>(null)
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     setting: '',
@@ -31,6 +33,7 @@ export default function CampaignList() {
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
+        .is('archived_at', null)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Campaign[]
@@ -104,12 +107,12 @@ export default function CampaignList() {
     },
   })
 
-  // Delete campaign mutation
-  const deleteCampaignMutation = useMutation({
+  // Archive campaign mutation
+  const archiveCampaignMutation = useMutation({
     mutationFn: async (campaignId: string) => {
       const { error } = await supabase
         .from('campaigns')
-        .delete()
+        .update({ archived_at: new Date().toISOString() })
         .eq('id', campaignId)
       if (error) throw error
     },
@@ -316,17 +319,12 @@ export default function CampaignList() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (
-                          confirm(
-                            `Delete campaign "${campaign.name}"? This cannot be undone.`
-                          )
-                        ) {
-                          deleteCampaignMutation.mutate(campaign.id)
-                        }
+                        setCampaignToArchive(campaign)
                       }}
-                      className="text-slate-400 hover:text-red-400 transition-colors"
+                      className="text-slate-400 hover:text-amber-400 transition-colors"
+                      title="Archive campaign"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Archive className="w-5 h-5" />
                     </button>
                   </div>
 
@@ -388,6 +386,40 @@ export default function CampaignList() {
           </div>
         )}
       </div>
+
+      {/* Archive Confirmation Modal */}
+      <Modal
+        isOpen={!!campaignToArchive}
+        onClose={() => setCampaignToArchive(null)}
+        title="Archive Campaign"
+        size="sm"
+        footer={
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setCampaignToArchive(null)}
+              className="bg-slate-800 hover:bg-slate-700 text-stone-200 font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (campaignToArchive) {
+                  archiveCampaignMutation.mutate(campaignToArchive.id)
+                  setCampaignToArchive(null)
+                }
+              }}
+              disabled={archiveCampaignMutation.isPending}
+              className="bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {archiveCampaignMutation.isPending ? 'Archiving...' : 'Archive'}
+            </button>
+          </div>
+        }
+      >
+        <p className="text-stone-300">
+          Archive <span className="font-semibold text-stone-100">"{campaignToArchive?.name}"</span>? It will be hidden from view.
+        </p>
+      </Modal>
     </div>
   )
 }

@@ -72,6 +72,7 @@ export interface Campaign {
   status: "active" | "paused" | "completed" | "planning";
   image_url?: string;
   dm_notes?: string;
+  archived_at?: string;
 }
 
 // Character model

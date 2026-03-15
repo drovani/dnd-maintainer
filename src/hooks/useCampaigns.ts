@@ -9,6 +9,7 @@ export function useCampaigns() {
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
+        .is('archived_at', null)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return (data || []) as Campaign[];
@@ -71,12 +72,15 @@ export function useUpdateCampaign() {
   });
 }
 
-export function useDeleteCampaign() {
+export function useArchiveCampaign() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('campaigns').delete().eq('id', id);
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ archived_at: new Date().toISOString() })
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
