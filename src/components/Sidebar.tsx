@@ -12,8 +12,8 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
-import { Button } from './ui/Button';
+import { Link, NavLink, useParams } from 'react-router-dom';
+import { Button } from './ui/button';
 
 export interface SidebarProps {
   campaigns: Campaign[];
@@ -69,8 +69,7 @@ export function Sidebar({
       <aside
         className={`
           fixed top-0 left-0 h-screen z-40
-          bg-linear-to-b from-slate-950 to-slate-900
-          border-r border-amber-900/20
+          bg-sidebar border-r border-sidebar-border
           transition-all duration-300
           md:relative md:translate-x-0
           ${isCollapsed ? '-translate-x-full' : 'translate-x-0'}
@@ -79,29 +78,29 @@ export function Sidebar({
         `}
       >
         {/* Logo/Title */}
-        <div className="px-4 py-6 border-b border-amber-900/20 flex items-center gap-3">
-          <Sword className="w-8 h-8 text-amber-500 shrink-0" />
+        <Link to="/" className="px-4 py-6 border-b border-sidebar-border flex items-center gap-3 hover:bg-sidebar-accent transition-colors">
+          <Sword className="w-8 h-8 text-sidebar-primary shrink-0" />
           {!isCollapsed && (
             <div>
-              <h1 className="text-lg font-bold text-amber-400">D&D Keeper</h1>
-              <p className="text-xs text-slate-500">Campaign Manager</p>
+              <h1 className="text-lg font-bold text-sidebar-foreground">D&D Keeper</h1>
+              <p className="text-xs text-muted-foreground">Campaign Manager</p>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Campaign Selector */}
-        <div className="px-4 py-4 border-b border-amber-900/20">
-          <div className="text-xs uppercase font-semibold text-slate-400 mb-2">
+        <div className="px-4 py-4 border-b border-sidebar-border">
+          <div className="text-xs uppercase font-semibold text-muted-foreground mb-2">
             {!isCollapsed && 'Campaign'}
           </div>
           <div className="relative">
             <button
               onClick={() => setShowCampaignDropdown(!showCampaignDropdown)}
               className={`
-                w-full px-3 py-2 rounded
-                bg-slate-800 border border-amber-900/30
-                text-slate-100 text-sm font-medium
-                hover:border-amber-600 transition-colors
+                w-full px-3 py-2 rounded-lg
+                bg-sidebar-accent border border-sidebar-border
+                text-sidebar-foreground text-sm font-medium
+                hover:border-ring transition-colors
                 flex items-center justify-between gap-2
               `}
               title={currentCampaign?.name}
@@ -132,11 +131,11 @@ export function Sidebar({
             {/* Dropdown Menu */}
             {showCampaignDropdown && !isCollapsed && (
               <div
-                className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-amber-900/30 rounded z-50"
+                className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg z-50 shadow-md"
                 onClick={() => setShowCampaignDropdown(false)}
               >
                 {campaigns.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-slate-400">No campaigns</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground">No campaigns</div>
                 ) : (
                   campaigns.map((campaign) => (
                     <button
@@ -147,8 +146,8 @@ export function Sidebar({
                       }}
                       className={`
                         w-full text-left px-3 py-2 text-sm
-                        hover:bg-amber-900/20 transition-colors
-                        ${campaign.id === currentCampaign?.id ? 'bg-amber-900/30 text-amber-400' : 'text-slate-100'}
+                        hover:bg-accent transition-colors
+                        ${campaign.id === currentCampaign?.id ? 'bg-accent text-accent-foreground font-medium' : 'text-popover-foreground'}
                       `}
                     >
                       {campaign.name}
@@ -173,7 +172,7 @@ export function Sidebar({
               return (
                 <span
                   key={item.label}
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 cursor-not-allowed"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-muted-foreground/50 cursor-not-allowed"
                   title={`${item.label} (select a campaign first)`}
                 >
                   <Icon className="w-5 h-5 shrink-0" />
@@ -196,8 +195,8 @@ export function Sidebar({
                     flex items-center gap-3 px-3 py-3 rounded-lg
                     transition-colors duration-200 group
                     ${isActive
-                    ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
-                    : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border border-sidebar-border'
+                    : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
                   }
                   `
                 }
@@ -211,7 +210,7 @@ export function Sidebar({
         </nav>
 
         {/* Footer */}
-        <div className="px-2 py-4 border-t border-amber-900/20">
+        <div className="px-2 py-4 border-t border-sidebar-border">
           <NavLink
             to="/export"
             onClick={() => {
@@ -224,8 +223,8 @@ export function Sidebar({
                 flex items-center gap-3 px-3 py-3 rounded-lg
                 transition-colors duration-200 group
                 ${isActive
-                ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
-                : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border border-sidebar-border'
+                : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
               }
               `
             }
@@ -235,7 +234,7 @@ export function Sidebar({
             {!isCollapsed && <span className="font-medium text-sm">Export Data</span>}
           </NavLink>
           {!isCollapsed && (
-            <p className="text-xs text-slate-500 px-3 mt-3">
+            <p className="text-xs text-muted-foreground px-3 mt-3">
               Campaign Manager v1.0<br />
               For D&D 5e
             </p>

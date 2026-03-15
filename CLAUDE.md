@@ -50,7 +50,7 @@ All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a 
 
 ### Styling
 
-Dark theme with D&D/fantasy aesthetic. Custom CSS variables for theme colors defined in `src/index.css`. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.glass-effect`, `.hover-lift`, `.gradient-gold`, `.grid-2`/`.grid-3`/`.grid-4`.
+Light theme only. Custom CSS variables for theme colors defined in `src/index.css`. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
 
 ## Environment Variables
 

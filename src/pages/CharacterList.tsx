@@ -92,7 +92,7 @@ export default function CharacterList() {
   if (error) {
     return (
       <div className="p-8">
-        <div className="rounded-lg bg-red-900/20 border border-red-500/50 p-4 text-red-200">
+        <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive">
           Error loading characters: {String(error)}
         </div>
       </div>
@@ -100,12 +100,12 @@ export default function CharacterList() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-card">
       <div className="p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-amber-400 mb-2">Characters</h1>
-            <p className="text-slate-400">
+            <h1 className="text-4xl font-bold text-primary mb-2">Characters</h1>
+            <p className="text-muted-foreground">
               {characters.length} total •{' '}
               <span className="text-blue-400">{pcCount} PCs</span> •{' '}
               <span className="text-purple-400">{npcCount} NPCs</span>
@@ -113,7 +113,7 @@ export default function CharacterList() {
           </div>
           <button
             onClick={() => navigate(`/campaign/${campaignId}/character/new`)}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             <Plus size={20} />
             Add Character
@@ -125,14 +125,14 @@ export default function CharacterList() {
           <div className="relative">
             <Search
               size={20}
-              className="absolute left-3 top-3 text-slate-400"
+              className="absolute left-3 top-3 text-muted-foreground"
             />
             <input
               type="text"
               placeholder="Search by name, player, race, or class..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
             />
           </div>
         </div>
@@ -143,8 +143,8 @@ export default function CharacterList() {
             <button
               onClick={() => setFilterType('all')}
               className={`px-4 py-2 rounded-lg transition-colors ${filterType === 'all'
-                ? 'bg-amber-600 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-foreground hover:bg-muted'
                 }`}
             >
               All Characters
@@ -152,8 +152,8 @@ export default function CharacterList() {
             <button
               onClick={() => setFilterType('pc')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${filterType === 'pc'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-blue-600 text-primary-foreground'
+                : 'bg-muted text-foreground hover:bg-muted'
                 }`}
             >
               <User size={16} />
@@ -162,8 +162,8 @@ export default function CharacterList() {
             <button
               onClick={() => setFilterType('npc')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${filterType === 'npc'
-                ? 'bg-purple-600 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-purple-600 text-primary-foreground'
+                : 'bg-muted text-foreground hover:bg-muted'
                 }`}
             >
               <Users size={16} />
@@ -174,7 +174,7 @@ export default function CharacterList() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortType)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 text-white rounded-lg focus:outline-none focus:border-amber-500"
+            className="px-4 py-2 bg-muted border border-border text-foreground rounded-lg outline-none focus:border-ring"
           >
             <option value="name">Sort by Name</option>
             <option value="level">Sort by Level (High to Low)</option>
@@ -186,15 +186,15 @@ export default function CharacterList() {
         {/* Characters Grid */}
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-slate-400">Loading characters...</p>
+            <p className="text-muted-foreground">Loading characters...</p>
           </div>
         ) : filteredAndSortedCharacters.length === 0 ? (
           <div className="text-center py-12">
-            <Users size={48} className="mx-auto text-slate-600 mb-4" />
-            <p className="text-slate-400 mb-4">No characters found</p>
+            <Users size={48} className="mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground mb-4">No characters found</p>
             <button
               onClick={() => navigate(`/campaign/${campaignId}/character/new`)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
             >
               <Plus size={20} />
               Create First Character
@@ -211,17 +211,17 @@ export default function CharacterList() {
                   )
                 }
                 className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${character.character_type === 'pc'
-                  ? 'bg-slate-800 border-blue-500/50 hover:border-blue-400'
-                  : 'bg-slate-800/50 border-purple-500/30 hover:border-purple-400'
+                  ? 'bg-muted border-blue-500/50 hover:border-blue-400'
+                  : 'bg-muted/50 border-purple-500/30 hover:border-purple-400'
                   }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-amber-300 mb-1">
+                    <h3 className="text-xl font-bold text-foreground mb-1">
                       {character.name}
                     </h3>
                     {character.player_name && (
-                      <p className="text-sm text-slate-400">
+                      <p className="text-sm text-muted-foreground">
                         Player: {character.player_name}
                       </p>
                     )}
@@ -238,30 +238,30 @@ export default function CharacterList() {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Race</span>
-                    <span className="text-slate-200">{character.race}</span>
+                    <span className="text-muted-foreground">Race</span>
+                    <span className="text-foreground">{character.race}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Class</span>
-                    <span className="text-slate-200">{character.class}</span>
+                    <span className="text-muted-foreground">Class</span>
+                    <span className="text-foreground">{character.class}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Level</span>
-                    <span className="text-amber-300 font-semibold">
+                    <span className="text-muted-foreground">Level</span>
+                    <span className="text-foreground font-semibold">
                       {character.level}
                     </span>
                   </div>
                 </div>
 
-                <div className="border-t border-slate-700 pt-4 space-y-2">
+                <div className="border-t border-border pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">HP</span>
-                    <span className="text-red-400 font-semibold">
+                    <span className="text-muted-foreground">HP</span>
+                    <span className="text-destructive font-semibold">
                       {character.hp_max}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">AC</span>
+                    <span className="text-muted-foreground">AC</span>
                     <span className="text-cyan-400 font-semibold">
                       {character.ac}
                     </span>

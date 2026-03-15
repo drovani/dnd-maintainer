@@ -34,6 +34,23 @@ export function useCharacter(id: string) {
   });
 }
 
+export function usePlayerNames() {
+  return useQuery({
+    queryKey: ['player-names'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('player_name')
+        .neq('player_name', '')
+        .not('player_name', 'is', null);
+      if (error) throw error;
+      const unique = [...new Set((data || []).map((d) => d.player_name as string))];
+      unique.sort();
+      return unique;
+    },
+  });
+}
+
 export function useCreateCharacter() {
   const queryClient = useQueryClient();
 

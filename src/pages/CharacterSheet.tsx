@@ -12,9 +12,27 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Input, Textarea } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
-import { Modal } from '@/components/ui/Modal'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Character {
   id: string
@@ -70,36 +88,30 @@ type EditSection = 'header' | 'abilities' | 'skills' | 'combat' | 'personality' 
 function SectionHeader({ title, onEdit }: { title: string; onEdit: () => void }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-lg font-bold text-amber-400">{title}</h2>
-      <button
+      <h2 className="text-lg font-bold text-foreground">{title}</h2>
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={onEdit}
-        className="p-1.5 hover:bg-slate-700 rounded transition-colors"
         title={`Edit ${title}`}
       >
-        <Edit2 size={14} className="text-amber-400" />
-      </button>
+        <Edit2 size={14} />
+      </Button>
     </div>
   )
 }
 
 function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCancel: () => void; saving: boolean }) {
   return (
-    <div className="flex justify-end gap-3">
-      <button
-        onClick={onCancel}
-        className="px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
-      >
+    <DialogFooter>
+      <Button variant="outline" onClick={onCancel}>
         Cancel
-      </button>
-      <button
-        onClick={onSave}
-        disabled={saving}
-        className="px-4 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white rounded transition-colors disabled:opacity-50 flex items-center gap-2"
-      >
+      </Button>
+      <Button onClick={onSave} disabled={saving}>
         <Save size={14} />
         {saving ? 'Saving...' : 'Save'}
-      </button>
-    </div>
+      </Button>
+    </DialogFooter>
   )
 }
 
@@ -159,16 +171,23 @@ export default function CharacterSheet() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 p-8">
-        <p className="text-slate-400">Loading character sheet...</p>
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+          </div>
+        </div>
       </div>
     )
   }
 
   if (error || !character) {
     return (
-      <div className="min-h-screen bg-slate-900 p-8">
-        <div className="rounded-lg bg-red-900/20 border border-red-500/50 p-4 text-red-200">
+      <div className="min-h-screen p-8">
+        <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
           Error loading character: {String(error)}
         </div>
       </div>
@@ -179,56 +198,57 @@ export default function CharacterSheet() {
   const profBonus = getProficiencyBonus(character.level)
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-amber-900/20 to-slate-900">
+    <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto p-8">
         {/* Header */}
-        <div className="bg-slate-800 border border-amber-700/50 rounded-lg p-6 mb-6">
+        <div className="bg-card border rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <div className="text-sm text-slate-400 mb-1">CHARACTER SHEET</div>
-              <h1 className="text-3xl font-bold text-amber-300">{character.name}</h1>
+              <div className="text-sm text-muted-foreground mb-1">CHARACTER SHEET</div>
+              <h1 className="text-3xl font-bold text-foreground">{character.name}</h1>
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setEditSection('header')}
-              className="p-2 hover:bg-slate-700 rounded transition-colors"
               title="Edit Character Info"
             >
-              <Edit2 size={16} className="text-amber-400" />
-            </button>
+              <Edit2 size={16} />
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-slate-400">Class</span>
-              <p className="text-amber-300 font-semibold">
+              <span className="text-muted-foreground">Class</span>
+              <p className="text-foreground font-semibold">
                 {character.class}{character.subclass ? ` (${character.subclass})` : ''}
               </p>
             </div>
             <div>
-              <span className="text-slate-400">Level</span>
-              <p className="text-amber-300 font-semibold">{character.level}</p>
+              <span className="text-muted-foreground">Level</span>
+              <p className="text-foreground font-semibold">{character.level}</p>
             </div>
             <div>
-              <span className="text-slate-400">Race</span>
-              <p className="text-amber-300 font-semibold">{character.race}</p>
+              <span className="text-muted-foreground">Race</span>
+              <p className="text-foreground font-semibold">{character.race}</p>
             </div>
             <div>
-              <span className="text-slate-400">Background</span>
-              <p className="text-amber-300 font-semibold">{character.background}</p>
+              <span className="text-muted-foreground">Background</span>
+              <p className="text-foreground font-semibold">{character.background}</p>
             </div>
             <div>
-              <span className="text-slate-400">Alignment</span>
-              <p className="text-amber-300 font-semibold">{alignmentName}</p>
+              <span className="text-muted-foreground">Alignment</span>
+              <p className="text-foreground font-semibold">{alignmentName}</p>
             </div>
             {character.player_name && (
               <div>
-                <span className="text-slate-400">Player</span>
-                <p className="text-amber-300 font-semibold">{character.player_name}</p>
+                <span className="text-muted-foreground">Player</span>
+                <p className="text-foreground font-semibold">{character.player_name}</p>
               </div>
             )}
             <div>
-              <span className="text-slate-400">Type</span>
-              <p className="text-amber-300 font-semibold uppercase">{character.character_type}</p>
+              <span className="text-muted-foreground">Type</span>
+              <p className="text-foreground font-semibold uppercase">{character.character_type}</p>
             </div>
           </div>
         </div>
@@ -238,19 +258,19 @@ export default function CharacterSheet() {
           {/* Left Column: Abilities & Skills */}
           <div className="lg:col-span-1 space-y-6">
             {/* Ability Scores */}
-            <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
+            <div className="bg-card border rounded-lg p-6">
               <SectionHeader title="Abilities" onEdit={() => setEditSection('abilities')} />
               <div className="space-y-3">
                 {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
                   const score = character.abilities[ability]
                   const modifier = getAbilityModifier(score)
                   return (
-                    <div key={ability} className="bg-slate-900/50 p-3 rounded border border-slate-700/50">
-                      <div className="text-xs text-slate-400 mb-1">{ABILITY_NAMES[ability]}</div>
+                    <div key={ability} className="bg-muted/50 p-3 rounded border">
+                      <div className="text-xs text-muted-foreground mb-1">{ABILITY_NAMES[ability]}</div>
                       <div className="flex items-end justify-between">
-                        <div className="text-sm font-bold text-amber-300">{score}</div>
+                        <div className="text-sm font-bold text-foreground">{score}</div>
                         <div
-                          className={`text-lg font-bold ${modifier >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                          className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}
                         >
                           {modifier >= 0 ? '+' : ''}{modifier}
                         </div>
@@ -262,15 +282,15 @@ export default function CharacterSheet() {
             </div>
 
             {/* Saving Throws */}
-            <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-              <h2 className="text-lg font-bold text-amber-400 mb-4">Saving Throws</h2>
+            <div className="bg-card border rounded-lg p-6">
+              <h2 className="text-lg font-bold text-foreground mb-4">Saving Throws</h2>
               <div className="space-y-2 text-sm">
                 {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
                   const modifier = getAbilityModifier(character.abilities[ability])
                   return (
-                    <div key={ability} className="flex justify-between text-slate-300">
+                    <div key={ability} className="flex justify-between text-foreground">
                       <span>{ABILITY_NAMES[ability]}</span>
-                      <span className="font-mono font-bold text-amber-300">
+                      <span className="font-mono font-bold">
                         {modifier >= 0 ? '+' : ''}{modifier}
                       </span>
                     </div>
@@ -280,12 +300,12 @@ export default function CharacterSheet() {
             </div>
 
             {/* Skills */}
-            <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
+            <div className="bg-card border rounded-lg p-6">
               <SectionHeader title="Skills" onEdit={() => setEditSection('skills')} />
               <div className="space-y-1 text-xs">
                 {Object.entries(skillsByAbility).map(([ability, skills]) => (
                   <div key={ability}>
-                    <div className="text-slate-500 font-semibold mt-2 mb-1">{ability}</div>
+                    <div className="text-muted-foreground font-semibold mt-2 mb-1">{ability}</div>
                     {skills.map((skill) => {
                       const skillData = character.skills?.[skill.id] ?? { proficient: false, expertise: false }
                       const abilityMod = getAbilityModifier(
@@ -296,12 +316,12 @@ export default function CharacterSheet() {
                       if (skillData.expertise) bonus += profBonus
 
                       return (
-                        <div key={skill.id} className="flex justify-between text-slate-300 py-1">
-                          <span className={skillData.proficient ? 'font-bold text-amber-300' : ''}>
+                        <div key={skill.id} className="flex justify-between text-foreground py-1">
+                          <span className={skillData.proficient ? 'font-bold' : ''}>
                             {skill.name}
                           </span>
                           <span
-                            className={`font-mono ${skillData.expertise ? 'text-green-400 font-bold' : 'text-slate-400'}`}
+                            className={`font-mono ${skillData.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
                           >
                             {bonus >= 0 ? '+' : ''}{bonus}
                           </span>
@@ -317,18 +337,18 @@ export default function CharacterSheet() {
           {/* Center Column: Combat & Features */}
           <div className="lg:col-span-1 space-y-6">
             {/* Combat Stats */}
-            <div className="bg-slate-800 border-2 border-red-700/50 rounded-lg p-6">
+            <div className="bg-card border-2 border-destructive/30 rounded-lg p-6">
               <SectionHeader title="Combat" onEdit={() => setEditSection('combat')} />
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-slate-900 p-4 rounded border border-red-700/30 text-center">
-                  <div className="text-xs text-slate-400 mb-2">ARMOR CLASS</div>
-                  <div className="text-4xl font-bold text-cyan-400">{character.ac}</div>
+                <div className="bg-muted/50 p-4 rounded border text-center">
+                  <div className="text-xs text-muted-foreground mb-2">ARMOR CLASS</div>
+                  <div className="text-4xl font-bold text-foreground">{character.ac}</div>
                 </div>
 
-                <div className="bg-slate-900 p-4 rounded border border-red-700/30 text-center">
-                  <div className="text-xs text-slate-400 mb-2">INITIATIVE</div>
-                  <div className="text-4xl font-bold text-cyan-400">
+                <div className="bg-muted/50 p-4 rounded border text-center">
+                  <div className="text-xs text-muted-foreground mb-2">INITIATIVE</div>
+                  <div className="text-4xl font-bold text-foreground">
                     {getAbilityModifier(character.abilities.dex) >= 0 ? '+' : ''}
                     {getAbilityModifier(character.abilities.dex)}
                   </div>
@@ -336,34 +356,37 @@ export default function CharacterSheet() {
               </div>
 
               {/* HP Tracker */}
-              <div className="bg-slate-900 p-4 rounded border border-red-700/30 mb-4">
-                <div className="text-xs text-slate-400 mb-2">HIT POINTS</div>
+              <div className="bg-muted/50 p-4 rounded border mb-4">
+                <div className="text-xs text-muted-foreground mb-2">HIT POINTS</div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
+                      variant="destructive"
+                      size="icon-xs"
                       onClick={() => updateHP(-1)}
-                      className="p-1 bg-red-900 hover:bg-red-800 text-white rounded"
                     >
                       <Minus size={16} />
-                    </button>
-                    <div className="text-2xl font-bold text-red-400 min-w-12 text-center">
+                    </Button>
+                    <div className="text-2xl font-bold text-red-600 min-w-12 text-center">
                       {character.hp_current}
                     </div>
-                    <button
+                    <Button
+                      variant="outline"
+                      size="icon-xs"
                       onClick={() => updateHP(1)}
-                      className="p-1 bg-green-900 hover:bg-green-800 text-white rounded"
+                      className="text-green-600 border-green-600/30 hover:bg-green-50"
                     >
                       <Plus size={16} />
-                    </button>
+                    </Button>
                   </div>
-                  <div className="text-slate-400 text-sm">/ {character.hp_max}</div>
+                  <div className="text-muted-foreground text-sm">/ {character.hp_max}</div>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div
                     className={`h-full transition-all ${character.hp_current > character.hp_max * 0.5
                       ? 'bg-green-600'
                       : character.hp_current > character.hp_max * 0.25
-                        ? 'bg-yellow-600'
+                        ? 'bg-yellow-500'
                         : 'bg-red-600'
                       }`}
                     style={{
@@ -373,28 +396,28 @@ export default function CharacterSheet() {
                 </div>
               </div>
 
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 <div className="flex justify-between py-1">
                   <span>Proficiency Bonus</span>
-                  <span className="font-mono text-amber-300">+{profBonus}</span>
+                  <span className="font-mono font-bold text-foreground">+{profBonus}</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span>Speed</span>
-                  <span className="font-mono text-amber-300">30 ft</span>
+                  <span className="font-mono font-bold text-foreground">30 ft</span>
                 </div>
               </div>
             </div>
 
             {/* Features */}
             {character.features && character.features.length > 0 && (
-              <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-amber-400 mb-4">Features & Traits</h2>
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">Features & Traits</h2>
                 <div className="space-y-3">
                   {character.features.map((feature) => (
-                    <div key={feature.id} className="bg-slate-900/50 p-3 rounded border border-slate-700/50">
-                      <div className="font-semibold text-amber-300 text-sm mb-1">{feature.name}</div>
-                      <p className="text-xs text-slate-300">{feature.description}</p>
-                      {feature.source && <div className="text-xs text-slate-500 mt-1">Source: {feature.source}</div>}
+                    <div key={feature.id} className="bg-muted/50 p-3 rounded border">
+                      <div className="font-semibold text-foreground text-sm mb-1">{feature.name}</div>
+                      <p className="text-xs text-muted-foreground">{feature.description}</p>
+                      {feature.source && <div className="text-xs text-muted-foreground/70 mt-1">Source: {feature.source}</div>}
                     </div>
                   ))}
                 </div>
@@ -406,22 +429,22 @@ export default function CharacterSheet() {
           <div className="lg:col-span-1 space-y-6">
             {/* Equipment */}
             {character.equipment && character.equipment.length > 0 && (
-              <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-amber-400 mb-4">Equipment</h2>
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">Equipment</h2>
                 <div className="space-y-2 text-xs">
                   {character.equipment.map((item) => (
                     <div
                       key={item.id}
-                      className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-900/20 border border-green-700/30' : 'bg-slate-900/50'
+                      className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-50 border border-green-200' : 'bg-muted/50'
                         }`}
                     >
                       <div>
-                        <div className="font-semibold text-slate-200">{item.name}</div>
-                        <div className="text-slate-500">
+                        <div className="font-semibold text-foreground">{item.name}</div>
+                        <div className="text-muted-foreground">
                           Qty: {item.quantity} | Wt: {item.weight}
                         </div>
                       </div>
-                      {item.equipped && <span className="text-green-400 font-bold">E</span>}
+                      {item.equipped && <span className="text-green-600 font-bold">E</span>}
                     </div>
                   ))}
                 </div>
@@ -430,16 +453,16 @@ export default function CharacterSheet() {
 
             {/* Spells */}
             {character.spells && character.spells.cantrips.length > 0 && (
-              <div className="bg-slate-800 border border-purple-700/30 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-amber-400 mb-4">Spells</h2>
+              <div className="bg-card border border-purple-200 rounded-lg p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">Spells</h2>
                 <div className="space-y-3">
                   {character.spells.cantrips.length > 0 && (
                     <div>
-                      <div className="text-xs font-bold text-slate-400 mb-2">CANTRIPS</div>
+                      <div className="text-xs font-bold text-muted-foreground mb-2">CANTRIPS</div>
                       <div className="space-y-1">
                         {character.spells.cantrips.map((cantrip, i) => (
-                          <div key={i} className="text-sm text-slate-300">
-                            • {cantrip}
+                          <div key={i} className="text-sm text-foreground">
+                            &bull; {cantrip}
                           </div>
                         ))}
                       </div>
@@ -451,31 +474,31 @@ export default function CharacterSheet() {
 
             {/* Personality */}
             {(character.personalityTraits || character.ideals || character.bonds || character.flaws) && (
-              <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
+              <div className="bg-card border rounded-lg p-6">
                 <SectionHeader title="Personality" onEdit={() => setEditSection('personality')} />
                 <div className="space-y-3 text-xs">
                   {character.personalityTraits && (
                     <div>
-                      <div className="font-semibold text-slate-400 mb-1">Traits</div>
-                      <p className="text-slate-300">{character.personalityTraits}</p>
+                      <div className="font-semibold text-muted-foreground mb-1">Traits</div>
+                      <p className="text-foreground">{character.personalityTraits}</p>
                     </div>
                   )}
                   {character.ideals && (
                     <div>
-                      <div className="font-semibold text-slate-400 mb-1">Ideals</div>
-                      <p className="text-slate-300">{character.ideals}</p>
+                      <div className="font-semibold text-muted-foreground mb-1">Ideals</div>
+                      <p className="text-foreground">{character.ideals}</p>
                     </div>
                   )}
                   {character.bonds && (
                     <div>
-                      <div className="font-semibold text-slate-400 mb-1">Bonds</div>
-                      <p className="text-slate-300">{character.bonds}</p>
+                      <div className="font-semibold text-muted-foreground mb-1">Bonds</div>
+                      <p className="text-foreground">{character.bonds}</p>
                     </div>
                   )}
                   {character.flaws && (
                     <div>
-                      <div className="font-semibold text-slate-400 mb-1">Flaws</div>
-                      <p className="text-slate-300">{character.flaws}</p>
+                      <div className="font-semibold text-muted-foreground mb-1">Flaws</div>
+                      <p className="text-foreground">{character.flaws}</p>
                     </div>
                   )}
                 </div>
@@ -486,23 +509,23 @@ export default function CharacterSheet() {
 
         {/* Full Width Backstory */}
         {character.backstory && (
-          <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
+          <div className="bg-card border rounded-lg p-6">
             <SectionHeader title="Backstory" onEdit={() => setEditSection('backstory')} />
-            <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{character.backstory}</p>
+            <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{character.backstory}</p>
           </div>
         )}
 
         {character.appearance && (
-          <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6 mt-6">
+          <div className="bg-card border rounded-lg p-6 mt-6">
             <SectionHeader title="Appearance" onEdit={() => setEditSection('appearance')} />
-            <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{character.appearance}</p>
+            <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{character.appearance}</p>
           </div>
         )}
       </div>
 
-      {/* Edit Modals */}
+      {/* Edit Dialogs */}
       {editSection === 'header' && (
-        <EditHeaderModal
+        <EditHeaderDialog
           character={character}
           onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
           onClose={() => setEditSection(null)}
@@ -510,7 +533,7 @@ export default function CharacterSheet() {
         />
       )}
       {editSection === 'abilities' && (
-        <EditAbilitiesModal
+        <EditAbilitiesDialog
           abilities={character.abilities}
           onSave={(abilities) => updateMutation.mutate({ abilities } as Partial<Character>)}
           onClose={() => setEditSection(null)}
@@ -518,7 +541,7 @@ export default function CharacterSheet() {
         />
       )}
       {editSection === 'skills' && (
-        <EditSkillsModal
+        <EditSkillsDialog
           skills={character.skills}
           onSave={(skills) => updateMutation.mutate({ skills } as Partial<Character>)}
           onClose={() => setEditSection(null)}
@@ -526,7 +549,7 @@ export default function CharacterSheet() {
         />
       )}
       {editSection === 'combat' && (
-        <EditCombatModal
+        <EditCombatDialog
           ac={character.ac}
           hpMax={character.hp_max}
           hpCurrent={character.hp_current}
@@ -536,7 +559,7 @@ export default function CharacterSheet() {
         />
       )}
       {editSection === 'personality' && (
-        <EditPersonalityModal
+        <EditPersonalityDialog
           personalityTraits={character.personalityTraits}
           ideals={character.ideals}
           bonds={character.bonds}
@@ -547,7 +570,7 @@ export default function CharacterSheet() {
         />
       )}
       {editSection === 'backstory' && (
-        <EditTextModal
+        <EditTextDialog
           title="Edit Backstory"
           field="backstory"
           value={character.backstory}
@@ -557,7 +580,7 @@ export default function CharacterSheet() {
         />
       )}
       {editSection === 'appearance' && (
-        <EditTextModal
+        <EditTextDialog
           title="Edit Appearance"
           field="appearance"
           value={character.appearance}
@@ -570,9 +593,9 @@ export default function CharacterSheet() {
   )
 }
 
-// --- Edit Modals ---
+// --- Edit Dialogs ---
 
-function EditHeaderModal({
+function EditHeaderDialog({
   character,
   onSave,
   onClose,
@@ -599,12 +622,120 @@ function EditHeaderModal({
     setForm((prev) => ({ ...prev, [key]: value }))
 
   return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title="Edit Character Info"
-      size="lg"
-      footer={
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Edit Character Info</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="char-name">Name</Label>
+            <Input
+              id="char-name"
+              value={form.name}
+              onChange={(e) => update('name', e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="char-player">Player Name</Label>
+            <Input
+              id="char-player"
+              value={form.player_name}
+              onChange={(e) => update('player_name', e.target.value)}
+              placeholder="Leave empty for NPCs"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Select value={form.character_type} onValueChange={(val) => update('character_type', val as 'pc' | 'npc')}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pc">PC</SelectItem>
+                <SelectItem value="npc">NPC</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Class</Label>
+            <Select value={form.class} onValueChange={(val) => val && update('class', val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_CLASSES.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="char-subclass">Subclass</Label>
+            <Input
+              id="char-subclass"
+              value={form.subclass}
+              onChange={(e) => update('subclass', e.target.value)}
+              placeholder="e.g. Champion, Arcane Trickster"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="char-level">Level</Label>
+            <Input
+              id="char-level"
+              type="number"
+              min={1}
+              max={20}
+              value={form.level}
+              onChange={(e) => update('level', Number(e.target.value))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Race</Label>
+            <Select value={form.race} onValueChange={(val) => val && update('race', val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_RACE_GROUPS.map((group) => (
+                  <SelectGroup key={group.label}>
+                    <SelectLabel>{group.label}</SelectLabel>
+                    {group.options.map((opt) => (
+                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Background</Label>
+            <Select value={form.background} onValueChange={(val) => val && update('background', val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_BACKGROUNDS.map((b) => (
+                  <SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Alignment</Label>
+            <Select value={form.alignment} onValueChange={(val) => val && update('alignment', val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_ALIGNMENTS.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <ModalFooter
           onSave={() =>
             onSave({
@@ -616,74 +747,12 @@ function EditHeaderModal({
           onCancel={onClose}
           saving={saving}
         />
-      }
-    >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Name"
-          value={form.name}
-          onChange={(e) => update('name', e.target.value)}
-          autoFocus
-        />
-        <Input
-          label="Player Name"
-          value={form.player_name}
-          onChange={(e) => update('player_name', e.target.value)}
-          placeholder="Leave empty for NPCs"
-        />
-        <Select
-          label="Type"
-          value={form.character_type}
-          onChange={(e) => update('character_type', e.target.value as 'pc' | 'npc')}
-          options={[
-            { value: 'pc', label: 'PC' },
-            { value: 'npc', label: 'NPC' },
-          ]}
-        />
-        <Select
-          label="Class"
-          value={form.class}
-          onChange={(e) => update('class', e.target.value)}
-          options={DND_CLASSES.map((c) => ({ value: c.name, label: c.name }))}
-        />
-        <Input
-          label="Subclass"
-          value={form.subclass}
-          onChange={(e) => update('subclass', e.target.value)}
-          placeholder="e.g. Champion, Arcane Trickster"
-        />
-        <Input
-          label="Level"
-          type="number"
-          min={1}
-          max={20}
-          value={form.level}
-          onChange={(e) => update('level', Number(e.target.value))}
-        />
-        <Select
-          label="Race"
-          value={form.race}
-          onChange={(e) => update('race', e.target.value)}
-          optgroups={DND_RACE_GROUPS}
-        />
-        <Select
-          label="Background"
-          value={form.background}
-          onChange={(e) => update('background', e.target.value)}
-          options={DND_BACKGROUNDS.map((b) => ({ value: b.name, label: b.name }))}
-        />
-        <Select
-          label="Alignment"
-          value={form.alignment}
-          onChange={(e) => update('alignment', e.target.value)}
-          options={DND_ALIGNMENTS.map((a) => ({ value: a.id, label: a.name }))}
-        />
-      </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function EditAbilitiesModal({
+function EditAbilitiesDialog({
   abilities,
   onSave,
   onClose,
@@ -696,40 +765,40 @@ function EditAbilitiesModal({
 }) {
   const [form, setForm] = useState({ ...abilities })
 
-  const update = (key: keyof typeof form, value: number) =>
+  const updateAbility = (key: keyof typeof form, value: number) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
   return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title="Edit Ability Scores"
-      size="sm"
-      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
-    >
-      <div className="space-y-4">
-        {(Object.keys(ABILITY_NAMES) as Array<keyof typeof abilities>).map((ability) => (
-          <div key={ability} className="flex items-center gap-4">
-            <label className="text-sm font-medium text-amber-400 w-28">{ABILITY_NAMES[ability]}</label>
-            <input
-              type="number"
-              min={1}
-              max={30}
-              value={form[ability]}
-              onChange={(e) => update(ability, Number(e.target.value))}
-              className="w-20 px-3 py-2 bg-slate-800 border border-amber-900/30 text-slate-100 rounded focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/30 text-center"
-            />
-            <span className={`text-sm font-mono font-bold w-8 text-center ${getAbilityModifier(form[ability]) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {getAbilityModifier(form[ability]) >= 0 ? '+' : ''}{getAbilityModifier(form[ability])}
-            </span>
-          </div>
-        ))}
-      </div>
-    </Modal>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Edit Ability Scores</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {(Object.keys(ABILITY_NAMES) as Array<keyof typeof abilities>).map((ability) => (
+            <div key={ability} className="flex items-center gap-4">
+              <Label className="w-28">{ABILITY_NAMES[ability]}</Label>
+              <Input
+                type="number"
+                min={1}
+                max={30}
+                value={form[ability]}
+                onChange={(e) => updateAbility(ability, Number(e.target.value))}
+                className="w-20 text-center"
+              />
+              <span className={`text-sm font-mono font-bold w-8 text-center ${getAbilityModifier(form[ability]) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {getAbilityModifier(form[ability]) >= 0 ? '+' : ''}{getAbilityModifier(form[ability])}
+              </span>
+            </div>
+          ))}
+        </div>
+        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function EditSkillsModal({
+function EditSkillsDialog({
   skills,
   onSave,
   onClose,
@@ -762,55 +831,55 @@ function EditSkillsModal({
   }
 
   return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title="Edit Skills"
-      size="md"
-      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
-    >
-      <div className="text-xs text-slate-400 mb-4">
-        Click <span className="font-bold text-amber-300">P</span> for proficiency, <span className="font-bold text-green-400">E</span> for expertise.
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
-        {DND_SKILLS.map((skill) => {
-          const data = form[skill.id]
-          return (
-            <div key={skill.id} className="flex items-center justify-between py-1.5 border-b border-slate-700/30">
-              <span className="text-sm text-slate-300">{skill.name}</span>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => toggle(skill.id, 'proficient')}
-                  className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
-                    data.proficient
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                  }`}
-                >
-                  P
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggle(skill.id, 'expertise')}
-                  className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
-                    data.expertise
-                      ? 'bg-green-600 text-white'
-                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                  }`}
-                >
-                  E
-                </button>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit Skills</DialogTitle>
+        </DialogHeader>
+        <div className="text-xs text-muted-foreground mb-4">
+          Click <span className="font-bold text-foreground">P</span> for proficiency, <span className="font-bold text-green-600">E</span> for expertise.
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-h-96 overflow-y-auto">
+          {DND_SKILLS.map((skill) => {
+            const data = form[skill.id]
+            return (
+              <div key={skill.id} className="flex items-center justify-between py-1.5 border-b">
+                <span className="text-sm text-foreground">{skill.name}</span>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => toggle(skill.id, 'proficient')}
+                    className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
+                      data.proficient
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-accent'
+                    }`}
+                  >
+                    P
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggle(skill.id, 'expertise')}
+                    className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
+                      data.expertise
+                        ? 'bg-green-600 text-white'
+                        : 'bg-muted text-muted-foreground hover:bg-accent'
+                    }`}
+                  >
+                    E
+                  </button>
+                </div>
               </div>
-            </div>
-          )
-        })}
-      </div>
-    </Modal>
+            )
+          })}
+        </div>
+        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function EditCombatModal({
+function EditCombatDialog({
   ac,
   hpMax,
   hpCurrent,
@@ -834,42 +903,51 @@ function EditCombatModal({
   }, [form.hp_max, form.hp_current])
 
   return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title="Edit Combat Stats"
-      size="sm"
-      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
-    >
-      <div className="space-y-4">
-        <Input
-          label="Armor Class"
-          type="number"
-          min={0}
-          value={form.ac}
-          onChange={(e) => setForm((prev) => ({ ...prev, ac: Number(e.target.value) }))}
-        />
-        <Input
-          label="Max HP"
-          type="number"
-          min={1}
-          value={form.hp_max}
-          onChange={(e) => setForm((prev) => ({ ...prev, hp_max: Number(e.target.value) }))}
-        />
-        <Input
-          label="Current HP"
-          type="number"
-          min={0}
-          max={form.hp_max}
-          value={form.hp_current}
-          onChange={(e) => setForm((prev) => ({ ...prev, hp_current: Number(e.target.value) }))}
-        />
-      </div>
-    </Modal>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Edit Combat Stats</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="combat-ac">Armor Class</Label>
+            <Input
+              id="combat-ac"
+              type="number"
+              min={0}
+              value={form.ac}
+              onChange={(e) => setForm((prev) => ({ ...prev, ac: Number(e.target.value) }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="combat-hp-max">Max HP</Label>
+            <Input
+              id="combat-hp-max"
+              type="number"
+              min={1}
+              value={form.hp_max}
+              onChange={(e) => setForm((prev) => ({ ...prev, hp_max: Number(e.target.value) }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="combat-hp-current">Current HP</Label>
+            <Input
+              id="combat-hp-current"
+              type="number"
+              min={0}
+              max={form.hp_max}
+              value={form.hp_current}
+              onChange={(e) => setForm((prev) => ({ ...prev, hp_current: Number(e.target.value) }))}
+            />
+          </div>
+        </div>
+        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function EditPersonalityModal({
+function EditPersonalityDialog({
   personalityTraits,
   ideals,
   bonds,
@@ -889,44 +967,56 @@ function EditPersonalityModal({
   const [form, setForm] = useState({ personalityTraits, ideals, bonds, flaws })
 
   return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title="Edit Personality"
-      size="md"
-      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
-    >
-      <div className="space-y-4">
-        <Textarea
-          label="Personality Traits"
-          value={form.personalityTraits}
-          onChange={(e) => setForm((prev) => ({ ...prev, personalityTraits: e.target.value }))}
-          rows={3}
-        />
-        <Textarea
-          label="Ideals"
-          value={form.ideals}
-          onChange={(e) => setForm((prev) => ({ ...prev, ideals: e.target.value }))}
-          rows={2}
-        />
-        <Textarea
-          label="Bonds"
-          value={form.bonds}
-          onChange={(e) => setForm((prev) => ({ ...prev, bonds: e.target.value }))}
-          rows={2}
-        />
-        <Textarea
-          label="Flaws"
-          value={form.flaws}
-          onChange={(e) => setForm((prev) => ({ ...prev, flaws: e.target.value }))}
-          rows={2}
-        />
-      </div>
-    </Modal>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit Personality</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="personality-traits">Personality Traits</Label>
+            <Textarea
+              id="personality-traits"
+              value={form.personalityTraits}
+              onChange={(e) => setForm((prev) => ({ ...prev, personalityTraits: e.target.value }))}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="personality-ideals">Ideals</Label>
+            <Textarea
+              id="personality-ideals"
+              value={form.ideals}
+              onChange={(e) => setForm((prev) => ({ ...prev, ideals: e.target.value }))}
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="personality-bonds">Bonds</Label>
+            <Textarea
+              id="personality-bonds"
+              value={form.bonds}
+              onChange={(e) => setForm((prev) => ({ ...prev, bonds: e.target.value }))}
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="personality-flaws">Flaws</Label>
+            <Textarea
+              id="personality-flaws"
+              value={form.flaws}
+              onChange={(e) => setForm((prev) => ({ ...prev, flaws: e.target.value }))}
+              rows={2}
+            />
+          </div>
+        </div>
+        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function EditTextModal({
+function EditTextDialog({
   title,
   field,
   value,
@@ -944,19 +1034,19 @@ function EditTextModal({
   const [text, setText] = useState(value)
 
   return (
-    <Modal
-      isOpen
-      onClose={onClose}
-      title={title}
-      size="lg"
-      footer={<ModalFooter onSave={() => onSave({ [field]: text })} onCancel={onClose} saving={saving} />}
-    >
-      <Textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={10}
-        autoFocus
-      />
-    </Modal>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={10}
+          autoFocus
+        />
+        <ModalFooter onSave={() => onSave({ [field]: text })} onCancel={onClose} saving={saving} />
+      </DialogContent>
+    </Dialog>
   )
 }

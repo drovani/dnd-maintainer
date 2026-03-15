@@ -3,19 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
-@custom-variant dark (&:is(.dark *));
 
 :root {
-  /* D&D Themed Colors */
-  --color-parchment: #f4e4c1;
-  --color-dark-parchment: #d4a574;
-  --color-ink: #2c1810;
-  --color-gold: #d4af37;
-  --color-blood-red: #8b0000;
-  --color-forest-green: #1b4332;
-  --color-deep-purple: #3a0066;
-  --color-stone-gray: #4a4a4a;
-  --color-shadow: #1a1a1a;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -50,30 +39,12 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-* {
-  @apply transition-colors duration-200;
-}
-
 html,
 body,
 #root {
   @apply h-full w-full;
 }
 
-body {
-  @apply bg-slate-950 text-slate-100 font-sans;
-  background-color: var(--color-shadow);
-}
-
-a {
-  @apply text-amber-500 hover:text-amber-400 underline;
-}
-
-button {
-  @apply font-medium;
-}
-
-/* Utility Classes */
 @layer components {
   .page-container {
     @apply p-6 max-w-7xl mx-auto;
@@ -84,11 +55,11 @@ button {
   }
 
   .page-title {
-    @apply text-3xl font-bold text-amber-400 mb-2;
+    @apply text-3xl font-bold text-foreground mb-2;
   }
 
   .page-subtitle {
-    @apply text-slate-400 text-lg;
+    @apply text-muted-foreground text-lg;
   }
 
   .grid-2 {
@@ -108,59 +79,18 @@ button {
   }
 
   .form-label {
-    @apply block text-sm font-semibold text-amber-400 mb-2;
+    @apply block text-sm font-semibold text-foreground mb-2;
   }
 
   .divider {
-    @apply border-t border-amber-900/20;
+    @apply border-t border-border;
   }
 
   .hover-lift {
     @apply hover:-translate-y-1 hover:shadow-lg transition-all duration-200;
   }
-
-  .glass-effect {
-    @apply bg-slate-900/80 backdrop-blur-sm border border-amber-900/20;
-  }
-
-  .gradient-gold {
-    @apply bg-linear-to-r from-amber-600 to-amber-500;
-  }
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
 
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
