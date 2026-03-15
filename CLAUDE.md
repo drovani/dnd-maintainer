@@ -12,6 +12,7 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - `npm run build` — typecheck with `tsc -b` then build with Vite
 - `npm run lint` — ESLint for ts/tsx files
 - `npm run preview` — preview production build
+- `npx supabase <command>` — always run Supabase CLI via `npx` (not bare `supabase`)
 - No test framework is configured yet
 
 ## Tech Stack
