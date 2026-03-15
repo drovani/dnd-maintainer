@@ -1,14 +1,20 @@
 import {
   DND_ALIGNMENTS,
+  DND_BACKGROUNDS,
+  DND_CLASSES,
+  DND_RACE_GROUPS,
   DND_SKILLS,
   getAbilityModifier,
   getProficiencyBonus,
 } from '@/lib/dnd-helpers'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Edit2, Minus, Plus, Save, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Edit2, Minus, Plus, Save } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Input, Textarea } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { Modal } from '@/components/ui/Modal'
 
 interface Character {
   id: string
@@ -59,11 +65,48 @@ const ABILITY_NAMES: Record<string, string> = {
   cha: 'Charisma',
 }
 
+type EditSection = 'header' | 'abilities' | 'skills' | 'combat' | 'personality' | 'backstory' | 'appearance' | null
+
+function SectionHeader({ title, onEdit }: { title: string; onEdit: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-lg font-bold text-amber-400">{title}</h2>
+      <button
+        onClick={onEdit}
+        className="p-1.5 hover:bg-slate-700 rounded transition-colors"
+        title={`Edit ${title}`}
+      >
+        <Edit2 size={14} className="text-amber-400" />
+      </button>
+    </div>
+  )
+}
+
+function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCancel: () => void; saving: boolean }) {
+  return (
+    <div className="flex justify-end gap-3">
+      <button
+        onClick={onCancel}
+        className="px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={onSave}
+        disabled={saving}
+        className="px-4 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white rounded transition-colors disabled:opacity-50 flex items-center gap-2"
+      >
+        <Save size={14} />
+        {saving ? 'Saving...' : 'Save'}
+      </button>
+    </div>
+  )
+}
+
 export default function CharacterSheet() {
   const { characterId } = useParams<{ id: string; characterId: string }>()
   const queryClient = useQueryClient()
-  const [editingField, setEditingField] = useState<string | null>(null)
-  const [editValue, setEditValue] = useState<unknown>(null)
+  const [editSection, setEditSection] = useState<EditSection>(null)
 
   const { data: character, isLoading, error } = useQuery({
     queryKey: ['character', characterId],
@@ -92,25 +135,9 @@ export default function CharacterSheet() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['character', characterId] })
-      setEditingField(null)
+      setEditSection(null)
     },
   })
-
-  const startEdit = (field: string, value: unknown) => {
-    setEditingField(field)
-    setEditValue(value)
-  }
-
-  const saveEdit = (field: keyof Omit<Character, 'id' | 'campaign_id' | 'updated_at'>) => {
-    if (editValue !== null && character) {
-      updateMutation.mutate({ [field]: editValue } as Partial<Character>)
-    }
-  }
-
-  const cancelEdit = () => {
-    setEditingField(null)
-    setEditValue(null)
-  }
 
   const updateHP = (delta: number) => {
     if (character) {
@@ -159,43 +186,23 @@ export default function CharacterSheet() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="text-sm text-slate-400 mb-1">CHARACTER SHEET</div>
-              {editingField === 'name' ? (
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={editValue as string}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    className="px-3 py-2 bg-slate-700 border border-amber-500 rounded text-white text-2xl font-bold focus:outline-none"
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => saveEdit('name')}
-                    className="p-2 bg-green-600 hover:bg-green-700 text-white rounded"
-                  >
-                    <Save size={16} />
-                  </button>
-                  <button onClick={cancelEdit} className="p-2 bg-red-600 hover:bg-red-700 text-white rounded">
-                    <X size={16} />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 group">
-                  <h1 className="text-3xl font-bold text-amber-300">{character.name}</h1>
-                  <button
-                    onClick={() => startEdit('name', character.name)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-opacity"
-                  >
-                    <Edit2 size={18} className="text-amber-400" />
-                  </button>
-                </div>
-              )}
+              <h1 className="text-3xl font-bold text-amber-300">{character.name}</h1>
             </div>
+            <button
+              onClick={() => setEditSection('header')}
+              className="p-2 hover:bg-slate-700 rounded transition-colors"
+              title="Edit Character Info"
+            >
+              <Edit2 size={16} className="text-amber-400" />
+            </button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-slate-400">Class</span>
-              <p className="text-amber-300 font-semibold">{character.class}</p>
+              <p className="text-amber-300 font-semibold">
+                {character.class}{character.subclass ? ` (${character.subclass})` : ''}
+              </p>
             </div>
             <div>
               <span className="text-slate-400">Level</span>
@@ -219,6 +226,10 @@ export default function CharacterSheet() {
                 <p className="text-amber-300 font-semibold">{character.player_name}</p>
               </div>
             )}
+            <div>
+              <span className="text-slate-400">Type</span>
+              <p className="text-amber-300 font-semibold uppercase">{character.character_type}</p>
+            </div>
           </div>
         </div>
 
@@ -228,7 +239,7 @@ export default function CharacterSheet() {
           <div className="lg:col-span-1 space-y-6">
             {/* Ability Scores */}
             <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-              <h2 className="text-lg font-bold text-amber-400 mb-4">Abilities</h2>
+              <SectionHeader title="Abilities" onEdit={() => setEditSection('abilities')} />
               <div className="space-y-3">
                 {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
                   const score = character.abilities[ability]
@@ -270,7 +281,7 @@ export default function CharacterSheet() {
 
             {/* Skills */}
             <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-              <h2 className="text-lg font-bold text-amber-400 mb-4">Skills</h2>
+              <SectionHeader title="Skills" onEdit={() => setEditSection('skills')} />
               <div className="space-y-1 text-xs">
                 {Object.entries(skillsByAbility).map(([ability, skills]) => (
                   <div key={ability}>
@@ -307,7 +318,7 @@ export default function CharacterSheet() {
           <div className="lg:col-span-1 space-y-6">
             {/* Combat Stats */}
             <div className="bg-slate-800 border-2 border-red-700/50 rounded-lg p-6">
-              <h2 className="text-lg font-bold text-amber-400 mb-4">Combat</h2>
+              <SectionHeader title="Combat" onEdit={() => setEditSection('combat')} />
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-slate-900 p-4 rounded border border-red-700/30 text-center">
@@ -439,9 +450,9 @@ export default function CharacterSheet() {
             )}
 
             {/* Personality */}
-            {character.personalityTraits && (
+            {(character.personalityTraits || character.ideals || character.bonds || character.flaws) && (
               <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-amber-400 mb-4">Personality</h2>
+                <SectionHeader title="Personality" onEdit={() => setEditSection('personality')} />
                 <div className="space-y-3 text-xs">
                   {character.personalityTraits && (
                     <div>
@@ -476,18 +487,476 @@ export default function CharacterSheet() {
         {/* Full Width Backstory */}
         {character.backstory && (
           <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6">
-            <h2 className="text-lg font-bold text-amber-400 mb-4">Backstory</h2>
+            <SectionHeader title="Backstory" onEdit={() => setEditSection('backstory')} />
             <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{character.backstory}</p>
           </div>
         )}
 
         {character.appearance && (
           <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-6 mt-6">
-            <h2 className="text-lg font-bold text-amber-400 mb-4">Appearance</h2>
+            <SectionHeader title="Appearance" onEdit={() => setEditSection('appearance')} />
             <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{character.appearance}</p>
           </div>
         )}
       </div>
+
+      {/* Edit Modals */}
+      {editSection === 'header' && (
+        <EditHeaderModal
+          character={character}
+          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
+      {editSection === 'abilities' && (
+        <EditAbilitiesModal
+          abilities={character.abilities}
+          onSave={(abilities) => updateMutation.mutate({ abilities } as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
+      {editSection === 'skills' && (
+        <EditSkillsModal
+          skills={character.skills}
+          onSave={(skills) => updateMutation.mutate({ skills } as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
+      {editSection === 'combat' && (
+        <EditCombatModal
+          ac={character.ac}
+          hpMax={character.hp_max}
+          hpCurrent={character.hp_current}
+          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
+      {editSection === 'personality' && (
+        <EditPersonalityModal
+          personalityTraits={character.personalityTraits}
+          ideals={character.ideals}
+          bonds={character.bonds}
+          flaws={character.flaws}
+          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
+      {editSection === 'backstory' && (
+        <EditTextModal
+          title="Edit Backstory"
+          field="backstory"
+          value={character.backstory}
+          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
+      {editSection === 'appearance' && (
+        <EditTextModal
+          title="Edit Appearance"
+          field="appearance"
+          value={character.appearance}
+          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          onClose={() => setEditSection(null)}
+          saving={updateMutation.isPending}
+        />
+      )}
     </div>
+  )
+}
+
+// --- Edit Modals ---
+
+function EditHeaderModal({
+  character,
+  onSave,
+  onClose,
+  saving,
+}: {
+  character: Character
+  onSave: (updates: Partial<Character>) => void
+  onClose: () => void
+  saving: boolean
+}) {
+  const [form, setForm] = useState({
+    name: character.name,
+    player_name: character.player_name ?? '',
+    character_type: character.character_type,
+    race: character.race,
+    class: character.class,
+    subclass: character.subclass,
+    level: character.level,
+    background: character.background,
+    alignment: character.alignment,
+  })
+
+  const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }))
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Edit Character Info"
+      size="lg"
+      footer={
+        <ModalFooter
+          onSave={() =>
+            onSave({
+              ...form,
+              player_name: form.player_name || null,
+              level: Number(form.level),
+            })
+          }
+          onCancel={onClose}
+          saving={saving}
+        />
+      }
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          label="Name"
+          value={form.name}
+          onChange={(e) => update('name', e.target.value)}
+          autoFocus
+        />
+        <Input
+          label="Player Name"
+          value={form.player_name}
+          onChange={(e) => update('player_name', e.target.value)}
+          placeholder="Leave empty for NPCs"
+        />
+        <Select
+          label="Type"
+          value={form.character_type}
+          onChange={(e) => update('character_type', e.target.value as 'pc' | 'npc')}
+          options={[
+            { value: 'pc', label: 'PC' },
+            { value: 'npc', label: 'NPC' },
+          ]}
+        />
+        <Select
+          label="Class"
+          value={form.class}
+          onChange={(e) => update('class', e.target.value)}
+          options={DND_CLASSES.map((c) => ({ value: c.name, label: c.name }))}
+        />
+        <Input
+          label="Subclass"
+          value={form.subclass}
+          onChange={(e) => update('subclass', e.target.value)}
+          placeholder="e.g. Champion, Arcane Trickster"
+        />
+        <Input
+          label="Level"
+          type="number"
+          min={1}
+          max={20}
+          value={form.level}
+          onChange={(e) => update('level', Number(e.target.value))}
+        />
+        <Select
+          label="Race"
+          value={form.race}
+          onChange={(e) => update('race', e.target.value)}
+          optgroups={DND_RACE_GROUPS}
+        />
+        <Select
+          label="Background"
+          value={form.background}
+          onChange={(e) => update('background', e.target.value)}
+          options={DND_BACKGROUNDS.map((b) => ({ value: b.name, label: b.name }))}
+        />
+        <Select
+          label="Alignment"
+          value={form.alignment}
+          onChange={(e) => update('alignment', e.target.value)}
+          options={DND_ALIGNMENTS.map((a) => ({ value: a.id, label: a.name }))}
+        />
+      </div>
+    </Modal>
+  )
+}
+
+function EditAbilitiesModal({
+  abilities,
+  onSave,
+  onClose,
+  saving,
+}: {
+  abilities: Character['abilities']
+  onSave: (abilities: Character['abilities']) => void
+  onClose: () => void
+  saving: boolean
+}) {
+  const [form, setForm] = useState({ ...abilities })
+
+  const update = (key: keyof typeof form, value: number) =>
+    setForm((prev) => ({ ...prev, [key]: value }))
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Edit Ability Scores"
+      size="sm"
+      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
+    >
+      <div className="space-y-4">
+        {(Object.keys(ABILITY_NAMES) as Array<keyof typeof abilities>).map((ability) => (
+          <div key={ability} className="flex items-center gap-4">
+            <label className="text-sm font-medium text-amber-400 w-28">{ABILITY_NAMES[ability]}</label>
+            <input
+              type="number"
+              min={1}
+              max={30}
+              value={form[ability]}
+              onChange={(e) => update(ability, Number(e.target.value))}
+              className="w-20 px-3 py-2 bg-slate-800 border border-amber-900/30 text-slate-100 rounded focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/30 text-center"
+            />
+            <span className={`text-sm font-mono font-bold w-8 text-center ${getAbilityModifier(form[ability]) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {getAbilityModifier(form[ability]) >= 0 ? '+' : ''}{getAbilityModifier(form[ability])}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Modal>
+  )
+}
+
+function EditSkillsModal({
+  skills,
+  onSave,
+  onClose,
+  saving,
+}: {
+  skills: Character['skills']
+  onSave: (skills: Character['skills']) => void
+  onClose: () => void
+  saving: boolean
+}) {
+  const [form, setForm] = useState<Record<string, { proficient: boolean; expertise: boolean }>>(() => {
+    const initial: Record<string, { proficient: boolean; expertise: boolean }> = {}
+    for (const skill of DND_SKILLS) {
+      initial[skill.id] = skills?.[skill.id] ?? { proficient: false, expertise: false }
+    }
+    return initial
+  })
+
+  const toggle = (skillId: string, field: 'proficient' | 'expertise') => {
+    setForm((prev) => {
+      const current = prev[skillId]
+      if (field === 'proficient' && current.proficient) {
+        return { ...prev, [skillId]: { proficient: false, expertise: false } }
+      }
+      if (field === 'expertise' && !current.proficient) {
+        return { ...prev, [skillId]: { proficient: true, expertise: true } }
+      }
+      return { ...prev, [skillId]: { ...current, [field]: !current[field] } }
+    })
+  }
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Edit Skills"
+      size="md"
+      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
+    >
+      <div className="text-xs text-slate-400 mb-4">
+        Click <span className="font-bold text-amber-300">P</span> for proficiency, <span className="font-bold text-green-400">E</span> for expertise.
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+        {DND_SKILLS.map((skill) => {
+          const data = form[skill.id]
+          return (
+            <div key={skill.id} className="flex items-center justify-between py-1.5 border-b border-slate-700/30">
+              <span className="text-sm text-slate-300">{skill.name}</span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => toggle(skill.id, 'proficient')}
+                  className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
+                    data.proficient
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  }`}
+                >
+                  P
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggle(skill.id, 'expertise')}
+                  className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
+                    data.expertise
+                      ? 'bg-green-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  }`}
+                >
+                  E
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </Modal>
+  )
+}
+
+function EditCombatModal({
+  ac,
+  hpMax,
+  hpCurrent,
+  onSave,
+  onClose,
+  saving,
+}: {
+  ac: number
+  hpMax: number
+  hpCurrent: number
+  onSave: (updates: { ac: number; hp_max: number; hp_current: number }) => void
+  onClose: () => void
+  saving: boolean
+}) {
+  const [form, setForm] = useState({ ac, hp_max: hpMax, hp_current: hpCurrent })
+
+  useEffect(() => {
+    if (form.hp_current > form.hp_max) {
+      setForm((prev) => ({ ...prev, hp_current: prev.hp_max }))
+    }
+  }, [form.hp_max, form.hp_current])
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Edit Combat Stats"
+      size="sm"
+      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
+    >
+      <div className="space-y-4">
+        <Input
+          label="Armor Class"
+          type="number"
+          min={0}
+          value={form.ac}
+          onChange={(e) => setForm((prev) => ({ ...prev, ac: Number(e.target.value) }))}
+        />
+        <Input
+          label="Max HP"
+          type="number"
+          min={1}
+          value={form.hp_max}
+          onChange={(e) => setForm((prev) => ({ ...prev, hp_max: Number(e.target.value) }))}
+        />
+        <Input
+          label="Current HP"
+          type="number"
+          min={0}
+          max={form.hp_max}
+          value={form.hp_current}
+          onChange={(e) => setForm((prev) => ({ ...prev, hp_current: Number(e.target.value) }))}
+        />
+      </div>
+    </Modal>
+  )
+}
+
+function EditPersonalityModal({
+  personalityTraits,
+  ideals,
+  bonds,
+  flaws,
+  onSave,
+  onClose,
+  saving,
+}: {
+  personalityTraits: string
+  ideals: string
+  bonds: string
+  flaws: string
+  onSave: (updates: { personalityTraits: string; ideals: string; bonds: string; flaws: string }) => void
+  onClose: () => void
+  saving: boolean
+}) {
+  const [form, setForm] = useState({ personalityTraits, ideals, bonds, flaws })
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Edit Personality"
+      size="md"
+      footer={<ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />}
+    >
+      <div className="space-y-4">
+        <Textarea
+          label="Personality Traits"
+          value={form.personalityTraits}
+          onChange={(e) => setForm((prev) => ({ ...prev, personalityTraits: e.target.value }))}
+          rows={3}
+        />
+        <Textarea
+          label="Ideals"
+          value={form.ideals}
+          onChange={(e) => setForm((prev) => ({ ...prev, ideals: e.target.value }))}
+          rows={2}
+        />
+        <Textarea
+          label="Bonds"
+          value={form.bonds}
+          onChange={(e) => setForm((prev) => ({ ...prev, bonds: e.target.value }))}
+          rows={2}
+        />
+        <Textarea
+          label="Flaws"
+          value={form.flaws}
+          onChange={(e) => setForm((prev) => ({ ...prev, flaws: e.target.value }))}
+          rows={2}
+        />
+      </div>
+    </Modal>
+  )
+}
+
+function EditTextModal({
+  title,
+  field,
+  value,
+  onSave,
+  onClose,
+  saving,
+}: {
+  title: string
+  field: string
+  value: string
+  onSave: (updates: Record<string, string>) => void
+  onClose: () => void
+  saving: boolean
+}) {
+  const [text, setText] = useState(value)
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={title}
+      size="lg"
+      footer={<ModalFooter onSave={() => onSave({ [field]: text })} onCancel={onClose} saving={saving} />}
+    >
+      <Textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={10}
+        autoFocus
+      />
+    </Modal>
   )
 }

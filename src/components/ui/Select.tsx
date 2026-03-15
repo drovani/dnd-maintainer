@@ -1,14 +1,20 @@
 import { forwardRef, SelectHTMLAttributes } from 'react';
 
+export interface SelectOptionGroup {
+  label: string;
+  options: Array<{ value: string | number; label: string; disabled?: boolean }>;
+}
+
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
-  options: Array<{ value: string | number; label: string }>;
+  options?: Array<{ value: string | number; label: string }>;
+  optgroups?: SelectOptionGroup[];
   placeholder?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, placeholder, className = '', ...props }, ref) => {
+  ({ label, error, options, optgroups, placeholder, className = '', ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
@@ -35,11 +41,21 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {placeholder}
             </option>
           )}
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
+          {optgroups
+            ? optgroups.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.options.map((option) => (
+                    <option key={option.value} value={option.value} disabled={option.disabled}>
+                      {option.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            : options?.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
         </select>
         {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
       </div>
