@@ -5,7 +5,14 @@ import {
   DND_RACE_GROUPS,
   DND_RACES,
   DND_SKILLS,
+  POINT_BUY_TOTAL,
+  STANDARD_ARRAY,
   getAbilityModifier,
+  getPointBuyCost,
+  getPointBuyDecrementReturn,
+  getPointBuyEquivalent,
+  getPointBuyIncrementCost,
+  rollAbilityScores,
 } from '@/lib/dnd-helpers'
 import { usePlayerNames } from '@/hooks/useCharacters'
 import { supabase } from '@/lib/supabase'
@@ -26,9 +33,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
-import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dices, Save, TrendingDown, TrendingUp } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 interface CharacterData {
@@ -44,6 +53,7 @@ interface CharacterData {
   alignment: string
 
   // Abilities
+  abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
   abilities: {
     str: number
     dex: number
@@ -52,6 +62,8 @@ interface CharacterData {
     wis: number
     cha: number
   }
+  abilityAssignments: Record<string, number | null>
+  rolledValues: number[]
 
   // Skills
   skills: Record<string, { proficient: boolean; expertise: boolean }>
@@ -119,6 +131,7 @@ export default function CharacterBuilder() {
     custom_background: '',
     alignment: DND_ALIGNMENTS[4].id,
 
+    abilityMethod: 'standard-array',
     abilities: {
       str: 10,
       dex: 10,
@@ -127,6 +140,8 @@ export default function CharacterBuilder() {
       wis: 10,
       cha: 10,
     },
+    abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+    rolledValues: [],
 
     skills: DND_SKILLS.reduce(
       (acc, skill) => ({
@@ -154,6 +169,10 @@ export default function CharacterBuilder() {
     hp_max: 0,
     ac: 10,
   })
+
+  const [isRolling, setIsRolling] = useState<boolean>(false)
+  const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
+  const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const selectedClass = DND_CLASSES.find((c) => c.id === characterData.class)
   const conModifier = getAbilityModifier(characterData.abilities.con)
@@ -210,6 +229,94 @@ export default function CharacterBuilder() {
       ...prev,
       abilities: { ...prev.abilities, [ability]: value },
     }))
+  }
+
+  const selectedRace = DND_RACES.find((r) => r.id === characterData.race)
+  const racialBonuses = selectedRace?.abilityBonuses ?? {}
+
+  const resetAbilitiesForMethod = (method: CharacterData['abilityMethod']) => {
+    const defaultScore = method === 'point-buy' ? 8 : 10
+    setCharacterData((prev) => ({
+      ...prev,
+      abilityMethod: method,
+      abilities: { str: defaultScore, dex: defaultScore, con: defaultScore, int: defaultScore, wis: defaultScore, cha: defaultScore },
+      abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+      rolledValues: method === 'rolling' ? prev.rolledValues : [],
+    }))
+  }
+
+  const assignAbilityScore = (ability: keyof CharacterData['abilities'], value: number | null) => {
+    setCharacterData((prev) => {
+      const newAssignments = { ...prev.abilityAssignments, [ability]: value }
+      const newAbilities = { ...prev.abilities }
+      for (const key of Object.keys(newAbilities) as Array<keyof typeof newAbilities>) {
+        newAbilities[key] = (newAssignments[key] as number) ?? 10
+      }
+      return { ...prev, abilityAssignments: newAssignments, abilities: newAbilities }
+    })
+  }
+
+  const unassignValue = (value: number) => {
+    setCharacterData((prev) => {
+      const abilityToUnassign = Object.entries(prev.abilityAssignments)
+        .find(([, val]) => val === value)?.[0]
+      if (!abilityToUnassign) return prev
+      const newAssignments = { ...prev.abilityAssignments, [abilityToUnassign]: null }
+      const newAbilities = { ...prev.abilities }
+      for (const key of Object.keys(newAbilities) as Array<keyof typeof newAbilities>) {
+        newAbilities[key] = (newAssignments[key] as number) ?? 10
+      }
+      return { ...prev, abilityAssignments: newAssignments, abilities: newAbilities }
+    })
+  }
+
+  const handleRollScores = useCallback(() => {
+    if (isRolling) return
+    setIsRolling(true)
+    setDisplayedRolls(Array.from({ length: 6 }, () => Math.floor(Math.random() * 13) + 3))
+
+    const finalValues = rollAbilityScores()
+    let ticks = 0
+    const totalTicks = 12
+
+    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+    rollIntervalRef.current = setInterval(() => {
+      ticks++
+      if (ticks < totalTicks) {
+        setDisplayedRolls(Array.from({ length: 6 }, () => Math.floor(Math.random() * 13) + 3))
+      } else {
+        if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+        setDisplayedRolls(finalValues)
+        setCharacterData((prev) => ({
+          ...prev,
+          rolledValues: finalValues,
+          abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+          abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
+        }))
+        setIsRolling(false)
+      }
+    }, 80)
+  }, [isRolling])
+
+  useEffect(() => {
+    return () => {
+      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+    }
+  }, [])
+
+  const incrementAbility = (ability: keyof CharacterData['abilities']) => {
+    const current = characterData.abilities[ability]
+    if (current >= 15) return
+    const cost = getPointBuyIncrementCost(current)
+    const spent = Object.values(characterData.abilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
+    if (POINT_BUY_TOTAL - spent < cost) return
+    updateAbility(ability, current + 1)
+  }
+
+  const decrementAbility = (ability: keyof CharacterData['abilities']) => {
+    const current = characterData.abilities[ability]
+    if (current <= 8) return
+    updateAbility(ability, current - 1)
   }
 
   const toggleSkillProficiency = (skillId: string) => {
@@ -474,39 +581,219 @@ export default function CharacterBuilder() {
     </div>
   )
 
-  const renderAbilitiesStep = () => (
-    <div className="space-y-6">
-      <p className="text-muted-foreground text-sm">
-        Set your ability scores. The modifier is calculated automatically.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(Object.keys(characterData.abilities) as Array<keyof typeof characterData.abilities>).map((ability) => {
-          const score = characterData.abilities[ability]
-          const modifier = getAbilityModifier(score)
-          return (
-            <Card key={ability}>
-              <CardContent className="p-4">
-                <Label className="mb-3">{ABILITY_NAMES[ability]}</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={score}
-                  onChange={(e) => updateAbility(ability, parseInt(e.target.value) || 10)}
-                  className="text-center text-lg font-bold mb-3"
-                />
-                <div className="text-center">
-                  <p className="text-muted-foreground text-xs mb-1">Modifier</p>
-                  <p className={`text-2xl font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {modifier >= 0 ? '+' : ''}{modifier}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+  const renderAbilityCard = (ability: keyof CharacterData['abilities'], scoreInput: React.ReactNode) => {
+    const baseScore = characterData.abilities[ability]
+    const raceBonus = racialBonuses[ability] ?? 0
+    const totalScore = baseScore + raceBonus
+    const modifier = getAbilityModifier(totalScore)
+
+    return (
+      <Card key={ability}>
+        <CardContent className="px-3 py-2 space-y-1">
+          <Label className="text-xs font-semibold text-muted-foreground">{ABILITY_NAMES[ability]}</Label>
+          <div className="flex items-center justify-between gap-2">
+            <div className="shrink-0">{scoreInput}</div>
+            {raceBonus > 0 && selectedRace && (
+              <Badge
+                variant="secondary"
+                className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
+                title={`${selectedRace.name} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${ABILITY_NAMES[ab as keyof typeof ABILITY_NAMES]}`).join(', ')}`}
+              >
+                +{raceBonus}
+              </Badge>
+            )}
+            <div className="flex items-baseline gap-2 ml-auto">
+              <span className="text-sm font-bold">{totalScore}</span>
+              <span className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {modifier >= 0 ? '+' : ''}{modifier}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const renderAssignmentSelect = (ability: keyof CharacterData['abilities'], availableValues: readonly number[]) => {
+    const currentValue = characterData.abilityAssignments[ability]
+    const assignedValues = Object.entries(characterData.abilityAssignments)
+      .filter(([key, val]) => key !== ability && val !== null)
+      .map(([, val]) => val as number)
+    const options = availableValues.filter((v) => !assignedValues.includes(v) || v === currentValue)
+
+    return (
+      <Select
+        value={currentValue !== null ? String(currentValue) : ''}
+        onValueChange={(val) => assignAbilityScore(ability, val ? Number(val) : null)}
+      >
+        <SelectTrigger size="sm" className="w-16 text-center font-bold">
+          <SelectValue placeholder="—" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((v) => (
+            <SelectItem key={v} value={String(v)}>
+              {v}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  const renderAbilitiesStep = () => {
+    const abilities = Object.keys(characterData.abilities) as Array<keyof typeof characterData.abilities>
+    const pointsSpent = Object.values(characterData.abilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
+    const pointsRemaining = POINT_BUY_TOTAL - pointsSpent
+    const rollValues = isRolling ? displayedRolls : characterData.rolledValues
+    const pointBuyEquiv = characterData.rolledValues.length > 0
+      ? getPointBuyEquivalent(characterData.rolledValues)
+      : null
+    const pointBuyDiff = pointBuyEquiv !== null ? pointBuyEquiv - POINT_BUY_TOTAL : null
+
+    return (
+      <div className="space-y-4">
+        <Tabs
+          value={characterData.abilityMethod}
+          onValueChange={(val) => resetAbilitiesForMethod(val as CharacterData['abilityMethod'])}
+        >
+          <TabsList className="w-full">
+            <TabsTrigger value="standard-array" className="flex-1">Standard Array</TabsTrigger>
+            <TabsTrigger value="point-buy" className="flex-1">Point-Buy</TabsTrigger>
+            <TabsTrigger value="rolling" className="flex-1">Rolling</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="standard-array" className="space-y-3 mt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-muted-foreground text-sm">
+                Assign each value to an ability. Each value used once.
+              </p>
+              <div className="flex gap-1.5">
+                {STANDARD_ARRAY.map((v) => {
+                  const isAssigned = Object.values(characterData.abilityAssignments).includes(v)
+                  return (
+                    <Badge
+                      key={v}
+                      variant={isAssigned ? 'outline' : 'default'}
+                      className={`text-xs select-none ${isAssigned ? 'opacity-30 cursor-pointer hover:opacity-60 transition-opacity' : 'cursor-default'}`}
+                      onClick={isAssigned ? () => unassignValue(v) : undefined}
+                    >
+                      {v}
+                    </Badge>
+                  )
+                })}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+              {abilities.map((ability) =>
+                renderAbilityCard(ability, renderAssignmentSelect(ability, STANDARD_ARRAY))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="point-buy" className="space-y-3 mt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-muted-foreground text-sm">
+                Spend points to increase scores from 8.
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">Points:</span>
+                <span className={`text-2xl font-bold tabular-nums ${pointsRemaining === 0 ? 'text-muted-foreground' : pointsRemaining < 5 ? 'text-amber-600' : 'text-foreground'}`}>
+                  {pointsRemaining}
+                </span>
+                <span className="text-sm text-muted-foreground">/ {POINT_BUY_TOTAL}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+              {abilities.map((ability) => {
+                const score = characterData.abilities[ability]
+                const canIncrement = score < 15 && pointsRemaining >= getPointBuyIncrementCost(score)
+                const canDecrement = score > 8
+                const incCost = score < 15 ? getPointBuyIncrementCost(score) : 0
+                const decReturn = score > 8 ? getPointBuyDecrementReturn(score) : 0
+
+                return renderAbilityCard(
+                  ability,
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      onClick={() => decrementAbility(ability)}
+                      disabled={!canDecrement}
+                      title={canDecrement ? `Decrease score, return ${decReturn} point${decReturn > 1 ? 's' : ''}` : 'Minimum score'}
+                    >
+                      <ChevronDown className="size-3" />
+                      {canDecrement && <span className="text-[10px] font-bold text-green-600">+{decReturn}</span>}
+                    </Button>
+                    <span className="text-lg font-bold w-8 text-center tabular-nums">{score}</span>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      onClick={() => incrementAbility(ability)}
+                      disabled={!canIncrement}
+                      title={canIncrement ? `Increase score, spend ${incCost} point${incCost > 1 ? 's' : ''}` : score >= 15 ? 'Maximum score' : 'Not enough points'}
+                    >
+                      <ChevronUp className="size-3" />
+                      {canIncrement && <span className="text-[10px] font-bold text-red-600">{incCost}</span>}
+                    </Button>
+                  </div>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="rolling" className="space-y-3 mt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-muted-foreground text-sm">
+                Roll 4d6, drop the lowest, then assign results.
+              </p>
+              <div className="flex items-center gap-3">
+                {pointBuyDiff !== null && !isRolling && (
+                  <div className={`flex items-center gap-1 text-sm font-medium ${pointBuyDiff > 0 ? 'text-green-600' : pointBuyDiff < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                    {pointBuyDiff > 0 ? <TrendingUp className="h-4 w-4" /> : pointBuyDiff < 0 ? <TrendingDown className="h-4 w-4" /> : null}
+                    <span>
+                      {pointBuyDiff > 0 ? `+${pointBuyDiff}` : pointBuyDiff < 0 ? `${pointBuyDiff}` : 'Even'}
+                      {' '}vs point-buy
+                    </span>
+                  </div>
+                )}
+                <Button variant="outline" size="sm" onClick={handleRollScores} disabled={isRolling}>
+                  <Dices className={`h-4 w-4 mr-1.5 ${isRolling ? 'animate-spin' : ''}`} />
+                  {characterData.rolledValues.length > 0 && !isRolling ? 'Re-Roll' : isRolling ? 'Rolling...' : 'Roll Scores'}
+                </Button>
+              </div>
+            </div>
+            {(rollValues.length > 0) && (
+              <div className="flex gap-1.5">
+                {rollValues.map((v, i) => {
+                  const isAssigned = !isRolling && Object.values(characterData.abilityAssignments).includes(v)
+                  return (
+                    <Badge
+                      key={i}
+                      variant={isAssigned ? 'outline' : 'default'}
+                      className={`text-xs select-none transition-all duration-100 ${isAssigned ? 'opacity-30 cursor-pointer hover:opacity-60' : 'cursor-default'} ${isRolling ? 'animate-pulse' : ''}`}
+                      onClick={isAssigned && !isRolling ? () => unassignValue(v) : undefined}
+                    >
+                      {v}
+                    </Badge>
+                  )
+                })}
+              </div>
+            )}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+              {abilities.map((ability) =>
+                renderAbilityCard(
+                  ability,
+                  characterData.rolledValues.length > 0 && !isRolling
+                    ? renderAssignmentSelect(ability, characterData.rolledValues)
+                    : <span className="text-xs text-muted-foreground w-16 text-center">{isRolling ? '...' : 'Roll first'}</span>
+                )
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderSkillsStep = () => {
     const skillsByAbility = DND_SKILLS.reduce(

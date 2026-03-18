@@ -505,3 +505,45 @@ export const DND_ALIGNMENTS: DndAlignment[] = [
   { id: 'ne', name: 'Neutral Evil', shorthand: 'NE' },
   { id: 'ce', name: 'Chaotic Evil', shorthand: 'CE' },
 ]
+
+// Ability Score Assignment Methods
+
+export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const
+
+export const POINT_BUY_COSTS: Record<number, number> = {
+  8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9,
+}
+
+export const POINT_BUY_TOTAL = 27
+
+export function getPointBuyCost(score: number): number {
+  return POINT_BUY_COSTS[score] ?? 0
+}
+
+export function getPointBuyIncrementCost(currentScore: number): number {
+  if (currentScore >= 15) return Infinity
+  return (POINT_BUY_COSTS[currentScore + 1] ?? 0) - (POINT_BUY_COSTS[currentScore] ?? 0)
+}
+
+export function getPointBuyDecrementReturn(currentScore: number): number {
+  if (currentScore <= 8) return 0
+  return (POINT_BUY_COSTS[currentScore] ?? 0) - (POINT_BUY_COSTS[currentScore - 1] ?? 0)
+}
+
+export function getPointBuyEquivalent(scores: number[]): number {
+  return scores.reduce((sum, score) => {
+    const clamped = Math.min(Math.max(score, 8), 15)
+    return sum + (POINT_BUY_COSTS[clamped] ?? 0)
+  }, 0)
+}
+
+export function roll4d6DropLowest(): number {
+  const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1)
+  rolls.sort((a, b) => a - b)
+  return rolls[1] + rolls[2] + rolls[3]
+}
+
+export function rollAbilityScores(): number[] {
+  return Array.from({ length: 6 }, () => roll4d6DropLowest())
+    .sort((a, b) => b - a)
+}
