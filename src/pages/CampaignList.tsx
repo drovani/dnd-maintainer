@@ -166,7 +166,7 @@ export default function CampaignList() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-                <Swords className="w-10 h-10 text-muted-foreground" />
+                <Swords className="size-10 text-muted-foreground" />
                 Campaigns
               </h1>
               <p className="text-muted-foreground mt-2">
@@ -174,14 +174,14 @@ export default function CampaignList() {
               </p>
             </div>
             <Button onClick={() => setShowNewCampaignForm(true)}>
-              <Plus className="w-5 h-5" />
+              <Plus className="size-5" />
               New Campaign
             </Button>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 size-5 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search campaigns by name or setting..."
@@ -267,7 +267,7 @@ export default function CampaignList() {
       <div className="max-w-7xl mx-auto px-8 py-12">
         {filteredCampaigns.length === 0 ? (
           <div className="text-center py-24 rounded-lg border bg-card p-12">
-            <Swords className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <Swords className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
               {campaigns.length === 0
                 ? 'No Campaigns Yet'
@@ -280,7 +280,7 @@ export default function CampaignList() {
             </p>
             {campaigns.length === 0 && (
               <Button onClick={() => setShowNewCampaignForm(true)}>
-                <Plus className="w-5 h-5" />
+                <Plus className="size-5" />
                 Create Your First Campaign
               </Button>
             )}
@@ -320,7 +320,7 @@ export default function CampaignList() {
                       className="text-muted-foreground hover:text-foreground transition-colors"
                       title="Archive campaign"
                     >
-                      <Archive className="w-5 h-5" />
+                      <Archive className="size-5" />
                     </button>
                   </div>
 
@@ -334,7 +334,7 @@ export default function CampaignList() {
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t">
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <Users className="size-4 text-muted-foreground" />
                       <div>
                         <p className="text-muted-foreground text-xs">Characters</p>
                         <p className="text-foreground font-bold">
@@ -343,7 +343,7 @@ export default function CampaignList() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-muted-foreground" />
+                      <BookOpen className="size-4 text-muted-foreground" />
                       <div>
                         <p className="text-muted-foreground text-xs">Sessions</p>
                         <p className="text-foreground font-bold">
@@ -371,7 +371,7 @@ export default function CampaignList() {
 
                   {/* Status indicator */}
                   <div className="mt-4 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-muted-foreground" />
+                    <Zap className="size-4 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground capitalize">
                       {campaign.status || 'Active'}
                     </span>

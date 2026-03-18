@@ -60,7 +60,7 @@ export function Layout() {
           ) : isError ? (
             <div className="flex items-center justify-center h-full">
               <div className="max-w-md mx-auto p-6 rounded-lg border bg-card text-center space-y-4">
-                <AlertTriangle className="w-12 h-12 text-destructive mx-auto" />
+                <AlertTriangle className="size-12 text-destructive mx-auto" />
                 <h2 className="text-xl font-bold text-foreground">Unable to Load Campaigns</h2>
                 <p className="text-muted-foreground text-sm">
                   Failed to connect after multiple attempts. Please verify:
@@ -77,7 +77,7 @@ export function Layout() {
                   </p>
                 )}
                 <Button onClick={() => refetch()}>
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="size-4" />
                   Try Again
                 </Button>
               </div>

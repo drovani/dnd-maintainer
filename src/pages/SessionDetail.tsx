@@ -299,11 +299,11 @@ export default function SessionDetail() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-primary hover:text-foreground mb-8"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="size-5" />
             Back
           </button>
           <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">Error loading session</p>
               <p className="text-sm">{String(error)}</p>
@@ -319,7 +319,7 @@ export default function SessionDetail() {
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto text-center py-12">
           <div className="inline-block animate-spin">
-            <Calendar className="w-8 h-8 text-primary" />
+            <Calendar className="size-8 text-primary" />
           </div>
           <p className="text-muted-foreground mt-4">Loading session...</p>
         </div>
@@ -338,7 +338,7 @@ export default function SessionDetail() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-primary hover:text-foreground mb-4 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="size-5" />
             Back to Sessions
           </button>
           <h1 className="text-4xl font-bold text-foreground">
@@ -353,7 +353,7 @@ export default function SessionDetail() {
         {/* Auto-save indicator */}
         {isSaving && (
           <div className="mb-6 flex items-center gap-2 text-primary text-sm">
-            <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+            <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
             Saving...
           </div>
         )}
@@ -361,7 +361,7 @@ export default function SessionDetail() {
         {/* Session Info Section */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" />
+            <BookOpen className="size-5 text-primary" />
             Session Details
           </h2>
 
@@ -442,7 +442,7 @@ export default function SessionDetail() {
         {/* DM Notes Section */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-primary" />
+            <Lock className="size-5 text-primary" />
             DM Notes (Private)
           </h2>
 
@@ -462,14 +462,14 @@ export default function SessionDetail() {
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Zap className="w-5 h-5 text-primary" />
+              <Zap className="size-5 text-primary" />
               Loot Table
             </h2>
             <button
               onClick={() => setShowNewLootForm(true)}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="size-4" />
               Add Item
             </button>
           </div>
@@ -571,7 +571,7 @@ export default function SessionDetail() {
                     onClick={() => handleDeleteLoot(item.id)}
                     className="text-muted-foreground hover:text-destructive transition-colors ml-4"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="size-5" />
                   </button>
                 </div>
               ))}
@@ -592,7 +592,7 @@ export default function SessionDetail() {
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <LinkIcon className="w-5 h-5 text-primary" />
+              <LinkIcon className="size-5 text-primary" />
               Linked Encounters
             </h2>
             <button
@@ -601,7 +601,7 @@ export default function SessionDetail() {
               }
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="size-4" />
               Add Encounter
             </button>
           </div>

@@ -618,7 +618,7 @@ export default function DmToolkit() {
       <div className="bg-muted/50 border-b border-border sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-8 py-6">
           <h1 className="text-4xl font-bold text-foreground flex items-center gap-3 mb-6">
-            <Swords className="w-8 h-8 text-primary" />
+            <Swords className="size-8 text-primary" />
             DM Toolkit
           </h1>
 
@@ -632,7 +632,7 @@ export default function DmToolkit() {
                 }`}
             >
               <div className="flex items-center gap-2">
-                <Swords className="w-5 h-5" />
+                <Swords className="size-5" />
                 Initiative Tracker
               </div>
             </button>
@@ -644,7 +644,7 @@ export default function DmToolkit() {
                 }`}
             >
               <div className="flex items-center gap-2">
-                <Dice6 className="w-5 h-5" />
+                <Dice6 className="size-5" />
                 Generators
               </div>
             </button>
@@ -656,7 +656,7 @@ export default function DmToolkit() {
                 }`}
             >
               <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+                <BookOpen className="size-5" />
                 Quick Reference
               </div>
             </button>
@@ -672,7 +672,7 @@ export default function DmToolkit() {
             {/* Add Combatant Form */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Plus className="w-6 h-6 text-primary" />
+                <Plus className="size-6 text-primary" />
                 Add Combatant
               </h2>
 
@@ -710,7 +710,7 @@ export default function DmToolkit() {
                     type="checkbox"
                     checked={newCombatantIsPlayer}
                     onChange={(e) => setNewCombatantIsPlayer(e.target.checked)}
-                    className="w-4 h-4"
+                    className="size-4"
                   />
                   <span className="text-foreground">Player</span>
                 </label>
@@ -720,7 +720,7 @@ export default function DmToolkit() {
                 onClick={addCombatant}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="size-5" />
                 Add Combatant
               </button>
             </div>
@@ -729,7 +729,7 @@ export default function DmToolkit() {
             {characters.length > 0 && (
               <div className="bg-card border border-border rounded-lg p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary" />
+                  <Users className="size-5 text-primary" />
                   Quick Add Party Members
                 </h3>
                 <div className="flex flex-wrap gap-3">
@@ -773,14 +773,14 @@ export default function DmToolkit() {
                       onClick={prevTurn}
                       className="flex-1 bg-muted hover:bg-muted border border-border rounded-lg py-2 px-4 text-foreground hover:text-primary font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                      <ChevronUp className="w-5 h-5" />
+                      <ChevronUp className="size-5" />
                       Previous Turn
                     </button>
                     <button
                       onClick={nextTurn}
                       className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
-                      <ChevronDown className="w-5 h-5" />
+                      <ChevronDown className="size-5" />
                       Next Turn
                     </button>
                   </div>
@@ -824,7 +824,7 @@ export default function DmToolkit() {
                               onClick={() => removeCombatant(combatant.id)}
                               className="text-destructive hover:text-destructive p-2 transition-colors"
                             >
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="size-5" />
                             </button>
                           </div>
 
@@ -862,14 +862,14 @@ export default function DmToolkit() {
                                 onClick={() => updateCombatantHp(combatant.id, 5)}
                                 className="flex-1 bg-green-100 hover:bg-green-200 border border-green-300 rounded px-3 py-1 text-green-600 text-sm font-semibold transition-colors flex items-center justify-center gap-1"
                               >
-                                <Heart className="w-4 h-4" />
+                                <Heart className="size-4" />
                                 +5
                               </button>
                               <button
                                 onClick={() => updateCombatantHp(combatant.id, -5)}
                                 className="flex-1 bg-red-100 hover:bg-red-200 border border-red-300 rounded px-3 py-1 text-destructive text-sm font-semibold transition-colors flex items-center justify-center gap-1"
                               >
-                                <Flame className="w-4 h-4" />
+                                <Flame className="size-4" />
                                 -5
                               </button>
                               <button
@@ -946,7 +946,7 @@ export default function DmToolkit() {
               {/* Save Encounter */}
               <div className="bg-card border border-border rounded-lg p-6 h-fit sticky top-24">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                  <Save className="w-5 h-5 text-primary" />
+                  <Save className="size-5 text-primary" />
                   Save Encounter
                 </h3>
 
@@ -1048,7 +1048,7 @@ export default function DmToolkit() {
                     onClick={generateFantasyName}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Wand2 className="w-5 h-5" />
+                    <Wand2 className="size-5" />
                     Generate Name
                   </button>
 
@@ -1086,7 +1086,7 @@ export default function DmToolkit() {
                     onClick={generateLoot}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Dice6 className="w-5 h-5" />
+                    <Dice6 className="size-5" />
                     Generate Loot
                   </button>
 
@@ -1122,7 +1122,7 @@ export default function DmToolkit() {
                                 key={idx}
                                 className="flex items-center gap-2 text-foreground"
                               >
-                                <Zap className="w-4 h-4 text-primary" />
+                                <Zap className="size-4 text-primary" />
                                 {item}
                               </li>
                             ))}
@@ -1141,7 +1141,7 @@ export default function DmToolkit() {
                     onClick={generateTavern}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Wand2 className="w-5 h-5" />
+                    <Wand2 className="size-5" />
                     Generate Tavern
                   </button>
 
@@ -1245,7 +1245,7 @@ export default function DmToolkit() {
                     onClick={generateEncounter}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Swords className="w-5 h-5" />
+                    <Swords className="size-5" />
                     Generate Encounter
                   </button>
 
@@ -1290,7 +1290,7 @@ export default function DmToolkit() {
             {/* Conditions */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <AlertCircle className="w-6 h-6 text-primary" />
+                <AlertCircle className="size-6 text-primary" />
                 Conditions
               </h2>
 
@@ -1312,7 +1312,7 @@ export default function DmToolkit() {
                         {condition.name}
                       </h3>
                       <ChevronDown
-                        className={`w-5 h-5 text-primary transition-transform ${expandedCondition === condition.name
+                        className={`size-5 text-primary transition-transform ${expandedCondition === condition.name
                             ? 'rotate-180'
                             : ''
                           }`}
@@ -1331,7 +1331,7 @@ export default function DmToolkit() {
             {/* Actions in Combat */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Swords className="w-6 h-6 text-primary" />
+                <Swords className="size-6 text-primary" />
                 Actions in Combat
               </h2>
 
@@ -1355,7 +1355,7 @@ export default function DmToolkit() {
             {/* Cover Rules */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Shield className="w-6 h-6 text-primary" />
+                <Shield className="size-6 text-primary" />
                 Cover Rules
               </h2>
 
@@ -1386,7 +1386,7 @@ export default function DmToolkit() {
             {/* Difficulty Classes */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Target className="w-6 h-6 text-primary" />
+                <Target className="size-6 text-primary" />
                 Difficulty Classes
               </h2>
 
@@ -1424,7 +1424,7 @@ export default function DmToolkit() {
             {/* Travel Pace */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Eye className="w-6 h-6 text-primary" />
+                <Eye className="size-6 text-primary" />
                 Travel Pace
               </h2>
 
@@ -1468,7 +1468,7 @@ export default function DmToolkit() {
             {/* Exhaustion */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Zap className="w-6 h-6 text-primary" />
+                <Zap className="size-6 text-primary" />
                 Exhaustion Levels
               </h2>
 

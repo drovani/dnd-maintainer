@@ -1060,7 +1060,7 @@ export default function CharacterBuilder() {
               <div key={step.id} className="flex items-center flex-1">
                 <button
                   onClick={() => goToStep(step.id)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${index === currentStepIndex
+                  className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${index === currentStepIndex
                     ? 'bg-primary text-primary-foreground'
                     : index < currentStepIndex
                       ? 'bg-green-600 text-white'

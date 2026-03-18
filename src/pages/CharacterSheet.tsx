@@ -849,7 +849,7 @@ function EditSkillsDialog({
                   <button
                     type="button"
                     onClick={() => toggle(skill.id, 'proficient')}
-                    className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
+                    className={`size-7 rounded text-xs font-bold transition-colors ${
                       data.proficient
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted text-muted-foreground hover:bg-accent'
@@ -860,7 +860,7 @@ function EditSkillsDialog({
                   <button
                     type="button"
                     onClick={() => toggle(skill.id, 'expertise')}
-                    className={`w-7 h-7 rounded text-xs font-bold transition-colors ${
+                    className={`size-7 rounded text-xs font-bold transition-colors ${
                       data.expertise
                         ? 'bg-green-600 text-white'
                         : 'bg-muted text-muted-foreground hover:bg-accent'

@@ -54,6 +54,8 @@ All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a 
 
 Light theme only. Custom CSS variables for theme colors defined in `src/index.css`. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
 
+- Prefer `size-*` over `w-* h-*` for square elements (icons, avatars, etc.) to signal intent that width and height should stay equal.
+
 ## Environment Variables
 
 Requires `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`.

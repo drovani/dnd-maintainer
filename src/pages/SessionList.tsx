@@ -117,7 +117,7 @@ export default function SessionList() {
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">Error loading sessions</p>
               <p className="text-sm">{String(error)}</p>
@@ -136,7 +136,7 @@ export default function SessionList() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-                <Calendar className="w-10 h-10 text-primary" />
+                <Calendar className="size-10 text-primary" />
                 Sessions
               </h1>
               <p className="text-muted-foreground mt-2">
@@ -147,14 +147,14 @@ export default function SessionList() {
               onClick={() => setShowNewSessionForm(true)}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="size-5" />
               Log New Session
             </button>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-3 size-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search sessions by title..."
@@ -249,13 +249,13 @@ export default function SessionList() {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin">
-              <Calendar className="w-8 h-8 text-primary" />
+              <Calendar className="size-8 text-primary" />
             </div>
             <p className="text-muted-foreground mt-4">Loading sessions...</p>
           </div>
         ) : filteredSessions.length === 0 ? (
           <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
-            <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <BookOpen className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
               {sessions.length === 0
                 ? 'No Sessions Yet'
@@ -271,7 +271,7 @@ export default function SessionList() {
                 onClick={() => setShowNewSessionForm(true)}
                 className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="size-5" />
                 Log Your First Session
               </button>
             )}
@@ -295,7 +295,7 @@ export default function SessionList() {
                 >
                   {/* Timeline dot */}
                   <div className="flex flex-col items-center pt-1">
-                    <div className="w-4 h-4 bg-amber-400 rounded-full ring-4 ring-background group-hover:scale-125 transition-transform" />
+                    <div className="size-4 bg-amber-400 rounded-full ring-4 ring-background group-hover:scale-125 transition-transform" />
                   </div>
 
                   {/* Card */}
@@ -311,11 +311,11 @@ export default function SessionList() {
                           </h3>
                         </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="size-4" />
                           {formatDate(session.date)}
                         </p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                      <ChevronRight className="size-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                     </div>
 
                     {/* Summary preview */}
@@ -329,7 +329,7 @@ export default function SessionList() {
                     <div className="flex items-center gap-4 pt-4 border-t border-border">
                       {session.xp_awarded && (
                         <div className="flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-primary" />
+                          <Zap className="size-4 text-primary" />
                           <span className="text-muted-foreground text-sm">
                             {session.xp_awarded} XP
                           </span>

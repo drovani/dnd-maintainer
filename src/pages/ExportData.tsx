@@ -99,7 +99,7 @@ export default function ExportData() {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-3xl mx-auto text-center py-12">
-          <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
+          <Loader2 className="size-8 text-primary animate-spin mx-auto" />
           <p className="text-foreground mt-4">Loading campaigns...</p>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function ExportData() {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-3xl mx-auto text-center py-12">
-          <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+          <AlertCircle className="size-8 text-destructive mx-auto" />
           <p className="text-destructive font-semibold mt-4">Failed to load campaigns</p>
           <p className="text-destructive text-sm mt-2">
             {campaignsError instanceof Error ? campaignsError.message : 'An unexpected error occurred.'}
@@ -126,7 +126,7 @@ export default function ExportData() {
       <div className="bg-muted/50 border-b border-border">
         <div className="max-w-3xl mx-auto px-8 py-8">
           <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-            <Download className="w-10 h-10 text-primary" />
+            <Download className="size-10 text-primary" />
             Export Data
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -140,7 +140,7 @@ export default function ExportData() {
         {/* Error banner */}
         {errorMessage && (
           <div className="mb-6 flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
-            <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+            <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
             <div>
               <p className="text-destructive font-semibold">Export failed</p>
               <p className="text-destructive text-sm mt-1 whitespace-pre-line">{errorMessage}</p>
@@ -150,7 +150,7 @@ export default function ExportData() {
 
         {campaigns.length === 0 ? (
           <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
-            <Download className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <Download className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">No Campaigns</h3>
             <p className="text-muted-foreground">Create a campaign first before exporting data.</p>
           </div>
@@ -195,9 +195,9 @@ export default function ExportData() {
                     `}
                   >
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 text-primary shrink-0" />
+                      <CheckSquare className="size-5 text-primary shrink-0" />
                     ) : (
-                      <Square className="w-5 h-5 text-muted-foreground shrink-0" />
+                      <Square className="size-5 text-muted-foreground shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{campaign.name}</p>
@@ -218,12 +218,12 @@ export default function ExportData() {
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="size-5 animate-spin" />
                   Exporting...
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5" />
+                  <Download className="size-5" />
                   Export SQL Backup
                 </>
               )}

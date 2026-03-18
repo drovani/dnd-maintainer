@@ -23,12 +23,12 @@ import { useParams } from 'react-router-dom'
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 
 const CATEGORIES: { value: NoteCategory; label: string; icon: React.ReactNode }[] = [
-  { value: 'lore', label: 'Lore', icon: <Scroll className="w-4 h-4" /> },
-  { value: 'npc', label: 'NPCs', icon: <Users className="w-4 h-4" /> },
-  { value: 'location', label: 'Locations', icon: <MapPin className="w-4 h-4" /> },
-  { value: 'item', label: 'Items', icon: <Wand2 className="w-4 h-4" /> },
-  { value: 'quest', label: 'Quests', icon: <BookOpen className="w-4 h-4" /> },
-  { value: 'general', label: 'General', icon: <Tag className="w-4 h-4" /> },
+  { value: 'lore', label: 'Lore', icon: <Scroll className="size-4" /> },
+  { value: 'npc', label: 'NPCs', icon: <Users className="size-4" /> },
+  { value: 'location', label: 'Locations', icon: <MapPin className="size-4" /> },
+  { value: 'item', label: 'Items', icon: <Wand2 className="size-4" /> },
+  { value: 'quest', label: 'Quests', icon: <BookOpen className="size-4" /> },
+  { value: 'general', label: 'General', icon: <Tag className="size-4" /> },
 ]
 
 export default function NotesPage() {
@@ -275,7 +275,7 @@ export default function NotesPage() {
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
           <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">Error loading notes</p>
               <p className="text-sm">{String(error)}</p>
@@ -294,7 +294,7 @@ export default function NotesPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
-                <Scroll className="w-10 h-10 text-primary" />
+                <Scroll className="size-10 text-primary" />
                 DM Notes
               </h1>
               <p className="text-muted-foreground mt-2">
@@ -305,14 +305,14 @@ export default function NotesPage() {
               onClick={handleOpenNewNote}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="size-5" />
               New Note
             </button>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-3 size-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search notes..."
@@ -406,13 +406,13 @@ export default function NotesPage() {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin">
-              <Scroll className="w-8 h-8 text-primary" />
+              <Scroll className="size-8 text-primary" />
             </div>
             <p className="text-muted-foreground mt-4">Loading notes...</p>
           </div>
         ) : filteredNotes.length === 0 ? (
           <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
-            <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <BookOpen className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
               {notes.length === 0 ? 'No Notes Yet' : 'No Notes Match'}
             </h3>
@@ -426,7 +426,7 @@ export default function NotesPage() {
                 onClick={handleOpenNewNote}
                 className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="size-5" />
                 Create Your First Note
               </button>
             )}
@@ -461,7 +461,7 @@ export default function NotesPage() {
                       : 'text-muted-foreground hover:text-primary'
                       }`}
                   >
-                    <Pin className="w-5 h-5" />
+                    <Pin className="size-5" />
                   </button>
                 </div>
 
@@ -489,7 +489,7 @@ export default function NotesPage() {
 
                   {/* Timestamp */}
                   <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="size-3" />
                     {new Date(note.updated_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -510,7 +510,7 @@ export default function NotesPage() {
                     onClick={() => handleDeleteNote(note.id)}
                     className="text-muted-foreground hover:text-destructive transition-colors"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="size-5" />
                   </button>
                 </div>
               </div>
@@ -530,7 +530,7 @@ export default function NotesPage() {
               </h2>
               {isSaving && (
                 <div className="flex items-center gap-2 text-primary text-sm">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                  <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
                   Saving...
                 </div>
               )}
@@ -541,7 +541,7 @@ export default function NotesPage() {
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="size-6" />
               </button>
             </div>
 
@@ -647,7 +647,7 @@ export default function NotesPage() {
                       setFormData({ ...formData, pinned: e.target.checked })
                     }
                   }}
-                  className="w-4 h-4 rounded bg-muted border border-border cursor-pointer accent-primary"
+                  className="size-4 rounded bg-muted border border-border cursor-pointer accent-primary"
                 />
                 <label htmlFor="pinned-checkbox" className="text-foreground">
                   Pin this note (appears at top)
@@ -664,7 +664,7 @@ export default function NotesPage() {
                   }
                   className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="size-4" />
                   {createNoteMutation.isPending || updateNoteMutation.isPending
                     ? 'Saving...'
                     : editingNote
@@ -679,7 +679,7 @@ export default function NotesPage() {
                     disabled={deleteNoteMutation.isPending}
                     className="px-6 bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg transition-colors disabled:opacity-50"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="size-4" />
                   </button>
                 )}
 

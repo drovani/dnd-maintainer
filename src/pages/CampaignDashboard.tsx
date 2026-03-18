@@ -125,7 +125,7 @@ export default function CampaignDashboard() {
       <div className="min-h-screen bg-background p-8">
         <div className="text-center py-12">
           <div className="inline-block animate-spin">
-            <Swords className="w-8 h-8 text-primary" />
+            <Swords className="size-8 text-primary" />
           </div>
           <p className="text-foreground mt-4">Loading campaign...</p>
         </div>
@@ -152,7 +152,7 @@ export default function CampaignDashboard() {
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="size-5" />
             Back to Campaigns
           </button>
 
@@ -177,13 +177,13 @@ export default function CampaignDashboard() {
                     disabled={updateCampaignMutation.isPending}
                     className="text-primary hover:text-foreground p-2"
                   >
-                    <Save className="w-6 h-6" />
+                    <Save className="size-6" />
                   </button>
                   <button
                     onClick={() => setIsEditingName(false)}
                     className="text-muted-foreground hover:text-foreground p-2"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="size-6" />
                   </button>
                 </div>
               ) : (
@@ -198,7 +198,7 @@ export default function CampaignDashboard() {
                     }}
                     className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
                   >
-                    <Edit2 className="w-5 h-5" />
+                    <Edit2 className="size-5" />
                   </button>
                 </div>
               )}
@@ -220,13 +220,13 @@ export default function CampaignDashboard() {
                     disabled={updateCampaignMutation.isPending}
                     className="text-primary hover:text-foreground p-1"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="size-4" />
                   </button>
                   <button
                     onClick={() => setIsEditingSetting(false)}
                     className="text-muted-foreground hover:text-foreground p-1"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="size-4" />
                   </button>
                 </div>
               ) : (
@@ -245,7 +245,7 @@ export default function CampaignDashboard() {
                     }}
                     className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover/setting:opacity-100"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="size-3.5" />
                   </button>
                 </div>
               )}
@@ -253,7 +253,7 @@ export default function CampaignDashboard() {
 
             <div className="text-right">
               <div className="inline-flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-lg border border-border">
-                <Zap className="w-5 h-5 text-primary" />
+                <Zap className="size-5 text-primary" />
                 <span className="text-foreground capitalize">
                   {campaign.status || 'Active'}
                 </span>
@@ -283,14 +283,14 @@ export default function CampaignDashboard() {
                 disabled={updateCampaignMutation.isPending}
                 className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
               >
-                <Save className="w-4 h-4" />
+                <Save className="size-4" />
                 Save
               </button>
               <button
                 onClick={() => setIsEditingDescription(false)}
                 className="flex items-center gap-2 bg-muted hover:bg-muted text-foreground font-bold py-2 px-4 rounded-lg transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="size-4" />
                 Cancel
               </button>
             </div>
@@ -306,7 +306,7 @@ export default function CampaignDashboard() {
                 }}
                 className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
               >
-                <Edit2 className="w-4 h-4" />
+                <Edit2 className="size-4" />
               </button>
             </div>
             <p className="text-muted-foreground">
@@ -330,14 +330,14 @@ export default function CampaignDashboard() {
               <div className="bg-card border border-border hover:border-border rounded-lg p-6 transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-foreground font-semibold flex items-center gap-2">
-                    <Users className="w-5 h-5 text-primary" />
+                    <Users className="size-5 text-primary" />
                     Characters
                   </h3>
                   <Link
                     to={`/campaign/${id}/characters`}
                     className="text-primary hover:text-foreground"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="size-5" />
                   </Link>
                 </div>
                 <div className="space-y-2">
@@ -368,14 +368,14 @@ export default function CampaignDashboard() {
               <div className="bg-card border border-border hover:border-border rounded-lg p-6 transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-foreground font-semibold flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
+                    <BookOpen className="size-5 text-primary" />
                     Sessions
                   </h3>
                   <Link
                     to={`/campaign/${id}/sessions`}
                     className="text-primary hover:text-foreground"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="size-5" />
                   </Link>
                 </div>
                 <p className="text-foreground font-bold text-lg">{sessions.length}</p>
@@ -390,14 +390,14 @@ export default function CampaignDashboard() {
               <div className="bg-card border border-border hover:border-border rounded-lg p-6 transition-all">
                 <div className="flex items-center justify-between">
                   <h3 className="text-foreground font-semibold flex items-center gap-2">
-                    <Scroll className="w-5 h-5 text-primary" />
+                    <Scroll className="size-5 text-primary" />
                     Notes
                   </h3>
                   <Link
                     to={`/campaign/${id}/notes`}
                     className="text-primary hover:text-foreground"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="size-5" />
                   </Link>
                 </div>
               </div>
@@ -409,7 +409,7 @@ export default function CampaignDashboard() {
             {/* Recent Activity */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
-                <Clock className="w-5 h-5 text-primary" />
+                <Clock className="size-5 text-primary" />
                 Recent Activity
               </h3>
 
@@ -446,7 +446,7 @@ export default function CampaignDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 bg-muted/30 rounded-lg border border-border">
-                  <BookOpen className="w-8 h-8 text-muted-foreground/50 mx-auto mb-3" />
+                  <BookOpen className="size-8 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">No sessions recorded yet</p>
                   <Link
                     to={`/campaign/${id}/sessions`}
@@ -461,7 +461,7 @@ export default function CampaignDashboard() {
             {/* Recently Modified Characters */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
-                <Users className="w-5 h-5 text-primary" />
+                <Users className="size-5 text-primary" />
                 Party Members
               </h3>
 
@@ -487,7 +487,7 @@ export default function CampaignDashboard() {
                             </p>
                           )}
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <ChevronRight className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                     </Link>
                   ))}
@@ -503,7 +503,7 @@ export default function CampaignDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 bg-muted/30 rounded-lg border border-border">
-                  <Users className="w-8 h-8 text-muted-foreground/50 mx-auto mb-3" />
+                  <Users className="size-8 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">No characters yet</p>
                   <Link
                     to={`/campaign/${id}/character/new`}
@@ -527,7 +527,7 @@ export default function CampaignDashboard() {
               to={`/campaign/${id}/characters`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
-              <Users className="w-6 h-6 text-primary" />
+              <Users className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
                   Characters
@@ -540,7 +540,7 @@ export default function CampaignDashboard() {
               to={`/campaign/${id}/sessions`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
-              <BookOpen className="w-6 h-6 text-primary" />
+              <BookOpen className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
                   Sessions
@@ -553,7 +553,7 @@ export default function CampaignDashboard() {
               to={`/campaign/${id}/notes`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
-              <Scroll className="w-6 h-6 text-primary" />
+              <Scroll className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
                   Notes
@@ -565,7 +565,7 @@ export default function CampaignDashboard() {
               to={`/campaign/${id}/toolkit`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
-              <Swords className="w-6 h-6 text-primary" />
+              <Swords className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
                   Toolkit
