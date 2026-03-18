@@ -13,6 +13,8 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - `npm run lint` — ESLint for ts/tsx files
 - `npm run preview` — preview production build
 - `npx supabase <command>` — always run Supabase CLI via `npx` (not bare `supabase`)
+- `npm run supabase:reset` — reset the local Supabase database (runs migrations fresh)
+- `npm run supabase:types` — regenerate `supabase/database.types.ts` from current schema. Always run after migration changes and before `typecheck`.
 - No test framework is configured yet
 
 ## Tech Stack
