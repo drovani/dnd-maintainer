@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { usePlayerNames } from '@/hooks/useCharacters'
 import {
   ABILITY_ABBREVIATIONS,
+  ABILITY_NAME_TO_KEY,
   DND_ALIGNMENTS,
   DND_BACKGROUNDS,
   DND_CLASSES,
@@ -35,7 +36,6 @@ import {
   POINT_BUY_TOTAL,
   rollAbilityScores,
   STANDARD_ARRAY,
-  type AbilityName,
 } from '@/lib/dnd-helpers'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dices, Save, TrendingDown, TrendingUp } from 'lucide-react'
@@ -125,15 +125,6 @@ const ABILITY_NAMES = {
   cha: 'Charisma',
 }
 
-const ABILITY_NAME_TO_KEY: Record<AbilityName, keyof CharacterData['abilities']> = {
-  Strength: 'str',
-  Dexterity: 'dex',
-  Constitution: 'con',
-  Intelligence: 'int',
-  Wisdom: 'wis',
-  Charisma: 'cha',
-}
-
 export default function CharacterBuilder() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -203,7 +194,7 @@ export default function CharacterBuilder() {
   const [isFinalizing, setIsFinalizing] = useState(false)
   const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
 
-  useEffect(() => { clearStatus() }, [characterData]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { clearStatus() }, [characterData, clearStatus])
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
 
@@ -258,7 +249,9 @@ export default function CharacterBuilder() {
     const currentStepId = STEPS[currentStepIndex].id
     setVisitedSteps((prev) => new Set([...prev, currentStepId]))
     validateStep(currentStepId)
-    void saveDraft(buildPayload()) // fire-and-forget
+    saveDraft(buildPayload()).catch((err) => {
+      console.error('Autosave failed during step navigation:', err)
+    })
     setCurrentStep(targetStep)
   }
 
@@ -279,8 +272,8 @@ export default function CharacterBuilder() {
     try {
       const id = await finalize(buildPayload())
       navigate(`/campaign/${campaignId}/character/${id}`)
-    } catch {
-      // error state handled by hook
+    } catch (err) {
+      console.error('Character finalization failed:', err)
     } finally {
       setIsFinalizing(false)
     }
@@ -293,7 +286,16 @@ export default function CharacterBuilder() {
         setFieldErrors((prev) => ({ ...prev, [key as RequiredField]: false }))
       }
     }
-    setCharacterData((prev) => ({ ...prev, ...updates }))
+    setCharacterData((prev) => {
+      const next = { ...prev, ...updates }
+      // Reset skill selections when class changes
+      if ('class' in updates && updates.class !== prev.class) {
+        next.skills = Object.fromEntries(
+          DND_SKILLS.map((skill) => [skill.id, { proficient: false, expertise: false }])
+        ) as Record<string, { proficient: boolean; expertise: boolean }>
+      }
+      return next
+    })
   }
 
   const updateAbility = (ability: keyof CharacterData['abilities'], value: number) => {
@@ -376,13 +378,6 @@ export default function CharacterBuilder() {
     }
   }, [])
 
-  useEffect(() => {
-    const resetSkills = Object.fromEntries(
-      DND_SKILLS.map((skill) => [skill.id, { proficient: false, expertise: false }])
-    ) as Record<string, { proficient: boolean; expertise: boolean }>
-    setCharacterData((prev) => ({ ...prev, skills: resetSkills }))
-  }, [characterData.class])
-
   const incrementAbility = (ability: keyof CharacterData['abilities']) => {
     const current = characterData.abilities[ability]
     if (current >= 15) return
@@ -403,7 +398,8 @@ export default function CharacterBuilder() {
       const cls = DND_CLASSES.find((c) => c.id === prev.class)
       if (!cls) return prev
 
-      const skillName = DND_SKILLS.find((s) => s.id === skillId)?.name ?? ''
+      const skillName = DND_SKILLS.find((s) => s.id === skillId)?.name
+      if (!skillName) return prev
       const inPool = cls.skillPool === null || cls.skillPool.includes(skillName)
       if (!inPool) return prev
 
@@ -902,7 +898,7 @@ export default function CharacterBuilder() {
             const abilityKey = ABILITY_NAME_TO_KEY[skill.ability]
             const abilityMod = getAbilityModifier(characterData.abilities[abilityKey] + (racialBonuses[abilityKey] ?? 0))
             const totalMod = skillData.proficient ? abilityMod + profBonus : abilityMod
-            const abbrev = ABILITY_ABBREVIATIONS[skill.ability] ?? skill.ability.slice(0, 3).toUpperCase()
+            const abbrev = ABILITY_ABBREVIATIONS[skill.ability]
             const inPool = cls.skillPool === null || cls.skillPool.includes(skill.name)
             const isDisabled = !inPool || (atMax && !skillData.proficient)
 

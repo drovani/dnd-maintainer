@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
+import type { AbilityScores, Feature, EquipmentItem } from '@/types/database'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -19,12 +20,16 @@ interface BuilderPayload {
   hit_points_current: number
   armor_class: number
   speed: number
-  abilities: Record<string, number>
+  abilities: AbilityScores
   saving_throws: Record<string, { proficient: boolean }>
   skills: Record<string, { proficient: boolean; expertise: boolean }>
-  features: unknown[]
-  equipment: unknown[]
-  spells: unknown
+  features: Feature[]
+  equipment: EquipmentItem[]
+  spells: {
+    cantrips: string[]
+    spellsByLevel: Record<number, string[]>
+    spellSlots: Record<number, number>
+  }
   personality_traits: string | null
   ideals: string | null
   bonds: string | null
@@ -43,7 +48,7 @@ export function useBuilderAutosave() {
   const saveDraft = async (payload: BuilderPayload): Promise<string> => {
     // If a save is already in flight, wait for it first
     if (savingRef.current) {
-      await savingRef.current
+      try { await savingRef.current } catch { /* previous save failed, proceeding with fresh data */ }
     }
 
     setSaveStatus('saving')
@@ -64,14 +69,16 @@ export function useBuilderAutosave() {
             .select('id')
             .single()
           if (error) throw error
+          if (!data?.id) throw new Error('Insert succeeded but no character ID was returned')
           characterIdRef.current = (data as { id: string }).id
           queryClient.invalidateQueries({ queryKey: ['characters', payload.campaign_id] })
         }
         setSaveStatus('saved')
         return characterIdRef.current!
-      } catch {
+      } catch (err) {
         setSaveStatus('error')
-        throw new Error('Failed to save draft')
+        console.error('Draft save failed:', err)
+        throw err
       } finally {
         savingRef.current = null
       }
@@ -83,18 +90,24 @@ export function useBuilderAutosave() {
 
   const finalize = async (payload: BuilderPayload): Promise<string> => {
     const id = await saveDraft(payload)
-    const { error } = await supabase
-      .from('characters')
-      .update({ status: 'ready' } as never)
-      .eq('id', id)
-    if (error) throw error
-    queryClient.invalidateQueries({ queryKey: ['characters', payload.campaign_id] })
-    return id
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .update({ status: 'ready' } as never)
+        .eq('id', id)
+      if (error) throw error
+      queryClient.invalidateQueries({ queryKey: ['characters', payload.campaign_id] })
+      return id
+    } catch (err) {
+      setSaveStatus('error')
+      console.error('Failed to finalize character (draft was saved):', err)
+      throw err
+    }
   }
 
-  const clearStatus = () => {
-    if (saveStatus === 'saved') setSaveStatus('idle')
-  }
+  const clearStatus = useCallback(() => {
+    setSaveStatus((prev) => prev === 'saved' ? 'idle' : prev)
+  }, [])
 
-  return { saveStatus, saveDraft, finalize, clearStatus, characterId: characterIdRef.current }
+  return { saveStatus, saveDraft, finalize, clearStatus }
 }

@@ -208,18 +208,20 @@ export interface DndClass {
   id: string
   name: string
   hitDie: number
-  primaryAbility: string
-  savingThrowProficiencies: string[]
-  spellcastingAbility?: string
+  primaryAbility: AbilityName
+  savingThrowProficiencies: AbilityName[]
+  spellcastingAbility?: AbilityName
   skillChoices: number
-  skillPool: readonly string[] | null
+  skillPool: readonly DndSkillName[] | null
 }
 
 export type AbilityName = 'Strength' | 'Dexterity' | 'Constitution' | 'Intelligence' | 'Wisdom' | 'Charisma'
 
+export type DndSkillName = 'Acrobatics' | 'Animal Handling' | 'Arcana' | 'Athletics' | 'Deception' | 'History' | 'Insight' | 'Intimidation' | 'Investigation' | 'Medicine' | 'Nature' | 'Perception' | 'Performance' | 'Persuasion' | 'Religion' | 'Sleight of Hand' | 'Stealth' | 'Survival'
+
 export interface DndSkill {
   id: string
-  name: string
+  name: DndSkillName
   ability: AbilityName
 }
 
@@ -534,13 +536,22 @@ export const DND_ALIGNMENTS: DndAlignment[] = [
   { id: 'ce', name: 'Chaotic Evil', shorthand: 'CE' },
 ]
 
-export const ABILITY_ABBREVIATIONS: Readonly<Record<string, string>> = {
+export const ABILITY_ABBREVIATIONS: Readonly<Record<AbilityName, string>> = {
   Strength: 'STR',
   Dexterity: 'DEX',
   Constitution: 'CON',
   Intelligence: 'INT',
   Wisdom: 'WIS',
   Charisma: 'CHA',
+}
+
+export const ABILITY_NAME_TO_KEY: Readonly<Record<AbilityName, 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'>> = {
+  Strength: 'str',
+  Dexterity: 'dex',
+  Constitution: 'con',
+  Intelligence: 'int',
+  Wisdom: 'wis',
+  Charisma: 'cha',
 }
 
 // Ability Score Assignment Methods
