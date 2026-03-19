@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Encounter } from '@/types/database';
+import type { Encounter } from '@/types/database';
+
 
 export function useEncounters(campaignId: string) {
   return useQuery({
@@ -12,7 +13,7 @@ export function useEncounters(campaignId: string) {
         .eq('campaign_id', campaignId)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as Encounter[];
+      return (data || []) as unknown as Encounter[];
     },
     enabled: !!campaignId,
   });
@@ -28,7 +29,7 @@ export function useSessionEncounters(sessionId: string) {
         .eq('session_id', sessionId)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as Encounter[];
+      return (data || []) as unknown as Encounter[];
     },
     enabled: !!sessionId,
   });
@@ -44,7 +45,7 @@ export function useEncounter(id: string) {
         .eq('id', id)
         .single();
       if (error) throw error;
-      return data as Encounter;
+      return data as unknown as Encounter;
     },
     enabled: !!id,
   });
@@ -57,11 +58,11 @@ export function useCreateEncounter() {
     mutationFn: async (encounter: Omit<Encounter, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('encounters')
-        .insert([encounter])
+        .insert(encounter as never)
         .select()
         .single();
       if (error) throw error;
-      return data as Encounter;
+      return data as unknown as Encounter;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['encounters', data.campaign_id] });
@@ -79,12 +80,12 @@ export function useUpdateEncounter() {
     mutationFn: async ({ id, ...updates }: Partial<Encounter> & { id: string }) => {
       const { data, error } = await supabase
         .from('encounters')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
       if (error) throw error;
-      return data as Encounter;
+      return data as unknown as Encounter;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['encounters', data.campaign_id] });

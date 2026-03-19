@@ -19,7 +19,7 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 
 ## Tech Stack
 
-- **React 18** with TypeScript (strict mode), Vite 5, React Router v6
+- **React 19** with TypeScript (strict mode), Vite 7, React Router v7
 - **Supabase** for backend (Postgres DB, client in `src/lib/supabase.ts`)
 - **TanStack React Query v5** for server state (client in `src/lib/query-client.ts`)
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (no tailwind.config — uses CSS-first config in `src/index.css`)
@@ -34,9 +34,9 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 ### Data Flow
 
 1. **Types**: `src/types/database.ts` — TypeScript interfaces for all domain models (Campaign, Character, Session, Encounter, Note, etc.). These are frontend types; the DB schema lives in `supabase/migrations/`.
-2. **Hooks**: `src/hooks/use*.ts` — each entity has a hook file exporting React Query hooks (`useQuery`/`useMutation`) that call Supabase directly. Pattern: `useCampaigns()`, `useCampaign(id)`, `useCreateCampaign()`, `useUpdateCampaign()`, `useDeleteCampaign()`.
+2. **Hooks**: `src/hooks/use*.ts` — CQRS-inspired separation: query hooks for reads (`useCampaigns()`, `useCampaign(id)`), mutation hooks for writes (`useCampaignMutations()` → `{ create, update, archive }`, `useCharacterMutations()` → `{ create, update, remove }`).
 3. **Pages**: `src/pages/` — route-level components. All routes are campaign-scoped (`/campaign/:id/...`).
-4. **Components**: `src/components/ui/` — reusable UI primitives (Button, Card, Input, Select, Modal, Badge, LoadingSpinner). `src/components/` — layout components (Layout, Sidebar).
+4. **Components**: `src/components/ui/` — shadcn/ui primitives (Badge, Button, Card, Checkbox, Dialog, Input, Label, Select, Skeleton, Switch, Tabs, Textarea) plus custom AutocompleteInput. `src/components/` — layout components (Layout, Sidebar).
 
 ### Routing
 
@@ -48,7 +48,7 @@ All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a 
 
 ### Database Schema
 
-`supabase/migrations/00001_initial_schema.sql` defines tables: campaigns, characters, sessions, encounters, notes. Complex data (abilities, equipment, spells, combatants) stored as JSONB columns. All tables cascade-delete from campaigns. Note: DB schema uses different column names than the frontend types in some cases (e.g., `character_type` vs `is_npc`).
+`supabase/migrations/` defines tables: campaigns, characters, sessions, encounters, notes. Complex data (abilities, equipment, spells, combatants) stored as JSONB columns. All tables cascade-delete from campaigns. Campaigns support soft-delete via `archived_at`. The DB has both `character_type` (source column) and `is_npc` (generated/computed column).
 
 ### Styling
 

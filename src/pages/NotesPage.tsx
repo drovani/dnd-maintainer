@@ -64,7 +64,7 @@ export default function NotesPage() {
         .order('updated_at', { ascending: false })
 
       if (error) throw error
-      return data as Note[]
+      return data as unknown as Note[]
     },
     enabled: !!campaignId,
   })
@@ -82,7 +82,7 @@ export default function NotesPage() {
       if (
         searchQuery &&
         !note.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !note.content.toLowerCase().includes(searchQuery.toLowerCase())
+        !note.content?.toLowerCase().includes(searchQuery.toLowerCase())
       ) {
         return false
       }
@@ -129,7 +129,7 @@ export default function NotesPage() {
               .split(',')
               .map((t) => t.trim())
               .filter((t) => t),
-            pinned: noteData.pinned,
+            is_pinned: noteData.pinned,
           },
         ])
         .select()
@@ -151,7 +151,7 @@ export default function NotesPage() {
 
       const { error } = await supabase
         .from('notes')
-        .update(noteData)
+        .update(noteData as never)
         .eq('id', editingNote.id)
 
       if (error) throw error
@@ -198,10 +198,10 @@ export default function NotesPage() {
     setEditingNote(note)
     setFormData({
       title: note.title,
-      content: note.content,
-      category: note.category,
+      content: note.content ?? '',
+      category: note.category ?? 'general',
       tags: note.tags?.join(', ') || '',
-      pinned: note.pinned || false,
+      pinned: note.is_pinned || false,
     })
     setShowNewNoteModal(true)
   }
@@ -220,7 +220,7 @@ export default function NotesPage() {
           .split(',')
           .map((t) => t.trim())
           .filter((t) => t),
-        pinned: formData.pinned,
+        is_pinned: formData.pinned,
       })
       setShowNewNoteModal(false)
     } else {
@@ -252,7 +252,7 @@ export default function NotesPage() {
   const handleTogglePinned = (note: Note) => {
     updateNoteMutation.mutate({
       id: note.id,
-      pinned: !note.pinned,
+      is_pinned: !note.is_pinned,
     })
   }
 
@@ -443,10 +443,10 @@ export default function NotesPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-primary">
-                        {getCategoryIcon(note.category)}
+                        {note.category && getCategoryIcon(note.category)}
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground uppercase">
-                        {getCategoryLabel(note.category)}
+                        {note.category ? getCategoryLabel(note.category) : 'Uncategorized'}
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
@@ -456,7 +456,7 @@ export default function NotesPage() {
 
                   <button
                     onClick={() => handleTogglePinned(note)}
-                    className={`ml-2 transition-colors ${note.pinned
+                    className={`ml-2 transition-colors ${note.is_pinned
                       ? 'text-primary'
                       : 'text-muted-foreground hover:text-primary'
                       }`}

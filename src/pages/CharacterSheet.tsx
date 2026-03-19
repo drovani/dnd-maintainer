@@ -7,8 +7,7 @@ import {
   getAbilityModifier,
   getProficiencyBonus,
 } from '@/lib/dnd-helpers'
-import { supabase } from '@/lib/supabase'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -33,46 +32,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-
-interface Character {
-  id: string
-  campaign_id: string
-  name: string
-  player_name: string | null
-  character_type: 'pc' | 'npc'
-  race: string
-  class: string
-  subclass: string
-  level: number
-  background: string
-  alignment: string
-  hp_max: number
-  hp_current: number
-  ac: number
-  abilities: {
-    str: number
-    dex: number
-    con: number
-    int: number
-    wis: number
-    cha: number
-  }
-  skills: Record<string, { proficient: boolean; expertise: boolean }>
-  features: Array<{ id: string; name: string; description: string; source: string; uses: number }>
-  equipment: Array<{ id: string; name: string; quantity: number; weight: number; equipped: boolean }>
-  spells: {
-    cantrips: string[]
-    spellsByLevel: Record<number, string[]>
-    spellSlots: Record<number, number>
-  }
-  personalityTraits: string
-  ideals: string
-  bonds: string
-  flaws: string
-  appearance: string
-  backstory: string
-  updated_at: string
-}
+import { Character } from '@/types/database'
 
 const ABILITY_NAMES: Record<string, string> = {
   str: 'Strength',
@@ -117,44 +77,22 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
 
 export default function CharacterSheet() {
   const { characterId } = useParams<{ id: string; characterId: string }>()
-  const queryClient = useQueryClient()
   const [editSection, setEditSection] = useState<EditSection>(null)
 
-  const { data: character, isLoading, error } = useQuery({
-    queryKey: ['character', characterId],
-    queryFn: async () => {
-      if (!characterId) return null
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .eq('id', characterId)
-        .single()
+  const { data: character, isLoading, error } = useCharacter(characterId)
+  const { update: updateMutation } = useCharacterMutations()
 
-      if (error) throw error
-      return data as Character
-    },
-    enabled: !!characterId,
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: async (updates: Partial<Character>) => {
-      const { error } = await supabase
-        .from('characters')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', characterId)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['character', characterId] })
-      setEditSection(null)
-    },
-  })
+  const handleUpdate = (updates: Partial<Character>) => {
+    if (!characterId) return
+    updateMutation.mutate({ id: characterId, ...updates }, {
+      onSuccess: () => setEditSection(null),
+    })
+  }
 
   const updateHP = (delta: number) => {
-    if (character) {
-      const newHP = Math.max(0, Math.min(character.hp_max, character.hp_current + delta))
-      updateMutation.mutate({ hp_current: newHP } as Partial<Character>)
+    if (character && characterId) {
+      const newHP = Math.max(0, Math.min(character.hit_points_max ?? 0, (character.hit_points_current ?? 0) + delta))
+      updateMutation.mutate({ id: characterId, hit_points_current: newHP })
     }
   }
 
@@ -343,7 +281,7 @@ export default function CharacterSheet() {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-muted/50 p-4 rounded border text-center">
                   <div className="text-xs text-muted-foreground mb-2">ARMOR CLASS</div>
-                  <div className="text-4xl font-bold text-foreground">{character.ac}</div>
+                  <div className="text-4xl font-bold text-foreground">{character.armor_class}</div>
                 </div>
 
                 <div className="bg-muted/50 p-4 rounded border text-center">
@@ -368,7 +306,7 @@ export default function CharacterSheet() {
                       <Minus size={16} />
                     </Button>
                     <div className="text-2xl font-bold text-red-600 min-w-12 text-center">
-                      {character.hp_current}
+                      {character.hit_points_current}
                     </div>
                     <Button
                       variant="outline"
@@ -379,18 +317,18 @@ export default function CharacterSheet() {
                       <Plus size={16} />
                     </Button>
                   </div>
-                  <div className="text-muted-foreground text-sm">/ {character.hp_max}</div>
+                  <div className="text-muted-foreground text-sm">/ {character.hit_points_max}</div>
                 </div>
                 <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div
-                    className={`h-full transition-all ${character.hp_current > character.hp_max * 0.5
+                    className={`h-full transition-all ${(character.hit_points_current ?? 0) > (character.hit_points_max ?? 1) * 0.5
                       ? 'bg-green-600'
-                      : character.hp_current > character.hp_max * 0.25
+                      : (character.hit_points_current ?? 0) > (character.hit_points_max ?? 1) * 0.25
                         ? 'bg-yellow-500'
                         : 'bg-red-600'
                       }`}
                     style={{
-                      width: `${(character.hp_current / character.hp_max) * 100}%`,
+                      width: `${((character.hit_points_current ?? 0) / (character.hit_points_max ?? 1)) * 100}%`,
                     }}
                   />
                 </div>
@@ -473,14 +411,14 @@ export default function CharacterSheet() {
             )}
 
             {/* Personality */}
-            {(character.personalityTraits || character.ideals || character.bonds || character.flaws) && (
+            {(character.personality_traits || character.ideals || character.bonds || character.flaws) && (
               <div className="bg-card border rounded-lg p-6">
                 <SectionHeader title="Personality" onEdit={() => setEditSection('personality')} />
                 <div className="space-y-3 text-xs">
-                  {character.personalityTraits && (
+                  {character.personality_traits && (
                     <div>
                       <div className="font-semibold text-muted-foreground mb-1">Traits</div>
-                      <p className="text-foreground">{character.personalityTraits}</p>
+                      <p className="text-foreground">{character.personality_traits}</p>
                     </div>
                   )}
                   {character.ideals && (
@@ -527,7 +465,7 @@ export default function CharacterSheet() {
       {editSection === 'header' && (
         <EditHeaderDialog
           character={character}
-          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          onSave={handleUpdate}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
@@ -535,7 +473,7 @@ export default function CharacterSheet() {
       {editSection === 'abilities' && (
         <EditAbilitiesDialog
           abilities={character.abilities}
-          onSave={(abilities) => updateMutation.mutate({ abilities } as Partial<Character>)}
+          onSave={(abilities) => handleUpdate({ abilities })}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
@@ -543,28 +481,28 @@ export default function CharacterSheet() {
       {editSection === 'skills' && (
         <EditSkillsDialog
           skills={character.skills}
-          onSave={(skills) => updateMutation.mutate({ skills } as Partial<Character>)}
+          onSave={(skills) => handleUpdate({ skills })}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
       )}
       {editSection === 'combat' && (
         <EditCombatDialog
-          ac={character.ac}
-          hpMax={character.hp_max}
-          hpCurrent={character.hp_current}
-          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          armorClass={character.armor_class ?? 10}
+          hpMax={character.hit_points_max ?? 1}
+          hpCurrent={character.hit_points_current ?? 1}
+          onSave={handleUpdate}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
       )}
       {editSection === 'personality' && (
         <EditPersonalityDialog
-          personalityTraits={character.personalityTraits}
-          ideals={character.ideals}
-          bonds={character.bonds}
-          flaws={character.flaws}
-          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          personality_traits={character.personality_traits ?? ''}
+          ideals={character.ideals ?? ''}
+          bonds={character.bonds ?? ''}
+          flaws={character.flaws ?? ''}
+          onSave={handleUpdate}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
@@ -573,8 +511,8 @@ export default function CharacterSheet() {
         <EditTextDialog
           title="Edit Backstory"
           field="backstory"
-          value={character.backstory}
-          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          value={character.backstory ?? ''}
+          onSave={handleUpdate}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
@@ -583,8 +521,8 @@ export default function CharacterSheet() {
         <EditTextDialog
           title="Edit Appearance"
           field="appearance"
-          value={character.appearance}
-          onSave={(updates) => updateMutation.mutate(updates as Partial<Character>)}
+          value={character.appearance ?? ''}
+          onSave={handleUpdate}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
         />
@@ -610,12 +548,12 @@ function EditHeaderDialog({
     name: character.name,
     player_name: character.player_name ?? '',
     character_type: character.character_type,
-    race: character.race,
-    class: character.class,
-    subclass: character.subclass,
+    race: character.race ?? '',
+    class: character.class ?? '',
+    subclass: character.subclass ?? '',
     level: character.level,
-    background: character.background,
-    alignment: character.alignment,
+    background: character.background ?? '',
+    alignment: character.alignment ?? '',
   })
 
   const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -666,7 +604,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_CLASSES.map((c) => (
-                  <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -717,7 +655,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_BACKGROUNDS.map((b) => (
-                  <SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -880,27 +818,27 @@ function EditSkillsDialog({
 }
 
 function EditCombatDialog({
-  ac,
+  armorClass,
   hpMax,
   hpCurrent,
   onSave,
   onClose,
   saving,
 }: {
-  ac: number
+  armorClass: number
   hpMax: number
   hpCurrent: number
-  onSave: (updates: { ac: number; hp_max: number; hp_current: number }) => void
+  onSave: (updates: { armor_class: number; hit_points_max: number; hit_points_current: number }) => void
   onClose: () => void
   saving: boolean
 }) {
-  const [form, setForm] = useState({ ac, hp_max: hpMax, hp_current: hpCurrent })
+  const [form, setForm] = useState({ armor_class: armorClass, hit_points_max: hpMax, hit_points_current: hpCurrent })
 
   useEffect(() => {
-    if (form.hp_current > form.hp_max) {
-      setForm((prev) => ({ ...prev, hp_current: prev.hp_max }))
+    if (form.hit_points_current > form.hit_points_max) {
+      setForm((prev) => ({ ...prev, hit_points_current: prev.hit_points_max }))
     }
-  }, [form.hp_max, form.hp_current])
+  }, [form.hit_points_max])
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -915,8 +853,8 @@ function EditCombatDialog({
               id="combat-ac"
               type="number"
               min={0}
-              value={form.ac}
-              onChange={(e) => setForm((prev) => ({ ...prev, ac: Number(e.target.value) }))}
+              value={form.armor_class}
+              onChange={(e) => setForm((prev) => ({ ...prev, armor_class: Number(e.target.value) }))}
             />
           </div>
           <div className="space-y-2">
@@ -925,8 +863,8 @@ function EditCombatDialog({
               id="combat-hp-max"
               type="number"
               min={1}
-              value={form.hp_max}
-              onChange={(e) => setForm((prev) => ({ ...prev, hp_max: Number(e.target.value) }))}
+              value={form.hit_points_max}
+              onChange={(e) => setForm((prev) => ({ ...prev, hit_points_max: Number(e.target.value) }))}
             />
           </div>
           <div className="space-y-2">
@@ -935,9 +873,9 @@ function EditCombatDialog({
               id="combat-hp-current"
               type="number"
               min={0}
-              max={form.hp_max}
-              value={form.hp_current}
-              onChange={(e) => setForm((prev) => ({ ...prev, hp_current: Number(e.target.value) }))}
+              max={form.hit_points_max}
+              value={form.hit_points_current}
+              onChange={(e) => setForm((prev) => ({ ...prev, hit_points_current: Number(e.target.value) }))}
             />
           </div>
         </div>
@@ -948,7 +886,7 @@ function EditCombatDialog({
 }
 
 function EditPersonalityDialog({
-  personalityTraits,
+  personality_traits,
   ideals,
   bonds,
   flaws,
@@ -956,15 +894,15 @@ function EditPersonalityDialog({
   onClose,
   saving,
 }: {
-  personalityTraits: string
+  personality_traits: string
   ideals: string
   bonds: string
   flaws: string
-  onSave: (updates: { personalityTraits: string; ideals: string; bonds: string; flaws: string }) => void
+  onSave: (updates: { personality_traits: string; ideals: string; bonds: string; flaws: string }) => void
   onClose: () => void
   saving: boolean
 }) {
-  const [form, setForm] = useState({ personalityTraits, ideals, bonds, flaws })
+  const [form, setForm] = useState({ personality_traits, ideals, bonds, flaws })
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -977,8 +915,8 @@ function EditPersonalityDialog({
             <Label htmlFor="personality-traits">Personality Traits</Label>
             <Textarea
               id="personality-traits"
-              value={form.personalityTraits}
-              onChange={(e) => setForm((prev) => ({ ...prev, personalityTraits: e.target.value }))}
+              value={form.personality_traits}
+              onChange={(e) => setForm((prev) => ({ ...prev, personality_traits: e.target.value }))}
               rows={3}
             />
           </div>

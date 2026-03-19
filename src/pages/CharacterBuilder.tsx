@@ -181,14 +181,32 @@ export default function CharacterBuilder() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from('characters').insert({
-        campaign_id: campaignId,
-        ...characterData,
-        hp_max: calculatedHp,
-        ac: calculatedAc,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }).select().single()
+      const insertPayload = {
+        campaign_id: campaignId!,
+        name: characterData.name,
+        player_name: characterData.player_name,
+        character_type: characterData.character_type,
+        race: characterData.race,
+        class: characterData.class,
+        level: characterData.level,
+        background: characterData.custom_background || characterData.background,
+        alignment: characterData.alignment,
+        abilities: characterData.abilities,
+        skills: characterData.skills,
+        features: characterData.features,
+        equipment: characterData.equipment,
+        spells: characterData.spells,
+        personality_traits: characterData.personalityTraits,
+        ideals: characterData.ideals,
+        bonds: characterData.bonds,
+        flaws: characterData.flaws,
+        appearance: characterData.appearance,
+        backstory: characterData.backstory,
+        hit_points_max: calculatedHp,
+        hit_points_current: calculatedHp,
+        armor_class: calculatedAc,
+      }
+      const { data, error } = await supabase.from('characters').insert(insertPayload as never).select().single()
 
       if (error) throw error
       return data
@@ -566,7 +584,7 @@ export default function CharacterBuilder() {
             <p className="text-xs text-muted-foreground">Max HP</p>
             <p className="text-lg font-bold">{calculatedHp}</p>
             <p className="text-xs text-muted-foreground">
-              {selectedClass?.hitDie ?? 8}d{selectedClass?.hitDie ?? 8} + {conModifier >= 0 ? '+' : ''}{conModifier} CON
+              1d{selectedClass?.hitDie ?? 8} + {conModifier >= 0 ? '+' : ''}{conModifier} CON
             </p>
           </CardContent>
         </Card>
@@ -749,7 +767,7 @@ export default function CharacterBuilder() {
               <div className="flex items-center gap-3">
                 {pointBuyDiff !== null && !isRolling && (
                   <div className={`flex items-center gap-1 text-sm font-medium ${pointBuyDiff > 0 ? 'text-green-600' : pointBuyDiff < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
-                    {pointBuyDiff > 0 ? <TrendingUp className="h-4 w-4" /> : pointBuyDiff < 0 ? <TrendingDown className="h-4 w-4" /> : null}
+                    {pointBuyDiff > 0 ? <TrendingUp className="size-4" /> : pointBuyDiff < 0 ? <TrendingDown className="size-4" /> : null}
                     <span>
                       {pointBuyDiff > 0 ? `+${pointBuyDiff}` : pointBuyDiff < 0 ? `${pointBuyDiff}` : 'Even'}
                       {' '}vs point-buy
@@ -757,7 +775,7 @@ export default function CharacterBuilder() {
                   </div>
                 )}
                 <Button variant="outline" size="sm" onClick={handleRollScores} disabled={isRolling}>
-                  <Dices className={`h-4 w-4 mr-1.5 ${isRolling ? 'animate-spin' : ''}`} />
+                  <Dices className={`size-4 mr-1.5 ${isRolling ? 'animate-spin' : ''}`} />
                   {characterData.rolledValues.length > 0 && !isRolling ? 'Re-Roll' : isRolling ? 'Rolling...' : 'Roll Scores'}
                 </Button>
               </div>
@@ -1048,6 +1066,10 @@ export default function CharacterBuilder() {
     }
   }
 
+  if (!campaignId) {
+    return <div className="page-container"><p className="text-destructive">Campaign ID is required to create a character.</p></div>
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="page-container">
@@ -1055,34 +1077,32 @@ export default function CharacterBuilder() {
 
         {/* Step Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-start">
             {STEPS.map((step, index) => (
               <div key={step.id} className="flex items-center flex-1">
-                <button
-                  onClick={() => goToStep(step.id)}
-                  className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${index === currentStepIndex
-                    ? 'bg-primary text-primary-foreground'
-                    : index < currentStepIndex
-                      ? 'bg-green-600 text-white'
-                      : 'bg-muted text-muted-foreground'
-                    }`}
-                >
-                  {index + 1}
-                </button>
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => goToStep(step.id)}
+                    className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${index === currentStepIndex
+                      ? 'bg-primary text-primary-foreground'
+                      : index < currentStepIndex
+                        ? 'bg-green-600 text-white'
+                        : 'bg-muted text-muted-foreground'
+                      }`}
+                  >
+                    {index + 1}
+                  </button>
+                  <span className="text-xs text-muted-foreground mt-2">
+                    {step.label}
+                  </span>
+                </div>
                 {index < STEPS.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'
+                    className={`flex-1 h-1 mx-2 self-start mt-5 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'
                       }`}
                   />
                 )}
               </div>
-            ))}
-          </div>
-          <div className="flex justify-between text-xs">
-            {STEPS.map((step) => (
-              <span key={step.id} className="text-muted-foreground">
-                {step.label}
-              </span>
             ))}
           </div>
         </div>

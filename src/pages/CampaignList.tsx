@@ -13,7 +13,8 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { supabase } from '@/lib/supabase'
 import { Campaign } from '@/types/database'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns'
+import { useQuery } from '@tanstack/react-query'
 import {
   Archive,
   BookOpen,
@@ -28,7 +29,6 @@ import { useNavigate } from 'react-router-dom'
 
 export default function CampaignList() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [showNewCampaignForm, setShowNewCampaignForm] = useState(false)
   const [campaignToArchive, setCampaignToArchive] = useState<Campaign | null>(null)
@@ -38,18 +38,8 @@ export default function CampaignList() {
     description: '',
   })
 
-  const { data: campaigns = [], isLoading } = useQuery({
-    queryKey: ['campaigns'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .is('archived_at', null)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Campaign[]
-    },
-  })
+  const { data: campaigns = [], isLoading } = useCampaigns()
+  const { create: createCampaignMutation, archive: archiveCampaignMutation } = useCampaignMutations()
 
   const { data: characterCounts = {} } = useQuery({
     queryKey: ['campaign-character-counts'],
@@ -90,48 +80,26 @@ export default function CampaignList() {
     },
   })
 
-  const createCampaignMutation = useMutation({
-    mutationFn: async (campaign: typeof newCampaign) => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .insert([
-          {
-            name: campaign.name,
-            setting: campaign.setting,
-            description: campaign.description,
-            status: 'planning',
-          },
-        ])
-        .select()
-
-      if (error) throw error
-      return data[0]
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns'] })
-      setShowNewCampaignForm(false)
-      setNewCampaign({ name: '', setting: '', description: '' })
-      navigate(`/campaign/${data.id}`)
-    },
-  })
-
-  const archiveCampaignMutation = useMutation({
-    mutationFn: async (campaignId: string) => {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ archived_at: new Date().toISOString() })
-        .eq('id', campaignId)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns'] })
-    },
-  })
-
   const handleCreateCampaign = (e: React.FormEvent) => {
     e.preventDefault()
     if (newCampaign.name.trim()) {
-      createCampaignMutation.mutate(newCampaign)
+      createCampaignMutation.mutate(newCampaign, {
+        onSuccess: (data) => {
+          setShowNewCampaignForm(false)
+          setNewCampaign({ name: '', setting: '', description: '' })
+          if (data?.id) {
+            navigate(`/campaign/${data.id}`)
+          }
+        },
+      })
+    }
+  }
+
+  const handleArchiveCampaign = () => {
+    if (campaignToArchive) {
+      archiveCampaignMutation.mutate(campaignToArchive.id, {
+        onSuccess: () => setCampaignToArchive(null),
+      })
     }
   }
 
@@ -401,12 +369,7 @@ export default function CampaignList() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (campaignToArchive) {
-                  archiveCampaignMutation.mutate(campaignToArchive.id)
-                  setCampaignToArchive(null)
-                }
-              }}
+              onClick={handleArchiveCampaign}
               disabled={archiveCampaignMutation.isPending}
             >
               {archiveCampaignMutation.isPending ? 'Archiving...' : 'Archive'}

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Session } from '@/types/database';
+import type { Session } from '@/types/database';
+
 
 export function useSessions(campaignId: string) {
   return useQuery({
@@ -12,7 +13,7 @@ export function useSessions(campaignId: string) {
         .eq('campaign_id', campaignId)
         .order('date', { ascending: false });
       if (error) throw error;
-      return (data || []) as Session[];
+      return (data || []) as unknown as Session[];
     },
     enabled: !!campaignId,
   });
@@ -28,7 +29,7 @@ export function useSession(id: string) {
         .eq('id', id)
         .single();
       if (error) throw error;
-      return data as Session;
+      return data as unknown as Session;
     },
     enabled: !!id,
   });
@@ -39,9 +40,13 @@ export function useCreateSession() {
 
   return useMutation({
     mutationFn: async (session: Omit<Session, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase.from('sessions').insert([session]).select().single();
+      const { data, error } = await supabase
+        .from('sessions')
+        .insert(session as never)
+        .select()
+        .single();
       if (error) throw error;
-      return data as Session;
+      return data as unknown as Session;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', data.campaign_id] });
@@ -56,12 +61,12 @@ export function useUpdateSession() {
     mutationFn: async ({ id, ...updates }: Partial<Session> & { id: string }) => {
       const { data, error } = await supabase
         .from('sessions')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
       if (error) throw error;
-      return data as Session;
+      return data as unknown as Session;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', data.campaign_id] });

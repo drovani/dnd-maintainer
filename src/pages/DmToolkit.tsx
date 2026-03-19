@@ -89,10 +89,10 @@ export default function DmToolkit() {
       const { data, error } = await supabase
         .from('characters')
         .select('*')
-        .eq('campaign_id', id)
+        .eq('campaign_id', id!)
         .eq('is_npc', false)
       if (error) throw error
-      return data as Character[]
+      return data as unknown as Character[]
     },
     enabled: !!id,
   })
@@ -102,10 +102,9 @@ export default function DmToolkit() {
     mutationFn: async () => {
       if (!id) throw new Error('Campaign ID required')
 
-      const encounter: Omit<Encounter, 'id' | 'created_at' | 'updated_at'> = {
-        campaign_id: id,
+      const encounter = {
+        campaign_id: id!,
         name: `Round ${initiativeState.round} Encounter`,
-        difficulty: 'medium',
         combatants: initiativeState.combatants.map((c) => ({
           id: c.id,
           name: c.name,
@@ -121,12 +120,13 @@ export default function DmToolkit() {
                 : 'healthy',
           conditions: c.conditions,
         })),
+        round: initiativeState.round,
         status: 'active',
       }
 
       const { data, error } = await supabase
         .from('encounters')
-        .insert([encounter])
+        .insert(encounter as never)
         .select()
         .single()
 
@@ -392,9 +392,9 @@ export default function DmToolkit() {
       name: char.name,
       type: 'character',
       initiative: 0,
-      hit_points: char.hit_points,
-      armor_class: char.armor_class,
-      currentHp: char.hit_points,
+      hit_points: char.hit_points_max ?? 10,
+      armor_class: char.armor_class ?? 10,
+      currentHp: char.hit_points_max ?? 10,
       status: 'healthy',
       conditions: [],
     }

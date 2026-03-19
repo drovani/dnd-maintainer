@@ -38,7 +38,7 @@ export default function SessionDetail() {
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
     summary: '',
-    xp_awarded: 0,
+    experience_awarded: 0,
   })
 
   const [dmNotes, setDmNotes] = useState('')
@@ -64,43 +64,14 @@ export default function SessionDetail() {
         .single()
 
       if (error) throw error
-      return data as Session
+      return data as unknown as Session
     },
     enabled: !!sessionId,
   })
 
-  // Fetch DM notes
-  const { data: notes = '' } = useQuery({
-    queryKey: ['session-dm-notes', sessionId],
-    queryFn: async () => {
-      if (!sessionId) return ''
-      const { data, error } = await supabase
-        .from('session_dm_notes')
-        .select('content')
-        .eq('session_id', sessionId)
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      return data?.content || ''
-    },
-    enabled: !!sessionId,
-  })
-
-  // Fetch loot
-  const { data: lootItems = [] } = useQuery({
-    queryKey: ['session-loot', sessionId],
-    queryFn: async () => {
-      if (!sessionId) return []
-      const { data, error } = await supabase
-        .from('session_loot')
-        .select('*')
-        .eq('session_id', sessionId)
-
-      if (error) throw error
-      return data as LootEntry[]
-    },
-    enabled: !!sessionId,
-  })
+  // DM notes and loot are stored on the session itself
+  const sessionNotes = (session as unknown as Record<string, unknown>)?.notes as string ?? ''
+  const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? []
 
   // Fetch linked encounters
   const { data: encounters = [] } = useQuery({
@@ -113,7 +84,7 @@ export default function SessionDetail() {
         .eq('session_id', sessionId)
 
       if (error) throw error
-      return data as Encounter[]
+      return data as unknown as Encounter[]
     },
     enabled: !!sessionId,
   })
@@ -136,78 +107,56 @@ export default function SessionDetail() {
     },
   })
 
-  // Update DM notes mutation
+  // Update DM notes mutation (stored on sessions.notes column)
   const updateDmNotesMutation = useMutation({
     mutationFn: async (content: string) => {
       if (!sessionId) throw new Error('Session ID is required')
 
-      const { error: deleteError } = await supabase
-        .from('session_dm_notes')
-        .delete()
-        .eq('session_id', sessionId)
-
-      if (deleteError && deleteError.code !== 'PGRST116') throw deleteError
-
-      if (content.trim()) {
-        const { error: insertError } = await supabase
-          .from('session_dm_notes')
-          .insert([
-            {
-              session_id: sessionId,
-              content,
-            },
-          ])
-
-        if (insertError) throw insertError
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['session-dm-notes', sessionId],
-      })
-    },
-  })
-
-  // Upsert loot mutation
-  const upsertLootMutation = useMutation({
-    mutationFn: async (lootEntry: LootEntry) => {
-      if (!sessionId) throw new Error('Session ID is required')
-
       const { error } = await supabase
-        .from('session_loot')
-        .upsert(
-          [
-            {
-              id: lootEntry.id,
-              session_id: sessionId,
-              item_name: lootEntry.item_name,
-              quantity: lootEntry.quantity,
-              gold_value: lootEntry.gold_value,
-              awarded_to: lootEntry.awarded_to,
-            },
-          ],
-          { onConflict: 'id' }
-        )
+        .from('sessions')
+        .update({ notes: content.trim() || null })
+        .eq('id', sessionId)
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session-loot', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+    },
+  })
+
+  // Upsert loot mutation (stored on sessions.loot JSONB column)
+  const upsertLootMutation = useMutation({
+    mutationFn: async (lootEntry: LootEntry) => {
+      if (!sessionId) throw new Error('Session ID is required')
+
+      const updatedLoot = [...loot.filter((l) => l.id !== lootEntry.id), lootEntry]
+      const { error } = await supabase
+        .from('sessions')
+        .update({ loot: updatedLoot as never })
+        .eq('id', sessionId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
     },
   })
 
   // Delete loot mutation
   const deleteLootMutation = useMutation({
     mutationFn: async (lootId: string) => {
+      if (!sessionId) throw new Error('Session ID is required')
+
+      const updatedLoot = loot.filter((l) => l.id !== lootId)
       const { error } = await supabase
-        .from('session_loot')
-        .delete()
-        .eq('id', lootId)
+        .from('sessions')
+        .update({ loot: updatedLoot as never })
+        .eq('id', sessionId)
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session-loot', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
     },
   })
 
@@ -219,8 +168,8 @@ export default function SessionDetail() {
   })
 
   useState(() => {
-    if (notes) {
-      setDmNotes(notes)
+    if (sessionNotes) {
+      setDmNotes(sessionNotes)
     }
   })
 
@@ -429,9 +378,9 @@ export default function SessionDetail() {
             </label>
             <input
               type="number"
-              value={formData.xp_awarded || 0}
+              value={formData.experience_awarded || 0}
               onChange={(e) =>
-                handleFieldChange('xp_awarded', parseInt(e.target.value, 10))
+                handleFieldChange('experience_awarded', parseInt(e.target.value, 10))
               }
               className="w-full md:w-48 bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               min="0"

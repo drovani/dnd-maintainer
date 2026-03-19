@@ -1,22 +1,9 @@
 import { supabase } from '@/lib/supabase'
+import { Character } from '@/types/database'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Search, User, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-interface Character {
-  id: string
-  campaign_id: string
-  name: string
-  player_name: string | null
-  character_type: 'pc' | 'npc'
-  race: string
-  class: string
-  level: number
-  hp_max: number
-  ac: number
-  updated_at: string
-}
 
 type FilterType = 'all' | 'pc' | 'npc'
 type SortType = 'name' | 'level' | 'class' | 'updated'
@@ -39,7 +26,7 @@ export default function CharacterList() {
         .order('updated_at', { ascending: false })
 
       if (error) throw error
-      return data as Character[]
+      return data as unknown as Character[]
     },
     enabled: !!campaignId,
   })
@@ -61,8 +48,8 @@ export default function CharacterList() {
         (c) =>
           c.name.toLowerCase().includes(query) ||
           c.player_name?.toLowerCase().includes(query) ||
-          c.race.toLowerCase().includes(query) ||
-          c.class.toLowerCase().includes(query)
+          c.race?.toLowerCase().includes(query) ||
+          c.class?.toLowerCase().includes(query)
       )
     }
 
@@ -76,7 +63,7 @@ export default function CharacterList() {
         sorted.sort((a, b) => b.level - a.level)
         break
       case 'class':
-        sorted.sort((a, b) => a.class.localeCompare(b.class))
+        sorted.sort((a, b) => (a.class ?? '').localeCompare(b.class ?? ''))
         break
       case 'updated':
         // Already sorted by updated_at from query
@@ -257,13 +244,13 @@ export default function CharacterList() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">HP</span>
                     <span className="text-destructive font-semibold">
-                      {character.hp_max}
+                      {character.hit_points_max}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">AC</span>
                     <span className="text-cyan-400 font-semibold">
-                      {character.ac}
+                      {character.armor_class}
                     </span>
                   </div>
                 </div>

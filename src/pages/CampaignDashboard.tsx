@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
-import { Campaign, Character, Session } from '@/types/database'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Character, Session } from '@/types/database'
+import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
+import { useQuery } from '@tanstack/react-query'
 import {
   ArrowLeft,
   BookOpen,
@@ -20,7 +21,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 export default function CampaignDashboard() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
   const [isEditingName, setIsEditingName] = useState(false)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
@@ -28,6 +28,39 @@ export default function CampaignDashboard() {
   const [editedName, setEditedName] = useState('')
   const [editedDescription, setEditedDescription] = useState('')
   const [editedSetting, setEditedSetting] = useState('')
+
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(id)
+  const { update: updateMutation } = useCampaignMutations()
+
+  // Fetch characters for this campaign
+  const { data: characters = [] } = useQuery({
+    queryKey: ['campaign-characters', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('*')
+        .eq('campaign_id', id!)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as unknown as Character[]
+    },
+    enabled: !!id,
+  })
+
+  // Fetch sessions for this campaign
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['campaign-sessions', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('campaign_id', id!)
+        .order('date', { ascending: false })
+      if (error) throw error
+      return data as unknown as Session[]
+    },
+    enabled: !!id,
+  })
 
   if (!id) {
     return (
@@ -39,80 +72,28 @@ export default function CampaignDashboard() {
     )
   }
 
-  // Fetch campaign
-  const { data: campaign, isLoading: campaignLoading } = useQuery({
-    queryKey: ['campaign', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('id', id)
-        .single()
-      if (error) throw error
-      return data as Campaign
-    },
-  })
-
-  // Fetch characters for this campaign
-  const { data: characters = [] } = useQuery({
-    queryKey: ['campaign-characters', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .eq('campaign_id', id)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Character[]
-    },
-  })
-
-  // Fetch sessions for this campaign
-  const { data: sessions = [] } = useQuery({
-    queryKey: ['campaign-sessions', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('campaign_id', id)
-        .order('date', { ascending: false })
-      if (error) throw error
-      return data as Session[]
-    },
-  })
-
-  // Update campaign mutation
-  const updateCampaignMutation = useMutation({
-    mutationFn: async (updates: Partial<Campaign>) => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single()
-      if (error) throw error
-      return data
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['campaign', id], data)
-      setIsEditingName(false)
-      setIsEditingDescription(false)
-      setIsEditingSetting(false)
-    },
-  })
+  const handleUpdate = (updates: Record<string, string>) => {
+    updateMutation.mutate({ id, ...updates }, {
+      onSuccess: () => {
+        setIsEditingName(false)
+        setIsEditingDescription(false)
+        setIsEditingSetting(false)
+      },
+    })
+  }
 
   const handleUpdateName = () => {
     if (editedName.trim()) {
-      updateCampaignMutation.mutate({ name: editedName })
+      handleUpdate({ name: editedName })
     }
   }
 
   const handleUpdateDescription = () => {
-    updateCampaignMutation.mutate({ description: editedDescription })
+    handleUpdate({ description: editedDescription })
   }
 
   const handleUpdateSetting = () => {
-    updateCampaignMutation.mutate({ setting: editedSetting })
+    handleUpdate({ setting: editedSetting })
   }
 
   const pcCount = characters.filter((c) => !c.is_npc).length
@@ -174,7 +155,7 @@ export default function CampaignDashboard() {
                   />
                   <button
                     onClick={handleUpdateName}
-                    disabled={updateCampaignMutation.isPending}
+                    disabled={updateMutation.isPending}
                     className="text-primary hover:text-foreground p-2"
                   >
                     <Save className="size-6" />
@@ -217,7 +198,7 @@ export default function CampaignDashboard() {
                   />
                   <button
                     onClick={handleUpdateSetting}
-                    disabled={updateCampaignMutation.isPending}
+                    disabled={updateMutation.isPending}
                     className="text-primary hover:text-foreground p-1"
                   >
                     <Save className="size-4" />
@@ -280,7 +261,7 @@ export default function CampaignDashboard() {
             <div className="flex gap-2">
               <button
                 onClick={handleUpdateDescription}
-                disabled={updateCampaignMutation.isPending}
+                disabled={updateMutation.isPending}
                 className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
               >
                 <Save className="size-4" />
@@ -381,7 +362,7 @@ export default function CampaignDashboard() {
                 <p className="text-foreground font-bold text-lg">{sessions.length}</p>
                 {lastSession && (
                   <p className="text-muted-foreground text-sm mt-2">
-                    Last session: {new Date(lastSession.date).toLocaleDateString()}
+                    Last session: {lastSession.date ? new Date(lastSession.date).toLocaleDateString() : 'No date'}
                   </p>
                 )}
               </div>
@@ -423,12 +404,12 @@ export default function CampaignDashboard() {
                       Session {lastSession.session_number}: {lastSession.title}
                     </p>
                     <p className="text-muted-foreground text-sm mt-2">
-                      {new Date(lastSession.date).toLocaleDateString('en-US', {
+                      {lastSession.date ? new Date(lastSession.date).toLocaleDateString('en-US', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
-                      })}
+                      }) : 'No date'}
                     </p>
                     {lastSession.summary && (
                       <p className="text-muted-foreground text-sm mt-3 line-clamp-2">
