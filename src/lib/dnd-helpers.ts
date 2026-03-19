@@ -215,10 +215,12 @@ export interface DndClass {
   skillPool: readonly string[] | null
 }
 
+export type AbilityName = 'Strength' | 'Dexterity' | 'Constitution' | 'Intelligence' | 'Wisdom' | 'Charisma'
+
 export interface DndSkill {
   id: string
   name: string
-  ability: string
+  ability: AbilityName
 }
 
 export interface DndBackground {

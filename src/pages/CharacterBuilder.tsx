@@ -15,6 +15,7 @@ import {
   getPointBuyEquivalent,
   getPointBuyIncrementCost,
   rollAbilityScores,
+  type AbilityName,
 } from '@/lib/dnd-helpers'
 import { usePlayerNames } from '@/hooks/useCharacters'
 import { supabase } from '@/lib/supabase'
@@ -117,7 +118,7 @@ const ABILITY_NAMES = {
   cha: 'Charisma',
 }
 
-const ABILITY_NAME_TO_KEY: Record<string, keyof CharacterData['abilities']> = {
+const ABILITY_NAME_TO_KEY: Record<AbilityName, keyof CharacterData['abilities']> = {
   Strength: 'str',
   Dexterity: 'dex',
   Constitution: 'con',
