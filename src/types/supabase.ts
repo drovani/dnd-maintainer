@@ -90,6 +90,7 @@ export type Database = {
           experience_points: number
           features: Json | null
           flaws: string | null
+          gender: string | null
           hit_points_current: number | null
           hit_points_max: number | null
           hit_points_temp: number
@@ -130,6 +131,7 @@ export type Database = {
           experience_points?: number
           features?: Json | null
           flaws?: string | null
+          gender?: string | null
           hit_points_current?: number | null
           hit_points_max?: number | null
           hit_points_temp?: number
@@ -170,6 +172,7 @@ export type Database = {
           experience_points?: number
           features?: Json | null
           flaws?: string | null
+          gender?: string | null
           hit_points_current?: number | null
           hit_points_max?: number | null
           hit_points_temp?: number

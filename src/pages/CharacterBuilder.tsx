@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 type StepType = 'basics' | 'abilities' | 'skills' | 'features' | 'equipment' | 'spells' | 'backstory'
-type RequiredField = 'name' | 'race' | 'class'
+type RequiredField = 'name' | 'race' | 'class' | 'gender'
 
 const STEPS: { id: StepType; label: string }[] = [
   { id: 'basics', label: 'Basics' }, { id: 'abilities', label: 'Abilities' },
@@ -31,12 +31,13 @@ const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[]
   { field: 'name', step: 'basics', label: 'Character Name' },
   { field: 'race', step: 'basics', label: 'Race' },
   { field: 'class', step: 'basics', label: 'Class' },
+  { field: 'gender', step: 'basics', label: 'Gender' },
 ]
 
 const INITIAL_CHARACTER_DATA: CharacterData = {
   name: '', player_name: '', character_type: 'pc',
   race: '', class: '', level: 1,
-  background: '', custom_background: '', alignment: DND_ALIGNMENTS[4].id,
+  background: '', custom_background: '', alignment: DND_ALIGNMENTS[4].id, gender: '',
   abilityMethod: 'standard-array',
   abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
   abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
@@ -85,6 +86,7 @@ export default function CharacterBuilder() {
       subclass: null, level: characterData.level,
       background: characterData.custom_background || characterData.background || null,
       alignment: characterData.alignment || null,
+      gender: (characterData.gender || null) as 'male' | 'female' | null,
       hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
       speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
       saving_throws: Object.fromEntries(
@@ -219,7 +221,7 @@ export default function CharacterBuilder() {
         <BasicsStep characterType={cd.character_type} name={cd.name} playerName={cd.player_name}
           race={cd.race} characterClass={cd.class} background={cd.background}
           customBackground={cd.custom_background} alignment={cd.alignment}
-          level={cd.level} fieldErrors={fieldErrors} onChange={updateBasics} />
+          level={cd.level} gender={cd.gender} fieldErrors={fieldErrors} onChange={updateBasics} />
       )
       case 'abilities': return (
         <AbilitiesStep abilityMethod={cd.abilityMethod} abilities={cd.abilities}

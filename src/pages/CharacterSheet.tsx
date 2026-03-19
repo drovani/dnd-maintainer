@@ -7,6 +7,7 @@ import {
   getAbilityModifier,
   getProficiencyBonus,
   type DndSkill,
+  type DndGender,
 } from '@/lib/dnd-helpers'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
@@ -32,6 +33,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { GenderToggle } from '@/components/ui/gender-toggle'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Character } from '@/types/database'
 
@@ -209,6 +211,12 @@ export default function CharacterSheet() {
               <span className="text-muted-foreground">Type</span>
               <p className="text-foreground font-semibold uppercase">{character.character_type}</p>
             </div>
+            {character.gender && (
+              <div>
+                <span className="text-muted-foreground">Gender</span>
+                <p className="text-foreground font-semibold capitalize">{character.gender}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -575,6 +583,7 @@ function EditHeaderDialog({
     level: character.level,
     background: character.background ?? '',
     alignment: character.alignment ?? '',
+    gender: (character.gender ?? '') as DndGender | '',
   })
 
   const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -694,6 +703,13 @@ function EditHeaderDialog({
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label>Gender</Label>
+            <GenderToggle
+              value={form.gender}
+              onChange={(g) => update('gender', g)}
+            />
+          </div>
         </div>
         <ModalFooter
           onSave={() =>
@@ -701,6 +717,7 @@ function EditHeaderDialog({
               ...form,
               player_name: form.player_name || null,
               level: Number(form.level),
+              gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
             })
           }
           onCancel={onClose}
