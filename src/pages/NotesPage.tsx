@@ -436,7 +436,7 @@ export default function NotesPage() {
             {filteredNotes.map((note) => (
               <div
                 key={note.id}
-                className="group bg-card border border-border hover:border-ring rounded-lg overflow-hidden transition-all hover:shadow-lg hover:shadow-md"
+                className="group bg-card border border-border hover:border-ring rounded-lg overflow-hidden transition-all hover:shadow-md"
               >
                 {/* Card Header */}
                 <div className="bg-muted/50 px-6 py-4 border-b border-border flex items-start justify-between">
