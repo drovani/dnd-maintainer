@@ -103,7 +103,7 @@ export function useBuilderAutosave() {
         }
       })();
 
-      // Assign ref before any async work resolves to prevent concurrent saves
+      // Assign ref synchronously so the next saveDraft call sees it before this promise settles
       savingRef.current = promise;
       // Clean up ref after promise settles
       promise.finally(() => {

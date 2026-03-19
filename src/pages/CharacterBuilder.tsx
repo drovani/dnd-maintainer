@@ -1,3 +1,4 @@
+import type { AbilityScores } from '@/types/database'
 import { AutocompleteInput } from '@/components/ui/autocomplete-input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -56,14 +57,7 @@ interface CharacterData {
 
   // Abilities
   abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
-  abilities: {
-    str: number
-    dex: number
-    con: number
-    int: number
-    wis: number
-    cha: number
-  }
+  abilities: AbilityScores
   abilityAssignments: Record<string, number | null>
   rolledValues: number[]
 
