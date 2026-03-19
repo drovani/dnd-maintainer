@@ -119,6 +119,7 @@ export interface Character {
   portrait_url: string | null
   is_npc: boolean | null
   is_active: boolean
+  status: 'draft' | 'ready'
 }
 
 // Combat participant

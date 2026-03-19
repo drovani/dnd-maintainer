@@ -6,6 +6,7 @@ import {
   DND_SKILLS,
   getAbilityModifier,
   getProficiencyBonus,
+  type DndSkill,
 } from '@/lib/dnd-helpers'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
@@ -123,7 +124,7 @@ export default function CharacterSheet() {
         acc[skill.ability].push(skill)
         return acc
       },
-      {} as Record<string, typeof DND_SKILLS>
+      {} as Record<string, DndSkill[]>
     )
   }, [])
 

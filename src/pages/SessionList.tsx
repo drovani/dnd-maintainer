@@ -298,7 +298,7 @@ export default function SessionList() {
                   </div>
 
                   {/* Card */}
-                  <div className="flex-1 bg-card border border-border hover:border-ring rounded-lg p-6 transition-all group-hover:shadow-lg group-hover:shadow-md">
+                  <div className="flex-1 bg-card border border-border hover:border-ring rounded-lg p-6 transition-all group-hover:shadow-md">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-baseline gap-3 mb-1">
