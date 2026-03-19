@@ -37,8 +37,7 @@ import {
   STANDARD_ARRAY,
   type AbilityName,
 } from '@/lib/dnd-helpers'
-import { supabase } from '@/lib/supabase'
-import { useMutation } from '@tanstack/react-query'
+import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dices, Save, TrendingDown, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -107,6 +106,14 @@ const STEPS: { id: StepType; label: string }[] = [
   { id: 'equipment', label: 'Equipment' },
   { id: 'spells', label: 'Spells' },
   { id: 'backstory', label: 'Backstory' },
+]
+
+type RequiredField = 'name' | 'race' | 'class'
+
+const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[] = [
+  { field: 'name', step: 'basics', label: 'Character Name' },
+  { field: 'race', step: 'basics', label: 'Race' },
+  { field: 'class', step: 'basics', label: 'Class' },
 ]
 
 const ABILITY_NAMES = {
@@ -191,66 +198,101 @@ export default function CharacterBuilder() {
   const calculatedHp = (selectedClass?.hitDie ?? 8) + conModifier
   const calculatedAc = 10 + getAbilityModifier(characterData.abilities.dex)
 
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      const insertPayload = {
-        campaign_id: campaignId!,
-        name: characterData.name,
-        player_name: characterData.player_name,
-        character_type: characterData.character_type,
-        race: characterData.race,
-        class: characterData.class,
-        level: characterData.level,
-        background: characterData.custom_background || characterData.background,
-        alignment: characterData.alignment,
-        abilities: characterData.abilities,
-        skills: characterData.skills,
-        features: characterData.features,
-        equipment: characterData.equipment,
-        spells: characterData.spells,
-        personality_traits: characterData.personalityTraits,
-        ideals: characterData.ideals,
-        bonds: characterData.bonds,
-        flaws: characterData.flaws,
-        appearance: characterData.appearance,
-        backstory: characterData.backstory,
-        hit_points_max: calculatedHp,
-        hit_points_current: calculatedHp,
-        armor_class: calculatedAc,
-      }
-      const { data, error } = await supabase.from('characters').insert(insertPayload as never).select().single()
+  const [visitedSteps, setVisitedSteps] = useState<Set<StepType>>(new Set())
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<RequiredField, boolean>>>({})
+  const [isFinalizing, setIsFinalizing] = useState(false)
+  const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
 
-      if (error) throw error
-      return data
-    },
-    onSuccess: (data) => {
-      if (data?.id) {
-        navigate(`/campaign/${campaignId}/character/${data.id}`)
-      } else {
-        navigate(`/campaign/${campaignId}/characters`)
-      }
-    },
-  })
+  useEffect(() => { clearStatus() }, [characterData]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
 
-  const goToStep = (step: StepType) => {
-    setCurrentStep(step)
+  const buildPayload = () => ({
+    campaign_id: campaignId!,
+    name: characterData.name,
+    character_type: characterData.character_type,
+    player_name: characterData.player_name || null,
+    race: characterData.race || null,
+    class: characterData.class || null,
+    subclass: null,
+    level: characterData.level,
+    background: characterData.custom_background || characterData.background || null,
+    alignment: characterData.alignment || null,
+    hit_points_max: calculatedHp,
+    hit_points_current: calculatedHp,
+    armor_class: calculatedAc,
+    speed: 30,
+    abilities: characterData.abilities,
+    saving_throws: {},
+    skills: characterData.skills,
+    features: characterData.features,
+    equipment: characterData.equipment,
+    spells: characterData.spells,
+    personality_traits: characterData.personalityTraits || null,
+    ideals: characterData.ideals || null,
+    bonds: characterData.bonds || null,
+    flaws: characterData.flaws || null,
+    appearance: characterData.appearance || null,
+    backstory: characterData.backstory || null,
+    notes: null,
+  })
+
+  const validateStep = (step: StepType) => {
+    const errors: Partial<Record<RequiredField, boolean>> = { ...fieldErrors }
+    for (const { field, step: fieldStep } of REQUIRED_FIELDS) {
+      if (fieldStep === step) {
+        errors[field] = !characterData[field]
+      }
+    }
+    setFieldErrors(errors)
+  }
+
+  const stepHasErrors = (step: StepType): boolean => {
+    if (!visitedSteps.has(step)) return false
+    return REQUIRED_FIELDS.some(({ field, step: fieldStep }) => fieldStep === step && fieldErrors[field])
+  }
+
+  const isReadyToFinalize = REQUIRED_FIELDS.every(({ field }) => !!characterData[field])
+
+  const goToStep = (targetStep: StepType) => {
+    const currentStepId = STEPS[currentStepIndex].id
+    setVisitedSteps((prev) => new Set([...prev, currentStepId]))
+    validateStep(currentStepId)
+    void saveDraft(buildPayload()) // fire-and-forget
+    setCurrentStep(targetStep)
   }
 
   const goNextStep = () => {
     if (currentStepIndex < STEPS.length - 1) {
-      setCurrentStep(STEPS[currentStepIndex + 1].id)
+      goToStep(STEPS[currentStepIndex + 1].id)
     }
   }
 
   const goPrevStep = () => {
     if (currentStepIndex > 0) {
-      setCurrentStep(STEPS[currentStepIndex - 1].id)
+      goToStep(STEPS[currentStepIndex - 1].id)
+    }
+  }
+
+  const handleFinalize = async () => {
+    setIsFinalizing(true)
+    try {
+      const id = await finalize(buildPayload())
+      navigate(`/campaign/${campaignId}/character/${id}`)
+    } catch {
+      // error state handled by hook
+    } finally {
+      setIsFinalizing(false)
     }
   }
 
   const updateBasics = (updates: Partial<CharacterData>) => {
+    // Clear errors for fields being updated
+    for (const key of Object.keys(updates)) {
+      if (key in fieldErrors) {
+        setFieldErrors((prev) => ({ ...prev, [key as RequiredField]: false }))
+      }
+    }
     setCharacterData((prev) => ({ ...prev, ...updates }))
   }
 
@@ -468,12 +510,16 @@ export default function CharacterBuilder() {
       {/* Name row */}
       <div className={`grid grid-cols-1 ${characterData.character_type === 'pc' ? 'md:grid-cols-2' : ''} gap-4`}>
         <div className="space-y-2">
-          <Label htmlFor="character-name">Character Name</Label>
+          <Label htmlFor="character-name">
+            Character Name
+            {fieldErrors.name && <span className="text-destructive ml-1">*</span>}
+          </Label>
           <Input
             id="character-name"
             value={characterData.name}
             onChange={(e) => updateBasics({ name: e.target.value })}
             placeholder="Enter character name"
+            className={fieldErrors.name ? 'border-destructive' : ''}
           />
         </div>
 
@@ -494,13 +540,16 @@ export default function CharacterBuilder() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Race</Label>
+            <Label>
+              Race
+              {fieldErrors.race && <span className="text-destructive ml-1">*</span>}
+            </Label>
             <Select
               value={characterData.race}
               onValueChange={(value) => value && updateBasics({ race: value })}
               items={DND_RACES.map((r) => ({ value: r.id, label: r.name }))}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
@@ -523,13 +572,16 @@ export default function CharacterBuilder() {
           </div>
 
           <div className="space-y-2">
-            <Label>Class</Label>
+            <Label>
+              Class
+              {fieldErrors.class && <span className="text-destructive ml-1">*</span>}
+            </Label>
             <Select
               value={characterData.class}
               onValueChange={(value) => value && updateBasics({ class: value })}
               items={DND_CLASSES.map((c) => ({ value: c.id, label: c.name }))}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1111,9 +1163,11 @@ export default function CharacterBuilder() {
                     onClick={() => goToStep(step.id)}
                     className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${index === currentStepIndex
                       ? 'bg-primary text-primary-foreground'
-                      : index < currentStepIndex
-                        ? 'bg-green-600 text-white'
-                        : 'bg-muted text-muted-foreground'
+                      : stepHasErrors(step.id)
+                        ? 'bg-destructive text-destructive-foreground'
+                        : index < currentStepIndex
+                          ? 'bg-green-600 text-white'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                   >
                     {index + 1}
@@ -1154,27 +1208,28 @@ export default function CharacterBuilder() {
             Previous
           </Button>
 
-          {currentStepIndex === STEPS.length - 1 ? (
+          <div className="flex items-center gap-3">
+            {saveStatus === 'saved' && (
+              <span className="text-sm text-muted-foreground">Draft saved</span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-sm text-destructive">Save failed</span>
+            )}
+            {currentStepIndex < STEPS.length - 1 && (
+              <Button onClick={goNextStep}>
+                Next
+                <ChevronRight size={16} />
+              </Button>
+            )}
             <Button
-              onClick={() => createMutation.mutate()}
-              disabled={createMutation.isPending || !characterData.name}
+              onClick={handleFinalize}
+              disabled={isFinalizing || !isReadyToFinalize}
             >
-              <Save size={16} />
-              {createMutation.isPending ? 'Saving...' : 'Create Character'}
+              <Save className="size-4" />
+              {isFinalizing ? 'Finalizing...' : 'Finalize Character'}
             </Button>
-          ) : (
-            <Button onClick={goNextStep}>
-              Next
-              <ChevronRight size={16} />
-            </Button>
-          )}
-        </div>
-
-        {createMutation.isError && (
-          <div className="mt-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
-            Error creating character: {String(createMutation.error)}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

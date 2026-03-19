@@ -110,6 +110,7 @@ export type Database = {
           skills: Json | null
           speed: number
           spells: Json | null
+          status: string
           subclass: string | null
           updated_at: string
         }
@@ -149,6 +150,7 @@ export type Database = {
           skills?: Json | null
           speed?: number
           spells?: Json | null
+          status?: string
           subclass?: string | null
           updated_at?: string
         }
@@ -188,6 +190,7 @@ export type Database = {
           skills?: Json | null
           speed?: number
           spells?: Json | null
+          status?: string
           subclass?: string | null
           updated_at?: string
         }
