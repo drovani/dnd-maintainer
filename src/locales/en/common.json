@@ -1,0 +1,273 @@
+{
+  "buttons": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "remove": "Remove",
+    "next": "Next",
+    "previous": "Previous",
+    "retrySave": "Retry Save",
+    "finalizeCharacter": "Finalize Character",
+    "finalizing": "Finalizing...",
+    "generateName": "Generate Name",
+    "generateLoot": "Generate Loot",
+    "generateTavern": "Generate Tavern",
+    "generateEncounter": "Generate Encounter",
+    "logNewSession": "Log New Session",
+    "logFirstSession": "Log Your First Session",
+    "saveToCampaign": "Save to Campaign",
+    "tryAgain": "Try Again",
+    "addCombatant": "Add Combatant",
+    "nextTurn": "Next Turn",
+    "previousTurn": "Previous Turn"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "characters": "Characters",
+    "sessions": "Sessions",
+    "notes": "Notes",
+    "dmToolkit": "DM Toolkit",
+    "exportData": "Export Data",
+    "selectCampaign": "Select Campaign",
+    "noCampaigns": "No campaigns",
+    "campaign": "Campaign"
+  },
+  "app": {
+    "title": "D&D Keeper",
+    "subtitle": "Campaign Manager",
+    "version": "Campaign Manager v1.0",
+    "for5e": "For D&D 5e"
+  },
+  "characterBuilder": {
+    "title": "Create New Character",
+    "steps": {
+      "basics": "Basics",
+      "abilities": "Abilities",
+      "skills": "Skills",
+      "features": "Features",
+      "equipment": "Equipment",
+      "spells": "Spells",
+      "backstory": "Backstory"
+    },
+    "fields": {
+      "characterName": "Character Name",
+      "race": "Race",
+      "class": "Class",
+      "gender": "Gender",
+      "playerName": "Player Name",
+      "level": "Level",
+      "background": "Background",
+      "alignment": "Alignment",
+      "subclass": "Subclass",
+      "type": "Type"
+    },
+    "status": {
+      "saving": "Saving...",
+      "draftSaved": "Draft saved"
+    },
+    "errors": {
+      "noCampaignId": "Campaign ID is required to create a character.",
+      "failedToFinalize": "Failed to finalize character: {{message}}",
+      "failedToSaveDraft": "Failed to save draft. Your recent changes may not have been saved."
+    }
+  },
+  "characterSheet": {
+    "title": "CHARACTER SHEET",
+    "sections": {
+      "abilities": "Abilities",
+      "savingThrows": "Saving Throws",
+      "skills": "Skills",
+      "combat": "Combat",
+      "featuresAndTraits": "Features & Traits",
+      "equipment": "Equipment",
+      "spells": "Spells",
+      "personality": "Personality",
+      "backstory": "Backstory",
+      "appearance": "Appearance",
+      "cantrips": "CANTRIPS"
+    },
+    "fields": {
+      "class": "Class",
+      "level": "Level",
+      "race": "Race",
+      "background": "Background",
+      "alignment": "Alignment",
+      "player": "Player",
+      "type": "Type",
+      "gender": "Gender",
+      "armorClass": "ARMOR CLASS",
+      "initiative": "INITIATIVE",
+      "hitPoints": "HIT POINTS",
+      "proficiencyBonus": "Proficiency Bonus",
+      "speed": "Speed",
+      "source": "Source: {{source}}"
+    },
+    "personality": {
+      "traits": "Traits",
+      "ideals": "Ideals",
+      "bonds": "Bonds",
+      "flaws": "Flaws"
+    },
+    "dialogs": {
+      "editCharacterInfo": "Edit Character Info",
+      "editAbilityScores": "Edit Ability Scores",
+      "editSkills": "Edit Skills",
+      "editCombatStats": "Edit Combat Stats",
+      "editPersonality": "Edit Personality",
+      "editBackstory": "Edit Backstory",
+      "editAppearance": "Edit Appearance"
+    },
+    "hints": {
+      "skillsProficiency": "Click P for proficiency, E for expertise.",
+      "leaveEmptyForNpcs": "Leave empty for NPCs",
+      "subclassPlaceholder": "e.g. Champion, Arcane Trickster"
+    },
+    "errors": {
+      "loadingCharacter": "Error loading character: {{error}}"
+    }
+  },
+  "dmToolkit": {
+    "title": "DM Toolkit",
+    "tabs": {
+      "initiativeTracker": "Initiative Tracker",
+      "generators": "Generators",
+      "quickReference": "Quick Reference"
+    },
+    "initiative": {
+      "addCombatant": "Add Combatant",
+      "quickAddPartyMembers": "Quick Add Party Members",
+      "round": "Round",
+      "currentTurn": "Current Turn",
+      "noCombatants": "No combatants added yet",
+      "initiativeOrder": "Initiative Order ({{count}})",
+      "hp": "HP",
+      "conditions": "Conditions",
+      "addCondition": "Add condition...",
+      "saveEncounter": "Save Encounter",
+      "saveToCampaign": "Save to Campaign",
+      "encounterSaved": "Encounter saved!",
+      "quickStats": "Quick stats: {{count}} combatants",
+      "none": "None",
+      "player": "Player",
+      "ko": "KO"
+    },
+    "generators": {
+      "nameGenerator": "Name Generator",
+      "lootGenerator": "Loot Generator",
+      "tavernGenerator": "Tavern Generator",
+      "encounterGenerator": "Encounter Generator",
+      "race": "Race",
+      "gender": "Gender",
+      "generatedName": "Generated Name",
+      "encounterCrRange": "Encounter CR Range",
+      "gold": "Gold",
+      "silver": "Silver",
+      "copper": "Copper",
+      "items": "Items",
+      "tavernName": "Tavern Name",
+      "description": "Description",
+      "barkeeper": "Barkeeper",
+      "special": "Special",
+      "rumor": "Rumor",
+      "partyLevel": "Party Level",
+      "partySize": "Party Size",
+      "difficulty": "Difficulty",
+      "suggestedMonsters": "Suggested Monsters",
+      "cr": "CR {{cr}}"
+    },
+    "reference": {
+      "conditions": "Conditions",
+      "actionsInCombat": "Actions in Combat",
+      "coverRules": "Cover Rules",
+      "difficultyClasses": "Difficulty Classes",
+      "travelPace": "Travel Pace",
+      "exhaustionLevels": "Exhaustion Levels",
+      "dc": "DC",
+      "difficulty": "Difficulty",
+      "pace": "Pace",
+      "perHour": "Per Hour",
+      "perDay": "Per Day",
+      "level": "Level {{level}}",
+      "ac": "AC {{ac}}"
+    }
+  },
+  "sessions": {
+    "title": "Sessions",
+    "subtitle": "{{count}} session • {{xp}} XP awarded",
+    "subtitle_plural": "{{count}} sessions • {{xp}} XP awarded",
+    "searchPlaceholder": "Search sessions by title...",
+    "logNewSession": "Log New Session",
+    "sessionTitle": "Session Title",
+    "sessionNumber": "Session Number",
+    "sessionDate": "Session Date",
+    "noSessionsYet": "No Sessions Yet",
+    "noSessionsMatch": "No Sessions Match",
+    "noSessionsDescription": "Log your first session to begin tracking your campaign!",
+    "noSessionsMatchDescription": "Try adjusting your search terms.",
+    "loadingSessions": "Loading sessions...",
+    "errorLoadingSessions": "Error loading sessions",
+    "sessionLabel": "Session {{number}}"
+  },
+  "campaign": {
+    "title": "Campaign",
+    "description": "Campaign Description",
+    "noDescription": "No campaign description",
+    "noSetting": "No setting specified",
+    "notFound": "Campaign not found",
+    "loading": "Loading campaign...",
+    "backToCampaigns": "Back to Campaigns",
+    "toolkit": {
+      "title": "Campaign Toolkit"
+    },
+    "stats": {
+      "characters": "Characters",
+      "sessions": "Sessions",
+      "notes": "Notes",
+      "toolkit": "Toolkit",
+      "total": "Total",
+      "lastSession": "Last session: {{date}}",
+      "noDate": "No date"
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "lastSessionPlayed": "Last Session Played",
+      "noSessions": "No sessions recorded yet",
+      "createFirstSession": "Create first session →",
+      "viewAllSessions": "View all sessions →",
+      "failedToLoadSessions": "Failed to load sessions"
+    },
+    "party": {
+      "title": "Party Members",
+      "noCharacters": "No characters yet",
+      "createCharacter": "Create a character →",
+      "viewAllCharacters": "View all {{count}} characters →",
+      "failedToLoadCharacters": "Failed to load characters",
+      "playedBy": "Played by {{name}}"
+    }
+  },
+  "characterType": {
+    "pc": "PC",
+    "npc": "NPC"
+  },
+  "errors": {
+    "loadingCampaigns": "Unable to Load Campaigns",
+    "loadingCampaignsDescription": "Failed to connect after multiple attempts. Please verify:",
+    "supabaseRunning": "The Supabase project is running and accessible",
+    "envVars": "Your .env.local contains valid VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY",
+    "networkConnection": "Your network connection is working",
+    "supabaseStatus": "If running locally, npx supabase status shows the DB is up",
+    "unexpectedError": "An unexpected error occurred. Please try again."
+  },
+  "status": {
+    "healthy": "healthy",
+    "injured": "injured",
+    "unconscious": "unconscious",
+    "dead": "dead",
+    "active": "Active"
+  }
+}

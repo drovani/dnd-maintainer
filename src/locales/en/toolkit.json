@@ -1,0 +1,267 @@
+{
+  "conditions": {
+    "blinded": {
+      "name": "Blinded",
+      "effects": "Cannot see. Automatic miss on attacks. Attacks against you have advantage."
+    },
+    "charmed": {
+      "name": "Charmed",
+      "effects": "Cannot attack the charmer. Charmer has advantage on social checks against you."
+    },
+    "deafened": {
+      "name": "Deafened",
+      "effects": "Cannot hear. Automatic fail on any check requiring hearing."
+    },
+    "frightened": {
+      "name": "Frightened",
+      "effects": "Disadvantage on attack rolls and ability checks. Cannot move closer to source."
+    },
+    "grappled": {
+      "name": "Grappled",
+      "effects": "Speed becomes 0. Cannot benefit from bonuses to speed. Ends if grappler is incapacitated."
+    },
+    "incapacitated": {
+      "name": "Incapacitated",
+      "effects": "Cannot take actions or reactions."
+    },
+    "invisible": {
+      "name": "Invisible",
+      "effects": "Cannot be seen. Attacks against you have disadvantage. Your attacks have advantage."
+    },
+    "paralyzed": {
+      "name": "Paralyzed",
+      "effects": "Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage."
+    },
+    "petrified": {
+      "name": "Petrified",
+      "effects": "Turned to stone along with nonmagical objects. Cannot move or speak."
+    },
+    "poisoned": {
+      "name": "Poisoned",
+      "effects": "Disadvantage on attack rolls and ability checks."
+    },
+    "prone": {
+      "name": "Prone",
+      "effects": "Melee attack rolls against you have advantage. Ranged attacks have disadvantage."
+    },
+    "restrained": {
+      "name": "Restrained",
+      "effects": "Speed becomes 0. Disadvantage on attack rolls. Attacks against you have advantage."
+    },
+    "stunned": {
+      "name": "Stunned",
+      "effects": "Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage."
+    },
+    "unconscious": {
+      "name": "Unconscious",
+      "effects": "Cannot move or wake unless someone uses action. Attacks have advantage."
+    }
+  },
+  "actions": {
+    "attack": {
+      "name": "Attack",
+      "description": "Make one melee or ranged attack"
+    },
+    "castASpell": {
+      "name": "Cast a Spell",
+      "description": "Cast a spell with a casting time of 1 action"
+    },
+    "dash": {
+      "name": "Dash",
+      "description": "Double your speed for this turn"
+    },
+    "disengage": {
+      "name": "Disengage",
+      "description": "Opportunity attacks against you have disadvantage"
+    },
+    "dodge": {
+      "name": "Dodge",
+      "description": "Attack rolls have disadvantage. You make DEX saves with advantage"
+    },
+    "help": {
+      "name": "Help",
+      "description": "Give another creature advantage on next ability check within 1 minute"
+    },
+    "hide": {
+      "name": "Hide",
+      "description": "Make a Stealth check. Must be out of sight of enemies"
+    },
+    "ready": {
+      "name": "Ready",
+      "description": "Choose a trigger and response for your reaction"
+    },
+    "search": {
+      "name": "Search",
+      "description": "Spend 1 minute searching a 5-foot cube area"
+    },
+    "useAnObject": {
+      "name": "Use an Object",
+      "description": "Interact with a second object during your turn"
+    }
+  },
+  "coverRules": {
+    "halfCover": {
+      "type": "Half Cover",
+      "ac": "+2",
+      "description": "Behind low wall, furniture, creatures"
+    },
+    "threeQuartersCover": {
+      "type": "3/4 Cover",
+      "ac": "+5",
+      "description": "Behind portcullis, narrow tree trunk"
+    },
+    "fullCover": {
+      "type": "Full Cover",
+      "ac": "Immune",
+      "description": "Complete concealment from attacker"
+    }
+  },
+  "dcTable": {
+    "5": { "dc": 5, "difficulty": "Very Easy" },
+    "10": { "dc": 10, "difficulty": "Easy" },
+    "15": { "dc": 15, "difficulty": "Medium" },
+    "20": { "dc": 20, "difficulty": "Hard" },
+    "25": { "dc": 25, "difficulty": "Very Hard" },
+    "30": { "dc": 30, "difficulty": "Nearly Impossible" }
+  },
+  "travelPace": {
+    "fast": {
+      "pace": "Fast",
+      "miles_hour": "4 miles",
+      "miles_day": "30 miles"
+    },
+    "normal": {
+      "pace": "Normal",
+      "miles_hour": "3 miles",
+      "miles_day": "24 miles"
+    },
+    "slow": {
+      "pace": "Slow",
+      "miles_hour": "2 miles",
+      "miles_day": "18 miles"
+    }
+  },
+  "exhaustionLevels": {
+    "1": { "level": 1, "effect": "Disadvantage on ability checks" },
+    "2": { "level": 2, "effect": "Speed halved" },
+    "3": { "level": 3, "effect": "Disadvantage on attack rolls and saves" },
+    "4": { "level": 4, "effect": "Speed reduced to 0" },
+    "5": { "level": 5, "effect": "Speed 0, max HP halved" },
+    "6": { "level": 6, "effect": "Death" }
+  },
+  "lootTables": {
+    "1-4": {
+      "items": [
+        "Potion of Healing",
+        "Scroll of Magic Missile",
+        "Small Shield",
+        "Rope (50ft)",
+        "Lantern"
+      ]
+    },
+    "5-10": {
+      "items": [
+        "Potion of Healing",
+        "Scroll of Cure Wounds",
+        "+1 Weapon",
+        "Wand of Magic Missiles",
+        "Cloak of Protection"
+      ]
+    },
+    "11-16": {
+      "items": [
+        "Potion of Greater Healing",
+        "+2 Weapon",
+        "Robe of the Archmagi",
+        "Wand of Fireballs",
+        "Ring of Protection"
+      ]
+    },
+    "17+": {
+      "items": [
+        "Potion of Supreme Healing",
+        "+3 Weapon",
+        "Staff of Power",
+        "Deck of Many Things",
+        "Artifact"
+      ]
+    }
+  },
+  "crRanges": {
+    "1-4": "CR 1-4",
+    "5-10": "CR 5-10",
+    "11-16": "CR 11-16",
+    "17+": "CR 17+"
+  },
+  "encounterDifficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "deadly": "Deadly"
+  },
+  "tavernNames": {
+    "adjectives": [
+      "Prancing",
+      "Dancing",
+      "Silver",
+      "Golden",
+      "Rusty",
+      "Broken",
+      "Weary"
+    ],
+    "nouns": [
+      "Pony",
+      "Griffin",
+      "Dragon",
+      "Sword",
+      "Shield",
+      "Flagon",
+      "Bottle"
+    ]
+  },
+  "tavernDescriptions": [
+    "A cozy tavern with a roaring fireplace and local patrons",
+    "A bustling tavern filled with merchants and adventurers",
+    "A dimly-lit tavern with suspicious corners and dark secrets",
+    "A rowdy tavern known for brawls and good spirits",
+    "An upscale tavern catering to nobles and wealthy merchants"
+  ],
+  "tavernBarkeepers": [
+    "Moira Ironbrew",
+    "Thorg Stonefist",
+    "Elara Brightwood",
+    "Caldus Blackthorne",
+    "Rosie Thistlebottom"
+  ],
+  "tavernSpecials": [
+    "Spiced mead and hearty stew",
+    "Roasted pheasant with mushroom sauce",
+    "Fresh bread and aged cheese selection",
+    "Smoked fish and pickled vegetables",
+    "Thick ale and warm meat pie"
+  ],
+  "tavernRumors": [
+    "A strange figure was seen heading toward the old ruins",
+    "Bandits have been spotted on the eastern road",
+    "The local lord seeks capable adventurers for a secret task",
+    "A merchant caravan went missing last week",
+    "Magic has been acting strangely in these lands"
+  ],
+  "monsters": [
+    { "name": "Goblin", "cr": 0.125 },
+    { "name": "Orc", "cr": 0.5 },
+    { "name": "Bandit", "cr": 0.125 },
+    { "name": "Cultist", "cr": 0.125 },
+    { "name": "Zombie", "cr": 0.25 },
+    { "name": "Skeleton", "cr": 0.25 },
+    { "name": "Troll", "cr": 5 },
+    { "name": "Wyvern", "cr": 6 },
+    { "name": "Dragon Wyrmling", "cr": 2 },
+    { "name": "Chimera", "cr": 6 },
+    { "name": "Hill Giant", "cr": 5 },
+    { "name": "Black Pudding", "cr": 4 },
+    { "name": "Beholder", "cr": 13 },
+    { "name": "Demon Lord", "cr": 20 },
+    { "name": "Ancient Red Dragon", "cr": 24 }
+  ]
+}
