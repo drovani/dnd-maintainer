@@ -1,26 +1,5 @@
-import {
-  ABILITY_ABBREVIATIONS,
-  DND_ALIGNMENTS,
-  DND_BACKGROUNDS,
-  DND_CLASSES,
-  DND_RACE_GROUPS,
-  DND_RACES,
-  DND_SKILLS,
-  POINT_BUY_TOTAL,
-  STANDARD_ARRAY,
-  getAbilityModifier,
-  getProficiencyBonus,
-  getPointBuyCost,
-  getPointBuyDecrementReturn,
-  getPointBuyEquivalent,
-  getPointBuyIncrementCost,
-  rollAbilityScores,
-  type AbilityName,
-} from '@/lib/dnd-helpers'
-import { usePlayerNames } from '@/hooks/useCharacters'
-import { supabase } from '@/lib/supabase'
-import { useMutation } from '@tanstack/react-query'
 import { AutocompleteInput } from '@/components/ui/autocomplete-input'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -38,7 +17,28 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
+import { usePlayerNames } from '@/hooks/useCharacters'
+import {
+  ABILITY_ABBREVIATIONS,
+  DND_ALIGNMENTS,
+  DND_BACKGROUNDS,
+  DND_CLASSES,
+  DND_RACE_GROUPS,
+  DND_RACES,
+  DND_SKILLS,
+  getAbilityModifier,
+  getPointBuyCost,
+  getPointBuyDecrementReturn,
+  getPointBuyEquivalent,
+  getPointBuyIncrementCost,
+  getProficiencyBonus,
+  POINT_BUY_TOTAL,
+  rollAbilityScores,
+  STANDARD_ARRAY,
+  type AbilityName,
+} from '@/lib/dnd-helpers'
+import { supabase } from '@/lib/supabase'
+import { useMutation } from '@tanstack/react-query'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dices, Save, TrendingDown, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -565,22 +565,35 @@ export default function CharacterBuilder() {
 
         <div className="space-y-2">
           <Label>Alignment</Label>
-          <Select
-            value={characterData.alignment}
-            onValueChange={(value) => value && updateBasics({ alignment: value })}
-            items={DND_ALIGNMENTS.map((a) => ({ value: a.id, label: a.name }))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DND_ALIGNMENTS.map((align) => (
-                <SelectItem key={align.id} value={align.id}>
-                  {align.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-3 gap-1.5">
+            {(['Lawful', 'Neutral', 'Chaotic'] as const).map((ethic) =>
+              (['Good', 'Neutral', 'Evil'] as const).map((moral) => {
+                const alignment = DND_ALIGNMENTS.find(
+                  (a) => a.name === (ethic === 'Neutral' && moral === 'Neutral' ? 'True Neutral' : `${ethic} ${moral}`)
+                )
+                if (!alignment) return null
+                const isSelected = characterData.alignment === alignment.id
+                const topLabel = ethic === 'Neutral' && moral === 'Neutral' ? 'True' : ethic
+                const bottomLabel = moral
+                return (
+                  <button
+                    key={alignment.id}
+                    type="button"
+                    title={alignment.name}
+                    onClick={() => updateBasics({ alignment: alignment.id })}
+                    className={`flex flex-col items-center justify-center rounded-md border-2 px-1 py-2 text-sm transition-colors cursor-pointer ${
+                      isSelected
+                        ? 'border-primary bg-primary/10 font-medium'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <span className="leading-tight">{topLabel}</span>
+                    <span className="leading-tight">{bottomLabel}</span>
+                  </button>
+                )
+              })
+            )}
+          </div>
         </div>
       </div>
 
@@ -865,28 +878,30 @@ export default function CharacterBuilder() {
             return (
               <div
                 key={skill.id}
-                className={`flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors ${
-                  inPool ? 'hover:bg-muted/50' : 'opacity-40'
-                }`}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
               >
-                <Checkbox
-                  id={`prof-${skill.id}`}
-                  checked={skillData.proficient}
-                  onCheckedChange={() => toggleSkillProficiency(skill.id)}
-                  disabled={isDisabled}
-                />
+                {inPool ? (
+                  <Checkbox
+                    id={`prof-${skill.id}`}
+                    checked={skillData.proficient}
+                    onCheckedChange={() => toggleSkillProficiency(skill.id)}
+                    disabled={isDisabled}
+                  />
+                ) : (
+                  <div className="size-4" />
+                )}
                 <span className={`w-8 text-right text-sm font-bold tabular-nums ${totalMod >= 0 ? 'text-green-700' : 'text-red-600'}`}>
                   {totalMod >= 0 ? '+' : ''}{totalMod}
                 </span>
                 <Label
                   htmlFor={`prof-${skill.id}`}
-                  className={`flex-1 cursor-pointer ${isDisabled ? 'cursor-not-allowed' : ''}`}
+                  className="flex-1 cursor-pointer"
                 >
                   {skill.name}
+                  <span className="text-xs text-muted-foreground">
+                    ({abbrev} {abilityMod >= 0 ? '+' : ''}{abilityMod})
+                  </span>
                 </Label>
-                <span className="text-xs text-muted-foreground w-16 text-right">
-                  {abbrev} {abilityMod >= 0 ? '+' : ''}{abilityMod}
-                </span>
               </div>
             )
           })}
