@@ -110,7 +110,7 @@ export function BasicsStep({
               <span className="text-destructive">*</span>
             </Label>
             <Select
-              value={race || undefined}
+              value={race || null}
               onValueChange={(value) => value && onChange({ race: value })}
               items={DND_RACES.map((r) => ({ value: r.id, label: r.name }))}
             >
@@ -142,7 +142,7 @@ export function BasicsStep({
               <span className="text-destructive">*</span>
             </Label>
             <Select
-              value={characterClass || undefined}
+              value={characterClass || null}
               onValueChange={(value) => value && onChange({ class: value })}
               items={DND_CLASSES.map((c) => ({ value: c.id, label: c.name }))}
             >
@@ -162,7 +162,7 @@ export function BasicsStep({
           <div className="space-y-2">
             <Label>Background</Label>
             <Select
-              value={background || undefined}
+              value={background || null}
               onValueChange={(value) => value && onChange({ background: value })}
               items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: b.name }))}
             >
