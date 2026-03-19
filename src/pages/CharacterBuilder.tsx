@@ -36,7 +36,7 @@ const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[]
 const INITIAL_CHARACTER_DATA: CharacterData = {
   name: '', player_name: '', character_type: 'pc',
   race: '', class: '', level: 1,
-  background: '', custom_background: '', alignment: DND_ALIGNMENTS[4].id,
+  background: '', custom_background: '', alignment: DND_ALIGNMENTS[4].id, gender: '',
   abilityMethod: 'standard-array',
   abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
   abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
@@ -85,6 +85,7 @@ export default function CharacterBuilder() {
       subclass: null, level: characterData.level,
       background: characterData.custom_background || characterData.background || null,
       alignment: characterData.alignment || null,
+      gender: (characterData.gender || null) as 'male' | 'female' | null,
       hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
       speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
       saving_throws: Object.fromEntries(

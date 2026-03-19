@@ -597,3 +597,86 @@ export function rollAbilityScores(): number[] {
   return Array.from({ length: 6 }, () => roll4d6DropLowest())
     .sort((a, b) => b - a)
 }
+
+export type DndGender = 'male' | 'female'
+
+export interface RaceNameData {
+  readonly male: readonly string[]
+  readonly female: readonly string[]
+  readonly clan: readonly string[]
+}
+
+export const DND_RACE_NAMES: Readonly<Record<string, RaceNameData>> = {
+  'dragonborn': {
+    male: ['Arjhan', 'Balasar', 'Bharash', 'Donaar', 'Ghesh', 'Heskan', 'Kriv', 'Medrash', 'Mehen', 'Nadarr', 'Pandjed', 'Patrin', 'Rhogar', 'Shamash', 'Shedinn'],
+    female: ['Akra', 'Biri', 'Daar', 'Farideh', 'Harann', 'Havilar', 'Jheri', 'Kava', 'Korinn', 'Mishann', 'Nala', 'Perra', 'Raiann', 'Sora', 'Surina'],
+    clan: ['Clethtinthiallor', 'Daardendrian', 'Delmirev', 'Drachedandion', 'Fenkenkabradon', 'Kepeshkmolik', 'Kerrhylon', 'Kimbatuul', 'Linxakasendalor', 'Myastan'],
+  },
+  'dwarf': {
+    male: ['Adrik', 'Alberich', 'Baern', 'Barendd', 'Brottor', 'Bruenor', 'Dain', 'Darrak', 'Delg', 'Eberk', 'Einkil', 'Fargrim', 'Flint', 'Gardain', 'Harbek'],
+    female: ['Amber', 'Artin', 'Audhild', 'Bardryn', 'Dagnal', 'Diesa', 'Eldeth', 'Falkrunn', 'Finellen', 'Gunnloda', 'Gurdis', 'Helja', 'Hlin', 'Kathra', 'Kristryd'],
+    clan: ['Balderk', 'Dankil', 'Gorunn', 'Holderhek', 'Loderr', 'Lutgehr', 'Rumnaheim', 'Strakeln', 'Torunn', 'Ungart'],
+  },
+  'elf': {
+    male: ['Adran', 'Aelar', 'Aramil', 'Arannis', 'Aust', 'Beiro', 'Berrian', 'Carric', 'Enialis', 'Erdan', 'Erevan', 'Galinndan', 'Hadarai', 'Heian', 'Himo'],
+    female: ['Adrie', 'Althaea', 'Anastrianna', 'Andraste', 'Antinua', 'Bethrynna', 'Birel', 'Caelynn', 'Drusilia', 'Enna', 'Felosial', 'Ielenia', 'Jelenneth', 'Keyleth', 'Leshanna'],
+    clan: ['Amakiir', 'Amastacia', 'Galanodel', 'Holimion', 'Ilphelkiir', 'Liadon', 'Meliamne', 'Nailo', 'Siannodel', 'Xiloscient'],
+  },
+  'gnome': {
+    male: ['Alston', 'Alvyn', 'Boddynock', 'Brocc', 'Burgell', 'Dimble', 'Eldon', 'Erky', 'Fonkin', 'Frug', 'Gerbo', 'Gimble', 'Glim', 'Jebeddo', 'Kellen'],
+    female: ['Bimpnottin', 'Breena', 'Caramip', 'Carlin', 'Donella', 'Duvamil', 'Ella', 'Ellyjobell', 'Ellywick', 'Lilli', 'Loopmottin', 'Lorilla', 'Mardnab', 'Nissa', 'Nyx'],
+    clan: ['Beren', 'Daergel', 'Folkor', 'Garrick', 'Nackle', 'Murnig', 'Ningel', 'Raulnor', 'Scheppen', 'Timbers'],
+  },
+  'half-elf': {
+    male: ['Adran', 'Aramil', 'Beiro', 'Carric', 'Erdan', 'Galinndan', 'Hadarai', 'Immeral', 'Ivellios', 'Laucian', 'Mindartis', 'Paelias', 'Peren', 'Quarion', 'Riardon'],
+    female: ['Adrie', 'Althaea', 'Andraste', 'Caelynn', 'Drusilia', 'Felosial', 'Ielenia', 'Jelenneth', 'Keyleth', 'Leshanna', 'Lia', 'Mialee', 'Naivara', 'Quelenna', 'Quillathe'],
+    clan: ['Brightwood', 'Evenwood', 'Farleaf', 'Galanodel', 'Holimion', 'Moonshadow', 'Nailo', 'Siannodel', 'Silverfrond', 'Windriver'],
+  },
+  'half-orc': {
+    male: ['Dench', 'Feng', 'Gell', 'Henk', 'Holg', 'Imsh', 'Keth', 'Krusk', 'Mhurren', 'Ront', 'Shump', 'Thokk', 'Urtra', 'Volen', 'Yargath'],
+    female: ['Baggi', 'Emen', 'Engong', 'Kansif', 'Myev', 'Neega', 'Ovak', 'Ownka', 'Shautha', 'Sutha', 'Vola', 'Volen', 'Yevelda', 'Zharra', 'Zovak'],
+    clan: ['Bloodfist', 'Dreadblade', 'Grimtusk', 'Ironhide', 'Marrowsmasher', 'Ragebringer', 'Skullcrusher', 'Stoneback', 'Thunderstep', 'Warchief'],
+  },
+  'halfling': {
+    male: ['Alton', 'Ander', 'Cade', 'Corrin', 'Eldon', 'Errich', 'Finnan', 'Garret', 'Lindal', 'Lyle', 'Merric', 'Milo', 'Osborn', 'Perrin', 'Reed'],
+    female: ['Andry', 'Bree', 'Callie', 'Cora', 'Euphemia', 'Jillian', 'Kithri', 'Lavinia', 'Lidda', 'Merla', 'Nedda', 'Paela', 'Portia', 'Seraphina', 'Shaena'],
+    clan: ['Brushgather', 'Goodbarrel', 'Greenbottle', 'High-hill', 'Hilltopple', 'Leagallow', 'Tealeaf', 'Thorngage', 'Tosscobble', 'Underbough'],
+  },
+  'human': {
+    male: ['Ander', 'Blath', 'Bram', 'Frath', 'Geth', 'Lander', 'Luth', 'Malcer', 'Stor', 'Taman', 'Urth', 'Aldric', 'Cedric', 'Edrick', 'Gareth'],
+    female: ['Amafrey', 'Betha', 'Cefrey', 'Kethra', 'Mara', 'Olga', 'Silifrey', 'Westra', 'Aldara', 'Brenna', 'Calla', 'Dara', 'Elara', 'Freya', 'Greta'],
+    clan: ['Brightmantle', 'Crownsilver', 'Dundragon', 'Eaglecloak', 'Goldvein', 'Hammerfall', 'Ironforge', 'Lionmane', 'Proudmoore', 'Stoneheart'],
+  },
+  'tiefling': {
+    male: ['Akmenos', 'Amnon', 'Barakas', 'Damakos', 'Ekemon', 'Iados', 'Kairon', 'Leucis', 'Melech', 'Mordai', 'Morthos', 'Pelaios', 'Skamos', 'Therai', 'Zovvak'],
+    female: ['Akta', 'Anakis', 'Bryseis', 'Criella', 'Damaia', 'Ea', 'Kallista', 'Lerissa', 'Makaria', 'Nemeia', 'Orianna', 'Phelaia', 'Rieta', 'Tanis', 'Zelaia'],
+    clan: ['Bloodthorn', 'Darkfire', 'Embersoul', 'Grimhallow', 'Hellborn', 'Infernus', 'Nightshade', 'Shadowflame', 'Soulreaper', 'Voidwalker'],
+  },
+}
+
+export function getBaseRaceId(raceId: string): string {
+  // Direct match first
+  if (raceId in DND_RACE_NAMES) return raceId
+
+  // Special cases for race IDs without dashes
+  if (raceId === 'halfelf') return 'half-elf'
+  if (raceId === 'halforc') return 'half-orc'
+
+  // Subrace IDs: check first segment before the first dash
+  const firstSegment = raceId.split('-')[0]
+  if (firstSegment && firstSegment in DND_RACE_NAMES) return firstSegment
+
+  return raceId
+}
+
+export function generateCharacterName(raceId: string, gender: DndGender): string {
+  const baseId = getBaseRaceId(raceId)
+  const raceData = DND_RACE_NAMES[baseId]
+  if (!raceData) return ''
+
+  const firstNames = raceData[gender]
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
+  const clanName = raceData.clan[Math.floor(Math.random() * raceData.clan.length)]
+
+  return `${firstName} ${clanName}`
+}

@@ -19,7 +19,7 @@ INSERT INTO campaigns (id, name, description, setting) VALUES
 
 INSERT INTO characters (
     id, campaign_id, name, character_type, player_name, race, class, subclass,
-    level, background, alignment, hit_points_max, hit_points_current, armor_class,
+    level, background, alignment, gender, hit_points_max, hit_points_current, armor_class,
     speed, proficiency_bonus, abilities, personality_traits, ideals, bonds, flaws,
     appearance, backstory
 ) VALUES
@@ -35,6 +35,7 @@ INSERT INTO characters (
     1,
     'Soldier',
     'Lawful Good',
+    'male',
     12,
     12,
     16,
@@ -60,6 +61,7 @@ INSERT INTO characters (
     1,
     'Sage',
     'Chaotic Good',
+    'female',
     6,
     6,
     12,
@@ -79,7 +81,7 @@ INSERT INTO characters (
 -- ============================================================================
 
 INSERT INTO characters (
-    id, campaign_id, name, character_type, race, class, level, alignment,
+    id, campaign_id, name, character_type, race, class, level, alignment, gender,
     appearance, backstory
 ) VALUES
 (
@@ -91,6 +93,7 @@ INSERT INTO characters (
     'Fighter',
     2,
     'Lawful Good',
+    'male',
     'A weathered human in his 50s with a graying beard and a missing arm (lost in battle with goblins).',
     'A former adventurer and mercenary who now works as a merchant lord. Seeks the party''s aid in finding Gundren Rockseeker.'
 ),
@@ -103,6 +106,7 @@ INSERT INTO characters (
     'Fighter',
     3,
     'Chaotic Evil',
+    'male',
     'A large goblin with battle scars and a cruel sneer. Wears armor fashioned from dark iron.',
     'The leader of the goblin tribe that captured Gundren. A cunning and brutal warlord.'
 );

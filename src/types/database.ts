@@ -120,6 +120,7 @@ export interface Character {
   is_npc: boolean | null
   is_active: boolean
   status: 'draft' | 'ready'
+  gender: 'male' | 'female' | null
 }
 
 // Combat participant

@@ -17,6 +17,7 @@ interface BuilderPayload {
   level: number;
   background: string | null;
   alignment: string | null;
+  gender: 'male' | 'female' | null;
   hit_points_max: number;
   hit_points_current: number;
   armor_class: number;

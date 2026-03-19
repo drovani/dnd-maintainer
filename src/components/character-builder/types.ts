@@ -11,6 +11,7 @@ export interface CharacterData {
   background: string
   custom_background: string
   alignment: string
+  gender: 'male' | 'female' | ''
 
   // Abilities
   abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
