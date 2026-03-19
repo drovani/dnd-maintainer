@@ -1,5 +1,5 @@
 import { type DndGender } from '@/lib/dnd-helpers'
-import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
 
 interface GenderToggleProps {
@@ -10,21 +10,17 @@ interface GenderToggleProps {
 
 export function GenderToggle({ value, onChange, error }: GenderToggleProps) {
   return (
-    <div className={cn('flex gap-2', error && 'rounded-md border border-destructive p-1')}>
-      <Button
-        type="button"
-        variant={value === 'male' ? 'default' : 'outline'}
-        onClick={() => onChange('male')}
-      >
-        Male
-      </Button>
-      <Button
-        type="button"
-        variant={value === 'female' ? 'default' : 'outline'}
-        onClick={() => onChange('female')}
-      >
-        Female
-      </Button>
-    </div>
+    <ToggleGroup
+      value={value ? [value] : []}
+      onValueChange={(values) => {
+        const selected = values[0] as DndGender | undefined
+        if (selected) onChange(selected)
+      }}
+      className={cn(error && 'rounded-md border border-destructive p-1')}
+      variant="outline"
+    >
+      <ToggleGroupItem value="male">Male</ToggleGroupItem>
+      <ToggleGroupItem value="female">Female</ToggleGroupItem>
+    </ToggleGroup>
   )
 }
