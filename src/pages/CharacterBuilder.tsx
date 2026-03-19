@@ -492,82 +492,82 @@ export default function CharacterBuilder() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Race</Label>
-          <Select
-            value={characterData.race}
-            onValueChange={(value) => value && updateBasics({ race: value })}
-            items={DND_RACES.map((r) => ({ value: r.id, label: r.name }))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false}>
-              {DND_RACE_GROUPS.map((group) => (
-                <SelectGroup key={group.label}>
-                  {group.options.length > 1 && <SelectLabel>{group.label}</SelectLabel>}
-                  {group.options.map((option) => {
-                    const race = DND_RACES.find((r) => r.name === option.label)
-                    if (!race) return null
-                    return (
-                      <SelectItem key={race.id} value={race.id} className={group.options.length > 1 ? 'pl-4' : ''}>
-                        {option.label}
-                      </SelectItem>
-                    )
-                  })}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Race</Label>
+            <Select
+              value={characterData.race}
+              onValueChange={(value) => value && updateBasics({ race: value })}
+              items={DND_RACES.map((r) => ({ value: r.id, label: r.name }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {DND_RACE_GROUPS.map((group) => (
+                  <SelectGroup key={group.label}>
+                    {group.options.length > 1 && <SelectLabel>{group.label}</SelectLabel>}
+                    {group.options.map((option) => {
+                      const race = DND_RACES.find((r) => r.name === option.label)
+                      if (!race) return null
+                      return (
+                        <SelectItem key={race.id} value={race.id} className={group.options.length > 1 ? 'pl-4' : ''}>
+                          {option.label}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label>Class</Label>
-          <Select
-            value={characterData.class}
-            onValueChange={(value) => value && updateBasics({ class: value })}
-            items={DND_CLASSES.map((c) => ({ value: c.id, label: c.name }))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DND_CLASSES.map((cls) => (
-                <SelectItem key={cls.id} value={cls.id}>
-                  {cls.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+          <div className="space-y-2">
+            <Label>Class</Label>
+            <Select
+              value={characterData.class}
+              onValueChange={(value) => value && updateBasics({ class: value })}
+              items={DND_CLASSES.map((c) => ({ value: c.id, label: c.name }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_CLASSES.map((cls) => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Background</Label>
-          <Select
-            value={characterData.background}
-            onValueChange={(value) => value && updateBasics({ background: value })}
-            items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: b.name }))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DND_BACKGROUNDS.map((bg) => (
-                <SelectItem key={bg.id} value={bg.id}>
-                  {bg.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <Label>Background</Label>
+            <Select
+              value={characterData.background}
+              onValueChange={(value) => value && updateBasics({ background: value })}
+              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: b.name }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_BACKGROUNDS.map((bg) => (
+                  <SelectItem key={bg.id} value={bg.id}>
+                    {bg.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">
           <Label>Alignment</Label>
-          <div className="grid grid-cols-3 gap-1.5">
-            {(['Lawful', 'Neutral', 'Chaotic'] as const).map((ethic) =>
-              (['Good', 'Neutral', 'Evil'] as const).map((moral) => {
+          <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-border">
+            {(['Good', 'Neutral', 'Evil'] as const).map((moral) =>
+              (['Lawful', 'Neutral', 'Chaotic'] as const).map((ethic) => {
                 const alignment = DND_ALIGNMENTS.find(
                   (a) => a.name === (ethic === 'Neutral' && moral === 'Neutral' ? 'True Neutral' : `${ethic} ${moral}`)
                 )
@@ -581,11 +581,10 @@ export default function CharacterBuilder() {
                     type="button"
                     title={alignment.name}
                     onClick={() => updateBasics({ alignment: alignment.id })}
-                    className={`flex flex-col items-center justify-center rounded-md border-2 px-1 py-2 text-sm transition-colors cursor-pointer ${
-                      isSelected
-                        ? 'border-primary bg-primary/10 font-medium'
-                        : 'border-border hover:border-primary/50'
-                    }`}
+                    className={`flex flex-col items-center justify-center border-r border-b border-border px-1 py-1 text-sm transition-colors cursor-pointer last-of-type:border-r-0 nth-[3n]:border-r-0 ${isSelected
+                      ? 'bg-primary/10 font-medium'
+                      : 'hover:bg-muted/50'
+                      }`}
                   >
                     <span className="leading-tight">{topLabel}</span>
                     <span className="leading-tight">{bottomLabel}</span>
@@ -608,26 +607,6 @@ export default function CharacterBuilder() {
           />
         </div>
       )}
-
-      {/* Calculated stats preview */}
-      <div className="flex gap-4 pt-2">
-        <Card>
-          <CardContent className="px-4 py-2 text-center">
-            <p className="text-xs text-muted-foreground">Max HP</p>
-            <p className="text-lg font-bold">{calculatedHp}</p>
-            <p className="text-xs text-muted-foreground">
-              1d{selectedClass?.hitDie ?? 8} + {conModifier >= 0 ? '+' : ''}{conModifier} CON
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="px-4 py-2 text-center">
-            <p className="text-xs text-muted-foreground">Armor Class</p>
-            <p className="text-lg font-bold">{calculatedAc}</p>
-            <p className="text-xs text-muted-foreground">base (no armor)</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 
