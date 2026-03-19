@@ -78,25 +78,26 @@ export default function CharacterBuilder() {
   const buildPayload = () => {
     if (!campaignId) throw new Error('Cannot save: no campaign ID in URL')
     return {
-    campaign_id: campaignId,
-    name: characterData.name, character_type: characterData.character_type,
-    player_name: characterData.player_name || null,
-    race: selectedRace?.name ?? null, class: selectedClass?.name ?? null,
-    subclass: null, level: characterData.level,
-    background: characterData.custom_background || characterData.background || null,
-    alignment: characterData.alignment || null,
-    hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
-    speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
-    saving_throws: Object.fromEntries(
-      (selectedClass?.savingThrowProficiencies ?? []).map((a) => [ABILITY_NAME_TO_KEY[a], { proficient: true }])
-    ),
-    skills: characterData.skills, features: characterData.features,
-    equipment: characterData.equipment, spells: characterData.spells,
-    personality_traits: characterData.personalityTraits || null,
-    ideals: characterData.ideals || null, bonds: characterData.bonds || null,
-    flaws: characterData.flaws || null, appearance: characterData.appearance || null,
-    backstory: characterData.backstory || null, notes: null,
-  }}
+      campaign_id: campaignId,
+      name: characterData.name, character_type: characterData.character_type,
+      player_name: characterData.player_name || null,
+      race: selectedRace?.name ?? null, class: selectedClass?.name ?? null,
+      subclass: null, level: characterData.level,
+      background: characterData.custom_background || characterData.background || null,
+      alignment: characterData.alignment || null,
+      hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
+      speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
+      saving_throws: Object.fromEntries(
+        (selectedClass?.savingThrowProficiencies ?? []).map((a) => [ABILITY_NAME_TO_KEY[a], { proficient: true }])
+      ),
+      skills: characterData.skills, features: characterData.features,
+      equipment: characterData.equipment, spells: characterData.spells,
+      personality_traits: characterData.personalityTraits || null,
+      ideals: characterData.ideals || null, bonds: characterData.bonds || null,
+      flaws: characterData.flaws || null, appearance: characterData.appearance || null,
+      backstory: characterData.backstory || null, notes: null,
+    }
+  }
 
   const validateStep = (step: StepType) => {
     setFieldErrors((prev) => {

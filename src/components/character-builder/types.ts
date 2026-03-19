@@ -40,7 +40,8 @@ export interface CharacterData {
   bonds: string
   flaws: string
   appearance: string
-  backstory: string}
+  backstory: string
+}
 
 export const ABILITY_NAMES: Record<keyof AbilityScores, string> = {
   str: 'Strength',
