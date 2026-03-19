@@ -125,8 +125,8 @@ export function BasicsStep({
               title={!race || !gender ? 'Select race and gender first' : 'Generate random name'}
               onClick={() => {
                 if (!race || !gender) return;
-                const name = generateCharacterName(race, gender as DndGender);
-                if (name) onChange({ name });
+                const generatedName = generateCharacterName(race, gender as DndGender);
+                if (generatedName) onChange({ name: generatedName });
               }}
             >
               <Wand2 className="size-4" />
