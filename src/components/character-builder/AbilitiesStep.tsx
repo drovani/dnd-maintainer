@@ -22,7 +22,7 @@ import {
   STANDARD_ARRAY,
 } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
-import { ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ABILITY_NAMES } from './types'
 import type { CharacterData } from './types'
@@ -71,6 +71,22 @@ export function AbilitiesStep({
 
   const assignAbilityScore = (ability: keyof AbilityScores, value: number | null) => {
     const newAssignments = { ...abilityAssignments, [ability]: value }
+    // Only unassign a conflict if the value is used more times than it appears in the pool
+    if (value !== null) {
+      const pool = abilityMethod === 'standard-array' ? STANDARD_ARRAY : rolledValues
+      const poolCount = pool.filter((v) => v === value).length
+      const assignedCount = Object.entries(newAssignments)
+        .filter(([, val]) => val === value).length
+      if (assignedCount > poolCount) {
+        // Unassign the first other ability that has this value
+        for (const key of Object.keys(newAssignments)) {
+          if (key !== ability && newAssignments[key] === value) {
+            newAssignments[key] = null
+            break
+          }
+        }
+      }
+    }
     const newAbilities = { ...abilities }
     for (const key of Object.keys(newAbilities) as Array<keyof typeof newAbilities>) {
       newAbilities[key] = (newAssignments[key] as number) ?? 10
@@ -165,10 +181,12 @@ export function AbilitiesStep({
 
   const renderAssignmentSelect = (ability: keyof AbilityScores, availableValues: readonly number[]) => {
     const currentValue = abilityAssignments[ability]
-    const assignedValues = Object.entries(abilityAssignments)
-      .filter(([key, val]) => key !== ability && val !== null)
-      .map(([, val]) => val as number)
-    const options = availableValues.filter((v) => !assignedValues.includes(v) || v === currentValue)
+    const options = [...new Set(availableValues)].sort((a, b) => b - a)
+    const assignedByOthers = new Set(
+      Object.entries(abilityAssignments)
+        .filter(([key, val]) => key !== ability && val !== null)
+        .map(([, val]) => val as number)
+    )
 
     return (
       <Select
@@ -181,7 +199,12 @@ export function AbilitiesStep({
         <SelectContent>
           {options.map((v) => (
             <SelectItem key={v} value={String(v)}>
-              {v}
+              <span className="flex items-center justify-between w-full">
+                {v}
+                {assignedByOthers.has(v) && v !== currentValue && (
+                  <Check className="size-3 text-muted-foreground" />
+                )}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -318,7 +341,10 @@ export function AbilitiesStep({
           {(rollValues.length > 0) && (
             <div className="flex gap-1.5">
               {rollValues.map((v, i) => {
-                const isAssigned = !isRolling && Object.values(abilityAssignments).includes(v)
+                // Count how many of this value are assigned vs how many appear up to and including this index
+                const assignedCount = !isRolling ? Object.values(abilityAssignments).filter((a) => a === v).length : 0
+                const poolCountUpToHere = rollValues.slice(0, i + 1).filter((rv) => rv === v).length
+                const isAssigned = assignedCount >= poolCountUpToHere
                 return (
                   <Badge
                     key={i}
