@@ -655,6 +655,29 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
   },
 }
 
+export interface DndCondition {
+  readonly id: string
+  readonly name: string
+  readonly effects: string
+}
+
+export const DND_CONDITIONS: readonly DndCondition[] = [
+  { id: 'blinded', name: 'Blinded', effects: 'Cannot see. Automatic miss on attacks. Attacks against you have advantage.' },
+  { id: 'charmed', name: 'Charmed', effects: 'Cannot attack the charmer. Charmer has advantage on social checks against you.' },
+  { id: 'deafened', name: 'Deafened', effects: 'Cannot hear. Automatic fail on any check requiring hearing.' },
+  { id: 'frightened', name: 'Frightened', effects: 'Disadvantage on attack rolls and ability checks. Cannot move closer to source.' },
+  { id: 'grappled', name: 'Grappled', effects: 'Speed becomes 0. Cannot benefit from bonuses to speed. Ends if grappler is incapacitated.' },
+  { id: 'incapacitated', name: 'Incapacitated', effects: 'Cannot take actions or reactions.' },
+  { id: 'invisible', name: 'Invisible', effects: 'Cannot be seen. Attacks against you have disadvantage. Your attacks have advantage.' },
+  { id: 'paralyzed', name: 'Paralyzed', effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.' },
+  { id: 'petrified', name: 'Petrified', effects: 'Turned to stone along with nonmagical objects. Cannot move or speak.' },
+  { id: 'poisoned', name: 'Poisoned', effects: 'Disadvantage on attack rolls and ability checks.' },
+  { id: 'prone', name: 'Prone', effects: 'Melee attack rolls against you have advantage. Ranged attacks have disadvantage.' },
+  { id: 'restrained', name: 'Restrained', effects: 'Speed becomes 0. Disadvantage on attack rolls. Attacks against you have advantage.' },
+  { id: 'stunned', name: 'Stunned', effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.' },
+  { id: 'unconscious', name: 'Unconscious', effects: 'Cannot move or wake unless someone uses action. Attacks have advantage.' },
+]
+
 export function getBaseRaceId(raceId: string): string {
   // Direct match first
   if (raceId in DND_RACE_NAMES) return raceId

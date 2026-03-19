@@ -154,7 +154,11 @@
       "quickStats": "Quick stats: {{count}} combatants",
       "none": "None",
       "player": "Player",
-      "ko": "KO"
+      "ko": "KO",
+      "namePlaceholder": "Name",
+      "initiativePlaceholder": "Init",
+      "hpPlaceholder": "HP",
+      "acPlaceholder": "AC"
     },
     "generators": {
       "nameGenerator": "Name Generator",

@@ -1,4 +1,4 @@
-import { DND_RACE_NAMES, generateCharacterName, type DndGender } from '@/lib/dnd-helpers'
+import { DND_CONDITIONS, DND_RACE_NAMES, generateCharacterName, type DndGender } from '@/lib/dnd-helpers'
 import { GenderToggle } from '@/components/ui/gender-toggle'
 import { supabase } from '@/lib/supabase'
 import { Character, Combatant } from '@/types/database'
@@ -23,6 +23,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 type TabType = 'initiative' | 'generators' | 'reference'
@@ -38,7 +39,40 @@ interface InitiativeState {
   combatants: InitiativeTrackerCombatant[]
 }
 
+interface MonsterEntry {
+  name: string
+  cr: number
+}
+
+interface ActionEntry {
+  name: string
+  description: string
+}
+
+interface CoverRuleEntry {
+  type: string
+  ac: string
+  description: string
+}
+
+interface DcTableEntry {
+  dc: number
+  difficulty: string
+}
+
+interface TravelPaceEntry {
+  pace: string
+  miles_hour: string
+  miles_day: string
+}
+
+interface ExhaustionEntry {
+  level: number
+  effect: string
+}
+
 export default function DmToolkit() {
+  const { t } = useTranslation(['toolkit', 'gamedata', 'common'])
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState<TabType>('initiative')
 
@@ -138,124 +172,57 @@ export default function DmToolkit() {
     },
   })
 
-  // Generator Functions
+  // Generator Data (from translations)
   const lootTables = {
     '1-4': {
       gold: [10, 25, 50, 75, 100],
       silver: [20, 50, 100, 150, 200],
-      items: [
-        'Potion of Healing',
-        'Scroll of Magic Missile',
-        'Small Shield',
-        'Rope (50ft)',
-        'Lantern',
-      ],
+      items: t('toolkit:lootTables.1-4.items', { returnObjects: true }) as string[],
     },
     '5-10': {
       gold: [100, 250, 500, 750, 1000],
       silver: [100, 250, 500, 750, 1000],
-      items: [
-        'Potion of Healing',
-        'Scroll of Cure Wounds',
-        '+1 Weapon',
-        'Wand of Magic Missiles',
-        'Cloak of Protection',
-      ],
+      items: t('toolkit:lootTables.5-10.items', { returnObjects: true }) as string[],
     },
     '11-16': {
       gold: [500, 1000, 2500, 5000, 7500],
       silver: [500, 1000, 2500, 5000, 7500],
-      items: [
-        'Potion of Greater Healing',
-        '+2 Weapon',
-        'Robe of the Archmagi',
-        'Wand of Fireballs',
-        'Ring of Protection',
-      ],
+      items: t('toolkit:lootTables.11-16.items', { returnObjects: true }) as string[],
     },
     '17+': {
       gold: [5000, 10000, 25000, 50000, 100000],
       silver: [5000, 10000, 25000, 50000, 100000],
-      items: [
-        'Potion of Supreme Healing',
-        '+3 Weapon',
-        'Staff of Power',
-        'Deck of Many Things',
-        'Artifact',
-      ],
+      items: t('toolkit:lootTables.17+.items', { returnObjects: true }) as string[],
     },
   }
 
-  const tavernNames = {
-    adjectives: [
-      'Prancing',
-      'Dancing',
-      'Silver',
-      'Golden',
-      'Rusty',
-      'Broken',
-      'Weary',
-    ],
-    nouns: [
-      'Pony',
-      'Griffin',
-      'Dragon',
-      'Sword',
-      'Shield',
-      'Flagon',
-      'Bottle',
-    ],
-  }
+  const tavernAdjectives = t('toolkit:tavernNames.adjectives', { returnObjects: true }) as string[]
+  const tavernNouns = t('toolkit:tavernNames.nouns', { returnObjects: true }) as string[]
+  const tavernDescriptions = t('toolkit:tavernDescriptions', { returnObjects: true }) as string[]
+  const tavernBarkeepers = t('toolkit:tavernBarkeepers', { returnObjects: true }) as string[]
+  const tavernSpecials = t('toolkit:tavernSpecials', { returnObjects: true }) as string[]
+  const tavernRumors = t('toolkit:tavernRumors', { returnObjects: true }) as string[]
+  const monstersList = t('toolkit:monsters', { returnObjects: true }) as MonsterEntry[]
 
-  const tavernDescriptions = [
-    'A cozy tavern with a roaring fireplace and local patrons',
-    'A bustling tavern filled with merchants and adventurers',
-    'A dimly-lit tavern with suspicious corners and dark secrets',
-    'A rowdy tavern known for brawls and good spirits',
-    'An upscale tavern catering to nobles and wealthy merchants',
-  ]
+  const actionsInCombat = Object.entries(
+    t('toolkit:actions', { returnObjects: true }) as Record<string, ActionEntry>
+  ).map(([id, action]) => ({ id, ...action }))
 
-  const tavernBarkeepers = [
-    'Moira Ironbrew',
-    'Thorg Stonefist',
-    'Elara Brightwood',
-    'Caldus Blackthorne',
-    'Rosie Thistlebottom',
-  ]
+  const coverRules = Object.values(
+    t('toolkit:coverRules', { returnObjects: true }) as Record<string, CoverRuleEntry>
+  )
 
-  const tavernSpecials = [
-    'Spiced mead and hearty stew',
-    'Roasted pheasant with mushroom sauce',
-    'Fresh bread and aged cheese selection',
-    'Smoked fish and pickled vegetables',
-    'Thick ale and warm meat pie',
-  ]
+  const dcTable = Object.values(
+    t('toolkit:dcTable', { returnObjects: true }) as Record<string, DcTableEntry>
+  )
 
-  const tavernRumors = [
-    'A strange figure was seen heading toward the old ruins',
-    'Bandits have been spotted on the eastern road',
-    'The local lord seeks capable adventurers for a secret task',
-    'A merchant caravan went missing last week',
-    'Magic has been acting strangely in these lands',
-  ]
+  const travelPace = Object.values(
+    t('toolkit:travelPace', { returnObjects: true }) as Record<string, TravelPaceEntry>
+  )
 
-  const monstersList = [
-    { name: 'Goblin', cr: 0.125 },
-    { name: 'Orc', cr: 0.5 },
-    { name: 'Bandit', cr: 0.125 },
-    { name: 'Cultist', cr: 0.125 },
-    { name: 'Zombie', cr: 0.25 },
-    { name: 'Skeleton', cr: 0.25 },
-    { name: 'Troll', cr: 5 },
-    { name: 'Wyvern', cr: 6 },
-    { name: 'Dragon Wyrmling', cr: 2 },
-    { name: 'Chimera', cr: 6 },
-    { name: 'Hill Giant', cr: 5 },
-    { name: 'Black Pudding', cr: 4 },
-    { name: 'Beholder', cr: 13 },
-    { name: 'Demon Lord', cr: 20 },
-    { name: 'Ancient Red Dragon', cr: 24 },
-  ]
+  const exhaustionLevels = Object.values(
+    t('toolkit:exhaustionLevels', { returnObjects: true }) as Record<string, ExhaustionEntry>
+  )
 
   // Helper functions
   const getRandomIndex = (arr: unknown[]) =>
@@ -285,13 +252,11 @@ export default function DmToolkit() {
   }
 
   const generateTavern = () => {
-    const adjective = tavernNames.adjectives[getRandomIndex(tavernNames.adjectives)]
-    const noun = tavernNames.nouns[getRandomIndex(tavernNames.nouns)]
+    const adjective = tavernAdjectives[getRandomIndex(tavernAdjectives)]
+    const noun = tavernNouns[getRandomIndex(tavernNouns)]
     const name = `The ${adjective} ${noun}`
-    const description =
-      tavernDescriptions[getRandomIndex(tavernDescriptions)]
-    const barkeeper =
-      tavernBarkeepers[getRandomIndex(tavernBarkeepers)]
+    const description = tavernDescriptions[getRandomIndex(tavernDescriptions)]
+    const barkeeper = tavernBarkeepers[getRandomIndex(tavernBarkeepers)]
     const special = tavernSpecials[getRandomIndex(tavernSpecials)]
     const rumor = tavernRumors[getRandomIndex(tavernRumors)]
 
@@ -451,139 +416,6 @@ export default function DmToolkit() {
     })
   }
 
-  // Reference Data
-  const conditions = [
-    {
-      name: 'Blinded',
-      effects: 'Cannot see. Automatic miss on attacks. Attacks against you have advantage.',
-    },
-    {
-      name: 'Charmed',
-      effects: 'Cannot attack the charmer. Charmer has advantage on social checks against you.',
-    },
-    {
-      name: 'Deafened',
-      effects: 'Cannot hear. Automatic fail on any check requiring hearing.',
-    },
-    {
-      name: 'Frightened',
-      effects: 'Disadvantage on attack rolls and ability checks. Cannot move closer to source.',
-    },
-    {
-      name: 'Grappled',
-      effects: 'Speed becomes 0. Cannot benefit from bonuses to speed. Ends if grappler is incapacitated.',
-    },
-    {
-      name: 'Incapacitated',
-      effects: 'Cannot take actions or reactions.',
-    },
-    {
-      name: 'Invisible',
-      effects: 'Cannot be seen. Attacks against you have disadvantage. Your attacks have advantage.',
-    },
-    {
-      name: 'Paralyzed',
-      effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.',
-    },
-    {
-      name: 'Petrified',
-      effects: 'Turned to stone along with nonmagical objects. Cannot move or speak.',
-    },
-    {
-      name: 'Poisoned',
-      effects: 'Disadvantage on attack rolls and ability checks.',
-    },
-    {
-      name: 'Prone',
-      effects: 'Melee attack rolls against you have advantage. Ranged attacks have disadvantage.',
-    },
-    {
-      name: 'Restrained',
-      effects: 'Speed becomes 0. Disadvantage on attack rolls. Attacks against you have advantage.',
-    },
-    {
-      name: 'Stunned',
-      effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.',
-    },
-    {
-      name: 'Unconscious',
-      effects: 'Cannot move or wake unless someone uses action. Attacks have advantage.',
-    },
-  ]
-
-  const actionsInCombat = [
-    {
-      name: 'Attack',
-      description: 'Make one melee or ranged attack',
-    },
-    {
-      name: 'Cast a Spell',
-      description: 'Cast a spell with a casting time of 1 action',
-    },
-    {
-      name: 'Dash',
-      description: 'Double your speed for this turn',
-    },
-    {
-      name: 'Disengage',
-      description: 'Opportunity attacks against you have disadvantage',
-    },
-    {
-      name: 'Dodge',
-      description: 'Attack rolls have disadvantage. You make DEX saves with advantage',
-    },
-    {
-      name: 'Help',
-      description: 'Give another creature advantage on next ability check within 1 minute',
-    },
-    {
-      name: 'Hide',
-      description: 'Make a Stealth check. Must be out of sight of enemies',
-    },
-    {
-      name: 'Ready',
-      description: 'Choose a trigger and response for your reaction',
-    },
-    {
-      name: 'Search',
-      description: 'Spend 1 minute searching a 5-foot cube area',
-    },
-    {
-      name: 'Use an Object',
-      description: 'Interact with a second object during your turn',
-    },
-  ]
-
-  const coverRules = [
-    { type: 'Half Cover', ac: '+2', description: 'Behind low wall, furniture, creatures' },
-    { type: '3/4 Cover', ac: '+5', description: 'Behind portcullis, narrow tree trunk' },
-    { type: 'Full Cover', ac: 'Immune', description: 'Complete concealment from attacker' },
-  ]
-
-  const dcTable = [
-    { dc: 5, difficulty: 'Very Easy' },
-    { dc: 10, difficulty: 'Easy' },
-    { dc: 15, difficulty: 'Medium' },
-    { dc: 20, difficulty: 'Hard' },
-    { dc: 25, difficulty: 'Very Hard' },
-    { dc: 30, difficulty: 'Nearly Impossible' },
-  ]
-
-  const travelPace = [
-    { pace: 'Fast', miles_hour: '4 miles', miles_day: '30 miles' },
-    { pace: 'Normal', miles_hour: '3 miles', miles_day: '24 miles' },
-    { pace: 'Slow', miles_hour: '2 miles', miles_day: '18 miles' },
-  ]
-
-  const exhaustionLevels = [
-    { level: 1, effect: 'Disadvantage on ability checks' },
-    { level: 2, effect: 'Speed halved' },
-    { level: 3, effect: 'Disadvantage on attack rolls and saves' },
-    { level: 4, effect: 'Speed reduced to 0' },
-    { level: 5, effect: 'Speed 0, max HP halved' },
-    { level: 6, effect: 'Death' },
-  ]
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -591,7 +423,7 @@ export default function DmToolkit() {
         <div className="max-w-7xl mx-auto px-8 py-6">
           <h1 className="text-4xl font-bold text-foreground flex items-center gap-3 mb-6">
             <Swords className="size-8 text-primary" />
-            DM Toolkit
+            {t('common:dmToolkit.title')}
           </h1>
 
           {/* Tabs */}
@@ -605,7 +437,7 @@ export default function DmToolkit() {
             >
               <div className="flex items-center gap-2">
                 <Swords className="size-5" />
-                Initiative Tracker
+                {t('common:dmToolkit.tabs.initiativeTracker')}
               </div>
             </button>
             <button
@@ -617,7 +449,7 @@ export default function DmToolkit() {
             >
               <div className="flex items-center gap-2">
                 <Dice6 className="size-5" />
-                Generators
+                {t('common:dmToolkit.tabs.generators')}
               </div>
             </button>
             <button
@@ -629,7 +461,7 @@ export default function DmToolkit() {
             >
               <div className="flex items-center gap-2">
                 <BookOpen className="size-5" />
-                Quick Reference
+                {t('common:dmToolkit.tabs.quickReference')}
               </div>
             </button>
           </div>
@@ -645,34 +477,34 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Plus className="size-6 text-primary" />
-                Add Combatant
+                {t('common:dmToolkit.initiative.addCombatant')}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder={t('common:dmToolkit.initiative.namePlaceholder')}
                   value={newCombatantName}
                   onChange={(e) => setNewCombatantName(e.target.value)}
                   className="md:col-span-2 bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
                 <input
                   type="number"
-                  placeholder="Initiative"
+                  placeholder={t('common:dmToolkit.initiative.initiativePlaceholder')}
                   value={newCombatantInit}
                   onChange={(e) => setNewCombatantInit(e.target.value)}
                   className="bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
                 <input
                   type="number"
-                  placeholder="HP"
+                  placeholder={t('common:dmToolkit.initiative.hpPlaceholder')}
                   value={newCombatantHp}
                   onChange={(e) => setNewCombatantHp(e.target.value)}
                   className="bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
                 <input
                   type="number"
-                  placeholder="AC"
+                  placeholder={t('common:dmToolkit.initiative.acPlaceholder')}
                   value={newCombatantAc}
                   onChange={(e) => setNewCombatantAc(e.target.value)}
                   className="bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
@@ -684,7 +516,7 @@ export default function DmToolkit() {
                     onChange={(e) => setNewCombatantIsPlayer(e.target.checked)}
                     className="size-4"
                   />
-                  <span className="text-foreground">Player</span>
+                  <span className="text-foreground">{t('common:dmToolkit.initiative.player')}</span>
                 </label>
               </div>
 
@@ -693,7 +525,7 @@ export default function DmToolkit() {
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
               >
                 <Plus className="size-5" />
-                Add Combatant
+                {t('common:dmToolkit.initiative.addCombatant')}
               </button>
             </div>
 
@@ -702,7 +534,7 @@ export default function DmToolkit() {
               <div className="bg-card border border-border rounded-lg p-6">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                   <Users className="size-5 text-primary" />
-                  Quick Add Party Members
+                  {t('common:dmToolkit.initiative.quickAddPartyMembers')}
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {characters.map((char) => (
@@ -725,17 +557,17 @@ export default function DmToolkit() {
                 <div className="bg-card border border-border rounded-lg p-6">
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="bg-muted/50 rounded-lg p-4">
-                      <p className="text-muted-foreground text-sm mb-2">Round</p>
+                      <p className="text-muted-foreground text-sm mb-2">{t('common:dmToolkit.initiative.round')}</p>
                       <p className="text-4xl font-bold text-primary">
                         {initiativeState.round}
                       </p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-4">
-                      <p className="text-muted-foreground text-sm mb-2">Current Turn</p>
+                      <p className="text-muted-foreground text-sm mb-2">{t('common:dmToolkit.initiative.currentTurn')}</p>
                       <p className="text-2xl font-bold text-primary">
                         {sortedCombatants.length > 0
                           ? sortedCombatants[initiativeState.currentTurn]?.name
-                          : 'None'}
+                          : t('common:dmToolkit.initiative.none')}
                       </p>
                     </div>
                   </div>
@@ -746,14 +578,14 @@ export default function DmToolkit() {
                       className="flex-1 bg-muted hover:bg-muted border border-border rounded-lg py-2 px-4 text-foreground hover:text-primary font-semibold transition-colors flex items-center justify-center gap-2"
                     >
                       <ChevronUp className="size-5" />
-                      Previous Turn
+                      {t('common:buttons.previousTurn')}
                     </button>
                     <button
                       onClick={nextTurn}
                       className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
                       <ChevronDown className="size-5" />
-                      Next Turn
+                      {t('common:buttons.nextTurn')}
                     </button>
                   </div>
                 </div>
@@ -761,11 +593,11 @@ export default function DmToolkit() {
                 {/* Combatants List */}
                 <div className="bg-card border border-border rounded-lg p-6">
                   <h3 className="text-lg font-bold text-foreground mb-4">
-                    Initiative Order ({sortedCombatants.length})
+                    {t('common:dmToolkit.initiative.initiativeOrder', { count: sortedCombatants.length })}
                   </h3>
 
                   {sortedCombatants.length === 0 ? (
-                    <p className="text-muted-foreground italic">No combatants added yet</p>
+                    <p className="text-muted-foreground italic">{t('common:dmToolkit.initiative.noCombatants')}</p>
                   ) : (
                     <div className="space-y-3">
                       {sortedCombatants.map((combatant, idx) => (
@@ -804,7 +636,7 @@ export default function DmToolkit() {
                           <div className="space-y-3 mb-3">
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-muted-foreground text-sm">HP</span>
+                                <span className="text-muted-foreground text-sm">{t('common:dmToolkit.initiative.hp')}</span>
                                 <span className="text-foreground font-bold">
                                   {combatant.currentHp} / {combatant.hit_points}
                                 </span>
@@ -853,14 +685,14 @@ export default function DmToolkit() {
                                 }
                                 className="flex-1 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-700/40 rounded px-3 py-1 text-purple-400 text-sm font-semibold transition-colors"
                               >
-                                KO
+                                {t('common:dmToolkit.initiative.ko')}
                               </button>
                             </div>
                           </div>
 
                           {/* Conditions */}
                           <div className="space-y-2">
-                            <p className="text-muted-foreground text-sm">Conditions</p>
+                            <p className="text-muted-foreground text-sm">{t('common:dmToolkit.initiative.conditions')}</p>
                             <select
                               onChange={(e) => {
                                 if (e.target.value) {
@@ -873,23 +705,12 @@ export default function DmToolkit() {
                               }}
                               className="w-full bg-muted border border-input rounded px-3 py-1 text-foreground text-sm outline-none focus-visible:border-ring"
                             >
-                              <option value="">Add condition...</option>
-                              <option value="Blinded">Blinded</option>
-                              <option value="Charmed">Charmed</option>
-                              <option value="Deafened">Deafened</option>
-                              <option value="Frightened">Frightened</option>
-                              <option value="Grappled">Grappled</option>
-                              <option value="Incapacitated">
-                                Incapacitated
-                              </option>
-                              <option value="Invisible">Invisible</option>
-                              <option value="Paralyzed">Paralyzed</option>
-                              <option value="Petrified">Petrified</option>
-                              <option value="Poisoned">Poisoned</option>
-                              <option value="Prone">Prone</option>
-                              <option value="Restrained">Restrained</option>
-                              <option value="Stunned">Stunned</option>
-                              <option value="Unconscious">Unconscious</option>
+                              <option value="">{t('common:dmToolkit.initiative.addCondition')}</option>
+                              {DND_CONDITIONS.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {t(`toolkit:conditions.${c.id}.name` as never)}
+                                </option>
+                              ))}
                             </select>
 
                             {combatant.conditions.length > 0 && (
@@ -902,7 +723,7 @@ export default function DmToolkit() {
                                     }
                                     className="bg-purple-900/50 hover:bg-purple-900/70 border border-purple-600/50 rounded px-3 py-1 text-purple-300 text-xs font-semibold transition-colors"
                                   >
-                                    {cond} ×
+                                    {t(`toolkit:conditions.${cond}.name` as never, { defaultValue: cond })} ×
                                   </button>
                                 ))}
                               </div>
@@ -919,7 +740,7 @@ export default function DmToolkit() {
               <div className="bg-card border border-border rounded-lg p-6 h-fit sticky top-24">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                   <Save className="size-5 text-primary" />
-                  Save Encounter
+                  {t('common:dmToolkit.initiative.saveEncounter')}
                 </h3>
 
                 <button
@@ -931,19 +752,19 @@ export default function DmToolkit() {
                   className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors mb-4"
                 >
                   {saveEncounterMutation.isPending
-                    ? 'Saving...'
-                    : 'Save to Campaign'}
+                    ? t('common:buttons.saving')
+                    : t('common:buttons.saveToCampaign')}
                 </button>
 
                 {saveEncounterMutation.isSuccess && (
                   <p className="text-green-600 text-sm text-center">
-                    Encounter saved!
+                    {t('common:dmToolkit.initiative.encounterSaved')}
                   </p>
                 )}
 
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-muted-foreground text-xs mb-4">
-                    Quick stats: {sortedCombatants.length} combatants
+                    {t('common:dmToolkit.initiative.quickStats', { count: sortedCombatants.length })}
                   </p>
                 </div>
               </div>
@@ -964,7 +785,7 @@ export default function DmToolkit() {
                       : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  Name Generator
+                  {t('common:dmToolkit.generators.nameGenerator')}
                 </button>
                 <button
                   onClick={() => setGeneratorTab('loot')}
@@ -973,7 +794,7 @@ export default function DmToolkit() {
                       : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  Loot Generator
+                  {t('common:dmToolkit.generators.lootGenerator')}
                 </button>
                 <button
                   onClick={() => setGeneratorTab('tavern')}
@@ -982,7 +803,7 @@ export default function DmToolkit() {
                       : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  Tavern Generator
+                  {t('common:dmToolkit.generators.tavernGenerator')}
                 </button>
                 <button
                   onClick={() => setGeneratorTab('encounter')}
@@ -991,7 +812,7 @@ export default function DmToolkit() {
                       : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  Encounter Generator
+                  {t('common:dmToolkit.generators.encounterGenerator')}
                 </button>
               </div>
 
@@ -1001,23 +822,26 @@ export default function DmToolkit() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-foreground font-semibold mb-3">
-                        Race
+                        {t('common:dmToolkit.generators.race')}
                       </label>
                       <select
                         value={selectedRace}
                         onChange={(e) => setSelectedRace(e.target.value)}
                         className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                       >
-                        {Object.keys(DND_RACE_NAMES).map((raceId) => (
-                          <option key={raceId} value={raceId}>
-                            {raceId.charAt(0).toUpperCase() + raceId.slice(1).replace(/-/g, ' ')}
-                          </option>
-                        ))}
+                        {Object.keys(DND_RACE_NAMES).map((raceId) => {
+                          const gamedataKey = raceId.replace(/-/g, '')
+                          return (
+                            <option key={raceId} value={raceId}>
+                              {t(`gamedata:raceGroups.${gamedataKey}` as never, { defaultValue: raceId.charAt(0).toUpperCase() + raceId.slice(1).replace(/-/g, ' ') })}
+                            </option>
+                          )
+                        })}
                       </select>
                     </div>
                     <div>
                       <label className="block text-foreground font-semibold mb-3">
-                        Gender
+                        {t('common:dmToolkit.generators.gender')}
                       </label>
                       <GenderToggle
                         value={selectedGender}
@@ -1031,12 +855,12 @@ export default function DmToolkit() {
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <Wand2 className="size-5" />
-                    Generate Name
+                    {t('common:buttons.generateName')}
                   </button>
 
                   {generatedName && (
                     <div className="bg-muted/50 border border-border rounded-lg p-6 text-center">
-                      <p className="text-muted-foreground text-sm mb-2">Generated Name</p>
+                      <p className="text-muted-foreground text-sm mb-2">{t('common:dmToolkit.generators.generatedName')}</p>
                       <p className="text-3xl font-bold text-primary">
                         {generatedName}
                       </p>
@@ -1050,17 +874,18 @@ export default function DmToolkit() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-foreground font-semibold mb-3">
-                      Encounter CR Range
+                      {t('common:dmToolkit.generators.encounterCrRange')}
                     </label>
                     <select
                       value={selectedCR}
                       onChange={(e) => setSelectedCR(e.target.value)}
                       className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                     >
-                      <option value="1-4">CR 1-4</option>
-                      <option value="5-10">CR 5-10</option>
-                      <option value="11-16">CR 11-16</option>
-                      <option value="17+">CR 17+</option>
+                      {Object.entries(
+                        t('toolkit:crRanges', { returnObjects: true }) as Record<string, string>
+                      ).map(([key, label]) => (
+                        <option key={key} value={key}>{label}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -1069,26 +894,26 @@ export default function DmToolkit() {
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <Dice6 className="size-5" />
-                    Generate Loot
+                    {t('common:buttons.generateLoot')}
                   </button>
 
                   {generatedLoot.gold > 0 && (
                     <div className="bg-muted/50 border border-border rounded-lg p-6 space-y-4">
                       <div className="grid grid-cols-3 gap-4">
                         <div className="bg-card rounded-lg p-4 text-center">
-                          <p className="text-yellow-600 text-sm mb-2">Gold</p>
+                          <p className="text-yellow-600 text-sm mb-2">{t('common:dmToolkit.generators.gold')}</p>
                           <p className="text-2xl font-bold text-yellow-400">
                             {generatedLoot.gold}
                           </p>
                         </div>
                         <div className="bg-card rounded-lg p-4 text-center">
-                          <p className="text-gray-400 text-sm mb-2">Silver</p>
+                          <p className="text-gray-400 text-sm mb-2">{t('common:dmToolkit.generators.silver')}</p>
                           <p className="text-2xl font-bold text-gray-300">
                             {generatedLoot.silver}
                           </p>
                         </div>
                         <div className="bg-card rounded-lg p-4 text-center">
-                          <p className="text-orange-700 text-sm mb-2">Copper</p>
+                          <p className="text-orange-700 text-sm mb-2">{t('common:dmToolkit.generators.copper')}</p>
                           <p className="text-2xl font-bold text-orange-400">
                             {generatedLoot.copper}
                           </p>
@@ -1097,7 +922,7 @@ export default function DmToolkit() {
 
                       {generatedLoot.items.length > 0 && (
                         <div className="pt-4 border-t border-border">
-                          <p className="text-muted-foreground text-sm mb-3">Items</p>
+                          <p className="text-muted-foreground text-sm mb-3">{t('common:dmToolkit.generators.items')}</p>
                           <ul className="space-y-2">
                             {generatedLoot.items.map((item, idx) => (
                               <li
@@ -1124,41 +949,41 @@ export default function DmToolkit() {
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <Wand2 className="size-5" />
-                    Generate Tavern
+                    {t('common:buttons.generateTavern')}
                   </button>
 
                   {generatedTavern && (
                     <div className="bg-muted/50 border border-border rounded-lg p-6 space-y-4">
                       <div>
-                        <p className="text-primary text-sm mb-1">Tavern Name</p>
+                        <p className="text-primary text-sm mb-1">{t('common:dmToolkit.generators.tavernName')}</p>
                         <p className="text-2xl font-bold text-foreground">
                           {generatedTavern.name}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-primary text-sm mb-2">Description</p>
+                        <p className="text-primary text-sm mb-2">{t('common:dmToolkit.generators.description')}</p>
                         <p className="text-foreground">
                           {generatedTavern.description}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-primary text-sm mb-1">Barkeeper</p>
+                        <p className="text-primary text-sm mb-1">{t('common:dmToolkit.generators.barkeeper')}</p>
                         <p className="text-foreground font-semibold">
                           {generatedTavern.barkeeper}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-primary text-sm mb-1">Special</p>
+                        <p className="text-primary text-sm mb-1">{t('common:dmToolkit.generators.special')}</p>
                         <p className="text-foreground">
                           {generatedTavern.special}
                         </p>
                       </div>
 
                       <div className="pt-4 border-t border-border">
-                        <p className="text-primary text-sm mb-2">Rumor</p>
+                        <p className="text-primary text-sm mb-2">{t('common:dmToolkit.generators.rumor')}</p>
                         <p className="text-foreground italic">
                           "{generatedTavern.rumor}"
                         </p>
@@ -1174,7 +999,7 @@ export default function DmToolkit() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-foreground font-semibold mb-2 text-sm">
-                        Party Level
+                        {t('common:dmToolkit.generators.partyLevel')}
                       </label>
                       <input
                         type="number"
@@ -1187,7 +1012,7 @@ export default function DmToolkit() {
                     </div>
                     <div>
                       <label className="block text-foreground font-semibold mb-2 text-sm">
-                        Party Size
+                        {t('common:dmToolkit.generators.partySize')}
                       </label>
                       <input
                         type="number"
@@ -1200,7 +1025,7 @@ export default function DmToolkit() {
                     </div>
                     <div>
                       <label className="block text-foreground font-semibold mb-2 text-sm">
-                        Difficulty
+                        {t('common:dmToolkit.generators.difficulty')}
                       </label>
                       <select
                         value={encounterDifficulty}
@@ -1215,10 +1040,11 @@ export default function DmToolkit() {
                         }
                         className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                       >
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                        <option value="deadly">Deadly</option>
+                        {Object.entries(
+                          t('toolkit:encounterDifficulty', { returnObjects: true }) as Record<string, string>
+                        ).map(([key, label]) => (
+                          <option key={key} value={key}>{label}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -1228,13 +1054,13 @@ export default function DmToolkit() {
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <Swords className="size-5" />
-                    Generate Encounter
+                    {t('common:buttons.generateEncounter')}
                   </button>
 
                   {generatedEncounter.length > 0 && (
                     <div className="bg-muted/50 border border-border rounded-lg p-6 space-y-4">
                       <div>
-                        <p className="text-primary text-sm mb-4">Suggested Monsters</p>
+                        <p className="text-primary text-sm mb-4">{t('common:dmToolkit.generators.suggestedMonsters')}</p>
                         <div className="space-y-3">
                           {generatedEncounter.map((monster, idx) => (
                             <div
@@ -1273,36 +1099,36 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <AlertCircle className="size-6 text-primary" />
-                Conditions
+                {t('common:dmToolkit.reference.conditions')}
               </h2>
 
               <div className="space-y-3">
-                {conditions.map((condition) => (
+                {DND_CONDITIONS.map((condition) => (
                   <button
-                    key={condition.name}
+                    key={condition.id}
                     onClick={() =>
                       setExpandedCondition(
-                        expandedCondition === condition.name
+                        expandedCondition === condition.id
                           ? null
-                          : condition.name
+                          : condition.id
                       )
                     }
                     className="w-full text-left bg-muted/50 hover:bg-muted border border-border hover:border-ring/30 rounded-lg p-4 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <h3 className="text-foreground font-semibold">
-                        {condition.name}
+                        {t(`toolkit:conditions.${condition.id}.name` as never)}
                       </h3>
                       <ChevronDown
-                        className={`size-5 text-primary transition-transform ${expandedCondition === condition.name
+                        className={`size-5 text-primary transition-transform ${expandedCondition === condition.id
                             ? 'rotate-180'
                             : ''
                           }`}
                       />
                     </div>
-                    {expandedCondition === condition.name && (
+                    {expandedCondition === condition.id && (
                       <p className="text-muted-foreground text-sm mt-3">
-                        {condition.effects}
+                        {t(`toolkit:conditions.${condition.id}.effects` as never)}
                       </p>
                     )}
                   </button>
@@ -1314,13 +1140,13 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Swords className="size-6 text-primary" />
-                Actions in Combat
+                {t('common:dmToolkit.reference.actionsInCombat')}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {actionsInCombat.map((action) => (
                   <div
-                    key={action.name}
+                    key={action.id}
                     className="bg-muted/50 border border-border rounded-lg p-4"
                   >
                     <h3 className="text-foreground font-semibold mb-2">
@@ -1338,7 +1164,7 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Shield className="size-6 text-primary" />
-                Cover Rules
+                {t('common:dmToolkit.reference.coverRules')}
               </h2>
 
               <div className="space-y-4">
@@ -1369,7 +1195,7 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Target className="size-6 text-primary" />
-                Difficulty Classes
+                {t('common:dmToolkit.reference.difficultyClasses')}
               </h2>
 
               <div className="overflow-x-auto">
@@ -1377,10 +1203,10 @@ export default function DmToolkit() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="px-4 py-3 text-foreground font-semibold">
-                        DC
+                        {t('common:dmToolkit.reference.dc')}
                       </th>
                       <th className="px-4 py-3 text-foreground font-semibold">
-                        Difficulty
+                        {t('common:dmToolkit.reference.difficulty')}
                       </th>
                     </tr>
                   </thead>
@@ -1407,7 +1233,7 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Eye className="size-6 text-primary" />
-                Travel Pace
+                {t('common:dmToolkit.reference.travelPace')}
               </h2>
 
               <div className="overflow-x-auto">
@@ -1415,13 +1241,13 @@ export default function DmToolkit() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="px-4 py-3 text-foreground font-semibold">
-                        Pace
+                        {t('common:dmToolkit.reference.pace')}
                       </th>
                       <th className="px-4 py-3 text-foreground font-semibold">
-                        Per Hour
+                        {t('common:dmToolkit.reference.perHour')}
                       </th>
                       <th className="px-4 py-3 text-foreground font-semibold">
-                        Per Day
+                        {t('common:dmToolkit.reference.perDay')}
                       </th>
                     </tr>
                   </thead>
@@ -1451,7 +1277,7 @@ export default function DmToolkit() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <Zap className="size-6 text-primary" />
-                Exhaustion Levels
+                {t('common:dmToolkit.reference.exhaustionLevels')}
               </h2>
 
               <div className="space-y-3">
@@ -1462,7 +1288,7 @@ export default function DmToolkit() {
                   >
                     <div className="bg-primary/20 rounded-lg px-4 py-2 min-w-fit">
                       <p className="text-primary font-bold text-lg">
-                        Level {level.level}
+                        {t('common:dmToolkit.reference.level', { level: level.level })}
                       </p>
                     </div>
                     <p className="text-foreground">{level.effect}</p>
