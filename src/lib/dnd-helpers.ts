@@ -340,33 +340,34 @@ export const DND_RACES: readonly DndRace[] = [
 ]
 
 export interface DndRaceGroup {
+  id: string
   label: string
   options: Array<{ value: string; label: string }>
 }
 
 export const DND_RACE_GROUPS: DndRaceGroup[] = [
-  { label: 'Dragonborn', options: [{ value: 'Dragonborn', label: 'Dragonborn' }] },
-  { label: 'Dwarf', options: [
-    { value: 'Hill Dwarf', label: 'Hill Dwarf' },
-    { value: 'Mountain Dwarf', label: 'Mountain Dwarf' },
+  { id: 'dragonborn', label: 'Dragonborn', options: [{ value: 'dragonborn', label: 'Dragonborn' }] },
+  { id: 'dwarf', label: 'Dwarf', options: [
+    { value: 'dwarf-hill', label: 'Hill Dwarf' },
+    { value: 'dwarf-mountain', label: 'Mountain Dwarf' },
   ]},
-  { label: 'Elf', options: [
-    { value: 'Dark Elf (Drow)', label: 'Dark Elf (Drow)' },
-    { value: 'High Elf', label: 'High Elf' },
-    { value: 'Wood Elf', label: 'Wood Elf' },
+  { id: 'elf', label: 'Elf', options: [
+    { value: 'elf-dark', label: 'Dark Elf (Drow)' },
+    { value: 'elf-high', label: 'High Elf' },
+    { value: 'elf-wood', label: 'Wood Elf' },
   ]},
-  { label: 'Gnome', options: [
-    { value: 'Forest Gnome', label: 'Forest Gnome' },
-    { value: 'Rock Gnome', label: 'Rock Gnome' },
+  { id: 'gnome', label: 'Gnome', options: [
+    { value: 'gnome-forest', label: 'Forest Gnome' },
+    { value: 'gnome-rock', label: 'Rock Gnome' },
   ]},
-  { label: 'Half-Elf', options: [{ value: 'Half-Elf', label: 'Half-Elf' }] },
-  { label: 'Half-Orc', options: [{ value: 'Half-Orc', label: 'Half-Orc' }] },
-  { label: 'Halfling', options: [
-    { value: 'Lightfoot Halfling', label: 'Lightfoot Halfling' },
-    { value: 'Stout Halfling', label: 'Stout Halfling' },
+  { id: 'halfelf', label: 'Half-Elf', options: [{ value: 'halfelf', label: 'Half-Elf' }] },
+  { id: 'halforc', label: 'Half-Orc', options: [{ value: 'halforc', label: 'Half-Orc' }] },
+  { id: 'halfling', label: 'Halfling', options: [
+    { value: 'halfling-lightfoot', label: 'Lightfoot Halfling' },
+    { value: 'halfling-stout', label: 'Stout Halfling' },
   ]},
-  { label: 'Human', options: [{ value: 'Human', label: 'Human' }] },
-  { label: 'Tiefling', options: [{ value: 'Tiefling', label: 'Tiefling' }] },
+  { id: 'human', label: 'Human', options: [{ value: 'human', label: 'Human' }] },
+  { id: 'tiefling', label: 'Tiefling', options: [{ value: 'tiefling', label: 'Tiefling' }] },
 ]
 
 export const DND_CLASSES: readonly DndClass[] = [

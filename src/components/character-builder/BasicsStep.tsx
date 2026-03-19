@@ -161,7 +161,7 @@ export function BasicsStep({
                   <SelectGroup key={group.label}>
                     {group.options.length > 1 && <SelectLabel>{group.label}</SelectLabel>}
                     {group.options.map((option) => {
-                      const raceItem = DND_RACES.find((r) => r.name === option.label)
+                      const raceItem = DND_RACES.find((r) => r.id === option.value)
                       if (!raceItem) {
                         console.warn(`Race not found for "${option.label}" — check DND_RACES/DND_RACE_GROUPS data sync`)
                         return null

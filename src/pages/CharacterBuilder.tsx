@@ -82,7 +82,7 @@ export default function CharacterBuilder() {
       campaign_id: campaignId,
       name: characterData.name, character_type: characterData.character_type,
       player_name: characterData.player_name || null,
-      race: selectedRace?.name ?? null, class: selectedClass?.name ?? null,
+      race: selectedRace?.id ?? null, class: selectedClass?.id ?? null,
       subclass: null, level: characterData.level,
       background: characterData.custom_background || characterData.background || null,
       alignment: characterData.alignment || null,

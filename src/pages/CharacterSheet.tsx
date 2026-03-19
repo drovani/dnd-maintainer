@@ -3,6 +3,7 @@ import {
   DND_BACKGROUNDS,
   DND_CLASSES,
   DND_RACE_GROUPS,
+  DND_RACES,
   DND_SKILLS,
   getAbilityModifier,
   getProficiencyBonus,
@@ -182,7 +183,8 @@ export default function CharacterSheet() {
             <div>
               <span className="text-muted-foreground">Class</span>
               <p className="text-foreground font-semibold">
-                {character.class}{character.subclass ? ` (${character.subclass})` : ''}
+                {(DND_CLASSES.find((c) => c.id === character.class)?.name ?? character.class)}
+                {character.subclass ? ` (${character.subclass})` : ''}
               </p>
             </div>
             <div>
@@ -191,11 +193,15 @@ export default function CharacterSheet() {
             </div>
             <div>
               <span className="text-muted-foreground">Race</span>
-              <p className="text-foreground font-semibold">{character.race}</p>
+              <p className="text-foreground font-semibold">
+                {DND_RACES.find((r) => r.id === character.race)?.name ?? character.race}
+              </p>
             </div>
             <div>
               <span className="text-muted-foreground">Background</span>
-              <p className="text-foreground font-semibold">{character.background}</p>
+              <p className="text-foreground font-semibold">
+                {DND_BACKGROUNDS.find((b) => b.id === character.background)?.name ?? character.background}
+              </p>
             </div>
             <div>
               <span className="text-muted-foreground">Alignment</span>
