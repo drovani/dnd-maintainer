@@ -1,4 +1,5 @@
 // D&D 5e Helper Functions and Data
+import type { AbilityKey } from '@/types/database'
 
 export function getAbilityModifier(score: number): number {
   return Math.floor((score - 10) / 2)
@@ -201,7 +202,7 @@ export interface DndRace {
   name: string
   size: string
   speed: number
-  abilityBonuses: Record<string, number>
+  abilityBonuses: Partial<Record<AbilityKey, number>>
 }
 
 export interface DndClass {
@@ -212,6 +213,7 @@ export interface DndClass {
   savingThrowProficiencies: AbilityName[]
   spellcastingAbility?: AbilityName
   skillChoices: number
+  /** Skills this class can choose from. null = any skill (e.g., Bard's Jack of All Trades). */
   skillPool: readonly DndSkillName[] | null
 }
 
@@ -236,7 +238,7 @@ export interface DndAlignment {
   shorthand: string
 }
 
-export const DND_RACES: DndRace[] = [
+export const DND_RACES: readonly DndRace[] = [
   {
     id: 'dragonborn',
     name: 'Dragonborn',
@@ -367,7 +369,7 @@ export const DND_RACE_GROUPS: DndRaceGroup[] = [
   { label: 'Tiefling', options: [{ value: 'Tiefling', label: 'Tiefling' }] },
 ]
 
-export const DND_CLASSES: DndClass[] = [
+export const DND_CLASSES: readonly DndClass[] = [
   {
     id: 'barbarian',
     name: 'Barbarian',
@@ -486,7 +488,7 @@ export const DND_CLASSES: DndClass[] = [
   },
 ]
 
-export const DND_SKILLS: DndSkill[] = [
+export const DND_SKILLS: readonly DndSkill[] = [
   { id: 'acrobatics', name: 'Acrobatics', ability: 'Dexterity' },
   { id: 'animalhandling', name: 'Animal Handling', ability: 'Wisdom' },
   { id: 'arcana', name: 'Arcana', ability: 'Intelligence' },
@@ -507,7 +509,7 @@ export const DND_SKILLS: DndSkill[] = [
   { id: 'survival', name: 'Survival', ability: 'Wisdom' },
 ]
 
-export const DND_BACKGROUNDS: DndBackground[] = [
+export const DND_BACKGROUNDS: readonly DndBackground[] = [
   { id: 'acolyte', name: 'Acolyte' },
   { id: 'charlatan', name: 'Charlatan' },
   { id: 'criminal', name: 'Criminal' },
@@ -524,7 +526,7 @@ export const DND_BACKGROUNDS: DndBackground[] = [
   { id: 'custom', name: 'Custom' },
 ]
 
-export const DND_ALIGNMENTS: DndAlignment[] = [
+export const DND_ALIGNMENTS: readonly DndAlignment[] = [
   { id: 'lg', name: 'Lawful Good', shorthand: 'LG' },
   { id: 'ng', name: 'Neutral Good', shorthand: 'NG' },
   { id: 'cg', name: 'Chaotic Good', shorthand: 'CG' },

@@ -185,21 +185,30 @@ export default function CharacterBuilder() {
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const selectedClass = DND_CLASSES.find((c) => c.id === characterData.class)
-  const conModifier = getAbilityModifier(characterData.abilities.con)
-  const calculatedHp = (selectedClass?.hitDie ?? 8) + conModifier
-  const calculatedAc = 10 + getAbilityModifier(characterData.abilities.dex)
+  const selectedRace = DND_RACES.find((r) => r.id === characterData.race)
+  const racialBonuses = selectedRace?.abilityBonuses ?? {}
+  const conWithRacial = characterData.abilities.con + (racialBonuses.con ?? 0)
+  const dexWithRacial = characterData.abilities.dex + (racialBonuses.dex ?? 0)
+  const calculatedHp = (selectedClass?.hitDie ?? 8) + getAbilityModifier(conWithRacial)
+  const calculatedAc = 10 + getAbilityModifier(dexWithRacial)
 
   const [visitedSteps, setVisitedSteps] = useState<Set<StepType>>(new Set())
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<RequiredField, boolean>>>({})
   const [isFinalizing, setIsFinalizing] = useState(false)
+  const [finalizeError, setFinalizeError] = useState<string | null>(null)
   const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
 
-  useEffect(() => { clearStatus() }, [characterData, clearStatus])
+  // Clear "saved" indicator after 2 seconds, but preserve "error" state
+  useEffect(() => {
+    if (saveStatus !== 'saved') return
+    const timer = setTimeout(() => clearStatus(), 2000)
+    return () => clearTimeout(timer)
+  }, [saveStatus, clearStatus])
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
 
   const buildPayload = () => ({
-    campaign_id: campaignId!,
+    campaign_id: campaignId as string,
     name: characterData.name,
     character_type: characterData.character_type,
     player_name: characterData.player_name || null,
@@ -229,13 +238,15 @@ export default function CharacterBuilder() {
   })
 
   const validateStep = (step: StepType) => {
-    const errors: Partial<Record<RequiredField, boolean>> = { ...fieldErrors }
-    for (const { field, step: fieldStep } of REQUIRED_FIELDS) {
-      if (fieldStep === step) {
-        errors[field] = !characterData[field]
+    setFieldErrors((prev) => {
+      const errors: Partial<Record<RequiredField, boolean>> = { ...prev }
+      for (const { field, step: fieldStep } of REQUIRED_FIELDS) {
+        if (fieldStep === step) {
+          errors[field] = !characterData[field]
+        }
       }
-    }
-    setFieldErrors(errors)
+      return errors
+    })
   }
 
   const stepHasErrors = (step: StepType): boolean => {
@@ -269,11 +280,13 @@ export default function CharacterBuilder() {
 
   const handleFinalize = async () => {
     setIsFinalizing(true)
+    setFinalizeError(null)
     try {
       const id = await finalize(buildPayload())
       navigate(`/campaign/${campaignId}/character/${id}`)
     } catch (err) {
       console.error('Character finalization failed:', err)
+      setFinalizeError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.')
     } finally {
       setIsFinalizing(false)
     }
@@ -288,7 +301,7 @@ export default function CharacterBuilder() {
     }
     setCharacterData((prev) => {
       const next = { ...prev, ...updates }
-      // Reset skill selections when class changes
+      // Reset skill selections when class changes, since each class has a different available skill pool
       if ('class' in updates && updates.class !== prev.class) {
         next.skills = Object.fromEntries(
           DND_SKILLS.map((skill) => [skill.id, { proficient: false, expertise: false }])
@@ -304,9 +317,6 @@ export default function CharacterBuilder() {
       abilities: { ...prev.abilities, [ability]: value },
     }))
   }
-
-  const selectedRace = DND_RACES.find((r) => r.id === characterData.race)
-  const racialBonuses = selectedRace?.abilityBonuses ?? {}
 
   const resetAbilitiesForMethod = (method: CharacterData['abilityMethod']) => {
     const defaultScore = method === 'point-buy' ? 8 : 10
@@ -404,7 +414,10 @@ export default function CharacterBuilder() {
       if (!inPool) return prev
 
       const current = prev.skills[skillId]
-      if (!current) return prev
+      if (!current) {
+        console.warn(`Skill data missing for "${skillId}" — possible state desync`)
+        return prev
+      }
 
       if (current.proficient) {
         return {
@@ -619,7 +632,10 @@ export default function CharacterBuilder() {
                 const alignment = DND_ALIGNMENTS.find(
                   (a) => a.name === (ethic === 'Neutral' && moral === 'Neutral' ? 'True Neutral' : `${ethic} ${moral}`)
                 )
-                if (!alignment) return null
+                if (!alignment) {
+                  console.warn(`Alignment not found for "${ethic} ${moral}" — check DND_ALIGNMENTS data`)
+                  return null
+                }
                 const isSelected = characterData.alignment === alignment.id
                 const topLabel = ethic === 'Neutral' && moral === 'Neutral' ? 'True' : ethic
                 const bottomLabel = moral
@@ -1193,6 +1209,14 @@ export default function CharacterBuilder() {
           </CardContent>
         </Card>
 
+        {(finalizeError || saveStatus === 'error') && (
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
+            {finalizeError
+              ? `Failed to finalize character: ${finalizeError}`
+              : 'Failed to save draft. Your recent changes may not have been saved.'}
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="flex items-center justify-between">
           <Button
@@ -1207,9 +1231,6 @@ export default function CharacterBuilder() {
           <div className="flex items-center gap-3">
             {saveStatus === 'saved' && (
               <span className="text-sm text-muted-foreground">Draft saved</span>
-            )}
-            {saveStatus === 'error' && (
-              <span className="text-sm text-destructive">Save failed</span>
             )}
             {currentStepIndex < STEPS.length - 1 && (
               <Button onClick={goNextStep}>
