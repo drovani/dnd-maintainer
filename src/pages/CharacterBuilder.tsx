@@ -11,7 +11,7 @@ import {
 } from '@/components/character-builder'
 import type { CharacterData } from '@/components/character-builder'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import { ABILITY_NAME_TO_KEY, DND_ALIGNMENTS, DND_BACKGROUNDS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
+import { ABILITY_NAME_TO_KEY, DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -35,8 +35,8 @@ const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[]
 
 const INITIAL_CHARACTER_DATA: CharacterData = {
   name: '', player_name: '', character_type: 'pc',
-  race: DND_RACES[0].id, class: DND_CLASSES[0].id, level: 1,
-  background: DND_BACKGROUNDS[0].id, custom_background: '', alignment: DND_ALIGNMENTS[4].id,
+  race: '', class: '', level: 1,
+  background: '', custom_background: '', alignment: DND_ALIGNMENTS[4].id,
   abilityMethod: 'standard-array',
   abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
   abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },

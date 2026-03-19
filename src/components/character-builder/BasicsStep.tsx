@@ -77,7 +77,7 @@ export function BasicsStep({
         <div className="space-y-2">
           <Label htmlFor="character-name">
             Character Name
-            {fieldErrors.name && <span className="text-destructive ml-1">*</span>}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             id="character-name"
@@ -107,15 +107,15 @@ export function BasicsStep({
           <div className="space-y-2">
             <Label>
               Race
-              {fieldErrors.race && <span className="text-destructive ml-1">*</span>}
+              <span className="text-destructive">*</span>
             </Label>
             <Select
-              value={race}
+              value={race || undefined}
               onValueChange={(value) => value && onChange({ race: value })}
               items={DND_RACES.map((r) => ({ value: r.id, label: r.name }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
-                <SelectValue />
+                <SelectValue placeholder="Choose a race" />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
                 {DND_RACE_GROUPS.map((group) => (
@@ -139,15 +139,15 @@ export function BasicsStep({
           <div className="space-y-2">
             <Label>
               Class
-              {fieldErrors.class && <span className="text-destructive ml-1">*</span>}
+              <span className="text-destructive">*</span>
             </Label>
             <Select
-              value={characterClass}
+              value={characterClass || undefined}
               onValueChange={(value) => value && onChange({ class: value })}
               items={DND_CLASSES.map((c) => ({ value: c.id, label: c.name }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
-                <SelectValue />
+                <SelectValue placeholder="Choose a class" />
               </SelectTrigger>
               <SelectContent>
                 {DND_CLASSES.map((cls) => (
@@ -162,12 +162,12 @@ export function BasicsStep({
           <div className="space-y-2">
             <Label>Background</Label>
             <Select
-              value={background}
+              value={background || undefined}
               onValueChange={(value) => value && onChange({ background: value })}
               items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: b.name }))}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue placeholder="Choose a background" />
               </SelectTrigger>
               <SelectContent>
                 {DND_BACKGROUNDS.map((bg) => (
