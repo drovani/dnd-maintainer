@@ -9,7 +9,7 @@ import {
 } from '@/lib/dnd-helpers'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -78,9 +78,18 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
 export default function CharacterSheet() {
   const { characterId } = useParams<{ id: string; characterId: string }>()
   const [editSection, setEditSection] = useState<EditSection>(null)
+  const [localHP, setLocalHP] = useState<number | null>(null)
+  const hpSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { data: character, isLoading, error } = useCharacter(characterId)
   const { update: updateMutation } = useCharacterMutations()
+
+  // Sync local HP when server data arrives and no local edits are pending
+  useEffect(() => {
+    if (character && localHP === null) {
+      setLocalHP(character.hit_points_current ?? 0)
+    }
+  }, [character, localHP])
 
   const handleUpdate = (updates: Partial<Character>) => {
     if (!characterId) return
@@ -89,11 +98,22 @@ export default function CharacterSheet() {
     })
   }
 
+  const currentHP = localHP ?? character?.hit_points_current ?? 0
+  const maxHP = character?.hit_points_max ?? 0
+
   const updateHP = (delta: number) => {
-    if (character && characterId) {
-      const newHP = Math.max(0, Math.min(character.hit_points_max ?? 0, (character.hit_points_current ?? 0) + delta))
-      updateMutation.mutate({ id: characterId, hit_points_current: newHP })
-    }
+    if (!character || !characterId) return
+    const newHP = Math.max(0, Math.min(maxHP, currentHP + delta))
+    setLocalHP(newHP)
+
+    // Debounce the save to handle rapid clicks
+    if (hpSaveTimer.current) clearTimeout(hpSaveTimer.current)
+    hpSaveTimer.current = setTimeout(() => {
+      updateMutation.mutate({ id: characterId, hit_points_current: newHP }, {
+        onSuccess: () => { setLocalHP(null) },
+        onError: () => { setLocalHP(null) },
+      })
+    }, 500)
   }
 
   const skillsByAbility = useMemo(() => {
@@ -306,7 +326,7 @@ export default function CharacterSheet() {
                       <Minus size={16} />
                     </Button>
                     <div className="text-2xl font-bold text-red-600 min-w-12 text-center">
-                      {character.hit_points_current}
+                      {currentHP}
                     </div>
                     <Button
                       variant="outline"
@@ -317,18 +337,18 @@ export default function CharacterSheet() {
                       <Plus size={16} />
                     </Button>
                   </div>
-                  <div className="text-muted-foreground text-sm">/ {character.hit_points_max}</div>
+                  <div className="text-muted-foreground text-sm">/ {maxHP}</div>
                 </div>
                 <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div
-                    className={`h-full transition-all ${(character.hit_points_current ?? 0) > (character.hit_points_max ?? 1) * 0.5
+                    className={`h-full transition-all ${currentHP > maxHP * 0.5
                       ? 'bg-green-600'
-                      : (character.hit_points_current ?? 0) > (character.hit_points_max ?? 1) * 0.25
+                      : currentHP > maxHP * 0.25
                         ? 'bg-yellow-500'
                         : 'bg-red-600'
                       }`}
                     style={{
-                      width: `${((character.hit_points_current ?? 0) / (character.hit_points_max ?? 1)) * 100}%`,
+                      width: `${(currentHP / (maxHP || 1)) * 100}%`,
                     }}
                   />
                 </div>

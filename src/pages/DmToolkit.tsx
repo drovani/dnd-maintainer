@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { Character, Combatant, Encounter } from '@/types/database'
+import { Character, Combatant } from '@/types/database'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,

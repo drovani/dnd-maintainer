@@ -96,7 +96,7 @@ export default function SessionDetail() {
 
       const { error } = await supabase
         .from('sessions')
-        .update(updates)
+        .update(updates as never)
         .eq('id', sessionId)
 
       if (error) throw error
@@ -574,9 +574,9 @@ export default function SessionDetail() {
                       <p className="text-foreground font-semibold">
                         {encounter.name}
                       </p>
-                      {encounter.location && (
+                      {encounter.description && (
                         <p className="text-muted-foreground text-sm mt-1">
-                          {encounter.location}
+                          {encounter.description}
                         </p>
                       )}
                     </div>

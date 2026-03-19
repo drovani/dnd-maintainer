@@ -98,13 +98,13 @@ export default function NotesPage() {
     })
     .sort((a, b) => {
       if (sortBy === 'pinned') {
-        if (a.pinned === b.pinned) {
+        if (a.is_pinned === b.is_pinned) {
           return (
             new Date(b.updated_at).getTime() -
             new Date(a.updated_at).getTime()
           )
         }
-        return (a.pinned ? -1 : 1) || (b.pinned ? 1 : -1)
+        return (a.is_pinned ? -1 : 1) || (b.is_pinned ? 1 : -1)
       } else if (sortBy === 'alphabetical') {
         return a.title.localeCompare(b.title)
       }

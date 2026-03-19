@@ -49,11 +49,11 @@ export default function SessionList() {
       if (!campaignId) return 0
       const { data, error } = await supabase
         .from('sessions')
-        .select('xp_awarded')
+        .select('experience_awarded')
         .eq('campaign_id', campaignId)
 
       if (error) throw error
-      return data.reduce((sum, session) => sum + (session.xp_awarded || 0), 0)
+      return data.reduce((sum, session) => sum + (session.experience_awarded || 0), 0)
     },
     enabled: !!campaignId,
   })
@@ -71,7 +71,6 @@ export default function SessionList() {
             title: session.title,
             session_number: session.session_number,
             date: session.date,
-            status: 'planned',
           },
         ])
         .select()
@@ -100,7 +99,7 @@ export default function SessionList() {
 
   const filteredSessions = sessions.filter((session) =>
     searchTerm.trim() === '' ? true :
-      session.title.toLowerCase().includes(searchTerm.toLowerCase())
+      session.title?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const formatDate = (dateString: string) => {
@@ -312,7 +311,7 @@ export default function SessionList() {
                         </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">
                           <Calendar className="size-4" />
-                          {formatDate(session.date)}
+                          {session.date ? formatDate(session.date) : 'No date'}
                         </p>
                       </div>
                       <ChevronRight className="size-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
@@ -327,28 +326,14 @@ export default function SessionList() {
 
                     {/* Stats footer */}
                     <div className="flex items-center gap-4 pt-4 border-t border-border">
-                      {session.xp_awarded && (
+                      {session.experience_awarded > 0 && (
                         <div className="flex items-center gap-2">
                           <Zap className="size-4 text-primary" />
                           <span className="text-muted-foreground text-sm">
-                            {session.xp_awarded} XP
+                            {session.experience_awarded} XP
                           </span>
                         </div>
                       )}
-                      <span
-                        className={`text-xs font-semibold px-2 py-1 rounded ${session.status === 'completed'
-                          ? 'bg-green-100 text-green-600'
-                          : session.status === 'in-progress'
-                            ? 'bg-blue-900/30 text-blue-400'
-                            : 'bg-muted text-muted-foreground'
-                          }`}
-                      >
-                        {session.status === 'completed'
-                          ? 'Completed'
-                          : session.status === 'in-progress'
-                            ? 'In Progress'
-                            : 'Planned'}
-                      </span>
                     </div>
                   </div>
                 </div>

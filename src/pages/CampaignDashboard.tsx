@@ -33,7 +33,7 @@ export default function CampaignDashboard() {
   const { update: updateMutation } = useCampaignMutations()
 
   // Fetch characters for this campaign
-  const { data: characters = [] } = useQuery({
+  const { data: characters = [], error: charactersError } = useQuery({
     queryKey: ['campaign-characters', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,7 +48,7 @@ export default function CampaignDashboard() {
   })
 
   // Fetch sessions for this campaign
-  const { data: sessions = [] } = useQuery({
+  const { data: sessions = [], error: sessionsError } = useQuery({
     queryKey: ['campaign-sessions', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -394,7 +394,11 @@ export default function CampaignDashboard() {
                 Recent Activity
               </h3>
 
-              {lastSession ? (
+              {sessionsError ? (
+                <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive text-sm">
+                  Failed to load sessions
+                </div>
+              ) : lastSession ? (
                 <div className="space-y-4">
                   <div className="bg-muted/50 rounded-lg p-4 border border-border">
                     <p className="text-foreground font-semibold">
@@ -446,7 +450,11 @@ export default function CampaignDashboard() {
                 Party Members
               </h3>
 
-              {recentCharacters.length > 0 ? (
+              {charactersError ? (
+                <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive text-sm">
+                  Failed to load characters
+                </div>
+              ) : recentCharacters.length > 0 ? (
                 <div className="space-y-3">
                   {recentCharacters.map((char) => (
                     <Link
