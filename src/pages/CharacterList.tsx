@@ -154,7 +154,7 @@ export default function CharacterList() {
                 }`}
             >
               <Users size={16} />
-              <span className="uppercase">npc</span>s
+              <span>NPCs</span>
             </button>
           </div>
 

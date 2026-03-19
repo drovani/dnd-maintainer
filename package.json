@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "npx supabase start && npx supabase gen types typescript --local > src/types/supabase.ts && vite",
-    "stop": "npx supabase stop",
+    "stop": "npx supabase stop --yes",
     "dev": "vite",
     "typecheck": "tsc -b --noEmit",
     "build": "tsc -b && vite build",
