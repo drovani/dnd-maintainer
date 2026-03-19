@@ -55,6 +55,8 @@ export function AbilitiesStep({
   const [isRolling, setIsRolling] = useState<boolean>(false)
   const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const onAbilitiesChangeRef = useRef(onAbilitiesChange)
+  onAbilitiesChangeRef.current = onAbilitiesChange
 
   // Cleanup interval on unmount to prevent leaks
   useEffect(() => {
@@ -107,11 +109,11 @@ export function AbilitiesStep({
         setDisplayedRolls(finalValues)
         const resetAbilities: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
         const resetAssignments: Record<string, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
-        onAbilitiesChange(resetAbilities, resetAssignments, finalValues)
+        onAbilitiesChangeRef.current(resetAbilities, resetAssignments, finalValues)
         setIsRolling(false)
       }
     }, 80)
-  }, [isRolling, onAbilitiesChange])
+  }, [isRolling])
 
   const incrementAbility = (ability: keyof AbilityScores) => {
     const current = abilities[ability]
@@ -195,6 +197,10 @@ export function AbilitiesStep({
   const pointBuyDiff = pointBuyEquiv !== null ? pointBuyEquiv - POINT_BUY_TOTAL : null
 
   const handleMethodChange = (val: string) => {
+    if (rollIntervalRef.current) {
+      clearInterval(rollIntervalRef.current)
+      rollIntervalRef.current = null
+    }
     setDisplayedRolls([])
     setIsRolling(false)
     onMethodChange(val as CharacterData['abilityMethod'])

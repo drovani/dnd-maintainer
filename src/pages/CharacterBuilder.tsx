@@ -150,6 +150,10 @@ export default function CharacterBuilder() {
     })
   }
 
+  const updateBackstory = (updates: Partial<CharacterData>) => {
+    setCharacterData((prev) => ({ ...prev, ...updates }))
+  }
+
   const resetAbilitiesForMethod = (method: CharacterData['abilityMethod']) => {
     const d = method === 'point-buy' ? 8 : 10
     setCharacterData((prev) => ({
@@ -210,7 +214,7 @@ export default function CharacterBuilder() {
         <BasicsStep characterType={cd.character_type} name={cd.name} playerName={cd.player_name}
           race={cd.race} characterClass={cd.class} background={cd.background}
           customBackground={cd.custom_background} alignment={cd.alignment}
-          fieldErrors={fieldErrors} onChange={updateBasics} />
+          level={cd.level} fieldErrors={fieldErrors} onChange={updateBasics} />
       )
       case 'abilities': return (
         <AbilitiesStep abilityMethod={cd.abilityMethod} abilities={cd.abilities}
@@ -233,7 +237,7 @@ export default function CharacterBuilder() {
       )
       case 'backstory': return (
         <BackstoryStep personalityTraits={cd.personalityTraits} ideals={cd.ideals} bonds={cd.bonds}
-          flaws={cd.flaws} appearance={cd.appearance} backstory={cd.backstory} onChange={updateBasics} />
+          flaws={cd.flaws} appearance={cd.appearance} backstory={cd.backstory} onChange={updateBackstory} />
       )
     }
   }
@@ -287,7 +291,7 @@ export default function CharacterBuilder() {
               {finalizeError ? `Failed to finalize character: ${finalizeError}` : 'Failed to save draft. Your recent changes may not have been saved.'}
             </span>
             {saveStatus === 'error' && (
-              <Button variant="outline" size="sm" onClick={() => saveDraft(buildPayload()).catch(() => {})}>
+              <Button variant="outline" size="sm" onClick={() => saveDraft(buildPayload()).catch((err) => console.error('Retry save failed:', err))}>
                 Retry Save
               </Button>
             )}

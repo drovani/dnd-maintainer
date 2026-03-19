@@ -30,6 +30,7 @@ interface BasicsStepProps {
   background: string
   customBackground: string
   alignment: string
+  level: number
   fieldErrors: Partial<Record<'name' | 'race' | 'class', boolean>>
   onChange: (updates: Partial<CharacterData>) => void
 }
@@ -43,6 +44,7 @@ export function BasicsStep({
   background,
   customBackground,
   alignment,
+  level,
   fieldErrors,
   onChange,
 }: BasicsStepProps) {
@@ -66,7 +68,7 @@ export function BasicsStep({
           <span className={`text-sm font-semibold ${characterType === 'npc' ? 'text-foreground' : 'text-muted-foreground'}`}>NPC</span>
         </label>
         <span className="text-sm text-muted-foreground">
-          Level <span className="font-bold text-foreground text-lg">1</span>
+          Level <span className="font-bold text-foreground text-lg">{level}</span>
         </span>
       </div>
 

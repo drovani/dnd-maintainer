@@ -21,7 +21,7 @@ export function SpellsStep({ spells, onSpellsChange }: SpellsStepProps) {
             onChange={(e) =>
               onSpellsChange({
                 ...spells,
-                cantrips: e.target.value.split(',').map((s) => s.trim()),
+                cantrips: e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
               })
             }
             placeholder="e.g., Fire Bolt, Mage Hand"

@@ -41,8 +41,9 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                   onChange={(e) => onUpdate(item.id, { weight: parseFloat(e.target.value) || 0 })}
                   placeholder="Weight"
                 />
-                <Label className="flex items-center gap-2">
+                <Label htmlFor={`equip-${item.id}`} className="flex items-center gap-2">
                   <Checkbox
+                    id={`equip-${item.id}`}
                     checked={item.equipped}
                     onCheckedChange={(checked) => onUpdate(item.id, { equipped: checked === true })}
                   />
