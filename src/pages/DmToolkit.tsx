@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { Character, Combatant, Encounter } from '@/types/database'
+import { Character, Combatant } from '@/types/database'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,
@@ -89,10 +89,10 @@ export default function DmToolkit() {
       const { data, error } = await supabase
         .from('characters')
         .select('*')
-        .eq('campaign_id', id)
+        .eq('campaign_id', id!)
         .eq('is_npc', false)
       if (error) throw error
-      return data as Character[]
+      return data as unknown as Character[]
     },
     enabled: !!id,
   })
@@ -102,10 +102,9 @@ export default function DmToolkit() {
     mutationFn: async () => {
       if (!id) throw new Error('Campaign ID required')
 
-      const encounter: Omit<Encounter, 'id' | 'created_at' | 'updated_at'> = {
-        campaign_id: id,
+      const encounter = {
+        campaign_id: id!,
         name: `Round ${initiativeState.round} Encounter`,
-        difficulty: 'medium',
         combatants: initiativeState.combatants.map((c) => ({
           id: c.id,
           name: c.name,
@@ -121,12 +120,13 @@ export default function DmToolkit() {
                 : 'healthy',
           conditions: c.conditions,
         })),
+        round: initiativeState.round,
         status: 'active',
       }
 
       const { data, error } = await supabase
         .from('encounters')
-        .insert([encounter])
+        .insert(encounter as never)
         .select()
         .single()
 
@@ -392,9 +392,9 @@ export default function DmToolkit() {
       name: char.name,
       type: 'character',
       initiative: 0,
-      hit_points: char.hit_points,
-      armor_class: char.armor_class,
-      currentHp: char.hit_points,
+      hit_points: char.hit_points_max ?? 10,
+      armor_class: char.armor_class ?? 10,
+      currentHp: char.hit_points_max ?? 10,
       status: 'healthy',
       conditions: [],
     }
@@ -613,50 +613,50 @@ export default function DmToolkit() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-linear-to-r from-slate-900 to-slate-800 border-b border-amber-500/20 sticky top-0 z-20">
+      <div className="bg-muted/50 border-b border-border sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-8 py-6">
-          <h1 className="text-4xl font-bold text-stone-100 flex items-center gap-3 mb-6">
-            <Swords className="w-8 h-8 text-amber-400" />
+          <h1 className="text-4xl font-bold text-foreground flex items-center gap-3 mb-6">
+            <Swords className="size-8 text-primary" />
             DM Toolkit
           </h1>
 
           {/* Tabs */}
-          <div className="flex gap-4 border-b border-slate-700">
+          <div className="flex gap-4 border-b border-border">
             <button
               onClick={() => setActiveTab('initiative')}
               className={`px-6 py-3 font-semibold transition-colors border-b-2 ${activeTab === 'initiative'
-                  ? 'text-amber-400 border-amber-400'
-                  : 'text-stone-400 border-transparent hover:text-stone-300'
+                  ? 'text-primary border-amber-400'
+                  : 'text-muted-foreground border-transparent hover:text-foreground'
                 }`}
             >
               <div className="flex items-center gap-2">
-                <Swords className="w-5 h-5" />
+                <Swords className="size-5" />
                 Initiative Tracker
               </div>
             </button>
             <button
               onClick={() => setActiveTab('generators')}
               className={`px-6 py-3 font-semibold transition-colors border-b-2 ${activeTab === 'generators'
-                  ? 'text-amber-400 border-amber-400'
-                  : 'text-stone-400 border-transparent hover:text-stone-300'
+                  ? 'text-primary border-amber-400'
+                  : 'text-muted-foreground border-transparent hover:text-foreground'
                 }`}
             >
               <div className="flex items-center gap-2">
-                <Dice6 className="w-5 h-5" />
+                <Dice6 className="size-5" />
                 Generators
               </div>
             </button>
             <button
               onClick={() => setActiveTab('reference')}
               className={`px-6 py-3 font-semibold transition-colors border-b-2 ${activeTab === 'reference'
-                  ? 'text-amber-400 border-amber-400'
-                  : 'text-stone-400 border-transparent hover:text-stone-300'
+                  ? 'text-primary border-amber-400'
+                  : 'text-muted-foreground border-transparent hover:text-foreground'
                 }`}
             >
               <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
+                <BookOpen className="size-5" />
                 Quick Reference
               </div>
             </button>
@@ -670,9 +670,9 @@ export default function DmToolkit() {
         {activeTab === 'initiative' && (
           <div className="space-y-8">
             {/* Add Combatant Form */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <Plus className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Plus className="size-6 text-primary" />
                 Add Combatant
               </h2>
 
@@ -682,54 +682,54 @@ export default function DmToolkit() {
                   placeholder="Name"
                   value={newCombatantName}
                   onChange={(e) => setNewCombatantName(e.target.value)}
-                  className="md:col-span-2 bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-400"
+                  className="md:col-span-2 bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
                 <input
                   type="number"
                   placeholder="Initiative"
                   value={newCombatantInit}
                   onChange={(e) => setNewCombatantInit(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-400"
+                  className="bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
                 <input
                   type="number"
                   placeholder="HP"
                   value={newCombatantHp}
                   onChange={(e) => setNewCombatantHp(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-400"
+                  className="bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
                 <input
                   type="number"
                   placeholder="AC"
                   value={newCombatantAc}
                   onChange={(e) => setNewCombatantAc(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-400"
+                  className="bg-muted border border-border rounded px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring"
                 />
-                <label className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded px-4 py-2 cursor-pointer hover:border-amber-400/50 transition-colors">
+                <label className="flex items-center gap-2 bg-muted border border-border rounded px-4 py-2 cursor-pointer hover:border-ring/50 transition-colors">
                   <input
                     type="checkbox"
                     checked={newCombatantIsPlayer}
                     onChange={(e) => setNewCombatantIsPlayer(e.target.checked)}
-                    className="w-4 h-4"
+                    className="size-4"
                   />
-                  <span className="text-stone-300">Player</span>
+                  <span className="text-foreground">Player</span>
                 </label>
               </div>
 
               <button
                 onClick={addCombatant}
-                className="bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="size-5" />
                 Add Combatant
               </button>
             </div>
 
             {/* Quick Add from Campaign Characters */}
             {characters.length > 0 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-stone-100 mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-amber-400" />
+              <div className="bg-card border border-border rounded-lg p-6">
+                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Users className="size-5 text-primary" />
                   Quick Add Party Members
                 </h3>
                 <div className="flex flex-wrap gap-3">
@@ -737,7 +737,7 @@ export default function DmToolkit() {
                     <button
                       key={char.id}
                       onClick={() => addQuickCharacter(char)}
-                      className="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400/50 rounded-lg px-4 py-2 text-stone-300 hover:text-amber-400 transition-colors text-sm font-semibold"
+                      className="bg-muted hover:bg-muted border border-border hover:border-ring/50 rounded-lg px-4 py-2 text-foreground hover:text-primary transition-colors text-sm font-semibold"
                     >
                       {char.name}
                     </button>
@@ -750,17 +750,17 @@ export default function DmToolkit() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 {/* Round and Turn Info */}
-                <div className="bg-slate-900 border border-amber-500/30 rounded-lg p-6">
+                <div className="bg-card border border-border rounded-lg p-6">
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-slate-800/50 rounded-lg p-4">
-                      <p className="text-stone-400 text-sm mb-2">Round</p>
-                      <p className="text-4xl font-bold text-amber-400">
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <p className="text-muted-foreground text-sm mb-2">Round</p>
+                      <p className="text-4xl font-bold text-primary">
                         {initiativeState.round}
                       </p>
                     </div>
-                    <div className="bg-slate-800/50 rounded-lg p-4">
-                      <p className="text-stone-400 text-sm mb-2">Current Turn</p>
-                      <p className="text-2xl font-bold text-amber-400">
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <p className="text-muted-foreground text-sm mb-2">Current Turn</p>
+                      <p className="text-2xl font-bold text-primary">
                         {sortedCombatants.length > 0
                           ? sortedCombatants[initiativeState.currentTurn]?.name
                           : 'None'}
@@ -771,60 +771,60 @@ export default function DmToolkit() {
                   <div className="flex gap-3">
                     <button
                       onClick={prevTurn}
-                      className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-2 px-4 text-stone-300 hover:text-amber-400 font-semibold transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 bg-muted hover:bg-muted border border-border rounded-lg py-2 px-4 text-foreground hover:text-primary font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                      <ChevronUp className="w-5 h-5" />
+                      <ChevronUp className="size-5" />
                       Previous Turn
                     </button>
                     <button
                       onClick={nextTurn}
-                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
-                      <ChevronDown className="w-5 h-5" />
+                      <ChevronDown className="size-5" />
                       Next Turn
                     </button>
                   </div>
                 </div>
 
                 {/* Combatants List */}
-                <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-stone-100 mb-4">
+                <div className="bg-card border border-border rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-foreground mb-4">
                     Initiative Order ({sortedCombatants.length})
                   </h3>
 
                   {sortedCombatants.length === 0 ? (
-                    <p className="text-stone-400 italic">No combatants added yet</p>
+                    <p className="text-muted-foreground italic">No combatants added yet</p>
                   ) : (
                     <div className="space-y-3">
                       {sortedCombatants.map((combatant, idx) => (
                         <div
                           key={combatant.id}
                           className={`rounded-lg p-4 border transition-all ${idx === initiativeState.currentTurn
-                              ? 'bg-amber-500/20 border-amber-400'
-                              : 'bg-slate-800/50 border-slate-700'
+                              ? 'bg-primary/20 border-amber-400'
+                              : 'bg-muted/50 border-border'
                             }`}
                         >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3 flex-1">
                               <div className="text-center w-12">
-                                <p className="text-amber-400 font-bold text-lg">
+                                <p className="text-primary font-bold text-lg">
                                   {combatant.initiative}
                                 </p>
                               </div>
                               <div className="flex-1">
-                                <p className="text-stone-100 font-semibold">
+                                <p className="text-foreground font-semibold">
                                   {combatant.name}
                                 </p>
-                                <p className="text-stone-400 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                   AC {combatant.armor_class}
                                 </p>
                               </div>
                             </div>
                             <button
                               onClick={() => removeCombatant(combatant.id)}
-                              className="text-red-400 hover:text-red-300 p-2 transition-colors"
+                              className="text-destructive hover:text-destructive p-2 transition-colors"
                             >
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="size-5" />
                             </button>
                           </div>
 
@@ -832,12 +832,12 @@ export default function DmToolkit() {
                           <div className="space-y-3 mb-3">
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-stone-400 text-sm">HP</span>
-                                <span className="text-stone-200 font-bold">
+                                <span className="text-muted-foreground text-sm">HP</span>
+                                <span className="text-foreground font-bold">
                                   {combatant.currentHp} / {combatant.hit_points}
                                 </span>
                               </div>
-                              <div className="w-full bg-slate-700 rounded-full h-3">
+                              <div className="w-full bg-muted rounded-full h-3">
                                 <div
                                   className={`h-3 rounded-full transition-all ${combatant.currentHp <= 0
                                       ? 'bg-red-600'
@@ -860,16 +860,16 @@ export default function DmToolkit() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => updateCombatantHp(combatant.id, 5)}
-                                className="flex-1 bg-green-900/40 hover:bg-green-900/60 border border-green-700/40 rounded px-3 py-1 text-green-400 text-sm font-semibold transition-colors flex items-center justify-center gap-1"
+                                className="flex-1 bg-green-100 hover:bg-green-200 border border-green-300 rounded px-3 py-1 text-green-600 text-sm font-semibold transition-colors flex items-center justify-center gap-1"
                               >
-                                <Heart className="w-4 h-4" />
+                                <Heart className="size-4" />
                                 +5
                               </button>
                               <button
                                 onClick={() => updateCombatantHp(combatant.id, -5)}
-                                className="flex-1 bg-red-900/40 hover:bg-red-900/60 border border-red-700/40 rounded px-3 py-1 text-red-400 text-sm font-semibold transition-colors flex items-center justify-center gap-1"
+                                className="flex-1 bg-red-100 hover:bg-red-200 border border-red-300 rounded px-3 py-1 text-destructive text-sm font-semibold transition-colors flex items-center justify-center gap-1"
                               >
-                                <Flame className="w-4 h-4" />
+                                <Flame className="size-4" />
                                 -5
                               </button>
                               <button
@@ -888,7 +888,7 @@ export default function DmToolkit() {
 
                           {/* Conditions */}
                           <div className="space-y-2">
-                            <p className="text-stone-400 text-sm">Conditions</p>
+                            <p className="text-muted-foreground text-sm">Conditions</p>
                             <select
                               onChange={(e) => {
                                 if (e.target.value) {
@@ -899,7 +899,7 @@ export default function DmToolkit() {
                                   e.target.value = ''
                                 }
                               }}
-                              className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-1 text-stone-300 text-sm focus:outline-none focus:border-amber-400"
+                              className="w-full bg-muted border border-input rounded px-3 py-1 text-foreground text-sm outline-none focus-visible:border-ring"
                             >
                               <option value="">Add condition...</option>
                               <option value="Blinded">Blinded</option>
@@ -944,9 +944,9 @@ export default function DmToolkit() {
               </div>
 
               {/* Save Encounter */}
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 h-fit sticky top-24">
-                <h3 className="text-lg font-bold text-stone-100 mb-4 flex items-center gap-2">
-                  <Save className="w-5 h-5 text-amber-400" />
+              <div className="bg-card border border-border rounded-lg p-6 h-fit sticky top-24">
+                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Save className="size-5 text-primary" />
                   Save Encounter
                 </h3>
 
@@ -956,7 +956,7 @@ export default function DmToolkit() {
                     sortedCombatants.length === 0 ||
                     saveEncounterMutation.isPending
                   }
-                  className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold py-2 px-4 rounded-lg transition-colors mb-4"
+                  className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors mb-4"
                 >
                   {saveEncounterMutation.isPending
                     ? 'Saving...'
@@ -964,13 +964,13 @@ export default function DmToolkit() {
                 </button>
 
                 {saveEncounterMutation.isSuccess && (
-                  <p className="text-green-400 text-sm text-center">
+                  <p className="text-green-600 text-sm text-center">
                     Encounter saved!
                   </p>
                 )}
 
-                <div className="mt-6 pt-6 border-t border-slate-800">
-                  <p className="text-stone-400 text-xs mb-4">
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-muted-foreground text-xs mb-4">
                     Quick stats: {sortedCombatants.length} combatants
                   </p>
                 </div>
@@ -983,13 +983,13 @@ export default function DmToolkit() {
         {activeTab === 'generators' && (
           <div className="space-y-8">
             {/* Generator Tabs */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <div className="flex gap-4 mb-8 border-b border-slate-800 pb-4">
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex gap-4 mb-8 border-b border-border pb-4">
                 <button
                   onClick={() => setGeneratorTab('name')}
                   className={`px-4 py-2 font-semibold transition-colors ${generatorTab === 'name'
-                      ? 'text-amber-400 border-b-2 border-amber-400'
-                      : 'text-stone-400 hover:text-stone-300'
+                      ? 'text-primary border-b-2 border-amber-400'
+                      : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
                   Name Generator
@@ -997,8 +997,8 @@ export default function DmToolkit() {
                 <button
                   onClick={() => setGeneratorTab('loot')}
                   className={`px-4 py-2 font-semibold transition-colors ${generatorTab === 'loot'
-                      ? 'text-amber-400 border-b-2 border-amber-400'
-                      : 'text-stone-400 hover:text-stone-300'
+                      ? 'text-primary border-b-2 border-amber-400'
+                      : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
                   Loot Generator
@@ -1006,8 +1006,8 @@ export default function DmToolkit() {
                 <button
                   onClick={() => setGeneratorTab('tavern')}
                   className={`px-4 py-2 font-semibold transition-colors ${generatorTab === 'tavern'
-                      ? 'text-amber-400 border-b-2 border-amber-400'
-                      : 'text-stone-400 hover:text-stone-300'
+                      ? 'text-primary border-b-2 border-amber-400'
+                      : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
                   Tavern Generator
@@ -1015,8 +1015,8 @@ export default function DmToolkit() {
                 <button
                   onClick={() => setGeneratorTab('encounter')}
                   className={`px-4 py-2 font-semibold transition-colors ${generatorTab === 'encounter'
-                      ? 'text-amber-400 border-b-2 border-amber-400'
-                      : 'text-stone-400 hover:text-stone-300'
+                      ? 'text-primary border-b-2 border-amber-400'
+                      : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
                   Encounter Generator
@@ -1027,13 +1027,13 @@ export default function DmToolkit() {
               {generatorTab === 'name' && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-stone-300 font-semibold mb-3">
+                    <label className="block text-foreground font-semibold mb-3">
                       Race
                     </label>
                     <select
                       value={selectedRace}
                       onChange={(e) => setSelectedRace(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                     >
                       <option value="human">Human</option>
                       <option value="elf">Elf</option>
@@ -1046,16 +1046,16 @@ export default function DmToolkit() {
 
                   <button
                     onClick={generateFantasyName}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Wand2 className="w-5 h-5" />
+                    <Wand2 className="size-5" />
                     Generate Name
                   </button>
 
                   {generatedName && (
-                    <div className="bg-slate-800/50 border border-amber-500/30 rounded-lg p-6 text-center">
-                      <p className="text-stone-400 text-sm mb-2">Generated Name</p>
-                      <p className="text-3xl font-bold text-amber-400">
+                    <div className="bg-muted/50 border border-border rounded-lg p-6 text-center">
+                      <p className="text-muted-foreground text-sm mb-2">Generated Name</p>
+                      <p className="text-3xl font-bold text-primary">
                         {generatedName}
                       </p>
                     </div>
@@ -1067,13 +1067,13 @@ export default function DmToolkit() {
               {generatorTab === 'loot' && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-stone-300 font-semibold mb-3">
+                    <label className="block text-foreground font-semibold mb-3">
                       Encounter CR Range
                     </label>
                     <select
                       value={selectedCR}
                       onChange={(e) => setSelectedCR(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                     >
                       <option value="1-4">CR 1-4</option>
                       <option value="5-10">CR 5-10</option>
@@ -1084,28 +1084,28 @@ export default function DmToolkit() {
 
                   <button
                     onClick={generateLoot}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Dice6 className="w-5 h-5" />
+                    <Dice6 className="size-5" />
                     Generate Loot
                   </button>
 
                   {generatedLoot.gold > 0 && (
-                    <div className="bg-slate-800/50 border border-amber-500/30 rounded-lg p-6 space-y-4">
+                    <div className="bg-muted/50 border border-border rounded-lg p-6 space-y-4">
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-slate-900 rounded-lg p-4 text-center">
+                        <div className="bg-card rounded-lg p-4 text-center">
                           <p className="text-yellow-600 text-sm mb-2">Gold</p>
                           <p className="text-2xl font-bold text-yellow-400">
                             {generatedLoot.gold}
                           </p>
                         </div>
-                        <div className="bg-slate-900 rounded-lg p-4 text-center">
+                        <div className="bg-card rounded-lg p-4 text-center">
                           <p className="text-gray-400 text-sm mb-2">Silver</p>
                           <p className="text-2xl font-bold text-gray-300">
                             {generatedLoot.silver}
                           </p>
                         </div>
-                        <div className="bg-slate-900 rounded-lg p-4 text-center">
+                        <div className="bg-card rounded-lg p-4 text-center">
                           <p className="text-orange-700 text-sm mb-2">Copper</p>
                           <p className="text-2xl font-bold text-orange-400">
                             {generatedLoot.copper}
@@ -1114,15 +1114,15 @@ export default function DmToolkit() {
                       </div>
 
                       {generatedLoot.items.length > 0 && (
-                        <div className="pt-4 border-t border-slate-700">
-                          <p className="text-stone-400 text-sm mb-3">Items</p>
+                        <div className="pt-4 border-t border-border">
+                          <p className="text-muted-foreground text-sm mb-3">Items</p>
                           <ul className="space-y-2">
                             {generatedLoot.items.map((item, idx) => (
                               <li
                                 key={idx}
-                                className="flex items-center gap-2 text-stone-300"
+                                className="flex items-center gap-2 text-foreground"
                               >
-                                <Zap className="w-4 h-4 text-amber-400" />
+                                <Zap className="size-4 text-primary" />
                                 {item}
                               </li>
                             ))}
@@ -1139,45 +1139,45 @@ export default function DmToolkit() {
                 <div className="space-y-6">
                   <button
                     onClick={generateTavern}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Wand2 className="w-5 h-5" />
+                    <Wand2 className="size-5" />
                     Generate Tavern
                   </button>
 
                   {generatedTavern && (
-                    <div className="bg-slate-800/50 border border-amber-500/30 rounded-lg p-6 space-y-4">
+                    <div className="bg-muted/50 border border-border rounded-lg p-6 space-y-4">
                       <div>
-                        <p className="text-amber-400 text-sm mb-1">Tavern Name</p>
-                        <p className="text-2xl font-bold text-stone-100">
+                        <p className="text-primary text-sm mb-1">Tavern Name</p>
+                        <p className="text-2xl font-bold text-foreground">
                           {generatedTavern.name}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-amber-400 text-sm mb-2">Description</p>
-                        <p className="text-stone-300">
+                        <p className="text-primary text-sm mb-2">Description</p>
+                        <p className="text-foreground">
                           {generatedTavern.description}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-amber-400 text-sm mb-1">Barkeeper</p>
-                        <p className="text-stone-300 font-semibold">
+                        <p className="text-primary text-sm mb-1">Barkeeper</p>
+                        <p className="text-foreground font-semibold">
                           {generatedTavern.barkeeper}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-amber-400 text-sm mb-1">Special</p>
-                        <p className="text-stone-300">
+                        <p className="text-primary text-sm mb-1">Special</p>
+                        <p className="text-foreground">
                           {generatedTavern.special}
                         </p>
                       </div>
 
-                      <div className="pt-4 border-t border-slate-700">
-                        <p className="text-amber-400 text-sm mb-2">Rumor</p>
-                        <p className="text-stone-300 italic">
+                      <div className="pt-4 border-t border-border">
+                        <p className="text-primary text-sm mb-2">Rumor</p>
+                        <p className="text-foreground italic">
                           "{generatedTavern.rumor}"
                         </p>
                       </div>
@@ -1191,7 +1191,7 @@ export default function DmToolkit() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-stone-300 font-semibold mb-2 text-sm">
+                      <label className="block text-foreground font-semibold mb-2 text-sm">
                         Party Level
                       </label>
                       <input
@@ -1200,11 +1200,11 @@ export default function DmToolkit() {
                         onChange={(e) => setPartyLevel(e.target.value)}
                         min="1"
                         max="20"
-                        className="w-full bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-stone-300 font-semibold mb-2 text-sm">
+                      <label className="block text-foreground font-semibold mb-2 text-sm">
                         Party Size
                       </label>
                       <input
@@ -1213,11 +1213,11 @@ export default function DmToolkit() {
                         onChange={(e) => setPartySize(e.target.value)}
                         min="1"
                         max="10"
-                        className="w-full bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                       />
                     </div>
                     <div>
-                      <label className="block text-stone-300 font-semibold mb-2 text-sm">
+                      <label className="block text-foreground font-semibold mb-2 text-sm">
                         Difficulty
                       </label>
                       <select
@@ -1231,7 +1231,7 @@ export default function DmToolkit() {
                             | 'deadly'
                           )
                         }
-                        className="w-full bg-slate-800 border border-slate-700 rounded px-4 py-2 text-stone-200 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
                       >
                         <option value="easy">Easy</option>
                         <option value="medium">Medium</option>
@@ -1243,32 +1243,32 @@ export default function DmToolkit() {
 
                   <button
                     onClick={generateEncounter}
-                    className="w-full bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
-                    <Swords className="w-5 h-5" />
+                    <Swords className="size-5" />
                     Generate Encounter
                   </button>
 
                   {generatedEncounter.length > 0 && (
-                    <div className="bg-slate-800/50 border border-amber-500/30 rounded-lg p-6 space-y-4">
+                    <div className="bg-muted/50 border border-border rounded-lg p-6 space-y-4">
                       <div>
-                        <p className="text-amber-400 text-sm mb-4">Suggested Monsters</p>
+                        <p className="text-primary text-sm mb-4">Suggested Monsters</p>
                         <div className="space-y-3">
                           {generatedEncounter.map((monster, idx) => (
                             <div
                               key={idx}
-                              className="flex items-center justify-between bg-slate-900 rounded-lg p-3"
+                              className="flex items-center justify-between bg-card rounded-lg p-3"
                             >
                               <div>
-                                <p className="text-stone-200 font-semibold">
+                                <p className="text-foreground font-semibold">
                                   {monster.name}
                                 </p>
-                                <p className="text-stone-400 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                   CR {monster.cr}
                                 </p>
                               </div>
-                              <div className="bg-amber-500/20 rounded-lg px-3 py-1">
-                                <p className="text-amber-400 font-bold">
+                              <div className="bg-primary/20 rounded-lg px-3 py-1">
+                                <p className="text-primary font-bold">
                                   ×{monster.count}
                                 </p>
                               </div>
@@ -1288,9 +1288,9 @@ export default function DmToolkit() {
         {activeTab === 'reference' && (
           <div className="space-y-8">
             {/* Conditions */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <AlertCircle className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <AlertCircle className="size-6 text-primary" />
                 Conditions
               </h2>
 
@@ -1305,21 +1305,21 @@ export default function DmToolkit() {
                           : condition.name
                       )
                     }
-                    className="w-full text-left bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/30 rounded-lg p-4 transition-all"
+                    className="w-full text-left bg-muted/50 hover:bg-muted border border-border hover:border-ring/30 rounded-lg p-4 transition-all"
                   >
                     <div className="flex items-center justify-between">
-                      <h3 className="text-stone-100 font-semibold">
+                      <h3 className="text-foreground font-semibold">
                         {condition.name}
                       </h3>
                       <ChevronDown
-                        className={`w-5 h-5 text-amber-400 transition-transform ${expandedCondition === condition.name
+                        className={`size-5 text-primary transition-transform ${expandedCondition === condition.name
                             ? 'rotate-180'
                             : ''
                           }`}
                       />
                     </div>
                     {expandedCondition === condition.name && (
-                      <p className="text-stone-400 text-sm mt-3">
+                      <p className="text-muted-foreground text-sm mt-3">
                         {condition.effects}
                       </p>
                     )}
@@ -1329,9 +1329,9 @@ export default function DmToolkit() {
             </div>
 
             {/* Actions in Combat */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <Swords className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Swords className="size-6 text-primary" />
                 Actions in Combat
               </h2>
 
@@ -1339,12 +1339,12 @@ export default function DmToolkit() {
                 {actionsInCombat.map((action) => (
                   <div
                     key={action.name}
-                    className="bg-slate-800/50 border border-slate-700 rounded-lg p-4"
+                    className="bg-muted/50 border border-border rounded-lg p-4"
                   >
-                    <h3 className="text-stone-100 font-semibold mb-2">
+                    <h3 className="text-foreground font-semibold mb-2">
                       {action.name}
                     </h3>
-                    <p className="text-stone-400 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {action.description}
                     </p>
                   </div>
@@ -1353,9 +1353,9 @@ export default function DmToolkit() {
             </div>
 
             {/* Cover Rules */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <Shield className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Shield className="size-6 text-primary" />
                 Cover Rules
               </h2>
 
@@ -1363,18 +1363,18 @@ export default function DmToolkit() {
                 {coverRules.map((rule) => (
                   <div
                     key={rule.type}
-                    className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-center"
+                    className="bg-muted/50 border border-border rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-center"
                   >
                     <div>
-                      <p className="text-stone-100 font-semibold">
+                      <p className="text-foreground font-semibold">
                         {rule.type}
                       </p>
-                      <p className="text-stone-400 text-sm mt-1">
+                      <p className="text-muted-foreground text-sm mt-1">
                         {rule.description}
                       </p>
                     </div>
                     <div className="md:col-span-2 text-right">
-                      <p className="text-amber-400 text-lg font-bold">
+                      <p className="text-primary text-lg font-bold">
                         AC {rule.ac}
                       </p>
                     </div>
@@ -1384,20 +1384,20 @@ export default function DmToolkit() {
             </div>
 
             {/* Difficulty Classes */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <Target className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Target className="size-6 text-primary" />
                 Difficulty Classes
               </h2>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-slate-700">
-                      <th className="px-4 py-3 text-stone-300 font-semibold">
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-3 text-foreground font-semibold">
                         DC
                       </th>
-                      <th className="px-4 py-3 text-stone-300 font-semibold">
+                      <th className="px-4 py-3 text-foreground font-semibold">
                         Difficulty
                       </th>
                     </tr>
@@ -1406,12 +1406,12 @@ export default function DmToolkit() {
                     {dcTable.map((row) => (
                       <tr
                         key={row.dc}
-                        className="border-b border-slate-800 hover:bg-slate-800/30"
+                        className="border-b border-border hover:bg-muted/30"
                       >
-                        <td className="px-4 py-3 text-amber-400 font-bold">
+                        <td className="px-4 py-3 text-primary font-bold">
                           {row.dc}
                         </td>
-                        <td className="px-4 py-3 text-stone-300">
+                        <td className="px-4 py-3 text-foreground">
                           {row.difficulty}
                         </td>
                       </tr>
@@ -1422,23 +1422,23 @@ export default function DmToolkit() {
             </div>
 
             {/* Travel Pace */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <Eye className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Eye className="size-6 text-primary" />
                 Travel Pace
               </h2>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-slate-700">
-                      <th className="px-4 py-3 text-stone-300 font-semibold">
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-3 text-foreground font-semibold">
                         Pace
                       </th>
-                      <th className="px-4 py-3 text-stone-300 font-semibold">
+                      <th className="px-4 py-3 text-foreground font-semibold">
                         Per Hour
                       </th>
-                      <th className="px-4 py-3 text-stone-300 font-semibold">
+                      <th className="px-4 py-3 text-foreground font-semibold">
                         Per Day
                       </th>
                     </tr>
@@ -1447,15 +1447,15 @@ export default function DmToolkit() {
                     {travelPace.map((row) => (
                       <tr
                         key={row.pace}
-                        className="border-b border-slate-800 hover:bg-slate-800/30"
+                        className="border-b border-border hover:bg-muted/30"
                       >
-                        <td className="px-4 py-3 text-stone-100 font-semibold">
+                        <td className="px-4 py-3 text-foreground font-semibold">
                           {row.pace}
                         </td>
-                        <td className="px-4 py-3 text-stone-300">
+                        <td className="px-4 py-3 text-foreground">
                           {row.miles_hour}
                         </td>
-                        <td className="px-4 py-3 text-stone-300">
+                        <td className="px-4 py-3 text-foreground">
                           {row.miles_day}
                         </td>
                       </tr>
@@ -1466,9 +1466,9 @@ export default function DmToolkit() {
             </div>
 
             {/* Exhaustion */}
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-stone-100 mb-6 flex items-center gap-2">
-                <Zap className="w-6 h-6 text-amber-400" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Zap className="size-6 text-primary" />
                 Exhaustion Levels
               </h2>
 
@@ -1476,14 +1476,14 @@ export default function DmToolkit() {
                 {exhaustionLevels.map((level) => (
                   <div
                     key={level.level}
-                    className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 flex items-center gap-4"
+                    className="bg-muted/50 border border-border rounded-lg p-4 flex items-center gap-4"
                   >
-                    <div className="bg-amber-500/20 rounded-lg px-4 py-2 min-w-fit">
-                      <p className="text-amber-400 font-bold text-lg">
+                    <div className="bg-primary/20 rounded-lg px-4 py-2 min-w-fit">
+                      <p className="text-primary font-bold text-lg">
                         Level {level.level}
                       </p>
                     </div>
-                    <p className="text-stone-300">{level.effect}</p>
+                    <p className="text-foreground">{level.effect}</p>
                   </div>
                 ))}
               </div>

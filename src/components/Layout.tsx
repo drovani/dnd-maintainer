@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Sidebar } from './Sidebar';
-import { LoadingSpinner } from './ui/LoadingSpinner';
+import { Skeleton } from './ui/skeleton';
+import { Button } from './ui/button';
 import { useCampaigns } from '@/hooks/useCampaigns';
 
 export function Layout() {
@@ -10,22 +12,19 @@ export function Layout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | undefined>(campaignId);
 
-  const { data: campaigns = [], isLoading } = useCampaigns();
+  const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
 
-  // Update selected campaign when route changes
   useEffect(() => {
     if (campaignId) {
       setSelectedCampaignId(campaignId);
     }
   }, [campaignId]);
 
-  // Handle campaign selection
   const handleSelectCampaign = (id: string) => {
     setSelectedCampaignId(id);
     navigate(`/campaign/${id}`);
   };
 
-  // Handle responsive sidebar collapse
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -38,8 +37,7 @@ export function Layout() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar
         campaigns={campaigns}
         selectedCampaignId={selectedCampaignId}
@@ -48,12 +46,41 @@ export function Layout() {
         onToggleCollapse={setIsCollapsed}
       />
 
-      {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <div className="w-full h-full">
           {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <div className="space-y-3 w-64">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+              <p className="text-muted-foreground text-sm">Loading campaigns...</p>
+            </div>
+          ) : isError ? (
             <div className="flex items-center justify-center h-full">
-              <LoadingSpinner size="lg" text="Loading campaigns..." />
+              <div className="max-w-md mx-auto p-6 rounded-lg border bg-card text-center space-y-4">
+                <AlertTriangle className="size-12 text-destructive mx-auto" />
+                <h2 className="text-xl font-bold text-foreground">Unable to Load Campaigns</h2>
+                <p className="text-muted-foreground text-sm">
+                  Failed to connect after multiple attempts. Please verify:
+                </p>
+                <ul className="text-left text-foreground text-sm space-y-2 list-disc list-inside">
+                  <li>The Supabase project is running and accessible</li>
+                  <li>Your <code className="text-muted-foreground">.env.local</code> contains valid <code className="text-muted-foreground">VITE_SUPABASE_URL</code> and <code className="text-muted-foreground">VITE_SUPABASE_ANON_KEY</code></li>
+                  <li>Your network connection is working</li>
+                  <li>If running locally, <code className="text-muted-foreground">npx supabase status</code> shows the DB is up</li>
+                </ul>
+                {error && (
+                  <p className="text-xs text-muted-foreground break-all">
+                    Error: {error.message}
+                  </p>
+                )}
+                <Button onClick={() => refetch()}>
+                  <RefreshCw className="size-4" />
+                  Try Again
+                </Button>
+              </div>
             </div>
           ) : (
             <Outlet context={{ selectedCampaignId }} />

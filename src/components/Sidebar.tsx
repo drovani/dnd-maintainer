@@ -3,6 +3,7 @@ import {
   BookOpen,
   ChevronDown,
   Download,
+  ExternalLink,
   Menu,
   ScrollText,
   Shield,
@@ -12,8 +13,8 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
-import { Button } from './ui/Button';
+import { Link, NavLink, useParams } from 'react-router-dom';
+import { Button } from './ui/button';
 
 export interface SidebarProps {
   campaigns: Campaign[];
@@ -53,7 +54,7 @@ export function Sidebar({
           onClick={() => onToggleCollapse(!isCollapsed)}
           className="p-2"
         >
-          {isCollapsed ? <Menu className="w-6 h-6" /> : <X className="w-6 h-6" />}
+          {isCollapsed ? <Menu className="size-6" /> : <X className="size-6" />}
         </Button>
       </div>
 
@@ -69,8 +70,7 @@ export function Sidebar({
       <aside
         className={`
           fixed top-0 left-0 h-screen z-40
-          bg-linear-to-b from-slate-950 to-slate-900
-          border-r border-amber-900/20
+          bg-sidebar border-r border-sidebar-border
           transition-all duration-300
           md:relative md:translate-x-0
           ${isCollapsed ? '-translate-x-full' : 'translate-x-0'}
@@ -79,29 +79,29 @@ export function Sidebar({
         `}
       >
         {/* Logo/Title */}
-        <div className="px-4 py-6 border-b border-amber-900/20 flex items-center gap-3">
-          <Sword className="w-8 h-8 text-amber-500 shrink-0" />
+        <Link to="/" className="px-4 py-6 border-b border-sidebar-border flex items-center gap-3 hover:bg-sidebar-accent transition-colors">
+          <Sword className="size-8 text-sidebar-primary shrink-0" />
           {!isCollapsed && (
             <div>
-              <h1 className="text-lg font-bold text-amber-400">D&D Keeper</h1>
-              <p className="text-xs text-slate-500">Campaign Manager</p>
+              <h1 className="text-lg font-bold text-sidebar-foreground">D&D Keeper</h1>
+              <p className="text-xs text-muted-foreground">Campaign Manager</p>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Campaign Selector */}
-        <div className="px-4 py-4 border-b border-amber-900/20">
-          <div className="text-xs uppercase font-semibold text-slate-400 mb-2">
+        <div className="px-4 py-4 border-b border-sidebar-border">
+          <div className="text-xs uppercase font-semibold text-muted-foreground mb-2">
             {!isCollapsed && 'Campaign'}
           </div>
           <div className="relative">
             <button
               onClick={() => setShowCampaignDropdown(!showCampaignDropdown)}
               className={`
-                w-full px-3 py-2 rounded
-                bg-slate-800 border border-amber-900/30
-                text-slate-100 text-sm font-medium
-                hover:border-amber-600 transition-colors
+                w-full px-3 py-2 rounded-lg
+                bg-sidebar-accent border border-sidebar-border
+                text-sidebar-foreground text-sm font-medium
+                hover:border-ring transition-colors
                 flex items-center justify-between gap-2
               `}
               title={currentCampaign?.name}
@@ -111,19 +111,19 @@ export function Sidebar({
                   !isCollapsed ? (
                     currentCampaign.name
                   ) : (
-                    <Shield className="w-4 h-4" />
+                    <Shield className="size-4" />
                   )
                 ) : (
                   !isCollapsed ? (
                     'Select Campaign'
                   ) : (
-                    <Shield className="w-4 h-4" />
+                    <Shield className="size-4" />
                   )
                 )}
               </span>
               {!isCollapsed && (
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform ${showCampaignDropdown ? 'rotate-180' : ''
+                  className={`size-4 transition-transform ${showCampaignDropdown ? 'rotate-180' : ''
                     }`}
                 />
               )}
@@ -132,11 +132,11 @@ export function Sidebar({
             {/* Dropdown Menu */}
             {showCampaignDropdown && !isCollapsed && (
               <div
-                className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-amber-900/30 rounded z-50"
+                className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg z-50 shadow-md"
                 onClick={() => setShowCampaignDropdown(false)}
               >
                 {campaigns.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-slate-400">No campaigns</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground">No campaigns</div>
                 ) : (
                   campaigns.map((campaign) => (
                     <button
@@ -147,8 +147,8 @@ export function Sidebar({
                       }}
                       className={`
                         w-full text-left px-3 py-2 text-sm
-                        hover:bg-amber-900/20 transition-colors
-                        ${campaign.id === currentCampaign?.id ? 'bg-amber-900/30 text-amber-400' : 'text-slate-100'}
+                        hover:bg-accent transition-colors
+                        ${campaign.id === currentCampaign?.id ? 'bg-accent text-accent-foreground font-medium' : 'text-popover-foreground'}
                       `}
                     >
                       {campaign.name}
@@ -173,10 +173,10 @@ export function Sidebar({
               return (
                 <span
                   key={item.label}
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 cursor-not-allowed"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-muted-foreground/50 cursor-not-allowed"
                   title={`${item.label} (select a campaign first)`}
                 >
-                  <Icon className="w-5 h-5 shrink-0" />
+                  <Icon className="size-5 shrink-0" />
                   {!isCollapsed && <span className="font-medium text-sm">{item.label}</span>}
                 </span>
               );
@@ -196,14 +196,14 @@ export function Sidebar({
                     flex items-center gap-3 px-3 py-3 rounded-lg
                     transition-colors duration-200 group
                     ${isActive
-                    ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
-                    : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border border-sidebar-border'
+                    : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
                   }
                   `
                 }
                 title={item.label}
               >
-                <Icon className="w-5 h-5 shrink-0" />
+                <Icon className="size-5 shrink-0" />
                 {!isCollapsed && <span className="font-medium text-sm">{item.label}</span>}
               </NavLink>
             );
@@ -211,7 +211,7 @@ export function Sidebar({
         </nav>
 
         {/* Footer */}
-        <div className="px-2 py-4 border-t border-amber-900/20">
+        <div className="px-2 py-4 border-t border-sidebar-border">
           <NavLink
             to="/export"
             onClick={() => {
@@ -224,21 +224,35 @@ export function Sidebar({
                 flex items-center gap-3 px-3 py-3 rounded-lg
                 transition-colors duration-200 group
                 ${isActive
-                ? 'bg-amber-900/30 text-amber-400 border border-amber-600/30'
-                : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border border-sidebar-border'
+                : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
               }
               `
             }
             title="Export Data"
           >
-            <Download className="w-5 h-5 shrink-0" />
+            <Download className="size-5 shrink-0" />
             {!isCollapsed && <span className="font-medium text-sm">Export Data</span>}
           </NavLink>
           {!isCollapsed && (
-            <p className="text-xs text-slate-500 px-3 mt-3">
-              Campaign Manager v1.0<br />
-              For D&D 5e
-            </p>
+            <div className="flex items-center gap-2 px-3 mt-3">
+              <p className="text-xs text-muted-foreground flex-1">
+                Campaign Manager v1.0<br />
+                For D&D 5e
+              </p>
+              <a
+                href="https://github.com/drovani/dnd-maintainer"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-sidebar-foreground transition-colors"
+                title="View on GitHub"
+              >
+                <span className="relative inline-block size-5">
+                  <svg className="size-5" role="img" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+                  <ExternalLink className="size-2 absolute -bottom-1 -right-1.5 stroke-3" />
+                </span>
+              </a>
+            </div>
           )}
         </div>
       </aside>

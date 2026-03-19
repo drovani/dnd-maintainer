@@ -20,15 +20,15 @@ import {
 import { useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-type NoteCategory = 'plot' | 'npc' | 'location' | 'loot' | 'rules' | 'other'
+type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 
 const CATEGORIES: { value: NoteCategory; label: string; icon: React.ReactNode }[] = [
-  { value: 'plot', label: 'Lore', icon: <Scroll className="w-4 h-4" /> },
-  { value: 'npc', label: 'NPCs', icon: <Users className="w-4 h-4" /> },
-  { value: 'location', label: 'Locations', icon: <MapPin className="w-4 h-4" /> },
-  { value: 'loot', label: 'Items', icon: <Wand2 className="w-4 h-4" /> },
-  { value: 'rules', label: 'Rules', icon: <BookOpen className="w-4 h-4" /> },
-  { value: 'other', label: 'General', icon: <Tag className="w-4 h-4" /> },
+  { value: 'lore', label: 'Lore', icon: <Scroll className="size-4" /> },
+  { value: 'npc', label: 'NPCs', icon: <Users className="size-4" /> },
+  { value: 'location', label: 'Locations', icon: <MapPin className="size-4" /> },
+  { value: 'item', label: 'Items', icon: <Wand2 className="size-4" /> },
+  { value: 'quest', label: 'Quests', icon: <BookOpen className="size-4" /> },
+  { value: 'general', label: 'General', icon: <Tag className="size-4" /> },
 ]
 
 export default function NotesPage() {
@@ -47,7 +47,7 @@ export default function NotesPage() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: 'other' as NoteCategory,
+    category: 'general' as NoteCategory,
     tags: '' as string,
     pinned: false,
   })
@@ -64,7 +64,7 @@ export default function NotesPage() {
         .order('updated_at', { ascending: false })
 
       if (error) throw error
-      return data as Note[]
+      return data as unknown as Note[]
     },
     enabled: !!campaignId,
   })
@@ -82,7 +82,7 @@ export default function NotesPage() {
       if (
         searchQuery &&
         !note.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !note.content.toLowerCase().includes(searchQuery.toLowerCase())
+        !note.content?.toLowerCase().includes(searchQuery.toLowerCase())
       ) {
         return false
       }
@@ -98,13 +98,13 @@ export default function NotesPage() {
     })
     .sort((a, b) => {
       if (sortBy === 'pinned') {
-        if (a.pinned === b.pinned) {
+        if (a.is_pinned === b.is_pinned) {
           return (
             new Date(b.updated_at).getTime() -
             new Date(a.updated_at).getTime()
           )
         }
-        return (a.pinned ? -1 : 1) || (b.pinned ? 1 : -1)
+        return (a.is_pinned ? -1 : 1) || (b.is_pinned ? 1 : -1)
       } else if (sortBy === 'alphabetical') {
         return a.title.localeCompare(b.title)
       }
@@ -129,7 +129,7 @@ export default function NotesPage() {
               .split(',')
               .map((t) => t.trim())
               .filter((t) => t),
-            pinned: noteData.pinned,
+            is_pinned: noteData.pinned,
           },
         ])
         .select()
@@ -151,7 +151,7 @@ export default function NotesPage() {
 
       const { error } = await supabase
         .from('notes')
-        .update(noteData)
+        .update(noteData as never)
         .eq('id', editingNote.id)
 
       if (error) throw error
@@ -182,7 +182,7 @@ export default function NotesPage() {
     setFormData({
       title: '',
       content: '',
-      category: 'other',
+      category: 'general',
       tags: '',
       pinned: false,
     })
@@ -198,10 +198,10 @@ export default function NotesPage() {
     setEditingNote(note)
     setFormData({
       title: note.title,
-      content: note.content,
-      category: note.category,
+      content: note.content ?? '',
+      category: note.category ?? 'general',
       tags: note.tags?.join(', ') || '',
-      pinned: note.pinned || false,
+      pinned: note.is_pinned || false,
     })
     setShowNewNoteModal(true)
   }
@@ -220,7 +220,7 @@ export default function NotesPage() {
           .split(',')
           .map((t) => t.trim())
           .filter((t) => t),
-        pinned: formData.pinned,
+        is_pinned: formData.pinned,
       })
       setShowNewNoteModal(false)
     } else {
@@ -252,7 +252,7 @@ export default function NotesPage() {
   const handleTogglePinned = (note: Note) => {
     updateNoteMutation.mutate({
       id: note.id,
-      pinned: !note.pinned,
+      is_pinned: !note.is_pinned,
     })
   }
 
@@ -272,10 +272,10 @@ export default function NotesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-950 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="rounded-lg bg-red-900/20 border border-red-500/50 p-4 text-red-200 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
+            <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">Error loading notes</p>
               <p className="text-sm">{String(error)}</p>
@@ -287,45 +287,45 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-linear-to-r from-slate-900 to-slate-800 border-b border-amber-500/20 sticky top-0 z-10">
+      <div className="bg-muted/50 border-b border-border sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-stone-100 flex items-center gap-3">
-                <Scroll className="w-10 h-10 text-amber-400" />
+              <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+                <Scroll className="size-10 text-primary" />
                 DM Notes
               </h1>
-              <p className="text-stone-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 {notes.length} note{notes.length !== 1 ? 's' : ''} total
               </p>
             </div>
             <button
               onClick={handleOpenNewNote}
-              className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-amber-600/50"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="size-5" />
               New Note
             </button>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-stone-500" />
+            <Search className="absolute left-3 top-3 size-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+              className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
           </div>
         </div>
       </div>
 
       {/* Category Tabs and Controls */}
-      <div className="bg-slate-900/50 border-b border-slate-800 sticky top-24 z-10">
+      <div className="bg-muted/50 border-b border-border sticky top-24 z-10">
         <div className="max-w-6xl mx-auto px-8 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             {/* Category Tabs */}
@@ -333,8 +333,8 @@ export default function NotesPage() {
               <button
                 onClick={() => setSelectedCategory('all')}
                 className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap ${selectedCategory === 'all'
-                    ? 'bg-amber-600 text-slate-950'
-                    : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-foreground hover:bg-muted'
                   }`}
               >
                 All
@@ -344,8 +344,8 @@ export default function NotesPage() {
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium whitespace-nowrap ${selectedCategory === cat.value
-                      ? 'bg-amber-600 text-slate-950'
-                      : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground hover:bg-muted'
                     }`}
                 >
                   {cat.icon}
@@ -358,7 +358,7 @@ export default function NotesPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="px-4 py-2 bg-slate-800 border border-slate-700 text-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+              className="px-4 py-2 bg-muted border border-border text-foreground rounded-lg outline-none focus:border-ring text-sm"
             >
               <option value="recent">Recently Updated</option>
               <option value="pinned">Pinned First</option>
@@ -369,7 +369,7 @@ export default function NotesPage() {
           {/* Tag Filters */}
           {allTags.length > 0 && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
-              <span className="text-stone-400 text-sm">Tags:</span>
+              <span className="text-muted-foreground text-sm">Tags:</span>
               {allTags.map((tag) => (
                 <button
                   key={tag}
@@ -381,8 +381,8 @@ export default function NotesPage() {
                     }
                   }}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${selectedTags.includes(tag)
-                      ? 'bg-amber-600 text-slate-950'
-                      : 'bg-slate-800 text-stone-300 hover:bg-slate-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground hover:bg-muted'
                     }`}
                 >
                   {tag}
@@ -391,7 +391,7 @@ export default function NotesPage() {
               {selectedTags.length > 0 && (
                 <button
                   onClick={() => setSelectedTags([])}
-                  className="text-stone-400 hover:text-stone-200 text-xs ml-2"
+                  className="text-muted-foreground hover:text-foreground text-xs ml-2"
                 >
                   Clear filters
                 </button>
@@ -406,17 +406,17 @@ export default function NotesPage() {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin">
-              <Scroll className="w-8 h-8 text-amber-400" />
+              <Scroll className="size-8 text-primary" />
             </div>
-            <p className="text-stone-400 mt-4">Loading notes...</p>
+            <p className="text-muted-foreground mt-4">Loading notes...</p>
           </div>
         ) : filteredNotes.length === 0 ? (
-          <div className="text-center py-24 bg-slate-900/30 rounded-lg border border-slate-800 p-12">
-            <BookOpen className="w-16 h-16 text-amber-400/50 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-stone-300 mb-2">
+          <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
+            <BookOpen className="size-16 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-2">
               {notes.length === 0 ? 'No Notes Yet' : 'No Notes Match'}
             </h3>
-            <p className="text-stone-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               {notes.length === 0
                 ? 'Create your first note to track campaign details!'
                 : 'Try adjusting your filters or search.'}
@@ -424,9 +424,9 @@ export default function NotesPage() {
             {notes.length === 0 && (
               <button
                 onClick={handleOpenNewNote}
-                className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 px-6 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="size-5" />
                 Create Your First Note
               </button>
             )}
@@ -436,39 +436,39 @@ export default function NotesPage() {
             {filteredNotes.map((note) => (
               <div
                 key={note.id}
-                className="group bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:shadow-amber-600/20"
+                className="group bg-card border border-border hover:border-ring rounded-lg overflow-hidden transition-all hover:shadow-lg hover:shadow-md"
               >
                 {/* Card Header */}
-                <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex items-start justify-between">
+                <div className="bg-muted/50 px-6 py-4 border-b border-border flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-amber-400">
-                        {getCategoryIcon(note.category)}
+                      <span className="text-primary">
+                        {note.category && getCategoryIcon(note.category)}
                       </span>
-                      <span className="text-xs font-semibold text-stone-400 uppercase">
-                        {getCategoryLabel(note.category)}
+                      <span className="text-xs font-semibold text-muted-foreground uppercase">
+                        {note.category ? getCategoryLabel(note.category) : 'Uncategorized'}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-stone-100 group-hover:text-amber-400 transition-colors line-clamp-2">
+                    <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
                       {note.title}
                     </h3>
                   </div>
 
                   <button
                     onClick={() => handleTogglePinned(note)}
-                    className={`ml-2 transition-colors ${note.pinned
-                        ? 'text-amber-400'
-                        : 'text-slate-400 hover:text-amber-400'
+                    className={`ml-2 transition-colors ${note.is_pinned
+                      ? 'text-primary'
+                      : 'text-muted-foreground hover:text-primary'
                       }`}
                   >
-                    <Pin className="w-5 h-5" />
+                    <Pin className="size-5" />
                   </button>
                 </div>
 
                 {/* Card Body */}
                 <div className="px-6 py-4">
                   {note.content && (
-                    <p className="text-stone-400 text-sm line-clamp-3 mb-3">
+                    <p className="text-muted-foreground text-sm line-clamp-3 mb-3">
                       {note.content}
                     </p>
                   )}
@@ -479,7 +479,7 @@ export default function NotesPage() {
                       {note.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-2 py-1 bg-slate-800 text-amber-400/70 rounded text-xs"
+                          className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs"
                         >
                           #{tag}
                         </span>
@@ -488,8 +488,8 @@ export default function NotesPage() {
                   )}
 
                   {/* Timestamp */}
-                  <div className="flex items-center gap-2 text-stone-500 text-xs">
-                    <Clock className="w-3 h-3" />
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                    <Clock className="size-3" />
                     {new Date(note.updated_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -499,18 +499,18 @@ export default function NotesPage() {
                 </div>
 
                 {/* Card Footer */}
-                <div className="bg-slate-800/50 px-6 py-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                <div className="bg-muted/50 px-6 py-3 border-t border-border flex items-center justify-between gap-2">
                   <button
                     onClick={() => handleEditNote(note)}
-                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-stone-200 font-semibold py-2 rounded transition-colors text-sm"
+                    className="flex-1 bg-muted hover:bg-accent text-foreground font-semibold py-2 rounded transition-colors text-sm"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteNote(note.id)}
-                    className="text-slate-400 hover:text-red-400 transition-colors"
+                    className="text-muted-foreground hover:text-destructive transition-colors"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="size-5" />
                   </button>
                 </div>
               </div>
@@ -522,15 +522,15 @@ export default function NotesPage() {
       {/* Note Editor Modal */}
       {showNewNoteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-lg border border-amber-500/30 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-card rounded-lg border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-slate-900 border-b border-amber-500/20 px-8 py-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-stone-100">
+            <div className="sticky top-0 bg-card border-b border-border px-8 py-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">
                 {editingNote ? 'Edit Note' : 'New Note'}
               </h2>
               {isSaving && (
-                <div className="flex items-center gap-2 text-amber-400 text-sm">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                <div className="flex items-center gap-2 text-primary text-sm">
+                  <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
                   Saving...
                 </div>
               )}
@@ -539,16 +539,16 @@ export default function NotesPage() {
                   setShowNewNoteModal(false)
                   if (!editingNote) resetForm()
                 }}
-                className="text-slate-400 hover:text-stone-200 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="size-6" />
               </button>
             </div>
 
             {/* Modal Content */}
             <form onSubmit={handleSaveNote} className="px-8 py-6 space-y-6">
               <div>
-                <label className="block text-stone-300 font-semibold mb-2">
+                <label className="block text-foreground font-semibold mb-2">
                   Title *
                 </label>
                 <input
@@ -562,13 +562,13 @@ export default function NotesPage() {
                     }
                   }}
                   placeholder="Note title"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-stone-300 font-semibold mb-2">
+                <label className="block text-foreground font-semibold mb-2">
                   Category
                 </label>
                 <select
@@ -581,7 +581,7 @@ export default function NotesPage() {
                       setFormData({ ...formData, category: value })
                     }
                   }}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-stone-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>
@@ -592,7 +592,7 @@ export default function NotesPage() {
               </div>
 
               <div>
-                <label className="block text-stone-300 font-semibold mb-2">
+                <label className="block text-foreground font-semibold mb-2">
                   Content
                 </label>
                 <textarea
@@ -606,12 +606,12 @@ export default function NotesPage() {
                   }}
                   placeholder="Your note content (markdown supported)"
                   rows={8}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 resize-none"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-stone-300 font-semibold mb-2">
+                <label className="block text-foreground font-semibold mb-2">
                   Tags (comma-separated)
                 </label>
                 <input
@@ -631,7 +631,7 @@ export default function NotesPage() {
                     }
                   }}
                   placeholder="e.g., important, villain, quest"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 />
               </div>
 
@@ -647,24 +647,24 @@ export default function NotesPage() {
                       setFormData({ ...formData, pinned: e.target.checked })
                     }
                   }}
-                  className="w-4 h-4 rounded bg-slate-800 border border-slate-700 cursor-pointer accent-amber-500"
+                  className="size-4 rounded bg-muted border border-border cursor-pointer accent-primary"
                 />
-                <label htmlFor="pinned-checkbox" className="text-stone-300">
+                <label htmlFor="pinned-checkbox" className="text-foreground">
                   Pin this note (appears at top)
                 </label>
               </div>
 
               {/* Form Actions */}
-              <div className="flex gap-3 pt-4 border-t border-slate-700">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   type="submit"
                   disabled={
                     createNoteMutation.isPending ||
                     updateNoteMutation.isPending
                   }
-                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-slate-950 font-bold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="size-4" />
                   {createNoteMutation.isPending || updateNoteMutation.isPending
                     ? 'Saving...'
                     : editingNote
@@ -677,9 +677,9 @@ export default function NotesPage() {
                     type="button"
                     onClick={() => handleDeleteNote(editingNote.id)}
                     disabled={deleteNoteMutation.isPending}
-                    className="px-6 bg-red-900/20 hover:bg-red-900/40 text-red-400 font-bold py-3 rounded-lg transition-colors disabled:opacity-50"
+                    className="px-6 bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg transition-colors disabled:opacity-50"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="size-4" />
                   </button>
                 )}
 
@@ -689,7 +689,7 @@ export default function NotesPage() {
                     setShowNewNoteModal(false)
                     if (!editingNote) resetForm()
                   }}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-stone-200 font-bold py-3 rounded-lg transition-colors"
+                  className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-3 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
