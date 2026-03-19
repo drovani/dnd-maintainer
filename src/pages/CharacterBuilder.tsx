@@ -45,7 +45,6 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
   features: [], equipment: [],
   spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },
   personalityTraits: '', ideals: '', bonds: '', flaws: '', appearance: '', backstory: '',
-  hp_max: 0, ac: 10,
 }
 
 export default function CharacterBuilder() {
@@ -71,18 +70,22 @@ export default function CharacterBuilder() {
   const racialBonuses = selectedRace?.abilityBonuses ?? {}
   const conWithRacial = characterData.abilities.con + (racialBonuses.con ?? 0)
   const dexWithRacial = characterData.abilities.dex + (racialBonuses.dex ?? 0)
-  const calculatedHp = (selectedClass?.hitDie ?? 8) + getAbilityModifier(conWithRacial)
+  const calculatedHp = selectedClass
+    ? selectedClass.hitDie + getAbilityModifier(conWithRacial)
+    : null
   const calculatedAc = 10 + getAbilityModifier(dexWithRacial)
 
-  const buildPayload = () => ({
-    campaign_id: campaignId as string,
+  const buildPayload = () => {
+    if (!campaignId) throw new Error('Cannot save: no campaign ID in URL')
+    return {
+    campaign_id: campaignId,
     name: characterData.name, character_type: characterData.character_type,
     player_name: characterData.player_name || null,
     race: selectedRace?.name ?? null, class: selectedClass?.name ?? null,
     subclass: null, level: characterData.level,
     background: characterData.custom_background || characterData.background || null,
     alignment: characterData.alignment || null,
-    hit_points_max: calculatedHp, hit_points_current: calculatedHp, armor_class: calculatedAc,
+    hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
     speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
     saving_throws: Object.fromEntries(
       (selectedClass?.savingThrowProficiencies ?? []).map((a) => [ABILITY_NAME_TO_KEY[a], { proficient: true }])
@@ -93,7 +96,7 @@ export default function CharacterBuilder() {
     ideals: characterData.ideals || null, bonds: characterData.bonds || null,
     flaws: characterData.flaws || null, appearance: characterData.appearance || null,
     backstory: characterData.backstory || null, notes: null,
-  })
+  }}
 
   const validateStep = (step: StepType) => {
     setFieldErrors((prev) => {
@@ -115,6 +118,7 @@ export default function CharacterBuilder() {
     const id = STEPS[currentStepIndex].id
     setVisitedSteps((prev) => new Set([...prev, id]))
     validateStep(id)
+    // useBuilderAutosave sets saveStatus to 'error' internally; catch prevents unhandled rejection
     saveDraft(buildPayload()).catch((err) => console.error('Autosave failed during step navigation:', err))
     setCurrentStep(targetStep)
   }
@@ -192,7 +196,7 @@ export default function CharacterBuilder() {
   }
 
   const addFeature = () => setCharacterData((prev) => ({
-    ...prev, features: [...prev.features, { id: `feature-${Date.now()}`, name: '', description: '', source: '', uses: 0 }],
+    ...prev, features: [...prev.features, { id: crypto.randomUUID(), name: '', description: '', source: '', uses: 0 }],
   }))
   const updateFeature = (id: string, updates: Partial<CharacterData['features'][0]>) =>
     setCharacterData((prev) => ({ ...prev, features: prev.features.map((f) => f.id === id ? { ...f, ...updates } : f) }))
@@ -200,7 +204,7 @@ export default function CharacterBuilder() {
     setCharacterData((prev) => ({ ...prev, features: prev.features.filter((f) => f.id !== id) }))
 
   const addEquipment = () => setCharacterData((prev) => ({
-    ...prev, equipment: [...prev.equipment, { id: `equipment-${Date.now()}`, name: '', quantity: 1, weight: 0, equipped: false }],
+    ...prev, equipment: [...prev.equipment, { id: crypto.randomUUID(), name: '', quantity: 1, weight: 0, equipped: false }],
   }))
   const updateEquipment = (id: string, updates: Partial<CharacterData['equipment'][0]>) =>
     setCharacterData((prev) => ({ ...prev, equipment: prev.equipment.map((e) => e.id === id ? { ...e, ...updates } : e) }))
@@ -239,6 +243,8 @@ export default function CharacterBuilder() {
         <BackstoryStep personalityTraits={cd.personalityTraits} ideals={cd.ideals} bonds={cd.bonds}
           flaws={cd.flaws} appearance={cd.appearance} backstory={cd.backstory} onChange={updateBackstory} />
       )
+      default:
+        return <p className="text-destructive">Unknown step: {currentStep}</p>
     }
   }
 
@@ -291,7 +297,8 @@ export default function CharacterBuilder() {
               {finalizeError ? `Failed to finalize character: ${finalizeError}` : 'Failed to save draft. Your recent changes may not have been saved.'}
             </span>
             {saveStatus === 'error' && (
-              <Button variant="outline" size="sm" onClick={() => saveDraft(buildPayload()).catch((err) => console.error('Retry save failed:', err))}>
+              <Button variant="outline" size="sm" onClick={() => /* saveStatus updated by useBuilderAutosave; catch prevents unhandled rejection */
+                  saveDraft(buildPayload()).catch((err) => console.error('Retry save failed:', err))}>
                 Retry Save
               </Button>
             )}

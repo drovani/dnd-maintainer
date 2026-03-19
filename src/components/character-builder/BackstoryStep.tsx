@@ -9,7 +9,7 @@ interface BackstoryStepProps {
   flaws: string
   appearance: string
   backstory: string
-  onChange: (updates: Partial<CharacterData>) => void
+  onChange: (updates: Partial<Pick<CharacterData, 'personalityTraits' | 'ideals' | 'bonds' | 'flaws' | 'appearance' | 'backstory'>>) => void
 }
 
 export function BackstoryStep({

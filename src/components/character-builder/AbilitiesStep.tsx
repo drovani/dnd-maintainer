@@ -30,14 +30,14 @@ import type { CharacterData } from './types'
 interface AbilitiesStepProps {
   abilityMethod: CharacterData['abilityMethod']
   abilities: AbilityScores
-  abilityAssignments: Record<string, number | null>
+  abilityAssignments: Record<keyof AbilityScores, number | null>
   rolledValues: number[]
   racialBonuses: Partial<AbilityScores>
   selectedRace: DndRace | undefined
   onMethodChange: (method: CharacterData['abilityMethod']) => void
   onAbilitiesChange: (
     abilities: AbilityScores,
-    assignments: Record<string, number | null>,
+    assignments: Record<keyof AbilityScores, number | null>,
     rolledValues?: number[]
   ) => void
 }
@@ -79,7 +79,7 @@ export function AbilitiesStep({
         .filter(([, val]) => val === value).length
       if (assignedCount > poolCount) {
         // Unassign the first other ability that has this value
-        for (const key of Object.keys(newAssignments)) {
+        for (const key of Object.keys(newAssignments) as Array<keyof AbilityScores>) {
           if (key !== ability && newAssignments[key] === value) {
             newAssignments[key] = null
             break
@@ -124,7 +124,7 @@ export function AbilitiesStep({
         if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
         setDisplayedRolls(finalValues)
         const resetAbilities: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
-        const resetAssignments: Record<string, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
+        const resetAssignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
         onAbilitiesChangeRef.current(resetAbilities, resetAssignments, finalValues)
         setIsRolling(false)
       }
@@ -220,6 +220,8 @@ export function AbilitiesStep({
   const pointBuyDiff = pointBuyEquiv !== null ? pointBuyEquiv - POINT_BUY_TOTAL : null
 
   const handleMethodChange = (val: string) => {
+    const VALID_METHODS: CharacterData['abilityMethod'][] = ['standard-array', 'point-buy', 'rolling']
+    if (!VALID_METHODS.includes(val as CharacterData['abilityMethod'])) return
     if (rollIntervalRef.current) {
       clearInterval(rollIntervalRef.current)
       rollIntervalRef.current = null

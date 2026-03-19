@@ -32,7 +32,7 @@ interface BasicsStepProps {
   alignment: string
   level: number
   fieldErrors: Partial<Record<'name' | 'race' | 'class', boolean>>
-  onChange: (updates: Partial<CharacterData>) => void
+  onChange: (updates: Partial<Pick<CharacterData, 'character_type' | 'player_name' | 'name' | 'race' | 'class' | 'background' | 'custom_background' | 'alignment' | 'level'>>) => void
 }
 
 export function BasicsStep({
@@ -48,7 +48,7 @@ export function BasicsStep({
   fieldErrors,
   onChange,
 }: BasicsStepProps) {
-  const { data: playerNames = [] } = usePlayerNames()
+  const { data: playerNames = [], isError: playerNamesError } = usePlayerNames()
 
   return (
     <div className="space-y-6">
@@ -98,6 +98,9 @@ export function BasicsStep({
               onChange={(value) => onChange({ player_name: value })}
               placeholder="Enter player name"
             />
+            {playerNamesError && (
+              <p className="text-xs text-destructive">Could not load player name suggestions</p>
+            )}
           </div>
         )}
       </div>
@@ -123,7 +126,10 @@ export function BasicsStep({
                     {group.options.length > 1 && <SelectLabel>{group.label}</SelectLabel>}
                     {group.options.map((option) => {
                       const raceItem = DND_RACES.find((r) => r.name === option.label)
-                      if (!raceItem) return null
+                      if (!raceItem) {
+                        console.warn(`Race not found for "${option.label}" — check DND_RACES/DND_RACE_GROUPS data sync`)
+                        return null
+                      }
                       return (
                         <SelectItem key={raceItem.id} value={raceItem.id} className={group.options.length > 1 ? 'pl-4' : ''}>
                           {option.label}

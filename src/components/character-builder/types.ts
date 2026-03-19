@@ -15,7 +15,7 @@ export interface CharacterData {
   // Abilities
   abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
   abilities: AbilityScores
-  abilityAssignments: Record<string, number | null>
+  abilityAssignments: Record<keyof AbilityScores, number | null>
   rolledValues: number[]
 
   // Skills
@@ -40,12 +40,7 @@ export interface CharacterData {
   bonds: string
   flaws: string
   appearance: string
-  backstory: string
-
-  // Combat (calculated)
-  hp_max: number
-  ac: number
-}
+  backstory: string}
 
 export const ABILITY_NAMES: Record<keyof AbilityScores, string> = {
   str: 'Strength',
