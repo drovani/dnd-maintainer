@@ -54,7 +54,7 @@ export function SkillsStep({
           const abilityKey = skill.ability
           const abilityMod = getAbilityModifier(abilities[abilityKey] + (racialBonuses[abilityKey] ?? 0))
           const totalMod = skillData.proficient ? abilityMod + profBonus : abilityMod
-          const abbrev = t(`abilityAbbreviations.${abilityKey}` as never, { defaultValue: ABILITY_ABBREVIATIONS[abilityKey] })
+          const abbrev = t(`abilityAbbreviations.${abilityKey}`, { defaultValue: ABILITY_ABBREVIATIONS[abilityKey] })
           const inPool = cls.skillPool === null || (cls.skillPool as readonly string[]).includes(skill.id)
           const isDisabled = !inPool || (atMax && !skillData.proficient)
 
@@ -80,7 +80,7 @@ export function SkillsStep({
                 htmlFor={`prof-${skill.id}`}
                 className="flex-1 cursor-pointer"
               >
-                {t(`skills.${skill.id}` as never, { defaultValue: skill.name })}
+                {t(`skills.${skill.id}`, { defaultValue: skill.name })}
                 <span className="text-xs text-muted-foreground">
                   ({abbrev} {abilityMod >= 0 ? '+' : ''}{abilityMod})
                 </span>

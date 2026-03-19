@@ -148,7 +148,7 @@ export default function CharacterSheet() {
     )
   }
 
-  const alignmentName = character.alignment ? t(`alignments.${character.alignment}` as never, { defaultValue: character.alignment }) : ''
+  const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
   const profBonus = getProficiencyBonus(character.level)
 
   return (
@@ -175,7 +175,7 @@ export default function CharacterSheet() {
             <div>
               <span className="text-muted-foreground">Class</span>
               <p className="text-foreground font-semibold">
-                {character.class ? t(`classes.${character.class}` as never, { defaultValue: character.class }) : ''}
+                {character.class ? t(`classes.${character.class}`, { defaultValue: character.class }) : ''}
                 {character.subclass ? ` (${character.subclass})` : ''}
               </p>
             </div>
@@ -186,13 +186,13 @@ export default function CharacterSheet() {
             <div>
               <span className="text-muted-foreground">Race</span>
               <p className="text-foreground font-semibold">
-                {character.race ? t(`races.${character.race}` as never, { defaultValue: character.race }) : ''}
+                {character.race ? t(`races.${character.race}`, { defaultValue: character.race }) : ''}
               </p>
             </div>
             <div>
               <span className="text-muted-foreground">Background</span>
               <p className="text-foreground font-semibold">
-                {character.background ? t(`backgrounds.${character.background}` as never, { defaultValue: character.background }) : ''}
+                {character.background ? t(`backgrounds.${character.background}`, { defaultValue: character.background }) : ''}
               </p>
             </div>
             <div>
@@ -231,7 +231,7 @@ export default function CharacterSheet() {
                   const modifier = getAbilityModifier(score)
                   return (
                     <div key={ability} className="bg-muted/50 p-3 rounded border">
-                      <div className="text-xs text-muted-foreground mb-1">{t(`abilities.${ability}` as never)}</div>
+                      <div className="text-xs text-muted-foreground mb-1">{t(`abilities.${ability}`)}</div>
                       <div className="flex items-end justify-between">
                         <div className="text-sm font-bold text-foreground">{score}</div>
                         <div
@@ -254,7 +254,7 @@ export default function CharacterSheet() {
                   const modifier = getAbilityModifier(character.abilities[ability])
                   return (
                     <div key={ability} className="flex justify-between text-foreground">
-                      <span>{t(`abilities.${ability}` as never)}</span>
+                      <span>{t(`abilities.${ability}`)}</span>
                       <span className="font-mono font-bold">
                         {modifier >= 0 ? '+' : ''}{modifier}
                       </span>
@@ -272,7 +272,7 @@ export default function CharacterSheet() {
                   const abilityKey = ability as keyof typeof character.abilities
                   return (
                   <div key={ability}>
-                    <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${abilityKey}` as never)}</div>
+                    <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${abilityKey}`)}</div>
                     {skills.map((skill) => {
                       const skillData = character.skills?.[skill.id] ?? { proficient: false, expertise: false }
                       const abilityMod = getAbilityModifier(
@@ -285,7 +285,7 @@ export default function CharacterSheet() {
                       return (
                         <div key={skill.id} className="flex justify-between text-foreground py-1">
                           <span className={skillData.proficient ? 'font-bold' : ''}>
-                            {t(`skills.${skill.id}` as never, { defaultValue: skill.name })}
+                            {t(`skills.${skill.id}`, { defaultValue: skill.name })}
                           </span>
                           <span
                             className={`font-mono ${skillData.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
@@ -636,7 +636,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_CLASSES.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{t(`classes.${c.id}` as never)}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>{t(`classes.${c.id}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -670,9 +670,9 @@ function EditHeaderDialog({
               <SelectContent>
                 {DND_RACE_GROUPS.map((group) => (
                   <SelectGroup key={group.id}>
-                    <SelectLabel>{t(`raceGroups.${group.id}` as never)}</SelectLabel>
+                    <SelectLabel>{t(`raceGroups.${group.id}`)}</SelectLabel>
                     {group.options.map((opt) => (
-                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}` as never)}</SelectItem>
+                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}`)}</SelectItem>
                     ))}
                   </SelectGroup>
                 ))}
@@ -687,7 +687,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_BACKGROUNDS.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}` as never, { defaultValue: b.id })}</SelectItem>
+                  <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}`, { defaultValue: b.id })}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -700,7 +700,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_ALIGNMENTS.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{t(`alignments.${a.id}` as never)}</SelectItem>
+                  <SelectItem key={a.id} value={a.id}>{t(`alignments.${a.id}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -758,7 +758,7 @@ function EditAbilitiesDialog({
         <div className="space-y-4">
           {abilityKeys.map((ability) => (
             <div key={ability} className="flex items-center gap-4">
-              <Label className="w-28">{t(`abilities.${ability}` as never)}</Label>
+              <Label className="w-28">{t(`abilities.${ability}`)}</Label>
               <Input
                 type="number"
                 min={1}
@@ -826,7 +826,7 @@ function EditSkillsDialog({
             const data = form[skill.id]
             return (
               <div key={skill.id} className="flex items-center justify-between py-1.5 border-b">
-                <span className="text-sm text-foreground">{t(`skills.${skill.id}` as never, { defaultValue: skill.name })}</span>
+                <span className="text-sm text-foreground">{t(`skills.${skill.id}`, { defaultValue: skill.name })}</span>
                 <div className="flex gap-1">
                   <button
                     type="button"

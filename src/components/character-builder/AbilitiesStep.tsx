@@ -156,14 +156,14 @@ export function AbilitiesStep({
     return (
       <Card key={ability}>
         <CardContent className="px-3 py-2 space-y-1">
-          <Label className="text-xs font-semibold text-muted-foreground">{t(`abilities.${ability}` as never)}</Label>
+          <Label className="text-xs font-semibold text-muted-foreground">{t(`abilities.${ability}`)}</Label>
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">{scoreInput}</div>
             {raceBonus > 0 && selectedRace && (
               <Badge
                 variant="secondary"
                 className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={`${selectedRace.name} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab}` as never)}`).join(', ')}`}
+                title={`${selectedRace.name} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab}`)}`).join(', ')}`}
               >
                 +{raceBonus}
               </Badge>

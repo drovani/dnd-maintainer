@@ -278,7 +278,7 @@ export default function CharacterBuilder() {
                   >
                     {index + 1}
                   </button>
-                  <span className="text-xs text-muted-foreground mt-2">{t(`characterBuilder.steps.${step.id}` as never)}</span>
+                  <span className="text-xs text-muted-foreground mt-2">{t(`characterBuilder.steps.${step.id}`)}</span>
                 </div>
                 {index < STEPS.length - 1 && (
                   <div className={`flex-1 h-1 mx-2 self-start mt-5 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'}`} />

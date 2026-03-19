@@ -60,7 +60,7 @@ UPDATE encounters
 SET combatants = (
   SELECT jsonb_agg(
     CASE
-      WHEN combatant ? 'conditions' THEN
+      WHEN combatant ? 'conditions' AND jsonb_typeof(combatant -> 'conditions') = 'array' THEN
         combatant || jsonb_build_object(
           'conditions',
           (
