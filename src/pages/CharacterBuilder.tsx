@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 type StepType = 'basics' | 'abilities' | 'skills' | 'features' | 'equipment' | 'spells' | 'backstory'
-type RequiredField = 'name' | 'race' | 'class'
+type RequiredField = 'name' | 'race' | 'class' | 'gender'
 
 const STEPS: { id: StepType; label: string }[] = [
   { id: 'basics', label: 'Basics' }, { id: 'abilities', label: 'Abilities' },
@@ -31,6 +31,7 @@ const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[]
   { field: 'name', step: 'basics', label: 'Character Name' },
   { field: 'race', step: 'basics', label: 'Race' },
   { field: 'class', step: 'basics', label: 'Class' },
+  { field: 'gender', step: 'basics', label: 'Gender' },
 ]
 
 const INITIAL_CHARACTER_DATA: CharacterData = {
@@ -220,7 +221,7 @@ export default function CharacterBuilder() {
         <BasicsStep characterType={cd.character_type} name={cd.name} playerName={cd.player_name}
           race={cd.race} characterClass={cd.class} background={cd.background}
           customBackground={cd.custom_background} alignment={cd.alignment}
-          level={cd.level} fieldErrors={fieldErrors} onChange={updateBasics} />
+          level={cd.level} gender={cd.gender} fieldErrors={fieldErrors} onChange={updateBasics} />
       )
       case 'abilities': return (
         <AbilitiesStep abilityMethod={cd.abilityMethod} abilities={cd.abilities}

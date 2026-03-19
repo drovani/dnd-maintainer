@@ -7,6 +7,7 @@ import {
   getAbilityModifier,
   getProficiencyBonus,
   type DndSkill,
+  type DndGender,
 } from '@/lib/dnd-helpers'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
@@ -209,6 +210,12 @@ export default function CharacterSheet() {
               <span className="text-muted-foreground">Type</span>
               <p className="text-foreground font-semibold uppercase">{character.character_type}</p>
             </div>
+            {character.gender && (
+              <div>
+                <span className="text-muted-foreground">Gender</span>
+                <p className="text-foreground font-semibold capitalize">{character.gender}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -575,6 +582,7 @@ function EditHeaderDialog({
     level: character.level,
     background: character.background ?? '',
     alignment: character.alignment ?? '',
+    gender: (character.gender ?? '') as DndGender | '',
   })
 
   const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -694,6 +702,25 @@ function EditHeaderDialog({
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label>Gender</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={form.gender === 'male' ? 'default' : 'outline'}
+                onClick={() => update('gender', 'male')}
+              >
+                Male
+              </Button>
+              <Button
+                type="button"
+                variant={form.gender === 'female' ? 'default' : 'outline'}
+                onClick={() => update('gender', 'female')}
+              >
+                Female
+              </Button>
+            </div>
+          </div>
         </div>
         <ModalFooter
           onSave={() =>
@@ -701,6 +728,7 @@ function EditHeaderDialog({
               ...form,
               player_name: form.player_name || null,
               level: Number(form.level),
+              gender: (form.gender || null) as 'male' | 'female' | null,
             })
           }
           onCancel={onClose}

@@ -1,4 +1,5 @@
 import { AutocompleteInput } from '@/components/ui/autocomplete-input'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -18,7 +19,10 @@ import {
   DND_CLASSES,
   DND_RACE_GROUPS,
   DND_RACES,
+  generateCharacterName,
+  type DndGender,
 } from '@/lib/dnd-helpers'
+import { Wand2 } from 'lucide-react'
 import type { CharacterData } from './types'
 
 interface BasicsStepProps {
@@ -31,8 +35,9 @@ interface BasicsStepProps {
   customBackground: string
   alignment: string
   level: number
-  fieldErrors: Partial<Record<'name' | 'race' | 'class', boolean>>
-  onChange: (updates: Partial<Pick<CharacterData, 'character_type' | 'player_name' | 'name' | 'race' | 'class' | 'background' | 'custom_background' | 'alignment' | 'level'>>) => void
+  gender: CharacterData['gender']
+  fieldErrors: Partial<Record<'name' | 'race' | 'class' | 'gender', boolean>>
+  onChange: (updates: Partial<Pick<CharacterData, 'character_type' | 'player_name' | 'name' | 'race' | 'class' | 'background' | 'custom_background' | 'alignment' | 'level' | 'gender'>>) => void
 }
 
 export function BasicsStep({
@@ -45,6 +50,7 @@ export function BasicsStep({
   customBackground,
   alignment,
   level,
+  gender,
   fieldErrors,
   onChange,
 }: BasicsStepProps) {
@@ -79,13 +85,25 @@ export function BasicsStep({
             Character Name
             <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="character-name"
-            value={name}
-            onChange={(e) => onChange({ name: e.target.value })}
-            placeholder="Enter character name"
-            className={fieldErrors.name ? 'border-destructive' : ''}
-          />
+          <div className="flex gap-2">
+            <Input
+              id="character-name"
+              value={name}
+              onChange={(e) => onChange({ name: e.target.value })}
+              placeholder="Enter character name"
+              className={fieldErrors.name ? 'border-destructive' : ''}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={!race || !gender}
+              title={!race || !gender ? 'Select race and gender first' : 'Generate random name'}
+              onClick={() => onChange({ name: generateCharacterName(race, gender as DndGender) })}
+            >
+              <Wand2 className="size-4" />
+            </Button>
+          </div>
         </div>
 
         {characterType === 'pc' && (
@@ -103,6 +121,30 @@ export function BasicsStep({
             )}
           </div>
         )}
+      </div>
+
+      {/* Gender selector */}
+      <div className="space-y-2">
+        <Label>
+          Gender
+          <span className="text-destructive">*</span>
+        </Label>
+        <div className={`flex gap-2 ${fieldErrors.gender ? 'border border-destructive rounded-md p-1' : ''}`}>
+          <Button
+            type="button"
+            variant={gender === 'male' ? 'default' : 'outline'}
+            onClick={() => onChange({ gender: 'male' })}
+          >
+            Male
+          </Button>
+          <Button
+            type="button"
+            variant={gender === 'female' ? 'default' : 'outline'}
+            onClick={() => onChange({ gender: 'female' })}
+          >
+            Female
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

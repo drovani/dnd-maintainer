@@ -1,3 +1,4 @@
+import { DND_RACE_NAMES, type DndGender } from '@/lib/dnd-helpers'
 import { supabase } from '@/lib/supabase'
 import { Character, Combatant } from '@/types/database'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -59,6 +60,7 @@ export default function DmToolkit() {
   >('name')
   const [generatedName, setGeneratedName] = useState('')
   const [selectedRace, setSelectedRace] = useState<string>('human')
+  const [selectedGender, setSelectedGender] = useState<DndGender>('male')
   const [generatedLoot, setGeneratedLoot] = useState<
     { gold: number; silver: number; copper: number; items: string[] }
   >({ gold: 0, silver: 0, copper: 0, items: [] })
@@ -136,33 +138,6 @@ export default function DmToolkit() {
   })
 
   // Generator Functions
-  const nameGeneratorData = {
-    human: {
-      firsts: ['Aldus', 'Brynn', 'Caspian', 'Darian', 'Elara', 'Finch', 'Garrett'],
-      lasts: ['Ashford', 'Blackthorn', 'Clearwater', 'Drax', 'Emerson', 'Findlay'],
-    },
-    elf: {
-      firsts: ['Aelindor', 'Belamon', 'Celestria', 'Daethiel', 'Elowen', 'Farion'],
-      lasts: ['Moonwhisper', 'Starlight', 'Silverleaf', 'Dawnbringer', 'Nightwood'],
-    },
-    dwarf: {
-      firsts: ['Borin', 'Durga', 'Gorath', 'Halmir', 'Ingrid', 'Kardor'],
-      lasts: ['Ironforge', 'Stonefist', 'Battlehammer', 'Goldbeard', 'Firehelm'],
-    },
-    halfling: {
-      firsts: ['Bildo', 'Merry', 'Pippin', 'Rosie', 'Tilly', 'Wooly'],
-      lasts: ['Baggins', 'Took', 'Brandybuck', 'Gamgee', 'Proudfoot'],
-    },
-    orc: {
-      firsts: ['Durotan', 'Garona', 'Grommash', 'Hurga', 'Thrall', 'Orgrim'],
-      lasts: ['Skullcrusher', 'Bonegrinder', 'Blackhand', 'Deathbringer'],
-    },
-    tiefling: {
-      firsts: ['Ashara', 'Calibre', 'Drakkar', 'Erinyes', 'Infernus', 'Zariel'],
-      lasts: ['Hellborn', 'Firebrand', 'Darkflame', 'Infernal', 'Demonkin'],
-    },
-  }
-
   const lootTables = {
     '1-4': {
       gold: [10, 25, 50, 75, 100],
@@ -286,11 +261,12 @@ export default function DmToolkit() {
     Math.floor(Math.random() * arr.length)
 
   const generateFantasyName = () => {
-    const raceData =
-      nameGeneratorData[selectedRace as keyof typeof nameGeneratorData]
-    const first =
-      raceData.firsts[getRandomIndex(raceData.firsts)]
-    const last = raceData.lasts[getRandomIndex(raceData.lasts)]
+    const raceData = DND_RACE_NAMES[selectedRace]
+    if (!raceData) return
+    const firstNames = [...raceData[selectedGender]]
+    const first = firstNames[getRandomIndex(firstNames)]
+    const clan = [...raceData.clan]
+    const last = clan[getRandomIndex(clan)]
     setGeneratedName(`${first} ${last}`)
   }
 
@@ -1026,22 +1002,52 @@ export default function DmToolkit() {
               {/* Name Generator */}
               {generatorTab === 'name' && (
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-foreground font-semibold mb-3">
-                      Race
-                    </label>
-                    <select
-                      value={selectedRace}
-                      onChange={(e) => setSelectedRace(e.target.value)}
-                      className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
-                    >
-                      <option value="human">Human</option>
-                      <option value="elf">Elf</option>
-                      <option value="dwarf">Dwarf</option>
-                      <option value="halfling">Halfling</option>
-                      <option value="orc">Orc</option>
-                      <option value="tiefling">Tiefling</option>
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-foreground font-semibold mb-3">
+                        Race
+                      </label>
+                      <select
+                        value={selectedRace}
+                        onChange={(e) => setSelectedRace(e.target.value)}
+                        className="w-full bg-muted border border-border rounded px-4 py-2 text-foreground outline-none focus-visible:border-ring"
+                      >
+                        {Object.keys(DND_RACE_NAMES).map((raceId) => (
+                          <option key={raceId} value={raceId}>
+                            {raceId.charAt(0).toUpperCase() + raceId.slice(1).replace(/-/g, ' ')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-foreground font-semibold mb-3">
+                        Gender
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGender('male')}
+                          className={`flex-1 py-2 px-4 rounded border font-semibold transition-colors ${
+                            selectedGender === 'male'
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-muted text-foreground border-border hover:border-ring/50'
+                          }`}
+                        >
+                          Male
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGender('female')}
+                          className={`flex-1 py-2 px-4 rounded border font-semibold transition-colors ${
+                            selectedGender === 'female'
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-muted text-foreground border-border hover:border-ring/50'
+                          }`}
+                        >
+                          Female
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <button
