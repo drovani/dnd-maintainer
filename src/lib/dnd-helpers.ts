@@ -669,10 +669,10 @@ export function getBaseRaceId(raceId: string): string {
   return raceId
 }
 
-export function generateCharacterName(raceId: string, gender: DndGender): string {
+export function generateCharacterName(raceId: string, gender: DndGender): string | null {
   const baseId = getBaseRaceId(raceId)
   const raceData = DND_RACE_NAMES[baseId]
-  if (!raceData) return ''
+  if (!raceData) return null
 
   const firstNames = raceData[gender]
   const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]

@@ -1,4 +1,4 @@
-import { DND_RACE_NAMES, type DndGender } from '@/lib/dnd-helpers'
+import { DND_RACE_NAMES, generateCharacterName, type DndGender } from '@/lib/dnd-helpers'
 import { supabase } from '@/lib/supabase'
 import { Character, Combatant } from '@/types/database'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -261,13 +261,8 @@ export default function DmToolkit() {
     Math.floor(Math.random() * arr.length)
 
   const generateFantasyName = () => {
-    const raceData = DND_RACE_NAMES[selectedRace]
-    if (!raceData) return
-    const firstNames = [...raceData[selectedGender]]
-    const first = firstNames[getRandomIndex(firstNames)]
-    const clan = [...raceData.clan]
-    const last = clan[getRandomIndex(clan)]
-    setGeneratedName(`${first} ${last}`)
+    const name = generateCharacterName(selectedRace, selectedGender)
+    if (name) setGeneratedName(name)
   }
 
   const generateLoot = () => {

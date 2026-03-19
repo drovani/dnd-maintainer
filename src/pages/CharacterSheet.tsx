@@ -728,7 +728,7 @@ function EditHeaderDialog({
               ...form,
               player_name: form.player_name || null,
               level: Number(form.level),
-              gender: (form.gender || null) as 'male' | 'female' | null,
+              gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
             })
           }
           onCancel={onClose}

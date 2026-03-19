@@ -78,51 +78,6 @@ export function BasicsStep({
         </span>
       </div>
 
-      {/* Name row */}
-      <div className={`grid grid-cols-1 ${characterType === 'pc' ? 'md:grid-cols-2' : ''} gap-4`}>
-        <div className="space-y-2">
-          <Label htmlFor="character-name">
-            Character Name
-            <span className="text-destructive">*</span>
-          </Label>
-          <div className="flex gap-2">
-            <Input
-              id="character-name"
-              value={name}
-              onChange={(e) => onChange({ name: e.target.value })}
-              placeholder="Enter character name"
-              className={fieldErrors.name ? 'border-destructive' : ''}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              disabled={!race || !gender}
-              title={!race || !gender ? 'Select race and gender first' : 'Generate random name'}
-              onClick={() => onChange({ name: generateCharacterName(race, gender as DndGender) })}
-            >
-              <Wand2 className="size-4" />
-            </Button>
-          </div>
-        </div>
-
-        {characterType === 'pc' && (
-          <div className="space-y-2">
-            <Label htmlFor="player-name">Player Name</Label>
-            <AutocompleteInput
-              id="player-name"
-              suggestions={playerNames}
-              value={playerName}
-              onChange={(value) => onChange({ player_name: value })}
-              placeholder="Enter player name"
-            />
-            {playerNamesError && (
-              <p className="text-xs text-destructive">Could not load player name suggestions</p>
-            )}
-          </div>
-        )}
-      </div>
-
       {/* Gender selector */}
       <div className="space-y-2">
         <Label>
@@ -145,6 +100,55 @@ export function BasicsStep({
             Female
           </Button>
         </div>
+      </div>
+
+      {/* Name row */}
+      <div className={`grid grid-cols-1 ${characterType === 'pc' ? 'md:grid-cols-2' : ''} gap-4`}>
+        <div className="space-y-2">
+          <Label htmlFor="character-name">
+            Character Name
+            <span className="text-destructive">*</span>
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="character-name"
+              value={name}
+              onChange={(e) => onChange({ name: e.target.value })}
+              placeholder="Enter character name"
+              className={fieldErrors.name ? 'border-destructive' : ''}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={!race || !gender}
+              title={!race || !gender ? 'Select race and gender first' : 'Generate random name'}
+              onClick={() => {
+                if (!race || !gender) return;
+                const name = generateCharacterName(race, gender as DndGender);
+                if (name) onChange({ name });
+              }}
+            >
+              <Wand2 className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        {characterType === 'pc' && (
+          <div className="space-y-2">
+            <Label htmlFor="player-name">Player Name</Label>
+            <AutocompleteInput
+              id="player-name"
+              suggestions={playerNames}
+              value={playerName}
+              onChange={(value) => onChange({ player_name: value })}
+              placeholder="Enter player name"
+            />
+            {playerNamesError && (
+              <p className="text-xs text-destructive">Could not load player name suggestions</p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
