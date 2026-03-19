@@ -9,6 +9,7 @@ import {
   getProficiencyBonus,
 } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface SkillsStepProps {
@@ -28,6 +29,7 @@ export function SkillsStep({
   racialBonuses,
   onSkillToggle,
 }: SkillsStepProps) {
+  const { t } = useTranslation('gamedata')
   const cls = DND_CLASSES.find((c) => c.id === characterClass)
   if (!cls) {
     return (
@@ -53,7 +55,7 @@ export function SkillsStep({
           const abilityKey = ABILITY_NAME_TO_KEY[skill.ability]
           const abilityMod = getAbilityModifier(abilities[abilityKey] + (racialBonuses[abilityKey] ?? 0))
           const totalMod = skillData.proficient ? abilityMod + profBonus : abilityMod
-          const abbrev = ABILITY_ABBREVIATIONS[skill.ability]
+          const abbrev = t(`abilityAbbreviations.${abilityKey}` as never, { defaultValue: ABILITY_ABBREVIATIONS[skill.ability] })
           const inPool = cls.skillPool === null || cls.skillPool.includes(skill.name)
           const isDisabled = !inPool || (atMax && !skillData.proficient)
 
@@ -79,7 +81,7 @@ export function SkillsStep({
                 htmlFor={`prof-${skill.id}`}
                 className="flex-1 cursor-pointer"
               >
-                {skill.name}
+                {t(`skills.${skill.id}` as never, { defaultValue: skill.name })}
                 <span className="text-xs text-muted-foreground">
                   ({abbrev} {abilityMod >= 0 ? '+' : ''}{abilityMod})
                 </span>

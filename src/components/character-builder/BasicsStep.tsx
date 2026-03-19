@@ -24,6 +24,7 @@ import {
   type DndGender,
 } from '@/lib/dnd-helpers'
 import { Wand2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface BasicsStepProps {
@@ -55,6 +56,7 @@ export function BasicsStep({
   fieldErrors,
   onChange,
 }: BasicsStepProps) {
+  const { t } = useTranslation('gamedata')
   const { data: playerNames = [], isError: playerNamesError } = usePlayerNames()
 
   return (
@@ -151,15 +153,15 @@ export function BasicsStep({
             <Select
               value={race || null}
               onValueChange={(value) => value && onChange({ race: value })}
-              items={DND_RACES.map((r) => ({ value: r.id, label: r.name }))}
+              items={DND_RACES.map((r) => ({ value: r.id, label: t(`races.${r.id}` as never) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
                 <SelectValue placeholder="Choose a race" />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
                 {DND_RACE_GROUPS.map((group) => (
-                  <SelectGroup key={group.label}>
-                    {group.options.length > 1 && <SelectLabel>{group.label}</SelectLabel>}
+                  <SelectGroup key={group.id}>
+                    {group.options.length > 1 && <SelectLabel>{t(`raceGroups.${group.id}` as never)}</SelectLabel>}
                     {group.options.map((option) => {
                       const raceItem = DND_RACES.find((r) => r.id === option.value)
                       if (!raceItem) {
@@ -168,7 +170,7 @@ export function BasicsStep({
                       }
                       return (
                         <SelectItem key={raceItem.id} value={raceItem.id} className={group.options.length > 1 ? 'pl-4' : ''}>
-                          {option.label}
+                          {t(`races.${raceItem.id}` as never)}
                         </SelectItem>
                       )
                     })}
@@ -186,7 +188,7 @@ export function BasicsStep({
             <Select
               value={characterClass || null}
               onValueChange={(value) => value && onChange({ class: value })}
-              items={DND_CLASSES.map((c) => ({ value: c.id, label: c.name }))}
+              items={DND_CLASSES.map((c) => ({ value: c.id, label: t(`classes.${c.id}` as never) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
                 <SelectValue placeholder="Choose a class" />
@@ -194,7 +196,7 @@ export function BasicsStep({
               <SelectContent>
                 {DND_CLASSES.map((cls) => (
                   <SelectItem key={cls.id} value={cls.id}>
-                    {cls.name}
+                    {t(`classes.${cls.id}` as never)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -206,7 +208,7 @@ export function BasicsStep({
             <Select
               value={background || null}
               onValueChange={(value) => value && onChange({ background: value })}
-              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: b.name }))}
+              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}` as never, { defaultValue: b.id }) }))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose a background" />
@@ -214,7 +216,7 @@ export function BasicsStep({
               <SelectContent>
                 {DND_BACKGROUNDS.map((bg) => (
                   <SelectItem key={bg.id} value={bg.id}>
-                    {bg.name}
+                    {t(`backgrounds.${bg.id}` as never, { defaultValue: bg.id })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -241,7 +243,7 @@ export function BasicsStep({
                   <button
                     key={alignmentItem.id}
                     type="button"
-                    title={alignmentItem.name}
+                    title={t(`alignments.${alignmentItem.id}` as never)}
                     onClick={() => onChange({ alignment: alignmentItem.id })}
                     className={`flex flex-col items-center justify-center border-r border-b border-border px-1 py-1 text-sm transition-colors cursor-pointer last-of-type:border-r-0 nth-[3n]:border-r-0 ${isSelected
                       ? 'bg-primary/10 font-medium'

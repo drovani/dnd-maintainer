@@ -24,7 +24,7 @@ import {
 import type { AbilityScores } from '@/types/database'
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ABILITY_NAMES } from './types'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface AbilitiesStepProps {
@@ -52,6 +52,7 @@ export function AbilitiesStep({
   onMethodChange,
   onAbilitiesChange,
 }: AbilitiesStepProps) {
+  const { t } = useTranslation('gamedata')
   const [isRolling, setIsRolling] = useState<boolean>(false)
   const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -155,14 +156,14 @@ export function AbilitiesStep({
     return (
       <Card key={ability}>
         <CardContent className="px-3 py-2 space-y-1">
-          <Label className="text-xs font-semibold text-muted-foreground">{ABILITY_NAMES[ability]}</Label>
+          <Label className="text-xs font-semibold text-muted-foreground">{t(`abilities.${ability}` as never)}</Label>
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">{scoreInput}</div>
             {raceBonus > 0 && selectedRace && (
               <Badge
                 variant="secondary"
                 className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={`${selectedRace.name} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${ABILITY_NAMES[ab as keyof typeof ABILITY_NAMES]}`).join(', ')}`}
+                title={`${selectedRace.name} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab}` as never)}`).join(', ')}`}
               >
                 +{raceBonus}
               </Badge>

@@ -3,7 +3,6 @@ import {
   DND_BACKGROUNDS,
   DND_CLASSES,
   DND_RACE_GROUPS,
-  DND_RACES,
   DND_SKILLS,
   getAbilityModifier,
   getProficiencyBonus,
@@ -13,6 +12,7 @@ import {
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -37,15 +37,6 @@ import { Button } from '@/components/ui/button'
 import { GenderToggle } from '@/components/ui/gender-toggle'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Character } from '@/types/database'
-
-const ABILITY_NAMES: Record<string, string> = {
-  str: 'Strength',
-  dex: 'Dexterity',
-  con: 'Constitution',
-  int: 'Intelligence',
-  wis: 'Wisdom',
-  cha: 'Charisma',
-}
 
 type EditSection = 'header' | 'abilities' | 'skills' | 'combat' | 'personality' | 'backstory' | 'appearance' | null
 
@@ -80,6 +71,7 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
 }
 
 export default function CharacterSheet() {
+  const { t } = useTranslation('gamedata')
   const { characterId } = useParams<{ id: string; characterId: string }>()
   const [editSection, setEditSection] = useState<EditSection>(null)
   const [localHP, setLocalHP] = useState<number | null>(null)
@@ -156,7 +148,7 @@ export default function CharacterSheet() {
     )
   }
 
-  const alignmentName = DND_ALIGNMENTS.find((a) => a.id === character.alignment)?.name || character.alignment
+  const alignmentName = character.alignment ? t(`alignments.${character.alignment}` as never, { defaultValue: character.alignment }) : ''
   const profBonus = getProficiencyBonus(character.level)
 
   return (
@@ -183,7 +175,7 @@ export default function CharacterSheet() {
             <div>
               <span className="text-muted-foreground">Class</span>
               <p className="text-foreground font-semibold">
-                {(DND_CLASSES.find((c) => c.id === character.class)?.name ?? character.class)}
+                {character.class ? t(`classes.${character.class}` as never, { defaultValue: character.class }) : ''}
                 {character.subclass ? ` (${character.subclass})` : ''}
               </p>
             </div>
@@ -194,13 +186,13 @@ export default function CharacterSheet() {
             <div>
               <span className="text-muted-foreground">Race</span>
               <p className="text-foreground font-semibold">
-                {DND_RACES.find((r) => r.id === character.race)?.name ?? character.race}
+                {character.race ? t(`races.${character.race}` as never, { defaultValue: character.race }) : ''}
               </p>
             </div>
             <div>
               <span className="text-muted-foreground">Background</span>
               <p className="text-foreground font-semibold">
-                {DND_BACKGROUNDS.find((b) => b.id === character.background)?.name ?? character.background}
+                {character.background ? t(`backgrounds.${character.background}` as never, { defaultValue: character.background }) : ''}
               </p>
             </div>
             <div>
@@ -239,7 +231,7 @@ export default function CharacterSheet() {
                   const modifier = getAbilityModifier(score)
                   return (
                     <div key={ability} className="bg-muted/50 p-3 rounded border">
-                      <div className="text-xs text-muted-foreground mb-1">{ABILITY_NAMES[ability]}</div>
+                      <div className="text-xs text-muted-foreground mb-1">{t(`abilities.${ability}` as never)}</div>
                       <div className="flex items-end justify-between">
                         <div className="text-sm font-bold text-foreground">{score}</div>
                         <div
@@ -262,7 +254,7 @@ export default function CharacterSheet() {
                   const modifier = getAbilityModifier(character.abilities[ability])
                   return (
                     <div key={ability} className="flex justify-between text-foreground">
-                      <span>{ABILITY_NAMES[ability]}</span>
+                      <span>{t(`abilities.${ability}` as never)}</span>
                       <span className="font-mono font-bold">
                         {modifier >= 0 ? '+' : ''}{modifier}
                       </span>
@@ -276,13 +268,15 @@ export default function CharacterSheet() {
             <div className="bg-card border rounded-lg p-6">
               <SectionHeader title="Skills" onEdit={() => setEditSection('skills')} />
               <div className="space-y-1 text-xs">
-                {Object.entries(skillsByAbility).map(([ability, skills]) => (
+                {Object.entries(skillsByAbility).map(([ability, skills]) => {
+                  const abilityKey = ability.toLowerCase() as keyof typeof character.abilities
+                  return (
                   <div key={ability}>
-                    <div className="text-muted-foreground font-semibold mt-2 mb-1">{ability}</div>
+                    <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${abilityKey}` as never)}</div>
                     {skills.map((skill) => {
                       const skillData = character.skills?.[skill.id] ?? { proficient: false, expertise: false }
                       const abilityMod = getAbilityModifier(
-                        character.abilities[skill.ability.toLowerCase() as keyof typeof character.abilities]
+                        character.abilities[abilityKey]
                       )
                       let bonus = abilityMod
                       if (skillData.proficient) bonus += profBonus
@@ -291,7 +285,7 @@ export default function CharacterSheet() {
                       return (
                         <div key={skill.id} className="flex justify-between text-foreground py-1">
                           <span className={skillData.proficient ? 'font-bold' : ''}>
-                            {skill.name}
+                            {t(`skills.${skill.id}` as never, { defaultValue: skill.name })}
                           </span>
                           <span
                             className={`font-mono ${skillData.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
@@ -302,7 +296,8 @@ export default function CharacterSheet() {
                       )
                     })}
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -579,6 +574,7 @@ function EditHeaderDialog({
   onClose: () => void
   saving: boolean
 }) {
+  const { t } = useTranslation('gamedata')
   const [form, setForm] = useState({
     name: character.name,
     player_name: character.player_name ?? '',
@@ -640,7 +636,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_CLASSES.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>{t(`classes.${c.id}` as never)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -673,10 +669,10 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_RACE_GROUPS.map((group) => (
-                  <SelectGroup key={group.label}>
-                    <SelectLabel>{group.label}</SelectLabel>
+                  <SelectGroup key={group.id}>
+                    <SelectLabel>{t(`raceGroups.${group.id}` as never)}</SelectLabel>
                     {group.options.map((opt) => (
-                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{opt.label}</SelectItem>
+                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}` as never)}</SelectItem>
                     ))}
                   </SelectGroup>
                 ))}
@@ -691,7 +687,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_BACKGROUNDS.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}` as never, { defaultValue: b.id })}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -704,7 +700,7 @@ function EditHeaderDialog({
               </SelectTrigger>
               <SelectContent>
                 {DND_ALIGNMENTS.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                  <SelectItem key={a.id} value={a.id}>{t(`alignments.${a.id}` as never)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -745,10 +741,13 @@ function EditAbilitiesDialog({
   onClose: () => void
   saving: boolean
 }) {
+  const { t } = useTranslation('gamedata')
   const [form, setForm] = useState({ ...abilities })
 
   const updateAbility = (key: keyof typeof form, value: number) =>
     setForm((prev) => ({ ...prev, [key]: value }))
+
+  const abilityKeys = Object.keys(abilities) as Array<keyof typeof abilities>
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -757,9 +756,9 @@ function EditAbilitiesDialog({
           <DialogTitle>Edit Ability Scores</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {(Object.keys(ABILITY_NAMES) as Array<keyof typeof abilities>).map((ability) => (
+          {abilityKeys.map((ability) => (
             <div key={ability} className="flex items-center gap-4">
-              <Label className="w-28">{ABILITY_NAMES[ability]}</Label>
+              <Label className="w-28">{t(`abilities.${ability}` as never)}</Label>
               <Input
                 type="number"
                 min={1}
@@ -791,6 +790,7 @@ function EditSkillsDialog({
   onClose: () => void
   saving: boolean
 }) {
+  const { t } = useTranslation('gamedata')
   const [form, setForm] = useState<Record<string, { proficient: boolean; expertise: boolean }>>(() => {
     const initial: Record<string, { proficient: boolean; expertise: boolean }> = {}
     for (const skill of DND_SKILLS) {
@@ -826,7 +826,7 @@ function EditSkillsDialog({
             const data = form[skill.id]
             return (
               <div key={skill.id} className="flex items-center justify-between py-1.5 border-b">
-                <span className="text-sm text-foreground">{skill.name}</span>
+                <span className="text-sm text-foreground">{t(`skills.${skill.id}` as never, { defaultValue: skill.name })}</span>
                 <div className="flex gap-1">
                   <button
                     type="button"

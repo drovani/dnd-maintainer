@@ -15,6 +15,7 @@ import { ABILITY_NAME_TO_KEY, DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS
 import type { AbilityScores } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
 type StepType = 'basics' | 'abilities' | 'skills' | 'features' | 'equipment' | 'spells' | 'backstory'
@@ -49,6 +50,7 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
 }
 
 export default function CharacterBuilder() {
+  const { t } = useTranslation('common')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
@@ -252,13 +254,13 @@ export default function CharacterBuilder() {
   }
 
   if (!campaignId) {
-    return <div className="page-container"><p className="text-destructive">Campaign ID is required to create a character.</p></div>
+    return <div className="page-container"><p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p></div>
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="page-container">
-        <h1 className="page-title mb-8">Create New Character</h1>
+        <h1 className="page-title mb-8">{t('characterBuilder.title')}</h1>
 
         {/* Step Indicator */}
         <div className="mb-8">
@@ -276,7 +278,7 @@ export default function CharacterBuilder() {
                   >
                     {index + 1}
                   </button>
-                  <span className="text-xs text-muted-foreground mt-2">{step.label}</span>
+                  <span className="text-xs text-muted-foreground mt-2">{t(`characterBuilder.steps.${step.id}` as never)}</span>
                 </div>
                 {index < STEPS.length - 1 && (
                   <div className={`flex-1 h-1 mx-2 self-start mt-5 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'}`} />
@@ -289,7 +291,7 @@ export default function CharacterBuilder() {
         {/* Step Content */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold mb-6">{STEPS[currentStepIndex].label}</h2>
+            <h2 className="text-2xl font-bold mb-6">{t(`characterBuilder.steps.${STEPS[currentStepIndex].id}`)}</h2>
             {renderStep()}
           </CardContent>
         </Card>
@@ -297,12 +299,12 @@ export default function CharacterBuilder() {
         {(finalizeError || saveStatus === 'error') && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
             <span>
-              {finalizeError ? `Failed to finalize character: ${finalizeError}` : 'Failed to save draft. Your recent changes may not have been saved.'}
+              {finalizeError ? t('characterBuilder.errors.failedToFinalize', { message: finalizeError }) : t('characterBuilder.errors.failedToSaveDraft')}
             </span>
             {saveStatus === 'error' && (
               <Button variant="outline" size="sm" onClick={() => /* saveStatus updated by useBuilderAutosave; catch prevents unhandled rejection */
                   saveDraft(buildPayload()).catch((err) => console.error('Retry save failed:', err))}>
-                Retry Save
+                {t('buttons.retrySave')}
               </Button>
             )}
           </div>
@@ -312,17 +314,17 @@ export default function CharacterBuilder() {
         <div className="flex items-center justify-between">
           <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0}>
             <ChevronLeft size={16} />
-            Previous
+            {t('buttons.previous')}
           </Button>
           <div className="flex items-center gap-3">
-            {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">Saving...</span>}
-            {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">Draft saved</span>}
+            {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
+            {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
             {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep}>Next <ChevronRight size={16} /></Button>
+              <Button onClick={goNextStep}>{t('buttons.next')} <ChevronRight size={16} /></Button>
             )}
             <Button onClick={handleFinalize} disabled={isFinalizing || !isReadyToFinalize}>
               <Save className="size-4" />
-              {isFinalizing ? 'Finalizing...' : 'Finalize Character'}
+              {isFinalizing ? t('buttons.finalizing') : t('buttons.finalizeCharacter')}
             </Button>
           </div>
         </div>
