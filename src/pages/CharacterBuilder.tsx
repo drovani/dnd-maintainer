@@ -1,4 +1,5 @@
 import {
+  ABILITY_ABBREVIATIONS,
   DND_ALIGNMENTS,
   DND_BACKGROUNDS,
   DND_CLASSES,
@@ -8,6 +9,7 @@ import {
   POINT_BUY_TOTAL,
   STANDARD_ARRAY,
   getAbilityModifier,
+  getProficiencyBonus,
   getPointBuyCost,
   getPointBuyDecrementReturn,
   getPointBuyEquivalent,
@@ -322,6 +324,16 @@ export default function CharacterBuilder() {
     }
   }, [])
 
+  useEffect(() => {
+    setCharacterData((prev) => ({
+      ...prev,
+      skills: DND_SKILLS.reduce(
+        (acc, skill) => ({ ...acc, [skill.id]: { proficient: false, expertise: false } }),
+        {} as Record<string, { proficient: boolean; expertise: boolean }>
+      ),
+    }))
+  }, [characterData.class])
+
   const incrementAbility = (ability: keyof CharacterData['abilities']) => {
     const current = characterData.abilities[ability]
     if (current >= 15) return
@@ -338,30 +350,28 @@ export default function CharacterBuilder() {
   }
 
   const toggleSkillProficiency = (skillId: string) => {
-    setCharacterData((prev) => ({
-      ...prev,
-      skills: {
-        ...prev.skills,
-        [skillId]: {
-          ...prev.skills[skillId],
-          proficient: !prev.skills[skillId].proficient,
-          expertise: false,
-        },
-      },
-    }))
-  }
+    const cls = DND_CLASSES.find((c) => c.id === characterData.class)
+    if (!cls) return
 
-  const toggleSkillExpertise = (skillId: string) => {
-    setCharacterData((prev) => ({
-      ...prev,
-      skills: {
-        ...prev.skills,
-        [skillId]: {
-          ...prev.skills[skillId],
-          expertise: !prev.skills[skillId].expertise,
-        },
-      },
-    }))
+    setCharacterData((prev) => {
+      const current = prev.skills[skillId]
+      if (current.proficient) {
+        return {
+          ...prev,
+          skills: { ...prev.skills, [skillId]: { proficient: false, expertise: false } },
+        }
+      }
+      const inPool = cls.skillPool === null || cls.skillPool.includes(
+        DND_SKILLS.find((s) => s.id === skillId)?.name ?? ''
+      )
+      if (!inPool) return prev
+      const selectedCount = Object.values(prev.skills).filter((s) => s.proficient).length
+      if (selectedCount >= cls.skillChoices) return prev
+      return {
+        ...prev,
+        skills: { ...prev.skills, [skillId]: { proficient: true, expertise: false } },
+      }
+    })
   }
 
   const addFeature = () => {
@@ -814,51 +824,60 @@ export default function CharacterBuilder() {
   }
 
   const renderSkillsStep = () => {
-    const skillsByAbility = DND_SKILLS.reduce(
-      (acc, skill) => {
-        if (!acc[skill.ability]) acc[skill.ability] = []
-        acc[skill.ability].push(skill)
-        return acc
-      },
-      {} as Record<string, typeof DND_SKILLS>
-    )
+    const cls = DND_CLASSES.find((c) => c.id === characterData.class)
+    if (!cls) return null
+
+    const profBonus = getProficiencyBonus(characterData.level)
+    const selectedCount = Object.values(characterData.skills).filter((s) => s.proficient).length
+    const atMax = selectedCount >= cls.skillChoices
+
+    const sortedSkills = [...DND_SKILLS].sort((a, b) => a.name.localeCompare(b.name))
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-4">
         <p className="text-muted-foreground text-sm">
-          Select proficiencies and expertise for your skills.
+          Choose {cls.skillChoices} skill{cls.skillChoices !== 1 ? 's' : ''} from your class list.{' '}
+          <span className="font-medium text-foreground">{selectedCount} / {cls.skillChoices} selected</span>
         </p>
-        {Object.entries(skillsByAbility).map(([ability, skills]) => (
-          <div key={ability}>
-            <h3 className="text-lg font-semibold mb-4">{ability}</h3>
-            <div className="space-y-2">
-              {skills.map((skill) => {
-                const skillData = characterData.skills[skill.id]
-                return (
-                  <div key={skill.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50">
-                    <Checkbox
-                      id={`prof-${skill.id}`}
-                      checked={skillData.proficient}
-                      onCheckedChange={() => toggleSkillProficiency(skill.id)}
-                    />
-                    <Label htmlFor={`prof-${skill.id}`} className="flex-1 cursor-pointer">
-                      {skill.name}
-                    </Label>
-                    <Checkbox
-                      id={`exp-${skill.id}`}
-                      checked={skillData.expertise}
-                      onCheckedChange={() => toggleSkillExpertise(skill.id)}
-                      disabled={!skillData.proficient}
-                    />
-                    <Label htmlFor={`exp-${skill.id}`} className="text-xs text-muted-foreground cursor-pointer">
-                      Expertise
-                    </Label>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+        <div className="space-y-1">
+          {sortedSkills.map((skill) => {
+            const skillData = characterData.skills[skill.id]
+            const abilityKey = skill.ability.toLowerCase().slice(0, 3) as keyof typeof characterData.abilities
+            const abilityMod = getAbilityModifier(characterData.abilities[abilityKey] + (racialBonuses[abilityKey] ?? 0))
+            const totalMod = skillData.proficient ? abilityMod + profBonus : abilityMod
+            const abbrev = ABILITY_ABBREVIATIONS[skill.ability] ?? skill.ability.slice(0, 3).toUpperCase()
+            const inPool = cls.skillPool === null || cls.skillPool.includes(skill.name)
+            const isDisabled = !inPool || (atMax && !skillData.proficient)
+
+            return (
+              <div
+                key={skill.id}
+                className={`flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors ${
+                  inPool ? 'hover:bg-muted/50' : 'opacity-40'
+                }`}
+              >
+                <Checkbox
+                  id={`prof-${skill.id}`}
+                  checked={skillData.proficient}
+                  onCheckedChange={() => toggleSkillProficiency(skill.id)}
+                  disabled={isDisabled}
+                />
+                <span className={`w-8 text-right text-sm font-bold tabular-nums ${totalMod >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                  {totalMod >= 0 ? '+' : ''}{totalMod}
+                </span>
+                <Label
+                  htmlFor={`prof-${skill.id}`}
+                  className={`flex-1 cursor-pointer ${isDisabled ? 'cursor-not-allowed' : ''}`}
+                >
+                  {skill.name}
+                </Label>
+                <span className="text-xs text-muted-foreground w-16 text-right">
+                  {abbrev} {abilityMod >= 0 ? '+' : ''}{abilityMod}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     )
   }
