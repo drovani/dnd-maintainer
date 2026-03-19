@@ -550,17 +550,6 @@ export default function CampaignDashboard() {
               </div>
             </Link>
 
-            <Link
-              to={`/campaign/${id}/toolkit`}
-              className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
-            >
-              <Swords className="size-6 text-primary" />
-              <div>
-                <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
-                  Toolkit
-                </p>
-              </div>
-            </Link>
           </div>
         </div>
       </div>

@@ -2,7 +2,6 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import commonEn from '@/locales/en/common.json'
 import gamedataEn from '@/locales/en/gamedata.json'
-import toolkitEn from '@/locales/en/toolkit.json'
 
 i18n
   .use(initReactI18next)
@@ -10,11 +9,12 @@ i18n
     lng: 'en',
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'gamedata', 'toolkit'],
+    ns: ['common', 'gamedata'],
     resources: {
-      en: { common: commonEn, gamedata: gamedataEn, toolkit: toolkitEn }
+      en: { common: commonEn, gamedata: gamedataEn }
     },
     interpolation: { escapeValue: false },
   })
+  .catch((err: unknown) => console.error('i18n initialization failed:', err))
 
 export default i18n

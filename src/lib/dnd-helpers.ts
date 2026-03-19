@@ -627,12 +627,12 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
     female: ['Bimpnottin', 'Breena', 'Caramip', 'Carlin', 'Donella', 'Duvamil', 'Ella', 'Ellyjobell', 'Ellywick', 'Lilli', 'Loopmottin', 'Lorilla', 'Mardnab', 'Nissa', 'Nyx'],
     clan: ['Beren', 'Daergel', 'Folkor', 'Garrick', 'Nackle', 'Murnig', 'Ningel', 'Raulnor', 'Scheppen', 'Timbers'],
   },
-  'half-elf': {
+  'halfelf': {
     male: ['Adran', 'Aramil', 'Beiro', 'Carric', 'Erdan', 'Galinndan', 'Hadarai', 'Immeral', 'Ivellios', 'Laucian', 'Mindartis', 'Paelias', 'Peren', 'Quarion', 'Riardon'],
     female: ['Adrie', 'Althaea', 'Andraste', 'Caelynn', 'Drusilia', 'Felosial', 'Ielenia', 'Jelenneth', 'Keyleth', 'Leshanna', 'Lia', 'Mialee', 'Naivara', 'Quelenna', 'Quillathe'],
     clan: ['Brightwood', 'Evenwood', 'Farleaf', 'Galanodel', 'Holimion', 'Moonshadow', 'Nailo', 'Siannodel', 'Silverfrond', 'Windriver'],
   },
-  'half-orc': {
+  'halforc': {
     male: ['Dench', 'Feng', 'Gell', 'Henk', 'Holg', 'Imsh', 'Keth', 'Krusk', 'Mhurren', 'Ront', 'Shump', 'Thokk', 'Urtra', 'Volen', 'Yargath'],
     female: ['Baggi', 'Emen', 'Engong', 'Kansif', 'Myev', 'Neega', 'Ovak', 'Ownka', 'Shautha', 'Sutha', 'Vola', 'Volen', 'Yevelda', 'Zharra', 'Zovak'],
     clan: ['Bloodfist', 'Dreadblade', 'Grimtusk', 'Ironhide', 'Marrowsmasher', 'Ragebringer', 'Skullcrusher', 'Stoneback', 'Thunderstep', 'Warchief'],
@@ -654,38 +654,9 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
   },
 }
 
-export interface DndCondition {
-  readonly id: string
-  readonly name: string
-  readonly effects: string
-}
-
-export const DND_CONDITIONS = [
-  { id: 'blinded', name: 'Blinded', effects: 'Cannot see. Automatic miss on attacks. Attacks against you have advantage.' },
-  { id: 'charmed', name: 'Charmed', effects: 'Cannot attack the charmer. Charmer has advantage on social checks against you.' },
-  { id: 'deafened', name: 'Deafened', effects: 'Cannot hear. Automatic fail on any check requiring hearing.' },
-  { id: 'frightened', name: 'Frightened', effects: 'Disadvantage on attack rolls and ability checks. Cannot move closer to source.' },
-  { id: 'grappled', name: 'Grappled', effects: 'Speed becomes 0. Cannot benefit from bonuses to speed. Ends if grappler is incapacitated.' },
-  { id: 'incapacitated', name: 'Incapacitated', effects: 'Cannot take actions or reactions.' },
-  { id: 'invisible', name: 'Invisible', effects: 'Cannot be seen. Attacks against you have disadvantage. Your attacks have advantage.' },
-  { id: 'paralyzed', name: 'Paralyzed', effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.' },
-  { id: 'petrified', name: 'Petrified', effects: 'Turned to stone along with nonmagical objects. Cannot move or speak.' },
-  { id: 'poisoned', name: 'Poisoned', effects: 'Disadvantage on attack rolls and ability checks.' },
-  { id: 'prone', name: 'Prone', effects: 'Melee attack rolls against you have advantage. Ranged attacks have disadvantage.' },
-  { id: 'restrained', name: 'Restrained', effects: 'Speed becomes 0. Disadvantage on attack rolls. Attacks against you have advantage.' },
-  { id: 'stunned', name: 'Stunned', effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.' },
-  { id: 'unconscious', name: 'Unconscious', effects: 'Cannot move or wake unless someone uses action. Attacks have advantage.' },
-] as const
-
-export type ConditionId = (typeof DND_CONDITIONS)[number]['id']
-
 export function getBaseRaceId(raceId: string): string {
   // Direct match first
   if (raceId in DND_RACE_NAMES) return raceId
-
-  // Special cases for race IDs without dashes
-  if (raceId === 'halfelf') return 'half-elf'
-  if (raceId === 'halforc') return 'half-orc'
 
   // Subrace IDs: check first segment before the first dash
   const firstSegment = raceId.split('-')[0]

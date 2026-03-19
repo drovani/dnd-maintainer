@@ -9,7 +9,6 @@ import {
   Shield,
   Sword,
   Users,
-  Wand2,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -29,7 +28,6 @@ const NAV_ITEMS = [
   { icon: Users, label: 'Characters', path: '/characters' },
   { icon: BookOpen, label: 'Sessions', path: '/sessions' },
   { icon: ScrollText, label: 'Notes', path: '/notes' },
-  { icon: Wand2, label: 'DM Toolkit', path: '/toolkit' },
 ];
 
 export function Sidebar({

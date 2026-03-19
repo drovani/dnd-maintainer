@@ -15,23 +15,16 @@
     "finalizeCharacter": "Finalize Character",
     "finalizing": "Finalizing...",
     "generateName": "Generate Name",
-    "generateLoot": "Generate Loot",
-    "generateTavern": "Generate Tavern",
-    "generateEncounter": "Generate Encounter",
     "logNewSession": "Log New Session",
     "logFirstSession": "Log Your First Session",
     "saveToCampaign": "Save to Campaign",
-    "tryAgain": "Try Again",
-    "addCombatant": "Add Combatant",
-    "nextTurn": "Next Turn",
-    "previousTurn": "Previous Turn"
+    "tryAgain": "Try Again"
   },
   "nav": {
     "dashboard": "Dashboard",
     "characters": "Characters",
     "sessions": "Sessions",
     "notes": "Notes",
-    "dmToolkit": "DM Toolkit",
     "exportData": "Export Data",
     "selectCampaign": "Select Campaign",
     "noCampaigns": "No campaigns",
@@ -131,75 +124,6 @@
       "loadingCharacter": "Error loading character: {{error}}"
     }
   },
-  "dmToolkit": {
-    "title": "DM Toolkit",
-    "tabs": {
-      "initiativeTracker": "Initiative Tracker",
-      "generators": "Generators",
-      "quickReference": "Quick Reference"
-    },
-    "initiative": {
-      "addCombatant": "Add Combatant",
-      "quickAddPartyMembers": "Quick Add Party Members",
-      "round": "Round",
-      "currentTurn": "Current Turn",
-      "noCombatants": "No combatants added yet",
-      "initiativeOrder": "Initiative Order ({{count}})",
-      "hp": "HP",
-      "conditions": "Conditions",
-      "addCondition": "Add condition...",
-      "saveEncounter": "Save Encounter",
-      "saveToCampaign": "Save to Campaign",
-      "encounterSaved": "Encounter saved!",
-      "quickStats": "Quick stats: {{count}} combatants",
-      "none": "None",
-      "player": "Player",
-      "ko": "KO",
-      "namePlaceholder": "Name",
-      "initiativePlaceholder": "Init",
-      "hpPlaceholder": "HP",
-      "acPlaceholder": "AC"
-    },
-    "generators": {
-      "nameGenerator": "Name Generator",
-      "lootGenerator": "Loot Generator",
-      "tavernGenerator": "Tavern Generator",
-      "encounterGenerator": "Encounter Generator",
-      "race": "Race",
-      "gender": "Gender",
-      "generatedName": "Generated Name",
-      "encounterCrRange": "Encounter CR Range",
-      "gold": "Gold",
-      "silver": "Silver",
-      "copper": "Copper",
-      "items": "Items",
-      "tavernName": "Tavern Name",
-      "description": "Description",
-      "barkeeper": "Barkeeper",
-      "special": "Special",
-      "rumor": "Rumor",
-      "partyLevel": "Party Level",
-      "partySize": "Party Size",
-      "difficulty": "Difficulty",
-      "suggestedMonsters": "Suggested Monsters",
-      "cr": "CR {{cr}}"
-    },
-    "reference": {
-      "conditions": "Conditions",
-      "actionsInCombat": "Actions in Combat",
-      "coverRules": "Cover Rules",
-      "difficultyClasses": "Difficulty Classes",
-      "travelPace": "Travel Pace",
-      "exhaustionLevels": "Exhaustion Levels",
-      "dc": "DC",
-      "difficulty": "Difficulty",
-      "pace": "Pace",
-      "perHour": "Per Hour",
-      "perDay": "Per Day",
-      "level": "Level {{level}}",
-      "ac": "AC {{ac}}"
-    }
-  },
   "sessions": {
     "title": "Sessions",
     "subtitle": "{{count}} session • {{xp}} XP awarded",
@@ -225,14 +149,10 @@
     "notFound": "Campaign not found",
     "loading": "Loading campaign...",
     "backToCampaigns": "Back to Campaigns",
-    "toolkit": {
-      "title": "Campaign Toolkit"
-    },
     "stats": {
       "characters": "Characters",
       "sessions": "Sessions",
       "notes": "Notes",
-      "toolkit": "Toolkit",
       "total": "Total",
       "lastSession": "Last session: {{date}}",
       "noDate": "No date"
