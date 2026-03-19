@@ -600,13 +600,13 @@ export function rollAbilityScores(): number[] {
 
 export type DndGender = 'male' | 'female'
 
-export interface RaceNameData {
-  readonly male: readonly string[]
-  readonly female: readonly string[]
+export type RaceNameData = {
+  readonly [G in DndGender]: readonly string[]
+} & {
   readonly clan: readonly string[]
 }
 
-export const DND_RACE_NAMES: Readonly<Record<string, RaceNameData>> = {
+export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
   'dragonborn': {
     male: ['Arjhan', 'Balasar', 'Bharash', 'Donaar', 'Ghesh', 'Heskan', 'Kriv', 'Medrash', 'Mehen', 'Nadarr', 'Pandjed', 'Patrin', 'Rhogar', 'Shamash', 'Shedinn'],
     female: ['Akra', 'Biri', 'Daar', 'Farideh', 'Harann', 'Havilar', 'Jheri', 'Kava', 'Korinn', 'Mishann', 'Nala', 'Perra', 'Raiann', 'Sora', 'Surina'],

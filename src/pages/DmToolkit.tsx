@@ -1,4 +1,5 @@
 import { DND_RACE_NAMES, generateCharacterName, type DndGender } from '@/lib/dnd-helpers'
+import { GenderToggle } from '@/components/ui/gender-toggle'
 import { supabase } from '@/lib/supabase'
 import { Character, Combatant } from '@/types/database'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -1018,30 +1019,10 @@ export default function DmToolkit() {
                       <label className="block text-foreground font-semibold mb-3">
                         Gender
                       </label>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedGender('male')}
-                          className={`flex-1 py-2 px-4 rounded border font-semibold transition-colors ${
-                            selectedGender === 'male'
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'bg-muted text-foreground border-border hover:border-ring/50'
-                          }`}
-                        >
-                          Male
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedGender('female')}
-                          className={`flex-1 py-2 px-4 rounded border font-semibold transition-colors ${
-                            selectedGender === 'female'
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : 'bg-muted text-foreground border-border hover:border-ring/50'
-                          }`}
-                        >
-                          Female
-                        </button>
-                      </div>
+                      <GenderToggle
+                        value={selectedGender}
+                        onChange={setSelectedGender}
+                      />
                     </div>
                   </div>
 

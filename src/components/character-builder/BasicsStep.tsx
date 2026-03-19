@@ -1,5 +1,6 @@
 import { AutocompleteInput } from '@/components/ui/autocomplete-input'
 import { Button } from '@/components/ui/button'
+import { GenderToggle } from '@/components/ui/gender-toggle'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -84,22 +85,11 @@ export function BasicsStep({
           Gender
           <span className="text-destructive">*</span>
         </Label>
-        <div className={`flex gap-2 ${fieldErrors.gender ? 'border border-destructive rounded-md p-1' : ''}`}>
-          <Button
-            type="button"
-            variant={gender === 'male' ? 'default' : 'outline'}
-            onClick={() => onChange({ gender: 'male' })}
-          >
-            Male
-          </Button>
-          <Button
-            type="button"
-            variant={gender === 'female' ? 'default' : 'outline'}
-            onClick={() => onChange({ gender: 'female' })}
-          >
-            Female
-          </Button>
-        </div>
+        <GenderToggle
+          value={gender}
+          onChange={(g) => onChange({ gender: g })}
+          error={fieldErrors.gender}
+        />
       </div>
 
       {/* Name row */}

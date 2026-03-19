@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import type { DndGender } from "@/lib/dnd-helpers";
 import type { AbilityScores, EquipmentItem, Feature } from "@/types/database";
 import type { TablesInsert, TablesUpdate } from "@/types/supabase";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ interface BuilderPayload {
   level: number;
   background: string | null;
   alignment: string | null;
-  gender: 'male' | 'female' | null;
+  gender: DndGender | null;
   hit_points_max: number;
   hit_points_current: number;
   armor_class: number;

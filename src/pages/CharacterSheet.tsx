@@ -33,6 +33,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { GenderToggle } from '@/components/ui/gender-toggle'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Character } from '@/types/database'
 
@@ -704,22 +705,10 @@ function EditHeaderDialog({
           </div>
           <div className="space-y-2">
             <Label>Gender</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={form.gender === 'male' ? 'default' : 'outline'}
-                onClick={() => update('gender', 'male')}
-              >
-                Male
-              </Button>
-              <Button
-                type="button"
-                variant={form.gender === 'female' ? 'default' : 'outline'}
-                onClick={() => update('gender', 'female')}
-              >
-                Female
-              </Button>
-            </div>
+            <GenderToggle
+              value={form.gender}
+              onChange={(g) => update('gender', g)}
+            />
           </div>
         </div>
         <ModalFooter

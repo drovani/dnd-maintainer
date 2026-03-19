@@ -1,3 +1,4 @@
+import type { DndGender } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 
 export interface CharacterData {
@@ -11,7 +12,7 @@ export interface CharacterData {
   background: string
   custom_background: string
   alignment: string
-  gender: 'male' | 'female' | ''
+  gender: DndGender | ''
 
   // Abilities
   abilityMethod: 'standard-array' | 'point-buy' | 'rolling'

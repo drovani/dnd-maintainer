@@ -1,3 +1,5 @@
+import type { DndGender } from '@/lib/dnd-helpers'
+
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
   str: number
@@ -120,7 +122,7 @@ export interface Character {
   is_npc: boolean | null
   is_active: boolean
   status: 'draft' | 'ready'
-  gender: 'male' | 'female' | null
+  gender: DndGender | null
 }
 
 // Combat participant
