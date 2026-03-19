@@ -213,17 +213,15 @@ export interface DndClass {
   savingThrowProficiencies: readonly AbilityName[]
   spellcastingAbility?: AbilityName
   skillChoices: number
-  /** Skills this class can choose from. null = any skill (e.g., Bard's Jack of All Trades). */
-  skillPool: readonly DndSkillName[] | null
+  /** Skills this class can choose from (by skill id). null = any skill (e.g., Bard's Jack of All Trades). */
+  skillPool: readonly string[] | null
 }
 
-export type AbilityName = 'Strength' | 'Dexterity' | 'Constitution' | 'Intelligence' | 'Wisdom' | 'Charisma'
-
-export type DndSkillName = 'Acrobatics' | 'Animal Handling' | 'Arcana' | 'Athletics' | 'Deception' | 'History' | 'Insight' | 'Intimidation' | 'Investigation' | 'Medicine' | 'Nature' | 'Perception' | 'Performance' | 'Persuasion' | 'Religion' | 'Sleight of Hand' | 'Stealth' | 'Survival'
+export type AbilityName = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
 
 export interface DndSkill {
   id: string
-  name: DndSkillName
+  name: string
   ability: AbilityName
 }
 
@@ -238,7 +236,7 @@ export interface DndAlignment {
   shorthand: string
 }
 
-export const DND_RACES: readonly DndRace[] = [
+export const DND_RACES = [
   {
     id: 'dragonborn',
     name: 'Dragonborn',
@@ -337,7 +335,9 @@ export const DND_RACES: readonly DndRace[] = [
     speed: 30,
     abilityBonuses: { cha: 2, int: 1 },
   },
-]
+] as const
+
+export type RaceId = (typeof DND_RACES)[number]['id']
 
 export interface DndRaceGroup {
   id: string
@@ -370,23 +370,23 @@ export const DND_RACE_GROUPS: DndRaceGroup[] = [
   { id: 'tiefling', label: 'Tiefling', options: [{ value: 'tiefling', label: 'Tiefling' }] },
 ]
 
-export const DND_CLASSES: readonly DndClass[] = [
+export const DND_CLASSES = [
   {
     id: 'barbarian',
     name: 'Barbarian',
     hitDie: 12,
-    primaryAbility: 'Strength',
-    savingThrowProficiencies: ['Strength', 'Constitution'],
+    primaryAbility: 'str',
+    savingThrowProficiencies: ['str', 'con'],
     skillChoices: 2,
-    skillPool: ['Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
+    skillPool: ['animalhandling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
   },
   {
     id: 'bard',
     name: 'Bard',
     hitDie: 8,
-    primaryAbility: 'Charisma',
-    savingThrowProficiencies: ['Dexterity', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'cha',
+    savingThrowProficiencies: ['dex', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 3,
     skillPool: null,
   },
@@ -394,123 +394,127 @@ export const DND_CLASSES: readonly DndClass[] = [
     id: 'cleric',
     name: 'Cleric',
     hitDie: 8,
-    primaryAbility: 'Wisdom',
-    savingThrowProficiencies: ['Wisdom', 'Charisma'],
-    spellcastingAbility: 'Wisdom',
+    primaryAbility: 'wis',
+    savingThrowProficiencies: ['wis', 'cha'],
+    spellcastingAbility: 'wis',
     skillChoices: 2,
-    skillPool: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'],
+    skillPool: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
   },
   {
     id: 'druid',
     name: 'Druid',
     hitDie: 8,
-    primaryAbility: 'Wisdom',
-    savingThrowProficiencies: ['Intelligence', 'Wisdom'],
-    spellcastingAbility: 'Wisdom',
+    primaryAbility: 'wis',
+    savingThrowProficiencies: ['int', 'wis'],
+    spellcastingAbility: 'wis',
     skillChoices: 2,
-    skillPool: ['Arcana', 'Animal Handling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
+    skillPool: ['arcana', 'animalhandling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival'],
   },
   {
     id: 'fighter',
     name: 'Fighter',
     hitDie: 10,
-    primaryAbility: 'Strength',
-    savingThrowProficiencies: ['Strength', 'Constitution'],
+    primaryAbility: 'str',
+    savingThrowProficiencies: ['str', 'con'],
     skillChoices: 2,
-    skillPool: ['Acrobatics', 'Animal Handling', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'],
+    skillPool: ['acrobatics', 'animalhandling', 'athletics', 'history', 'insight', 'intimidation', 'perception', 'survival'],
   },
   {
     id: 'monk',
     name: 'Monk',
     hitDie: 8,
-    primaryAbility: 'Dexterity',
-    savingThrowProficiencies: ['Strength', 'Dexterity'],
+    primaryAbility: 'dex',
+    savingThrowProficiencies: ['str', 'dex'],
     skillChoices: 2,
-    skillPool: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
+    skillPool: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
   },
   {
     id: 'paladin',
     name: 'Paladin',
     hitDie: 10,
-    primaryAbility: 'Strength',
-    savingThrowProficiencies: ['Wisdom', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'str',
+    savingThrowProficiencies: ['wis', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 2,
-    skillPool: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
+    skillPool: ['athletics', 'insight', 'intimidation', 'medicine', 'persuasion', 'religion'],
   },
   {
     id: 'ranger',
     name: 'Ranger',
     hitDie: 10,
-    primaryAbility: 'Dexterity',
-    savingThrowProficiencies: ['Strength', 'Dexterity'],
-    spellcastingAbility: 'Wisdom',
+    primaryAbility: 'dex',
+    savingThrowProficiencies: ['str', 'dex'],
+    spellcastingAbility: 'wis',
     skillChoices: 3,
-    skillPool: ['Animal Handling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
+    skillPool: ['animalhandling', 'athletics', 'insight', 'investigation', 'nature', 'perception', 'stealth', 'survival'],
   },
   {
     id: 'rogue',
     name: 'Rogue',
     hitDie: 8,
-    primaryAbility: 'Dexterity',
-    savingThrowProficiencies: ['Dexterity', 'Intelligence'],
+    primaryAbility: 'dex',
+    savingThrowProficiencies: ['dex', 'int'],
     skillChoices: 4,
-    skillPool: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'Sleight of Hand', 'Stealth'],
+    skillPool: ['acrobatics', 'athletics', 'deception', 'insight', 'intimidation', 'investigation', 'perception', 'performance', 'persuasion', 'sleightofhand', 'stealth'],
   },
   {
     id: 'sorcerer',
     name: 'Sorcerer',
     hitDie: 6,
-    primaryAbility: 'Charisma',
-    savingThrowProficiencies: ['Constitution', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'cha',
+    savingThrowProficiencies: ['con', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 2,
-    skillPool: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
+    skillPool: ['arcana', 'deception', 'insight', 'intimidation', 'persuasion', 'religion'],
   },
   {
     id: 'warlock',
     name: 'Warlock',
     hitDie: 8,
-    primaryAbility: 'Charisma',
-    savingThrowProficiencies: ['Wisdom', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'cha',
+    savingThrowProficiencies: ['wis', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 2,
-    skillPool: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
+    skillPool: ['arcana', 'deception', 'history', 'intimidation', 'investigation', 'nature', 'religion'],
   },
   {
     id: 'wizard',
     name: 'Wizard',
     hitDie: 6,
-    primaryAbility: 'Intelligence',
-    savingThrowProficiencies: ['Intelligence', 'Wisdom'],
-    spellcastingAbility: 'Intelligence',
+    primaryAbility: 'int',
+    savingThrowProficiencies: ['int', 'wis'],
+    spellcastingAbility: 'int',
     skillChoices: 2,
-    skillPool: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
+    skillPool: ['arcana', 'history', 'insight', 'investigation', 'medicine', 'religion'],
   },
-]
+] as const
 
-export const DND_SKILLS: readonly DndSkill[] = [
-  { id: 'acrobatics', name: 'Acrobatics', ability: 'Dexterity' },
-  { id: 'animalhandling', name: 'Animal Handling', ability: 'Wisdom' },
-  { id: 'arcana', name: 'Arcana', ability: 'Intelligence' },
-  { id: 'athletics', name: 'Athletics', ability: 'Strength' },
-  { id: 'deception', name: 'Deception', ability: 'Charisma' },
-  { id: 'history', name: 'History', ability: 'Intelligence' },
-  { id: 'insight', name: 'Insight', ability: 'Wisdom' },
-  { id: 'intimidation', name: 'Intimidation', ability: 'Charisma' },
-  { id: 'investigation', name: 'Investigation', ability: 'Intelligence' },
-  { id: 'medicine', name: 'Medicine', ability: 'Wisdom' },
-  { id: 'nature', name: 'Nature', ability: 'Intelligence' },
-  { id: 'perception', name: 'Perception', ability: 'Wisdom' },
-  { id: 'performance', name: 'Performance', ability: 'Charisma' },
-  { id: 'persuasion', name: 'Persuasion', ability: 'Charisma' },
-  { id: 'religion', name: 'Religion', ability: 'Intelligence' },
-  { id: 'sleightofhand', name: 'Sleight of Hand', ability: 'Dexterity' },
-  { id: 'stealth', name: 'Stealth', ability: 'Dexterity' },
-  { id: 'survival', name: 'Survival', ability: 'Wisdom' },
-]
+export type ClassId = (typeof DND_CLASSES)[number]['id']
 
-export const DND_BACKGROUNDS: readonly DndBackground[] = [
+export const DND_SKILLS = [
+  { id: 'acrobatics', name: 'Acrobatics', ability: 'dex' },
+  { id: 'animalhandling', name: 'Animal Handling', ability: 'wis' },
+  { id: 'arcana', name: 'Arcana', ability: 'int' },
+  { id: 'athletics', name: 'Athletics', ability: 'str' },
+  { id: 'deception', name: 'Deception', ability: 'cha' },
+  { id: 'history', name: 'History', ability: 'int' },
+  { id: 'insight', name: 'Insight', ability: 'wis' },
+  { id: 'intimidation', name: 'Intimidation', ability: 'cha' },
+  { id: 'investigation', name: 'Investigation', ability: 'int' },
+  { id: 'medicine', name: 'Medicine', ability: 'wis' },
+  { id: 'nature', name: 'Nature', ability: 'int' },
+  { id: 'perception', name: 'Perception', ability: 'wis' },
+  { id: 'performance', name: 'Performance', ability: 'cha' },
+  { id: 'persuasion', name: 'Persuasion', ability: 'cha' },
+  { id: 'religion', name: 'Religion', ability: 'int' },
+  { id: 'sleightofhand', name: 'Sleight of Hand', ability: 'dex' },
+  { id: 'stealth', name: 'Stealth', ability: 'dex' },
+  { id: 'survival', name: 'Survival', ability: 'wis' },
+] as const
+
+export type SkillId = (typeof DND_SKILLS)[number]['id']
+
+export const DND_BACKGROUNDS = [
   { id: 'acolyte', name: 'Acolyte' },
   { id: 'charlatan', name: 'Charlatan' },
   { id: 'criminal', name: 'Criminal' },
@@ -525,9 +529,11 @@ export const DND_BACKGROUNDS: readonly DndBackground[] = [
   { id: 'soldier', name: 'Soldier' },
   { id: 'urchin', name: 'Urchin' },
   { id: 'custom', name: 'Custom' },
-]
+] as const
 
-export const DND_ALIGNMENTS: readonly DndAlignment[] = [
+export type BackgroundId = (typeof DND_BACKGROUNDS)[number]['id']
+
+export const DND_ALIGNMENTS = [
   { id: 'lg', name: 'Lawful Good', shorthand: 'LG' },
   { id: 'ng', name: 'Neutral Good', shorthand: 'NG' },
   { id: 'cg', name: 'Chaotic Good', shorthand: 'CG' },
@@ -537,24 +543,17 @@ export const DND_ALIGNMENTS: readonly DndAlignment[] = [
   { id: 'le', name: 'Lawful Evil', shorthand: 'LE' },
   { id: 'ne', name: 'Neutral Evil', shorthand: 'NE' },
   { id: 'ce', name: 'Chaotic Evil', shorthand: 'CE' },
-]
+] as const
+
+export type AlignmentId = (typeof DND_ALIGNMENTS)[number]['id']
 
 export const ABILITY_ABBREVIATIONS: Readonly<Record<AbilityName, string>> = {
-  Strength: 'STR',
-  Dexterity: 'DEX',
-  Constitution: 'CON',
-  Intelligence: 'INT',
-  Wisdom: 'WIS',
-  Charisma: 'CHA',
-}
-
-export const ABILITY_NAME_TO_KEY: Readonly<Record<AbilityName, 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'>> = {
-  Strength: 'str',
-  Dexterity: 'dex',
-  Constitution: 'con',
-  Intelligence: 'int',
-  Wisdom: 'wis',
-  Charisma: 'cha',
+  str: 'STR',
+  dex: 'DEX',
+  con: 'CON',
+  int: 'INT',
+  wis: 'WIS',
+  cha: 'CHA',
 }
 
 // Ability Score Assignment Methods
@@ -661,7 +660,7 @@ export interface DndCondition {
   readonly effects: string
 }
 
-export const DND_CONDITIONS: readonly DndCondition[] = [
+export const DND_CONDITIONS = [
   { id: 'blinded', name: 'Blinded', effects: 'Cannot see. Automatic miss on attacks. Attacks against you have advantage.' },
   { id: 'charmed', name: 'Charmed', effects: 'Cannot attack the charmer. Charmer has advantage on social checks against you.' },
   { id: 'deafened', name: 'Deafened', effects: 'Cannot hear. Automatic fail on any check requiring hearing.' },
@@ -676,7 +675,9 @@ export const DND_CONDITIONS: readonly DndCondition[] = [
   { id: 'restrained', name: 'Restrained', effects: 'Speed becomes 0. Disadvantage on attack rolls. Attacks against you have advantage.' },
   { id: 'stunned', name: 'Stunned', effects: 'Cannot move or speak. Automatic fail on STR and DEX saves. Attacks have advantage.' },
   { id: 'unconscious', name: 'Unconscious', effects: 'Cannot move or wake unless someone uses action. Attacks have advantage.' },
-]
+] as const
+
+export type ConditionId = (typeof DND_CONDITIONS)[number]['id']
 
 export function getBaseRaceId(raceId: string): string {
   // Direct match first

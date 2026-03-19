@@ -269,7 +269,7 @@ export default function CharacterSheet() {
               <SectionHeader title="Skills" onEdit={() => setEditSection('skills')} />
               <div className="space-y-1 text-xs">
                 {Object.entries(skillsByAbility).map(([ability, skills]) => {
-                  const abilityKey = ability.toLowerCase() as keyof typeof character.abilities
+                  const abilityKey = ability as keyof typeof character.abilities
                   return (
                   <div key={ability}>
                     <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${abilityKey}` as never)}</div>

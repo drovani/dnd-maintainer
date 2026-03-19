@@ -2,7 +2,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import {
   ABILITY_ABBREVIATIONS,
-  ABILITY_NAME_TO_KEY,
   DND_CLASSES,
   DND_SKILLS,
   getAbilityModifier,
@@ -46,17 +45,17 @@ export function SkillsStep({
   return (
     <div className="space-y-4">
       <p className="text-muted-foreground text-sm">
-        Choose {cls.skillChoices} skill{cls.skillChoices !== 1 ? 's' : ''} from your class list.{' '}
+        Choose {cls.skillChoices} skill{(cls.skillChoices as number) !== 1 ? 's' : ''} from your class list.{' '}
         <span className="font-medium text-foreground">{selectedCount} / {cls.skillChoices} selected</span>
       </p>
       <div className="space-y-1">
         {DND_SKILLS.map((skill) => {
           const skillData = skills[skill.id] ?? { proficient: false, expertise: false }
-          const abilityKey = ABILITY_NAME_TO_KEY[skill.ability]
+          const abilityKey = skill.ability
           const abilityMod = getAbilityModifier(abilities[abilityKey] + (racialBonuses[abilityKey] ?? 0))
           const totalMod = skillData.proficient ? abilityMod + profBonus : abilityMod
-          const abbrev = t(`abilityAbbreviations.${abilityKey}` as never, { defaultValue: ABILITY_ABBREVIATIONS[skill.ability] })
-          const inPool = cls.skillPool === null || cls.skillPool.includes(skill.name)
+          const abbrev = t(`abilityAbbreviations.${abilityKey}` as never, { defaultValue: ABILITY_ABBREVIATIONS[abilityKey] })
+          const inPool = cls.skillPool === null || (cls.skillPool as readonly string[]).includes(skill.id)
           const isDisabled = !inPool || (atMax && !skillData.proficient)
 
           return (

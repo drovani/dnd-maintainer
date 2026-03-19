@@ -45,11 +45,3 @@ export interface CharacterData {
   backstory: string
 }
 
-export const ABILITY_NAMES: Record<keyof AbilityScores, string> = {
-  str: 'Strength',
-  dex: 'Dexterity',
-  con: 'Constitution',
-  int: 'Intelligence',
-  wis: 'Wisdom',
-  cha: 'Charisma',
-}

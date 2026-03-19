@@ -11,8 +11,8 @@ import {
 } from '@/components/character-builder'
 import type { CharacterData } from '@/components/character-builder'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import { ABILITY_NAME_TO_KEY, DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
-import type { AbilityScores } from '@/types/database'
+import { DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
+import type { AbilityKey, AbilityScores } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -70,7 +70,7 @@ export default function CharacterBuilder() {
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
   const selectedClass = DND_CLASSES.find((c) => c.id === characterData.class)
   const selectedRace = DND_RACES.find((r) => r.id === characterData.race)
-  const racialBonuses = selectedRace?.abilityBonuses ?? {}
+  const racialBonuses: Partial<Record<AbilityKey, number>> = selectedRace?.abilityBonuses ?? {}
   const conWithRacial = characterData.abilities.con + (racialBonuses.con ?? 0)
   const dexWithRacial = characterData.abilities.dex + (racialBonuses.dex ?? 0)
   const calculatedHp = selectedClass
@@ -92,7 +92,7 @@ export default function CharacterBuilder() {
       hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
       speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
       saving_throws: Object.fromEntries(
-        (selectedClass?.savingThrowProficiencies ?? []).map((a) => [ABILITY_NAME_TO_KEY[a], { proficient: true }])
+        (selectedClass?.savingThrowProficiencies ?? []).map((a) => [a, { proficient: true }])
       ),
       skills: characterData.skills, features: characterData.features,
       equipment: characterData.equipment, spells: characterData.spells,
@@ -188,9 +188,9 @@ export default function CharacterBuilder() {
     setCharacterData((prev) => {
       const cls = DND_CLASSES.find((c) => c.id === prev.class)
       if (!cls) return prev
-      const skillName = DND_SKILLS.find((s) => s.id === skillId)?.name
-      if (!skillName) return prev
-      const inPool = cls.skillPool === null || cls.skillPool.includes(skillName)
+      const skillExists = DND_SKILLS.some((s) => s.id === skillId)
+      if (!skillExists) return prev
+      const inPool = cls.skillPool === null || (cls.skillPool as readonly string[]).includes(skillId)
       if (!inPool) return prev
       const current = prev.skills[skillId]
       if (!current) { console.warn(`Skill data missing for "${skillId}" — possible state desync`); return prev }
