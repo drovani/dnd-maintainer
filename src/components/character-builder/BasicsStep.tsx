@@ -15,27 +15,37 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { usePlayerNames } from '@/hooks/useCharacters'
 import {
-  DND_ALIGNMENTS,
   DND_BACKGROUNDS,
   DND_CLASSES,
   DND_RACE_GROUPS,
   DND_RACES,
   generateCharacterName,
+  type AlignmentId,
+  type BackgroundId,
+  type ClassId,
   type DndGender,
+  type RaceId,
 } from '@/lib/dnd-helpers'
 import { Wand2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
+// Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
+const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
+  'Lawful Good': 'lg', 'Neutral Good': 'ng', 'Chaotic Good': 'cg',
+  'Lawful Neutral': 'ln', 'Neutral Neutral': 'n', 'Chaotic Neutral': 'cn',
+  'Lawful Evil': 'le', 'Neutral Evil': 'ne', 'Chaotic Evil': 'ce',
+}
+
 interface BasicsStepProps {
   characterType: CharacterData['character_type']
   name: string
   playerName: string
-  race: string
-  characterClass: string
-  background: string
+  race: CharacterData['race']
+  characterClass: CharacterData['class']
+  background: CharacterData['background']
   customBackground: string
-  alignment: string
+  alignment: CharacterData['alignment']
   level: number
   gender: CharacterData['gender']
   fieldErrors: Partial<Record<'name' | 'race' | 'class' | 'gender', boolean>>
@@ -152,7 +162,7 @@ export function BasicsStep({
             </Label>
             <Select
               value={race || null}
-              onValueChange={(value) => value && onChange({ race: value })}
+              onValueChange={(value) => value && onChange({ race: value as RaceId })}
               items={DND_RACES.map((r) => ({ value: r.id, label: t(`races.${r.id}`) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
@@ -187,7 +197,7 @@ export function BasicsStep({
             </Label>
             <Select
               value={characterClass || null}
-              onValueChange={(value) => value && onChange({ class: value })}
+              onValueChange={(value) => value && onChange({ class: value as ClassId })}
               items={DND_CLASSES.map((c) => ({ value: c.id, label: t(`classes.${c.id}`) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
@@ -207,7 +217,7 @@ export function BasicsStep({
             <Label>Background</Label>
             <Select
               value={background || null}
-              onValueChange={(value) => value && onChange({ background: value })}
+              onValueChange={(value) => value && onChange({ background: value as BackgroundId })}
               items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`, { defaultValue: b.id }) }))}
             >
               <SelectTrigger className="w-full">
@@ -229,22 +239,20 @@ export function BasicsStep({
           <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-border">
             {(['Good', 'Neutral', 'Evil'] as const).map((moral) =>
               (['Lawful', 'Neutral', 'Chaotic'] as const).map((ethic) => {
-                const alignmentItem = DND_ALIGNMENTS.find(
-                  (a) => a.name === (ethic === 'Neutral' && moral === 'Neutral' ? 'True Neutral' : `${ethic} ${moral}`)
-                )
-                if (!alignmentItem) {
-                  console.warn(`Alignment not found for "${ethic} ${moral}" — check DND_ALIGNMENTS data`)
+                const alignmentId = ALIGNMENT_GRID[`${ethic} ${moral}`]
+                if (!alignmentId) {
+                  console.warn(`Alignment not found for "${ethic} ${moral}" — check ALIGNMENT_GRID mapping`)
                   return null
                 }
-                const isSelected = alignment === alignmentItem.id
+                const isSelected = alignment === alignmentId
                 const topLabel = ethic === 'Neutral' && moral === 'Neutral' ? 'True' : ethic
                 const bottomLabel = moral
                 return (
                   <button
-                    key={alignmentItem.id}
+                    key={alignmentId}
                     type="button"
-                    title={t(`alignments.${alignmentItem.id}`)}
-                    onClick={() => onChange({ alignment: alignmentItem.id })}
+                    title={t(`alignments.${alignmentId}`)}
+                    onClick={() => onChange({ alignment: alignmentId })}
                     className={`flex flex-col items-center justify-center border-r border-b border-border px-1 py-1 text-sm transition-colors cursor-pointer last-of-type:border-r-0 nth-[3n]:border-r-0 ${isSelected
                       ? 'bg-primary/10 font-medium'
                       : 'hover:bg-muted/50'

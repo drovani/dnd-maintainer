@@ -80,7 +80,7 @@ export function SkillsStep({
                 htmlFor={`prof-${skill.id}`}
                 className="flex-1 cursor-pointer"
               >
-                {t(`skills.${skill.id}`, { defaultValue: skill.name })}
+                {t(`skills.${skill.id}`)}
                 <span className="text-xs text-muted-foreground">
                   ({abbrev} {abilityMod >= 0 ? '+' : ''}{abilityMod})
                 </span>

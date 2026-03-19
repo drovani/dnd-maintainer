@@ -285,7 +285,7 @@ export default function CharacterSheet() {
                       return (
                         <div key={skill.id} className="flex justify-between text-foreground py-1">
                           <span className={skillData.proficient ? 'font-bold' : ''}>
-                            {t(`skills.${skill.id}`, { defaultValue: skill.name })}
+                            {t(`skills.${skill.id}`)}
                           </span>
                           <span
                             className={`font-mono ${skillData.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
@@ -826,7 +826,7 @@ function EditSkillsDialog({
             const data = form[skill.id]
             return (
               <div key={skill.id} className="flex items-center justify-between py-1.5 border-b">
-                <span className="text-sm text-foreground">{t(`skills.${skill.id}`, { defaultValue: skill.name })}</span>
+                <span className="text-sm text-foreground">{t(`skills.${skill.id}`)}</span>
                 <div className="flex gap-1">
                   <button
                     type="button"

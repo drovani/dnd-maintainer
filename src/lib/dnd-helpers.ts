@@ -1,6 +1,8 @@
 // D&D 5e Helper Functions and Data
 import type { AbilityKey } from '@/types/database'
 
+export type AbilityName = AbilityKey
+
 export function getAbilityModifier(score: number): number {
   return Math.floor((score - 10) / 2)
 }
@@ -198,139 +200,117 @@ export function getSpellSlots(className: string, level: number): number[] {
 }
 
 export interface DndRace {
-  id: string
-  name: string
-  size: string
-  speed: number
-  abilityBonuses: Partial<Record<AbilityKey, number>>
+  readonly id: RaceId
+  readonly size: string
+  readonly speed: number
+  readonly abilityBonuses: Partial<Record<AbilityKey, number>>
 }
 
 export interface DndClass {
-  id: string
-  name: string
-  hitDie: number
-  primaryAbility: AbilityName
-  savingThrowProficiencies: readonly AbilityName[]
-  spellcastingAbility?: AbilityName
-  skillChoices: number
+  readonly id: ClassId
+  readonly hitDie: number
+  readonly primaryAbility: AbilityName
+  readonly savingThrowProficiencies: readonly AbilityName[]
+  readonly spellcastingAbility?: AbilityName
+  readonly skillChoices: number
   /** Skills this class can choose from (by skill id). null = any skill (e.g., Bard's Jack of All Trades). */
-  skillPool: readonly string[] | null
+  readonly skillPool: readonly SkillId[] | null
 }
 
-export type AbilityName = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'
-
 export interface DndSkill {
-  id: string
-  name: string
-  ability: AbilityName
+  readonly id: SkillId
+  readonly ability: AbilityName
 }
 
 export interface DndBackground {
-  id: string
-  name: string
+  readonly id: BackgroundId
 }
 
 export interface DndAlignment {
-  id: string
-  name: string
-  shorthand: string
+  readonly id: AlignmentId
 }
 
 export const DND_RACES = [
   {
     id: 'dragonborn',
-    name: 'Dragonborn',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 2, cha: 1 },
   },
   {
     id: 'dwarf-hill',
-    name: 'Hill Dwarf',
     size: 'Medium',
     speed: 25,
     abilityBonuses: { con: 2, wis: 1 },
   },
   {
     id: 'dwarf-mountain',
-    name: 'Mountain Dwarf',
     size: 'Medium',
     speed: 25,
     abilityBonuses: { con: 2, str: 2 },
   },
   {
     id: 'elf-dark',
-    name: 'Dark Elf (Drow)',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { dex: 2, cha: 1 },
   },
   {
     id: 'elf-high',
-    name: 'High Elf',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { dex: 2, int: 1 },
   },
   {
     id: 'elf-wood',
-    name: 'Wood Elf',
     size: 'Medium',
     speed: 35,
     abilityBonuses: { dex: 2, wis: 1 },
   },
   {
     id: 'gnome-forest',
-    name: 'Forest Gnome',
     size: 'Small',
     speed: 25,
     abilityBonuses: { int: 2, dex: 1 },
   },
   {
     id: 'gnome-rock',
-    name: 'Rock Gnome',
     size: 'Small',
     speed: 25,
     abilityBonuses: { int: 2, con: 1 },
   },
   {
     id: 'halfelf',
-    name: 'Half-Elf',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1, wis: 1 },
   },
   {
     id: 'halforc',
-    name: 'Half-Orc',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 2, con: 1 },
   },
   {
     id: 'halfling-lightfoot',
-    name: 'Lightfoot Halfling',
     size: 'Small',
     speed: 25,
     abilityBonuses: { dex: 2, cha: 1 },
   },
   {
     id: 'halfling-stout',
-    name: 'Stout Halfling',
     size: 'Small',
     speed: 25,
     abilityBonuses: { dex: 2, con: 1 },
   },
   {
     id: 'human',
-    name: 'Human',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 },
   },
   {
     id: 'tiefling',
-    name: 'Tiefling',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1 },
@@ -340,9 +320,9 @@ export const DND_RACES = [
 export type RaceId = (typeof DND_RACES)[number]['id']
 
 export interface DndRaceGroup {
-  id: string
-  label: string
-  options: Array<{ value: string; label: string }>
+  readonly id: string
+  readonly label: string
+  readonly options: ReadonlyArray<{ readonly value: RaceId; readonly label: string }>
 }
 
 export const DND_RACE_GROUPS: DndRaceGroup[] = [
@@ -373,7 +353,6 @@ export const DND_RACE_GROUPS: DndRaceGroup[] = [
 export const DND_CLASSES = [
   {
     id: 'barbarian',
-    name: 'Barbarian',
     hitDie: 12,
     primaryAbility: 'str',
     savingThrowProficiencies: ['str', 'con'],
@@ -382,7 +361,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'bard',
-    name: 'Bard',
     hitDie: 8,
     primaryAbility: 'cha',
     savingThrowProficiencies: ['dex', 'cha'],
@@ -392,7 +370,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'cleric',
-    name: 'Cleric',
     hitDie: 8,
     primaryAbility: 'wis',
     savingThrowProficiencies: ['wis', 'cha'],
@@ -402,7 +379,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'druid',
-    name: 'Druid',
     hitDie: 8,
     primaryAbility: 'wis',
     savingThrowProficiencies: ['int', 'wis'],
@@ -412,7 +388,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'fighter',
-    name: 'Fighter',
     hitDie: 10,
     primaryAbility: 'str',
     savingThrowProficiencies: ['str', 'con'],
@@ -421,7 +396,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'monk',
-    name: 'Monk',
     hitDie: 8,
     primaryAbility: 'dex',
     savingThrowProficiencies: ['str', 'dex'],
@@ -430,7 +404,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'paladin',
-    name: 'Paladin',
     hitDie: 10,
     primaryAbility: 'str',
     savingThrowProficiencies: ['wis', 'cha'],
@@ -440,7 +413,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'ranger',
-    name: 'Ranger',
     hitDie: 10,
     primaryAbility: 'dex',
     savingThrowProficiencies: ['str', 'dex'],
@@ -450,7 +422,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'rogue',
-    name: 'Rogue',
     hitDie: 8,
     primaryAbility: 'dex',
     savingThrowProficiencies: ['dex', 'int'],
@@ -459,7 +430,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'sorcerer',
-    name: 'Sorcerer',
     hitDie: 6,
     primaryAbility: 'cha',
     savingThrowProficiencies: ['con', 'cha'],
@@ -469,7 +439,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'warlock',
-    name: 'Warlock',
     hitDie: 8,
     primaryAbility: 'cha',
     savingThrowProficiencies: ['wis', 'cha'],
@@ -479,7 +448,6 @@ export const DND_CLASSES = [
   },
   {
     id: 'wizard',
-    name: 'Wizard',
     hitDie: 6,
     primaryAbility: 'int',
     savingThrowProficiencies: ['int', 'wis'],
@@ -492,57 +460,57 @@ export const DND_CLASSES = [
 export type ClassId = (typeof DND_CLASSES)[number]['id']
 
 export const DND_SKILLS = [
-  { id: 'acrobatics', name: 'Acrobatics', ability: 'dex' },
-  { id: 'animalhandling', name: 'Animal Handling', ability: 'wis' },
-  { id: 'arcana', name: 'Arcana', ability: 'int' },
-  { id: 'athletics', name: 'Athletics', ability: 'str' },
-  { id: 'deception', name: 'Deception', ability: 'cha' },
-  { id: 'history', name: 'History', ability: 'int' },
-  { id: 'insight', name: 'Insight', ability: 'wis' },
-  { id: 'intimidation', name: 'Intimidation', ability: 'cha' },
-  { id: 'investigation', name: 'Investigation', ability: 'int' },
-  { id: 'medicine', name: 'Medicine', ability: 'wis' },
-  { id: 'nature', name: 'Nature', ability: 'int' },
-  { id: 'perception', name: 'Perception', ability: 'wis' },
-  { id: 'performance', name: 'Performance', ability: 'cha' },
-  { id: 'persuasion', name: 'Persuasion', ability: 'cha' },
-  { id: 'religion', name: 'Religion', ability: 'int' },
-  { id: 'sleightofhand', name: 'Sleight of Hand', ability: 'dex' },
-  { id: 'stealth', name: 'Stealth', ability: 'dex' },
-  { id: 'survival', name: 'Survival', ability: 'wis' },
+  { id: 'acrobatics', ability: 'dex' },
+  { id: 'animalhandling', ability: 'wis' },
+  { id: 'arcana', ability: 'int' },
+  { id: 'athletics', ability: 'str' },
+  { id: 'deception', ability: 'cha' },
+  { id: 'history', ability: 'int' },
+  { id: 'insight', ability: 'wis' },
+  { id: 'intimidation', ability: 'cha' },
+  { id: 'investigation', ability: 'int' },
+  { id: 'medicine', ability: 'wis' },
+  { id: 'nature', ability: 'int' },
+  { id: 'perception', ability: 'wis' },
+  { id: 'performance', ability: 'cha' },
+  { id: 'persuasion', ability: 'cha' },
+  { id: 'religion', ability: 'int' },
+  { id: 'sleightofhand', ability: 'dex' },
+  { id: 'stealth', ability: 'dex' },
+  { id: 'survival', ability: 'wis' },
 ] as const
 
 export type SkillId = (typeof DND_SKILLS)[number]['id']
 
 export const DND_BACKGROUNDS = [
-  { id: 'acolyte', name: 'Acolyte' },
-  { id: 'charlatan', name: 'Charlatan' },
-  { id: 'criminal', name: 'Criminal' },
-  { id: 'entertainer', name: 'Entertainer' },
-  { id: 'folkhero', name: 'Folk Hero' },
-  { id: 'guildartisan', name: 'Guild Artisan' },
-  { id: 'hermit', name: 'Hermit' },
-  { id: 'noble', name: 'Noble' },
-  { id: 'outlander', name: 'Outlander' },
-  { id: 'sage', name: 'Sage' },
-  { id: 'sailor', name: 'Sailor' },
-  { id: 'soldier', name: 'Soldier' },
-  { id: 'urchin', name: 'Urchin' },
-  { id: 'custom', name: 'Custom' },
+  { id: 'acolyte' },
+  { id: 'charlatan' },
+  { id: 'criminal' },
+  { id: 'entertainer' },
+  { id: 'folkhero' },
+  { id: 'guildartisan' },
+  { id: 'hermit' },
+  { id: 'noble' },
+  { id: 'outlander' },
+  { id: 'sage' },
+  { id: 'sailor' },
+  { id: 'soldier' },
+  { id: 'urchin' },
+  { id: 'custom' },
 ] as const
 
 export type BackgroundId = (typeof DND_BACKGROUNDS)[number]['id']
 
 export const DND_ALIGNMENTS = [
-  { id: 'lg', name: 'Lawful Good', shorthand: 'LG' },
-  { id: 'ng', name: 'Neutral Good', shorthand: 'NG' },
-  { id: 'cg', name: 'Chaotic Good', shorthand: 'CG' },
-  { id: 'ln', name: 'Lawful Neutral', shorthand: 'LN' },
-  { id: 'n', name: 'True Neutral', shorthand: 'N' },
-  { id: 'cn', name: 'Chaotic Neutral', shorthand: 'CN' },
-  { id: 'le', name: 'Lawful Evil', shorthand: 'LE' },
-  { id: 'ne', name: 'Neutral Evil', shorthand: 'NE' },
-  { id: 'ce', name: 'Chaotic Evil', shorthand: 'CE' },
+  { id: 'lg' },
+  { id: 'ng' },
+  { id: 'cg' },
+  { id: 'ln' },
+  { id: 'n' },
+  { id: 'cn' },
+  { id: 'le' },
+  { id: 'ne' },
+  { id: 'ce' },
 ] as const
 
 export type AlignmentId = (typeof DND_ALIGNMENTS)[number]['id']
