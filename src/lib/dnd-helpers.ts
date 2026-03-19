@@ -210,7 +210,7 @@ export interface DndClass {
   name: string
   hitDie: number
   primaryAbility: AbilityName
-  savingThrowProficiencies: AbilityName[]
+  savingThrowProficiencies: readonly AbilityName[]
   spellcastingAbility?: AbilityName
   skillChoices: number
   /** Skills this class can choose from. null = any skill (e.g., Bard's Jack of All Trades). */

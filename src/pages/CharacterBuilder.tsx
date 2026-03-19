@@ -212,8 +212,8 @@ export default function CharacterBuilder() {
     name: characterData.name,
     character_type: characterData.character_type,
     player_name: characterData.player_name || null,
-    race: characterData.race || null,
-    class: characterData.class || null,
+    race: selectedRace?.name ?? null,
+    class: selectedClass?.name ?? null,
     subclass: null,
     level: characterData.level,
     background: characterData.custom_background || characterData.background || null,
@@ -221,9 +221,14 @@ export default function CharacterBuilder() {
     hit_points_max: calculatedHp,
     hit_points_current: calculatedHp,
     armor_class: calculatedAc,
-    speed: 30,
+    speed: selectedRace?.speed ?? 30,
     abilities: characterData.abilities,
-    saving_throws: {},
+    saving_throws: Object.fromEntries(
+      (selectedClass?.savingThrowProficiencies ?? []).map((ability) => [
+        ABILITY_NAME_TO_KEY[ability],
+        { proficient: true },
+      ])
+    ),
     skills: characterData.skills,
     features: characterData.features,
     equipment: characterData.equipment,
@@ -1210,10 +1215,21 @@ export default function CharacterBuilder() {
         </Card>
 
         {(finalizeError || saveStatus === 'error') && (
-          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
-            {finalizeError
-              ? `Failed to finalize character: ${finalizeError}`
-              : 'Failed to save draft. Your recent changes may not have been saved.'}
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
+            <span>
+              {finalizeError
+                ? `Failed to finalize character: ${finalizeError}`
+                : 'Failed to save draft. Your recent changes may not have been saved.'}
+            </span>
+            {saveStatus === 'error' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => saveDraft(buildPayload()).catch(() => {})}
+              >
+                Retry Save
+              </Button>
+            )}
           </div>
         )}
 
@@ -1229,6 +1245,9 @@ export default function CharacterBuilder() {
           </Button>
 
           <div className="flex items-center gap-3">
+            {saveStatus === 'saving' && (
+              <span className="text-sm text-muted-foreground">Saving...</span>
+            )}
             {saveStatus === 'saved' && (
               <span className="text-sm text-muted-foreground">Draft saved</span>
             )}
