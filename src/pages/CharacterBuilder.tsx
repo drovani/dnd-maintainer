@@ -117,6 +117,15 @@ const ABILITY_NAMES = {
   cha: 'Charisma',
 }
 
+const ABILITY_NAME_TO_KEY: Record<string, keyof CharacterData['abilities']> = {
+  Strength: 'str',
+  Dexterity: 'dex',
+  Constitution: 'con',
+  Intelligence: 'int',
+  Wisdom: 'wis',
+  Charisma: 'cha',
+}
+
 export default function CharacterBuilder() {
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -325,13 +334,10 @@ export default function CharacterBuilder() {
   }, [])
 
   useEffect(() => {
-    setCharacterData((prev) => ({
-      ...prev,
-      skills: DND_SKILLS.reduce(
-        (acc, skill) => ({ ...acc, [skill.id]: { proficient: false, expertise: false } }),
-        {} as Record<string, { proficient: boolean; expertise: boolean }>
-      ),
-    }))
+    const resetSkills = Object.fromEntries(
+      DND_SKILLS.map((skill) => [skill.id, { proficient: false, expertise: false }])
+    ) as Record<string, { proficient: boolean; expertise: boolean }>
+    setCharacterData((prev) => ({ ...prev, skills: resetSkills }))
   }, [characterData.class])
 
   const incrementAbility = (ability: keyof CharacterData['abilities']) => {
@@ -350,21 +356,23 @@ export default function CharacterBuilder() {
   }
 
   const toggleSkillProficiency = (skillId: string) => {
-    const cls = DND_CLASSES.find((c) => c.id === characterData.class)
-    if (!cls) return
-
     setCharacterData((prev) => {
+      const cls = DND_CLASSES.find((c) => c.id === prev.class)
+      if (!cls) return prev
+
+      const skillName = DND_SKILLS.find((s) => s.id === skillId)?.name ?? ''
+      const inPool = cls.skillPool === null || cls.skillPool.includes(skillName)
+      if (!inPool) return prev
+
       const current = prev.skills[skillId]
+      if (!current) return prev
+
       if (current.proficient) {
         return {
           ...prev,
           skills: { ...prev.skills, [skillId]: { proficient: false, expertise: false } },
         }
       }
-      const inPool = cls.skillPool === null || cls.skillPool.includes(
-        DND_SKILLS.find((s) => s.id === skillId)?.name ?? ''
-      )
-      if (!inPool) return prev
       const selectedCount = Object.values(prev.skills).filter((s) => s.proficient).length
       if (selectedCount >= cls.skillChoices) return prev
       return {
@@ -825,13 +833,17 @@ export default function CharacterBuilder() {
 
   const renderSkillsStep = () => {
     const cls = DND_CLASSES.find((c) => c.id === characterData.class)
-    if (!cls) return null
+    if (!cls) {
+      return (
+        <p className="text-muted-foreground text-sm">
+          Please select a class in the Basics step before choosing skills.
+        </p>
+      )
+    }
 
     const profBonus = getProficiencyBonus(characterData.level)
     const selectedCount = Object.values(characterData.skills).filter((s) => s.proficient).length
     const atMax = selectedCount >= cls.skillChoices
-
-    const sortedSkills = [...DND_SKILLS].sort((a, b) => a.name.localeCompare(b.name))
 
     return (
       <div className="space-y-4">
@@ -840,9 +852,9 @@ export default function CharacterBuilder() {
           <span className="font-medium text-foreground">{selectedCount} / {cls.skillChoices} selected</span>
         </p>
         <div className="space-y-1">
-          {sortedSkills.map((skill) => {
-            const skillData = characterData.skills[skill.id]
-            const abilityKey = skill.ability.toLowerCase().slice(0, 3) as keyof typeof characterData.abilities
+          {DND_SKILLS.map((skill) => {
+            const skillData = characterData.skills[skill.id] ?? { proficient: false, expertise: false }
+            const abilityKey = ABILITY_NAME_TO_KEY[skill.ability]
             const abilityMod = getAbilityModifier(characterData.abilities[abilityKey] + (racialBonuses[abilityKey] ?? 0))
             const totalMod = skillData.proficient ? abilityMod + profBonus : abilityMod
             const abbrev = ABILITY_ABBREVIATIONS[skill.ability] ?? skill.ability.slice(0, 3).toUpperCase()
