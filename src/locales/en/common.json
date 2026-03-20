@@ -421,7 +421,10 @@
     "injured": "injured",
     "unconscious": "unconscious",
     "dead": "dead",
-    "active": "Active"
+    "active": "Active",
+    "planning": "Planning",
+    "paused": "Paused",
+    "completed": "Completed"
   },
   "common": {
     "loading": "Loading...",

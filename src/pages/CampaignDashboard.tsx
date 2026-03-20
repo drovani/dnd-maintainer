@@ -31,6 +31,7 @@ export default function CampaignDashboard() {
   const [editedSetting, setEditedSetting] = useState('')
 
   const { t } = useTranslation('common')
+  const { t: tg } = useTranslation('gamedata')
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(id)
   const { update: updateMutation } = useCampaignMutations()
@@ -238,8 +239,8 @@ export default function CampaignDashboard() {
             <div className="text-right">
               <div className="inline-flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-lg border border-border">
                 <Zap className="size-5 text-primary" />
-                <span className="text-foreground capitalize">
-                  {campaign.status || t('status.active')}
+                <span className="text-foreground">
+                  {t(`status.${campaign.status || 'active'}`)}
                 </span>
               </div>
             </div>
@@ -471,7 +472,7 @@ export default function CampaignDashboard() {
                             {char.name}
                           </p>
                           <p className="text-muted-foreground text-sm">
-                            {t('campaign.party.charSummary', { race: char.race, class: char.class, level: char.level })}
+                            {t('campaign.party.charSummary', { race: tg(`races.${char.race ?? ''}` as never, { defaultValue: char.race ?? '' }), class: tg(`classes.${char.class ?? ''}` as never, { defaultValue: char.class ?? '' }), level: char.level })}
                           </p>
                           {char.player_name && (
                             <p className="text-muted-foreground text-xs mt-1">

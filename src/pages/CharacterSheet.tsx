@@ -203,12 +203,12 @@ export default function CharacterSheet() {
             )}
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.type')}</span>
-              <p className="text-foreground font-semibold uppercase">{character.character_type}</p>
+              <p className="text-foreground font-semibold uppercase">{tc(`characterType.${character.character_type}`)}</p>
             </div>
             {character.gender && (
               <div>
                 <span className="text-muted-foreground">{tc('characterSheet.fields.gender')}</span>
-                <p className="text-foreground font-semibold capitalize">{character.gender}</p>
+                <p className="text-foreground font-semibold">{t(`gender.${character.gender}`, { defaultValue: character.gender })}</p>
               </div>
             )}
           </div>
@@ -667,7 +667,7 @@ function EditHeaderDialog({
               <SelectContent>
                 {DND_RACE_GROUPS.map((group) => (
                   <SelectGroup key={group.id}>
-                    <SelectLabel>{t(`raceGroups.${group.id}`)}</SelectLabel>
+                    <SelectLabel>{t(`raceGroups.${group.id}` as never)}</SelectLabel>
                     {group.options.map((opt) => (
                       <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}`)}</SelectItem>
                     ))}

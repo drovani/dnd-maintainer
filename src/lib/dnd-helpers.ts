@@ -230,6 +230,9 @@ export interface DndAlignment {
   readonly id: AlignmentId
 }
 
+// Race ID convention: base races use plain IDs (e.g., 'human', 'tiefling'),
+// subraces use '{base}-{variant}' (e.g., 'dwarf-hill', 'elf-dark'),
+// half-races use 'half{race}' without hyphen (e.g., 'halfelf', 'halforc').
 export const DND_RACES = [
   {
     id: 'dragonborn',

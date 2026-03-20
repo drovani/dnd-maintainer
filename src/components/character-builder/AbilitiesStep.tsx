@@ -164,7 +164,7 @@ export function AbilitiesStep({
               <Badge
                 variant="secondary"
                 className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={`${t(`races.${selectedRace.id}`)} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab}`)}`).join(', ')}`}
+                title={`${t(`races.${selectedRace.id}`)} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`).join(', ')}`}
               >
                 +{raceBonus}
               </Badge>

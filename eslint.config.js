@@ -24,5 +24,8 @@ export default defineConfig(
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
   },
-  i18next.configs["flat/recommended"],
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ...i18next.configs["flat/recommended"],
+  },
 );
