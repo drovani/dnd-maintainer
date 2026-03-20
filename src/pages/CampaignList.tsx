@@ -26,7 +26,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 
 export default function CampaignList() {
   const navigate = useNavigate()
@@ -329,12 +329,12 @@ export default function CampaignList() {
                     <div className="mt-3 pt-3 border-t flex gap-4 text-xs">
                       {charCount.pc > 0 && (
                         <span className="text-muted-foreground">
-                          {charCount.pc} <span className="uppercase">pc</span>s
+                          {t('characterList.pcCount', { count: charCount.pc })}
                         </span>
                       )}
                       {charCount.npc > 0 && (
                         <span className="text-muted-foreground">
-                          {charCount.npc} <span className="uppercase">npc</span>s
+                          {t('characterList.npcCount', { count: charCount.npc })}
                         </span>
                       )}
                     </div>
@@ -360,7 +360,11 @@ export default function CampaignList() {
           <DialogHeader>
             <DialogTitle>{t('campaign.archiveCampaign')}</DialogTitle>
             <DialogDescription>
-              Archive <span className="font-semibold">"{campaignToArchive?.name}"</span>? It will be hidden from view.
+              <Trans
+                i18nKey="campaign.archiveConfirm"
+                values={{ name: campaignToArchive?.name }}
+                components={{ bold: <span className="font-semibold" /> }}
+              />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import i18next from "eslint-plugin-i18next";
 import reactHooks from "eslint-plugin-react-hooks";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
@@ -23,4 +24,5 @@ export default defineConfig(
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
   },
+  i18next.configs["flat/recommended"],
 );

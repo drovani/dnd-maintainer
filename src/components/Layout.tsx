@@ -64,9 +64,9 @@ export function Layout() {
                 </p>
                 <ul className="text-left text-foreground text-sm space-y-2 list-disc list-inside">
                   <li>{t('errors.supabaseRunning')}</li>
-                  <li>Your <code className="text-muted-foreground">.env.local</code> contains valid <code className="text-muted-foreground">VITE_SUPABASE_URL</code> and <code className="text-muted-foreground">VITE_SUPABASE_ANON_KEY</code></li>
+                  <li>{t('errors.envVars')}</li>
                   <li>{t('errors.networkConnection')}</li>
-                  <li>If running locally, <code className="text-muted-foreground">npx supabase status</code> shows the DB is up</li>
+                  <li>{t('errors.supabaseStatus')}</li>
                 </ul>
                 {error && (
                   <p className="text-xs text-muted-foreground break-all">

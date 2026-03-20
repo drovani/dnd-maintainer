@@ -531,7 +531,7 @@ export default function SessionDetail() {
                 <div className="border-t border-border pt-3 mt-4 flex justify-end items-center gap-2">
                   <span className="text-muted-foreground text-sm">{t('sessionDetail.totalValue')}</span>
                   <span className="text-primary font-bold">
-                    {totalLootValue} gp
+                    {t('sessionDetail.lootValueGp', { value: totalLootValue })}
                   </span>
                 </div>
               )}

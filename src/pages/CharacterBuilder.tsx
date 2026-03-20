@@ -249,7 +249,7 @@ export default function CharacterBuilder() {
           flaws={cd.flaws} appearance={cd.appearance} backstory={cd.backstory} onChange={updateBackstory} />
       )
       default:
-        return <p className="text-destructive">Unknown step: {currentStep}</p>
+        return <p className="text-destructive">{t('characterBuilder.errors.unknownStep', { step: currentStep })}</p>
     }
   }
 

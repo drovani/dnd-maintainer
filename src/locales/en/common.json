@@ -44,7 +44,8 @@
     "rolling": "Rolling...",
     "rollScores": "Roll Scores",
     "updateNote": "Update Note",
-    "createNote": "Create Note"
+    "createNote": "Create Note",
+    "close": "Close"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -192,7 +193,9 @@
       "currentHp": "Current HP",
       "personalityTraits": "Personality Traits",
       "qty": "Qty: {{qty}}",
-      "weight": "Wt: {{weight}}"
+      "weight": "Wt: {{weight}}",
+      "speedFt": "{{value}} ft",
+      "qtyAndWeight": "Qty: {{qty}} | Wt: {{weight}}"
     },
     "personality": {
       "traits": "Traits",
@@ -279,6 +282,7 @@
     "noItemsYet": "No items awarded yet",
     "lootQtyValue": "Qty: {{qty}} • Value: {{value}} gp",
     "totalValue": "Total value:",
+    "lootValueGp": "{{value}} gp",
     "linkedEncounters": "Linked Encounters",
     "noEncounters": "No encounters linked to this session",
     "encounterCompleted": "Completed",
@@ -386,7 +390,10 @@
       "noteContent": "Your note content (markdown supported)",
       "tags": "e.g., important, villain, quest"
     },
-    "loading": "Loading notes..."
+    "loading": "Loading notes...",
+    "errors": {
+      "loading": "Error loading notes"
+    }
   },
   "export": {
     "title": "Export Data",

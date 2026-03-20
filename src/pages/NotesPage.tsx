@@ -279,7 +279,7 @@ export default function NotesPage() {
           <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
             <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Error loading notes</p>
+              <p className="font-semibold">{t('notes.errors.loading')}</p>
               <p className="text-sm">{String(error)}</p>
             </div>
           </div>

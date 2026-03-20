@@ -367,7 +367,7 @@ export default function CharacterSheet() {
                 </div>
                 <div className="flex justify-between py-1">
                   <span>{tc('characterSheet.fields.speed')}</span>
-                  <span className="font-mono font-bold text-foreground">30 ft</span>
+                  <span className="font-mono font-bold text-foreground">{tc('characterSheet.fields.speedFt', { value: 30 })}</span>
                 </div>
               </div>
             </div>
@@ -405,7 +405,7 @@ export default function CharacterSheet() {
                       <div>
                         <div className="font-semibold text-foreground">{item.name}</div>
                         <div className="text-muted-foreground">
-                          Qty: {item.quantity} | Wt: {item.weight}
+                          {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: item.weight })}
                         </div>
                       </div>
                       {item.equipped && <span className="text-green-600 font-bold">E</span>}
@@ -818,7 +818,7 @@ function EditSkillsDialog({
           <DialogTitle>{tc('characterSheet.dialogs.editSkills')}</DialogTitle>
         </DialogHeader>
         <div className="text-xs text-muted-foreground mb-4">
-          Click <span className="font-bold text-foreground">P</span> for proficiency, <span className="font-bold text-green-600">E</span> for expertise.
+          {tc('characterSheet.hints.skillsProficiency')}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-h-96 overflow-y-auto">
           {DND_SKILLS.map((skill) => {
@@ -894,7 +894,7 @@ function EditCombatDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="combat-ac">Armor Class</Label>
+            <Label htmlFor="combat-ac">{tc('characterSheet.fields.armorClass')}</Label>
             <Input
               id="combat-ac"
               type="number"

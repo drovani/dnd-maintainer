@@ -233,6 +233,7 @@ export default function ExportData() {
 
             <p className="text-xs text-muted-foreground mt-4 text-center">
               {t('export.restoreHint')}{' '}
+              {/* eslint-disable-next-line i18next/no-literal-string -- CLI command, not translatable */}
               <code className="bg-muted px-2 py-0.5 rounded text-muted-foreground">
                 psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f seed.sql
               </code>

@@ -342,8 +342,8 @@ export default function CampaignDashboard() {
                     />
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{pcCount} <span className="uppercase">pc</span>s</span>
-                    <span>{npcCount} <span className="uppercase">npc</span>s</span>
+                    <span>{t('characterList.pcCount', { count: pcCount })}</span>
+                    <span>{t('characterList.npcCount', { count: npcCount })}</span>
                   </div>
                 </div>
               </div>
