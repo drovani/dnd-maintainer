@@ -11,7 +11,7 @@ import {
 } from '@/lib/dnd-helpers'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { Edit2, Minus, Plus, Save } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
@@ -82,13 +82,6 @@ export default function CharacterSheet() {
   const { data: character, isLoading, error } = useCharacter(characterId)
   const { update: updateMutation } = useCharacterMutations()
 
-  // Sync local HP when server data arrives and no local edits are pending
-  useEffect(() => {
-    if (character && localHP === null) {
-      setLocalHP(character.hit_points_current ?? 0)
-    }
-  }, [character, localHP])
-
   const handleUpdate = (updates: Partial<Character>) => {
     if (!characterId) return
     updateMutation.mutate({ id: characterId, ...updates }, {
@@ -96,6 +89,7 @@ export default function CharacterSheet() {
     })
   }
 
+  // localHP is only set during active editing; otherwise derive from server data
   const currentHP = localHP ?? character?.hit_points_current ?? 0
   const maxHP = character?.hit_points_max ?? 0
 
@@ -884,11 +878,13 @@ function EditCombatDialog({
   const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({ armor_class: armorClass, hit_points_max: hpMax, hit_points_current: hpCurrent })
 
-  useEffect(() => {
-    if (form.hit_points_current > form.hit_points_max) {
-      setForm((prev) => ({ ...prev, hit_points_current: prev.hit_points_max }))
-    }
-  }, [form.hit_points_max])
+  const updateMaxHP = (newMax: number) => {
+    setForm((prev) => ({
+      ...prev,
+      hit_points_max: newMax,
+      hit_points_current: Math.min(prev.hit_points_current, newMax),
+    }))
+  }
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
@@ -914,7 +910,7 @@ function EditCombatDialog({
               type="number"
               min={1}
               value={form.hit_points_max}
-              onChange={(e) => setForm((prev) => ({ ...prev, hit_points_max: Number(e.target.value) }))}
+              onChange={(e) => updateMaxHP(Number(e.target.value))}
             />
           </div>
           <div className="space-y-2">

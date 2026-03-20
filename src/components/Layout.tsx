@@ -11,19 +11,14 @@ export function Layout() {
   const { id: campaignId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string | undefined>(campaignId);
 
   const { t } = useTranslation('common');
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
 
-  useEffect(() => {
-    if (campaignId) {
-      setSelectedCampaignId(campaignId);
-    }
-  }, [campaignId]);
+  // campaignId from URL is the source of truth; no state sync needed
+  const selectedCampaignId = campaignId;
 
   const handleSelectCampaign = (id: string) => {
-    setSelectedCampaignId(id);
     navigate(`/campaign/${id}`);
   };
 
