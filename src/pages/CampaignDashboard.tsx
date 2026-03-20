@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { Character, Session } from '@/types/database'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
@@ -28,6 +29,8 @@ export default function CampaignDashboard() {
   const [editedName, setEditedName] = useState('')
   const [editedDescription, setEditedDescription] = useState('')
   const [editedSetting, setEditedSetting] = useState('')
+
+  const { t } = useTranslation('common')
 
   const { data: campaign, isLoading: campaignLoading } = useCampaign(id)
   const { update: updateMutation } = useCampaignMutations()
@@ -66,7 +69,7 @@ export default function CampaignDashboard() {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="text-center">
-          <p className="text-destructive">Campaign not found</p>
+          <p className="text-destructive">{t('campaign.notFound')}</p>
         </div>
       </div>
     )
@@ -108,7 +111,7 @@ export default function CampaignDashboard() {
           <div className="inline-block animate-spin">
             <Swords className="size-8 text-primary" />
           </div>
-          <p className="text-foreground mt-4">Loading campaign...</p>
+          <p className="text-foreground mt-4">{t('campaign.loading')}</p>
         </div>
       </div>
     )
@@ -118,7 +121,7 @@ export default function CampaignDashboard() {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="text-center">
-          <p className="text-destructive">Campaign not found</p>
+          <p className="text-destructive">{t('campaign.notFound')}</p>
         </div>
       </div>
     )
@@ -134,7 +137,7 @@ export default function CampaignDashboard() {
             className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4"
           >
             <ArrowLeft className="size-5" />
-            Back to Campaigns
+            {t('campaign.backToCampaigns')}
           </button>
 
           {/* Campaign Title - Editable */}
@@ -215,7 +218,7 @@ export default function CampaignDashboard() {
                   <p className="text-muted-foreground">
                     {campaign.setting || (
                       <span className="italic text-muted-foreground">
-                        No setting specified
+                        {t('campaign.noSetting')}
                       </span>
                     )}
                   </p>
@@ -236,7 +239,7 @@ export default function CampaignDashboard() {
               <div className="inline-flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-lg border border-border">
                 <Zap className="size-5 text-primary" />
                 <span className="text-foreground capitalize">
-                  {campaign.status || 'Active'}
+                  {campaign.status || t('status.active')}
                 </span>
               </div>
             </div>
@@ -248,7 +251,7 @@ export default function CampaignDashboard() {
       <div className="max-w-7xl mx-auto px-8 py-8 border-b border-border">
         {isEditingDescription ? (
           <div className="flex flex-col gap-3">
-            <label className="text-foreground font-semibold">Description</label>
+            <label className="text-foreground font-semibold">{t('campaign.description')}</label>
             <textarea
               value={editedDescription}
               onChange={(e) => setEditedDescription(e.target.value)}
@@ -265,21 +268,21 @@ export default function CampaignDashboard() {
                 className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
               >
                 <Save className="size-4" />
-                Save
+                {t('buttons.save')}
               </button>
               <button
                 onClick={() => setIsEditingDescription(false)}
                 className="flex items-center gap-2 bg-muted hover:bg-muted text-foreground font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 <X className="size-4" />
-                Cancel
+                {t('buttons.cancel')}
               </button>
             </div>
           </div>
         ) : (
           <div className="group">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-foreground font-semibold">Campaign Description</h3>
+              <h3 className="text-foreground font-semibold">{t('campaign.description')}</h3>
               <button
                 onClick={() => {
                   setEditedDescription(campaign.description || '')
@@ -293,7 +296,7 @@ export default function CampaignDashboard() {
             <p className="text-muted-foreground">
               {campaign.description || (
                 <span className="italic text-muted-foreground">
-                  No campaign description
+                  {t('campaign.noDescription')}
                 </span>
               )}
             </p>
@@ -312,7 +315,7 @@ export default function CampaignDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-foreground font-semibold flex items-center gap-2">
                     <Users className="size-5 text-primary" />
-                    Characters
+                    {t('campaign.stats.characters')}
                   </h3>
                   <Link
                     to={`/campaign/${id}/characters`}
@@ -323,7 +326,7 @@ export default function CampaignDashboard() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total</span>
+                    <span className="text-muted-foreground">{t('campaign.stats.total')}</span>
                     <span className="text-foreground font-bold text-lg">
                       {pcCount + npcCount}
                     </span>
@@ -350,7 +353,7 @@ export default function CampaignDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-foreground font-semibold flex items-center gap-2">
                     <BookOpen className="size-5 text-primary" />
-                    Sessions
+                    {t('campaign.stats.sessions')}
                   </h3>
                   <Link
                     to={`/campaign/${id}/sessions`}
@@ -362,7 +365,7 @@ export default function CampaignDashboard() {
                 <p className="text-foreground font-bold text-lg">{sessions.length}</p>
                 {lastSession && (
                   <p className="text-muted-foreground text-sm mt-2">
-                    Last session: {lastSession.date ? new Date(lastSession.date).toLocaleDateString() : 'No date'}
+                    {t('campaign.stats.lastSession', { date: lastSession.date ? new Date(lastSession.date).toLocaleDateString() : t('campaign.stats.noDate') })}
                   </p>
                 )}
               </div>
@@ -372,7 +375,7 @@ export default function CampaignDashboard() {
                 <div className="flex items-center justify-between">
                   <h3 className="text-foreground font-semibold flex items-center gap-2">
                     <Scroll className="size-5 text-primary" />
-                    Notes
+                    {t('campaign.stats.notes')}
                   </h3>
                   <Link
                     to={`/campaign/${id}/notes`}
@@ -391,21 +394,21 @@ export default function CampaignDashboard() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
                 <Clock className="size-5 text-primary" />
-                Recent Activity
+                {t('campaign.activity.title')}
               </h3>
 
               {sessionsError ? (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive text-sm">
-                  Failed to load sessions
+                  {t('campaign.activity.failedToLoadSessions')}
                 </div>
               ) : lastSession ? (
                 <div className="space-y-4">
                   <div className="bg-muted/50 rounded-lg p-4 border border-border">
                     <p className="text-foreground font-semibold">
-                      Last Session Played
+                      {t('campaign.activity.lastSessionPlayed')}
                     </p>
                     <p className="text-primary font-bold text-lg mt-1">
-                      Session {lastSession.session_number}: {lastSession.title}
+                      {t('sessionDetail.sessionHeading', { number: lastSession.session_number, title: lastSession.title })}
                     </p>
                     <p className="text-muted-foreground text-sm mt-2">
                       {lastSession.date ? new Date(lastSession.date).toLocaleDateString('en-US', {
@@ -413,7 +416,7 @@ export default function CampaignDashboard() {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
-                      }) : 'No date'}
+                      }) : t('campaign.stats.noDate')}
                     </p>
                     {lastSession.summary && (
                       <p className="text-muted-foreground text-sm mt-3 line-clamp-2">
@@ -426,18 +429,18 @@ export default function CampaignDashboard() {
                     to={`/campaign/${id}/sessions`}
                     className="block text-primary hover:text-foreground text-sm font-semibold transition-colors"
                   >
-                    View all sessions →
+                    {t('campaign.activity.viewAllSessions')}
                   </Link>
                 </div>
               ) : (
                 <div className="text-center py-8 bg-muted/30 rounded-lg border border-border">
                   <BookOpen className="size-8 text-muted-foreground/50 mx-auto mb-3" />
-                  <p className="text-muted-foreground">No sessions recorded yet</p>
+                  <p className="text-muted-foreground">{t('campaign.activity.noSessions')}</p>
                   <Link
                     to={`/campaign/${id}/sessions`}
                     className="text-primary hover:text-foreground text-sm font-semibold mt-3 inline-block transition-colors"
                   >
-                    Create first session →
+                    {t('campaign.activity.createFirstSession')}
                   </Link>
                 </div>
               )}
@@ -447,12 +450,12 @@ export default function CampaignDashboard() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-2 mb-6">
                 <Users className="size-5 text-primary" />
-                Party Members
+                {t('campaign.party.title')}
               </h3>
 
               {charactersError ? (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive text-sm">
-                  Failed to load characters
+                  {t('campaign.party.failedToLoadCharacters')}
                 </div>
               ) : recentCharacters.length > 0 ? (
                 <div className="space-y-3">
@@ -468,11 +471,11 @@ export default function CampaignDashboard() {
                             {char.name}
                           </p>
                           <p className="text-muted-foreground text-sm">
-                            {char.race} {char.class} • Level {char.level}
+                            {t('campaign.party.charSummary', { race: char.race, class: char.class, level: char.level })}
                           </p>
                           {char.player_name && (
                             <p className="text-muted-foreground text-xs mt-1">
-                              Played by {char.player_name}
+                              {t('campaign.party.playedBy', { name: char.player_name })}
                             </p>
                           )}
                         </div>
@@ -486,19 +489,19 @@ export default function CampaignDashboard() {
                       to={`/campaign/${id}/characters`}
                       className="block text-primary hover:text-foreground text-sm font-semibold transition-colors mt-4"
                     >
-                      View all {characters.length} characters →
+                      {t('campaign.party.viewAllCharacters', { count: characters.length })}
                     </Link>
                   )}
                 </div>
               ) : (
                 <div className="text-center py-8 bg-muted/30 rounded-lg border border-border">
                   <Users className="size-8 text-muted-foreground/50 mx-auto mb-3" />
-                  <p className="text-muted-foreground">No characters yet</p>
+                  <p className="text-muted-foreground">{t('campaign.party.noCharacters')}</p>
                   <Link
                     to={`/campaign/${id}/character/new`}
                     className="text-primary hover:text-foreground text-sm font-semibold mt-3 inline-block transition-colors"
                   >
-                    Create a character →
+                    {t('campaign.party.createCharacter')}
                   </Link>
                 </div>
               )}
@@ -509,7 +512,7 @@ export default function CampaignDashboard() {
         {/* Quick Links */}
         <div className="mt-12 bg-card border border-border rounded-lg p-8">
           <h3 className="text-xl font-bold text-foreground mb-6">
-            Campaign Toolkit
+            {t('campaign.toolkit.title')}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
@@ -519,7 +522,7 @@ export default function CampaignDashboard() {
               <Users className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
-                  Characters
+                  {t('campaign.stats.characters')}
                 </p>
                 <p className="text-muted-foreground text-xs">{pcCount + npcCount}</p>
               </div>
@@ -532,7 +535,7 @@ export default function CampaignDashboard() {
               <BookOpen className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
-                  Sessions
+                  {t('campaign.stats.sessions')}
                 </p>
                 <p className="text-muted-foreground text-xs">{sessions.length}</p>
               </div>
@@ -545,7 +548,7 @@ export default function CampaignDashboard() {
               <Scroll className="size-6 text-primary" />
               <div>
                 <p className="text-foreground font-semibold group-hover:text-primary transition-colors">
-                  Notes
+                  {t('campaign.stats.notes')}
                 </p>
               </div>
             </Link>

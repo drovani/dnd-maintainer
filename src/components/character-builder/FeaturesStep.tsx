@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface FeaturesStepProps {
@@ -12,9 +13,11 @@ interface FeaturesStepProps {
 }
 
 export function FeaturesStep({ features, onAdd, onUpdate, onRemove }: FeaturesStepProps) {
+  const { t } = useTranslation('common')
+
   return (
     <div className="space-y-4">
-      <Button onClick={onAdd}>Add Feature</Button>
+      <Button onClick={onAdd}>{t('buttons.addFeature')}</Button>
       <div className="space-y-4">
         {features.map((feature) => (
           <Card key={feature.id}>
@@ -22,25 +25,25 @@ export function FeaturesStep({ features, onAdd, onUpdate, onRemove }: FeaturesSt
               <Input
                 value={feature.name}
                 onChange={(e) => onUpdate(feature.id, { name: e.target.value })}
-                placeholder="Feature name"
+                placeholder={t('characterBuilder.placeholders.featureName')}
               />
               <Textarea
                 value={feature.description}
                 onChange={(e) => onUpdate(feature.id, { description: e.target.value })}
-                placeholder="Description"
+                placeholder={t('characterBuilder.placeholders.featureDescription')}
               />
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   value={feature.source}
                   onChange={(e) => onUpdate(feature.id, { source: e.target.value })}
-                  placeholder="Source (e.g., Class Feature)"
+                  placeholder={t('characterBuilder.placeholders.featureSource')}
                 />
                 <Input
                   type="number"
                   min="0"
                   value={feature.uses}
                   onChange={(e) => onUpdate(feature.id, { uses: parseInt(e.target.value) || 0 })}
-                  placeholder="Uses"
+                  placeholder={t('characterBuilder.placeholders.featureUses')}
                 />
               </div>
               <Button
@@ -48,7 +51,7 @@ export function FeaturesStep({ features, onAdd, onUpdate, onRemove }: FeaturesSt
                 size="sm"
                 onClick={() => onRemove(feature.id)}
               >
-                Remove
+                {t('buttons.remove')}
               </Button>
             </CardContent>
           </Card>

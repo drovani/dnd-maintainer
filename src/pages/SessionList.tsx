@@ -11,9 +11,11 @@ import {
   Zap,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
 export default function SessionList() {
+  const { t } = useTranslation('common')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -118,7 +120,7 @@ export default function SessionList() {
           <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
             <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Error loading sessions</p>
+              <p className="font-semibold">{t('sessions.errorLoadingSessions')}</p>
               <p className="text-sm">{String(error)}</p>
             </div>
           </div>
@@ -136,10 +138,10 @@ export default function SessionList() {
             <div>
               <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
                 <Calendar className="size-10 text-primary" />
-                Sessions
+                {t('sessions.title')}
               </h1>
               <p className="text-muted-foreground mt-2">
-                {sessions.length} session{sessions.length !== 1 ? 's' : ''} • {totalXp} XP awarded
+                {t('sessions.subtitle', { count: sessions.length, xp: totalXp })}
               </p>
             </div>
             <button
@@ -147,7 +149,7 @@ export default function SessionList() {
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
               <Plus className="size-5" />
-              Log New Session
+              {t('sessions.logNewSession')}
             </button>
           </div>
 
@@ -156,7 +158,7 @@ export default function SessionList() {
             <Search className="absolute left-3 top-3 size-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search sessions by title..."
+              placeholder={t('sessions.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -170,13 +172,13 @@ export default function SessionList() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg border border-border p-8 max-w-md w-full shadow-2xl">
             <h2 className="text-2xl font-bold text-foreground mb-6">
-              Log New Session
+              {t('sessions.logNewSession')}
             </h2>
 
             <form onSubmit={handleCreateSession} className="space-y-4">
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Session Title
+                  {t('sessions.sessionTitle')}
                 </label>
                 <input
                   type="text"
@@ -184,7 +186,7 @@ export default function SessionList() {
                   onChange={(e) =>
                     setNewSession({ ...newSession, title: e.target.value })
                   }
-                  placeholder="e.g., The Goblin Ambush"
+                  placeholder={t('sessions.placeholderTitle')}
                   className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                   autoFocus
                 />
@@ -192,7 +194,7 @@ export default function SessionList() {
 
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Session Number
+                  {t('sessions.sessionNumber')}
                 </label>
                 <input
                   type="number"
@@ -210,7 +212,7 @@ export default function SessionList() {
 
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Session Date
+                  {t('sessions.sessionDate')}
                 </label>
                 <input
                   type="date"
@@ -228,14 +230,14 @@ export default function SessionList() {
                   disabled={createSessionMutation.isPending}
                   className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {createSessionMutation.isPending ? 'Creating...' : 'Create'}
+                  {createSessionMutation.isPending ? t('buttons.creating') : t('buttons.create')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowNewSessionForm(false)}
                   className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-2 rounded-lg transition-colors"
                 >
-                  Cancel
+                  {t('buttons.cancel')}
                 </button>
               </div>
             </form>
@@ -250,20 +252,20 @@ export default function SessionList() {
             <div className="inline-block animate-spin">
               <Calendar className="size-8 text-primary" />
             </div>
-            <p className="text-muted-foreground mt-4">Loading sessions...</p>
+            <p className="text-muted-foreground mt-4">{t('sessions.loadingSessions')}</p>
           </div>
         ) : filteredSessions.length === 0 ? (
           <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
             <BookOpen className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
               {sessions.length === 0
-                ? 'No Sessions Yet'
-                : 'No Sessions Match'}
+                ? t('sessions.noSessionsYet')
+                : t('sessions.noSessionsMatch')}
             </h3>
             <p className="text-muted-foreground mb-6">
               {sessions.length === 0
-                ? 'Log your first session to begin tracking your campaign!'
-                : 'Try adjusting your search terms.'}
+                ? t('sessions.noSessionsDescription')
+                : t('sessions.noSessionsMatchDescription')}
             </p>
             {sessions.length === 0 && (
               <button
@@ -271,7 +273,7 @@ export default function SessionList() {
                 className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 <Plus className="size-5" />
-                Log Your First Session
+                {t('buttons.logFirstSession')}
               </button>
             )}
           </div>
@@ -303,7 +305,7 @@ export default function SessionList() {
                       <div className="flex-1">
                         <div className="flex items-baseline gap-3 mb-1">
                           <span className="text-sm font-semibold text-primary">
-                            Session {session.session_number}
+                            {t('sessions.sessionLabel', { number: session.session_number })}
                           </span>
                           <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                             {session.title}
@@ -311,7 +313,7 @@ export default function SessionList() {
                         </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">
                           <Calendar className="size-4" />
-                          {session.date ? formatDate(session.date) : 'No date'}
+                          {session.date ? formatDate(session.date) : t('sessions.noDate')}
                         </p>
                       </div>
                       <ChevronRight className="size-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />

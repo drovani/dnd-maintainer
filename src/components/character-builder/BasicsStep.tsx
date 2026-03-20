@@ -67,6 +67,7 @@ export function BasicsStep({
   onChange,
 }: BasicsStepProps) {
   const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const { data: playerNames = [], isError: playerNamesError } = usePlayerNames()
 
   return (
@@ -74,7 +75,7 @@ export function BasicsStep({
       {/* Character Type Switch + Level display */}
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2 cursor-pointer">
-          <span className={`text-sm font-semibold ${characterType === 'pc' ? 'text-foreground' : 'text-muted-foreground'}`}>PC</span>
+          <span className={`text-sm font-semibold ${characterType === 'pc' ? 'text-foreground' : 'text-muted-foreground'}`}>{tc('characterType.pc')}</span>
           <Switch
             checked={characterType === 'npc'}
             onCheckedChange={(checked: boolean) =>
@@ -84,17 +85,17 @@ export function BasicsStep({
               })
             }
           />
-          <span className={`text-sm font-semibold ${characterType === 'npc' ? 'text-foreground' : 'text-muted-foreground'}`}>NPC</span>
+          <span className={`text-sm font-semibold ${characterType === 'npc' ? 'text-foreground' : 'text-muted-foreground'}`}>{tc('characterType.npc')}</span>
         </label>
         <span className="text-sm text-muted-foreground">
-          Level <span className="font-bold text-foreground text-lg">{level}</span>
+          {tc('characterBuilder.fields.level')} <span className="font-bold text-foreground text-lg">{level}</span>
         </span>
       </div>
 
       {/* Gender selector */}
       <div className="space-y-2">
         <Label>
-          Gender
+          {tc('characterBuilder.fields.gender')}
           <span className="text-destructive">*</span>
         </Label>
         <GenderToggle
@@ -108,7 +109,7 @@ export function BasicsStep({
       <div className={`grid grid-cols-1 ${characterType === 'pc' ? 'md:grid-cols-2' : ''} gap-4`}>
         <div className="space-y-2">
           <Label htmlFor="character-name">
-            Character Name
+            {tc('characterBuilder.fields.characterName')}
             <span className="text-destructive">*</span>
           </Label>
           <div className="flex gap-2">
@@ -116,7 +117,7 @@ export function BasicsStep({
               id="character-name"
               value={name}
               onChange={(e) => onChange({ name: e.target.value })}
-              placeholder="Enter character name"
+              placeholder={tc('characterBuilder.placeholders.enterCharacterName')}
               className={fieldErrors.name ? 'border-destructive' : ''}
             />
             <Button
@@ -124,7 +125,7 @@ export function BasicsStep({
               variant="outline"
               size="icon"
               disabled={!race || !gender}
-              title={!race || !gender ? 'Select race and gender first' : 'Generate random name'}
+              title={!race || !gender ? tc('characterBuilder.hints.selectRaceAndGender') : tc('characterBuilder.hints.generateRandomName')}
               onClick={() => {
                 if (!race || !gender) return;
                 const generatedName = generateCharacterName(race, gender as DndGender);
@@ -138,16 +139,16 @@ export function BasicsStep({
 
         {characterType === 'pc' && (
           <div className="space-y-2">
-            <Label htmlFor="player-name">Player Name</Label>
+            <Label htmlFor="player-name">{tc('characterBuilder.fields.playerName')}</Label>
             <AutocompleteInput
               id="player-name"
               suggestions={playerNames}
               value={playerName}
               onChange={(value) => onChange({ player_name: value })}
-              placeholder="Enter player name"
+              placeholder={tc('characterBuilder.placeholders.enterPlayerName')}
             />
             {playerNamesError && (
-              <p className="text-xs text-destructive">Could not load player name suggestions</p>
+              <p className="text-xs text-destructive">{tc('characterBuilder.hints.couldNotLoadPlayerNames')}</p>
             )}
           </div>
         )}
@@ -157,7 +158,7 @@ export function BasicsStep({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>
-              Race
+              {tc('characterBuilder.fields.race')}
               <span className="text-destructive">*</span>
             </Label>
             <Select
@@ -166,7 +167,7 @@ export function BasicsStep({
               items={DND_RACES.map((r) => ({ value: r.id, label: t(`races.${r.id}`) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
-                <SelectValue placeholder="Choose a race" />
+                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseRace')} />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
                 {DND_RACE_GROUPS.map((group) => (
@@ -192,7 +193,7 @@ export function BasicsStep({
 
           <div className="space-y-2">
             <Label>
-              Class
+              {tc('characterBuilder.fields.class')}
               <span className="text-destructive">*</span>
             </Label>
             <Select
@@ -201,7 +202,7 @@ export function BasicsStep({
               items={DND_CLASSES.map((c) => ({ value: c.id, label: t(`classes.${c.id}`) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
-                <SelectValue placeholder="Choose a class" />
+                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseClass')} />
               </SelectTrigger>
               <SelectContent>
                 {DND_CLASSES.map((cls) => (
@@ -214,14 +215,14 @@ export function BasicsStep({
           </div>
 
           <div className="space-y-2">
-            <Label>Background</Label>
+            <Label>{tc('characterBuilder.fields.background')}</Label>
             <Select
               value={background || null}
               onValueChange={(value) => value && onChange({ background: value as BackgroundId })}
               items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`, { defaultValue: b.id }) }))}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a background" />
+                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
               </SelectTrigger>
               <SelectContent>
                 {DND_BACKGROUNDS.map((bg) => (
@@ -235,7 +236,7 @@ export function BasicsStep({
         </div>
 
         <div className="space-y-2">
-          <Label>Alignment</Label>
+          <Label>{tc('characterBuilder.fields.alignment')}</Label>
           <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-border">
             {(['Good', 'Neutral', 'Evil'] as const).map((moral) =>
               (['Lawful', 'Neutral', 'Chaotic'] as const).map((ethic) => {
@@ -270,12 +271,12 @@ export function BasicsStep({
 
       {background === 'custom' && (
         <div className="space-y-2">
-          <Label htmlFor="custom-background">Custom Background</Label>
+          <Label htmlFor="custom-background">{tc('characterBuilder.fields.customBackground')}</Label>
           <Input
             id="custom-background"
             value={customBackground}
             onChange={(e) => onChange({ custom_background: e.target.value })}
-            placeholder="Describe your background briefly"
+            placeholder={tc('characterBuilder.placeholders.describeBackground')}
           />
         </div>
       )}

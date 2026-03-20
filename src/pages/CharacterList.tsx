@@ -3,12 +3,14 @@ import { Character } from '@/types/database'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Search, User, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
 type FilterType = 'all' | 'pc' | 'npc'
 type SortType = 'name' | 'level' | 'class' | 'updated'
 
 export default function CharacterList() {
+  const { t } = useTranslation('common')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [filterType, setFilterType] = useState<FilterType>('all')
@@ -80,7 +82,7 @@ export default function CharacterList() {
     return (
       <div className="p-8">
         <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive">
-          Error loading characters: {String(error)}
+          {t('characterList.errorLoading', { error: String(error) })}
         </div>
       </div>
     )
@@ -91,11 +93,11 @@ export default function CharacterList() {
       <div className="p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">Characters</h1>
+            <h1 className="text-4xl font-bold text-primary mb-2">{t('characterList.title')}</h1>
             <p className="text-muted-foreground">
-              {characters.length} total •{' '}
-              <span className="text-blue-400">{pcCount} PCs</span> •{' '}
-              <span className="text-purple-400">{npcCount} NPCs</span>
+              {t('characterList.subtitle', { count: characters.length })} •{' '}
+              <span className="text-blue-400">{t('characterList.pcCount', { count: pcCount })}</span> •{' '}
+              <span className="text-purple-400">{t('characterList.npcCount', { count: npcCount })}</span>
             </p>
           </div>
           <button
@@ -103,7 +105,7 @@ export default function CharacterList() {
             className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             <Plus size={20} />
-            Add Character
+            {t('buttons.addCharacter')}
           </button>
         </div>
 
@@ -116,7 +118,7 @@ export default function CharacterList() {
             />
             <input
               type="text"
-              placeholder="Search by name, player, race, or class..."
+              placeholder={t('characterList.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
@@ -134,7 +136,7 @@ export default function CharacterList() {
                 : 'bg-muted text-foreground hover:bg-muted'
                 }`}
             >
-              All Characters
+              {t('characterList.allCharacters')}
             </button>
             <button
               onClick={() => setFilterType('pc')}
@@ -144,7 +146,7 @@ export default function CharacterList() {
                 }`}
             >
               <User size={16} />
-              Player Characters
+              {t('characterList.playerCharacters')}
             </button>
             <button
               onClick={() => setFilterType('npc')}
@@ -154,7 +156,7 @@ export default function CharacterList() {
                 }`}
             >
               <Users size={16} />
-              <span>NPCs</span>
+              <span>{t('characterList.npcs')}</span>
             </button>
           </div>
 
@@ -163,28 +165,28 @@ export default function CharacterList() {
             onChange={(e) => setSortBy(e.target.value as SortType)}
             className="px-4 py-2 bg-muted border border-border text-foreground rounded-lg outline-none focus:border-ring"
           >
-            <option value="name">Sort by Name</option>
-            <option value="level">Sort by Level (High to Low)</option>
-            <option value="class">Sort by Class</option>
-            <option value="updated">Sort by Recently Updated</option>
+            <option value="name">{t('characterList.sortByName')}</option>
+            <option value="level">{t('characterList.sortByLevel')}</option>
+            <option value="class">{t('characterList.sortByClass')}</option>
+            <option value="updated">{t('characterList.sortByRecentlyUpdated')}</option>
           </select>
         </div>
 
         {/* Characters Grid */}
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading characters...</p>
+            <p className="text-muted-foreground">{t('characterList.loading')}</p>
           </div>
         ) : filteredAndSortedCharacters.length === 0 ? (
           <div className="text-center py-12">
             <Users size={48} className="mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No characters found</p>
+            <p className="text-muted-foreground mb-4">{t('characterList.noCharactersFound')}</p>
             <button
               onClick={() => navigate(`/campaign/${campaignId}/character/new`)}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
             >
               <Plus size={20} />
-              Create First Character
+              {t('buttons.createFirstCharacter')}
             </button>
           </div>
         ) : (
@@ -209,7 +211,7 @@ export default function CharacterList() {
                     </h3>
                     {character.player_name && (
                       <p className="text-sm text-muted-foreground">
-                        Player: {character.player_name}
+                        {t('characterList.player', { name: character.player_name })}
                       </p>
                     )}
                   </div>
@@ -225,15 +227,15 @@ export default function CharacterList() {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Race</span>
+                    <span className="text-muted-foreground">{t('characterList.race')}</span>
                     <span className="text-foreground">{character.race}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Class</span>
+                    <span className="text-muted-foreground">{t('characterList.class')}</span>
                     <span className="text-foreground">{character.class}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Level</span>
+                    <span className="text-muted-foreground">{t('characterList.level')}</span>
                     <span className="text-foreground font-semibold">
                       {character.level}
                     </span>
@@ -242,13 +244,13 @@ export default function CharacterList() {
 
                 <div className="border-t border-border pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">HP</span>
+                    <span className="text-muted-foreground">{t('characterList.hp')}</span>
                     <span className="text-destructive font-semibold">
                       {character.hit_points_max}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">AC</span>
+                    <span className="text-muted-foreground">{t('characterList.ac')}</span>
                     <span className="text-cyan-400 font-semibold">
                       {character.armor_class}
                     </span>

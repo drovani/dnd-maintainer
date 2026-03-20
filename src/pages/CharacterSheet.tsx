@@ -57,14 +57,15 @@ function SectionHeader({ title, onEdit }: { title: string; onEdit: () => void })
 }
 
 function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCancel: () => void; saving: boolean }) {
+  const { t } = useTranslation('common')
   return (
     <DialogFooter>
       <Button variant="outline" onClick={onCancel}>
-        Cancel
+        {t('buttons.cancel')}
       </Button>
       <Button onClick={onSave} disabled={saving}>
         <Save size={14} />
-        {saving ? 'Saving...' : 'Save'}
+        {saving ? t('buttons.saving') : t('buttons.save')}
       </Button>
     </DialogFooter>
   )
@@ -72,6 +73,7 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
 
 export default function CharacterSheet() {
   const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const { characterId } = useParams<{ id: string; characterId: string }>()
   const [editSection, setEditSection] = useState<EditSection>(null)
   const [localHP, setLocalHP] = useState<number | null>(null)
@@ -142,7 +144,7 @@ export default function CharacterSheet() {
     return (
       <div className="min-h-screen p-8">
         <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
-          Error loading character: {String(error)}
+          {tc('characterSheet.errors.loadingCharacter', { error: String(error) })}
         </div>
       </div>
     )
@@ -158,14 +160,14 @@ export default function CharacterSheet() {
         <div className="bg-card border rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <div className="text-sm text-muted-foreground mb-1">CHARACTER SHEET</div>
+              <div className="text-sm text-muted-foreground mb-1">{tc('characterSheet.title')}</div>
               <h1 className="text-3xl font-bold text-foreground">{character.name}</h1>
             </div>
             <Button
               variant="ghost"
               size="icon-sm"
               onClick={() => setEditSection('header')}
-              title="Edit Character Info"
+              title={tc('characterSheet.dialogs.editCharacterInfo')}
             >
               <Edit2 size={16} />
             </Button>
@@ -173,45 +175,45 @@ export default function CharacterSheet() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground">Class</span>
+              <span className="text-muted-foreground">{tc('characterSheet.fields.class')}</span>
               <p className="text-foreground font-semibold">
                 {character.class ? t(`classes.${character.class}`, { defaultValue: character.class }) : ''}
                 {character.subclass ? ` (${character.subclass})` : ''}
               </p>
             </div>
             <div>
-              <span className="text-muted-foreground">Level</span>
+              <span className="text-muted-foreground">{tc('characterSheet.fields.level')}</span>
               <p className="text-foreground font-semibold">{character.level}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Race</span>
+              <span className="text-muted-foreground">{tc('characterSheet.fields.race')}</span>
               <p className="text-foreground font-semibold">
                 {character.race ? t(`races.${character.race}`, { defaultValue: character.race }) : ''}
               </p>
             </div>
             <div>
-              <span className="text-muted-foreground">Background</span>
+              <span className="text-muted-foreground">{tc('characterSheet.fields.background')}</span>
               <p className="text-foreground font-semibold">
                 {character.background ? t(`backgrounds.${character.background}`, { defaultValue: character.background }) : ''}
               </p>
             </div>
             <div>
-              <span className="text-muted-foreground">Alignment</span>
+              <span className="text-muted-foreground">{tc('characterSheet.fields.alignment')}</span>
               <p className="text-foreground font-semibold">{alignmentName}</p>
             </div>
             {character.player_name && (
               <div>
-                <span className="text-muted-foreground">Player</span>
+                <span className="text-muted-foreground">{tc('characterSheet.fields.player')}</span>
                 <p className="text-foreground font-semibold">{character.player_name}</p>
               </div>
             )}
             <div>
-              <span className="text-muted-foreground">Type</span>
+              <span className="text-muted-foreground">{tc('characterSheet.fields.type')}</span>
               <p className="text-foreground font-semibold uppercase">{character.character_type}</p>
             </div>
             {character.gender && (
               <div>
-                <span className="text-muted-foreground">Gender</span>
+                <span className="text-muted-foreground">{tc('characterSheet.fields.gender')}</span>
                 <p className="text-foreground font-semibold capitalize">{character.gender}</p>
               </div>
             )}
@@ -224,7 +226,7 @@ export default function CharacterSheet() {
           <div className="lg:col-span-1 space-y-6">
             {/* Ability Scores */}
             <div className="bg-card border rounded-lg p-6">
-              <SectionHeader title="Abilities" onEdit={() => setEditSection('abilities')} />
+              <SectionHeader title={tc('characterSheet.sections.abilities')} onEdit={() => setEditSection('abilities')} />
               <div className="space-y-3">
                 {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
                   const score = character.abilities[ability]
@@ -248,7 +250,7 @@ export default function CharacterSheet() {
 
             {/* Saving Throws */}
             <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-lg font-bold text-foreground mb-4">Saving Throws</h2>
+              <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.savingThrows')}</h2>
               <div className="space-y-2 text-sm">
                 {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
                   const modifier = getAbilityModifier(character.abilities[ability])
@@ -266,7 +268,7 @@ export default function CharacterSheet() {
 
             {/* Skills */}
             <div className="bg-card border rounded-lg p-6">
-              <SectionHeader title="Skills" onEdit={() => setEditSection('skills')} />
+              <SectionHeader title={tc('characterSheet.sections.skills')} onEdit={() => setEditSection('skills')} />
               <div className="space-y-1 text-xs">
                 {Object.entries(skillsByAbility).map(([ability, skills]) => {
                   const abilityKey = ability as keyof typeof character.abilities
@@ -306,16 +308,16 @@ export default function CharacterSheet() {
           <div className="lg:col-span-1 space-y-6">
             {/* Combat Stats */}
             <div className="bg-card border-2 border-destructive/30 rounded-lg p-6">
-              <SectionHeader title="Combat" onEdit={() => setEditSection('combat')} />
+              <SectionHeader title={tc('characterSheet.sections.combat')} onEdit={() => setEditSection('combat')} />
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-muted/50 p-4 rounded border text-center">
-                  <div className="text-xs text-muted-foreground mb-2">ARMOR CLASS</div>
+                  <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.armorClass')}</div>
                   <div className="text-4xl font-bold text-foreground">{character.armor_class}</div>
                 </div>
 
                 <div className="bg-muted/50 p-4 rounded border text-center">
-                  <div className="text-xs text-muted-foreground mb-2">INITIATIVE</div>
+                  <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.initiative')}</div>
                   <div className="text-4xl font-bold text-foreground">
                     {getAbilityModifier(character.abilities.dex) >= 0 ? '+' : ''}
                     {getAbilityModifier(character.abilities.dex)}
@@ -325,7 +327,7 @@ export default function CharacterSheet() {
 
               {/* HP Tracker */}
               <div className="bg-muted/50 p-4 rounded border mb-4">
-                <div className="text-xs text-muted-foreground mb-2">HIT POINTS</div>
+                <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.hitPoints')}</div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Button
@@ -366,11 +368,11 @@ export default function CharacterSheet() {
 
               <div className="text-xs text-muted-foreground">
                 <div className="flex justify-between py-1">
-                  <span>Proficiency Bonus</span>
+                  <span>{tc('characterSheet.fields.proficiencyBonus')}</span>
                   <span className="font-mono font-bold text-foreground">+{profBonus}</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span>Speed</span>
+                  <span>{tc('characterSheet.fields.speed')}</span>
                   <span className="font-mono font-bold text-foreground">30 ft</span>
                 </div>
               </div>
@@ -379,13 +381,13 @@ export default function CharacterSheet() {
             {/* Features */}
             {character.features && character.features.length > 0 && (
               <div className="bg-card border rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">Features & Traits</h2>
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.featuresAndTraits')}</h2>
                 <div className="space-y-3">
                   {character.features.map((feature) => (
                     <div key={feature.id} className="bg-muted/50 p-3 rounded border">
                       <div className="font-semibold text-foreground text-sm mb-1">{feature.name}</div>
                       <p className="text-xs text-muted-foreground">{feature.description}</p>
-                      {feature.source && <div className="text-xs text-muted-foreground/70 mt-1">Source: {feature.source}</div>}
+                      {feature.source && <div className="text-xs text-muted-foreground/70 mt-1">{tc('characterSheet.fields.source', { source: feature.source })}</div>}
                     </div>
                   ))}
                 </div>
@@ -398,7 +400,7 @@ export default function CharacterSheet() {
             {/* Equipment */}
             {character.equipment && character.equipment.length > 0 && (
               <div className="bg-card border rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">Equipment</h2>
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.equipment')}</h2>
                 <div className="space-y-2 text-xs">
                   {character.equipment.map((item) => (
                     <div
@@ -422,11 +424,11 @@ export default function CharacterSheet() {
             {/* Spells */}
             {character.spells && character.spells.cantrips.length > 0 && (
               <div className="bg-card border border-purple-200 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">Spells</h2>
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.spells')}</h2>
                 <div className="space-y-3">
                   {character.spells.cantrips.length > 0 && (
                     <div>
-                      <div className="text-xs font-bold text-muted-foreground mb-2">CANTRIPS</div>
+                      <div className="text-xs font-bold text-muted-foreground mb-2">{tc('characterSheet.sections.cantrips')}</div>
                       <div className="space-y-1">
                         {character.spells.cantrips.map((cantrip, i) => (
                           <div key={i} className="text-sm text-foreground">
@@ -443,29 +445,29 @@ export default function CharacterSheet() {
             {/* Personality */}
             {(character.personality_traits || character.ideals || character.bonds || character.flaws) && (
               <div className="bg-card border rounded-lg p-6">
-                <SectionHeader title="Personality" onEdit={() => setEditSection('personality')} />
+                <SectionHeader title={tc('characterSheet.sections.personality')} onEdit={() => setEditSection('personality')} />
                 <div className="space-y-3 text-xs">
                   {character.personality_traits && (
                     <div>
-                      <div className="font-semibold text-muted-foreground mb-1">Traits</div>
+                      <div className="font-semibold text-muted-foreground mb-1">{tc('characterSheet.personality.traits')}</div>
                       <p className="text-foreground">{character.personality_traits}</p>
                     </div>
                   )}
                   {character.ideals && (
                     <div>
-                      <div className="font-semibold text-muted-foreground mb-1">Ideals</div>
+                      <div className="font-semibold text-muted-foreground mb-1">{tc('characterSheet.personality.ideals')}</div>
                       <p className="text-foreground">{character.ideals}</p>
                     </div>
                   )}
                   {character.bonds && (
                     <div>
-                      <div className="font-semibold text-muted-foreground mb-1">Bonds</div>
+                      <div className="font-semibold text-muted-foreground mb-1">{tc('characterSheet.personality.bonds')}</div>
                       <p className="text-foreground">{character.bonds}</p>
                     </div>
                   )}
                   {character.flaws && (
                     <div>
-                      <div className="font-semibold text-muted-foreground mb-1">Flaws</div>
+                      <div className="font-semibold text-muted-foreground mb-1">{tc('characterSheet.personality.flaws')}</div>
                       <p className="text-foreground">{character.flaws}</p>
                     </div>
                   )}
@@ -478,14 +480,14 @@ export default function CharacterSheet() {
         {/* Full Width Backstory */}
         {character.backstory && (
           <div className="bg-card border rounded-lg p-6">
-            <SectionHeader title="Backstory" onEdit={() => setEditSection('backstory')} />
+            <SectionHeader title={tc('characterSheet.sections.backstory')} onEdit={() => setEditSection('backstory')} />
             <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{character.backstory}</p>
           </div>
         )}
 
         {character.appearance && (
           <div className="bg-card border rounded-lg p-6 mt-6">
-            <SectionHeader title="Appearance" onEdit={() => setEditSection('appearance')} />
+            <SectionHeader title={tc('characterSheet.sections.appearance')} onEdit={() => setEditSection('appearance')} />
             <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{character.appearance}</p>
           </div>
         )}
@@ -539,7 +541,7 @@ export default function CharacterSheet() {
       )}
       {editSection === 'backstory' && (
         <EditTextDialog
-          title="Edit Backstory"
+          title={tc('characterSheet.dialogs.editBackstory')}
           field="backstory"
           value={character.backstory ?? ''}
           onSave={handleUpdate}
@@ -549,7 +551,7 @@ export default function CharacterSheet() {
       )}
       {editSection === 'appearance' && (
         <EditTextDialog
-          title="Edit Appearance"
+          title={tc('characterSheet.dialogs.editAppearance')}
           field="appearance"
           value={character.appearance ?? ''}
           onSave={handleUpdate}
@@ -575,6 +577,7 @@ function EditHeaderDialog({
   saving: boolean
 }) {
   const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({
     name: character.name,
     player_name: character.player_name ?? '',
@@ -595,11 +598,11 @@ function EditHeaderDialog({
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Edit Character Info</DialogTitle>
+          <DialogTitle>{tc('characterSheet.dialogs.editCharacterInfo')}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="char-name">Name</Label>
+            <Label htmlFor="char-name">{tc('characterSheet.fields.name')}</Label>
             <Input
               id="char-name"
               value={form.name}
@@ -608,28 +611,28 @@ function EditHeaderDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="char-player">Player Name</Label>
+            <Label htmlFor="char-player">{tc('characterSheet.fields.player')}</Label>
             <Input
               id="char-player"
               value={form.player_name}
               onChange={(e) => update('player_name', e.target.value)}
-              placeholder="Leave empty for NPCs"
+              placeholder={tc('characterSheet.hints.leaveEmptyForNpcs')}
             />
           </div>
           <div className="space-y-2">
-            <Label>Type</Label>
+            <Label>{tc('characterSheet.fields.type')}</Label>
             <Select value={form.character_type} onValueChange={(val) => update('character_type', val as 'pc' | 'npc')}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pc">PC</SelectItem>
-                <SelectItem value="npc">NPC</SelectItem>
+                <SelectItem value="pc">{tc('characterType.pc')}</SelectItem>
+                <SelectItem value="npc">{tc('characterType.npc')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Class</Label>
+            <Label>{tc('characterSheet.fields.class')}</Label>
             <Select value={form.class} onValueChange={(val) => val && update('class', val)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -642,16 +645,16 @@ function EditHeaderDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="char-subclass">Subclass</Label>
+            <Label htmlFor="char-subclass">{tc('characterBuilder.fields.subclass')}</Label>
             <Input
               id="char-subclass"
               value={form.subclass}
               onChange={(e) => update('subclass', e.target.value)}
-              placeholder="e.g. Champion, Arcane Trickster"
+              placeholder={tc('characterSheet.hints.subclassPlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="char-level">Level</Label>
+            <Label htmlFor="char-level">{tc('characterSheet.fields.level')}</Label>
             <Input
               id="char-level"
               type="number"
@@ -662,7 +665,7 @@ function EditHeaderDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label>Race</Label>
+            <Label>{tc('characterSheet.fields.race')}</Label>
             <Select value={form.race} onValueChange={(val) => val && update('race', val)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -680,7 +683,7 @@ function EditHeaderDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Background</Label>
+            <Label>{tc('characterSheet.fields.background')}</Label>
             <Select value={form.background} onValueChange={(val) => val && update('background', val)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -693,7 +696,7 @@ function EditHeaderDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Alignment</Label>
+            <Label>{tc('characterSheet.fields.alignment')}</Label>
             <Select value={form.alignment} onValueChange={(val) => val && update('alignment', val)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -706,7 +709,7 @@ function EditHeaderDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Gender</Label>
+            <Label>{tc('characterSheet.fields.gender')}</Label>
             <GenderToggle
               value={form.gender}
               onChange={(g) => update('gender', g)}
@@ -742,6 +745,7 @@ function EditAbilitiesDialog({
   saving: boolean
 }) {
   const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({ ...abilities })
 
   const updateAbility = (key: keyof typeof form, value: number) =>
@@ -753,7 +757,7 @@ function EditAbilitiesDialog({
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Edit Ability Scores</DialogTitle>
+          <DialogTitle>{tc('characterSheet.dialogs.editAbilityScores')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {abilityKeys.map((ability) => (
@@ -791,6 +795,7 @@ function EditSkillsDialog({
   saving: boolean
 }) {
   const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const [form, setForm] = useState<Record<string, { proficient: boolean; expertise: boolean }>>(() => {
     const initial: Record<string, { proficient: boolean; expertise: boolean }> = {}
     for (const skill of DND_SKILLS) {
@@ -816,7 +821,7 @@ function EditSkillsDialog({
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Skills</DialogTitle>
+          <DialogTitle>{tc('characterSheet.dialogs.editSkills')}</DialogTitle>
         </DialogHeader>
         <div className="text-xs text-muted-foreground mb-4">
           Click <span className="font-bold text-foreground">P</span> for proficiency, <span className="font-bold text-green-600">E</span> for expertise.
@@ -876,6 +881,7 @@ function EditCombatDialog({
   onClose: () => void
   saving: boolean
 }) {
+  const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({ armor_class: armorClass, hit_points_max: hpMax, hit_points_current: hpCurrent })
 
   useEffect(() => {
@@ -888,7 +894,7 @@ function EditCombatDialog({
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Edit Combat Stats</DialogTitle>
+          <DialogTitle>{tc('characterSheet.dialogs.editCombatStats')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -902,7 +908,7 @@ function EditCombatDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="combat-hp-max">Max HP</Label>
+            <Label htmlFor="combat-hp-max">{tc('characterSheet.fields.maxHp')}</Label>
             <Input
               id="combat-hp-max"
               type="number"
@@ -912,7 +918,7 @@ function EditCombatDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="combat-hp-current">Current HP</Label>
+            <Label htmlFor="combat-hp-current">{tc('characterSheet.fields.currentHp')}</Label>
             <Input
               id="combat-hp-current"
               type="number"
@@ -946,17 +952,18 @@ function EditPersonalityDialog({
   onClose: () => void
   saving: boolean
 }) {
+  const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({ personality_traits, ideals, bonds, flaws })
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Personality</DialogTitle>
+          <DialogTitle>{tc('characterSheet.dialogs.editPersonality')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="personality-traits">Personality Traits</Label>
+            <Label htmlFor="personality-traits">{tc('characterSheet.fields.personalityTraits')}</Label>
             <Textarea
               id="personality-traits"
               value={form.personality_traits}
@@ -965,7 +972,7 @@ function EditPersonalityDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="personality-ideals">Ideals</Label>
+            <Label htmlFor="personality-ideals">{tc('characterSheet.personality.ideals')}</Label>
             <Textarea
               id="personality-ideals"
               value={form.ideals}
@@ -974,7 +981,7 @@ function EditPersonalityDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="personality-bonds">Bonds</Label>
+            <Label htmlFor="personality-bonds">{tc('characterSheet.personality.bonds')}</Label>
             <Textarea
               id="personality-bonds"
               value={form.bonds}
@@ -983,7 +990,7 @@ function EditPersonalityDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="personality-flaws">Flaws</Label>
+            <Label htmlFor="personality-flaws">{tc('characterSheet.personality.flaws')}</Label>
             <Textarea
               id="personality-flaws"
               value={form.flaws}

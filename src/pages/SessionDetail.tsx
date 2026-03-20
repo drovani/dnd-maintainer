@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { Encounter, Session } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import {
   AlertCircle,
   ArrowLeft,
@@ -24,6 +25,7 @@ interface LootEntry {
 }
 
 export default function SessionDetail() {
+  const { t } = useTranslation('common')
   const { id: campaignId, sessionId } = useParams<{
     id: string
     sessionId: string
@@ -215,7 +217,7 @@ export default function SessionDetail() {
   }
 
   const handleDeleteLoot = (lootId: string) => {
-    if (confirm('Remove this item from the loot table?')) {
+    if (confirm(t('sessionDetail.confirmRemoveLoot'))) {
       deleteLootMutation.mutate(lootId)
     }
   }
@@ -249,12 +251,12 @@ export default function SessionDetail() {
             className="flex items-center gap-2 text-primary hover:text-foreground mb-8"
           >
             <ArrowLeft className="size-5" />
-            Back
+            {t('buttons.back')}
           </button>
           <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive flex items-start gap-3">
             <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Error loading session</p>
+              <p className="font-semibold">{t('sessionDetail.errorLoadingSession')}</p>
               <p className="text-sm">{String(error)}</p>
             </div>
           </div>
@@ -270,7 +272,7 @@ export default function SessionDetail() {
           <div className="inline-block animate-spin">
             <Calendar className="size-8 text-primary" />
           </div>
-          <p className="text-muted-foreground mt-4">Loading session...</p>
+          <p className="text-muted-foreground mt-4">{t('sessionDetail.loadingSession')}</p>
         </div>
       </div>
     )
@@ -288,10 +290,10 @@ export default function SessionDetail() {
             className="flex items-center gap-2 text-primary hover:text-foreground mb-4 transition-colors"
           >
             <ArrowLeft className="size-5" />
-            Back to Sessions
+            {t('buttons.backToSessions')}
           </button>
           <h1 className="text-4xl font-bold text-foreground">
-            Session {formData.session_number}: {formData.title}
+            {t('sessionDetail.sessionHeading', { number: formData.session_number, title: formData.title })}
           </h1>
           <p className="text-muted-foreground mt-2">{formatDate(formData.date || '')}</p>
         </div>
@@ -303,7 +305,7 @@ export default function SessionDetail() {
         {isSaving && (
           <div className="mb-6 flex items-center gap-2 text-primary text-sm">
             <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
-            Saving...
+            {t('buttons.saving')}
           </div>
         )}
 
@@ -311,26 +313,26 @@ export default function SessionDetail() {
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <BookOpen className="size-5 text-primary" />
-            Session Details
+            {t('sessionDetail.sessionDetails')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
               <label className="block text-muted-foreground text-sm font-semibold mb-2">
-                Title
+                {t('sessionDetail.title')}
               </label>
               <input
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleFieldChange('title', e.target.value)}
                 className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                placeholder="Session title"
+                placeholder={t('sessionDetail.placeholderTitle')}
               />
             </div>
 
             <div>
               <label className="block text-muted-foreground text-sm font-semibold mb-2">
-                Session Number
+                {t('sessions.sessionNumber')}
               </label>
               <input
                 type="number"
@@ -348,7 +350,7 @@ export default function SessionDetail() {
 
             <div>
               <label className="block text-muted-foreground text-sm font-semibold mb-2">
-                Date
+                {t('sessionDetail.date')}
               </label>
               <input
                 type="date"
@@ -361,12 +363,12 @@ export default function SessionDetail() {
 
           <div>
             <label className="block text-muted-foreground text-sm font-semibold mb-2">
-              Summary (Player-Facing)
+              {t('sessionDetail.summary')}
             </label>
             <textarea
               value={formData.summary || ''}
               onChange={(e) => handleFieldChange('summary', e.target.value)}
-              placeholder="What happened in this session? This will be visible to players."
+              placeholder={t('sessionDetail.placeholderSummary')}
               rows={4}
               className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
             />
@@ -374,7 +376,7 @@ export default function SessionDetail() {
 
           <div className="mt-6 pt-6 border-t border-border">
             <label className="block text-muted-foreground text-sm font-semibold mb-2">
-              XP Awarded
+              {t('sessionDetail.xpAwarded')}
             </label>
             <input
               type="number"
@@ -392,7 +394,7 @@ export default function SessionDetail() {
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <Lock className="size-5 text-primary" />
-            DM Notes (Private)
+            {t('sessionDetail.dmNotes')}
           </h2>
 
           <textarea
@@ -401,7 +403,7 @@ export default function SessionDetail() {
               setDmNotes(e.target.value)
               handleSaveDmNotes()
             }}
-            placeholder="Your private DM notes for this session. Not visible to players."
+            placeholder={t('sessionDetail.placeholderDmNotes')}
             rows={6}
             className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
           />
@@ -412,14 +414,14 @@ export default function SessionDetail() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Zap className="size-5 text-primary" />
-              Loot Table
+              {t('sessionDetail.lootTable')}
             </h2>
             <button
               onClick={() => setShowNewLootForm(true)}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
               <Plus className="size-4" />
-              Add Item
+              {t('buttons.addItem')}
             </button>
           </div>
 
@@ -432,7 +434,7 @@ export default function SessionDetail() {
                   onChange={(e) =>
                     setNewLoot({ ...newLoot, item_name: e.target.value })
                   }
-                  placeholder="Item name"
+                  placeholder={t('sessionDetail.placeholderItemName')}
                   className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                   autoFocus
                 />
@@ -445,7 +447,7 @@ export default function SessionDetail() {
                       quantity: parseInt(e.target.value, 10),
                     })
                   }
-                  placeholder="Quantity"
+                  placeholder={t('sessionDetail.placeholderQuantity')}
                   className="bg-muted border border-input rounded px-3 py-2 text-foreground outline-none focus:border-ring"
                   min="1"
                 />
@@ -458,7 +460,7 @@ export default function SessionDetail() {
                       gold_value: parseInt(e.target.value, 10),
                     })
                   }
-                  placeholder="Gold value"
+                  placeholder={t('sessionDetail.placeholderGoldValue')}
                   className="bg-muted border border-input rounded px-3 py-2 text-foreground outline-none focus:border-ring"
                   min="0"
                 />
@@ -468,7 +470,7 @@ export default function SessionDetail() {
                   onChange={(e) =>
                     setNewLoot({ ...newLoot, awarded_to: e.target.value })
                   }
-                  placeholder="Awarded to (optional)"
+                  placeholder={t('sessionDetail.placeholderAwardedTo')}
                   className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                 />
               </div>
@@ -479,14 +481,14 @@ export default function SessionDetail() {
                   onClick={() => setShowNewLootForm(false)}
                   className="px-4 py-2 bg-muted hover:bg-accent text-foreground rounded transition-colors text-sm"
                 >
-                  Cancel
+                  {t('buttons.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={upsertLootMutation.isPending}
                   className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded transition-colors text-sm disabled:opacity-50"
                 >
-                  {upsertLootMutation.isPending ? 'Adding...' : 'Add Item'}
+                  {upsertLootMutation.isPending ? t('buttons.adding') : t('buttons.addItem')}
                 </button>
               </div>
             </form>
@@ -494,7 +496,7 @@ export default function SessionDetail() {
 
           {loot.length === 0 ? (
             <p className="text-muted-foreground text-sm py-4 text-center">
-              No items awarded yet
+              {t('sessionDetail.noItemsYet')}
             </p>
           ) : (
             <div className="space-y-3">
@@ -508,7 +510,7 @@ export default function SessionDetail() {
                       {item.item_name}
                     </p>
                     <p className="text-muted-foreground text-sm mt-1">
-                      Qty: {item.quantity} • Value: {item.gold_value} gp
+                      {t('sessionDetail.lootQtyValue', { qty: item.quantity, value: item.gold_value })}
                     </p>
                     {item.awarded_to && (
                       <p className="text-muted-foreground text-sm mt-2">
@@ -527,7 +529,7 @@ export default function SessionDetail() {
 
               {totalLootValue > 0 && (
                 <div className="border-t border-border pt-3 mt-4 flex justify-end items-center gap-2">
-                  <span className="text-muted-foreground text-sm">Total value:</span>
+                  <span className="text-muted-foreground text-sm">{t('sessionDetail.totalValue')}</span>
                   <span className="text-primary font-bold">
                     {totalLootValue} gp
                   </span>
@@ -542,7 +544,7 @@ export default function SessionDetail() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <LinkIcon className="size-5 text-primary" />
-              Linked Encounters
+              {t('sessionDetail.linkedEncounters')}
             </h2>
             <button
               onClick={() =>
@@ -551,13 +553,13 @@ export default function SessionDetail() {
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
               <Plus className="size-4" />
-              Add Encounter
+              {t('buttons.addEncounter')}
             </button>
           </div>
 
           {encounters.length === 0 ? (
             <p className="text-muted-foreground text-sm py-4 text-center">
-              No encounters linked to this session
+              {t('sessionDetail.noEncounters')}
             </p>
           ) : (
             <div className="space-y-3">
@@ -589,10 +591,10 @@ export default function SessionDetail() {
                         }`}
                     >
                       {encounter.status === 'completed'
-                        ? 'Completed'
+                        ? t('sessionDetail.encounterCompleted')
                         : encounter.status === 'active'
-                          ? 'Active'
-                          : 'Planning'}
+                          ? t('sessionDetail.encounterActive')
+                          : t('sessionDetail.encounterPlanning')}
                     </span>
                   </div>
                 </div>

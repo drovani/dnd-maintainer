@@ -18,22 +18,24 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 
-const CATEGORIES: { value: NoteCategory; label: string; icon: React.ReactNode }[] = [
-  { value: 'lore', label: 'Lore', icon: <Scroll className="size-4" /> },
-  { value: 'npc', label: 'NPCs', icon: <Users className="size-4" /> },
-  { value: 'location', label: 'Locations', icon: <MapPin className="size-4" /> },
-  { value: 'item', label: 'Items', icon: <Wand2 className="size-4" /> },
-  { value: 'quest', label: 'Quests', icon: <BookOpen className="size-4" /> },
-  { value: 'general', label: 'General', icon: <Tag className="size-4" /> },
+const CATEGORIES: { value: NoteCategory; icon: React.ReactNode }[] = [
+  { value: 'lore', icon: <Scroll className="size-4" /> },
+  { value: 'npc', icon: <Users className="size-4" /> },
+  { value: 'location', icon: <MapPin className="size-4" /> },
+  { value: 'item', icon: <Wand2 className="size-4" /> },
+  { value: 'quest', icon: <BookOpen className="size-4" /> },
+  { value: 'general', icon: <Tag className="size-4" /> },
 ]
 
 export default function NotesPage() {
   const { id: campaignId } = useParams<{ id: string }>()
   const queryClient = useQueryClient()
+  const { t } = useTranslation('common')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<NoteCategory | 'all'>('all')
@@ -267,7 +269,7 @@ export default function NotesPage() {
   }
 
   const getCategoryLabel = (category: NoteCategory) => {
-    return CATEGORIES.find((c) => c.value === category)?.label
+    return t(`notes.categories.${category}`)
   }
 
   if (error) {
@@ -295,10 +297,10 @@ export default function NotesPage() {
             <div>
               <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
                 <Scroll className="size-10 text-primary" />
-                DM Notes
+                {t('notes.title')}
               </h1>
               <p className="text-muted-foreground mt-2">
-                {notes.length} note{notes.length !== 1 ? 's' : ''} total
+                {t('notes.noteCount', { count: notes.length })}
               </p>
             </div>
             <button
@@ -306,7 +308,7 @@ export default function NotesPage() {
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
               <Plus className="size-5" />
-              New Note
+              {t('buttons.newNote')}
             </button>
           </div>
 
@@ -315,7 +317,7 @@ export default function NotesPage() {
             <Search className="absolute left-3 top-3 size-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search notes..."
+              placeholder={t('notes.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-muted border border-border rounded-lg pl-10 pr-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -337,7 +339,7 @@ export default function NotesPage() {
                   : 'bg-muted text-foreground hover:bg-muted'
                   }`}
               >
-                All
+                {t('notes.all')}
               </button>
               {CATEGORIES.map((cat) => (
                 <button
@@ -349,7 +351,7 @@ export default function NotesPage() {
                     }`}
                 >
                   {cat.icon}
-                  {cat.label}
+                  {t(`notes.categories.${cat.value}`)}
                 </button>
               ))}
             </div>
@@ -360,16 +362,16 @@ export default function NotesPage() {
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="px-4 py-2 bg-muted border border-border text-foreground rounded-lg outline-none focus:border-ring text-sm"
             >
-              <option value="recent">Recently Updated</option>
-              <option value="pinned">Pinned First</option>
-              <option value="alphabetical">Alphabetical</option>
+              <option value="recent">{t('notes.sort.recent')}</option>
+              <option value="pinned">{t('notes.sort.pinned')}</option>
+              <option value="alphabetical">{t('notes.sort.alphabetical')}</option>
             </select>
           </div>
 
           {/* Tag Filters */}
           {allTags.length > 0 && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
-              <span className="text-muted-foreground text-sm">Tags:</span>
+              <span className="text-muted-foreground text-sm">{t('notes.tags')}</span>
               {allTags.map((tag) => (
                 <button
                   key={tag}
@@ -393,7 +395,7 @@ export default function NotesPage() {
                   onClick={() => setSelectedTags([])}
                   className="text-muted-foreground hover:text-foreground text-xs ml-2"
                 >
-                  Clear filters
+                  {t('buttons.clearFilters')}
                 </button>
               )}
             </div>
@@ -408,18 +410,18 @@ export default function NotesPage() {
             <div className="inline-block animate-spin">
               <Scroll className="size-8 text-primary" />
             </div>
-            <p className="text-muted-foreground mt-4">Loading notes...</p>
+            <p className="text-muted-foreground mt-4">{t('notes.loading')}</p>
           </div>
         ) : filteredNotes.length === 0 ? (
           <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
             <BookOpen className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
-              {notes.length === 0 ? 'No Notes Yet' : 'No Notes Match'}
+              {notes.length === 0 ? t('notes.noNotesYet') : t('notes.noNotesMatch')}
             </h3>
             <p className="text-muted-foreground mb-6">
               {notes.length === 0
-                ? 'Create your first note to track campaign details!'
-                : 'Try adjusting your filters or search.'}
+                ? t('notes.noNotesDescription')
+                : t('notes.noNotesMatchDescription')}
             </p>
             {notes.length === 0 && (
               <button
@@ -427,7 +429,7 @@ export default function NotesPage() {
                 className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 <Plus className="size-5" />
-                Create Your First Note
+                {t('buttons.createYourFirstNote')}
               </button>
             )}
           </div>
@@ -446,7 +448,7 @@ export default function NotesPage() {
                         {note.category && getCategoryIcon(note.category)}
                       </span>
                       <span className="text-xs font-semibold text-muted-foreground uppercase">
-                        {note.category ? getCategoryLabel(note.category) : 'Uncategorized'}
+                        {note.category ? getCategoryLabel(note.category) : t('notes.uncategorized')}
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
@@ -504,7 +506,7 @@ export default function NotesPage() {
                     onClick={() => handleEditNote(note)}
                     className="flex-1 bg-muted hover:bg-accent text-foreground font-semibold py-2 rounded transition-colors text-sm"
                   >
-                    Edit
+                    {t('buttons.edit')}
                   </button>
                   <button
                     onClick={() => handleDeleteNote(note.id)}
@@ -526,12 +528,12 @@ export default function NotesPage() {
             {/* Modal Header */}
             <div className="sticky top-0 bg-card border-b border-border px-8 py-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">
-                {editingNote ? 'Edit Note' : 'New Note'}
+                {editingNote ? t('notes.editNote') : t('notes.newNote')}
               </h2>
               {isSaving && (
                 <div className="flex items-center gap-2 text-primary text-sm">
                   <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
-                  Saving...
+                  {t('buttons.saving')}
                 </div>
               )}
               <button
@@ -549,7 +551,7 @@ export default function NotesPage() {
             <form onSubmit={handleSaveNote} className="px-8 py-6 space-y-6">
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Title *
+                  {t('notes.fields.titleRequired')}
                 </label>
                 <input
                   type="text"
@@ -561,7 +563,7 @@ export default function NotesPage() {
                       setFormData({ ...formData, title: e.target.value })
                     }
                   }}
-                  placeholder="Note title"
+                  placeholder={t('notes.placeholders.noteTitle')}
                   className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                   autoFocus
                 />
@@ -569,7 +571,7 @@ export default function NotesPage() {
 
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Category
+                  {t('notes.fields.category')}
                 </label>
                 <select
                   value={formData.category}
@@ -585,7 +587,7 @@ export default function NotesPage() {
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>
-                      {cat.label}
+                      {t(`notes.categories.${cat.value}`)}
                     </option>
                   ))}
                 </select>
@@ -593,7 +595,7 @@ export default function NotesPage() {
 
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Content
+                  {t('notes.fields.content')}
                 </label>
                 <textarea
                   value={formData.content}
@@ -604,7 +606,7 @@ export default function NotesPage() {
                       setFormData({ ...formData, content: e.target.value })
                     }
                   }}
-                  placeholder="Your note content (markdown supported)"
+                  placeholder={t('notes.placeholders.noteContent')}
                   rows={8}
                   className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none"
                 />
@@ -612,7 +614,7 @@ export default function NotesPage() {
 
               <div>
                 <label className="block text-foreground font-semibold mb-2">
-                  Tags (comma-separated)
+                  {t('notes.fields.tagsCommaSeparated')}
                 </label>
                 <input
                   type="text"
@@ -630,7 +632,7 @@ export default function NotesPage() {
                       setFormData({ ...formData, tags: e.target.value })
                     }
                   }}
-                  placeholder="e.g., important, villain, quest"
+                  placeholder={t('notes.placeholders.tags')}
                   className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 />
               </div>
@@ -650,7 +652,7 @@ export default function NotesPage() {
                   className="size-4 rounded bg-muted border border-border cursor-pointer accent-primary"
                 />
                 <label htmlFor="pinned-checkbox" className="text-foreground">
-                  Pin this note (appears at top)
+                  {t('notes.fields.pinNote')}
                 </label>
               </div>
 
@@ -666,10 +668,10 @@ export default function NotesPage() {
                 >
                   <Save className="size-4" />
                   {createNoteMutation.isPending || updateNoteMutation.isPending
-                    ? 'Saving...'
+                    ? t('buttons.saving')
                     : editingNote
-                      ? 'Update Note'
-                      : 'Create Note'}
+                      ? t('buttons.updateNote')
+                      : t('buttons.createNote')}
                 </button>
 
                 {editingNote && (
@@ -691,7 +693,7 @@ export default function NotesPage() {
                   }}
                   className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-3 rounded-lg transition-colors"
                 >
-                  Cancel
+                  {t('buttons.cancel')}
                 </button>
               </div>
             </form>

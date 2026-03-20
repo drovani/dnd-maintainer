@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Skeleton } from './ui/skeleton';
@@ -12,6 +13,7 @@ export function Layout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | undefined>(campaignId);
 
+  const { t } = useTranslation('common');
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
 
   useEffect(() => {
@@ -55,30 +57,30 @@ export function Layout() {
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
               </div>
-              <p className="text-muted-foreground text-sm">Loading campaigns...</p>
+              <p className="text-muted-foreground text-sm">{t('campaign.loading')}</p>
             </div>
           ) : isError ? (
             <div className="flex items-center justify-center h-full">
               <div className="max-w-md mx-auto p-6 rounded-lg border bg-card text-center space-y-4">
                 <AlertTriangle className="size-12 text-destructive mx-auto" />
-                <h2 className="text-xl font-bold text-foreground">Unable to Load Campaigns</h2>
+                <h2 className="text-xl font-bold text-foreground">{t('errors.loadingCampaigns')}</h2>
                 <p className="text-muted-foreground text-sm">
-                  Failed to connect after multiple attempts. Please verify:
+                  {t('errors.loadingCampaignsDescription')}
                 </p>
                 <ul className="text-left text-foreground text-sm space-y-2 list-disc list-inside">
-                  <li>The Supabase project is running and accessible</li>
+                  <li>{t('errors.supabaseRunning')}</li>
                   <li>Your <code className="text-muted-foreground">.env.local</code> contains valid <code className="text-muted-foreground">VITE_SUPABASE_URL</code> and <code className="text-muted-foreground">VITE_SUPABASE_ANON_KEY</code></li>
-                  <li>Your network connection is working</li>
+                  <li>{t('errors.networkConnection')}</li>
                   <li>If running locally, <code className="text-muted-foreground">npx supabase status</code> shows the DB is up</li>
                 </ul>
                 {error && (
                   <p className="text-xs text-muted-foreground break-all">
-                    Error: {error.message}
+                    {t('errors.errorPrefix', { message: error.message })}
                   </p>
                 )}
                 <Button onClick={() => refetch()}>
                   <RefreshCw className="size-4" />
-                  Try Again
+                  {t('buttons.tryAgain')}
                 </Button>
               </div>
             </div>

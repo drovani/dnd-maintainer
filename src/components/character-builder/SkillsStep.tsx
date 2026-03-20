@@ -29,11 +29,12 @@ export function SkillsStep({
   onSkillToggle,
 }: SkillsStepProps) {
   const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const cls = DND_CLASSES.find((c) => c.id === characterClass)
   if (!cls) {
     return (
       <p className="text-muted-foreground text-sm">
-        Please select a class in the Basics step before choosing skills.
+        {tc('characterBuilder.skills.selectClassFirst')}
       </p>
     )
   }
@@ -45,8 +46,8 @@ export function SkillsStep({
   return (
     <div className="space-y-4">
       <p className="text-muted-foreground text-sm">
-        Choose {cls.skillChoices} skill{(cls.skillChoices as number) !== 1 ? 's' : ''} from your class list.{' '}
-        <span className="font-medium text-foreground">{selectedCount} / {cls.skillChoices} selected</span>
+        {tc('characterBuilder.skills.chooseSkills', { count: cls.skillChoices })}{' '}
+        <span className="font-medium text-foreground">{tc('characterBuilder.skills.selected', { count: selectedCount, max: cls.skillChoices })}</span>
       </p>
       <div className="space-y-1">
         {DND_SKILLS.map((skill) => {

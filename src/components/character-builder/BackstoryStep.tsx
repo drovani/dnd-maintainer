@@ -1,5 +1,6 @@
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface BackstoryStepProps {
@@ -21,65 +22,67 @@ export function BackstoryStep({
   backstory,
   onChange,
 }: BackstoryStepProps) {
+  const { t } = useTranslation('common')
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="personality">Personality Traits</Label>
+        <Label htmlFor="personality">{t('characterSheet.fields.personalityTraits')}</Label>
         <Textarea
           id="personality"
           value={personalityTraits}
           onChange={(e) => onChange({ personalityTraits: e.target.value })}
-          placeholder="Describe personality traits..."
+          placeholder={t('characterBuilder.placeholders.personalityTraits')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ideals">Ideals</Label>
+        <Label htmlFor="ideals">{t('characterSheet.personality.ideals')}</Label>
         <Textarea
           id="ideals"
           value={ideals}
           onChange={(e) => onChange({ ideals: e.target.value })}
-          placeholder="What ideals does your character hold..."
+          placeholder={t('characterBuilder.placeholders.ideals')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="bonds">Bonds</Label>
+        <Label htmlFor="bonds">{t('characterSheet.personality.bonds')}</Label>
         <Textarea
           id="bonds"
           value={bonds}
           onChange={(e) => onChange({ bonds: e.target.value })}
-          placeholder="Bonds to people, places, or things..."
+          placeholder={t('characterBuilder.placeholders.bonds')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="flaws">Flaws</Label>
+        <Label htmlFor="flaws">{t('characterSheet.personality.flaws')}</Label>
         <Textarea
           id="flaws"
           value={flaws}
           onChange={(e) => onChange({ flaws: e.target.value })}
-          placeholder="Character flaws and weaknesses..."
+          placeholder={t('characterBuilder.placeholders.flaws')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="appearance">Appearance</Label>
+        <Label htmlFor="appearance">{t('characterSheet.sections.appearance')}</Label>
         <Textarea
           id="appearance"
           value={appearance}
           onChange={(e) => onChange({ appearance: e.target.value })}
-          placeholder="Physical description..."
+          placeholder={t('characterBuilder.placeholders.appearance')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="backstory">Backstory</Label>
+        <Label htmlFor="backstory">{t('characterSheet.sections.backstory')}</Label>
         <Textarea
           id="backstory"
           value={backstory}
           onChange={(e) => onChange({ backstory: e.target.value })}
-          placeholder="Character backstory..."
+          placeholder={t('characterBuilder.placeholders.backstory')}
         />
       </div>
     </div>

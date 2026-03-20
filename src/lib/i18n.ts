@@ -14,6 +14,10 @@ i18n
       en: { common: commonEn, gamedata: gamedataEn }
     },
     interpolation: { escapeValue: false },
+    saveMissing: true,
+    missingKeyHandler: (_lngs, ns, key) => {
+      console.warn(`[i18n] Missing translation key: ${ns}:${key}`)
+    },
   })
   .catch((err: unknown) => console.error('i18n initialization failed:', err))
 
