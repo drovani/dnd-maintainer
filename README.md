@@ -9,7 +9,7 @@ A free, open-source campaign management tool for D&D 5th Edition. Run it locally
 - **Session Log** — Record session summaries, XP awards, loot, and link encounters to sessions
 - **Encounter Tracker** — Plan encounters with combatant lists and status tracking
 - **DM Notes** — Organize notes by category (plot, NPC, location, loot, rules) with tagging and pinning
-- **DM Toolkit** — Initiative tracker and quick-reference tools during play
+- **Internationalization** — All UI text externalized via react-i18next, ready for localization
 
 ## Prerequisites
 
@@ -78,20 +78,24 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Tech Stack
 
-- **React 18** + TypeScript (strict mode)
-- **Vite 5** for dev server and builds
+- **React 19** + TypeScript (strict mode)
+- **Vite 7** for dev server and builds
 - **Supabase** (local Postgres) for data storage
 - **TanStack React Query v5** for server state
-- **Tailwind CSS v4** with a dark fantasy theme
+- **Tailwind CSS v4** with CSS-first config
+- **react-i18next** for internationalization
+- **ESLint 9** flat config with `eslint-plugin-i18next`
 - **Lucide React** for icons
 
 ## Project Structure
 
 ```
 src/
+  @types/         # Module augmentations (i18next typed resources)
   components/     # Layout and reusable UI components
   hooks/          # React Query hooks for each entity
-  lib/            # Supabase client, query client, D&D 5e helpers
+  lib/            # Supabase client, query client, i18n config, D&D 5e helpers
+  locales/en/     # Translation files (common.json, gamedata.json)
   pages/          # Route-level page components
   types/          # TypeScript interfaces for all domain models
 supabase/
