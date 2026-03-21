@@ -1,7 +1,7 @@
-import React from 'react'
+import type { CSSProperties } from 'react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
-function Toaster({ ...props }: ToasterProps) {
+function Toaster(props: ToasterProps) {
   return (
     <Sonner
       theme="light"
@@ -17,7 +17,7 @@ function Toaster({ ...props }: ToasterProps) {
           '--error-bg': 'var(--popover)',
           '--error-text': 'var(--destructive)',
           '--error-border': 'var(--border)',
-        } as React.CSSProperties
+        } as CSSProperties
       }
       {...props}
     />
