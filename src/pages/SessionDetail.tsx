@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { Encounter, Session } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import {
   AlertCircle,
   ArrowLeft,
@@ -32,8 +33,8 @@ export default function SessionDetail() {
   }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle')
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
+  const saveToastId = useRef<string | number | undefined>(undefined)
   useEffect(() => {
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
@@ -111,10 +112,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      setSaveStatus('idle')
+      toast.success(t('status.saved'), { id: saveToastId.current, duration: 2000 })
     },
     onError: () => {
-      setSaveStatus('error')
+      toast.error(t('status.saveError'), { id: saveToastId.current })
     },
   })
 
@@ -132,10 +133,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      setSaveStatus('idle')
+      toast.success(t('status.saved'), { id: saveToastId.current, duration: 2000 })
     },
     onError: () => {
-      setSaveStatus('error')
+      toast.error(t('status.saveError'), { id: saveToastId.current })
     },
   })
 
@@ -195,12 +196,12 @@ export default function SessionDetail() {
       }
 
       // Set new timer for auto-save
-      setSaveStatus('saving')
+      saveToastId.current = toast.loading(t('status.saving'))
       autoSaveTimer.current = setTimeout(() => {
         updateSessionMutation.mutate(updated)
       }, 1000)
     },
-    [formData, updateSessionMutation]
+    [formData, updateSessionMutation, t]
   )
 
   const handleAddLoot = (e: React.FormEvent) => {
@@ -292,20 +293,6 @@ export default function SessionDetail() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-8 py-8">
-        {/* Auto-save indicator */}
-        {saveStatus === 'saving' && (
-          <div className="mb-6 flex items-center gap-2 text-primary text-sm">
-            <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
-            {t('buttons.saving')}
-          </div>
-        )}
-        {saveStatus === 'error' && (
-          <div className="mb-6 flex items-center gap-2 text-red-600 text-sm">
-            <AlertCircle className="size-4 shrink-0" />
-            {t('errors.saveFailed')}
-          </div>
-        )}
-
         {/* Session Info Section */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
@@ -400,7 +387,7 @@ export default function SessionDetail() {
               const newValue = e.target.value
               setDmNotes(newValue)
               if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-              setSaveStatus('saving')
+              saveToastId.current = toast.loading(t('status.saving'))
               autoSaveTimer.current = setTimeout(() => {
                 updateDmNotesMutation.mutate(newValue)
               }, 1000)
