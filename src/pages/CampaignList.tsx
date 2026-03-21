@@ -27,6 +27,7 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
+import { ValidationError } from '@/components/ui/validation-error'
 
 export default function CampaignList() {
   const navigate = useNavigate()
@@ -38,6 +39,7 @@ export default function CampaignList() {
     setting: '',
     description: '',
   })
+  const [nameError, setNameError] = useState<string>('')
 
   const { t } = useTranslation('common')
 
@@ -85,17 +87,20 @@ export default function CampaignList() {
 
   const handleCreateCampaign = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newCampaign.name.trim()) {
-      createCampaignMutation.mutate(newCampaign, {
-        onSuccess: (data) => {
-          setShowNewCampaignForm(false)
-          setNewCampaign({ name: '', setting: '', description: '' })
-          if (data?.id) {
-            navigate(`/campaign/${data.id}`)
-          }
-        },
-      })
+    if (!newCampaign.name.trim()) {
+      setNameError(t('validation.nameRequired'))
+      return
     }
+    createCampaignMutation.mutate(newCampaign, {
+      onSuccess: (data) => {
+        setShowNewCampaignForm(false)
+        setNewCampaign({ name: '', setting: '', description: '' })
+        setNameError('')
+        if (data?.id) {
+          navigate(`/campaign/${data.id}`)
+        }
+      },
+    })
   }
 
   const handleArchiveCampaign = () => {
@@ -144,7 +149,7 @@ export default function CampaignList() {
                 {t('campaign.campaignCount', { count: campaigns.length })}
               </p>
             </div>
-            <Button onClick={() => setShowNewCampaignForm(true)}>
+            <Button onClick={() => { setShowNewCampaignForm(true); setNameError('') }}>
               <Plus className="size-5" />
               {t('buttons.newCampaign')}
             </Button>
@@ -165,7 +170,7 @@ export default function CampaignList() {
       </div>
 
       {/* New Campaign Dialog */}
-      <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
+      <Dialog open={showNewCampaignForm} onOpenChange={(open) => { setShowNewCampaignForm(open); if (!open) setNameError('') }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t('campaign.createNew')}</DialogTitle>
@@ -177,14 +182,18 @@ export default function CampaignList() {
           <form onSubmit={handleCreateCampaign} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="campaign-name">{t('campaign.campaignName')}</Label>
-              <Input
-                id="campaign-name"
-                value={newCampaign.name}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, name: e.target.value })
-                }
-                placeholder={t('campaign.placeholderName')}
-              />
+              <div className="flex flex-col gap-1">
+                <Input
+                  id="campaign-name"
+                  value={newCampaign.name}
+                  onChange={(e) => {
+                    setNameError('')
+                    setNewCampaign({ ...newCampaign, name: e.target.value })
+                  }}
+                  placeholder={t('campaign.placeholderName')}
+                />
+                <ValidationError message={nameError} />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -219,7 +228,7 @@ export default function CampaignList() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setShowNewCampaignForm(false)}
+                onClick={() => { setShowNewCampaignForm(false); setNameError('') }}
               >
                 {t('buttons.cancel')}
               </Button>
@@ -250,7 +259,7 @@ export default function CampaignList() {
                 : t('campaign.noCampaignsMatchDescription')}
             </p>
             {campaigns.length === 0 && (
-              <Button onClick={() => setShowNewCampaignForm(true)}>
+              <Button onClick={() => { setShowNewCampaignForm(true); setNameError('') }}>
                 <Plus className="size-5" />
                 {t('buttons.createYourFirstCampaign')}
               </Button>

@@ -20,6 +20,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+import { ValidationError } from '@/components/ui/validation-error'
 
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 
@@ -51,6 +52,7 @@ export default function NotesPage() {
   }, [])
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle')
 
+  const [titleError, setTitleError] = useState<string>('')
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -202,6 +204,7 @@ export default function NotesPage() {
     setEditingNote(null)
     resetForm()
     setSaveStatus('idle')
+    setTitleError('')
     setShowNewNoteModal(true)
   }
 
@@ -215,13 +218,17 @@ export default function NotesPage() {
       pinned: note.is_pinned || false,
     })
     setSaveStatus('idle')
+    setTitleError('')
     setShowNewNoteModal(true)
   }
 
   const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.title.trim()) return
+    if (!formData.title.trim()) {
+      setTitleError(t('validation.titleRequired'))
+      return
+    }
 
     if (editingNote) {
       updateNoteMutation.mutate({
@@ -555,6 +562,7 @@ export default function NotesPage() {
               <button
                 onClick={() => {
                   setShowNewNoteModal(false)
+                  setTitleError('')
                   if (!editingNote) resetForm()
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -569,20 +577,24 @@ export default function NotesPage() {
                 <label className="block text-foreground font-semibold mb-2">
                   {t('notes.fields.titleRequired')}
                 </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => {
-                    if (editingNote) {
-                      handleAutoSaveNote('title', e.target.value)
-                    } else {
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                  }}
-                  placeholder={t('notes.placeholders.noteTitle')}
-                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  autoFocus
-                />
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => {
+                      setTitleError('')
+                      if (editingNote) {
+                        handleAutoSaveNote('title', e.target.value)
+                      } else {
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                    }}
+                    placeholder={t('notes.placeholders.noteTitle')}
+                    className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    autoFocus
+                  />
+                  <ValidationError message={titleError} />
+                </div>
               </div>
 
               <div>
@@ -705,6 +717,7 @@ export default function NotesPage() {
                   type="button"
                   onClick={() => {
                     setShowNewNoteModal(false)
+                    setTitleError('')
                     if (!editingNote) resetForm()
                   }}
                   className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-3 rounded-lg transition-colors"

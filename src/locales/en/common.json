@@ -438,5 +438,10 @@
     "loading": "Loading...",
     "noDate": "No date",
     "selectCampaignFirst": "{{label}} (select a campaign first)"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "titleRequired": "Title is required",
+    "itemNameRequired": "Item name is required"
   }
 }
