@@ -575,22 +575,24 @@ export default function NotesPage() {
                 <label className="block text-foreground font-semibold mb-2">
                   {t('notes.fields.titleRequired')}
                 </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => {
-                    setTitleError('')
-                    if (editingNote) {
-                      handleAutoSaveNote('title', e.target.value)
-                    } else {
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                  }}
-                  placeholder={t('notes.placeholders.noteTitle')}
-                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  autoFocus
-                />
-                {titleError && <p className="text-sm text-red-600 mt-1">{titleError}</p>}
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => {
+                      setTitleError('')
+                      if (editingNote) {
+                        handleAutoSaveNote('title', e.target.value)
+                      } else {
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                    }}
+                    placeholder={t('notes.placeholders.noteTitle')}
+                    className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    autoFocus
+                  />
+                  {titleError && <p className="text-sm text-red-600">{titleError}</p>}
+                </div>
               </div>
 
               <div>
@@ -686,8 +688,7 @@ export default function NotesPage() {
                   type="submit"
                   disabled={
                     createNoteMutation.isPending ||
-                    updateNoteMutation.isPending ||
-                    !formData.title.trim()
+                    updateNoteMutation.isPending
                   }
                   className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >

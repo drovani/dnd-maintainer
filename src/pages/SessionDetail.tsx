@@ -493,14 +493,14 @@ export default function SessionDetail() {
               <div className="flex gap-2 justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowNewLootForm(false)}
+                  onClick={() => { setShowNewLootForm(false); setLootNameError('') }}
                   className="px-4 py-2 bg-muted hover:bg-accent text-foreground rounded transition-colors text-sm"
                 >
                   {t('buttons.cancel')}
                 </button>
                 <button
                   type="submit"
-                  disabled={upsertLootMutation.isPending || !newLoot.item_name.trim()}
+                  disabled={upsertLootMutation.isPending}
                   className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded transition-colors text-sm disabled:opacity-50"
                 >
                   {upsertLootMutation.isPending ? t('buttons.adding') : t('buttons.addItem')}

@@ -160,19 +160,19 @@ export default function CampaignDashboard() {
                       className="text-3xl font-bold bg-muted border border-ring rounded px-3 py-1 text-foreground outline-none"
                       autoFocus
                       onKeyDown={(e) => {
-                        if (e.key === 'Escape') setIsEditingName(false)
+                        if (e.key === 'Escape') { setIsEditingName(false); setNameError('') }
                         if (e.key === 'Enter') handleUpdateName()
                       }}
                     />
                     <button
                       onClick={handleUpdateName}
-                      disabled={updateMutation.isPending || !editedName.trim()}
+                      disabled={updateMutation.isPending}
                       className="text-primary hover:text-foreground p-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="size-6" />
                     </button>
                     <button
-                      onClick={() => setIsEditingName(false)}
+                      onClick={() => { setIsEditingName(false); setNameError('') }}
                       className="text-muted-foreground hover:text-foreground p-2"
                     >
                       <X className="size-6" />
@@ -188,6 +188,7 @@ export default function CampaignDashboard() {
                   <button
                     onClick={() => {
                       setEditedName(campaign.name)
+                      setNameError('')
                       setIsEditingName(true)
                     }}
                     className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
