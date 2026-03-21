@@ -15,7 +15,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "supabase:types": "npx supabase gen types typescript --local > src/types/supabase.ts",
-    "supabase:reset": "npx supabase stop --no-backup && npx supabase start && supabase:types"
+    "supabase:reset": "npx supabase stop --no-backup && npx supabase start && npm run supabase:types"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
