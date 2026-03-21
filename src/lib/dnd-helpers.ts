@@ -1,6 +1,8 @@
 // D&D 5e Helper Functions and Data
 import type { AbilityKey } from '@/types/database'
 
+export type AbilityName = AbilityKey
+
 export function getAbilityModifier(score: number): number {
   return Math.floor((score - 10) / 2)
 }
@@ -198,362 +200,330 @@ export function getSpellSlots(className: string, level: number): number[] {
 }
 
 export interface DndRace {
-  id: string
-  name: string
-  size: string
-  speed: number
-  abilityBonuses: Partial<Record<AbilityKey, number>>
+  readonly id: RaceId
+  readonly size: string
+  readonly speed: number
+  readonly abilityBonuses: Partial<Record<AbilityKey, number>>
 }
 
 export interface DndClass {
-  id: string
-  name: string
-  hitDie: number
-  primaryAbility: AbilityName
-  savingThrowProficiencies: readonly AbilityName[]
-  spellcastingAbility?: AbilityName
-  skillChoices: number
-  /** Skills this class can choose from. null = any skill (e.g., Bard's Jack of All Trades). */
-  skillPool: readonly DndSkillName[] | null
+  readonly id: ClassId
+  readonly hitDie: number
+  readonly primaryAbility: AbilityName
+  readonly savingThrowProficiencies: readonly AbilityName[]
+  readonly spellcastingAbility?: AbilityName
+  readonly skillChoices: number
+  /** Skills this class can choose from (by skill id). null = can choose from any skill (e.g., Bard). */
+  readonly skillPool: readonly SkillId[] | null
 }
 
-export type AbilityName = 'Strength' | 'Dexterity' | 'Constitution' | 'Intelligence' | 'Wisdom' | 'Charisma'
-
-export type DndSkillName = 'Acrobatics' | 'Animal Handling' | 'Arcana' | 'Athletics' | 'Deception' | 'History' | 'Insight' | 'Intimidation' | 'Investigation' | 'Medicine' | 'Nature' | 'Perception' | 'Performance' | 'Persuasion' | 'Religion' | 'Sleight of Hand' | 'Stealth' | 'Survival'
-
 export interface DndSkill {
-  id: string
-  name: DndSkillName
-  ability: AbilityName
+  readonly id: SkillId
+  readonly ability: AbilityName
 }
 
 export interface DndBackground {
-  id: string
-  name: string
+  readonly id: BackgroundId
 }
 
 export interface DndAlignment {
-  id: string
-  name: string
-  shorthand: string
+  readonly id: AlignmentId
 }
 
-export const DND_RACES: readonly DndRace[] = [
+// Race ID convention: base races use plain IDs (e.g., 'human', 'tiefling'),
+// subraces use '{base}-{variant}' (e.g., 'dwarf-hill', 'elf-dark'),
+// half-races use 'half{race}' without hyphen (e.g., 'halfelf', 'halforc').
+export const DND_RACES = [
   {
     id: 'dragonborn',
-    name: 'Dragonborn',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 2, cha: 1 },
   },
   {
     id: 'dwarf-hill',
-    name: 'Hill Dwarf',
     size: 'Medium',
     speed: 25,
     abilityBonuses: { con: 2, wis: 1 },
   },
   {
     id: 'dwarf-mountain',
-    name: 'Mountain Dwarf',
     size: 'Medium',
     speed: 25,
     abilityBonuses: { con: 2, str: 2 },
   },
   {
     id: 'elf-dark',
-    name: 'Dark Elf (Drow)',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { dex: 2, cha: 1 },
   },
   {
     id: 'elf-high',
-    name: 'High Elf',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { dex: 2, int: 1 },
   },
   {
     id: 'elf-wood',
-    name: 'Wood Elf',
     size: 'Medium',
     speed: 35,
     abilityBonuses: { dex: 2, wis: 1 },
   },
   {
     id: 'gnome-forest',
-    name: 'Forest Gnome',
     size: 'Small',
     speed: 25,
     abilityBonuses: { int: 2, dex: 1 },
   },
   {
     id: 'gnome-rock',
-    name: 'Rock Gnome',
     size: 'Small',
     speed: 25,
     abilityBonuses: { int: 2, con: 1 },
   },
   {
     id: 'halfelf',
-    name: 'Half-Elf',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1, wis: 1 },
   },
   {
     id: 'halforc',
-    name: 'Half-Orc',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 2, con: 1 },
   },
   {
     id: 'halfling-lightfoot',
-    name: 'Lightfoot Halfling',
     size: 'Small',
     speed: 25,
     abilityBonuses: { dex: 2, cha: 1 },
   },
   {
     id: 'halfling-stout',
-    name: 'Stout Halfling',
     size: 'Small',
     speed: 25,
     abilityBonuses: { dex: 2, con: 1 },
   },
   {
     id: 'human',
-    name: 'Human',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 },
   },
   {
     id: 'tiefling',
-    name: 'Tiefling',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1 },
   },
-]
+] as const
+
+export type RaceId = (typeof DND_RACES)[number]['id']
 
 export interface DndRaceGroup {
-  label: string
-  options: Array<{ value: string; label: string }>
+  readonly id: string
+  readonly options: ReadonlyArray<{ readonly value: RaceId }>
 }
 
 export const DND_RACE_GROUPS: DndRaceGroup[] = [
-  { label: 'Dragonborn', options: [{ value: 'Dragonborn', label: 'Dragonborn' }] },
-  { label: 'Dwarf', options: [
-    { value: 'Hill Dwarf', label: 'Hill Dwarf' },
-    { value: 'Mountain Dwarf', label: 'Mountain Dwarf' },
+  { id: 'dragonborn', options: [{ value: 'dragonborn' }] },
+  { id: 'dwarf', options: [
+    { value: 'dwarf-hill' },
+    { value: 'dwarf-mountain' },
   ]},
-  { label: 'Elf', options: [
-    { value: 'Dark Elf (Drow)', label: 'Dark Elf (Drow)' },
-    { value: 'High Elf', label: 'High Elf' },
-    { value: 'Wood Elf', label: 'Wood Elf' },
+  { id: 'elf', options: [
+    { value: 'elf-dark' },
+    { value: 'elf-high' },
+    { value: 'elf-wood' },
   ]},
-  { label: 'Gnome', options: [
-    { value: 'Forest Gnome', label: 'Forest Gnome' },
-    { value: 'Rock Gnome', label: 'Rock Gnome' },
+  { id: 'gnome', options: [
+    { value: 'gnome-forest' },
+    { value: 'gnome-rock' },
   ]},
-  { label: 'Half-Elf', options: [{ value: 'Half-Elf', label: 'Half-Elf' }] },
-  { label: 'Half-Orc', options: [{ value: 'Half-Orc', label: 'Half-Orc' }] },
-  { label: 'Halfling', options: [
-    { value: 'Lightfoot Halfling', label: 'Lightfoot Halfling' },
-    { value: 'Stout Halfling', label: 'Stout Halfling' },
+  { id: 'halfelf', options: [{ value: 'halfelf' }] },
+  { id: 'halforc', options: [{ value: 'halforc' }] },
+  { id: 'halfling', options: [
+    { value: 'halfling-lightfoot' },
+    { value: 'halfling-stout' },
   ]},
-  { label: 'Human', options: [{ value: 'Human', label: 'Human' }] },
-  { label: 'Tiefling', options: [{ value: 'Tiefling', label: 'Tiefling' }] },
+  { id: 'human', options: [{ value: 'human' }] },
+  { id: 'tiefling', options: [{ value: 'tiefling' }] },
 ]
 
-export const DND_CLASSES: readonly DndClass[] = [
+export const DND_CLASSES = [
   {
     id: 'barbarian',
-    name: 'Barbarian',
     hitDie: 12,
-    primaryAbility: 'Strength',
-    savingThrowProficiencies: ['Strength', 'Constitution'],
+    primaryAbility: 'str',
+    savingThrowProficiencies: ['str', 'con'],
     skillChoices: 2,
-    skillPool: ['Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
+    skillPool: ['animalhandling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
   },
   {
     id: 'bard',
-    name: 'Bard',
     hitDie: 8,
-    primaryAbility: 'Charisma',
-    savingThrowProficiencies: ['Dexterity', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'cha',
+    savingThrowProficiencies: ['dex', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 3,
     skillPool: null,
   },
   {
     id: 'cleric',
-    name: 'Cleric',
     hitDie: 8,
-    primaryAbility: 'Wisdom',
-    savingThrowProficiencies: ['Wisdom', 'Charisma'],
-    spellcastingAbility: 'Wisdom',
+    primaryAbility: 'wis',
+    savingThrowProficiencies: ['wis', 'cha'],
+    spellcastingAbility: 'wis',
     skillChoices: 2,
-    skillPool: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'],
+    skillPool: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
   },
   {
     id: 'druid',
-    name: 'Druid',
     hitDie: 8,
-    primaryAbility: 'Wisdom',
-    savingThrowProficiencies: ['Intelligence', 'Wisdom'],
-    spellcastingAbility: 'Wisdom',
+    primaryAbility: 'wis',
+    savingThrowProficiencies: ['int', 'wis'],
+    spellcastingAbility: 'wis',
     skillChoices: 2,
-    skillPool: ['Arcana', 'Animal Handling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
+    skillPool: ['arcana', 'animalhandling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival'],
   },
   {
     id: 'fighter',
-    name: 'Fighter',
     hitDie: 10,
-    primaryAbility: 'Strength',
-    savingThrowProficiencies: ['Strength', 'Constitution'],
+    primaryAbility: 'str',
+    savingThrowProficiencies: ['str', 'con'],
     skillChoices: 2,
-    skillPool: ['Acrobatics', 'Animal Handling', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'],
+    skillPool: ['acrobatics', 'animalhandling', 'athletics', 'history', 'insight', 'intimidation', 'perception', 'survival'],
   },
   {
     id: 'monk',
-    name: 'Monk',
     hitDie: 8,
-    primaryAbility: 'Dexterity',
-    savingThrowProficiencies: ['Strength', 'Dexterity'],
+    primaryAbility: 'dex',
+    savingThrowProficiencies: ['str', 'dex'],
     skillChoices: 2,
-    skillPool: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
+    skillPool: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
   },
   {
     id: 'paladin',
-    name: 'Paladin',
     hitDie: 10,
-    primaryAbility: 'Strength',
-    savingThrowProficiencies: ['Wisdom', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'str',
+    savingThrowProficiencies: ['wis', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 2,
-    skillPool: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
+    skillPool: ['athletics', 'insight', 'intimidation', 'medicine', 'persuasion', 'religion'],
   },
   {
     id: 'ranger',
-    name: 'Ranger',
     hitDie: 10,
-    primaryAbility: 'Dexterity',
-    savingThrowProficiencies: ['Strength', 'Dexterity'],
-    spellcastingAbility: 'Wisdom',
+    primaryAbility: 'dex',
+    savingThrowProficiencies: ['str', 'dex'],
+    spellcastingAbility: 'wis',
     skillChoices: 3,
-    skillPool: ['Animal Handling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
+    skillPool: ['animalhandling', 'athletics', 'insight', 'investigation', 'nature', 'perception', 'stealth', 'survival'],
   },
   {
     id: 'rogue',
-    name: 'Rogue',
     hitDie: 8,
-    primaryAbility: 'Dexterity',
-    savingThrowProficiencies: ['Dexterity', 'Intelligence'],
+    primaryAbility: 'dex',
+    savingThrowProficiencies: ['dex', 'int'],
     skillChoices: 4,
-    skillPool: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'Sleight of Hand', 'Stealth'],
+    skillPool: ['acrobatics', 'athletics', 'deception', 'insight', 'intimidation', 'investigation', 'perception', 'performance', 'persuasion', 'sleightofhand', 'stealth'],
   },
   {
     id: 'sorcerer',
-    name: 'Sorcerer',
     hitDie: 6,
-    primaryAbility: 'Charisma',
-    savingThrowProficiencies: ['Constitution', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'cha',
+    savingThrowProficiencies: ['con', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 2,
-    skillPool: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
+    skillPool: ['arcana', 'deception', 'insight', 'intimidation', 'persuasion', 'religion'],
   },
   {
     id: 'warlock',
-    name: 'Warlock',
     hitDie: 8,
-    primaryAbility: 'Charisma',
-    savingThrowProficiencies: ['Wisdom', 'Charisma'],
-    spellcastingAbility: 'Charisma',
+    primaryAbility: 'cha',
+    savingThrowProficiencies: ['wis', 'cha'],
+    spellcastingAbility: 'cha',
     skillChoices: 2,
-    skillPool: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
+    skillPool: ['arcana', 'deception', 'history', 'intimidation', 'investigation', 'nature', 'religion'],
   },
   {
     id: 'wizard',
-    name: 'Wizard',
     hitDie: 6,
-    primaryAbility: 'Intelligence',
-    savingThrowProficiencies: ['Intelligence', 'Wisdom'],
-    spellcastingAbility: 'Intelligence',
+    primaryAbility: 'int',
+    savingThrowProficiencies: ['int', 'wis'],
+    spellcastingAbility: 'int',
     skillChoices: 2,
-    skillPool: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
+    skillPool: ['arcana', 'history', 'insight', 'investigation', 'medicine', 'religion'],
   },
-]
+] as const
 
-export const DND_SKILLS: readonly DndSkill[] = [
-  { id: 'acrobatics', name: 'Acrobatics', ability: 'Dexterity' },
-  { id: 'animalhandling', name: 'Animal Handling', ability: 'Wisdom' },
-  { id: 'arcana', name: 'Arcana', ability: 'Intelligence' },
-  { id: 'athletics', name: 'Athletics', ability: 'Strength' },
-  { id: 'deception', name: 'Deception', ability: 'Charisma' },
-  { id: 'history', name: 'History', ability: 'Intelligence' },
-  { id: 'insight', name: 'Insight', ability: 'Wisdom' },
-  { id: 'intimidation', name: 'Intimidation', ability: 'Charisma' },
-  { id: 'investigation', name: 'Investigation', ability: 'Intelligence' },
-  { id: 'medicine', name: 'Medicine', ability: 'Wisdom' },
-  { id: 'nature', name: 'Nature', ability: 'Intelligence' },
-  { id: 'perception', name: 'Perception', ability: 'Wisdom' },
-  { id: 'performance', name: 'Performance', ability: 'Charisma' },
-  { id: 'persuasion', name: 'Persuasion', ability: 'Charisma' },
-  { id: 'religion', name: 'Religion', ability: 'Intelligence' },
-  { id: 'sleightofhand', name: 'Sleight of Hand', ability: 'Dexterity' },
-  { id: 'stealth', name: 'Stealth', ability: 'Dexterity' },
-  { id: 'survival', name: 'Survival', ability: 'Wisdom' },
-]
+export type ClassId = (typeof DND_CLASSES)[number]['id']
 
-export const DND_BACKGROUNDS: readonly DndBackground[] = [
-  { id: 'acolyte', name: 'Acolyte' },
-  { id: 'charlatan', name: 'Charlatan' },
-  { id: 'criminal', name: 'Criminal' },
-  { id: 'entertainer', name: 'Entertainer' },
-  { id: 'folkhero', name: 'Folk Hero' },
-  { id: 'guildartisan', name: 'Guild Artisan' },
-  { id: 'hermit', name: 'Hermit' },
-  { id: 'noble', name: 'Noble' },
-  { id: 'outlander', name: 'Outlander' },
-  { id: 'sage', name: 'Sage' },
-  { id: 'sailor', name: 'Sailor' },
-  { id: 'soldier', name: 'Soldier' },
-  { id: 'urchin', name: 'Urchin' },
-  { id: 'custom', name: 'Custom' },
-]
+export const DND_SKILLS = [
+  { id: 'acrobatics', ability: 'dex' },
+  { id: 'animalhandling', ability: 'wis' },
+  { id: 'arcana', ability: 'int' },
+  { id: 'athletics', ability: 'str' },
+  { id: 'deception', ability: 'cha' },
+  { id: 'history', ability: 'int' },
+  { id: 'insight', ability: 'wis' },
+  { id: 'intimidation', ability: 'cha' },
+  { id: 'investigation', ability: 'int' },
+  { id: 'medicine', ability: 'wis' },
+  { id: 'nature', ability: 'int' },
+  { id: 'perception', ability: 'wis' },
+  { id: 'performance', ability: 'cha' },
+  { id: 'persuasion', ability: 'cha' },
+  { id: 'religion', ability: 'int' },
+  { id: 'sleightofhand', ability: 'dex' },
+  { id: 'stealth', ability: 'dex' },
+  { id: 'survival', ability: 'wis' },
+] as const
 
-export const DND_ALIGNMENTS: readonly DndAlignment[] = [
-  { id: 'lg', name: 'Lawful Good', shorthand: 'LG' },
-  { id: 'ng', name: 'Neutral Good', shorthand: 'NG' },
-  { id: 'cg', name: 'Chaotic Good', shorthand: 'CG' },
-  { id: 'ln', name: 'Lawful Neutral', shorthand: 'LN' },
-  { id: 'n', name: 'True Neutral', shorthand: 'N' },
-  { id: 'cn', name: 'Chaotic Neutral', shorthand: 'CN' },
-  { id: 'le', name: 'Lawful Evil', shorthand: 'LE' },
-  { id: 'ne', name: 'Neutral Evil', shorthand: 'NE' },
-  { id: 'ce', name: 'Chaotic Evil', shorthand: 'CE' },
-]
+export type SkillId = (typeof DND_SKILLS)[number]['id']
+
+export const DND_BACKGROUNDS = [
+  { id: 'acolyte' },
+  { id: 'charlatan' },
+  { id: 'criminal' },
+  { id: 'entertainer' },
+  { id: 'folkhero' },
+  { id: 'guildartisan' },
+  { id: 'hermit' },
+  { id: 'noble' },
+  { id: 'outlander' },
+  { id: 'sage' },
+  { id: 'sailor' },
+  { id: 'soldier' },
+  { id: 'urchin' },
+  { id: 'custom' },
+] as const
+
+export type BackgroundId = (typeof DND_BACKGROUNDS)[number]['id']
+
+export const DND_ALIGNMENTS = [
+  { id: 'lg' },
+  { id: 'ng' },
+  { id: 'cg' },
+  { id: 'ln' },
+  { id: 'n' },
+  { id: 'cn' },
+  { id: 'le' },
+  { id: 'ne' },
+  { id: 'ce' },
+] as const
+
+export type AlignmentId = (typeof DND_ALIGNMENTS)[number]['id']
 
 export const ABILITY_ABBREVIATIONS: Readonly<Record<AbilityName, string>> = {
-  Strength: 'STR',
-  Dexterity: 'DEX',
-  Constitution: 'CON',
-  Intelligence: 'INT',
-  Wisdom: 'WIS',
-  Charisma: 'CHA',
-}
-
-export const ABILITY_NAME_TO_KEY: Readonly<Record<AbilityName, 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'>> = {
-  Strength: 'str',
-  Dexterity: 'dex',
-  Constitution: 'con',
-  Intelligence: 'int',
-  Wisdom: 'wis',
-  Charisma: 'cha',
+  str: 'STR',
+  dex: 'DEX',
+  con: 'CON',
+  int: 'INT',
+  wis: 'WIS',
+  cha: 'CHA',
 }
 
 // Ability Score Assignment Methods
@@ -627,12 +597,12 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
     female: ['Bimpnottin', 'Breena', 'Caramip', 'Carlin', 'Donella', 'Duvamil', 'Ella', 'Ellyjobell', 'Ellywick', 'Lilli', 'Loopmottin', 'Lorilla', 'Mardnab', 'Nissa', 'Nyx'],
     clan: ['Beren', 'Daergel', 'Folkor', 'Garrick', 'Nackle', 'Murnig', 'Ningel', 'Raulnor', 'Scheppen', 'Timbers'],
   },
-  'half-elf': {
+  'halfelf': {
     male: ['Adran', 'Aramil', 'Beiro', 'Carric', 'Erdan', 'Galinndan', 'Hadarai', 'Immeral', 'Ivellios', 'Laucian', 'Mindartis', 'Paelias', 'Peren', 'Quarion', 'Riardon'],
     female: ['Adrie', 'Althaea', 'Andraste', 'Caelynn', 'Drusilia', 'Felosial', 'Ielenia', 'Jelenneth', 'Keyleth', 'Leshanna', 'Lia', 'Mialee', 'Naivara', 'Quelenna', 'Quillathe'],
     clan: ['Brightwood', 'Evenwood', 'Farleaf', 'Galanodel', 'Holimion', 'Moonshadow', 'Nailo', 'Siannodel', 'Silverfrond', 'Windriver'],
   },
-  'half-orc': {
+  'halforc': {
     male: ['Dench', 'Feng', 'Gell', 'Henk', 'Holg', 'Imsh', 'Keth', 'Krusk', 'Mhurren', 'Ront', 'Shump', 'Thokk', 'Urtra', 'Volen', 'Yargath'],
     female: ['Baggi', 'Emen', 'Engong', 'Kansif', 'Myev', 'Neega', 'Ovak', 'Ownka', 'Shautha', 'Sutha', 'Vola', 'Volen', 'Yevelda', 'Zharra', 'Zovak'],
     clan: ['Bloodfist', 'Dreadblade', 'Grimtusk', 'Ironhide', 'Marrowsmasher', 'Ragebringer', 'Skullcrusher', 'Stoneback', 'Thunderstep', 'Warchief'],
@@ -657,10 +627,6 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
 export function getBaseRaceId(raceId: string): string {
   // Direct match first
   if (raceId in DND_RACE_NAMES) return raceId
-
-  // Special cases for race IDs without dashes
-  if (raceId === 'halfelf') return 'half-elf'
-  if (raceId === 'halforc') return 'half-orc'
 
   // Subrace IDs: check first segment before the first dash
   const firstSegment = raceId.split('-')[0]

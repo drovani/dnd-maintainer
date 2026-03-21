@@ -4,8 +4,10 @@ import { downloadFile, generateSeedSql } from '@/lib/export-sql';
 import { supabase } from '@/lib/supabase';
 import { AlertCircle, CheckSquare, Download, Loader2, Square } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ExportData() {
+  const { t } = useTranslation('common');
   const { data: campaigns = [], isLoading: isCampaignsLoading, isError: isCampaignsError, error: campaignsError } = useCampaigns();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState<boolean>(false);
@@ -88,7 +90,7 @@ export default function ExportData() {
         throw new Error(`Data was generated successfully but the download failed: ${msg}`);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred during export.';
+      const message = err instanceof Error ? err.message : t('errors.unexpectedError');
       setErrorMessage(message);
     } finally {
       setIsExporting(false);
@@ -100,7 +102,7 @@ export default function ExportData() {
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-3xl mx-auto text-center py-12">
           <Loader2 className="size-8 text-primary animate-spin mx-auto" />
-          <p className="text-foreground mt-4">Loading campaigns...</p>
+          <p className="text-foreground mt-4">{t('export.loadingCampaigns')}</p>
         </div>
       </div>
     );
@@ -111,9 +113,9 @@ export default function ExportData() {
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-3xl mx-auto text-center py-12">
           <AlertCircle className="size-8 text-destructive mx-auto" />
-          <p className="text-destructive font-semibold mt-4">Failed to load campaigns</p>
+          <p className="text-destructive font-semibold mt-4">{t('export.failedToLoadCampaigns')}</p>
           <p className="text-destructive text-sm mt-2">
-            {campaignsError instanceof Error ? campaignsError.message : 'An unexpected error occurred.'}
+            {campaignsError instanceof Error ? campaignsError.message : t('errors.unexpectedError')}
           </p>
         </div>
       </div>
@@ -127,10 +129,10 @@ export default function ExportData() {
         <div className="max-w-3xl mx-auto px-8 py-8">
           <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
             <Download className="size-10 text-primary" />
-            Export Data
+            {t('export.title')}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Download campaign data as a SQL seed file for backup or migration.
+            {t('export.description')}
           </p>
         </div>
       </div>
@@ -142,7 +144,7 @@ export default function ExportData() {
           <div className="mb-6 flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
             <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
             <div>
-              <p className="text-destructive font-semibold">Export failed</p>
+              <p className="text-destructive font-semibold">{t('export.exportFailed')}</p>
               <p className="text-destructive text-sm mt-1 whitespace-pre-line">{errorMessage}</p>
             </div>
           </div>
@@ -151,28 +153,28 @@ export default function ExportData() {
         {campaigns.length === 0 ? (
           <div className="text-center py-24 bg-card/50 rounded-lg border border-border p-12">
             <Download className="size-16 text-muted-foreground/50 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">No Campaigns</h3>
-            <p className="text-muted-foreground">Create a campaign first before exporting data.</p>
+            <h3 className="text-2xl font-bold text-foreground mb-2">{t('export.noCampaigns')}</h3>
+            <p className="text-muted-foreground">{t('export.noCampaignsDescription')}</p>
           </div>
         ) : (
           <>
             {/* Selection controls */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-foreground font-semibold">
-                Select campaigns to export ({selectedIds.size} of {campaigns.length} selected)
+                {t('export.selectCampaigns', { selected: selectedIds.size, total: campaigns.length })}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={selectAll}
                   className="text-sm text-primary hover:text-foreground transition-colors px-3 py-1 rounded border border-border hover:border-amber-600"
                 >
-                  Select All
+                  {t('buttons.selectAll')}
                 </button>
                 <button
                   onClick={deselectAll}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1 rounded border border-border hover:border-input"
                 >
-                  Deselect All
+                  {t('buttons.deselectAll')}
                 </button>
               </div>
             </div>
@@ -219,18 +221,19 @@ export default function ExportData() {
               {isExporting ? (
                 <>
                   <Loader2 className="size-5 animate-spin" />
-                  Exporting...
+                  {t('buttons.exporting')}
                 </>
               ) : (
                 <>
                   <Download className="size-5" />
-                  Export SQL Backup
+                  {t('buttons.exportSqlBackup')}
                 </>
               )}
             </button>
 
             <p className="text-xs text-muted-foreground mt-4 text-center">
-              The exported file can be restored with:{' '}
+              {t('export.restoreHint')}{' '}
+              {/* eslint-disable-next-line i18next/no-literal-string -- CLI command, not translatable */}
               <code className="bg-muted px-2 py-0.5 rounded text-muted-foreground">
                 psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f seed.sql
               </code>

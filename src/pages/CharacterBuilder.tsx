@@ -11,27 +11,28 @@ import {
 } from '@/components/character-builder'
 import type { CharacterData } from '@/components/character-builder'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import { ABILITY_NAME_TO_KEY, DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
-import type { AbilityScores } from '@/types/database'
+import { DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
+import type { AbilityKey, AbilityScores } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
 type StepType = 'basics' | 'abilities' | 'skills' | 'features' | 'equipment' | 'spells' | 'backstory'
 type RequiredField = 'name' | 'race' | 'class' | 'gender'
 
-const STEPS: { id: StepType; label: string }[] = [
-  { id: 'basics', label: 'Basics' }, { id: 'abilities', label: 'Abilities' },
-  { id: 'skills', label: 'Skills' }, { id: 'features', label: 'Features' },
-  { id: 'equipment', label: 'Equipment' }, { id: 'spells', label: 'Spells' },
-  { id: 'backstory', label: 'Backstory' },
+const STEPS: { id: StepType }[] = [
+  { id: 'basics' }, { id: 'abilities' },
+  { id: 'skills' }, { id: 'features' },
+  { id: 'equipment' }, { id: 'spells' },
+  { id: 'backstory' },
 ]
 
-const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[] = [
-  { field: 'name', step: 'basics', label: 'Character Name' },
-  { field: 'race', step: 'basics', label: 'Race' },
-  { field: 'class', step: 'basics', label: 'Class' },
-  { field: 'gender', step: 'basics', label: 'Gender' },
+const REQUIRED_FIELDS: { field: RequiredField; step: StepType }[] = [
+  { field: 'name', step: 'basics' },
+  { field: 'race', step: 'basics' },
+  { field: 'class', step: 'basics' },
+  { field: 'gender', step: 'basics' },
 ]
 
 const INITIAL_CHARACTER_DATA: CharacterData = {
@@ -49,6 +50,7 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
 }
 
 export default function CharacterBuilder() {
+  const { t } = useTranslation('common')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
@@ -68,7 +70,7 @@ export default function CharacterBuilder() {
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
   const selectedClass = DND_CLASSES.find((c) => c.id === characterData.class)
   const selectedRace = DND_RACES.find((r) => r.id === characterData.race)
-  const racialBonuses = selectedRace?.abilityBonuses ?? {}
+  const racialBonuses: Partial<Record<AbilityKey, number>> = selectedRace?.abilityBonuses ?? {}
   const conWithRacial = characterData.abilities.con + (racialBonuses.con ?? 0)
   const dexWithRacial = characterData.abilities.dex + (racialBonuses.dex ?? 0)
   const calculatedHp = selectedClass
@@ -82,7 +84,7 @@ export default function CharacterBuilder() {
       campaign_id: campaignId,
       name: characterData.name, character_type: characterData.character_type,
       player_name: characterData.player_name || null,
-      race: selectedRace?.name ?? null, class: selectedClass?.name ?? null,
+      race: selectedRace?.id ?? null, class: selectedClass?.id ?? null,
       subclass: null, level: characterData.level,
       background: characterData.custom_background || characterData.background || null,
       alignment: characterData.alignment || null,
@@ -90,7 +92,7 @@ export default function CharacterBuilder() {
       hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
       speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
       saving_throws: Object.fromEntries(
-        (selectedClass?.savingThrowProficiencies ?? []).map((a) => [ABILITY_NAME_TO_KEY[a], { proficient: true }])
+        (selectedClass?.savingThrowProficiencies ?? []).map((a) => [a, { proficient: true }])
       ),
       skills: characterData.skills, features: characterData.features,
       equipment: characterData.equipment, spells: characterData.spells,
@@ -137,7 +139,7 @@ export default function CharacterBuilder() {
       navigate(`/campaign/${campaignId}/character/${id}`)
     } catch (err) {
       console.error('Character finalization failed:', err)
-      setFinalizeError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.')
+      setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'))
     } finally {
       setIsFinalizing(false)
     }
@@ -186,9 +188,9 @@ export default function CharacterBuilder() {
     setCharacterData((prev) => {
       const cls = DND_CLASSES.find((c) => c.id === prev.class)
       if (!cls) return prev
-      const skillName = DND_SKILLS.find((s) => s.id === skillId)?.name
-      if (!skillName) return prev
-      const inPool = cls.skillPool === null || cls.skillPool.includes(skillName)
+      const skillExists = DND_SKILLS.some((s) => s.id === skillId)
+      if (!skillExists) return prev
+      const inPool = cls.skillPool === null || (cls.skillPool as readonly string[]).includes(skillId)
       if (!inPool) return prev
       const current = prev.skills[skillId]
       if (!current) { console.warn(`Skill data missing for "${skillId}" — possible state desync`); return prev }
@@ -247,18 +249,18 @@ export default function CharacterBuilder() {
           flaws={cd.flaws} appearance={cd.appearance} backstory={cd.backstory} onChange={updateBackstory} />
       )
       default:
-        return <p className="text-destructive">Unknown step: {currentStep}</p>
+        return <p className="text-destructive">{t('characterBuilder.errors.unknownStep', { step: currentStep })}</p>
     }
   }
 
   if (!campaignId) {
-    return <div className="page-container"><p className="text-destructive">Campaign ID is required to create a character.</p></div>
+    return <div className="page-container"><p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p></div>
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="page-container">
-        <h1 className="page-title mb-8">Create New Character</h1>
+        <h1 className="page-title mb-8">{t('characterBuilder.title')}</h1>
 
         {/* Step Indicator */}
         <div className="mb-8">
@@ -276,7 +278,7 @@ export default function CharacterBuilder() {
                   >
                     {index + 1}
                   </button>
-                  <span className="text-xs text-muted-foreground mt-2">{step.label}</span>
+                  <span className="text-xs text-muted-foreground mt-2">{t(`characterBuilder.steps.${step.id}`)}</span>
                 </div>
                 {index < STEPS.length - 1 && (
                   <div className={`flex-1 h-1 mx-2 self-start mt-5 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'}`} />
@@ -289,7 +291,7 @@ export default function CharacterBuilder() {
         {/* Step Content */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold mb-6">{STEPS[currentStepIndex].label}</h2>
+            <h2 className="text-2xl font-bold mb-6">{t(`characterBuilder.steps.${STEPS[currentStepIndex].id}`)}</h2>
             {renderStep()}
           </CardContent>
         </Card>
@@ -297,12 +299,12 @@ export default function CharacterBuilder() {
         {(finalizeError || saveStatus === 'error') && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
             <span>
-              {finalizeError ? `Failed to finalize character: ${finalizeError}` : 'Failed to save draft. Your recent changes may not have been saved.'}
+              {finalizeError ? t('characterBuilder.errors.failedToFinalize', { message: finalizeError }) : t('characterBuilder.errors.failedToSaveDraft')}
             </span>
             {saveStatus === 'error' && (
               <Button variant="outline" size="sm" onClick={() => /* saveStatus updated by useBuilderAutosave; catch prevents unhandled rejection */
                   saveDraft(buildPayload()).catch((err) => console.error('Retry save failed:', err))}>
-                Retry Save
+                {t('buttons.retrySave')}
               </Button>
             )}
           </div>
@@ -312,17 +314,17 @@ export default function CharacterBuilder() {
         <div className="flex items-center justify-between">
           <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0}>
             <ChevronLeft size={16} />
-            Previous
+            {t('buttons.previous')}
           </Button>
           <div className="flex items-center gap-3">
-            {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">Saving...</span>}
-            {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">Draft saved</span>}
+            {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
+            {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
             {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep}>Next <ChevronRight size={16} /></Button>
+              <Button onClick={goNextStep}>{t('buttons.next')} <ChevronRight size={16} /></Button>
             )}
             <Button onClick={handleFinalize} disabled={isFinalizing || !isReadyToFinalize}>
               <Save className="size-4" />
-              {isFinalizing ? 'Finalizing...' : 'Finalize Character'}
+              {isFinalizing ? t('buttons.finalizing') : t('buttons.finalizeCharacter')}
             </Button>
           </div>
         </div>

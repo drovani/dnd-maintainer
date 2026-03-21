@@ -24,6 +24,8 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - **TanStack React Query v5** for server state (client in `src/lib/query-client.ts`)
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (no tailwind.config — uses CSS-first config in `src/index.css`)
 - **Lucide React** for icons
+- **react-i18next** for internationalization (config in `src/lib/i18n.ts`)
+- **ESLint 9** flat config with `eslint-plugin-i18next` to catch untranslated literal strings
 
 ## Architecture
 
@@ -42,9 +44,21 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 
 All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern.
 
+### Internationalization (i18n)
+
+All user-facing strings must use `react-i18next` translation keys — never hardcode English text in components. `eslint-plugin-i18next` enforces this.
+
+- **Config**: `src/lib/i18n.ts` initializes i18next with bundled JSON resources (no async loading).
+- **Namespaces**: `common` (UI strings — buttons, labels, errors) and `gamedata` (D&D reference data — race names, class names, skills, etc.).
+- **Translation files**: `src/locales/en/common.json` and `src/locales/en/gamedata.json`.
+- **Type safety**: `src/@types/i18next.d.ts` maps `resources` to the JSON files, giving compile-time key checking. Invalid `t('nonexistent.key')` calls fail typecheck.
+- **Usage pattern**: `const { t } = useTranslation('common')` for UI strings, `const { t } = useTranslation('gamedata')` for game data. When both are needed in one component, alias one: `const { t: tc } = useTranslation('common')`.
+- **Dynamic keys**: When constructing keys from variables (e.g., `t(\`races.${raceId}\`)`), use a type assertion (`as never`) if the variable type is wider than the key union (e.g., `string` from `Object.entries()`).
+- **ID-based data model**: Race, class, background, alignment, and skill values are stored as lowercase IDs in the database (e.g., `dwarf-hill`, `wizard`, `folkhero`). Always translate IDs to display names via `t()` from the `gamedata` namespace — never display raw IDs to users.
+
 ### D&D Game Data
 
-`src/lib/dnd-helpers.ts` contains D&D 5e reference data (races, classes, skills, backgrounds, alignments) and utility functions (ability modifier calculation, proficiency bonus, spell slot tables).
+`src/lib/dnd-helpers.ts` contains D&D 5e reference data (races, classes, skills, backgrounds, alignments) and utility functions (ability modifier calculation, proficiency bonus, spell slot tables). Race/class/background data uses ID-based keys that correspond to translation keys in `gamedata.json`.
 
 ### Database Schema
 

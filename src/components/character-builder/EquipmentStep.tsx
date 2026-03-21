@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface EquipmentStepProps {
@@ -13,9 +14,11 @@ interface EquipmentStepProps {
 }
 
 export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: EquipmentStepProps) {
+  const { t } = useTranslation('common')
+
   return (
     <div className="space-y-4">
-      <Button onClick={onAdd}>Add Equipment</Button>
+      <Button onClick={onAdd}>{t('buttons.addEquipment')}</Button>
       <div className="space-y-4">
         {equipment.map((item) => (
           <Card key={item.id}>
@@ -23,7 +26,7 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
               <Input
                 value={item.name}
                 onChange={(e) => onUpdate(item.id, { name: e.target.value })}
-                placeholder="Item name"
+                placeholder={t('characterBuilder.placeholders.itemName')}
               />
               <div className="grid grid-cols-3 gap-2">
                 <Input
@@ -31,7 +34,7 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                   min="1"
                   value={item.quantity}
                   onChange={(e) => onUpdate(item.id, { quantity: parseInt(e.target.value) || 1 })}
-                  placeholder="Qty"
+                  placeholder={t('characterBuilder.placeholders.quantity')}
                 />
                 <Input
                   type="number"
@@ -39,7 +42,7 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                   step="0.1"
                   value={item.weight}
                   onChange={(e) => onUpdate(item.id, { weight: parseFloat(e.target.value) || 0 })}
-                  placeholder="Weight"
+                  placeholder={t('characterBuilder.placeholders.weight')}
                 />
                 <Label htmlFor={`equip-${item.id}`} className="flex items-center gap-2">
                   <Checkbox
@@ -47,7 +50,7 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                     checked={item.equipped}
                     onCheckedChange={(checked) => onUpdate(item.id, { equipped: checked === true })}
                   />
-                  Equipped
+                  {t('characterBuilder.equipment.equipped')}
                 </Label>
               </div>
               <Button
@@ -55,7 +58,7 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                 size="sm"
                 onClick={() => onRemove(item.id)}
               >
-                Remove
+                {t('buttons.remove')}
               </Button>
             </CardContent>
           </Card>

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Trans, useTranslation } from 'react-i18next'
 
 export default function CampaignList() {
   const navigate = useNavigate()
@@ -37,6 +38,8 @@ export default function CampaignList() {
     setting: '',
     description: '',
   })
+
+  const { t } = useTranslation('common')
 
   const { data: campaigns = [], isLoading } = useCampaigns()
   const { create: createCampaignMutation, archive: archiveCampaignMutation } = useCampaignMutations()
@@ -135,15 +138,15 @@ export default function CampaignList() {
             <div>
               <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
                 <Swords className="size-10 text-muted-foreground" />
-                Campaigns
+                {t('campaign.campaigns')}
               </h1>
               <p className="text-muted-foreground mt-2">
-                {campaigns.length} campaign{campaigns.length !== 1 ? 's' : ''} total
+                {t('campaign.campaignCount', { count: campaigns.length })}
               </p>
             </div>
             <Button onClick={() => setShowNewCampaignForm(true)}>
               <Plus className="size-5" />
-              New Campaign
+              {t('buttons.newCampaign')}
             </Button>
           </div>
 
@@ -152,7 +155,7 @@ export default function CampaignList() {
             <Search className="absolute left-3 top-2.5 size-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search campaigns by name or setting..."
+              placeholder={t('campaign.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -165,39 +168,39 @@ export default function CampaignList() {
       <Dialog open={showNewCampaignForm} onOpenChange={setShowNewCampaignForm}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create New Campaign</DialogTitle>
+            <DialogTitle>{t('campaign.createNew')}</DialogTitle>
             <DialogDescription>
-              Set up a new campaign to begin your adventure.
+              {t('campaign.createNewDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleCreateCampaign} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="campaign-name">Campaign Name</Label>
+              <Label htmlFor="campaign-name">{t('campaign.campaignName')}</Label>
               <Input
                 id="campaign-name"
                 value={newCampaign.name}
                 onChange={(e) =>
                   setNewCampaign({ ...newCampaign, name: e.target.value })
                 }
-                placeholder="e.g., Lost Mines of Phandalin"
+                placeholder={t('campaign.placeholderName')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="campaign-setting">Setting</Label>
+              <Label htmlFor="campaign-setting">{t('campaign.setting')}</Label>
               <Input
                 id="campaign-setting"
                 value={newCampaign.setting}
                 onChange={(e) =>
                   setNewCampaign({ ...newCampaign, setting: e.target.value })
                 }
-                placeholder="e.g., Forgotten Realms, Greyhawk"
+                placeholder={t('campaign.placeholderSetting')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="campaign-description">Description</Label>
+              <Label htmlFor="campaign-description">{t('campaign.description')}</Label>
               <Textarea
                 id="campaign-description"
                 value={newCampaign.description}
@@ -207,7 +210,7 @@ export default function CampaignList() {
                     description: e.target.value,
                   })
                 }
-                placeholder="Describe your campaign..."
+                placeholder={t('campaign.placeholderDescription')}
                 rows={4}
               />
             </div>
@@ -218,13 +221,13 @@ export default function CampaignList() {
                 variant="outline"
                 onClick={() => setShowNewCampaignForm(false)}
               >
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={createCampaignMutation.isPending}
               >
-                {createCampaignMutation.isPending ? 'Creating...' : 'Create'}
+                {createCampaignMutation.isPending ? t('buttons.creating') : t('buttons.create')}
               </Button>
             </DialogFooter>
           </form>
@@ -238,18 +241,18 @@ export default function CampaignList() {
             <Swords className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
               {campaigns.length === 0
-                ? 'No Campaigns Yet'
-                : 'No Campaigns Match'}
+                ? t('campaign.noCampaignsYet')
+                : t('campaign.noCampaignsMatch')}
             </h3>
             <p className="text-muted-foreground mb-6">
               {campaigns.length === 0
-                ? 'Create your first campaign to begin your adventure!'
-                : 'Try adjusting your search terms.'}
+                ? t('campaign.noCampaignsDescription')
+                : t('campaign.noCampaignsMatchDescription')}
             </p>
             {campaigns.length === 0 && (
               <Button onClick={() => setShowNewCampaignForm(true)}>
                 <Plus className="size-5" />
-                Create Your First Campaign
+                {t('buttons.createYourFirstCampaign')}
               </Button>
             )}
           </div>
@@ -286,7 +289,7 @@ export default function CampaignList() {
                         setCampaignToArchive(campaign)
                       }}
                       className="text-muted-foreground hover:text-foreground transition-colors"
-                      title="Archive campaign"
+                      title={t('campaign.archiveTitle')}
                     >
                       <Archive className="size-5" />
                     </button>
@@ -304,7 +307,7 @@ export default function CampaignList() {
                     <div className="flex items-center gap-2">
                       <Users className="size-4 text-muted-foreground" />
                       <div>
-                        <p className="text-muted-foreground text-xs">Characters</p>
+                        <p className="text-muted-foreground text-xs">{t('campaign.stats.characters')}</p>
                         <p className="text-foreground font-bold">
                           {charCount.pc + charCount.npc}
                         </p>
@@ -313,7 +316,7 @@ export default function CampaignList() {
                     <div className="flex items-center gap-2">
                       <BookOpen className="size-4 text-muted-foreground" />
                       <div>
-                        <p className="text-muted-foreground text-xs">Sessions</p>
+                        <p className="text-muted-foreground text-xs">{t('campaign.stats.sessions')}</p>
                         <p className="text-foreground font-bold">
                           {sessionCount}
                         </p>
@@ -326,12 +329,12 @@ export default function CampaignList() {
                     <div className="mt-3 pt-3 border-t flex gap-4 text-xs">
                       {charCount.pc > 0 && (
                         <span className="text-muted-foreground">
-                          {charCount.pc} <span className="uppercase">pc</span>s
+                          {t('characterList.pcCount', { count: charCount.pc })}
                         </span>
                       )}
                       {charCount.npc > 0 && (
                         <span className="text-muted-foreground">
-                          {charCount.npc} <span className="uppercase">npc</span>s
+                          {t('characterList.npcCount', { count: charCount.npc })}
                         </span>
                       )}
                     </div>
@@ -341,7 +344,7 @@ export default function CampaignList() {
                   <div className="mt-4 flex items-center gap-2">
                     <Zap className="size-4 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground capitalize">
-                      {campaign.status || 'Active'}
+                      {t(`status.${campaign.status || 'active'}`, { defaultValue: campaign.status || 'active' })}
                     </span>
                   </div>
                 </div>
@@ -355,9 +358,13 @@ export default function CampaignList() {
       <Dialog open={!!campaignToArchive} onOpenChange={(open) => { if (!open) setCampaignToArchive(null) }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Archive Campaign</DialogTitle>
+            <DialogTitle>{t('campaign.archiveCampaign')}</DialogTitle>
             <DialogDescription>
-              Archive <span className="font-semibold">"{campaignToArchive?.name}"</span>? It will be hidden from view.
+              <Trans
+                i18nKey="campaign.archiveConfirm"
+                values={{ name: campaignToArchive?.name }}
+                components={{ bold: <span className="font-semibold" /> }}
+              />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -365,14 +372,14 @@ export default function CampaignList() {
               variant="outline"
               onClick={() => setCampaignToArchive(null)}
             >
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={handleArchiveCampaign}
               disabled={archiveCampaignMutation.isPending}
             >
-              {archiveCampaignMutation.isPending ? 'Archiving...' : 'Archive'}
+              {archiveCampaignMutation.isPending ? t('buttons.archiving') : t('buttons.archive')}
             </Button>
           </DialogFooter>
         </DialogContent>

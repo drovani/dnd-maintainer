@@ -24,7 +24,7 @@ import {
 import type { AbilityScores } from '@/types/database'
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ABILITY_NAMES } from './types'
+import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface AbilitiesStepProps {
@@ -52,6 +52,8 @@ export function AbilitiesStep({
   onMethodChange,
   onAbilitiesChange,
 }: AbilitiesStepProps) {
+  const { t } = useTranslation('gamedata')
+  const { t: tc } = useTranslation('common')
   const [isRolling, setIsRolling] = useState<boolean>(false)
   const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -155,14 +157,14 @@ export function AbilitiesStep({
     return (
       <Card key={ability}>
         <CardContent className="px-3 py-2 space-y-1">
-          <Label className="text-xs font-semibold text-muted-foreground">{ABILITY_NAMES[ability]}</Label>
+          <Label className="text-xs font-semibold text-muted-foreground">{t(`abilities.${ability}`)}</Label>
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">{scoreInput}</div>
             {raceBonus > 0 && selectedRace && (
               <Badge
                 variant="secondary"
                 className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={`${selectedRace.name} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${ABILITY_NAMES[ab as keyof typeof ABILITY_NAMES]}`).join(', ')}`}
+                title={tc('characterBuilder.abilities.racialBonus', { race: t(`races.${selectedRace.id}`), bonuses: Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`).join(', ') })}
               >
                 +{raceBonus}
               </Badge>
@@ -235,15 +237,15 @@ export function AbilitiesStep({
     <div className="space-y-4">
       <Tabs value={abilityMethod} onValueChange={handleMethodChange}>
         <TabsList className="w-full">
-          <TabsTrigger value="standard-array" className="flex-1">Standard Array</TabsTrigger>
-          <TabsTrigger value="point-buy" className="flex-1">Point-Buy</TabsTrigger>
-          <TabsTrigger value="rolling" className="flex-1">Rolling</TabsTrigger>
+          <TabsTrigger value="standard-array" className="flex-1">{tc('characterBuilder.abilities.standardArray')}</TabsTrigger>
+          <TabsTrigger value="point-buy" className="flex-1">{tc('characterBuilder.abilities.pointBuy')}</TabsTrigger>
+          <TabsTrigger value="rolling" className="flex-1">{tc('characterBuilder.abilities.rolling')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="standard-array" className="space-y-3 mt-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-muted-foreground text-sm">
-              Assign each value to an ability. Each value used once.
+              {tc('characterBuilder.abilities.assignEachValue')}
             </p>
             <div className="flex gap-1.5">
               {STANDARD_ARRAY.map((v) => {
@@ -271,10 +273,10 @@ export function AbilitiesStep({
         <TabsContent value="point-buy" className="space-y-3 mt-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-muted-foreground text-sm">
-              Spend points to increase scores from 8.
+              {tc('characterBuilder.abilities.spendPoints')}
             </p>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">Points:</span>
+              <span className="text-sm font-medium text-muted-foreground">{tc('characterBuilder.abilities.points')}</span>
               <span className={`text-2xl font-bold tabular-nums ${pointsRemaining === 0 ? 'text-muted-foreground' : pointsRemaining < 5 ? 'text-amber-600' : 'text-foreground'}`}>
                 {pointsRemaining}
               </span>
@@ -297,7 +299,7 @@ export function AbilitiesStep({
                     size="xs"
                     onClick={() => decrementAbility(ability)}
                     disabled={!canDecrement}
-                    title={canDecrement ? `Decrease score, return ${decReturn} point${decReturn > 1 ? 's' : ''}` : 'Minimum score'}
+                    title={canDecrement ? tc('characterBuilder.abilities.decreaseScore', { count: decReturn }) : tc('characterBuilder.abilities.minimumScore')}
                   >
                     <ChevronDown className="size-3" />
                     {canDecrement && <span className="text-[10px] font-bold text-green-600">+{decReturn}</span>}
@@ -308,7 +310,7 @@ export function AbilitiesStep({
                     size="xs"
                     onClick={() => incrementAbility(ability)}
                     disabled={!canIncrement}
-                    title={canIncrement ? `Increase score, spend ${incCost} point${incCost > 1 ? 's' : ''}` : score >= 15 ? 'Maximum score' : 'Not enough points'}
+                    title={canIncrement ? tc('characterBuilder.abilities.increaseScore', { count: incCost }) : score >= 15 ? tc('characterBuilder.abilities.maximumScore') : tc('characterBuilder.abilities.notEnoughPoints')}
                   >
                     <ChevronUp className="size-3" />
                     {canIncrement && <span className="text-[10px] font-bold text-red-600">{incCost}</span>}
@@ -322,21 +324,21 @@ export function AbilitiesStep({
         <TabsContent value="rolling" className="space-y-3 mt-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-muted-foreground text-sm">
-              Roll 4d6, drop the lowest, then assign results.
+              {tc('characterBuilder.abilities.rollInstructions')}
             </p>
             <div className="flex items-center gap-3">
               {pointBuyDiff !== null && !isRolling && (
                 <div className={`flex items-center gap-1 text-sm font-medium ${pointBuyDiff > 0 ? 'text-green-600' : pointBuyDiff < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
                   {pointBuyDiff > 0 ? <TrendingUp className="size-4" /> : pointBuyDiff < 0 ? <TrendingDown className="size-4" /> : null}
                   <span>
-                    {pointBuyDiff > 0 ? `+${pointBuyDiff}` : pointBuyDiff < 0 ? `${pointBuyDiff}` : 'Even'}
-                    {' '}vs point-buy
+                    {pointBuyDiff > 0 ? `+${pointBuyDiff}` : pointBuyDiff < 0 ? `${pointBuyDiff}` : tc('characterBuilder.abilities.even')}
+                    {' '}{tc('characterBuilder.abilities.vsPointBuy')}
                   </span>
                 </div>
               )}
               <Button variant="outline" size="sm" onClick={handleRollScores} disabled={isRolling}>
                 <Dices className={`size-4 mr-1.5 ${isRolling ? 'animate-spin' : ''}`} />
-                {rolledValues.length > 0 && !isRolling ? 'Re-Roll' : isRolling ? 'Rolling...' : 'Roll Scores'}
+                {rolledValues.length > 0 && !isRolling ? tc('buttons.reRoll') : isRolling ? tc('buttons.rolling') : tc('buttons.rollScores')}
               </Button>
             </div>
           </div>
@@ -366,7 +368,7 @@ export function AbilitiesStep({
                 ability,
                 rolledValues.length > 0 && !isRolling
                   ? renderAssignmentSelect(ability, rolledValues)
-                  : <span className="text-xs text-muted-foreground w-16 text-center">{isRolling ? '...' : 'Roll first'}</span>
+                  : <span className="text-xs text-muted-foreground w-16 text-center">{isRolling ? '...' : tc('characterBuilder.abilities.rollFirst')}</span>
               )
             )}
           </div>

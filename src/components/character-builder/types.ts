@@ -1,4 +1,4 @@
-import type { DndGender } from '@/lib/dnd-helpers'
+import type { AlignmentId, BackgroundId, ClassId, DndGender, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 
 export interface CharacterData {
@@ -6,12 +6,12 @@ export interface CharacterData {
   name: string
   player_name: string
   character_type: 'pc' | 'npc'
-  race: string
-  class: string
+  race: RaceId | ''
+  class: ClassId | ''
   level: number
-  background: string
+  background: BackgroundId | ''
   custom_background: string
-  alignment: string
+  alignment: AlignmentId | ''
   gender: DndGender | ''
 
   // Abilities
@@ -45,11 +45,3 @@ export interface CharacterData {
   backstory: string
 }
 
-export const ABILITY_NAMES: Record<keyof AbilityScores, string> = {
-  str: 'Strength',
-  dex: 'Dexterity',
-  con: 'Constitution',
-  int: 'Intelligence',
-  wis: 'Wisdom',
-  cha: 'Charisma',
-}

@@ -1,0 +1,134 @@
+{
+  "races": {
+    "dragonborn": "Dragonborn",
+    "dwarf-hill": "Hill Dwarf",
+    "dwarf-mountain": "Mountain Dwarf",
+    "elf-dark": "Dark Elf (Drow)",
+    "elf-high": "High Elf",
+    "elf-wood": "Wood Elf",
+    "gnome-forest": "Forest Gnome",
+    "gnome-rock": "Rock Gnome",
+    "halfelf": "Half-Elf",
+    "halforc": "Half-Orc",
+    "halfling-lightfoot": "Lightfoot Halfling",
+    "halfling-stout": "Stout Halfling",
+    "human": "Human",
+    "tiefling": "Tiefling"
+  },
+  "raceGroups": {
+    "dragonborn": "Dragonborn",
+    "dwarf": "Dwarf",
+    "elf": "Elf",
+    "gnome": "Gnome",
+    "halfelf": "Half-Elf",
+    "halforc": "Half-Orc",
+    "halfling": "Halfling",
+    "human": "Human",
+    "tiefling": "Tiefling"
+  },
+  "classes": {
+    "barbarian": "Barbarian",
+    "bard": "Bard",
+    "cleric": "Cleric",
+    "druid": "Druid",
+    "fighter": "Fighter",
+    "monk": "Monk",
+    "paladin": "Paladin",
+    "ranger": "Ranger",
+    "rogue": "Rogue",
+    "sorcerer": "Sorcerer",
+    "warlock": "Warlock",
+    "wizard": "Wizard"
+  },
+  "backgrounds": {
+    "acolyte": "Acolyte",
+    "charlatan": "Charlatan",
+    "criminal": "Criminal",
+    "entertainer": "Entertainer",
+    "folkhero": "Folk Hero",
+    "guildartisan": "Guild Artisan",
+    "hermit": "Hermit",
+    "noble": "Noble",
+    "outlander": "Outlander",
+    "sage": "Sage",
+    "sailor": "Sailor",
+    "soldier": "Soldier",
+    "urchin": "Urchin",
+    "custom": "Custom"
+  },
+  "alignments": {
+    "lg": "Lawful Good",
+    "ng": "Neutral Good",
+    "cg": "Chaotic Good",
+    "ln": "Lawful Neutral",
+    "n": "True Neutral",
+    "cn": "Chaotic Neutral",
+    "le": "Lawful Evil",
+    "ne": "Neutral Evil",
+    "ce": "Chaotic Evil"
+  },
+  "alignmentAxes": {
+    "lawful": "Lawful",
+    "neutral": "Neutral",
+    "chaotic": "Chaotic",
+    "good": "Good",
+    "evil": "Evil",
+    "true": "True"
+  },
+  "alignmentShorthands": {
+    "lg": "LG",
+    "ng": "NG",
+    "cg": "CG",
+    "ln": "LN",
+    "n": "N",
+    "cn": "CN",
+    "le": "LE",
+    "ne": "NE",
+    "ce": "CE"
+  },
+  "abilities": {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma"
+  },
+  "abilityAbbreviations": {
+    "str": "STR",
+    "dex": "DEX",
+    "con": "CON",
+    "int": "INT",
+    "wis": "WIS",
+    "cha": "CHA"
+  },
+  "skills": {
+    "acrobatics": "Acrobatics",
+    "animalhandling": "Animal Handling",
+    "arcana": "Arcana",
+    "athletics": "Athletics",
+    "deception": "Deception",
+    "history": "History",
+    "insight": "Insight",
+    "intimidation": "Intimidation",
+    "investigation": "Investigation",
+    "medicine": "Medicine",
+    "nature": "Nature",
+    "perception": "Perception",
+    "performance": "Performance",
+    "persuasion": "Persuasion",
+    "religion": "Religion",
+    "sleightofhand": "Sleight of Hand",
+    "stealth": "Stealth",
+    "survival": "Survival"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "nonbinary": "Non-Binary"
+  },
+  "sizes": {
+    "small": "Small",
+    "medium": "Medium"
+  }
+}
