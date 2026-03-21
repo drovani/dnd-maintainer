@@ -34,7 +34,6 @@ export default function SessionDetail() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
-  const saveToastId = useRef<string | number | undefined>(undefined)
   useEffect(() => {
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
@@ -112,10 +111,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      toast.success(t('status.saved'), { id: saveToastId.current, duration: 2000 })
+      toast.success(t('status.saved'), { duration: 2000 })
     },
     onError: () => {
-      toast.error(t('status.saveError'), { id: saveToastId.current })
+      toast.error(t('status.saveError'))
     },
   })
 
@@ -133,10 +132,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      toast.success(t('status.saved'), { id: saveToastId.current, duration: 2000 })
+      toast.success(t('status.saved'), { duration: 2000 })
     },
     onError: () => {
-      toast.error(t('status.saveError'), { id: saveToastId.current })
+      toast.error(t('status.saveError'))
     },
   })
 
@@ -196,10 +195,9 @@ export default function SessionDetail() {
       }
 
       // Set new timer for auto-save
-      saveToastId.current = toast.loading(t('status.saving'))
       autoSaveTimer.current = setTimeout(() => {
         updateSessionMutation.mutate(updated)
-      }, 1000)
+      }, 3000)
     },
     [formData, updateSessionMutation, t]
   )
@@ -387,10 +385,9 @@ export default function SessionDetail() {
               const newValue = e.target.value
               setDmNotes(newValue)
               if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-              saveToastId.current = toast.loading(t('status.saving'))
               autoSaveTimer.current = setTimeout(() => {
                 updateDmNotesMutation.mutate(newValue)
-              }, 1000)
+              }, 3000)
             }}
             placeholder={t('sessionDetail.placeholderDmNotes')}
             rows={6}
