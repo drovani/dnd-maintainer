@@ -115,7 +115,7 @@ export default function ExportData() {
           <AlertCircle className="size-8 text-destructive mx-auto" />
           <p className="text-destructive font-semibold mt-4">{t('export.failedToLoadCampaigns')}</p>
           <p className="text-destructive text-sm mt-2">
-            {campaignsError instanceof Error ? campaignsError.message : 'An unexpected error occurred.'}
+            {campaignsError instanceof Error ? campaignsError.message : t('errors.unexpectedError')}
           </p>
         </div>
       </div>

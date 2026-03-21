@@ -344,7 +344,7 @@ export default function CampaignList() {
                   <div className="mt-4 flex items-center gap-2">
                     <Zap className="size-4 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground capitalize">
-                      {campaign.status || t('status.active')}
+                      {t(`status.${campaign.status || 'active'}`)}
                     </span>
                   </div>
                 </div>

@@ -1,25 +1,26 @@
 -- Normalize race, class, and background from English names to IDs
 -- This migration aligns these columns with alignment/skills which already use IDs
 
--- Normalize characters.race: English name → ID
-UPDATE characters SET race = CASE race
-  WHEN 'Dragonborn'         THEN 'dragonborn'
-  WHEN 'Hill Dwarf'         THEN 'dwarf-hill'
-  WHEN 'Mountain Dwarf'     THEN 'dwarf-mountain'
-  WHEN 'Dark Elf (Drow)'    THEN 'elf-dark'
-  WHEN 'High Elf'           THEN 'elf-high'
-  WHEN 'Wood Elf'           THEN 'elf-wood'
-  WHEN 'Forest Gnome'       THEN 'gnome-forest'
-  WHEN 'Rock Gnome'         THEN 'gnome-rock'
-  WHEN 'Half-Elf'           THEN 'halfelf'
-  WHEN 'Half-Orc'           THEN 'halforc'
-  WHEN 'Lightfoot Halfling' THEN 'halfling-lightfoot'
-  WHEN 'Stout Halfling'     THEN 'halfling-stout'
-  WHEN 'Human'              THEN 'human'
-  WHEN 'Tiefling'           THEN 'tiefling'
+-- Normalize characters.race: English name → ID (case-insensitive matching via LOWER/TRIM)
+UPDATE characters SET race = CASE LOWER(TRIM(race))
+  WHEN 'dragonborn'         THEN 'dragonborn'
+  WHEN 'hill dwarf'         THEN 'dwarf-hill'
+  WHEN 'mountain dwarf'     THEN 'dwarf-mountain'
+  WHEN 'dark elf (drow)'    THEN 'elf-dark'
+  WHEN 'high elf'           THEN 'elf-high'
+  WHEN 'wood elf'           THEN 'elf-wood'
+  WHEN 'forest gnome'       THEN 'gnome-forest'
+  WHEN 'rock gnome'         THEN 'gnome-rock'
+  WHEN 'half-elf'           THEN 'halfelf'
+  WHEN 'half-orc'           THEN 'halforc'
+  WHEN 'lightfoot halfling' THEN 'halfling-lightfoot'
+  WHEN 'stout halfling'     THEN 'halfling-stout'
+  WHEN 'human'              THEN 'human'
+  WHEN 'tiefling'           THEN 'tiefling'
   ELSE race
 END
-WHERE race IN (
+WHERE race IS NOT NULL AND race != LOWER(TRIM(race))
+   OR race IN (
   'Dragonborn', 'Hill Dwarf', 'Mountain Dwarf', 'Dark Elf (Drow)',
   'High Elf', 'Wood Elf', 'Forest Gnome', 'Rock Gnome',
   'Half-Elf', 'Half-Orc', 'Lightfoot Halfling', 'Stout Halfling',
@@ -30,26 +31,28 @@ WHERE race IN (
 UPDATE characters SET class = LOWER(class)
 WHERE class IS NOT NULL AND class != LOWER(class);
 
--- Normalize characters.background: only update rows matching a known standard background name exactly
+-- Normalize characters.background: case-insensitive matching via LOWER/TRIM
 -- Custom/free-text backgrounds are intentionally left untouched
-UPDATE characters SET background = CASE background
-  WHEN 'Acolyte'      THEN 'acolyte'
-  WHEN 'Charlatan'    THEN 'charlatan'
-  WHEN 'Criminal'     THEN 'criminal'
-  WHEN 'Entertainer'  THEN 'entertainer'
-  WHEN 'Folk Hero'    THEN 'folkhero'
-  WHEN 'Guild Artisan' THEN 'guildartisan'
-  WHEN 'Hermit'       THEN 'hermit'
-  WHEN 'Noble'        THEN 'noble'
-  WHEN 'Outlander'    THEN 'outlander'
-  WHEN 'Sage'         THEN 'sage'
-  WHEN 'Sailor'       THEN 'sailor'
-  WHEN 'Soldier'      THEN 'soldier'
-  WHEN 'Urchin'       THEN 'urchin'
-  WHEN 'Custom'       THEN 'custom'
+-- WARNING: migration 00007 adds a CHECK constraint limiting background to these IDs plus 'custom'
+UPDATE characters SET background = CASE LOWER(TRIM(background))
+  WHEN 'acolyte'        THEN 'acolyte'
+  WHEN 'charlatan'      THEN 'charlatan'
+  WHEN 'criminal'       THEN 'criminal'
+  WHEN 'entertainer'    THEN 'entertainer'
+  WHEN 'folk hero'      THEN 'folkhero'
+  WHEN 'guild artisan'  THEN 'guildartisan'
+  WHEN 'hermit'         THEN 'hermit'
+  WHEN 'noble'          THEN 'noble'
+  WHEN 'outlander'      THEN 'outlander'
+  WHEN 'sage'           THEN 'sage'
+  WHEN 'sailor'         THEN 'sailor'
+  WHEN 'soldier'        THEN 'soldier'
+  WHEN 'urchin'         THEN 'urchin'
+  WHEN 'custom'         THEN 'custom'
   ELSE background
 END
-WHERE background IN (
+WHERE background IS NOT NULL AND background != LOWER(TRIM(background))
+   OR background IN (
   'Acolyte', 'Charlatan', 'Criminal', 'Entertainer', 'Folk Hero',
   'Guild Artisan', 'Hermit', 'Noble', 'Outlander', 'Sage',
   'Sailor', 'Soldier', 'Urchin', 'Custom'
@@ -63,9 +66,10 @@ SET combatants = (
       WHEN combatant ? 'conditions' AND jsonb_typeof(combatant -> 'conditions') = 'array' THEN
         combatant || jsonb_build_object(
           'conditions',
-          (
-            SELECT jsonb_agg(LOWER(condition))
-            FROM jsonb_array_elements_text(combatant -> 'conditions') AS condition
+          COALESCE(
+            (SELECT jsonb_agg(LOWER(condition))
+             FROM jsonb_array_elements_text(combatant -> 'conditions') AS condition),
+            '[]'::jsonb
           )
         )
       ELSE combatant

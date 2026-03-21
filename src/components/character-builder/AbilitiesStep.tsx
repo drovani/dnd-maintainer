@@ -164,7 +164,7 @@ export function AbilitiesStep({
               <Badge
                 variant="secondary"
                 className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={`${t(`races.${selectedRace.id}`)} Racial Bonus: ${Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`).join(', ')}`}
+                title={tc('characterBuilder.abilities.racialBonus', { race: t(`races.${selectedRace.id}`), bonuses: Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`).join(', ') })}
               >
                 +{raceBonus}
               </Badge>
@@ -299,7 +299,7 @@ export function AbilitiesStep({
                     size="xs"
                     onClick={() => decrementAbility(ability)}
                     disabled={!canDecrement}
-                    title={canDecrement ? `Decrease score, return ${decReturn} point${decReturn > 1 ? 's' : ''}` : tc('characterBuilder.abilities.minimumScore')}
+                    title={canDecrement ? tc('characterBuilder.abilities.decreaseScore', { count: decReturn }) : tc('characterBuilder.abilities.minimumScore')}
                   >
                     <ChevronDown className="size-3" />
                     {canDecrement && <span className="text-[10px] font-bold text-green-600">+{decReturn}</span>}
@@ -310,7 +310,7 @@ export function AbilitiesStep({
                     size="xs"
                     onClick={() => incrementAbility(ability)}
                     disabled={!canIncrement}
-                    title={canIncrement ? `Increase score, spend ${incCost} point${incCost > 1 ? 's' : ''}` : score >= 15 ? tc('characterBuilder.abilities.maximumScore') : tc('characterBuilder.abilities.notEnoughPoints')}
+                    title={canIncrement ? tc('characterBuilder.abilities.increaseScore', { count: incCost }) : score >= 15 ? tc('characterBuilder.abilities.maximumScore') : tc('characterBuilder.abilities.notEnoughPoints')}
                   >
                     <ChevronUp className="size-3" />
                     {canIncrement && <span className="text-[10px] font-bold text-red-600">{incCost}</span>}

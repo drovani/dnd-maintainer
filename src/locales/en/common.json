@@ -136,7 +136,8 @@
       "increaseScore": "Increase score, spend {{count}} point",
       "increaseScore_plural": "Increase score, spend {{count}} points",
       "maximumScore": "Maximum score",
-      "notEnoughPoints": "Not enough points"
+      "notEnoughPoints": "Not enough points",
+      "racialBonus": "{{race}} Racial Bonus: {{bonuses}}"
     },
     "skills": {
       "selectClassFirst": "Please select a class in the Basics step before choosing skills.",

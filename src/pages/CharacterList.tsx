@@ -11,6 +11,7 @@ type SortType = 'name' | 'level' | 'class' | 'updated'
 
 export default function CharacterList() {
   const { t } = useTranslation('common')
+  const { t: tg } = useTranslation('gamedata')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [filterType, setFilterType] = useState<FilterType>('all')
@@ -228,11 +229,11 @@ export default function CharacterList() {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.race')}</span>
-                    <span className="text-foreground">{character.race}</span>
+                    <span className="text-foreground">{character.race ? tg(`races.${character.race}` as never, { defaultValue: character.race }) : ''}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.class')}</span>
-                    <span className="text-foreground">{character.class}</span>
+                    <span className="text-foreground">{character.class ? tg(`classes.${character.class}` as never, { defaultValue: character.class }) : ''}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.level')}</span>

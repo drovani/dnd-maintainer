@@ -21,6 +21,9 @@ i18n
       },
     }),
   })
-  .catch((err: unknown) => console.error('i18n initialization failed:', err))
+  .catch((err: unknown) => {
+    console.error('i18n initialization failed:', err)
+    throw err
+  })
 
 export default i18n

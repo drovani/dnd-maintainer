@@ -213,7 +213,7 @@ export interface DndClass {
   readonly savingThrowProficiencies: readonly AbilityName[]
   readonly spellcastingAbility?: AbilityName
   readonly skillChoices: number
-  /** Skills this class can choose from (by skill id). null = any skill (e.g., Bard's Jack of All Trades). */
+  /** Skills this class can choose from (by skill id). null = can choose from any skill (e.g., Bard). */
   readonly skillPool: readonly SkillId[] | null
 }
 
@@ -324,33 +324,32 @@ export type RaceId = (typeof DND_RACES)[number]['id']
 
 export interface DndRaceGroup {
   readonly id: string
-  readonly label: string
-  readonly options: ReadonlyArray<{ readonly value: RaceId; readonly label: string }>
+  readonly options: ReadonlyArray<{ readonly value: RaceId }>
 }
 
 export const DND_RACE_GROUPS: DndRaceGroup[] = [
-  { id: 'dragonborn', label: 'Dragonborn', options: [{ value: 'dragonborn', label: 'Dragonborn' }] },
-  { id: 'dwarf', label: 'Dwarf', options: [
-    { value: 'dwarf-hill', label: 'Hill Dwarf' },
-    { value: 'dwarf-mountain', label: 'Mountain Dwarf' },
+  { id: 'dragonborn', options: [{ value: 'dragonborn' }] },
+  { id: 'dwarf', options: [
+    { value: 'dwarf-hill' },
+    { value: 'dwarf-mountain' },
   ]},
-  { id: 'elf', label: 'Elf', options: [
-    { value: 'elf-dark', label: 'Dark Elf (Drow)' },
-    { value: 'elf-high', label: 'High Elf' },
-    { value: 'elf-wood', label: 'Wood Elf' },
+  { id: 'elf', options: [
+    { value: 'elf-dark' },
+    { value: 'elf-high' },
+    { value: 'elf-wood' },
   ]},
-  { id: 'gnome', label: 'Gnome', options: [
-    { value: 'gnome-forest', label: 'Forest Gnome' },
-    { value: 'gnome-rock', label: 'Rock Gnome' },
+  { id: 'gnome', options: [
+    { value: 'gnome-forest' },
+    { value: 'gnome-rock' },
   ]},
-  { id: 'halfelf', label: 'Half-Elf', options: [{ value: 'halfelf', label: 'Half-Elf' }] },
-  { id: 'halforc', label: 'Half-Orc', options: [{ value: 'halforc', label: 'Half-Orc' }] },
-  { id: 'halfling', label: 'Halfling', options: [
-    { value: 'halfling-lightfoot', label: 'Lightfoot Halfling' },
-    { value: 'halfling-stout', label: 'Stout Halfling' },
+  { id: 'halfelf', options: [{ value: 'halfelf' }] },
+  { id: 'halforc', options: [{ value: 'halforc' }] },
+  { id: 'halfling', options: [
+    { value: 'halfling-lightfoot' },
+    { value: 'halfling-stout' },
   ]},
-  { id: 'human', label: 'Human', options: [{ value: 'human', label: 'Human' }] },
-  { id: 'tiefling', label: 'Tiefling', options: [{ value: 'tiefling', label: 'Tiefling' }] },
+  { id: 'human', options: [{ value: 'human' }] },
+  { id: 'tiefling', options: [{ value: 'tiefling' }] },
 ]
 
 export const DND_CLASSES = [
