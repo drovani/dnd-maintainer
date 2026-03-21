@@ -21,18 +21,18 @@ import { useNavigate, useParams } from 'react-router-dom'
 type StepType = 'basics' | 'abilities' | 'skills' | 'features' | 'equipment' | 'spells' | 'backstory'
 type RequiredField = 'name' | 'race' | 'class' | 'gender'
 
-const STEPS: { id: StepType; label: string }[] = [
-  { id: 'basics', label: 'Basics' }, { id: 'abilities', label: 'Abilities' },
-  { id: 'skills', label: 'Skills' }, { id: 'features', label: 'Features' },
-  { id: 'equipment', label: 'Equipment' }, { id: 'spells', label: 'Spells' },
-  { id: 'backstory', label: 'Backstory' },
+const STEPS: { id: StepType }[] = [
+  { id: 'basics' }, { id: 'abilities' },
+  { id: 'skills' }, { id: 'features' },
+  { id: 'equipment' }, { id: 'spells' },
+  { id: 'backstory' },
 ]
 
-const REQUIRED_FIELDS: { field: RequiredField; step: StepType; label: string }[] = [
-  { field: 'name', step: 'basics', label: 'Character Name' },
-  { field: 'race', step: 'basics', label: 'Race' },
-  { field: 'class', step: 'basics', label: 'Class' },
-  { field: 'gender', step: 'basics', label: 'Gender' },
+const REQUIRED_FIELDS: { field: RequiredField; step: StepType }[] = [
+  { field: 'name', step: 'basics' },
+  { field: 'race', step: 'basics' },
+  { field: 'class', step: 'basics' },
+  { field: 'gender', step: 'basics' },
 ]
 
 const INITIAL_CHARACTER_DATA: CharacterData = {
@@ -139,7 +139,7 @@ export default function CharacterBuilder() {
       navigate(`/campaign/${campaignId}/character/${id}`)
     } catch (err) {
       console.error('Character finalization failed:', err)
-      setFinalizeError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.')
+      setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'))
     } finally {
       setIsFinalizing(false)
     }

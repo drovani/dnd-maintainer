@@ -238,16 +238,17 @@ export function BasicsStep({
         <div className="space-y-2">
           <Label>{tc('characterBuilder.fields.alignment')}</Label>
           <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-border">
-            {(['Good', 'Neutral', 'Evil'] as const).map((moral) =>
-              (['Lawful', 'Neutral', 'Chaotic'] as const).map((ethic) => {
-                const alignmentId = ALIGNMENT_GRID[`${ethic} ${moral}`]
+            {(['good', 'neutral', 'evil'] as const).map((moral) =>
+              (['lawful', 'neutral', 'chaotic'] as const).map((ethic) => {
+                const gridKey = `${ethic.charAt(0).toUpperCase() + ethic.slice(1)} ${moral.charAt(0).toUpperCase() + moral.slice(1)}` as keyof typeof ALIGNMENT_GRID
+                const alignmentId = ALIGNMENT_GRID[gridKey]
                 if (!alignmentId) {
-                  console.warn(`Alignment not found for "${ethic} ${moral}" — check ALIGNMENT_GRID mapping`)
+                  console.warn(`Alignment not found for "${gridKey}" — check ALIGNMENT_GRID mapping`)
                   return null
                 }
                 const isSelected = alignment === alignmentId
-                const topLabel = ethic === 'Neutral' && moral === 'Neutral' ? 'True' : ethic
-                const bottomLabel = moral
+                const topLabel = ethic === 'neutral' && moral === 'neutral' ? t(`alignmentAxes.true` as never) : t(`alignmentAxes.${ethic}` as never)
+                const bottomLabel = t(`alignmentAxes.${moral}` as never)
                 return (
                   <button
                     key={alignmentId}

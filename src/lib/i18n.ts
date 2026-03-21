@@ -14,12 +14,14 @@ i18n
       en: { common: commonEn, gamedata: gamedataEn }
     },
     interpolation: { escapeValue: false },
-    ...(import.meta.env.DEV && {
-      saveMissing: true,
-      missingKeyHandler: (_lngs: readonly string[], ns: string, key: string) => {
+    saveMissing: true,
+    missingKeyHandler: (_lngs: readonly string[], ns: string, key: string) => {
+      if (import.meta.env.DEV) {
         console.warn(`[i18n] Missing translation key: ${ns}:${key}`)
-      },
-    }),
+      } else {
+        console.error(`[i18n] Missing translation key: ${ns}:${key}`)
+      }
+    },
   })
   .catch((err: unknown) => {
     console.error('i18n initialization failed:', err)

@@ -222,7 +222,7 @@ export default function CharacterList() {
                       : 'bg-purple-900 text-purple-200'
                       }`}
                   >
-                    {character.character_type}
+                    {t(`characterType.${character.character_type}`)}
                   </span>
                 </div>
 

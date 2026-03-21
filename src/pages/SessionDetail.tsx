@@ -35,6 +35,7 @@ export default function SessionDetail() {
   const [isSaving, setIsSaving] = useState(false)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
 
+  const [formInitialized, setFormInitialized] = useState(false)
   const [formData, setFormData] = useState<Partial<Session>>({
     title: '',
     session_number: 1,
@@ -162,24 +163,13 @@ export default function SessionDetail() {
     },
   })
 
-  // Initialize form when session loads
-  useState(() => {
-    if (session) {
-      setFormData(session)
-    }
-  })
-
-  useState(() => {
-    if (sessionNotes) {
-      setDmNotes(sessionNotes)
-    }
-  })
-
-  useState(() => {
-    if (lootItems) {
-      setLoot(lootItems)
-    }
-  })
+  // Sync form state from query data on first load
+  if (session && !formInitialized) {
+    setFormInitialized(true)
+    setFormData(session)
+    setDmNotes(sessionNotes)
+    setLoot(lootItems)
+  }
 
   // Auto-save handler
   const handleFieldChange = useCallback(
@@ -235,7 +225,7 @@ export default function SessionDetail() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(undefined, {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

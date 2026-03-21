@@ -240,7 +240,7 @@ export default function CampaignDashboard() {
               <div className="inline-flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-lg border border-border">
                 <Zap className="size-5 text-primary" />
                 <span className="text-foreground">
-                  {t(`status.${campaign.status || 'active'}`)}
+                  {t(`status.${campaign.status || 'active'}`, { defaultValue: campaign.status || 'active' })}
                 </span>
               </div>
             </div>
@@ -412,7 +412,7 @@ export default function CampaignDashboard() {
                       {t('sessionDetail.sessionHeading', { number: lastSession.session_number, title: lastSession.title })}
                     </p>
                     <p className="text-muted-foreground text-sm mt-2">
-                      {lastSession.date ? new Date(lastSession.date).toLocaleDateString('en-US', {
+                      {lastSession.date ? new Date(lastSession.date).toLocaleDateString(undefined, {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',

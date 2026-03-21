@@ -90,7 +90,7 @@ export default function ExportData() {
         throw new Error(`Data was generated successfully but the download failed: ${msg}`);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred during export.';
+      const message = err instanceof Error ? err.message : t('errors.unexpectedError');
       setErrorMessage(message);
     } finally {
       setIsExporting(false);

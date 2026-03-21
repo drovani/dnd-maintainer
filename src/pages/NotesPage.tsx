@@ -259,7 +259,7 @@ export default function NotesPage() {
   }
 
   const handleDeleteNote = (noteId: string) => {
-    if (confirm('Delete this note? This cannot be undone.')) {
+    if (confirm(t('notes.confirmDeleteNote'))) {
       deleteNoteMutation.mutate(noteId)
     }
   }
@@ -492,7 +492,7 @@ export default function NotesPage() {
                   {/* Timestamp */}
                   <div className="flex items-center gap-2 text-muted-foreground text-xs">
                     <Clock className="size-3" />
-                    {new Date(note.updated_at).toLocaleDateString('en-US', {
+                    {new Date(note.updated_at).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',

@@ -67,6 +67,14 @@
     "ne": "Neutral Evil",
     "ce": "Chaotic Evil"
   },
+  "alignmentAxes": {
+    "lawful": "Lawful",
+    "neutral": "Neutral",
+    "chaotic": "Chaotic",
+    "good": "Good",
+    "evil": "Evil",
+    "true": "True"
+  },
   "alignmentShorthands": {
     "lg": "LG",
     "ng": "NG",

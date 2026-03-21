@@ -106,7 +106,7 @@ export default function SessionList() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + 'T00:00:00')
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -332,7 +332,7 @@ export default function SessionList() {
                         <div className="flex items-center gap-2">
                           <Zap className="size-4 text-primary" />
                           <span className="text-muted-foreground text-sm">
-                            {session.experience_awarded} XP
+                            {t('sessions.xpAmount', { amount: session.experience_awarded })}
                           </span>
                         </div>
                       )}

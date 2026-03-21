@@ -161,6 +161,7 @@
   },
   "characterSheet": {
     "title": "CHARACTER SHEET",
+    "editSection": "Edit {{section}}",
     "sections": {
       "abilities": "Abilities",
       "savingThrows": "Saving Throws",
@@ -249,6 +250,7 @@
     "title": "Sessions",
     "subtitle": "{{count}} session • {{xp}} XP awarded",
     "subtitle_plural": "{{count}} sessions • {{xp}} XP awarded",
+    "xpAmount": "{{amount}} XP",
     "searchPlaceholder": "Search sessions by title...",
     "logNewSession": "Log New Session",
     "sessionTitle": "Session Title",
@@ -391,6 +393,7 @@
       "noteContent": "Your note content (markdown supported)",
       "tags": "e.g., important, villain, quest"
     },
+    "confirmDeleteNote": "Delete this note? This cannot be undone.",
     "loading": "Loading notes...",
     "errors": {
       "loading": "Error loading notes"
