@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { createWrapper } from '@/test/wrapper'
 import { supabase, mockQueryResult } from '@/test/mocks/supabase'
@@ -48,11 +49,6 @@ beforeEach(() => {
   vi.mocked(supabase.from).mockClear()
   // Restore then to its default behavior in case a test overrode it
   supabase.then = (resolve, reject) => Promise.resolve({ ...mockQueryResult }).then(resolve, reject)
-  process.on('unhandledRejection', suppressUnhandledRejection)
-})
-
-afterEach(() => {
-  process.off('unhandledRejection', suppressUnhandledRejection)
 })
 
 describe('useBuilderAutosave', () => {
@@ -128,15 +124,21 @@ describe('useBuilderAutosave', () => {
       mockQueryResult.error = { message: 'Save failed' }
       mockQueryResult.data = null
 
+      process.on('unhandledRejection', suppressUnhandledRejection)
+
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      await act(async () => {
-        await result.current.saveDraft(basePayload).catch(() => {
-          // saveDraft throws on error — suppress so we can assert saveStatus
+      try {
+        await act(async () => {
+          await result.current.saveDraft(basePayload).catch((err: { message: string }) => {
+            expect(err).toEqual({ message: 'Save failed' })
+          })
         })
-      })
 
-      expect(result.current.saveStatus).toBe<SaveStatus>('error')
+        expect(result.current.saveStatus).toBe<SaveStatus>('error')
+      } finally {
+        process.off('unhandledRejection', suppressUnhandledRejection)
+      }
     })
 
     it('includes status draft in insert payload', async () => {
@@ -187,7 +189,6 @@ describe('useBuilderAutosave', () => {
       // saveDraft insert succeeds; the ready-update fails.
       // Override `then` to return different results per call.
       let callIndex = 0
-      const originalThen = supabase.then.bind(supabase)
       supabase.then = (resolve, reject) => {
         callIndex++
         if (callIndex === 1) {
@@ -196,17 +197,21 @@ describe('useBuilderAutosave', () => {
         return Promise.resolve({ data: null, error: { message: 'Status update failed' } }).then(resolve, reject)
       }
 
+      process.on('unhandledRejection', suppressUnhandledRejection)
+
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      await act(async () => {
-        await result.current.finalize(basePayload).catch(() => {
-          // finalize throws when status update fails — suppress
+      try {
+        await act(async () => {
+          await result.current.finalize(basePayload).catch((err: { message: string }) => {
+            expect(err).toEqual({ message: 'Status update failed' })
+          })
         })
-      })
 
-      await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'))
-
-      supabase.then = originalThen
+        await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'))
+      } finally {
+        process.off('unhandledRejection', suppressUnhandledRejection)
+      }
     })
   })
 
@@ -232,22 +237,28 @@ describe('useBuilderAutosave', () => {
     it('does not change saveStatus when it is error', async () => {
       mockQueryResult.error = { message: 'Save failed' }
 
+      process.on('unhandledRejection', suppressUnhandledRejection)
+
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      await act(async () => {
-        await result.current.saveDraft(basePayload).catch(() => {
-          // suppress — checking that clearStatus preserves error
+      try {
+        await act(async () => {
+          await result.current.saveDraft(basePayload).catch((err: { message: string }) => {
+            expect(err).toEqual({ message: 'Save failed' })
+          })
         })
-      })
 
-      expect(result.current.saveStatus).toBe<SaveStatus>('error')
+        expect(result.current.saveStatus).toBe<SaveStatus>('error')
 
-      act(() => {
-        result.current.clearStatus()
-      })
+        act(() => {
+          result.current.clearStatus()
+        })
 
-      // clearStatus only resets 'saved' → 'idle'; error is preserved
-      expect(result.current.saveStatus).toBe<SaveStatus>('error')
+        // clearStatus only resets 'saved' → 'idle'; error is preserved
+        expect(result.current.saveStatus).toBe<SaveStatus>('error')
+      } finally {
+        process.off('unhandledRejection', suppressUnhandledRejection)
+      }
     })
 
     it('does not change saveStatus when it is idle', () => {
