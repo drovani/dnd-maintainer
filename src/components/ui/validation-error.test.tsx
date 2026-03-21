@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { ValidationError } from './ValidationError'
+import { ValidationError } from '@/components/ui/validation-error'
 
 describe('ValidationError', () => {
   it('renders the error message when message is non-empty', () => {

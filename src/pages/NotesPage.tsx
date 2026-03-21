@@ -20,7 +20,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
-import { ValidationError } from '@/components/ui/ValidationError'
+import { ValidationError } from '@/components/ui/validation-error'
 
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 

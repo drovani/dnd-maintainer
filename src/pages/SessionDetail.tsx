@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ValidationError } from '@/components/ui/ValidationError'
+import { ValidationError } from '@/components/ui/validation-error'
 
 interface LootEntry {
   id: string

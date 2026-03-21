@@ -14,7 +14,7 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ValidationError } from '@/components/ui/ValidationError'
+import { ValidationError } from '@/components/ui/validation-error'
 
 export default function SessionList() {
   const { t } = useTranslation('common')

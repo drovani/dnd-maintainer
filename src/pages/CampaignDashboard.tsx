@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ValidationError } from '@/components/ui/ValidationError'
+import { ValidationError } from '@/components/ui/validation-error'
 import { supabase } from '@/lib/supabase'
 import { Character, Session } from '@/types/database'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'

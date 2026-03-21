@@ -27,7 +27,7 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
-import { ValidationError } from '@/components/ui/ValidationError'
+import { ValidationError } from '@/components/ui/validation-error'
 
 export default function CampaignList() {
   const navigate = useNavigate()
