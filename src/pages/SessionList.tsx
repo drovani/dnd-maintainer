@@ -86,6 +86,7 @@ export default function SessionList() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', campaignId] })
       setShowNewSessionForm(false)
+      setTitleError('')
       setNewSession({
         title: '',
         session_number: Math.max(...sessions.map(s => s.session_number), 0) + 1,

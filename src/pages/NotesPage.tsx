@@ -562,6 +562,7 @@ export default function NotesPage() {
               <button
                 onClick={() => {
                   setShowNewNoteModal(false)
+                  setTitleError('')
                   if (!editingNote) resetForm()
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -716,6 +717,7 @@ export default function NotesPage() {
                   type="button"
                   onClick={() => {
                     setShowNewNoteModal(false)
+                    setTitleError('')
                     if (!editingNote) resetForm()
                   }}
                   className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-3 rounded-lg transition-colors"

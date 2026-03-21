@@ -1,8 +1,19 @@
-interface ValidationErrorProps {
-  message: string
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+function ValidationError({ message, className, ...props }: { message: string } & React.ComponentProps<"p">) {
+  if (!message) return null
+  return (
+    <p
+      data-slot="validation-error"
+      role="alert"
+      className={cn("text-sm text-destructive", className)}
+      {...props}
+    >
+      {message}
+    </p>
+  )
 }
 
-export function ValidationError({ message }: ValidationErrorProps): React.JSX.Element | null {
-  if (!message) return null
-  return <p className="text-sm text-red-600">{message}</p>
-}
+export { ValidationError }
