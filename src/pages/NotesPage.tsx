@@ -204,6 +204,7 @@ export default function NotesPage() {
   const handleOpenNewNote = () => {
     setEditingNote(null)
     resetForm()
+    setSaveError(false)
     setShowNewNoteModal(true)
   }
 
@@ -216,6 +217,7 @@ export default function NotesPage() {
       tags: note.tags?.join(', ') || '',
       pinned: note.is_pinned || false,
     })
+    setSaveError(false)
     setShowNewNoteModal(true)
   }
 
@@ -252,6 +254,7 @@ export default function NotesPage() {
         clearTimeout(autoSaveTimer.current)
       }
 
+      setSaveError(false)
       setIsSaving(true)
       autoSaveTimer.current = setTimeout(() => {
         updateNoteMutation.mutate({
@@ -550,7 +553,7 @@ export default function NotesPage() {
               {saveError && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
                   <AlertCircle className="size-4 shrink-0" />
-                  {t('notes.saveError')}
+                  {t('errors.saveFailed')}
                 </div>
               )}
               <button

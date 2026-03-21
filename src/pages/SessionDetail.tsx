@@ -200,6 +200,7 @@ export default function SessionDetail() {
       }
 
       // Set new timer for auto-save
+      setSaveError(false)
       setIsSaving(true)
       autoSaveTimer.current = setTimeout(() => {
         updateSessionMutation.mutate(updated)
@@ -234,6 +235,7 @@ export default function SessionDetail() {
       clearTimeout(autoSaveTimer.current)
     }
 
+    setSaveError(false)
     setIsSaving(true)
     autoSaveTimer.current = setTimeout(() => {
       updateDmNotesMutation.mutate(dmNotes)
@@ -318,7 +320,7 @@ export default function SessionDetail() {
         {saveError && (
           <div className="mb-6 flex items-center gap-2 text-red-600 text-sm">
             <AlertCircle className="size-4 shrink-0" />
-            {t('sessionDetail.saveError')}
+            {t('errors.saveFailed')}
           </div>
         )}
 
