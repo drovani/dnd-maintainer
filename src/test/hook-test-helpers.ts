@@ -31,7 +31,12 @@ export function setupMockReset(): void {
   beforeEach(() => {
     mockQueryResult.data = null
     mockQueryResult.error = null
-    vi.mocked(supabase.from).mockClear()
+    for (const key of Object.keys(supabase)) {
+      const fn = supabase[key as keyof typeof supabase]
+      if (typeof fn === 'function' && 'mockClear' in fn) {
+        vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear()
+      }
+    }
   })
 }
 
@@ -190,6 +195,15 @@ export function describeUpdateMutation<TPayload extends { id: string }>(
       expect(supabase.update).toHaveBeenCalled()
       expect(supabase.eq).toHaveBeenCalledWith('id', payload.id)
     })
+
+    it('sets error when update fails', async () => {
+      mockQueryResult.error = { message: 'Update failed' }
+
+      const { result } = hookFn()
+      result.current.mutate(payload)
+
+      await waitFor(() => expect(result.current.isError).toBe(true))
+    })
   })
 }
 
@@ -216,6 +230,15 @@ export function describeDeleteMutation<TPayload extends { id: string }>(
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
       expect(supabase.delete).toHaveBeenCalled()
       expect(supabase.eq).toHaveBeenCalledWith('id', payload.id)
+    })
+
+    it('sets error when delete fails', async () => {
+      mockQueryResult.error = { message: 'Delete failed' }
+
+      const { result } = hookFn()
+      result.current.mutate(payload)
+
+      await waitFor(() => expect(result.current.isError).toBe(true))
     })
   })
 }
