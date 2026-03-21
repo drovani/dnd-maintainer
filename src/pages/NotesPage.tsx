@@ -17,7 +17,7 @@ import {
   Wand2,
   X,
 } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
@@ -44,6 +44,11 @@ export default function NotesPage() {
   const [showNewNoteModal, setShowNewNoteModal] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    }
+  }, [])
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState(false)
 

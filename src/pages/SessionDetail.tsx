@@ -13,7 +13,7 @@ import {
   Trash2,
   Zap,
 } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 interface LootEntry {
@@ -35,6 +35,11 @@ export default function SessionDetail() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState(false)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    }
+  }, [])
 
   const [formInitialized, setFormInitialized] = useState(false)
   const [formData, setFormData] = useState<Partial<Session>>({
