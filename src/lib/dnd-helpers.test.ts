@@ -28,7 +28,7 @@ describe('getAbilityModifier', () => {
     [11, 0],
     [15, 2],
     [20, 5],
-  ])('returns %i for score %i', (score, expected) => {
+  ])('score %i returns modifier %i', (score, expected) => {
     expect(getAbilityModifier(score)).toBe(expected)
   })
 })
@@ -48,7 +48,7 @@ describe('getProficiencyBonus', () => {
     [16, 5],
     [17, 6],
     [20, 6],
-  ])('returns %i for level %i', (level, expected) => {
+  ])('level %i returns bonus %i', (level, expected) => {
     expect(getProficiencyBonus(level)).toBe(expected)
   })
 })
@@ -100,7 +100,7 @@ describe('getPointBuyCost', () => {
     [15, 9],
     [7, 0],
     [16, 0],
-  ])('returns %i for score %i', (score, expected) => {
+  ])('score %i costs %i points', (score, expected) => {
     expect(getPointBuyCost(score)).toBe(expected)
   })
 })
@@ -111,7 +111,7 @@ describe('getPointBuyIncrementCost', () => {
     [13, 2],
     [14, 2],
     [15, Infinity],
-  ])('returns %i for score %i', (score, expected) => {
+  ])('score %i increment costs %i points', (score, expected) => {
     expect(getPointBuyIncrementCost(score)).toBe(expected)
   })
 })
@@ -122,7 +122,7 @@ describe('getPointBuyDecrementReturn', () => {
     [9, 1],
     [15, 2],
     [14, 2],
-  ])('returns %i for score %i', (score, expected) => {
+  ])('score %i decrement returns %i points', (score, expected) => {
     expect(getPointBuyDecrementReturn(score)).toBe(expected)
   })
 })
@@ -280,6 +280,7 @@ describe.each<[string, ReadonlyArray<{ readonly id: string }>]>([
   ['DND_ALIGNMENTS', DND_ALIGNMENTS],
 ])('%s', (_label, collection) => {
   it('all entries have unique ids', () => {
+    expect(collection.length).toBeGreaterThan(0)
     const ids = collection.map((entry) => entry.id)
     expect(new Set(ids).size).toBe(ids.length)
   })

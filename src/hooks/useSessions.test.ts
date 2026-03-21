@@ -46,7 +46,7 @@ describeSingleQuery(
   '',
 )
 
-const { id, created_at, updated_at, ...createSessionPayload } = baseSession
+const { id: _id, created_at: _created_at, updated_at: _updated_at, ...createSessionPayload } = baseSession
 
 describeCreateMutation(
   'useCreateSession',

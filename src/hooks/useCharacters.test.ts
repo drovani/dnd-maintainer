@@ -118,7 +118,7 @@ describe('useCharacterMutations', () => {
 
     const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() })
 
-    const { id, created_at, updated_at, is_npc, is_active, ...createPayload } = baseCharacter
+    const { id: _id, created_at: _created_at, updated_at: _updated_at, is_npc: _is_npc, is_active: _is_active, ...createPayload } = baseCharacter
     result.current.create.mutate(createPayload)
 
     await waitFor(() => expect(result.current.create.isSuccess).toBe(true))

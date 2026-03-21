@@ -75,7 +75,7 @@ describeSingleQuery(
   '',
 )
 
-const { id, created_at, updated_at, ...createEncounterPayload } = baseEncounter
+const { id: _id, created_at: _created_at, updated_at: _updated_at, ...createEncounterPayload } = baseEncounter
 
 describeCreateMutation(
   'useCreateEncounter',

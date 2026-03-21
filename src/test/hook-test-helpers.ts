@@ -86,6 +86,7 @@ export function describeListQuery<T>(
       const { result } = invoke()
 
       await waitFor(() => expect(result.current.isError).toBe(true))
+      expect(result.current.error).toEqual({ message: 'DB error' })
     })
 
     if (invokeDisabled !== null) {

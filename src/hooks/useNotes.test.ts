@@ -44,7 +44,7 @@ describeSingleQuery(
   '',
 )
 
-const { id, created_at, updated_at, ...createNotePayload } = baseNote
+const { id: _id, created_at: _created_at, updated_at: _updated_at, ...createNotePayload } = baseNote
 
 describeCreateMutation(
   'useCreateNote',

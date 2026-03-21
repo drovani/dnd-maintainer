@@ -6,7 +6,9 @@ describe('cn', () => {
   })
 
   it('handles conditional and falsy values', () => {
-    expect(cn('foo', false && 'bar', null, undefined, 0 && 'baz')).toBe('foo')
+    const condA = false
+    const condB = 0
+    expect(cn('foo', condA && 'bar', null, undefined, condB && 'baz')).toBe('foo')
   })
 
   it('resolves Tailwind conflicts — last value wins', () => {

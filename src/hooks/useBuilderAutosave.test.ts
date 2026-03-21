@@ -51,7 +51,12 @@ async function withSuppressedRejections(fn: () => Promise<void>): Promise<void> 
 beforeEach(() => {
   mockQueryResult.data = null
   mockQueryResult.error = null
-  vi.mocked(supabase.from).mockClear()
+  for (const key of Object.keys(supabase)) {
+    const fn = supabase[key as keyof typeof supabase]
+    if (typeof fn === 'function' && 'mockClear' in fn) {
+      vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear()
+    }
+  }
   // Restore then to its default behavior in case a test overrode it
   supabase.then = (resolve, reject) => Promise.resolve({ ...mockQueryResult }).then(resolve, reject)
 })
@@ -126,6 +131,7 @@ describe('useBuilderAutosave', () => {
     })
 
     it('sets saveStatus to error when supabase returns an error', async () => {
+      expect.assertions(2)
       mockQueryResult.error = { message: 'Save failed' }
       mockQueryResult.data = null
 
@@ -187,6 +193,7 @@ describe('useBuilderAutosave', () => {
     })
 
     it('sets saveStatus to error when the status update fails', async () => {
+      expect.assertions(2)
       // saveDraft insert succeeds; the ready-update fails.
       // Override `then` to return different results per call.
       let callIndex = 0
@@ -281,6 +288,7 @@ describe('useBuilderAutosave', () => {
     })
 
     it('does not change saveStatus when it is error', async () => {
+      expect.assertions(3)
       mockQueryResult.error = { message: 'Save failed' }
 
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
