@@ -17,7 +17,7 @@ import {
   Wand2,
   X,
 } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
@@ -44,7 +44,12 @@ export default function NotesPage() {
   const [showNewNoteModal, setShowNewNoteModal] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
-  const [isSaving, setIsSaving] = useState(false)
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    }
+  }, [])
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle')
 
   const [formData, setFormData] = useState({
     title: '',
@@ -160,7 +165,10 @@ export default function NotesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', campaignId] })
-      setIsSaving(false)
+      setSaveStatus('idle')
+    },
+    onError: () => {
+      setSaveStatus('error')
     },
   })
 
@@ -193,6 +201,7 @@ export default function NotesPage() {
   const handleOpenNewNote = () => {
     setEditingNote(null)
     resetForm()
+    setSaveStatus('idle')
     setShowNewNoteModal(true)
   }
 
@@ -205,6 +214,7 @@ export default function NotesPage() {
       tags: note.tags?.join(', ') || '',
       pinned: note.is_pinned || false,
     })
+    setSaveStatus('idle')
     setShowNewNoteModal(true)
   }
 
@@ -241,7 +251,7 @@ export default function NotesPage() {
         clearTimeout(autoSaveTimer.current)
       }
 
-      setIsSaving(true)
+      setSaveStatus('saving')
       autoSaveTimer.current = setTimeout(() => {
         updateNoteMutation.mutate({
           [field]: value,
@@ -530,10 +540,16 @@ export default function NotesPage() {
               <h2 className="text-2xl font-bold text-foreground">
                 {editingNote ? t('notes.editNote') : t('notes.newNote')}
               </h2>
-              {isSaving && (
+              {saveStatus === 'saving' && (
                 <div className="flex items-center gap-2 text-primary text-sm">
                   <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
                   {t('buttons.saving')}
+                </div>
+              )}
+              {saveStatus === 'error' && (
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <AlertCircle className="size-4 shrink-0" />
+                  {t('errors.saveFailed')}
                 </div>
               )}
               <button

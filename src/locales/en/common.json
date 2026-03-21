@@ -418,7 +418,8 @@
     "networkConnection": "Your network connection is working",
     "supabaseStatus": "If running locally, npx supabase status shows the DB is up",
     "unexpectedError": "An unexpected error occurred. Please try again.",
-    "errorPrefix": "Error: {{message}}"
+    "errorPrefix": "Error: {{message}}",
+    "saveFailed": "Save failed — your changes may not have been saved"
   },
   "status": {
     "healthy": "healthy",

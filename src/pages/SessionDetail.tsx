@@ -13,7 +13,7 @@ import {
   Trash2,
   Zap,
 } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 interface LootEntry {
@@ -32,8 +32,13 @@ export default function SessionDetail() {
   }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [isSaving, setIsSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle')
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    }
+  }, [])
 
   const [formInitialized, setFormInitialized] = useState(false)
   const [formData, setFormData] = useState<Partial<Session>>({
@@ -106,7 +111,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      setIsSaving(false)
+      setSaveStatus('idle')
+    },
+    onError: () => {
+      setSaveStatus('error')
     },
   })
 
@@ -124,6 +132,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      setSaveStatus('idle')
+    },
+    onError: () => {
+      setSaveStatus('error')
     },
   })
 
@@ -183,7 +195,7 @@ export default function SessionDetail() {
       }
 
       // Set new timer for auto-save
-      setIsSaving(true)
+      setSaveStatus('saving')
       autoSaveTimer.current = setTimeout(() => {
         updateSessionMutation.mutate(updated)
       }, 1000)
@@ -217,7 +229,7 @@ export default function SessionDetail() {
       clearTimeout(autoSaveTimer.current)
     }
 
-    setIsSaving(true)
+    setSaveStatus('saving')
     autoSaveTimer.current = setTimeout(() => {
       updateDmNotesMutation.mutate(dmNotes)
     }, 1000)
@@ -292,10 +304,16 @@ export default function SessionDetail() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-8 py-8">
         {/* Auto-save indicator */}
-        {isSaving && (
+        {saveStatus === 'saving' && (
           <div className="mb-6 flex items-center gap-2 text-primary text-sm">
             <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
             {t('buttons.saving')}
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div className="mb-6 flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle className="size-4 shrink-0" />
+            {t('errors.saveFailed')}
           </div>
         )}
 
