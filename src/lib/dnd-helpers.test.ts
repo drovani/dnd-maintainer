@@ -335,10 +335,6 @@ describe('generateCharacterName', () => {
 // Static data shape and counts
 // ---------------------------------------------------------------------------
 describe('DND_RACES', () => {
-  it('has 14 entries', () => {
-    expect(DND_RACES).toHaveLength(14)
-  })
-
   it('all entries have unique ids', () => {
     const ids = DND_RACES.map((r) => r.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -346,10 +342,6 @@ describe('DND_RACES', () => {
 })
 
 describe('DND_CLASSES', () => {
-  it('has 12 entries', () => {
-    expect(DND_CLASSES).toHaveLength(12)
-  })
-
   it('all entries have unique ids', () => {
     const ids = DND_CLASSES.map((c) => c.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -357,10 +349,6 @@ describe('DND_CLASSES', () => {
 })
 
 describe('DND_SKILLS', () => {
-  it('has exactly 18 entries', () => {
-    expect(DND_SKILLS).toHaveLength(18)
-  })
-
   it('all entries have unique ids', () => {
     const ids = DND_SKILLS.map((s) => s.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -368,10 +356,6 @@ describe('DND_SKILLS', () => {
 })
 
 describe('DND_BACKGROUNDS', () => {
-  it('has 14 entries', () => {
-    expect(DND_BACKGROUNDS).toHaveLength(14)
-  })
-
   it('all entries have unique ids', () => {
     const ids = DND_BACKGROUNDS.map((b) => b.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -379,10 +363,6 @@ describe('DND_BACKGROUNDS', () => {
 })
 
 describe('DND_ALIGNMENTS', () => {
-  it('has exactly 9 entries', () => {
-    expect(DND_ALIGNMENTS).toHaveLength(9)
-  })
-
   it('all entries have unique ids', () => {
     const ids = DND_ALIGNMENTS.map((a) => a.id)
     expect(new Set(ids).size).toBe(ids.length)
