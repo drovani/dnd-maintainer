@@ -1,3 +1,4 @@
+import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { Session } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -202,7 +203,7 @@ export default function SessionList() {
                   onChange={(e) =>
                     setNewSession({
                       ...newSession,
-                      session_number: parseInt(e.target.value, 10),
+                      session_number: parseIntOrDefault(e.target.value, 1),
                     })
                   }
                   className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"

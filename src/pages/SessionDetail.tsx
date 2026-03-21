@@ -1,3 +1,4 @@
+import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { Encounter, Session } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -342,7 +343,7 @@ export default function SessionDetail() {
                 onChange={(e) =>
                   handleFieldChange(
                     'session_number',
-                    parseInt(e.target.value, 10)
+                    parseIntOrDefault(e.target.value, 1)
                   )
                 }
                 className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -384,7 +385,7 @@ export default function SessionDetail() {
               type="number"
               value={formData.experience_awarded || 0}
               onChange={(e) =>
-                handleFieldChange('experience_awarded', parseInt(e.target.value, 10))
+                handleFieldChange('experience_awarded', parseIntOrDefault(e.target.value, 0))
               }
               className="w-full md:w-48 bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               min="0"
@@ -447,7 +448,7 @@ export default function SessionDetail() {
                   onChange={(e) =>
                     setNewLoot({
                       ...newLoot,
-                      quantity: parseInt(e.target.value, 10),
+                      quantity: parseIntOrDefault(e.target.value, 1),
                     })
                   }
                   placeholder={t('sessionDetail.placeholderQuantity')}
@@ -460,7 +461,7 @@ export default function SessionDetail() {
                   onChange={(e) =>
                     setNewLoot({
                       ...newLoot,
-                      gold_value: parseInt(e.target.value, 10),
+                      gold_value: parseIntOrDefault(e.target.value, 0),
                     })
                   }
                   placeholder={t('sessionDetail.placeholderGoldValue')}

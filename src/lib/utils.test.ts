@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn, parseIntOrDefault } from '@/lib/utils'
 
 describe('cn', () => {
   it('merges multiple class strings', () => {
@@ -17,5 +17,25 @@ describe('cn', () => {
 
   it('returns empty string for empty input', () => {
     expect(cn()).toBe('')
+  })
+})
+
+describe('parseIntOrDefault', () => {
+  it.each([
+    ['42', 0, 42],
+    ['1', 0, 1],
+    ['-5', 0, -5],
+    ['0', 1, 0],
+    ['3.7', 0, 3],
+    ['', 1, 1],
+    [' ', 1, 1],
+    ['abc', 99, 99],
+    ['', 7, 7],
+  ])('parseIntOrDefault(%j, %i) returns %i', (value, defaultValue, expected) => {
+    expect(parseIntOrDefault(value, defaultValue)).toBe(expected)
+  })
+
+  it('respects a custom defaultValue', () => {
+    expect(parseIntOrDefault('', 42)).toBe(42)
   })
 })
