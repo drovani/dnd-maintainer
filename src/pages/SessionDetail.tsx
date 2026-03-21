@@ -55,6 +55,7 @@ export default function SessionDetail() {
   const [dmNotes, setDmNotes] = useState('')
   const [loot, setLoot] = useState<LootEntry[]>([])
   const [showNewLootForm, setShowNewLootForm] = useState(false)
+  const [lootNameError, setLootNameError] = useState<string>('')
   const [newLoot, setNewLoot] = useState<LootEntry>({
     id: crypto.randomUUID(),
     item_name: '',
@@ -203,17 +204,20 @@ export default function SessionDetail() {
 
   const handleAddLoot = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newLoot.item_name.trim()) {
-      upsertLootMutation.mutate(newLoot)
-      setNewLoot({
-        id: crypto.randomUUID(),
-        item_name: '',
-        quantity: 1,
-        gold_value: 0,
-        awarded_to: '',
-      })
-      setShowNewLootForm(false)
+    if (!newLoot.item_name.trim()) {
+      setLootNameError(t('validation.itemNameRequired'))
+      return
     }
+    upsertLootMutation.mutate(newLoot)
+    setNewLoot({
+      id: crypto.randomUUID(),
+      item_name: '',
+      quantity: 1,
+      gold_value: 0,
+      awarded_to: '',
+    })
+    setLootNameError('')
+    setShowNewLootForm(false)
   }
 
   const handleDeleteLoot = (lootId: string) => {
@@ -421,7 +425,10 @@ export default function SessionDetail() {
               {t('sessionDetail.lootTable')}
             </h2>
             <button
-              onClick={() => setShowNewLootForm(true)}
+              onClick={() => {
+                setLootNameError('')
+                setShowNewLootForm(true)
+              }}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
               <Plus className="size-4" />
@@ -432,16 +439,20 @@ export default function SessionDetail() {
           {showNewLootForm && (
             <form onSubmit={handleAddLoot} className="bg-muted rounded-lg p-4 mb-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  value={newLoot.item_name}
-                  onChange={(e) =>
-                    setNewLoot({ ...newLoot, item_name: e.target.value })
-                  }
-                  placeholder={t('sessionDetail.placeholderItemName')}
-                  className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
-                  autoFocus
-                />
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    value={newLoot.item_name}
+                    onChange={(e) => {
+                      setLootNameError('')
+                      setNewLoot({ ...newLoot, item_name: e.target.value })
+                    }}
+                    placeholder={t('sessionDetail.placeholderItemName')}
+                    className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
+                    autoFocus
+                  />
+                  {lootNameError && <p className="text-sm text-red-600">{lootNameError}</p>}
+                </div>
                 <input
                   type="number"
                   value={newLoot.quantity}
@@ -489,7 +500,7 @@ export default function SessionDetail() {
                 </button>
                 <button
                   type="submit"
-                  disabled={upsertLootMutation.isPending}
+                  disabled={upsertLootMutation.isPending || !newLoot.item_name.trim()}
                   className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded transition-colors text-sm disabled:opacity-50"
                 >
                   {upsertLootMutation.isPending ? t('buttons.adding') : t('buttons.addItem')}

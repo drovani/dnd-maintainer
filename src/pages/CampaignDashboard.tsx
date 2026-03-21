@@ -29,6 +29,7 @@ export default function CampaignDashboard() {
   const [editedName, setEditedName] = useState('')
   const [editedDescription, setEditedDescription] = useState('')
   const [editedSetting, setEditedSetting] = useState('')
+  const [nameError, setNameError] = useState<string>('')
 
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
@@ -87,9 +88,11 @@ export default function CampaignDashboard() {
   }
 
   const handleUpdateName = () => {
-    if (editedName.trim()) {
-      handleUpdate({ name: editedName })
+    if (!editedName.trim()) {
+      setNameError(t('validation.nameRequired'))
+      return
     }
+    handleUpdate({ name: editedName })
   }
 
   const handleUpdateDescription = () => {
@@ -145,31 +148,37 @@ export default function CampaignDashboard() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               {isEditingName ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    className="text-3xl font-bold bg-muted border border-ring rounded px-3 py-1 text-foreground outline-none"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') setIsEditingName(false)
-                      if (e.key === 'Enter') handleUpdateName()
-                    }}
-                  />
-                  <button
-                    onClick={handleUpdateName}
-                    disabled={updateMutation.isPending}
-                    className="text-primary hover:text-foreground p-2"
-                  >
-                    <Save className="size-6" />
-                  </button>
-                  <button
-                    onClick={() => setIsEditingName(false)}
-                    className="text-muted-foreground hover:text-foreground p-2"
-                  >
-                    <X className="size-6" />
-                  </button>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => {
+                        setEditedName(e.target.value)
+                        setNameError('')
+                      }}
+                      className="text-3xl font-bold bg-muted border border-ring rounded px-3 py-1 text-foreground outline-none"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setIsEditingName(false)
+                        if (e.key === 'Enter') handleUpdateName()
+                      }}
+                    />
+                    <button
+                      onClick={handleUpdateName}
+                      disabled={updateMutation.isPending || !editedName.trim()}
+                      className="text-primary hover:text-foreground p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Save className="size-6" />
+                    </button>
+                    <button
+                      onClick={() => setIsEditingName(false)}
+                      className="text-muted-foreground hover:text-foreground p-2"
+                    >
+                      <X className="size-6" />
+                    </button>
+                  </div>
+                  {nameError && <p className="text-sm text-red-600">{nameError}</p>}
                 </div>
               ) : (
                 <div className="flex items-center gap-4 group">
