@@ -33,10 +33,12 @@ export default function SessionDetail() {
   }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const autoSaveTimer = useRef<NodeJS.Timeout>(null)
+  const sessionSaveTimer = useRef<NodeJS.Timeout>(null)
+  const dmNotesSaveTimer = useRef<NodeJS.Timeout>(null)
   useEffect(() => {
     return () => {
-      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+      if (sessionSaveTimer.current) clearTimeout(sessionSaveTimer.current)
+      if (dmNotesSaveTimer.current) clearTimeout(dmNotesSaveTimer.current)
     }
   }, [])
 
@@ -111,10 +113,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      toast.success(t('status.saved'), { duration: 2000 })
+      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
     onError: () => {
-      toast.error(t('status.saveError'))
+      toast.error(t('status.saveError'), { id: 'session-save' })
     },
   })
 
@@ -132,10 +134,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      toast.success(t('status.saved'), { duration: 2000 })
+      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
     onError: () => {
-      toast.error(t('status.saveError'))
+      toast.error(t('status.saveError'), { id: 'session-save' })
     },
   })
 
@@ -183,23 +185,19 @@ export default function SessionDetail() {
     setLoot(lootItems)
   }
 
+  function scheduleSave(timer: React.RefObject<NodeJS.Timeout | null>, mutateFn: () => void): void {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(mutateFn, 3000)
+  }
+
   // Auto-save handler
   const handleFieldChange = useCallback(
     (field: string, value: unknown) => {
       const updated = { ...formData, [field]: value }
       setFormData(updated)
-
-      // Clear existing timer
-      if (autoSaveTimer.current) {
-        clearTimeout(autoSaveTimer.current)
-      }
-
-      // Set new timer for auto-save
-      autoSaveTimer.current = setTimeout(() => {
-        updateSessionMutation.mutate(updated)
-      }, 3000)
+      scheduleSave(sessionSaveTimer, () => updateSessionMutation.mutate(updated))
     },
-    [formData, updateSessionMutation, t]
+    [formData, updateSessionMutation]
   )
 
   const handleAddLoot = (e: React.FormEvent) => {
@@ -220,6 +218,28 @@ export default function SessionDetail() {
   const handleDeleteLoot = (lootId: string) => {
     if (confirm(t('sessionDetail.confirmRemoveLoot'))) {
       deleteLootMutation.mutate(lootId)
+    }
+  }
+
+  function encounterStatusClass(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-600'
+      case 'active':
+        return 'bg-red-100 text-destructive'
+      default:
+        return 'bg-muted text-muted-foreground'
+    }
+  }
+
+  function encounterStatusLabel(status: string): string {
+    switch (status) {
+      case 'completed':
+        return t('sessionDetail.encounterCompleted')
+      case 'active':
+        return t('sessionDetail.encounterActive')
+      default:
+        return t('sessionDetail.encounterPlanning')
     }
   }
 
@@ -384,10 +404,7 @@ export default function SessionDetail() {
             onChange={(e) => {
               const newValue = e.target.value
               setDmNotes(newValue)
-              if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-              autoSaveTimer.current = setTimeout(() => {
-                updateDmNotesMutation.mutate(newValue)
-              }, 3000)
+              scheduleSave(dmNotesSaveTimer, () => updateDmNotesMutation.mutate(newValue))
             }}
             placeholder={t('sessionDetail.placeholderDmNotes')}
             rows={6}
@@ -569,18 +586,9 @@ export default function SessionDetail() {
                       )}
                     </div>
                     <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${encounter.status === 'completed'
-                          ? 'bg-green-100 text-green-600'
-                          : encounter.status === 'active'
-                            ? 'bg-red-100 text-destructive'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
+                      className={`text-xs font-semibold px-2 py-1 rounded ${encounterStatusClass(encounter.status)}`}
                     >
-                      {encounter.status === 'completed'
-                        ? t('sessionDetail.encounterCompleted')
-                        : encounter.status === 'active'
-                          ? t('sessionDetail.encounterActive')
-                          : t('sessionDetail.encounterPlanning')}
+                      {encounterStatusLabel(encounter.status)}
                     </span>
                   </div>
                 </div>
