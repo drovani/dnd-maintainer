@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { Encounter, Session } from '@/types/database'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import {
   AlertCircle,
   ArrowLeft,
@@ -32,11 +33,12 @@ export default function SessionDetail() {
   }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle')
-  const autoSaveTimer = useRef<NodeJS.Timeout>(null)
+  const sessionSaveTimer = useRef<NodeJS.Timeout>(null)
+  const dmNotesSaveTimer = useRef<NodeJS.Timeout>(null)
   useEffect(() => {
     return () => {
-      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+      if (sessionSaveTimer.current) clearTimeout(sessionSaveTimer.current)
+      if (dmNotesSaveTimer.current) clearTimeout(dmNotesSaveTimer.current)
     }
   }, [])
 
@@ -111,10 +113,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      setSaveStatus('idle')
+      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
     onError: () => {
-      setSaveStatus('error')
+      toast.error(t('status.saveError'), { id: 'session-save' })
     },
   })
 
@@ -132,10 +134,10 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-      setSaveStatus('idle')
+      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
     onError: () => {
-      setSaveStatus('error')
+      toast.error(t('status.saveError'), { id: 'session-save' })
     },
   })
 
@@ -183,22 +185,17 @@ export default function SessionDetail() {
     setLoot(lootItems)
   }
 
+  function scheduleSave(timer: React.RefObject<NodeJS.Timeout | null>, mutateFn: () => void): void {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(mutateFn, 3000)
+  }
+
   // Auto-save handler
   const handleFieldChange = useCallback(
     (field: string, value: unknown) => {
       const updated = { ...formData, [field]: value }
       setFormData(updated)
-
-      // Clear existing timer
-      if (autoSaveTimer.current) {
-        clearTimeout(autoSaveTimer.current)
-      }
-
-      // Set new timer for auto-save
-      setSaveStatus('saving')
-      autoSaveTimer.current = setTimeout(() => {
-        updateSessionMutation.mutate(updated)
-      }, 1000)
+      scheduleSave(sessionSaveTimer, () => updateSessionMutation.mutate(updated))
     },
     [formData, updateSessionMutation]
   )
@@ -224,16 +221,27 @@ export default function SessionDetail() {
     }
   }
 
-  const handleSaveDmNotes = useCallback(() => {
-    if (autoSaveTimer.current) {
-      clearTimeout(autoSaveTimer.current)
+  function encounterStatusClass(status: string): string {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-600'
+      case 'active':
+        return 'bg-red-100 text-destructive'
+      default:
+        return 'bg-muted text-muted-foreground'
     }
+  }
 
-    setSaveStatus('saving')
-    autoSaveTimer.current = setTimeout(() => {
-      updateDmNotesMutation.mutate(dmNotes)
-    }, 1000)
-  }, [dmNotes, updateDmNotesMutation])
+  function encounterStatusLabel(status: string): string {
+    switch (status) {
+      case 'completed':
+        return t('sessionDetail.encounterCompleted')
+      case 'active':
+        return t('sessionDetail.encounterActive')
+      default:
+        return t('sessionDetail.encounterPlanning')
+    }
+  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + 'T00:00:00')
@@ -303,20 +311,6 @@ export default function SessionDetail() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-8 py-8">
-        {/* Auto-save indicator */}
-        {saveStatus === 'saving' && (
-          <div className="mb-6 flex items-center gap-2 text-primary text-sm">
-            <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
-            {t('buttons.saving')}
-          </div>
-        )}
-        {saveStatus === 'error' && (
-          <div className="mb-6 flex items-center gap-2 text-red-600 text-sm">
-            <AlertCircle className="size-4 shrink-0" />
-            {t('errors.saveFailed')}
-          </div>
-        )}
-
         {/* Session Info Section */}
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
@@ -408,8 +402,9 @@ export default function SessionDetail() {
           <textarea
             value={dmNotes}
             onChange={(e) => {
-              setDmNotes(e.target.value)
-              handleSaveDmNotes()
+              const newValue = e.target.value
+              setDmNotes(newValue)
+              scheduleSave(dmNotesSaveTimer, () => updateDmNotesMutation.mutate(newValue))
             }}
             placeholder={t('sessionDetail.placeholderDmNotes')}
             rows={6}
@@ -591,18 +586,9 @@ export default function SessionDetail() {
                       )}
                     </div>
                     <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${encounter.status === 'completed'
-                          ? 'bg-green-100 text-green-600'
-                          : encounter.status === 'active'
-                            ? 'bg-red-100 text-destructive'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
+                      className={`text-xs font-semibold px-2 py-1 rounded ${encounterStatusClass(encounter.status)}`}
                     >
-                      {encounter.status === 'completed'
-                        ? t('sessionDetail.encounterCompleted')
-                        : encounter.status === 'active'
-                          ? t('sessionDetail.encounterActive')
-                          : t('sessionDetail.encounterPlanning')}
+                      {encounterStatusLabel(encounter.status)}
                     </span>
                   </div>
                 </div>

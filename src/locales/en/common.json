@@ -429,7 +429,10 @@
     "active": "Active",
     "planning": "Planning",
     "paused": "Paused",
-    "completed": "Completed"
+    "completed": "Completed",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "saveError": "Save failed — your changes may not have been saved"
   },
   "common": {
     "loading": "Loading...",
