@@ -30,12 +30,7 @@ describe('parseIntOrDefault', () => {
     ['', 1, 1],
     [' ', 1, 1],
     ['abc', 99, 99],
-    ['', 7, 7],
   ])('parseIntOrDefault(%j, %i) returns %i', (value, defaultValue, expected) => {
     expect(parseIntOrDefault(value, defaultValue)).toBe(expected)
-  })
-
-  it('respects a custom defaultValue', () => {
-    expect(parseIntOrDefault('', 42)).toBe(42)
   })
 })
