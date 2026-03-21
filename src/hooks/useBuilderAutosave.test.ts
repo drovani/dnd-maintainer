@@ -1,7 +1,6 @@
 /// <reference types="node" />
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { createWrapper } from '@/test/wrapper'
-import { supabase, mockQueryResult } from '@/test/mocks/supabase'
+import { act, waitFor } from '@testing-library/react'
+import { setupMockReset, withSuppressedRejections, renderHook, createWrapper, supabase, mockQueryResult } from '@/test/hook-test-helpers'
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
 
@@ -39,24 +38,9 @@ const basePayload = {
   notes: null,
 }
 
-// The hook internally uses promise.finally() which creates an uncaught derived rejection
-// when the underlying promise rejects. This listener silences those expected rejections.
-const suppressUnhandledRejection = () => { /* intentional no-op */ }
-
-async function withSuppressedRejections(fn: () => Promise<void>): Promise<void> {
-  process.on('unhandledRejection', suppressUnhandledRejection)
-  try { await fn() } finally { process.off('unhandledRejection', suppressUnhandledRejection) }
-}
+setupMockReset()
 
 beforeEach(() => {
-  mockQueryResult.data = null
-  mockQueryResult.error = null
-  for (const key of Object.keys(supabase)) {
-    const fn = supabase[key as keyof typeof supabase]
-    if (typeof fn === 'function' && 'mockClear' in fn) {
-      vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear()
-    }
-  }
   // Restore then to its default behavior in case a test overrode it
   supabase.then = (resolve, reject) => Promise.resolve({ ...mockQueryResult }).then(resolve, reject)
 })
@@ -216,55 +200,6 @@ describe('useBuilderAutosave', () => {
 
         await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'))
       })
-    })
-  })
-
-  describe('concurrent save sequencing', () => {
-    // Skipped: this test exercises the savingRef concurrent-save sequencing logic
-    // but is inherently flaky because it depends on precise async timing between
-    // two in-flight saveDraft calls and a manually-controlled deferred promise.
-    // The ordering of microtask resolution varies across Node versions and CI
-    // environments, making assertions about "second waits for first" unreliable.
-    it.skip('second saveDraft waits for first to settle before starting', async () => {
-      let resolveFirst!: (value: { data: { id: string }; error: null }) => void
-      const firstPromise = new Promise<{ data: { id: string }; error: null }>((resolve) => {
-        resolveFirst = resolve
-      })
-
-      let callIndex = 0
-      supabase.then = (resolve, reject) => {
-        callIndex++
-        if (callIndex === 1) {
-          return firstPromise.then(resolve, reject)
-        }
-        return Promise.resolve({ data: null, error: null }).then(resolve, reject)
-      }
-
-      const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
-
-      // Start first save — will hang until firstPromise resolves
-      const firstSavePromise = act(async () => {
-        result.current.saveDraft(basePayload)
-      })
-
-      // Start second save before first resolves — it should queue behind the first
-      const secondSavePromise = act(async () => {
-        result.current.saveDraft({ ...basePayload, name: 'Second Save' })
-      })
-
-      // First save is still in flight; second should be waiting
-      expect(callIndex).toBe(1)
-
-      // Resolve the first save
-      resolveFirst({ data: { id: 'char-first' }, error: null })
-
-      // Now both should complete
-      await firstSavePromise
-      await secondSavePromise
-
-      // Both saves ran (first insert + second update)
-      expect(callIndex).toBe(2)
-      expect(result.current.saveStatus).toBe<SaveStatus>('saved')
     })
   })
 

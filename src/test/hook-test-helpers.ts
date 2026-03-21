@@ -248,5 +248,19 @@ export function describeDeleteMutation<TPayload extends { id: string }>(
   })
 }
 
+// The hook internally uses promise.finally() which creates an uncaught derived rejection
+// when the underlying promise rejects. This listener silences those expected rejections.
+const suppressUnhandledRejection = () => { /* intentional no-op */ }
+
+/**
+ * Wraps an async test function to suppress unhandled promise rejections that arise
+ * from hooks using promise.finally() internally. The rejection is expected and handled
+ * by the test — this just prevents Node from treating it as unhandled.
+ */
+export async function withSuppressedRejections(fn: () => Promise<void>): Promise<void> {
+  process.on('unhandledRejection', suppressUnhandledRejection)
+  try { await fn() } finally { process.off('unhandledRejection', suppressUnhandledRejection) }
+}
+
 // Re-export commonly needed test utilities so files only need one import line.
 export { renderHook, waitFor, createWrapper, supabase, mockQueryResult }
