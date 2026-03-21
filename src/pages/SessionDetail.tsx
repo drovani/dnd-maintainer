@@ -224,17 +224,6 @@ export default function SessionDetail() {
     }
   }
 
-  const handleSaveDmNotes = useCallback(() => {
-    if (autoSaveTimer.current) {
-      clearTimeout(autoSaveTimer.current)
-    }
-
-    setSaveStatus('saving')
-    autoSaveTimer.current = setTimeout(() => {
-      updateDmNotesMutation.mutate(dmNotes)
-    }, 1000)
-  }, [dmNotes, updateDmNotesMutation])
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + 'T00:00:00')
     return date.toLocaleDateString(undefined, {
@@ -408,8 +397,13 @@ export default function SessionDetail() {
           <textarea
             value={dmNotes}
             onChange={(e) => {
-              setDmNotes(e.target.value)
-              handleSaveDmNotes()
+              const newValue = e.target.value
+              setDmNotes(newValue)
+              if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+              setSaveStatus('saving')
+              autoSaveTimer.current = setTimeout(() => {
+                updateDmNotesMutation.mutate(newValue)
+              }, 1000)
             }}
             placeholder={t('sessionDetail.placeholderDmNotes')}
             rows={6}
