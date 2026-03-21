@@ -16,6 +16,7 @@ interface MutationResult {
   isSuccess: boolean
   isError: boolean
   data: unknown
+  error: unknown
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mutate: (payload: any) => void
 }
@@ -167,6 +168,7 @@ export function describeCreateMutation<TPayload, TResult>(
       result.current.mutate(payload)
 
       await waitFor(() => expect(result.current.isError).toBe(true))
+      expect(result.current.error).toEqual({ message: 'Insert failed' })
     })
   })
 }
@@ -203,6 +205,7 @@ export function describeUpdateMutation<TPayload extends { id: string }>(
       result.current.mutate(payload)
 
       await waitFor(() => expect(result.current.isError).toBe(true))
+      expect(result.current.error).toEqual({ message: 'Update failed' })
     })
   })
 }
@@ -239,6 +242,7 @@ export function describeDeleteMutation<TPayload extends { id: string }>(
       result.current.mutate(payload)
 
       await waitFor(() => expect(result.current.isError).toBe(true))
+      expect(result.current.error).toEqual({ message: 'Delete failed' })
     })
   })
 }

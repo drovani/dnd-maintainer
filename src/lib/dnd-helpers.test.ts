@@ -21,28 +21,15 @@ import {
 // getAbilityModifier
 // ---------------------------------------------------------------------------
 describe('getAbilityModifier', () => {
-  it('returns -5 for score 1', () => {
-    expect(getAbilityModifier(1)).toBe(-5)
-  })
-
-  it('returns -1 for score 8', () => {
-    expect(getAbilityModifier(8)).toBe(-1)
-  })
-
-  it('returns 0 for score 10', () => {
-    expect(getAbilityModifier(10)).toBe(0)
-  })
-
-  it('returns 0 for score 11', () => {
-    expect(getAbilityModifier(11)).toBe(0)
-  })
-
-  it('returns +2 for score 15', () => {
-    expect(getAbilityModifier(15)).toBe(2)
-  })
-
-  it('returns +5 for score 20', () => {
-    expect(getAbilityModifier(20)).toBe(5)
+  it.each<[number, number]>([
+    [1, -5],
+    [8, -1],
+    [10, 0],
+    [11, 0],
+    [15, 2],
+    [20, 5],
+  ])('returns %i for score %i', (score, expected) => {
+    expect(getAbilityModifier(score)).toBe(expected)
   })
 })
 
@@ -50,44 +37,19 @@ describe('getAbilityModifier', () => {
 // getProficiencyBonus
 // ---------------------------------------------------------------------------
 describe('getProficiencyBonus', () => {
-  it('returns 2 for level 1', () => {
-    expect(getProficiencyBonus(1)).toBe(2)
-  })
-
-  it('returns 2 for level 4', () => {
-    expect(getProficiencyBonus(4)).toBe(2)
-  })
-
-  it('returns 3 for level 5', () => {
-    expect(getProficiencyBonus(5)).toBe(3)
-  })
-
-  it('returns 3 for level 8', () => {
-    expect(getProficiencyBonus(8)).toBe(3)
-  })
-
-  it('returns 4 for level 9', () => {
-    expect(getProficiencyBonus(9)).toBe(4)
-  })
-
-  it('returns 4 for level 12', () => {
-    expect(getProficiencyBonus(12)).toBe(4)
-  })
-
-  it('returns 5 for level 13', () => {
-    expect(getProficiencyBonus(13)).toBe(5)
-  })
-
-  it('returns 5 for level 16', () => {
-    expect(getProficiencyBonus(16)).toBe(5)
-  })
-
-  it('returns 6 for level 17', () => {
-    expect(getProficiencyBonus(17)).toBe(6)
-  })
-
-  it('returns 6 for level 20', () => {
-    expect(getProficiencyBonus(20)).toBe(6)
+  it.each<[number, number]>([
+    [1, 2],
+    [4, 2],
+    [5, 3],
+    [8, 3],
+    [9, 4],
+    [12, 4],
+    [13, 5],
+    [16, 5],
+    [17, 6],
+    [20, 6],
+  ])('returns %i for level %i', (level, expected) => {
+    expect(getProficiencyBonus(level)).toBe(expected)
   })
 })
 
@@ -132,60 +94,36 @@ describe('getSpellSlots', () => {
 // Point buy functions
 // ---------------------------------------------------------------------------
 describe('getPointBuyCost', () => {
-  it('returns 0 for score 8 (minimum)', () => {
-    expect(getPointBuyCost(8)).toBe(0)
-  })
-
-  it('returns 7 for score 14', () => {
-    expect(getPointBuyCost(14)).toBe(7)
-  })
-
-  it('returns 9 for score 15 (maximum)', () => {
-    expect(getPointBuyCost(15)).toBe(9)
-  })
-
-  it('returns 0 for out-of-range score (below 8)', () => {
-    expect(getPointBuyCost(7)).toBe(0)
-  })
-
-  it('returns 0 for out-of-range score (above 15)', () => {
-    expect(getPointBuyCost(16)).toBe(0)
+  it.each<[number, number]>([
+    [8, 0],
+    [14, 7],
+    [15, 9],
+    [7, 0],
+    [16, 0],
+  ])('returns %i for score %i', (score, expected) => {
+    expect(getPointBuyCost(score)).toBe(expected)
   })
 })
 
 describe('getPointBuyIncrementCost', () => {
-  it('returns 1 to go from 8 to 9', () => {
-    expect(getPointBuyIncrementCost(8)).toBe(1)
-  })
-
-  it('returns 2 to go from 13 to 14', () => {
-    expect(getPointBuyIncrementCost(13)).toBe(2)
-  })
-
-  it('returns 2 to go from 14 to 15', () => {
-    expect(getPointBuyIncrementCost(14)).toBe(2)
-  })
-
-  it('returns Infinity when already at max (15)', () => {
-    expect(getPointBuyIncrementCost(15)).toBe(Infinity)
+  it.each<[number, number]>([
+    [8, 1],
+    [13, 2],
+    [14, 2],
+    [15, Infinity],
+  ])('returns %i for score %i', (score, expected) => {
+    expect(getPointBuyIncrementCost(score)).toBe(expected)
   })
 })
 
 describe('getPointBuyDecrementReturn', () => {
-  it('returns 0 when already at minimum (8)', () => {
-    expect(getPointBuyDecrementReturn(8)).toBe(0)
-  })
-
-  it('returns 1 to go from 9 to 8', () => {
-    expect(getPointBuyDecrementReturn(9)).toBe(1)
-  })
-
-  it('returns 2 to go from 15 to 14', () => {
-    expect(getPointBuyDecrementReturn(15)).toBe(2)
-  })
-
-  it('returns 2 to go from 14 to 13', () => {
-    expect(getPointBuyDecrementReturn(14)).toBe(2)
+  it.each<[number, number]>([
+    [8, 0],
+    [9, 1],
+    [15, 2],
+    [14, 2],
+  ])('returns %i for score %i', (score, expected) => {
+    expect(getPointBuyDecrementReturn(score)).toBe(expected)
   })
 })
 
@@ -334,37 +272,15 @@ describe('generateCharacterName', () => {
 // ---------------------------------------------------------------------------
 // Static data shape and counts
 // ---------------------------------------------------------------------------
-describe('DND_RACES', () => {
+describe.each<[string, ReadonlyArray<{ readonly id: string }>]>([
+  ['DND_RACES', DND_RACES],
+  ['DND_CLASSES', DND_CLASSES],
+  ['DND_SKILLS', DND_SKILLS],
+  ['DND_BACKGROUNDS', DND_BACKGROUNDS],
+  ['DND_ALIGNMENTS', DND_ALIGNMENTS],
+])('%s', (_label, collection) => {
   it('all entries have unique ids', () => {
-    const ids = DND_RACES.map((r) => r.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-})
-
-describe('DND_CLASSES', () => {
-  it('all entries have unique ids', () => {
-    const ids = DND_CLASSES.map((c) => c.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-})
-
-describe('DND_SKILLS', () => {
-  it('all entries have unique ids', () => {
-    const ids = DND_SKILLS.map((s) => s.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-})
-
-describe('DND_BACKGROUNDS', () => {
-  it('all entries have unique ids', () => {
-    const ids = DND_BACKGROUNDS.map((b) => b.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-})
-
-describe('DND_ALIGNMENTS', () => {
-  it('all entries have unique ids', () => {
-    const ids = DND_ALIGNMENTS.map((a) => a.id)
+    const ids = collection.map((entry) => entry.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
 })

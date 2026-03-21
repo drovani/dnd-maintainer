@@ -1,5 +1,6 @@
 import {
   setupMockReset,
+  describeListQuery,
   describeSingleQuery,
   renderHook,
   waitFor,
@@ -57,34 +58,13 @@ const baseCharacter: Character = {
 
 setupMockReset()
 
-describe('useCharacters', () => {
-  it('returns list of characters filtered by campaignId', async () => {
-    mockQueryResult.data = [baseCharacter]
-
-    const { result } = renderHook(() => useCharacters('camp-1'), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual([baseCharacter])
-    expect(supabase.eq).toHaveBeenCalledWith('campaign_id', 'camp-1')
-  })
-
-  it('returns empty array when no characters exist', async () => {
-    mockQueryResult.data = []
-
-    const { result } = renderHook(() => useCharacters('camp-1'), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual([])
-  })
-
-  it('sets error state when query fails', async () => {
-    mockQueryResult.error = { message: 'DB error' }
-
-    const { result } = renderHook(() => useCharacters('camp-1'), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isError).toBe(true))
-  })
-})
+describeListQuery(
+  'useCharacters',
+  () => renderHook(() => useCharacters('camp-1'), { wrapper: createWrapper() }),
+  baseCharacter,
+  () => renderHook(() => useCharacters(''), { wrapper: createWrapper() }),
+  'campaign_id',
+)
 
 describeSingleQuery(
   'useCharacter',

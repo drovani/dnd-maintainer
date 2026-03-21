@@ -43,6 +43,11 @@ const basePayload = {
 // when the underlying promise rejects. This listener silences those expected rejections.
 const suppressUnhandledRejection = () => { /* intentional no-op */ }
 
+async function withSuppressedRejections(fn: () => Promise<void>): Promise<void> {
+  process.on('unhandledRejection', suppressUnhandledRejection)
+  try { await fn() } finally { process.off('unhandledRejection', suppressUnhandledRejection) }
+}
+
 beforeEach(() => {
   mockQueryResult.data = null
   mockQueryResult.error = null
@@ -124,11 +129,9 @@ describe('useBuilderAutosave', () => {
       mockQueryResult.error = { message: 'Save failed' }
       mockQueryResult.data = null
 
-      process.on('unhandledRejection', suppressUnhandledRejection)
-
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      try {
+      await withSuppressedRejections(async () => {
         await act(async () => {
           await result.current.saveDraft(basePayload).catch((err: { message: string }) => {
             expect(err).toEqual({ message: 'Save failed' })
@@ -136,9 +139,7 @@ describe('useBuilderAutosave', () => {
         })
 
         expect(result.current.saveStatus).toBe<SaveStatus>('error')
-      } finally {
-        process.off('unhandledRejection', suppressUnhandledRejection)
-      }
+      })
     })
 
     it('includes status draft in insert payload', async () => {
@@ -197,11 +198,9 @@ describe('useBuilderAutosave', () => {
         return Promise.resolve({ data: null, error: { message: 'Status update failed' } }).then(resolve, reject)
       }
 
-      process.on('unhandledRejection', suppressUnhandledRejection)
-
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      try {
+      await withSuppressedRejections(async () => {
         await act(async () => {
           await result.current.finalize(basePayload).catch((err: { message: string }) => {
             expect(err).toEqual({ message: 'Status update failed' })
@@ -209,9 +208,7 @@ describe('useBuilderAutosave', () => {
         })
 
         await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'))
-      } finally {
-        process.off('unhandledRejection', suppressUnhandledRejection)
-      }
+      })
     })
   })
 
@@ -286,11 +283,9 @@ describe('useBuilderAutosave', () => {
     it('does not change saveStatus when it is error', async () => {
       mockQueryResult.error = { message: 'Save failed' }
 
-      process.on('unhandledRejection', suppressUnhandledRejection)
-
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      try {
+      await withSuppressedRejections(async () => {
         await act(async () => {
           await result.current.saveDraft(basePayload).catch((err: { message: string }) => {
             expect(err).toEqual({ message: 'Save failed' })
@@ -305,9 +300,7 @@ describe('useBuilderAutosave', () => {
 
         // clearStatus only resets 'saved' → 'idle'; error is preserved
         expect(result.current.saveStatus).toBe<SaveStatus>('error')
-      } finally {
-        process.off('unhandledRejection', suppressUnhandledRejection)
-      }
+      })
     })
 
     it('does not change saveStatus when it is idle', () => {
