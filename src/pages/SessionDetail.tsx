@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ValidationError } from '@/components/ui/ValidationError'
 
 interface LootEntry {
   id: string
@@ -451,7 +452,7 @@ export default function SessionDetail() {
                     className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                     autoFocus
                   />
-                  {lootNameError && <p className="text-sm text-red-600">{lootNameError}</p>}
+                  <ValidationError message={lootNameError} />
                 </div>
                 <input
                   type="number"

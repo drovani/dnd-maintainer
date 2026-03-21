@@ -20,6 +20,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+import { ValidationError } from '@/components/ui/ValidationError'
 
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
 
@@ -591,7 +592,7 @@ export default function NotesPage() {
                     className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                     autoFocus
                   />
-                  {titleError && <p className="text-sm text-red-600">{titleError}</p>}
+                  <ValidationError message={titleError} />
                 </div>
               </div>
 

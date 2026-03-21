@@ -14,6 +14,7 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ValidationError } from '@/components/ui/ValidationError'
 
 export default function SessionList() {
   const { t } = useTranslation('common')
@@ -27,6 +28,7 @@ export default function SessionList() {
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
   })
+  const [titleError, setTitleError] = useState<string>('')
 
   // Fetch sessions
   const { data: sessions = [], isLoading, error } = useQuery({
@@ -95,9 +97,11 @@ export default function SessionList() {
 
   const handleCreateSession = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newSession.title.trim()) {
-      createSessionMutation.mutate(newSession)
+    if (!newSession.title.trim()) {
+      setTitleError(t('validation.titleRequired'))
+      return
     }
+    createSessionMutation.mutate(newSession)
   }
 
   const filteredSessions = sessions.filter((session) =>
@@ -146,7 +150,7 @@ export default function SessionList() {
               </p>
             </div>
             <button
-              onClick={() => setShowNewSessionForm(true)}
+              onClick={() => { setShowNewSessionForm(true); setTitleError('') }}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
               <Plus className="size-5" />
@@ -181,16 +185,20 @@ export default function SessionList() {
                 <label className="block text-foreground font-semibold mb-2">
                   {t('sessions.sessionTitle')}
                 </label>
-                <input
-                  type="text"
-                  value={newSession.title}
-                  onChange={(e) =>
-                    setNewSession({ ...newSession, title: e.target.value })
-                  }
-                  placeholder={t('sessions.placeholderTitle')}
-                  className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  autoFocus
-                />
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    value={newSession.title}
+                    onChange={(e) => {
+                      setTitleError('')
+                      setNewSession({ ...newSession, title: e.target.value })
+                    }}
+                    placeholder={t('sessions.placeholderTitle')}
+                    className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    autoFocus
+                  />
+                  <ValidationError message={titleError} />
+                </div>
               </div>
 
               <div>
@@ -235,7 +243,7 @@ export default function SessionList() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowNewSessionForm(false)}
+                  onClick={() => { setShowNewSessionForm(false); setTitleError('') }}
                   className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-2 rounded-lg transition-colors"
                 >
                   {t('buttons.cancel')}
@@ -270,7 +278,7 @@ export default function SessionList() {
             </p>
             {sessions.length === 0 && (
               <button
-                onClick={() => setShowNewSessionForm(true)}
+                onClick={() => { setShowNewSessionForm(true); setTitleError('') }}
                 className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 <Plus className="size-5" />

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { ValidationError } from '@/components/ui/ValidationError'
 import { supabase } from '@/lib/supabase'
 import { Character, Session } from '@/types/database'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
@@ -178,7 +179,7 @@ export default function CampaignDashboard() {
                       <X className="size-6" />
                     </button>
                   </div>
-                  {nameError && <p className="text-sm text-red-600">{nameError}</p>}
+                  <ValidationError message={nameError} />
                 </div>
               ) : (
                 <div className="flex items-center gap-4 group">
