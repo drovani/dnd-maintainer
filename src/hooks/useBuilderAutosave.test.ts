@@ -38,12 +38,21 @@ const basePayload = {
   notes: null,
 }
 
+// The hook internally uses promise.finally() which creates an uncaught derived rejection
+// when the underlying promise rejects. This listener silences those expected rejections.
+const suppressUnhandledRejection = () => { /* intentional no-op */ }
+
 beforeEach(() => {
   mockQueryResult.data = null
   mockQueryResult.error = null
   vi.mocked(supabase.from).mockClear()
   // Restore then to its default behavior in case a test overrode it
   supabase.then = (resolve, reject) => Promise.resolve({ ...mockQueryResult }).then(resolve, reject)
+  process.on('unhandledRejection', suppressUnhandledRejection)
+})
+
+afterEach(() => {
+  process.off('unhandledRejection', suppressUnhandledRejection)
 })
 
 describe('useBuilderAutosave', () => {
@@ -100,10 +109,10 @@ describe('useBuilderAutosave', () => {
         await result.current.saveDraft(basePayload)
       })
 
-      // Clear so we can detect the second call type
+      // Clear call tracking so we can detect the second call type
       vi.mocked(supabase.insert).mockClear()
       vi.mocked(supabase.update).mockClear()
-      // For subsequent calls, update doesn't need to return data
+      // Update doesn't need to return data
       mockQueryResult.data = null
 
       // Second call — should update, not insert
@@ -123,7 +132,7 @@ describe('useBuilderAutosave', () => {
 
       await act(async () => {
         await result.current.saveDraft(basePayload).catch(() => {
-          // suppress — we want to check saveStatus
+          // saveDraft throws on error — suppress so we can assert saveStatus
         })
       })
 
@@ -175,16 +184,15 @@ describe('useBuilderAutosave', () => {
     })
 
     it('sets saveStatus to error when the status update fails', async () => {
-      // saveDraft insert succeeds, then the ready-update fails
+      // saveDraft insert succeeds; the ready-update fails.
+      // Override `then` to return different results per call.
       let callIndex = 0
-      const originalThen: typeof supabase.then = supabase.then.bind(supabase)
+      const originalThen = supabase.then.bind(supabase)
       supabase.then = (resolve, reject) => {
         callIndex++
         if (callIndex === 1) {
-          // insert for draft — succeed with id
           return Promise.resolve({ data: { id: 'char-new' }, error: null }).then(resolve, reject)
         }
-        // status=ready update — fail
         return Promise.resolve({ data: null, error: { message: 'Status update failed' } }).then(resolve, reject)
       }
 
@@ -192,7 +200,7 @@ describe('useBuilderAutosave', () => {
 
       await act(async () => {
         await result.current.finalize(basePayload).catch(() => {
-          // suppress — checking saveStatus
+          // finalize throws when status update fails — suppress
         })
       })
 
@@ -228,7 +236,7 @@ describe('useBuilderAutosave', () => {
 
       await act(async () => {
         await result.current.saveDraft(basePayload).catch(() => {
-          // suppress
+          // suppress — checking that clearStatus preserves error
         })
       })
 
