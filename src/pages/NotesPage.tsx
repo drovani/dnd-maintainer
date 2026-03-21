@@ -49,8 +49,7 @@ export default function NotesPage() {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
     }
   }, [])
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveError, setSaveError] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle')
 
   const [formData, setFormData] = useState({
     title: '',
@@ -166,12 +165,10 @@ export default function NotesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', campaignId] })
-      setSaveError(false)
-      setIsSaving(false)
+      setSaveStatus('idle')
     },
     onError: () => {
-      setSaveError(true)
-      setIsSaving(false)
+      setSaveStatus('error')
     },
   })
 
@@ -204,7 +201,7 @@ export default function NotesPage() {
   const handleOpenNewNote = () => {
     setEditingNote(null)
     resetForm()
-    setSaveError(false)
+    setSaveStatus('idle')
     setShowNewNoteModal(true)
   }
 
@@ -217,7 +214,7 @@ export default function NotesPage() {
       tags: note.tags?.join(', ') || '',
       pinned: note.is_pinned || false,
     })
-    setSaveError(false)
+    setSaveStatus('idle')
     setShowNewNoteModal(true)
   }
 
@@ -254,8 +251,7 @@ export default function NotesPage() {
         clearTimeout(autoSaveTimer.current)
       }
 
-      setSaveError(false)
-      setIsSaving(true)
+      setSaveStatus('saving')
       autoSaveTimer.current = setTimeout(() => {
         updateNoteMutation.mutate({
           [field]: value,
@@ -544,13 +540,13 @@ export default function NotesPage() {
               <h2 className="text-2xl font-bold text-foreground">
                 {editingNote ? t('notes.editNote') : t('notes.newNote')}
               </h2>
-              {isSaving && (
+              {saveStatus === 'saving' && (
                 <div className="flex items-center gap-2 text-primary text-sm">
                   <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
                   {t('buttons.saving')}
                 </div>
               )}
-              {saveError && (
+              {saveStatus === 'error' && (
                 <div className="flex items-center gap-2 text-red-600 text-sm">
                   <AlertCircle className="size-4 shrink-0" />
                   {t('errors.saveFailed')}
