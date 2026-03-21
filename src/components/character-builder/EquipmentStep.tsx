@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { parseIntOrDefault } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
@@ -33,7 +34,7 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                   type="number"
                   min="1"
                   value={item.quantity}
-                  onChange={(e) => onUpdate(item.id, { quantity: parseInt(e.target.value) || 1 })}
+                  onChange={(e) => onUpdate(item.id, { quantity: parseIntOrDefault(e.target.value, 1) })}
                   placeholder={t('characterBuilder.placeholders.quantity')}
                 />
                 <Input

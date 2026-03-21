@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { parseIntOrDefault } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
@@ -42,7 +43,7 @@ export function FeaturesStep({ features, onAdd, onUpdate, onRemove }: FeaturesSt
                   type="number"
                   min="0"
                   value={feature.uses}
-                  onChange={(e) => onUpdate(feature.id, { uses: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => onUpdate(feature.id, { uses: parseIntOrDefault(e.target.value, 0) })}
                   placeholder={t('characterBuilder.placeholders.featureUses')}
                 />
               </div>
