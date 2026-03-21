@@ -15,7 +15,9 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - `npx supabase <command>` — always run Supabase CLI via `npx` (not bare `supabase`)
 - `npm run supabase:reset` — reset the local Supabase database (runs migrations fresh)
 - `npm run supabase:types` — regenerate `supabase/database.types.ts` from current schema. Always run after migration changes and before `typecheck`.
-- No test framework is configured yet
+- `npm run test` — run Vitest unit tests
+- `npm run test:watch` — run tests in watch mode
+- `npm run test:coverage` — run tests with v8 coverage report
 
 ## Tech Stack
 
@@ -26,6 +28,7 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - **Lucide React** for icons
 - **react-i18next** for internationalization (config in `src/lib/i18n.ts`)
 - **ESLint 9** flat config with `eslint-plugin-i18next` to catch untranslated literal strings
+- **Vitest** with jsdom and `@testing-library/react` for unit and hook tests
 
 ## Architecture
 
@@ -69,6 +72,17 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 Light theme only. Custom CSS variables for theme colors defined in `src/index.css`. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
 
 - Prefer `size-*` over `w-* h-*` for square elements (icons, avatars, etc.) to signal intent that width and height should stay equal.
+
+### Testing
+
+- **Framework**: Vitest with jsdom, globals enabled, `restoreMocks: true`
+- **Test location**: Co-located with source files (`src/lib/foo.test.ts`, `src/hooks/useHook.test.ts`)
+- **Test infrastructure**: `src/test/` — `setup.ts` (global setup), `wrapper.tsx` (`createWrapper()` for QueryClient), `mocks/supabase.ts` (Supabase mock), `hook-test-helpers.ts` (shared CRUD helpers)
+- **Supabase mock**: `vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))` — chainable builder; configure response via `mockQueryResult.data` / `mockQueryResult.error`
+- **Hook tests**: Use `createWrapper()` from `src/test/wrapper.tsx` as the `renderHook` wrapper. Call `setupMockReset()` at the top of each describe block to reset mock state between tests.
+- **Shared CRUD helpers** (`src/test/hook-test-helpers.ts`): `describeListQuery`, `describeSingleQuery`, `describeCreateMutation`, `describeUpdateMutation`, `describeDeleteMutation` — cover standard success/error/disabled cases. Write inline tests for behavior unique to a hook.
+- **Lib function tests**: Co-locate test file; use `it.each` for pure input/output functions; mock `Math.random` via `vi.spyOn` for random-dependent functions.
+- **Coverage**: v8 provider; includes `src/lib/**` and `src/hooks/**`; excludes `supabase.ts`, `query-client.ts`, `i18n.ts`.
 
 ## Environment Variables
 

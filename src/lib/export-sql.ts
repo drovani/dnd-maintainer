@@ -61,6 +61,8 @@ const TABLE_COLUMNS = {
     { name: 'backstory', type: 'text' },
     { name: 'portrait_url', type: 'text' },
     { name: 'is_active', type: 'boolean' },
+    { name: 'status', type: 'text' },
+    { name: 'gender', type: 'text' },
     // is_npc is a GENERATED ALWAYS column and must not appear in INSERT statements
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },

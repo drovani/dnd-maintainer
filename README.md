@@ -75,6 +75,9 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | `npm run preview`   | Preview the production build       |
 | `npm run typecheck` | Run TypeScript type checking       |
 | `npm run lint`      | Lint TypeScript/TSX files          |
+| `npm run test`      | Run unit tests                     |
+| `npm run test:watch` | Run tests in watch mode           |
+| `npm run test:coverage` | Run tests with coverage report |
 
 ## Tech Stack
 
@@ -85,6 +88,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 - **Tailwind CSS v4** with CSS-first config
 - **react-i18next** for internationalization
 - **ESLint 9** flat config with `eslint-plugin-i18next`
+- **Vitest** with jsdom and `@testing-library/react` for unit and hook tests
 - **Lucide React** for icons
 
 ## Project Structure
@@ -97,6 +101,7 @@ src/
   lib/            # Supabase client, query client, i18n config, D&D 5e helpers
   locales/en/     # Translation files (common.json, gamedata.json)
   pages/          # Route-level page components
+  test/           # Test setup, mocks, wrapper, and shared hook-test helpers
   types/          # TypeScript interfaces for all domain models
 supabase/
   migrations/     # SQL migration files for the database schema
