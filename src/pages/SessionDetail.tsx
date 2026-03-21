@@ -33,6 +33,7 @@ export default function SessionDetail() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
 
   const [formInitialized, setFormInitialized] = useState(false)
@@ -106,6 +107,11 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      setSaveError(false)
+      setIsSaving(false)
+    },
+    onError: () => {
+      setSaveError(true)
       setIsSaving(false)
     },
   })
@@ -124,6 +130,12 @@ export default function SessionDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      setSaveError(false)
+      setIsSaving(false)
+    },
+    onError: () => {
+      setSaveError(true)
+      setIsSaving(false)
     },
   })
 
@@ -296,6 +308,12 @@ export default function SessionDetail() {
           <div className="mb-6 flex items-center gap-2 text-primary text-sm">
             <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
             {t('buttons.saving')}
+          </div>
+        )}
+        {saveError && (
+          <div className="mb-6 flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle className="size-4 shrink-0" />
+            {t('sessionDetail.saveError')}
           </div>
         )}
 

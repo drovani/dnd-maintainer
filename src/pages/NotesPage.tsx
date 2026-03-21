@@ -45,6 +45,7 @@ export default function NotesPage() {
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -160,6 +161,11 @@ export default function NotesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', campaignId] })
+      setSaveError(false)
+      setIsSaving(false)
+    },
+    onError: () => {
+      setSaveError(true)
       setIsSaving(false)
     },
   })
@@ -534,6 +540,12 @@ export default function NotesPage() {
                 <div className="flex items-center gap-2 text-primary text-sm">
                   <div className="size-2 bg-amber-400 rounded-full animate-pulse" />
                   {t('buttons.saving')}
+                </div>
+              )}
+              {saveError && (
+                <div className="flex items-center gap-2 text-red-600 text-sm">
+                  <AlertCircle className="size-4 shrink-0" />
+                  {t('notes.saveError')}
                 </div>
               )}
               <button
