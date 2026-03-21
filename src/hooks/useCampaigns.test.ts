@@ -1,6 +1,13 @@
-import { renderHook, waitFor } from '@testing-library/react'
-import { createWrapper } from '@/test/wrapper'
-import { supabase, mockQueryResult } from '@/test/mocks/supabase'
+import {
+  setupMockReset,
+  describeListQuery,
+  describeSingleQuery,
+  renderHook,
+  waitFor,
+  createWrapper,
+  supabase,
+  mockQueryResult,
+} from '@/test/hook-test-helpers'
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
 
@@ -20,59 +27,23 @@ const baseCampaign: Campaign = {
   archived_at: null,
 }
 
-beforeEach(() => {
-  mockQueryResult.data = null
-  mockQueryResult.error = null
-  vi.mocked(supabase.from).mockClear()
-})
+setupMockReset()
 
-describe('useCampaigns', () => {
-  it('returns a list of campaigns', async () => {
-    mockQueryResult.data = [baseCampaign]
+// useCampaigns has no id param — pass null to skip the "does not fetch" test
+describeListQuery(
+  'useCampaigns',
+  () => renderHook(() => useCampaigns(), { wrapper: createWrapper() }),
+  baseCampaign,
+  null,
+)
 
-    const { result } = renderHook(() => useCampaigns(), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual([baseCampaign])
-  })
-
-  it('returns empty array when no campaigns exist', async () => {
-    mockQueryResult.data = []
-
-    const { result } = renderHook(() => useCampaigns(), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual([])
-  })
-
-  it('sets error state when query fails', async () => {
-    mockQueryResult.error = { message: 'DB error' }
-
-    const { result } = renderHook(() => useCampaigns(), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(result.current.error).toEqual({ message: 'DB error' })
-  })
-})
-
-describe('useCampaign', () => {
-  it('returns a single campaign by id', async () => {
-    mockQueryResult.data = baseCampaign
-
-    const { result } = renderHook(() => useCampaign('camp-1'), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(baseCampaign)
-  })
-
-  it('does not fetch when id is undefined', () => {
-    const { result } = renderHook(() => useCampaign(undefined), { wrapper: createWrapper() })
-
-    expect(result.current.fetchStatus).toBe('idle')
-    expect(result.current.isLoading).toBe(false)
-    expect(supabase.from).not.toHaveBeenCalled()
-  })
-})
+describeSingleQuery(
+  'useCampaign',
+  (id) => renderHook(() => useCampaign(id as string | undefined), { wrapper: createWrapper() }),
+  baseCampaign,
+  'camp-1',
+  undefined,
+)
 
 describe('useCampaignMutations', () => {
   it('create inserts with status planning', async () => {

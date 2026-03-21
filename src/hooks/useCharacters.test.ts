@@ -1,6 +1,12 @@
-import { renderHook, waitFor } from '@testing-library/react'
-import { createWrapper } from '@/test/wrapper'
-import { supabase, mockQueryResult } from '@/test/mocks/supabase'
+import {
+  setupMockReset,
+  describeSingleQuery,
+  renderHook,
+  waitFor,
+  createWrapper,
+  supabase,
+  mockQueryResult,
+} from '@/test/hook-test-helpers'
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
 
@@ -49,11 +55,7 @@ const baseCharacter: Character = {
   gender: null,
 }
 
-beforeEach(() => {
-  mockQueryResult.data = null
-  mockQueryResult.error = null
-  vi.mocked(supabase.from).mockClear()
-})
+setupMockReset()
 
 describe('useCharacters', () => {
   it('returns list of characters filtered by campaignId', async () => {
@@ -84,23 +86,13 @@ describe('useCharacters', () => {
   })
 })
 
-describe('useCharacter', () => {
-  it('returns a single character by id', async () => {
-    mockQueryResult.data = baseCharacter
-
-    const { result } = renderHook(() => useCharacter('char-1'), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(baseCharacter)
-  })
-
-  it('does not fetch when id is undefined', () => {
-    const { result } = renderHook(() => useCharacter(undefined), { wrapper: createWrapper() })
-
-    expect(result.current.fetchStatus).toBe('idle')
-    expect(supabase.from).not.toHaveBeenCalled()
-  })
-})
+describeSingleQuery(
+  'useCharacter',
+  (id) => renderHook(() => useCharacter(id as string | undefined), { wrapper: createWrapper() }),
+  baseCharacter,
+  'char-1',
+  undefined,
+)
 
 describe('usePlayerNames', () => {
   it('returns sorted unique player names', async () => {
