@@ -14,6 +14,7 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
 
 export default function SessionList() {
@@ -235,20 +236,21 @@ export default function SessionList() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
+                <Button
                   type="submit"
-                  disabled={createSessionMutation.isPending}
-                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1"
+                  pending={createSessionMutation.isPending}
                 >
                   {createSessionMutation.isPending ? t('buttons.creating') : t('buttons.create')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
+                  className="flex-1"
                   onClick={() => { setShowNewSessionForm(false); setTitleError('') }}
-                  className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-2 rounded-lg transition-colors"
                 >
                   {t('buttons.cancel')}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

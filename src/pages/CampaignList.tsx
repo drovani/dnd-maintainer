@@ -234,7 +234,7 @@ export default function CampaignList() {
               </Button>
               <Button
                 type="submit"
-                disabled={createCampaignMutation.isPending}
+                pending={createCampaignMutation.isPending}
               >
                 {createCampaignMutation.isPending ? t('buttons.creating') : t('buttons.create')}
               </Button>
@@ -386,7 +386,7 @@ export default function CampaignList() {
             <Button
               variant="destructive"
               onClick={handleArchiveCampaign}
-              disabled={archiveCampaignMutation.isPending}
+              pending={archiveCampaignMutation.isPending}
             >
               {archiveCampaignMutation.isPending ? t('buttons.archiving') : t('buttons.archive')}
             </Button>

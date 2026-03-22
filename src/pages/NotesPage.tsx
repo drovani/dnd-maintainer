@@ -20,6 +20,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
 
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
@@ -686,13 +687,10 @@ export default function NotesPage() {
 
               {/* Form Actions */}
               <div className="flex gap-3 pt-4 border-t border-border">
-                <button
+                <Button
                   type="submit"
-                  disabled={
-                    createNoteMutation.isPending ||
-                    updateNoteMutation.isPending
-                  }
-                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1"
+                  pending={createNoteMutation.isPending || updateNoteMutation.isPending}
                 >
                   <Save className="size-4" />
                   {createNoteMutation.isPending || updateNoteMutation.isPending
@@ -700,30 +698,31 @@ export default function NotesPage() {
                     : editingNote
                       ? t('buttons.updateNote')
                       : t('buttons.createNote')}
-                </button>
+                </Button>
 
                 {editingNote && (
-                  <button
+                  <Button
                     type="button"
+                    variant="destructive"
                     onClick={() => handleDeleteNote(editingNote.id)}
-                    disabled={deleteNoteMutation.isPending}
-                    className="px-6 bg-destructive/10 hover:bg-destructive/20 text-destructive font-bold py-3 rounded-lg transition-colors disabled:opacity-50"
+                    pending={deleteNoteMutation.isPending}
                   >
                     <Trash2 className="size-4" />
-                  </button>
+                  </Button>
                 )}
 
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  className="flex-1"
                   onClick={() => {
                     setShowNewNoteModal(false)
                     setTitleError('')
                     if (!editingNote) resetForm()
                   }}
-                  className="flex-1 bg-muted hover:bg-muted text-foreground font-bold py-3 rounded-lg transition-colors"
                 >
                   {t('buttons.cancel')}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

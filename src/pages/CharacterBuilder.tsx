@@ -322,7 +322,7 @@ export default function CharacterBuilder() {
             {currentStepIndex < STEPS.length - 1 && (
               <Button onClick={goNextStep}>{t('buttons.next')} <ChevronRight size={16} /></Button>
             )}
-            <Button onClick={handleFinalize} disabled={isFinalizing || !isReadyToFinalize}>
+            <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing}>
               <Save className="size-4" />
               {isFinalizing ? t('buttons.finalizing') : t('buttons.finalizeCharacter')}
             </Button>

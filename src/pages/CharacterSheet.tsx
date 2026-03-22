@@ -64,7 +64,7 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
       <Button variant="outline" onClick={onCancel}>
         {t('buttons.cancel')}
       </Button>
-      <Button onClick={onSave} disabled={saving}>
+      <Button onClick={onSave} pending={saving}>
         <Save size={14} />
         {saving ? t('buttons.saving') : t('buttons.save')}
       </Button>
