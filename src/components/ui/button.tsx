@@ -40,6 +40,9 @@ const buttonVariants = cva(
   }
 )
 
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & { pending?: boolean }
+
 function Button({
   className,
   variant = "default",
@@ -47,8 +50,7 @@ function Button({
   pending = false,
   disabled,
   ...props
-}: ButtonPrimitive.Props &
-  VariantProps<typeof buttonVariants> & { pending?: boolean }) {
+}: ButtonProps) {
   const isIconSize = size?.startsWith("icon")
 
   return (
@@ -65,4 +67,4 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants, type ButtonProps }

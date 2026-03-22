@@ -8,14 +8,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
+const SUPABASE_FETCH_TIMEOUT_MS = 5000
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   global: {
-    fetch: (url, options) => {
-      const timeout = AbortSignal.timeout(5000)
+    fetch: async (url, options) => {
+      const timeout = AbortSignal.timeout(SUPABASE_FETCH_TIMEOUT_MS)
       const signal = options?.signal
         ? AbortSignal.any([options.signal, timeout])
         : timeout
-      return fetch(url, { ...options, signal })
+      try {
+        return await fetch(url, { ...options, signal })
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'TimeoutError') {
+          throw new Error(`Supabase request timed out after ${SUPABASE_FETCH_TIMEOUT_MS}ms`)
+        }
+        throw error
+      }
     },
   },
 })

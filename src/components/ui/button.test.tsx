@@ -22,15 +22,18 @@ describe('Button', () => {
     expect(button).not.toHaveClass('btn-pending-pulse')
   })
 
-  it('has btn-pending-pulse instead of shimmer when pending={true} with size="icon"', () => {
-    render(<Button pending={true} size="icon">X</Button>)
-    const button = screen.getByRole('button', { name: 'X' })
+  it.each(['icon', 'icon-sm', 'icon-xs', 'icon-lg'] as const)(
+    'has btn-pending-pulse instead of shimmer when pending={true} with size="%s"',
+    (iconSize) => {
+      render(<Button pending={true} size={iconSize}>X</Button>)
+      const button = screen.getByRole('button', { name: 'X' })
 
-    expect(button).toBeDisabled()
-    expect(button).toHaveAttribute('aria-busy', 'true')
-    expect(button).toHaveClass('btn-pending-pulse')
-    expect(button).not.toHaveClass('btn-pending-shimmer')
-  })
+      expect(button).toBeDisabled()
+      expect(button).toHaveAttribute('aria-busy', 'true')
+      expect(button).toHaveClass('btn-pending-pulse')
+      expect(button).not.toHaveClass('btn-pending-shimmer')
+    }
+  )
 
   it('is disabled when both pending={true} and disabled prop are passed', () => {
     render(<Button pending={true} disabled={true}>Save</Button>)
