@@ -45,21 +45,20 @@ function Button({
   variant = "default",
   size = "default",
   pending = false,
+  disabled,
   ...props
 }: ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & { pending?: boolean }) {
-  const isIconSize = typeof size === "string" && size?.startsWith("icon")
+  const isIconSize = size?.startsWith("icon")
 
   return (
     <ButtonPrimitive
       data-slot="button"
-      disabled={pending || props.disabled}
+      disabled={pending || disabled}
       aria-busy={pending || undefined}
       className={cn(
         buttonVariants({ variant, size, className }),
-        pending && "disabled:opacity-80",
-        pending && isIconSize && "btn-pending-pulse",
-        pending && !isIconSize && "btn-pending-shimmer"
+        pending && `disabled:opacity-80 ${isIconSize ? "btn-pending-pulse" : "btn-pending-shimmer"}`
       )}
       {...props}
     />
