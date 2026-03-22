@@ -10,6 +10,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   global: {
-    fetch: (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(10000) }),
+    fetch: (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(5000) }),
   },
 })
