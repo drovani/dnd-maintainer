@@ -13,7 +13,7 @@ describe('queryClient global mutation onError handler', () => {
     expect(onError).toBeDefined()
 
     const testError = new Error('Network failure')
-    onError!(testError, '', undefined, undefined)
+    onError!(testError, '' as never, undefined as never, undefined as never)
 
     expect(toast.error).toHaveBeenCalledWith(
       'Save failed \u2014 your changes may not have been saved'
