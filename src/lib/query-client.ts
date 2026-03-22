@@ -13,7 +13,7 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: 1,
       onError: (error) => {
-        toast.error(i18next.t('errors.saveFailed', { ns: 'common' }))
+        toast.error(i18next.t('errors.saveFailed', { ns: 'common' }), { id: 'mutation-error' })
         console.error('Mutation failed:', error)
       },
     },

@@ -118,9 +118,6 @@ export default function SessionDetail() {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
       toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
-    onError: () => {
-      toast.error(t('status.saveError'), { id: 'session-save' })
-    },
   })
 
   // Update DM notes mutation (stored on sessions.notes column)
@@ -138,9 +135,6 @@ export default function SessionDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
       toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
-    },
-    onError: () => {
-      toast.error(t('status.saveError'), { id: 'session-save' })
     },
   })
 
