@@ -1,9 +1,9 @@
 import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
-import { Session, EncounterSummary } from '@/types/database'
+import { Session } from '@/types/database'
 import { useSession } from '@/hooks/useSessions'
-import { ENCOUNTER_SUMMARY_COLS } from '@/lib/query-columns'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSessionEncounters } from '@/hooks/useEncounters'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
@@ -77,20 +77,7 @@ export default function SessionDetail() {
   const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? []
 
   // Fetch linked encounters
-  const { data: encounters = [] } = useQuery({
-    queryKey: ['session-encounters', sessionId],
-    queryFn: async () => {
-      if (!sessionId) return []
-      const { data, error } = await supabase
-        .from('encounters')
-        .select(ENCOUNTER_SUMMARY_COLS)
-        .eq('session_id', sessionId)
-
-      if (error) throw error
-      return data as unknown as EncounterSummary[]
-    },
-    enabled: !!sessionId,
-  })
+  const { data: encounters = [] } = useSessionEncounters(sessionId!)
 
   // Update session mutation
   const updateSessionMutation = useMutation({

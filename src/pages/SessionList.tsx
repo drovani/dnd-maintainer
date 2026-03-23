@@ -11,7 +11,7 @@ import {
   Search,
   Zap,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -92,7 +92,12 @@ export default function SessionList() {
     createSessionMutation.mutate(newSession)
   }
 
-  const filteredSessions = sessions.filter((session) =>
+  const sortedSessions = useMemo(() =>
+    [...(sessions ?? [])].sort((a, b) => a.session_number - b.session_number),
+    [sessions]
+  )
+
+  const filteredSessions = sortedSessions.filter((session) =>
     searchTerm.trim() === '' ? true :
       session.title?.toLowerCase().includes(searchTerm.toLowerCase())
   )

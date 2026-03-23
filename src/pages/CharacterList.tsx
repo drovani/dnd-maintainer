@@ -53,7 +53,7 @@ export default function CharacterList() {
         sorted.sort((a, b) => (a.class ?? '').localeCompare(b.class ?? ''))
         break
       case 'updated':
-        // Already sorted by updated_at from query
+        sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         break
     }
 

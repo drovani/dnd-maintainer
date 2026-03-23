@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
-import { supabase } from '@/lib/supabase'
-import { CharacterSummary, SessionSummary } from '@/types/database'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
-import { CHARACTER_SUMMARY_COLS, SESSION_SUMMARY_COLS } from '@/lib/query-columns'
-import { useQuery } from '@tanstack/react-query'
+import { useCharacters } from '@/hooks/useCharacters'
+import { useSessions } from '@/hooks/useSessions'
+import { useMemo } from 'react'
 import {
   ArrowLeft,
   BookOpen,
@@ -41,34 +40,14 @@ export default function CampaignDashboard() {
   const { update: updateMutation } = useCampaignMutations()
 
   // Fetch characters for this campaign
-  const { data: characters = [], error: charactersError } = useQuery({
-    queryKey: ['campaign-characters', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select(CHARACTER_SUMMARY_COLS)
-        .eq('campaign_id', id!)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as unknown as CharacterSummary[]
-    },
-    enabled: !!id,
-  })
+  const { data: charactersRaw = [], error: charactersError } = useCharacters(id!)
+  const characters = useMemo(
+    () => [...charactersRaw].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
+    [charactersRaw]
+  )
 
-  // Fetch sessions for this campaign
-  const { data: sessions = [], error: sessionsError } = useQuery({
-    queryKey: ['campaign-sessions', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select(SESSION_SUMMARY_COLS)
-        .eq('campaign_id', id!)
-        .order('date', { ascending: false })
-      if (error) throw error
-      return data as unknown as SessionSummary[]
-    },
-    enabled: !!id,
-  })
+  // Fetch sessions for this campaign (hook already sorts by date DESC)
+  const { data: sessions = [], error: sessionsError } = useSessions(id!)
 
   if (!id) {
     return (

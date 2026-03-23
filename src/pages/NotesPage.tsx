@@ -65,7 +65,7 @@ export default function NotesPage() {
 
   // Fetch all notes (needs content for search)
   const { data: notes = [], isLoading, error } = useQuery({
-    queryKey: ['notes-full', campaignId],
+    queryKey: ['notes', campaignId, 'full'],
     queryFn: async () => {
       if (!campaignId) return []
       const { data, error } = await supabase
@@ -149,7 +149,7 @@ export default function NotesPage() {
       return data[0]
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes-full', campaignId] })
+      queryClient.invalidateQueries({ queryKey: ['notes', campaignId, 'full'] })
       setShowNewNoteModal(false)
       resetForm()
     },
@@ -168,7 +168,7 @@ export default function NotesPage() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes-full', campaignId] })
+      queryClient.invalidateQueries({ queryKey: ['notes', campaignId, 'full'] })
       setSaveStatus('idle')
     },
     onError: () => {
@@ -187,7 +187,7 @@ export default function NotesPage() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes-full', campaignId] })
+      queryClient.invalidateQueries({ queryKey: ['notes', campaignId, 'full'] })
       setEditingNote(null)
     },
   })

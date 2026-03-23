@@ -50,8 +50,8 @@ export function useCreateNote() {
       if (error) throw error;
       return data as unknown as Note;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['notes', data.campaign_id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
 }
@@ -71,7 +71,7 @@ export function useUpdateNote() {
       return data as unknown as Note;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['notes', data.campaign_id] });
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
       queryClient.invalidateQueries({ queryKey: ['note', data.id] });
     },
   });
@@ -85,8 +85,8 @@ export function useDeleteNote() {
       const { error } = await supabase.from('notes').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: (_, { campaignId }) => {
-      queryClient.invalidateQueries({ queryKey: ['notes', campaignId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
 }
