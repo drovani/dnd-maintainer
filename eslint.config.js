@@ -28,4 +28,14 @@ export default defineConfig(
     files: ["src/**/*.{ts,tsx}"],
     ...i18next.configs["flat/recommended"],
   },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/*.test.{ts,tsx}", "src/test/**"],
+    rules: {
+      "no-restricted-syntax": ["error", {
+        selector: "TSAsExpression > TSNeverKeyword",
+        message: "Do not use 'as never'. Narrow the type instead — see CLAUDE.md i18n guidance.",
+      }],
+    },
+  },
 );

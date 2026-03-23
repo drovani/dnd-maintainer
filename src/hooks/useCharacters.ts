@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Character, CharacterSummary } from '@/types/database'
+import type { TablesInsert, TablesUpdate } from '@/types/supabase'
 import { CHARACTER_SUMMARY_COLS, CHARACTER_DETAIL_COLS } from '@/lib/query-columns'
 
 // --- Queries ---
@@ -63,7 +64,7 @@ export function useCharacterMutations() {
     mutationFn: async (character: Omit<Character, 'id' | 'created_at' | 'updated_at' | 'is_npc' | 'is_active'>) => {
       const { data, error } = await supabase
         .from('characters')
-        .insert(character as never)
+        .insert(character as unknown as TablesInsert<'characters'>)
         .select()
         .single()
       if (error) throw error
@@ -78,7 +79,7 @@ export function useCharacterMutations() {
     mutationFn: async ({ id, ...updates }: Partial<Character> & { id: string }) => {
       const { data, error } = await supabase
         .from('characters')
-        .update(updates as never)
+        .update(updates as unknown as TablesUpdate<'characters'>)
         .eq('id', id)
         .select()
         .single()

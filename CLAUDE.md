@@ -56,7 +56,7 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 - **Translation files**: `src/locales/en/common.json` and `src/locales/en/gamedata.json`.
 - **Type safety**: `src/@types/i18next.d.ts` maps `resources` to the JSON files, giving compile-time key checking. Invalid `t('nonexistent.key')` calls fail typecheck.
 - **Usage pattern**: `const { t } = useTranslation('common')` for UI strings, `const { t } = useTranslation('gamedata')` for game data. When both are needed in one component, alias one: `const { t: tc } = useTranslation('common')`.
-- **Dynamic keys**: When constructing keys from variables (e.g., `t(\`races.${raceId}\`)`), use a type assertion (`as never`) if the variable type is wider than the key union (e.g., `string` from `Object.entries()`).
+- **Dynamic keys**: Domain ID types (`RaceId`, `ClassId`, `AlignmentId`) are narrow enough that template literals like `` t(`races.${raceId}`) `` typecheck without casts. If a variable is wider than the key union (e.g., `string` from `Object.entries()`), narrow it first rather than using `as never`.
 - **ID-based data model**: Race, class, background, alignment, and skill values are stored as lowercase IDs in the database (e.g., `dwarf-hill`, `wizard`, `folkhero`). Always translate IDs to display names via `t()` from the `gamedata` namespace — never display raw IDs to users.
 
 ### D&D Game Data

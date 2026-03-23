@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Encounter, EncounterSummary } from '@/types/database';
+import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { ENCOUNTER_SUMMARY_COLS, ENCOUNTER_DETAIL_COLS } from '@/lib/query-columns';
 
 
@@ -59,7 +60,7 @@ export function useCreateEncounter() {
     mutationFn: async (encounter: Omit<Encounter, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('encounters')
-        .insert(encounter as never)
+        .insert(encounter as unknown as TablesInsert<'encounters'>)
         .select()
         .single();
       if (error) throw error;
@@ -81,7 +82,7 @@ export function useUpdateEncounter() {
     mutationFn: async ({ id, ...updates }: Partial<Encounter> & { id: string }) => {
       const { data, error } = await supabase
         .from('encounters')
-        .update(updates as never)
+        .update(updates as unknown as TablesUpdate<'encounters'>)
         .eq('id', id)
         .select()
         .single();

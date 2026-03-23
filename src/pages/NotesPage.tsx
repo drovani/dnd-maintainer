@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { Note } from '@/types/database'
+import type { TablesUpdate } from '@/types/supabase'
 import { NOTE_DETAIL_COLS } from '@/lib/query-columns'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -162,7 +163,7 @@ export default function NotesPage() {
 
       const { error } = await supabase
         .from('notes')
-        .update(noteData as never)
+        .update(noteData as unknown as TablesUpdate<'notes'>)
         .eq('id', editingNote.id)
 
       if (error) throw error

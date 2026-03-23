@@ -213,11 +213,11 @@ export default function CharacterList() {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.race')}</span>
-                    <span className="text-foreground">{character.race ? tg(`races.${character.race}` as never, { defaultValue: character.race }) : ''}</span>
+                    <span className="text-foreground">{character.race ? tg(`races.${character.race}`, { defaultValue: character.race }) : ''}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.class')}</span>
-                    <span className="text-foreground">{character.class ? tg(`classes.${character.class}` as never, { defaultValue: character.class }) : ''}</span>
+                    <span className="text-foreground">{character.class ? tg(`classes.${character.class}`, { defaultValue: character.class }) : ''}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.level')}</span>

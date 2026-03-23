@@ -1,4 +1,4 @@
-import type { DndGender } from '@/lib/dnd-helpers'
+import type { DndGender, RaceId, ClassId, AlignmentId } from '@/lib/dnd-helpers'
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
@@ -87,12 +87,12 @@ export interface Character {
   name: string
   player_name: string | null
   character_type: 'pc' | 'npc'
-  race: string | null
-  class: string | null
+  race: RaceId | null
+  class: ClassId | null
   subclass: string | null
   level: number
   background: string | null
-  alignment: string | null
+  alignment: AlignmentId | null
   experience_points: number
   hit_points_max: number | null
   hit_points_current: number | null

@@ -668,7 +668,7 @@ function EditHeaderDialog({
               <SelectContent>
                 {DND_RACE_GROUPS.map((group) => (
                   <SelectGroup key={group.id}>
-                    <SelectLabel>{t(`races.${group.id}` as never)}</SelectLabel>
+                    <SelectLabel>{t(`races.${group.id}`)}</SelectLabel>
                     {group.options.map((opt) => (
                       <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}`)}</SelectItem>
                     ))}
@@ -717,6 +717,9 @@ function EditHeaderDialog({
               ...form,
               player_name: form.player_name || null,
               level: Number(form.level),
+              race: (form.race || null) as Character['race'],
+              class: (form.class || null) as Character['class'],
+              alignment: (form.alignment || null) as Character['alignment'],
               gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
             })
           }
