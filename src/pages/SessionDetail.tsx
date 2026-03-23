@@ -38,9 +38,11 @@ export default function SessionDetail() {
   const sessionSaveTimer = useRef<NodeJS.Timeout>(null)
   const dmNotesSaveTimer = useRef<NodeJS.Timeout>(null)
   useEffect(() => {
+    const sessionTimer = sessionSaveTimer.current
+    const dmNotesTimer = dmNotesSaveTimer.current
     return () => {
-      if (sessionSaveTimer.current) clearTimeout(sessionSaveTimer.current)
-      if (dmNotesSaveTimer.current) clearTimeout(dmNotesSaveTimer.current)
+      if (sessionTimer) clearTimeout(sessionTimer)
+      if (dmNotesTimer) clearTimeout(dmNotesTimer)
     }
   }, [])
 
