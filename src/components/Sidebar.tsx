@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Menu,
   ScrollText,
+  Settings,
   Shield,
   Sword,
   Users,
@@ -212,6 +213,28 @@ export function Sidebar({
 
         {/* Footer */}
         <div className="px-2 py-4 border-t border-sidebar-border">
+          <NavLink
+            to="/settings/theme"
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                onToggleCollapse(true);
+              }
+            }}
+            className={({ isActive }) =>
+              `
+                flex items-center gap-3 px-3 py-3 rounded-lg
+                transition-colors duration-200 group
+                ${isActive
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border border-sidebar-border'
+                : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
+              }
+              `
+            }
+            title={t('nav.settings')}
+          >
+            <Settings className="size-5 shrink-0" />
+            {!isCollapsed && <span className="font-medium text-sm">{t('nav.settings')}</span>}
+          </NavLink>
           <NavLink
             to="/export"
             onClick={() => {
