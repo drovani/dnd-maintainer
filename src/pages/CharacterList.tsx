@@ -1,6 +1,4 @@
-import { supabase } from '@/lib/supabase'
-import { Character } from '@/types/database'
-import { useQuery } from '@tanstack/react-query'
+import { useCharacters } from '@/hooks/useCharacters'
 import { Plus, Search, User, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,21 +16,7 @@ export default function CharacterList() {
   const [sortBy, setSortBy] = useState<SortType>('name')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data: characters = [], isLoading, error } = useQuery({
-    queryKey: ['characters', campaignId],
-    queryFn: async () => {
-      if (!campaignId) return []
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .eq('campaign_id', campaignId)
-        .order('updated_at', { ascending: false })
-
-      if (error) throw error
-      return data as unknown as Character[]
-    },
-    enabled: !!campaignId,
-  })
+  const { data: characters = [], isLoading, error } = useCharacters(campaignId!)
 
   const filteredAndSortedCharacters = useMemo(() => {
     let result = characters
@@ -69,7 +53,7 @@ export default function CharacterList() {
         sorted.sort((a, b) => (a.class ?? '').localeCompare(b.class ?? ''))
         break
       case 'updated':
-        // Already sorted by updated_at from query
+        sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
         break
     }
 

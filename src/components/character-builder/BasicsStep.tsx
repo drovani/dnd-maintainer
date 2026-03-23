@@ -172,7 +172,7 @@ export function BasicsStep({
               <SelectContent alignItemWithTrigger={false}>
                 {DND_RACE_GROUPS.map((group) => (
                   <SelectGroup key={group.id}>
-                    {group.options.length > 1 && <SelectLabel>{t(`raceGroups.${group.id}` as never)}</SelectLabel>}
+                    {group.options.length > 1 && <SelectLabel>{t(`races.${group.id}` as never)}</SelectLabel>}
                     {group.options.map((option) => {
                       const raceItem = DND_RACES.find((r) => r.id === option.value)
                       if (!raceItem) {

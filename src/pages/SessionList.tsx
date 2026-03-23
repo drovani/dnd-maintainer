@@ -1,6 +1,6 @@
 import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
-import { Session } from '@/types/database'
+import { useSessions } from '@/hooks/useSessions'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
@@ -11,7 +11,7 @@ import {
   Search,
   Zap,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -32,21 +32,7 @@ export default function SessionList() {
   const [titleError, setTitleError] = useState<string>('')
 
   // Fetch sessions
-  const { data: sessions = [], isLoading, error } = useQuery({
-    queryKey: ['sessions', campaignId],
-    queryFn: async () => {
-      if (!campaignId) return []
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('campaign_id', campaignId)
-        .order('session_number', { ascending: true })
-
-      if (error) throw error
-      return data as Session[]
-    },
-    enabled: !!campaignId,
-  })
+  const { data: sessions = [], isLoading, error } = useSessions(campaignId!)
 
   // Fetch total XP awarded
   const { data: totalXp = 0 } = useQuery({
@@ -106,7 +92,12 @@ export default function SessionList() {
     createSessionMutation.mutate(newSession)
   }
 
-  const filteredSessions = sessions.filter((session) =>
+  const sortedSessions = useMemo(() =>
+    [...sessions].sort((a, b) => a.session_number - b.session_number),
+    [sessions]
+  )
+
+  const filteredSessions = sortedSessions.filter((session) =>
     searchTerm.trim() === '' ? true :
       session.title?.toLowerCase().includes(searchTerm.toLowerCase())
   )

@@ -102,13 +102,13 @@ INSERT INTO characters (
     '550e8400-e29b-41d4-a716-446655440000'::uuid,
     'Grol the Destroyer',
     'npc',
-    'goblin',
+    'dwarf',
     'fighter',
     3,
     'ce',
     'male',
-    'A large goblin with battle scars and a cruel sneer. Wears armor fashioned from dark iron.',
-    'The leader of the goblin tribe that captured Gundren. A cunning and brutal warlord.'
+    'A large dwarf with battle scars and a cruel sneer. Wears armor fashioned from dark iron.',
+    'The leader of the dwarf clan that captured Gundren. A cunning and brutal warlord.'
 );
 
 -- ============================================================================
