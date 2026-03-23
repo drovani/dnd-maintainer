@@ -107,8 +107,8 @@ INSERT INTO characters (
     3,
     'ce',
     'male',
-    'A large dwarf with battle scars and a cruel sneer. Wears armor fashioned from dark iron.',
-    'The leader of the dwarf clan that captured Gundren. A cunning and brutal warlord.'
+    'A towering half-orc with battle scars and a cruel sneer. Wears armor fashioned from dark iron.',
+    'The half-orc warlord who captured Gundren on behalf of the Black Spider. Cunning and brutal, he commands goblins through fear.'
 );
 
 -- ============================================================================

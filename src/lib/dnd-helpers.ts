@@ -226,10 +226,6 @@ export interface DndBackground {
   readonly id: BackgroundId
 }
 
-export interface DndAlignment {
-  readonly id: AlignmentId
-}
-
 // Race ID convention: base races use plain IDs (e.g., 'human', 'tiefling'),
 // subraces use '{base}-{variant}' (e.g., 'dwarf-hill', 'elf-dark'),
 // half-races use 'half{race}' without hyphen (e.g., 'halfelf', 'halforc').
@@ -346,13 +342,6 @@ export const DND_RACE_GROUPS = [
   { id: 'human', options: [{ value: 'human' }] },
   { id: 'tiefling', options: [{ value: 'tiefling' }] },
 ] as const
-
-export type RaceGroupId = (typeof DND_RACE_GROUPS)[number]['id']
-
-export interface DndRaceGroup {
-  readonly id: RaceGroupId
-  readonly options: ReadonlyArray<{ readonly value: RaceId }>
-}
 
 export const DND_CLASSES = [
   {
