@@ -464,7 +464,7 @@ export default function CampaignDashboard() {
                             {char.name}
                           </p>
                           <p className="text-muted-foreground text-sm">
-                            {t('campaign.party.charSummary', { race: char.race ? tg(`races.${char.race}` as never, { defaultValue: char.race }) : '', class: char.class ? tg(`classes.${char.class}` as never, { defaultValue: char.class }) : '', level: char.level })}
+                            {t('campaign.party.charSummary', { race: char.race ? tg(`races.${char.race}`, { defaultValue: char.race }) : '', class: char.class ? tg(`classes.${char.class}`, { defaultValue: char.class }) : '', level: char.level })}
                           </p>
                           {char.player_name && (
                             <p className="text-muted-foreground text-xs mt-1">

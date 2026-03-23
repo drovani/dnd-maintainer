@@ -172,7 +172,7 @@ export function BasicsStep({
               <SelectContent alignItemWithTrigger={false}>
                 {DND_RACE_GROUPS.map((group) => (
                   <SelectGroup key={group.id}>
-                    {group.options.length > 1 && <SelectLabel>{t(`races.${group.id}` as never)}</SelectLabel>}
+                    {group.options.length > 1 && <SelectLabel>{t(`races.${group.id}`)}</SelectLabel>}
                     {group.options.map((option) => {
                       const raceItem = DND_RACES.find((r) => r.id === option.value)
                       if (!raceItem) {
@@ -247,8 +247,8 @@ export function BasicsStep({
                   return null
                 }
                 const isSelected = alignment === alignmentId
-                const topLabel = ethic === 'neutral' && moral === 'neutral' ? t(`alignmentAxes.true` as never) : t(`alignmentAxes.${ethic}` as never)
-                const bottomLabel = t(`alignmentAxes.${moral}` as never)
+                const topLabel = ethic === 'neutral' && moral === 'neutral' ? t('alignmentAxes.true') : t(`alignmentAxes.${ethic}`)
+                const bottomLabel = t(`alignmentAxes.${moral}`)
                 return (
                   <button
                     key={alignmentId}

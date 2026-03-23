@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Session, SessionSummary } from '@/types/database';
+import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { SESSION_SUMMARY_COLS, SESSION_DETAIL_COLS } from '@/lib/query-columns';
 
 
@@ -43,7 +44,7 @@ export function useCreateSession() {
     mutationFn: async (session: Omit<Session, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('sessions')
-        .insert(session as never)
+        .insert(session as unknown as TablesInsert<'sessions'>)
         .select()
         .single();
       if (error) throw error;
@@ -62,7 +63,7 @@ export function useUpdateSession() {
     mutationFn: async ({ id, ...updates }: Partial<Session> & { id: string }) => {
       const { data, error } = await supabase
         .from('sessions')
-        .update(updates as never)
+        .update(updates as unknown as TablesUpdate<'sessions'>)
         .eq('id', id)
         .select()
         .single();

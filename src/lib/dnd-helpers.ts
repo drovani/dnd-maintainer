@@ -322,12 +322,7 @@ export const DND_RACES = [
 
 export type RaceId = (typeof DND_RACES)[number]['id']
 
-export interface DndRaceGroup {
-  readonly id: string
-  readonly options: ReadonlyArray<{ readonly value: RaceId }>
-}
-
-export const DND_RACE_GROUPS: DndRaceGroup[] = [
+export const DND_RACE_GROUPS = [
   { id: 'dragonborn', options: [{ value: 'dragonborn' }] },
   { id: 'dwarf', options: [
     { value: 'dwarf-hill' },
@@ -350,7 +345,14 @@ export const DND_RACE_GROUPS: DndRaceGroup[] = [
   ]},
   { id: 'human', options: [{ value: 'human' }] },
   { id: 'tiefling', options: [{ value: 'tiefling' }] },
-]
+] as const
+
+export type RaceGroupId = (typeof DND_RACE_GROUPS)[number]['id']
+
+export interface DndRaceGroup {
+  readonly id: RaceGroupId
+  readonly options: ReadonlyArray<{ readonly value: RaceId }>
+}
 
 export const DND_CLASSES = [
   {

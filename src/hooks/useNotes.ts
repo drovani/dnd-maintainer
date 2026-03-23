@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Note, NoteSummary } from '@/types/database';
+import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { NOTE_SUMMARY_COLS, NOTE_DETAIL_COLS } from '@/lib/query-columns';
 
 
@@ -44,7 +45,7 @@ export function useCreateNote() {
     mutationFn: async (note: Omit<Note, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('notes')
-        .insert(note as never)
+        .insert(note as unknown as TablesInsert<'notes'>)
         .select()
         .single();
       if (error) throw error;
@@ -63,7 +64,7 @@ export function useUpdateNote() {
     mutationFn: async ({ id, ...updates }: Partial<Note> & { id: string }) => {
       const { data, error } = await supabase
         .from('notes')
-        .update(updates as never)
+        .update(updates as unknown as TablesUpdate<'notes'>)
         .eq('id', id)
         .select()
         .single();

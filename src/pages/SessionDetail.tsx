@@ -1,6 +1,7 @@
 import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { Session } from '@/types/database'
+import type { Json, TablesUpdate } from '@/types/supabase'
 import { useSession } from '@/hooks/useSessions'
 import { useSessionEncounters } from '@/hooks/useEncounters'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -86,7 +87,7 @@ export default function SessionDetail() {
 
       const { error } = await supabase
         .from('sessions')
-        .update(updates as never)
+        .update(updates as unknown as TablesUpdate<'sessions'>)
         .eq('id', sessionId)
 
       if (error) throw error
@@ -123,7 +124,7 @@ export default function SessionDetail() {
       const updatedLoot = [...loot.filter((l) => l.id !== lootEntry.id), lootEntry]
       const { error } = await supabase
         .from('sessions')
-        .update({ loot: updatedLoot as never })
+        .update({ loot: updatedLoot as unknown as Json })
         .eq('id', sessionId)
 
       if (error) throw error
@@ -141,7 +142,7 @@ export default function SessionDetail() {
       const updatedLoot = loot.filter((l) => l.id !== lootId)
       const { error } = await supabase
         .from('sessions')
-        .update({ loot: updatedLoot as never })
+        .update({ loot: updatedLoot as unknown as Json })
         .eq('id', sessionId)
 
       if (error) throw error

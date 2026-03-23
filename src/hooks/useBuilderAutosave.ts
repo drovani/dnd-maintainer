@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { DndGender } from "@/lib/dnd-helpers";
+import type { DndGender, RaceId, ClassId, AlignmentId } from "@/lib/dnd-helpers";
 import type { AbilityScores, EquipmentItem, Feature } from "@/types/database";
 import type { TablesInsert, TablesUpdate } from "@/types/supabase";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,12 +12,12 @@ interface BuilderPayload {
   name: string;
   character_type: "pc" | "npc";
   player_name: string | null;
-  race: string | null;
-  class: string | null;
+  race: RaceId | null;
+  class: ClassId | null;
   subclass: string | null;
   level: number;
   background: string | null;
-  alignment: string | null;
+  alignment: AlignmentId | null;
   gender: DndGender | null;
   hit_points_max: number;
   hit_points_current: number;
