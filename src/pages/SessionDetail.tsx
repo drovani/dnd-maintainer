@@ -139,7 +139,8 @@ export default function SessionDetail() {
 
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: (_data, lootEntry) => {
+      setLoot(prev => [...prev.filter(l => l.id !== lootEntry.id), lootEntry])
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
     },
   })
@@ -157,7 +158,8 @@ export default function SessionDetail() {
 
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: (_data, lootId) => {
+      setLoot(prev => prev.filter(l => l.id !== lootId))
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
     },
   })
