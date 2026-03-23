@@ -44,6 +44,7 @@ export default function ExportData() {
     try {
       const ids = Array.from(selectedIds);
 
+      // Full export — all columns needed; select('*') is intentional
       const [campaignsRes, charactersRes, sessionsRes, encountersRes, notesRes] = await Promise.all([
         supabase.from('campaigns').select('*').in('id', ids),
         supabase.from('characters').select('*').in('campaign_id', ids),

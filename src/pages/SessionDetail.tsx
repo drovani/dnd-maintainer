@@ -1,6 +1,8 @@
 import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
-import { Encounter, Session } from '@/types/database'
+import { Session, EncounterSummary } from '@/types/database'
+import { useSession } from '@/hooks/useSessions'
+import { ENCOUNTER_SUMMARY_COLS } from '@/lib/query-columns'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -68,21 +70,7 @@ export default function SessionDetail() {
   })
 
   // Fetch session
-  const { data: session, isLoading, error } = useQuery({
-    queryKey: ['session', sessionId],
-    queryFn: async () => {
-      if (!sessionId) return null
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('id', sessionId)
-        .single()
-
-      if (error) throw error
-      return data as unknown as Session
-    },
-    enabled: !!sessionId,
-  })
+  const { data: session, isLoading, error } = useSession(sessionId!)
 
   // DM notes and loot are stored on the session itself
   const sessionNotes = (session as unknown as Record<string, unknown>)?.notes as string ?? ''
@@ -95,11 +83,11 @@ export default function SessionDetail() {
       if (!sessionId) return []
       const { data, error } = await supabase
         .from('encounters')
-        .select('*')
+        .select(ENCOUNTER_SUMMARY_COLS)
         .eq('session_id', sessionId)
 
       if (error) throw error
-      return data as unknown as Encounter[]
+      return data as unknown as EncounterSummary[]
     },
     enabled: !!sessionId,
   })

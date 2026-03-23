@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Session } from '@/types/database';
+import type { Session, SessionSummary } from '@/types/database';
+import { SESSION_SUMMARY_COLS, SESSION_DETAIL_COLS } from '@/lib/query-columns';
 
 
 export function useSessions(campaignId: string) {
@@ -9,11 +10,11 @@ export function useSessions(campaignId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
-        .select('*')
+        .select(SESSION_SUMMARY_COLS)
         .eq('campaign_id', campaignId)
         .order('date', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as Session[];
+      return (data || []) as unknown as SessionSummary[];
     },
     enabled: !!campaignId,
   });
@@ -25,7 +26,7 @@ export function useSession(id: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
-        .select('*')
+        .select(SESSION_DETAIL_COLS)
         .eq('id', id)
         .single();
       if (error) throw error;

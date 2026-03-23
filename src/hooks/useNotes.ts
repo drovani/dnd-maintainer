@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Note } from '@/types/database';
+import type { Note, NoteSummary } from '@/types/database';
+import { NOTE_SUMMARY_COLS, NOTE_DETAIL_COLS } from '@/lib/query-columns';
 
 
 export function useNotes(campaignId: string) {
@@ -9,12 +10,12 @@ export function useNotes(campaignId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notes')
-        .select('*')
+        .select(NOTE_SUMMARY_COLS)
         .eq('campaign_id', campaignId)
         .order('is_pinned', { ascending: false })
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as Note[];
+      return (data || []) as unknown as NoteSummary[];
     },
     enabled: !!campaignId,
   });
@@ -26,7 +27,7 @@ export function useNote(id: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notes')
-        .select('*')
+        .select(NOTE_DETAIL_COLS)
         .eq('id', id)
         .single();
       if (error) throw error;

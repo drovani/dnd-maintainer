@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Encounter } from '@/types/database';
+import type { Encounter, EncounterSummary } from '@/types/database';
+import { ENCOUNTER_SUMMARY_COLS, ENCOUNTER_DETAIL_COLS } from '@/lib/query-columns';
 
 
 export function useEncounters(campaignId: string) {
@@ -9,11 +10,11 @@ export function useEncounters(campaignId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
-        .select('*')
+        .select(ENCOUNTER_SUMMARY_COLS)
         .eq('campaign_id', campaignId)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as Encounter[];
+      return (data || []) as unknown as EncounterSummary[];
     },
     enabled: !!campaignId,
   });
@@ -25,11 +26,11 @@ export function useSessionEncounters(sessionId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
-        .select('*')
+        .select(ENCOUNTER_SUMMARY_COLS)
         .eq('session_id', sessionId)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as Encounter[];
+      return (data || []) as unknown as EncounterSummary[];
     },
     enabled: !!sessionId,
   });
@@ -41,7 +42,7 @@ export function useEncounter(id: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
-        .select('*')
+        .select(ENCOUNTER_DETAIL_COLS)
         .eq('id', id)
         .single();
       if (error) throw error;

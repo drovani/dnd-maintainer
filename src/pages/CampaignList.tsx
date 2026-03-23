@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { supabase } from '@/lib/supabase'
-import { Campaign } from '@/types/database'
+import { CampaignSummary } from '@/types/database'
 import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -33,7 +33,7 @@ export default function CampaignList() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [showNewCampaignForm, setShowNewCampaignForm] = useState(false)
-  const [campaignToArchive, setCampaignToArchive] = useState<Campaign | null>(null)
+  const [campaignToArchive, setCampaignToArchive] = useState<CampaignSummary | null>(null)
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     setting: '',

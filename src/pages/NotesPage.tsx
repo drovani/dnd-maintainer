@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { Note } from '@/types/database'
+import { NOTE_DETAIL_COLS } from '@/lib/query-columns'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
@@ -62,14 +63,14 @@ export default function NotesPage() {
     pinned: false,
   })
 
-  // Fetch all notes
+  // Fetch all notes (needs content for search)
   const { data: notes = [], isLoading, error } = useQuery({
-    queryKey: ['notes', campaignId],
+    queryKey: ['notes-full', campaignId],
     queryFn: async () => {
       if (!campaignId) return []
       const { data, error } = await supabase
         .from('notes')
-        .select('*')
+        .select(NOTE_DETAIL_COLS)
         .eq('campaign_id', campaignId)
         .order('updated_at', { ascending: false })
 
@@ -148,7 +149,7 @@ export default function NotesPage() {
       return data[0]
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes', campaignId] })
+      queryClient.invalidateQueries({ queryKey: ['notes-full', campaignId] })
       setShowNewNoteModal(false)
       resetForm()
     },
@@ -167,7 +168,7 @@ export default function NotesPage() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes', campaignId] })
+      queryClient.invalidateQueries({ queryKey: ['notes-full', campaignId] })
       setSaveStatus('idle')
     },
     onError: () => {
@@ -186,7 +187,7 @@ export default function NotesPage() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes', campaignId] })
+      queryClient.invalidateQueries({ queryKey: ['notes-full', campaignId] })
       setEditingNote(null)
     },
   })

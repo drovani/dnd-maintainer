@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { Character } from '@/types/database'
+import type { Character, CharacterSummary } from '@/types/database'
+import { CHARACTER_SUMMARY_COLS, CHARACTER_DETAIL_COLS } from '@/lib/query-columns'
 
 // --- Queries ---
 
@@ -10,11 +11,11 @@ export function useCharacters(campaignId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('characters')
-        .select('*')
+        .select(CHARACTER_SUMMARY_COLS)
         .eq('campaign_id', campaignId)
         .order('name', { ascending: true })
       if (error) throw error
-      return (data || []) as unknown as Character[]
+      return (data || []) as unknown as CharacterSummary[]
     },
     enabled: !!campaignId,
   })
@@ -26,7 +27,7 @@ export function useCharacter(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('characters')
-        .select('*')
+        .select(CHARACTER_DETAIL_COLS)
         .eq('id', id!)
         .single()
       if (error) throw error

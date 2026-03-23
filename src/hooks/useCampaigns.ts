@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Campaign } from '@/types/database'
+import { Campaign, CampaignSummary } from '@/types/database'
+import { CAMPAIGN_SUMMARY_COLS, CAMPAIGN_DETAIL_COLS } from '@/lib/query-columns'
 
 // --- Queries ---
 
@@ -10,11 +11,11 @@ export function useCampaigns() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*')
+        .select(CAMPAIGN_SUMMARY_COLS)
         .is('archived_at', null)
         .order('updated_at', { ascending: false })
       if (error) throw error
-      return (data || []) as Campaign[]
+      return (data || []) as unknown as CampaignSummary[]
     },
   })
 }
@@ -25,11 +26,11 @@ export function useCampaign(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*')
+        .select(CAMPAIGN_DETAIL_COLS)
         .eq('id', id!)
         .single()
       if (error) throw error
-      return data as Campaign
+      return data as unknown as Campaign
     },
     enabled: !!id,
   })

@@ -2,8 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
 import { supabase } from '@/lib/supabase'
-import { Character, Session } from '@/types/database'
+import { CharacterSummary, SessionSummary } from '@/types/database'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
+import { CHARACTER_SUMMARY_COLS, SESSION_SUMMARY_COLS } from '@/lib/query-columns'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowLeft,
@@ -45,11 +46,11 @@ export default function CampaignDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('characters')
-        .select('*')
+        .select(CHARACTER_SUMMARY_COLS)
         .eq('campaign_id', id!)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return data as unknown as Character[]
+      return data as unknown as CharacterSummary[]
     },
     enabled: !!id,
   })
@@ -60,11 +61,11 @@ export default function CampaignDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
-        .select('*')
+        .select(SESSION_SUMMARY_COLS)
         .eq('campaign_id', id!)
         .order('date', { ascending: false })
       if (error) throw error
-      return data as unknown as Session[]
+      return data as unknown as SessionSummary[]
     },
     enabled: !!id,
   })
