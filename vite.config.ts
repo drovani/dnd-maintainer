@@ -23,7 +23,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/lib/**', 'src/hooks/**'],
-      exclude: ['src/lib/supabase.ts', 'src/lib/query-client.ts', 'src/lib/i18n.ts'],
+      exclude: ['src/lib/query-client.ts', 'src/lib/i18n.ts'],
     },
   },
 })
