@@ -1,4 +1,5 @@
 import type { DndGender, RaceId, ClassId, AlignmentId } from '@/lib/dnd-helpers'
+import type { ThemeId } from '@/lib/theme'
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
@@ -76,7 +77,7 @@ export interface Campaign {
   status: 'active' | 'paused' | 'completed' | 'planning' | null
   image_url?: string | null
   dm_notes?: string | null
-  theme?: 'default' | 'sylvan' | 'arcane' | null
+  theme?: ThemeId | null
   archived_at?: string | null
 }
 

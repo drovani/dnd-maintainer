@@ -20,6 +20,7 @@ interface ThemeContextValue {
   resolvedMode: ResolvedMode;
   campaignThemeOverride: ThemeId | null;
   setCampaignThemeOverride: (id: ThemeId | null) => void;
+  effectiveTheme: ThemeId;    // after campaign override resolution
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -68,8 +69,9 @@ export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.
       resolvedMode,
       campaignThemeOverride,
       setCampaignThemeOverride,
+      effectiveTheme,
     }),
-    [theme, setTheme, colorMode, setColorMode, resolvedMode, campaignThemeOverride],
+    [theme, setTheme, colorMode, setColorMode, resolvedMode, campaignThemeOverride, effectiveTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

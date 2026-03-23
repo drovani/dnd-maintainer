@@ -10,13 +10,22 @@
     <div id="root"></div>
     <script>
   (function() {
-    var mode = localStorage.getItem('dnd-color-mode') || 'system';
-    var theme = localStorage.getItem('dnd-theme');
-    if (mode === 'system') {
-      mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try {
+      var validThemes = ['sylvan', 'arcane'];
+      var validModes = ['light', 'dark', 'system'];
+      var mode = localStorage.getItem('dnd-color-mode');
+      var theme = localStorage.getItem('dnd-theme');
+      if (!mode || validModes.indexOf(mode) === -1) mode = 'system';
+      if (mode === 'system') {
+        mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      if (mode === 'dark') document.documentElement.classList.add('dark');
+      if (theme && validThemes.indexOf(theme) !== -1) {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    } catch (e) {
+      // Storage unavailable; ThemeProvider will apply theme once React mounts
     }
-    if (mode === 'dark') document.documentElement.classList.add('dark');
-    if (theme && theme !== 'default') document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
     <script type="module" src="/src/main.tsx"></script>

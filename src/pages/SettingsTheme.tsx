@@ -80,6 +80,9 @@ export default function SettingsTheme(): React.JSX.Element {
                     onChange={(id) => handleCampaignThemeChange(campaign.id, id)}
                     allowNone
                   />
+                  {update.isError && update.variables?.id === campaign.id && (
+                    <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
+                  )}
                 </div>
               ))}
             </div>

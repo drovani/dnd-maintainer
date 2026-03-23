@@ -564,6 +564,9 @@ export default function CampaignDashboard() {
                   onChange={(newTheme) => updateMutation.mutate({ id: id!, theme: newTheme })}
                   allowNone
                 />
+                {updateMutation.isError && (
+                  <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
+                )}
               </CardContent>
             </Card>
           </div>

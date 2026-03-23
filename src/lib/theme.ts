@@ -1,10 +1,3 @@
-export const THEME_IDS = ['default', 'sylvan', 'arcane'] as const;
-export type ThemeId = (typeof THEME_IDS)[number];
-
-export const COLOR_MODES = ['light', 'dark', 'system'] as const;
-export type ColorMode = (typeof COLOR_MODES)[number];
-export type ResolvedMode = 'light' | 'dark';
-
 export const THEMES = [
   { id: 'default', labelKey: 'settings.themes.default', swatch: 'oklch(0.55 0.14 85)' },
   { id: 'sylvan', labelKey: 'settings.themes.sylvan', swatch: 'oklch(0.50 0.15 155)' },
@@ -12,6 +5,12 @@ export const THEMES = [
 ] as const;
 
 export type ThemeMeta = (typeof THEMES)[number];
+export type ThemeId = ThemeMeta['id'];
+export const THEME_IDS: readonly ThemeId[] = THEMES.map(t => t.id);
+
+export const COLOR_MODES = ['light', 'dark', 'system'] as const;
+export type ColorMode = (typeof COLOR_MODES)[number];
+export type ResolvedMode = Exclude<ColorMode, 'system'>;
 
 const STORAGE_KEYS = {
   theme: 'dnd-theme',
@@ -23,21 +22,37 @@ export function isThemeId(value: unknown): value is ThemeId {
 }
 
 export function readStoredTheme(): ThemeId {
-  const v = localStorage.getItem(STORAGE_KEYS.theme);
-  return isThemeId(v) ? v : 'default';
+  try {
+    const v = localStorage.getItem(STORAGE_KEYS.theme);
+    return isThemeId(v) ? v : 'default';
+  } catch {
+    return 'default';
+  }
 }
 
 export function writeStoredTheme(id: ThemeId): void {
-  localStorage.setItem(STORAGE_KEYS.theme, id);
+  try {
+    localStorage.setItem(STORAGE_KEYS.theme, id);
+  } catch {
+    // Storage unavailable; in-memory state is still correct
+  }
 }
 
 export function readStoredColorMode(): ColorMode {
-  const v = localStorage.getItem(STORAGE_KEYS.colorMode);
-  return typeof v === 'string' && COLOR_MODES.includes(v as ColorMode) ? (v as ColorMode) : 'system';
+  try {
+    const v = localStorage.getItem(STORAGE_KEYS.colorMode);
+    return typeof v === 'string' && COLOR_MODES.includes(v as ColorMode) ? (v as ColorMode) : 'system';
+  } catch {
+    return 'system';
+  }
 }
 
 export function writeStoredColorMode(mode: ColorMode): void {
-  localStorage.setItem(STORAGE_KEYS.colorMode, mode);
+  try {
+    localStorage.setItem(STORAGE_KEYS.colorMode, mode);
+  } catch {
+    // Storage unavailable; in-memory state is still correct
+  }
 }
 
 export function resolveColorMode(mode: ColorMode): ResolvedMode {
