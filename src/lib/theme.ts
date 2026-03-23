@@ -21,6 +21,10 @@ export function isThemeId(value: unknown): value is ThemeId {
   return typeof value === 'string' && THEME_IDS.includes(value as ThemeId);
 }
 
+export function isColorMode(value: unknown): value is ColorMode {
+  return typeof value === 'string' && COLOR_MODES.includes(value as ColorMode);
+}
+
 export function readStoredTheme(): ThemeId {
   try {
     const v = localStorage.getItem(STORAGE_KEYS.theme);
@@ -41,7 +45,7 @@ export function writeStoredTheme(id: ThemeId): void {
 export function readStoredColorMode(): ColorMode {
   try {
     const v = localStorage.getItem(STORAGE_KEYS.colorMode);
-    return typeof v === 'string' && COLOR_MODES.includes(v as ColorMode) ? (v as ColorMode) : 'system';
+    return isColorMode(v) ? v : 'system';
   } catch {
     return 'system';
   }

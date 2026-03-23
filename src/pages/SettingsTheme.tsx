@@ -61,7 +61,7 @@ export default function SettingsTheme(): React.JSX.Element {
             <h2 className="text-lg font-semibold">{t('settings.globalTheme')}</h2>
             <p className="text-sm text-muted-foreground">{t('settings.globalThemeDescription')}</p>
           </div>
-          <ThemePicker value={theme} onChange={(id) => setTheme(id ?? 'default')} />
+          <ThemePicker value={theme} onChange={(id) => setTheme(id)} />
         </section>
 
         {/* Per-Campaign Overrides */}
@@ -79,6 +79,7 @@ export default function SettingsTheme(): React.JSX.Element {
                     value={campaign.theme ?? null}
                     onChange={(id) => handleCampaignThemeChange(campaign.id, id)}
                     allowNone
+                    disabled={update.isPending}
                   />
                   {update.isError && update.variables?.id === campaign.id && (
                     <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>

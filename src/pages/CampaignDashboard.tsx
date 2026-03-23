@@ -563,6 +563,7 @@ export default function CampaignDashboard() {
                   value={campaign.theme ?? null}
                   onChange={(newTheme) => updateMutation.mutate({ id: id!, theme: newTheme })}
                   allowNone
+                  disabled={updateMutation.isPending}
                 />
                 {updateMutation.isError && (
                   <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
