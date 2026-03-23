@@ -5,25 +5,26 @@ import {
   BackstoryStep,
   BasicsStep,
   EquipmentStep,
-  FeaturesStep,
+  ProficienciesStep,
   SkillsStep,
   SpellsStep,
 } from '@/components/character-builder'
 import type { CharacterData } from '@/components/character-builder'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
 import { DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
+import type { LanguageId, ToolProficiencyId } from '@/lib/dnd-helpers'
 import type { AbilityKey, AbilityScores } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
-type StepType = 'basics' | 'abilities' | 'skills' | 'features' | 'equipment' | 'spells' | 'backstory'
+type StepType = 'basics' | 'abilities' | 'skills' | 'proficiencies' | 'equipment' | 'spells' | 'backstory'
 type RequiredField = 'name' | 'race' | 'class' | 'gender'
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' }, { id: 'abilities' },
-  { id: 'skills' }, { id: 'features' },
+  { id: 'skills' }, { id: 'proficiencies' },
   { id: 'equipment' }, { id: 'spells' },
   { id: 'backstory' },
 ]
@@ -44,6 +45,7 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
   abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
   rolledValues: [],
   skills: DND_SKILLS.reduce((acc, s) => ({ ...acc, [s.id]: { proficient: false, expertise: false } }), {}),
+  proficiencies: { armor: [], weapons: [], tools: [], toolChoices: [], languages: [], languageChoices: [] },
   features: [], equipment: [],
   spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },
   personalityTraits: '', ideals: '', bonds: '', flaws: '', appearance: '', backstory: '',
@@ -94,7 +96,8 @@ export default function CharacterBuilder() {
       saving_throws: Object.fromEntries(
         (selectedClass?.savingThrowProficiencies ?? []).map((a) => [a, { proficient: true }])
       ),
-      skills: characterData.skills, features: characterData.features,
+      skills: characterData.skills, proficiencies: characterData.proficiencies,
+      features: characterData.features,
       equipment: characterData.equipment, spells: characterData.spells,
       personality_traits: characterData.personalityTraits || null,
       ideals: characterData.ideals || null, bonds: characterData.bonds || null,
@@ -151,9 +154,30 @@ export default function CharacterBuilder() {
     }
     setCharacterData((prev) => {
       const next = { ...prev, ...updates }
+      const classChanged = 'class' in updates && updates.class !== prev.class
+      const raceChanged = 'race' in updates && updates.race !== prev.race
       // Reset skill selections when class changes — each class has a different available skill pool
-      if ('class' in updates && updates.class !== prev.class) {
+      if (classChanged) {
         next.skills = Object.fromEntries(DND_SKILLS.map((s) => [s.id, { proficient: false, expertise: false }]))
+      }
+      // Recompute auto-granted proficiencies when class or race changes
+      if (classChanged || raceChanged) {
+        const newCls = DND_CLASSES.find((c) => c.id === next.class)
+        const newRace = DND_RACES.find((r) => r.id === next.race)
+        const raceWeapons = newRace && 'weaponProficiencies' in newRace
+          ? [...newRace.weaponProficiencies]
+          : []
+        next.proficiencies = {
+          armor: newCls ? [...newCls.armorProficiencies] : [],
+          weapons: [
+            ...(newCls ? [...newCls.weaponProficiencies] : []),
+            ...raceWeapons,
+          ],
+          tools: newCls ? [...newCls.toolProficiencies] : [],
+          toolChoices: classChanged ? [] : prev.proficiencies.toolChoices,
+          languages: newRace ? [...newRace.languages] : [],
+          languageChoices: raceChanged ? [] : prev.proficiencies.languageChoices,
+        }
       }
       return next
     })
@@ -200,13 +224,35 @@ export default function CharacterBuilder() {
     })
   }
 
-  const addFeature = () => setCharacterData((prev) => ({
-    ...prev, features: [...prev.features, { id: crypto.randomUUID(), name: '', description: '', source: '', uses: 0 }],
-  }))
-  const updateFeature = (id: string, updates: Partial<CharacterData['features'][0]>) =>
-    setCharacterData((prev) => ({ ...prev, features: prev.features.map((f) => f.id === id ? { ...f, ...updates } : f) }))
-  const removeFeature = (id: string) =>
-    setCharacterData((prev) => ({ ...prev, features: prev.features.filter((f) => f.id !== id) }))
+  const toggleToolChoice = (tool: string) => {
+    setCharacterData((prev) => {
+      const cls = DND_CLASSES.find((c) => c.id === prev.class)
+      if (!cls || !('toolChoices' in cls)) return prev
+      const { toolChoices: clsToolChoices } = cls
+      const current = prev.proficiencies.toolChoices
+      const toolId = tool as ToolProficiencyId
+      if (current.includes(toolId)) {
+        return { ...prev, proficiencies: { ...prev.proficiencies, toolChoices: current.filter((t) => t !== toolId) } }
+      }
+      if (current.length >= clsToolChoices.count) return prev
+      return { ...prev, proficiencies: { ...prev.proficiencies, toolChoices: [...current, toolId] } }
+    })
+  }
+
+  const toggleLanguageChoice = (lang: string) => {
+    setCharacterData((prev) => {
+      const raceData = DND_RACES.find((r) => r.id === prev.race)
+      const maxChoices = raceData && 'languageChoices' in raceData ? (raceData.languageChoices as number) : 0
+      if (maxChoices === 0) return prev
+      const current = prev.proficiencies.languageChoices
+      const langId = lang as LanguageId
+      if (current.includes(langId)) {
+        return { ...prev, proficiencies: { ...prev.proficiencies, languageChoices: current.filter((l) => l !== langId) } }
+      }
+      if (current.length >= maxChoices) return prev
+      return { ...prev, proficiencies: { ...prev.proficiencies, languageChoices: [...current, langId] } }
+    })
+  }
 
   const addEquipment = () => setCharacterData((prev) => ({
     ...prev, equipment: [...prev.equipment, { id: crypto.randomUUID(), name: '', quantity: 1, weight: 0, equipped: false }],
@@ -235,8 +281,9 @@ export default function CharacterBuilder() {
         <SkillsStep characterClass={cd.class} level={cd.level} skills={cd.skills}
           abilities={cd.abilities} racialBonuses={racialBonuses} onSkillToggle={toggleSkillProficiency} />
       )
-      case 'features': return (
-        <FeaturesStep features={cd.features} onAdd={addFeature} onUpdate={updateFeature} onRemove={removeFeature} />
+      case 'proficiencies': return (
+        <ProficienciesStep characterClass={cd.class} race={cd.race}
+          proficiencies={cd.proficiencies} onToolChoiceToggle={toggleToolChoice} onLanguageChoiceToggle={toggleLanguageChoice} />
       )
       case 'equipment': return (
         <EquipmentStep equipment={cd.equipment} onAdd={addEquipment} onUpdate={updateEquipment} onRemove={removeEquipment} />

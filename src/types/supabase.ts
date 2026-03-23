@@ -105,6 +105,7 @@ export type Database = {
           personality_traits: string | null
           player_name: string | null
           portrait_url: string | null
+          proficiencies: Json | null
           proficiency_bonus: number
           race: string | null
           saving_throws: Json | null
@@ -146,6 +147,7 @@ export type Database = {
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
+          proficiencies?: Json | null
           proficiency_bonus?: number
           race?: string | null
           saving_throws?: Json | null
@@ -187,6 +189,7 @@ export type Database = {
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
+          proficiencies?: Json | null
           proficiency_bonus?: number
           race?: string | null
           saving_throws?: Json | null

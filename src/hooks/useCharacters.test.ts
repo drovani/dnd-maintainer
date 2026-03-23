@@ -39,6 +39,7 @@ const baseCharacter: Character = {
   abilities: { str: 8, dex: 14, con: 12, int: 17, wis: 13, cha: 10 },
   saving_throws: null,
   skills: null,
+  proficiencies: null,
   features: null,
   equipment: null,
   spells: null,

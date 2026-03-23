@@ -1,4 +1,4 @@
-import type { DndGender, RaceId, ClassId, AlignmentId } from '@/lib/dnd-helpers'
+import type { ArmorProficiencyId, DndGender, LanguageId, RaceId, ClassId, AlignmentId, ToolProficiencyId, WeaponProficiencyId } from '@/lib/dnd-helpers'
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
@@ -25,6 +25,16 @@ export interface Skill {
   ability: AbilityKey
   proficient: boolean
   bonus?: number
+}
+
+// Proficiencies & Languages
+export interface Proficiencies {
+  armor: ArmorProficiencyId[]
+  weapons: WeaponProficiencyId[]
+  tools: ToolProficiencyId[]
+  toolChoices: ToolProficiencyId[]
+  languages: LanguageId[]
+  languageChoices: LanguageId[]
 }
 
 // Character features and traits
@@ -104,6 +114,7 @@ export interface Character {
   abilities: AbilityScores
   saving_throws?: Record<string, { proficient: boolean }> | null
   skills: Record<string, { proficient: boolean; expertise: boolean }> | null
+  proficiencies: Proficiencies | null
   features: Feature[] | null
   equipment: EquipmentItem[] | null
   spells: {

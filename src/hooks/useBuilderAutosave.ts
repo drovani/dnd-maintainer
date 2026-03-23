@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type { DndGender, RaceId, ClassId, AlignmentId } from "@/lib/dnd-helpers";
-import type { AbilityScores, EquipmentItem, Feature } from "@/types/database";
+import type { AbilityScores, EquipmentItem, Feature, Proficiencies } from "@/types/database";
 import type { TablesInsert, TablesUpdate } from "@/types/supabase";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
@@ -26,6 +26,7 @@ interface BuilderPayload {
   abilities: AbilityScores;
   saving_throws: Record<string, { proficient: boolean }>;
   skills: Record<string, { proficient: boolean; expertise: boolean }>;
+  proficiencies: Proficiencies | null;
   features: Feature[];
   equipment: EquipmentItem[];
   spells: {

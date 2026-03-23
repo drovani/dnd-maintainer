@@ -26,6 +26,7 @@ const basePayload = {
   abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 11, cha: 9 },
   saving_throws: {},
   skills: {},
+  proficiencies: null,
   features: [],
   equipment: [],
   spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },

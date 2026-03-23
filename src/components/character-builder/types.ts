@@ -1,4 +1,4 @@
-import type { AlignmentId, BackgroundId, ClassId, DndGender, RaceId } from '@/lib/dnd-helpers'
+import type { AlignmentId, ArmorProficiencyId, BackgroundId, ClassId, DndGender, LanguageId, RaceId, ToolProficiencyId, WeaponProficiencyId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 
 export interface CharacterData {
@@ -22,6 +22,16 @@ export interface CharacterData {
 
   // Skills
   skills: Record<string, { proficient: boolean; expertise: boolean }>
+
+  // Proficiencies & Languages
+  proficiencies: {
+    armor: ArmorProficiencyId[]
+    weapons: WeaponProficiencyId[]
+    tools: ToolProficiencyId[]
+    toolChoices: ToolProficiencyId[]
+    languages: LanguageId[]
+    languageChoices: LanguageId[]
+  }
 
   // Features
   features: Array<{ id: string; name: string; description: string; source: string; uses: number }>
