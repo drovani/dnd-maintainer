@@ -292,8 +292,10 @@ export default function NotesPage() {
   }
 
   const handleConfirmDeleteNote = () => {
-    deleteNoteMutation.mutate(deletingNoteId!)
-    setDeletingNoteId(null)
+    if (!deletingNoteId) return
+    deleteNoteMutation.mutate(deletingNoteId, {
+      onSettled: () => setDeletingNoteId(null),
+    })
   }
 
   const getCategoryIcon = (category: NoteCategory) => {

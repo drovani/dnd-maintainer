@@ -211,8 +211,10 @@ export default function SessionDetail() {
   }
 
   const handleConfirmDeleteLoot = () => {
-    deleteLootMutation.mutate(deletingLootId!)
-    setDeletingLootId(null)
+    if (!deletingLootId) return
+    deleteLootMutation.mutate(deletingLootId, {
+      onSettled: () => setDeletingLootId(null),
+    })
   }
 
   function encounterStatusClass(status: string): string {
