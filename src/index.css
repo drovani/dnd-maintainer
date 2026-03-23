@@ -89,6 +89,46 @@ body,
   .hover-lift {
     @apply hover:-translate-y-1 hover:shadow-lg transition-all duration-200;
   }
+
+  .btn-pending-pulse {
+    animation: btn-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes btn-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.92);
+    }
+  }
+
+  .btn-pending-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-pending-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      oklch(1 0 0 / 0.3) 50%,
+      transparent 100%
+    );
+    animation: btn-shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes btn-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
 
 

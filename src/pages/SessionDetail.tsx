@@ -38,9 +38,11 @@ export default function SessionDetail() {
   const sessionSaveTimer = useRef<NodeJS.Timeout>(null)
   const dmNotesSaveTimer = useRef<NodeJS.Timeout>(null)
   useEffect(() => {
+    const sessionTimer = sessionSaveTimer.current
+    const dmNotesTimer = dmNotesSaveTimer.current
     return () => {
-      if (sessionSaveTimer.current) clearTimeout(sessionSaveTimer.current)
-      if (dmNotesSaveTimer.current) clearTimeout(dmNotesSaveTimer.current)
+      if (sessionTimer) clearTimeout(sessionTimer)
+      if (dmNotesTimer) clearTimeout(dmNotesTimer)
     }
   }, [])
 
@@ -118,9 +120,6 @@ export default function SessionDetail() {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
       toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
-    onError: () => {
-      toast.error(t('status.saveError'), { id: 'session-save' })
-    },
   })
 
   // Update DM notes mutation (stored on sessions.notes column)
@@ -138,9 +137,6 @@ export default function SessionDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
       toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
-    },
-    onError: () => {
-      toast.error(t('status.saveError'), { id: 'session-save' })
     },
   })
 
@@ -209,16 +205,19 @@ export default function SessionDetail() {
       setLootNameError(t('validation.itemNameRequired'))
       return
     }
-    upsertLootMutation.mutate(newLoot)
-    setNewLoot({
-      id: crypto.randomUUID(),
-      item_name: '',
-      quantity: 1,
-      gold_value: 0,
-      awarded_to: '',
+    upsertLootMutation.mutate(newLoot, {
+      onSuccess: () => {
+        setNewLoot({
+          id: crypto.randomUUID(),
+          item_name: '',
+          quantity: 1,
+          gold_value: 0,
+          awarded_to: '',
+        })
+        setLootNameError('')
+        setShowNewLootForm(false)
+      },
     })
-    setLootNameError('')
-    setShowNewLootForm(false)
   }
 
   const handleDeleteLoot = (lootId: string) => {

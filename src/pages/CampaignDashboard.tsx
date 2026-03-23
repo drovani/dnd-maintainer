@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
 import { supabase } from '@/lib/supabase'
 import { Character, Session } from '@/types/database'
@@ -165,13 +166,14 @@ export default function CampaignDashboard() {
                         if (e.key === 'Enter') handleUpdateName()
                       }}
                     />
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={handleUpdateName}
-                      disabled={updateMutation.isPending}
-                      className="text-primary hover:text-foreground p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      pending={updateMutation.isPending}
                     >
                       <Save className="size-6" />
-                    </button>
+                    </Button>
                     <button
                       onClick={() => { setIsEditingName(false); setNameError('') }}
                       className="text-muted-foreground hover:text-foreground p-2"
@@ -211,13 +213,14 @@ export default function CampaignDashboard() {
                       if (e.key === 'Enter') handleUpdateSetting()
                     }}
                   />
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={handleUpdateSetting}
-                    disabled={updateMutation.isPending}
-                    className="text-primary hover:text-foreground p-1"
+                    pending={updateMutation.isPending}
                   >
                     <Save className="size-4" />
-                  </button>
+                  </Button>
                   <button
                     onClick={() => setIsEditingSetting(false)}
                     className="text-muted-foreground hover:text-foreground p-1"
@@ -274,14 +277,13 @@ export default function CampaignDashboard() {
               }}
             />
             <div className="flex gap-2">
-              <button
+              <Button
                 onClick={handleUpdateDescription}
-                disabled={updateMutation.isPending}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+                pending={updateMutation.isPending}
               >
                 <Save className="size-4" />
                 {t('buttons.save')}
-              </button>
+              </Button>
               <button
                 onClick={() => setIsEditingDescription(false)}
                 className="flex items-center gap-2 bg-muted hover:bg-muted text-foreground font-bold py-2 px-4 rounded-lg transition-colors"

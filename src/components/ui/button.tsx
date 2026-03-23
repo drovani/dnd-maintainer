@@ -40,19 +40,31 @@ const buttonVariants = cva(
   }
 )
 
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & { pending?: boolean }
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  pending = false,
+  disabled,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
+  const isIconSize = size?.startsWith("icon")
+
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      disabled={pending || disabled}
+      aria-busy={pending || undefined}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        pending && `disabled:opacity-80 ${isIconSize ? "btn-pending-pulse" : "btn-pending-shimmer"}`
+      )}
       {...props}
     />
   )
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants, type ButtonProps }
