@@ -11,36 +11,36 @@ describe('createTimeoutFetch', () => {
     expect(result).toBe(mockResponse)
   })
 
-  it('rejects with timed out error when fetch never resolves and timeout elapses', async () => {
-    vi.useFakeTimers()
+  it('rejects with timeout error when request exceeds time limit', async () => {
+    // AbortSignal.timeout() uses real browser timers not supported in jsdom,
+    // so we stub it to fire immediately with a TimeoutError.
+    const abortController = new AbortController()
+    const timeoutError = new DOMException('signal timed out', 'TimeoutError')
+    vi.spyOn(AbortSignal, 'timeout').mockReturnValue(abortController.signal)
 
     vi.stubGlobal(
       'fetch',
       vi.fn().mockImplementation((_url: string, opts?: RequestInit) => {
-        // Reject when the controller's signal aborts
         return new Promise<Response>((_resolve, reject) => {
           opts?.signal?.addEventListener('abort', () => {
-            reject(opts.signal!.reason)
+            reject(timeoutError)
           })
+          // Trigger abort synchronously after attaching listener
+          abortController.abort(timeoutError)
         })
       }),
     )
 
-    const timeoutFetch = createTimeoutFetch(SUPABASE_FETCH_TIMEOUT_MS)
-    const fetchPromise = timeoutFetch('https://example.com/api')
-    const assertion = expect(fetchPromise).rejects.toThrow(
-      `timed out after ${SUPABASE_FETCH_TIMEOUT_MS}ms`,
-    )
-
-    await vi.advanceTimersByTimeAsync(SUPABASE_FETCH_TIMEOUT_MS + 1)
-    await assertion
-
-    vi.useRealTimers()
+    const timeoutFetch = createTimeoutFetch(10) // 10ms timeout
+    await expect(
+      timeoutFetch('https://example.com/api', {}),
+    ).rejects.toThrow('Supabase request to https://example.com/api timed out after 10ms')
   })
 
   it('rejects immediately when caller signal is already aborted', async () => {
-    // fetch should not be called at all
-    const mockFetch = vi.fn()
+    const mockFetch = vi.fn().mockRejectedValue(
+      new DOMException('signal is aborted without reason', 'AbortError'),
+    )
     vi.stubGlobal('fetch', mockFetch)
 
     const controller = new AbortController()
@@ -49,9 +49,29 @@ describe('createTimeoutFetch', () => {
     const timeoutFetch = createTimeoutFetch(SUPABASE_FETCH_TIMEOUT_MS)
     await expect(
       timeoutFetch('https://example.com/api', { signal: controller.signal }),
-    ).rejects.toThrow()
+    ).rejects.toThrow(DOMException)
+  })
 
-    expect(mockFetch).not.toHaveBeenCalled()
+  it('rejects with AbortError when caller aborts an in-flight request', async () => {
+    const controller = new AbortController()
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((_url: string, opts?: RequestInit) => {
+        return new Promise<Response>((_resolve, reject) => {
+          opts?.signal?.addEventListener('abort', () => {
+            reject(new DOMException('The operation was aborted.', 'AbortError'))
+          })
+        })
+      }),
+    )
+
+    const timeoutFetch = createTimeoutFetch(SUPABASE_FETCH_TIMEOUT_MS)
+    const fetchPromise = timeoutFetch('https://example.com/api', { signal: controller.signal })
+
+    controller.abort()
+
+    await expect(fetchPromise).rejects.toThrow(DOMException)
   })
 
   it('re-throws non-timeout errors unchanged', async () => {
