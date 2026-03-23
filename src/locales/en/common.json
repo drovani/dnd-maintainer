@@ -292,6 +292,7 @@
     "encounterActive": "Active",
     "encounterPlanning": "Planning",
     "confirmRemoveLoot": "Remove this item from the loot table?",
+    "confirmRemoveLootTitle": "Remove Loot Item",
     "loadingSession": "Loading session...",
     "errorLoadingSession": "Error loading session"
   },
@@ -394,6 +395,7 @@
       "tags": "e.g., important, villain, quest"
     },
     "confirmDeleteNote": "Delete this note? This cannot be undone.",
+    "confirmDeleteNoteTitle": "Delete Note",
     "loading": "Loading notes...",
     "errors": {
       "loading": "Error loading notes"

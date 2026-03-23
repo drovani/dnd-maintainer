@@ -23,6 +23,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { ValidationError } from '@/components/ui/validation-error'
 
 type NoteCategory = 'lore' | 'npc' | 'location' | 'quest' | 'item' | 'general'
@@ -47,6 +55,7 @@ export default function NotesPage() {
   const [sortBy, setSortBy] = useState<'recent' | 'pinned' | 'alphabetical'>('recent')
   const [showNewNoteModal, setShowNewNoteModal] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
   const autoSaveTimer = useRef<NodeJS.Timeout>(null)
   useEffect(() => {
     return () => {
@@ -279,9 +288,14 @@ export default function NotesPage() {
   }
 
   const handleDeleteNote = (noteId: string) => {
-    if (confirm(t('notes.confirmDeleteNote'))) {
-      deleteNoteMutation.mutate(noteId)
-    }
+    setDeletingNoteId(noteId)
+  }
+
+  const handleConfirmDeleteNote = () => {
+    if (!deletingNoteId) return
+    deleteNoteMutation.mutate(deletingNoteId, {
+      onSettled: () => setDeletingNoteId(null),
+    })
   }
 
   const getCategoryIcon = (category: NoteCategory) => {
@@ -540,6 +554,31 @@ export default function NotesPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Note Confirmation Dialog */}
+      <Dialog open={deletingNoteId !== null} onOpenChange={(open) => { if (!open) setDeletingNoteId(null) }}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>{t('notes.confirmDeleteNoteTitle')}</DialogTitle>
+            <DialogDescription>{t('notes.confirmDeleteNote')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeletingNoteId(null)}
+            >
+              {t('buttons.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDeleteNote}
+              pending={deleteNoteMutation.isPending}
+            >
+              {t('buttons.delete')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Note Editor Modal */}
       {showNewNoteModal && (
