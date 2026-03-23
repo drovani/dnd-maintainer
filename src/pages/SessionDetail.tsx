@@ -20,6 +20,15 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { ValidationError } from '@/components/ui/validation-error'
 
 interface LootEntry {
@@ -61,6 +70,7 @@ export default function SessionDetail() {
   const [dmNotes, setDmNotes] = useState('')
   const [loot, setLoot] = useState<LootEntry[]>([])
   const [showNewLootForm, setShowNewLootForm] = useState(false)
+  const [deletingLootId, setDeletingLootId] = useState<string | null>(null)
   const [lootNameError, setLootNameError] = useState<string>('')
   const [newLoot, setNewLoot] = useState<LootEntry>({
     id: crypto.randomUUID(),
@@ -197,9 +207,12 @@ export default function SessionDetail() {
   }
 
   const handleDeleteLoot = (lootId: string) => {
-    if (confirm(t('sessionDetail.confirmRemoveLoot'))) {
-      deleteLootMutation.mutate(lootId)
-    }
+    setDeletingLootId(lootId)
+  }
+
+  const handleConfirmDeleteLoot = () => {
+    deleteLootMutation.mutate(deletingLootId!)
+    setDeletingLootId(null)
   }
 
   function encounterStatusClass(status: string): string {
@@ -585,6 +598,31 @@ export default function SessionDetail() {
           )}
         </div>
       </div>
+
+      {/* Remove Loot Confirmation Dialog */}
+      <Dialog open={deletingLootId !== null} onOpenChange={(open) => { if (!open) setDeletingLootId(null) }}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>{t('sessionDetail.confirmRemoveLootTitle')}</DialogTitle>
+            <DialogDescription>{t('sessionDetail.confirmRemoveLoot')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeletingLootId(null)}
+            >
+              {t('buttons.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDeleteLoot}
+              pending={deleteLootMutation.isPending}
+            >
+              {t('buttons.remove')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
