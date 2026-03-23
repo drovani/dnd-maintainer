@@ -1,21 +1,13 @@
+import { Button } from '@/components/ui/button'
 import {
-  DND_ALIGNMENTS,
-  DND_BACKGROUNDS,
-  DND_CLASSES,
-  DND_RACE_GROUPS,
-  DND_SKILLS,
-  getAbilityModifier,
-  getProficiencyBonus,
-  type DndSkill,
-  type DndGender,
-} from '@/lib/dnd-helpers'
-import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
-import { Edit2, Minus, Plus, Save } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { GenderToggle } from '@/components/ui/gender-toggle'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -26,17 +18,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { GenderToggle } from '@/components/ui/gender-toggle'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
+import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
+import {
+  DND_ALIGNMENTS,
+  DND_BACKGROUNDS,
+  DND_CLASSES,
+  DND_RACE_GROUPS,
+  DND_SKILLS,
+  getAbilityModifier,
+  getProficiencyBonus,
+  type DndGender,
+  type DndSkill,
+} from '@/lib/dnd-helpers'
 import { Character } from '@/types/database'
+import { Edit2, Minus, Plus, Save } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 
 type EditSection = 'header' | 'abilities' | 'skills' | 'combat' | 'personality' | 'backstory' | 'appearance' | null
 
@@ -668,7 +668,7 @@ function EditHeaderDialog({
               <SelectContent>
                 {DND_RACE_GROUPS.map((group) => (
                   <SelectGroup key={group.id}>
-                    <SelectLabel>{t(`raceGroups.${group.id}` as never)}</SelectLabel>
+                    <SelectLabel>{t(`races.${group.id}` as never)}</SelectLabel>
                     {group.options.map((opt) => (
                       <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}`)}</SelectItem>
                     ))}
