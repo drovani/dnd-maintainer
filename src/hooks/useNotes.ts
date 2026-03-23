@@ -81,7 +81,7 @@ export function useDeleteNote() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id }: { id: string; campaignId: string }) => {
+    mutationFn: async ({ id }: { id: string }) => {
       const { error } = await supabase.from('notes').delete().eq('id', id);
       if (error) throw error;
     },

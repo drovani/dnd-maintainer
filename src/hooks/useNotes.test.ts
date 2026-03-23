@@ -62,5 +62,5 @@ describeUpdateMutation(
 describeDeleteMutation(
   'useDeleteNote',
   () => renderHook(() => useDeleteNote(), { wrapper: createWrapper() }),
-  { id: 'note-1', campaignId: 'camp-1' },
+  { id: 'note-1' },
 )

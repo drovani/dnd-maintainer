@@ -93,7 +93,7 @@ export default function SessionList() {
   }
 
   const sortedSessions = useMemo(() =>
-    [...(sessions ?? [])].sort((a, b) => a.session_number - b.session_number),
+    [...sessions].sort((a, b) => a.session_number - b.session_number),
     [sessions]
   )
 
