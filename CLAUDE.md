@@ -69,7 +69,7 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 
 ### Styling
 
-Three color themes (Default/gold, Sylvan/green, Arcane/purple) with light and dark mode. Theme is set via `data-theme` attribute on `<html>`, dark mode via `.dark` class. Theme state managed by `ThemeProvider` in `src/lib/theme.tsx`. CSS variables for each theme defined in `src/index.css`. Per-campaign theme overrides stored in the `campaigns.theme` DB column. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
+Three color themes (Default/gold, Sylvan/green, Arcane/purple) with light and dark mode. Theme is set via `data-theme` attribute on `<html>`, dark mode via `.dark` class. Theme state managed by `ThemeProvider` in `src/components/ThemeProvider.tsx`. CSS variables for each theme defined in `src/index.css`. Per-campaign theme overrides stored in the `campaigns.theme` DB column. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
 
 - Prefer `size-*` over `w-* h-*` for square elements (icons, avatars, etc.) to signal intent that width and height should stay equal.
 

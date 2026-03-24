@@ -1,15 +1,21 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   applyThemeToDOM,
+  COLOR_MODES,
+  isColorMode,
   isThemeId,
   readStoredColorMode,
   readStoredTheme,
   resolveColorMode,
+  STORAGE_KEYS,
+  THEME_IDS,
   writeStoredColorMode,
   writeStoredTheme,
 } from '@/lib/theme';
 
-const THEME_STORAGE_KEY = 'dnd-theme';
-const COLOR_MODE_STORAGE_KEY = 'dnd-color-mode';
+const THEME_STORAGE_KEY = STORAGE_KEYS.theme;
+const COLOR_MODE_STORAGE_KEY = STORAGE_KEYS.colorMode;
 
 beforeEach(() => {
   localStorage.clear();
@@ -35,6 +41,27 @@ describe('isThemeId', () => {
     ['boolean', true],
   ])('returns false for invalid input: %s', (_label, value) => {
     expect(isThemeId(value)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isColorMode
+// ---------------------------------------------------------------------------
+describe('isColorMode', () => {
+  it.each(['light', 'dark', 'system'])('returns true for valid color mode "%s"', (mode) => {
+    expect(isColorMode(mode)).toBe(true);
+  });
+
+  it.each([
+    ['empty string', ''],
+    ['unknown string', 'auto'],
+    ['number', 42],
+    ['null', null],
+    ['undefined', undefined],
+    ['object', {}],
+    ['boolean', true],
+  ])('returns false for invalid input: %s', (_label, value) => {
+    expect(isColorMode(value)).toBe(false);
   });
 });
 
@@ -181,5 +208,77 @@ describe('applyThemeToDOM', () => {
     document.documentElement.classList.add('dark');
     applyThemeToDOM('default', 'light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// localStorage exception handling
+// ---------------------------------------------------------------------------
+describe('localStorage exception handling', () => {
+  it('readStoredTheme returns default when localStorage throws', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    expect(readStoredTheme()).toBe('default');
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
+    warnSpy.mockRestore();
+  });
+
+  it('readStoredColorMode returns system when localStorage throws', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    expect(readStoredColorMode()).toBe('system');
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
+    warnSpy.mockRestore();
+  });
+
+  it('writeStoredTheme does not throw when localStorage throws', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(() => writeStoredTheme('arcane')).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
+    warnSpy.mockRestore();
+  });
+
+  it('writeStoredColorMode does not throw when localStorage throws', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(() => writeStoredColorMode('dark')).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
+    warnSpy.mockRestore();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// index.html sync check — theme constants must match THEMES/COLOR_MODES
+// ---------------------------------------------------------------------------
+describe('index.html theme constants sync', () => {
+  const indexHtml = fs.readFileSync(path.resolve(__dirname, '../../index.html'), 'utf-8');
+
+  it('validThemes in index.html matches THEME_IDS (excluding default)', () => {
+    const match = indexHtml.match(/var validThemes = \[([^\]]+)\]/);
+    expect(match).not.toBeNull();
+    const inlineThemes = match![1].replace(/'/g, '').split(',').map(s => s.trim());
+    const expectedThemes = THEME_IDS.filter(id => id !== 'default');
+    expect(inlineThemes).toEqual(expectedThemes);
+  });
+
+  it('validModes in index.html matches COLOR_MODES', () => {
+    const match = indexHtml.match(/var validModes = \[([^\]]+)\]/);
+    expect(match).not.toBeNull();
+    const inlineModes = match![1].replace(/'/g, '').split(',').map(s => s.trim());
+    expect(inlineModes).toEqual([...COLOR_MODES]);
+  });
+
+  it('storage keys in index.html match STORAGE_KEYS', () => {
+    expect(indexHtml).toContain(`localStorage.getItem('${STORAGE_KEYS.colorMode}')`);
+    expect(indexHtml).toContain(`localStorage.getItem('${STORAGE_KEYS.theme}')`);
   });
 });

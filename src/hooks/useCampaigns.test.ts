@@ -24,6 +24,7 @@ const baseCampaign: Campaign = {
   setting: null,
   image_url: null,
   dm_notes: null,
+  theme: null,
   archived_at: null,
 }
 

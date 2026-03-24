@@ -80,9 +80,25 @@ describe('campaign theme override', () => {
   });
 });
 
-describe('system preference listener', () => {
+describe('system preference detection', () => {
+  it('resolves to dark when system prefers dark and mode is system', () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      media: '(prefers-color-scheme: dark)',
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    });
+
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    expect(result.current.resolvedMode).toBe('dark');
+  });
+
   it('responds to system preference changes when mode is system', () => {
-    let changeHandler: ((e: MediaQueryListEvent) => void) | null = null;
+    let changeHandler: (() => void) | null = null;
     vi.mocked(window.matchMedia).mockReturnValue({
       matches: false,
       media: '(prefers-color-scheme: dark)',
@@ -90,7 +106,7 @@ describe('system preference listener', () => {
       addListener: vi.fn(),
       removeListener: vi.fn(),
       addEventListener: vi.fn((_event: string, handler: EventListenerOrEventListenerObject) => {
-        changeHandler = handler as (e: MediaQueryListEvent) => void;
+        changeHandler = handler as () => void;
       }),
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
@@ -99,30 +115,38 @@ describe('system preference listener', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     expect(result.current.resolvedMode).toBe('light');
 
-    // Simulate system dark mode change
-    act(() => {
-      changeHandler?.({ matches: true } as MediaQueryListEvent);
-    });
-    expect(result.current.resolvedMode).toBe('dark');
-  });
-
-  it('removes listener when switching away from system mode', () => {
-    const removeEventListener = vi.fn();
+    // Simulate system dark mode change — useSyncExternalStore re-reads getSnapshot
     vi.mocked(window.matchMedia).mockReturnValue({
-      matches: false,
+      matches: true,
       media: '(prefers-color-scheme: dark)',
       onchange: null,
       addListener: vi.fn(),
       removeListener: vi.fn(),
       addEventListener: vi.fn(),
-      removeEventListener,
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    });
+    act(() => {
+      changeHandler?.();
+    });
+    expect(result.current.resolvedMode).toBe('dark');
+  });
+
+  it('ignores system preference when mode is explicit', () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      media: '(prefers-color-scheme: dark)',
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     });
 
     const { result } = renderHook(() => useTheme(), { wrapper });
-    // Switch away from system to trigger cleanup
-    act(() => result.current.setColorMode('dark'));
-    expect(removeEventListener).toHaveBeenCalled();
+    act(() => result.current.setColorMode('light'));
+    expect(result.current.resolvedMode).toBe('light');
   });
 });
 

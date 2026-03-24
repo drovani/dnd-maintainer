@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 import {
   type ColorMode,
@@ -7,7 +7,6 @@ import {
   applyThemeToDOM,
   readStoredColorMode,
   readStoredTheme,
-  resolveColorMode,
   writeStoredColorMode,
   writeStoredTheme,
 } from '@/lib/theme';
@@ -20,16 +19,35 @@ interface ThemeContextValue {
   resolvedMode: ResolvedMode;
   campaignThemeOverride: ThemeId | null;
   setCampaignThemeOverride: (id: ThemeId | null) => void;
-  effectiveTheme: ThemeId;    // after campaign override resolution
+  effectiveTheme: ThemeId;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+function subscribeToSystemPreference(callback: () => void): () => void {
+  const mql = window.matchMedia('(prefers-color-scheme: dark)');
+  mql.addEventListener('change', callback);
+  return () => mql.removeEventListener('change', callback);
+}
+
+function getSystemPrefersDark(): boolean {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function deriveResolvedMode(colorMode: ColorMode, systemPrefersDark: boolean): ResolvedMode {
+  if (colorMode === 'system') {
+    return systemPrefersDark ? 'dark' : 'light';
+  }
+  return colorMode;
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.Element {
   const [theme, setThemeState] = useState<ThemeId>(readStoredTheme);
   const [colorMode, setColorModeState] = useState<ColorMode>(readStoredColorMode);
-  const [resolvedMode, setResolvedMode] = useState<ResolvedMode>(() => resolveColorMode(colorMode));
   const [campaignThemeOverride, setCampaignThemeOverride] = useState<ThemeId | null>(null);
+
+  const systemPrefersDark = useSyncExternalStore(subscribeToSystemPreference, getSystemPrefersDark);
+  const resolvedMode = deriveResolvedMode(colorMode, systemPrefersDark);
 
   const setTheme = useCallback((id: ThemeId) => {
     setThemeState(id);
@@ -39,23 +57,10 @@ export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.
   const setColorMode = useCallback((mode: ColorMode) => {
     setColorModeState(mode);
     writeStoredColorMode(mode);
-    setResolvedMode(resolveColorMode(mode));
   }, []);
 
-  // Listen to system preference changes when mode is "system"
-  useEffect(() => {
-    if (colorMode !== 'system') return;
-
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent): void => {
-      setResolvedMode(e.matches ? 'dark' : 'light');
-    };
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, [colorMode]);
-
-  // Apply theme to DOM whenever effective theme or mode changes
   const effectiveTheme = campaignThemeOverride ?? theme;
+
   useEffect(() => {
     applyThemeToDOM(effectiveTheme, resolvedMode);
   }, [effectiveTheme, resolvedMode]);
@@ -71,7 +76,7 @@ export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.
       setCampaignThemeOverride,
       effectiveTheme,
     }),
-    [theme, setTheme, colorMode, setColorMode, resolvedMode, campaignThemeOverride, effectiveTheme],
+    [theme, setTheme, colorMode, setColorMode, resolvedMode, campaignThemeOverride, setCampaignThemeOverride, effectiveTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

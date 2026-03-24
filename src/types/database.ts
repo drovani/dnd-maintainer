@@ -77,7 +77,7 @@ export interface Campaign {
   status: 'active' | 'paused' | 'completed' | 'planning' | null
   image_url?: string | null
   dm_notes?: string | null
-  theme?: ThemeId | null
+  theme: ThemeId | null
   archived_at?: string | null
 }
 

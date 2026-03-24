@@ -12,7 +12,7 @@ export const COLOR_MODES = ['light', 'dark', 'system'] as const;
 export type ColorMode = (typeof COLOR_MODES)[number];
 export type ResolvedMode = Exclude<ColorMode, 'system'>;
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   theme: 'dnd-theme',
   colorMode: 'dnd-color-mode',
 } as const;
@@ -29,7 +29,8 @@ export function readStoredTheme(): ThemeId {
   try {
     const v = localStorage.getItem(STORAGE_KEYS.theme);
     return isThemeId(v) ? v : 'default';
-  } catch {
+  } catch (err) {
+    console.warn('[theme] Failed to read theme from localStorage:', err);
     return 'default';
   }
 }
@@ -37,8 +38,8 @@ export function readStoredTheme(): ThemeId {
 export function writeStoredTheme(id: ThemeId): void {
   try {
     localStorage.setItem(STORAGE_KEYS.theme, id);
-  } catch {
-    // Storage unavailable; in-memory state is still correct
+  } catch (err) {
+    console.warn('[theme] Failed to persist theme to localStorage:', err);
   }
 }
 
@@ -46,7 +47,8 @@ export function readStoredColorMode(): ColorMode {
   try {
     const v = localStorage.getItem(STORAGE_KEYS.colorMode);
     return isColorMode(v) ? v : 'system';
-  } catch {
+  } catch (err) {
+    console.warn('[theme] Failed to read color mode from localStorage:', err);
     return 'system';
   }
 }
@@ -54,8 +56,8 @@ export function readStoredColorMode(): ColorMode {
 export function writeStoredColorMode(mode: ColorMode): void {
   try {
     localStorage.setItem(STORAGE_KEYS.colorMode, mode);
-  } catch {
-    // Storage unavailable; in-memory state is still correct
+  } catch (err) {
+    console.warn('[theme] Failed to persist color mode to localStorage:', err);
   }
 }
 

@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { AlertTriangle, Sun, Moon, Monitor, RefreshCw } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemePicker } from '@/components/ThemePicker';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns';
 import type { ThemeId } from '@/lib/theme';
 import { cn } from '@/lib/utils';
@@ -15,7 +17,7 @@ const COLOR_MODE_OPTIONS = [
 export default function SettingsTheme(): React.JSX.Element {
   const { t } = useTranslation('common');
   const { theme, setTheme, colorMode, setColorMode } = useTheme();
-  const { data: campaigns = [] } = useCampaigns();
+  const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
   const { update } = useCampaignMutations();
 
   const handleCampaignThemeChange = (campaignId: string, newTheme: ThemeId | null): void => {
@@ -65,30 +67,57 @@ export default function SettingsTheme(): React.JSX.Element {
         </section>
 
         {/* Per-Campaign Overrides */}
-        {campaigns.length > 0 && (
-          <section className="space-y-3">
-            <div>
-              <h2 className="text-lg font-semibold">{t('settings.campaignOverrides')}</h2>
-              <p className="text-sm text-muted-foreground">{t('settings.campaignOverridesDescription')}</p>
-            </div>
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold">{t('settings.campaignOverrides')}</h2>
+            <p className="text-sm text-muted-foreground">{t('settings.campaignOverridesDescription')}</p>
+          </div>
+          {isLoading ? (
             <div className="space-y-4">
-              {campaigns.map((campaign) => (
-                <div key={campaign.id} className="flex items-center justify-between rounded-lg border border-border p-4">
-                  <span className="font-medium">{campaign.name}</span>
-                  <ThemePicker
-                    value={campaign.theme ?? null}
-                    onChange={(id) => handleCampaignThemeChange(campaign.id, id)}
-                    allowNone
-                    disabled={update.isPending}
-                  />
-                  {update.isError && update.variables?.id === campaign.id && (
-                    <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
-                  )}
-                </div>
-              ))}
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
             </div>
-          </section>
-        )}
+          ) : isError ? (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="size-4" />
+                <span className="text-sm font-medium">{t('errors.loadingCampaigns')}</span>
+              </div>
+              {error && (
+                <p className="text-xs text-muted-foreground">{t('errors.errorPrefix', { message: error.message })}</p>
+              )}
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="size-4" />
+                {t('buttons.tryAgain')}
+              </Button>
+            </div>
+          ) : campaigns.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('nav.noCampaigns')}</p>
+          ) : (
+            <div className="space-y-4">
+              {campaigns.map((campaign) => {
+                const isMutatingThis = update.isPending && update.variables?.id === campaign.id;
+                const hasErrorForThis = update.isError && update.variables?.id === campaign.id;
+                return (
+                  <div key={campaign.id} className="rounded-lg border border-border p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{campaign.name}</span>
+                      <ThemePicker
+                        value={campaign.theme ?? null}
+                        onChange={(id) => handleCampaignThemeChange(campaign.id, id)}
+                        allowNone
+                        disabled={isMutatingThis}
+                      />
+                    </div>
+                    {hasErrorForThis && (
+                      <p className="text-sm text-destructive">{t('errors.saveFailed')}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
