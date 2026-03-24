@@ -117,6 +117,7 @@
   },
   "languages": {
     "common": "Common",
+    "common-sign": "Common Sign Language",
     "dwarvish": "Dwarvish",
     "elvish": "Elvish",
     "giant": "Giant",
@@ -132,6 +133,37 @@
     "primordial": "Primordial",
     "sylvan": "Sylvan",
     "undercommon": "Undercommon"
+  },
+  "languageCategories": {
+    "standard": "Standard Languages",
+    "exotic": "Exotic Languages"
+  },
+  "languageSpeakers": {
+    "common": "Humans",
+    "common-sign": "Hearing-impaired communities",
+    "dwarvish": "Dwarves",
+    "elvish": "Elves",
+    "giant": "Ogres, Giants",
+    "gnomish": "Gnomes",
+    "goblin": "Goblinoids",
+    "halfling": "Halflings",
+    "orc": "Orcs",
+    "abyssal": "Demons",
+    "celestial": "Celestials",
+    "draconic": "Dragons, Dragonborn",
+    "deepspeech": "Aboleths, Cloakers",
+    "infernal": "Devils",
+    "primordial": "Elementals",
+    "sylvan": "Fey creatures",
+    "undercommon": "Underworld traders"
+  },
+  "languageScripts": {
+    "common": "Common",
+    "dwarvish": "Dwarvish",
+    "elvish": "Elvish",
+    "draconic": "Draconic",
+    "infernal": "Infernal",
+    "celestial": "Celestial"
   },
   "armor": {
     "light": "Light",

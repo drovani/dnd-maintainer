@@ -234,11 +234,40 @@ export interface DndBackground {
 }
 
 export const DND_LANGUAGES = [
-  'common', 'dwarvish', 'elvish', 'giant', 'gnomish', 'goblin', 'halfling', 'orc',
+  'common', 'common-sign', 'dwarvish', 'elvish', 'giant', 'gnomish', 'goblin', 'halfling', 'orc',
   'abyssal', 'celestial', 'draconic', 'deepspeech', 'infernal', 'primordial', 'sylvan', 'undercommon',
 ] as const
 
 export type LanguageId = (typeof DND_LANGUAGES)[number]
+
+export type LanguageCategory = 'standard' | 'exotic'
+export type ScriptId = 'common' | 'dwarvish' | 'elvish' | 'draconic' | 'infernal' | 'celestial'
+
+export interface DndLanguage {
+  readonly id: LanguageId
+  readonly category: LanguageCategory
+  readonly script: ScriptId | null
+}
+
+export const DND_LANGUAGE_DATA: readonly DndLanguage[] = [
+  { id: 'common', category: 'standard', script: 'common' },
+  { id: 'common-sign', category: 'standard', script: null },
+  { id: 'dwarvish', category: 'standard', script: 'dwarvish' },
+  { id: 'elvish', category: 'standard', script: 'elvish' },
+  { id: 'giant', category: 'standard', script: 'dwarvish' },
+  { id: 'gnomish', category: 'standard', script: 'dwarvish' },
+  { id: 'goblin', category: 'standard', script: 'dwarvish' },
+  { id: 'halfling', category: 'standard', script: 'common' },
+  { id: 'orc', category: 'standard', script: 'dwarvish' },
+  { id: 'abyssal', category: 'exotic', script: 'infernal' },
+  { id: 'celestial', category: 'exotic', script: 'celestial' },
+  { id: 'draconic', category: 'exotic', script: 'draconic' },
+  { id: 'deepspeech', category: 'exotic', script: null },
+  { id: 'infernal', category: 'exotic', script: 'infernal' },
+  { id: 'primordial', category: 'exotic', script: 'dwarvish' },
+  { id: 'sylvan', category: 'exotic', script: 'elvish' },
+  { id: 'undercommon', category: 'exotic', script: 'elvish' },
+] as const
 
 export const DND_ARMOR_PROFICIENCIES = [
   'light', 'medium', 'medium-nonmetal', 'heavy', 'shields', 'shields-nonmetal',
@@ -638,6 +667,32 @@ export function getPointBuyEquivalent(scores: number[]): number {
     const clamped = Math.min(Math.max(score, 8), 15)
     return sum + (POINT_BUY_COSTS[clamped] ?? 0)
   }, 0)
+}
+
+// SRD d12 random language table (standard languages only)
+const RANDOM_LANGUAGE_TABLE: readonly { readonly min: number; readonly max: number; readonly id: LanguageId }[] = [
+  { min: 1, max: 1, id: 'common-sign' },
+  { min: 2, max: 2, id: 'draconic' },
+  { min: 3, max: 4, id: 'dwarvish' },
+  { min: 5, max: 6, id: 'elvish' },
+  { min: 7, max: 7, id: 'giant' },
+  { min: 8, max: 8, id: 'gnomish' },
+  { min: 9, max: 9, id: 'goblin' },
+  { min: 10, max: 11, id: 'halfling' },
+  { min: 12, max: 12, id: 'orc' },
+]
+
+export function rollRandomLanguage(exclude: readonly LanguageId[]): LanguageId | null {
+  const available = RANDOM_LANGUAGE_TABLE.filter((entry) => !exclude.includes(entry.id))
+  if (available.length === 0) return null
+  const totalWeight = available.reduce((sum, e) => sum + (e.max - e.min + 1), 0)
+  let roll = Math.floor(Math.random() * totalWeight)
+  for (const entry of available) {
+    const weight = entry.max - entry.min + 1
+    if (roll < weight) return entry.id
+    roll -= weight
+  }
+  return available[available.length - 1].id
 }
 
 export function roll4d6DropLowest(): number {

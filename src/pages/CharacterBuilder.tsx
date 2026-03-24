@@ -223,6 +223,13 @@ export default function CharacterBuilder() {
     })
   }
 
+  const handleLanguageRandomize = (languages: LanguageId[]) => {
+    setCharacterData((prev) => ({
+      ...prev,
+      proficiencies: { ...prev.proficiencies, languageChoices: languages },
+    }))
+  }
+
   const addEquipment = () => setCharacterData((prev) => ({
     ...prev, equipment: [...prev.equipment, { id: crypto.randomUUID(), name: '', quantity: 1, weight: 0, equipped: false }],
   }))
@@ -252,7 +259,7 @@ export default function CharacterBuilder() {
       )
       case 'proficiencies': return (
         <ProficienciesStep characterClass={cd.class} race={cd.race}
-          proficiencies={cd.proficiencies} onToolChoiceToggle={handleToolChoiceToggle} onLanguageChoiceToggle={handleLanguageChoiceToggle} />
+          proficiencies={cd.proficiencies} onToolChoiceToggle={handleToolChoiceToggle} onLanguageChoiceToggle={handleLanguageChoiceToggle} onLanguageRandomize={handleLanguageRandomize} />
       )
       case 'equipment': return (
         <EquipmentStep equipment={cd.equipment} onAdd={addEquipment} onUpdate={updateEquipment} onRemove={removeEquipment} />
