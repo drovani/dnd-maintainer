@@ -1,5 +1,5 @@
 import type { AlignmentId, BackgroundId, ClassId, DndGender, RaceId } from '@/lib/dnd-helpers'
-import type { AbilityScores } from '@/types/database'
+import type { AbilityScores, Proficiencies } from '@/types/database'
 
 export interface CharacterData {
   // Basics
@@ -22,6 +22,9 @@ export interface CharacterData {
 
   // Skills
   skills: Record<string, { proficient: boolean; expertise: boolean }>
+
+  // Proficiencies & Languages
+  proficiencies: Proficiencies
 
   // Features
   features: Array<{ id: string; name: string; description: string; source: string; uses: number }>

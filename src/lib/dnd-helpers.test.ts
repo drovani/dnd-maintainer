@@ -1,9 +1,15 @@
 import {
   DND_ALIGNMENTS,
+  DND_ARMOR_PROFICIENCIES,
   DND_BACKGROUNDS,
   DND_CLASSES,
+  DND_LANGUAGES,
   DND_RACES,
   DND_SKILLS,
+  DND_TOOL_PROFICIENCIES,
+  DND_WEAPON_PROFICIENCIES,
+  EMPTY_PROFICIENCIES,
+  computeProficiencies,
   generateCharacterName,
   getAbilityModifier,
   getBaseRaceId,
@@ -15,7 +21,10 @@ import {
   getSpellSlots,
   roll4d6DropLowest,
   rollAbilityScores,
+  toggleLanguageProficiencyChoice,
+  toggleToolProficiencyChoice,
 } from "@/lib/dnd-helpers";
+import type { DndClass, DndRace, Proficiencies } from "@/lib/dnd-helpers";
 
 // ---------------------------------------------------------------------------
 // getAbilityModifier
@@ -283,5 +292,287 @@ describe.each<[string, ReadonlyArray<{ readonly id: string }>]>([
     expect(collection.length).toBeGreaterThan(0);
     const ids = collection.map((entry) => entry.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Static data integrity for proficiency/language arrays
+// ---------------------------------------------------------------------------
+describe.each<[string, readonly string[]]>([
+  ["DND_LANGUAGES", DND_LANGUAGES],
+  ["DND_ARMOR_PROFICIENCIES", DND_ARMOR_PROFICIENCIES],
+  ["DND_WEAPON_PROFICIENCIES", DND_WEAPON_PROFICIENCIES],
+  ["DND_TOOL_PROFICIENCIES", DND_TOOL_PROFICIENCIES],
+])("%s", (_label, collection) => {
+  it("has unique entries", () => {
+    expect(collection.length).toBeGreaterThan(0);
+    expect(new Set(collection).size).toBe(collection.length);
+  });
+});
+
+describe("DND_RACES language data integrity", () => {
+  it("every race has at least one language", () => {
+    for (const race of DND_RACES) {
+      expect(race.languages.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("all race languages exist in DND_LANGUAGES", () => {
+    for (const race of DND_RACES) {
+      for (const lang of race.languages) {
+        expect(DND_LANGUAGES).toContain(lang);
+      }
+    }
+  });
+});
+
+describe("DND_RACES proficiency data integrity", () => {
+  it("all race weaponProficiencies exist in DND_WEAPON_PROFICIENCIES", () => {
+    for (const race of DND_RACES) {
+      const r = race as DndRace;
+      if (r.weaponProficiencies) {
+        for (const weapon of r.weaponProficiencies) {
+          expect(DND_WEAPON_PROFICIENCIES).toContain(weapon);
+        }
+      }
+    }
+  });
+});
+
+describe("DND_CLASSES proficiency data integrity", () => {
+  it("all class armorProficiencies exist in DND_ARMOR_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      for (const armor of cls.armorProficiencies) {
+        expect(DND_ARMOR_PROFICIENCIES).toContain(armor);
+      }
+    }
+  });
+
+  it("all class weaponProficiencies exist in DND_WEAPON_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      for (const weapon of cls.weaponProficiencies) {
+        expect(DND_WEAPON_PROFICIENCIES).toContain(weapon);
+      }
+    }
+  });
+
+  it("all class toolProficiencies exist in DND_TOOL_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      for (const tool of cls.toolProficiencies) {
+        expect(DND_TOOL_PROFICIENCIES).toContain(tool);
+      }
+    }
+  });
+
+  it("all class toolChoices.from entries exist in DND_TOOL_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      const c = cls as DndClass;
+      if (c.toolChoices) {
+        for (const tool of c.toolChoices.from) {
+          expect(DND_TOOL_PROFICIENCIES).toContain(tool);
+        }
+      }
+    }
+  });
+
+  it("toolChoices.from is disjoint from toolProficiencies", () => {
+    for (const cls of DND_CLASSES) {
+      const c = cls as DndClass;
+      if (c.toolChoices) {
+        for (const tool of c.toolChoices.from) {
+          expect(c.toolProficiencies).not.toContain(tool);
+        }
+      }
+    }
+  });
+
+  it("toolChoices.count does not exceed toolChoices.from.length", () => {
+    for (const cls of DND_CLASSES) {
+      const c = cls as DndClass;
+      if (c.toolChoices) {
+        expect(c.toolChoices.count).toBeLessThanOrEqual(c.toolChoices.from.length);
+      }
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeProficiencies
+// ---------------------------------------------------------------------------
+describe("computeProficiencies", () => {
+  const base: Proficiencies = { ...EMPTY_PROFICIENCIES };
+
+  it("returns previous proficiencies when neither class nor race changed", () => {
+    const result = computeProficiencies("fighter", "human", base, false, false);
+    expect(result).toBe(base);
+  });
+
+  it("computes class proficiencies when class changes", () => {
+    const result = computeProficiencies("fighter", "", base, true, false);
+    expect(result.armor).toEqual(["light", "medium", "heavy", "shields"]);
+    expect(result.weapons).toEqual(["simple", "martial"]);
+    expect(result.tools).toEqual([]);
+    expect(result.toolChoices).toEqual([]);
+  });
+
+  it("includes race weapon proficiencies when no class is selected", () => {
+    const result = computeProficiencies("", "dwarf-mountain", base, false, true);
+    expect(result.weapons).toEqual(["battleaxe", "handaxe", "lighthammer", "warhammer"]);
+    expect(result.armor).toEqual([]);
+  });
+
+  it("computes race languages when race changes", () => {
+    const result = computeProficiencies("", "human", base, false, true);
+    expect(result.languages).toEqual(["common"]);
+    expect(result.languageChoices).toEqual([]);
+  });
+
+  it("merges class and race weapon proficiencies", () => {
+    const result = computeProficiencies("rogue", "elf-high", base, true, true);
+    // Rogue: simple, handcrossbow, longsword, rapier, shortsword
+    // Elf-High: longsword, shortsword, shortbow, longbow
+    expect(result.weapons).toContain("simple");
+    expect(result.weapons).toContain("shortbow");
+    expect(result.weapons).toContain("longbow");
+  });
+
+  it("deduplicates overlapping weapon proficiencies", () => {
+    const result = computeProficiencies("rogue", "elf-high", base, true, true);
+    const longswordCount = result.weapons.filter((w) => w === "longsword").length;
+    const shortswordCount = result.weapons.filter((w) => w === "shortsword").length;
+    expect(longswordCount).toBe(1);
+    expect(shortswordCount).toBe(1);
+  });
+
+  it("resets toolChoices when class changes", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum"] };
+    const result = computeProficiencies("bard", "human", prev, true, false);
+    expect(result.toolChoices).toEqual([]);
+  });
+
+  it("preserves toolChoices when only race changes", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum"] };
+    const result = computeProficiencies("bard", "halfelf", prev, false, true);
+    expect(result.toolChoices).toEqual(["drum"]);
+  });
+
+  it("resets languageChoices when race changes", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["giant"] };
+    const result = computeProficiencies("fighter", "human", prev, false, true);
+    expect(result.languageChoices).toEqual([]);
+  });
+
+  it("preserves languageChoices when only class changes", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["giant"] };
+    const result = computeProficiencies("fighter", "human", prev, true, false);
+    expect(result.languageChoices).toEqual(["giant"]);
+  });
+
+  it("returns empty arrays when class and race are empty strings", () => {
+    const result = computeProficiencies("", "", base, true, true);
+    expect(result.armor).toEqual([]);
+    expect(result.weapons).toEqual([]);
+    expect(result.tools).toEqual([]);
+    expect(result.languages).toEqual([]);
+  });
+
+  it("resets both toolChoices and languageChoices when both class and race change", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum", "flute"], languageChoices: ["giant"] };
+    const result = computeProficiencies("fighter", "halfelf", prev, true, true);
+    expect(result.toolChoices).toEqual([]);
+    expect(result.languageChoices).toEqual([]);
+    expect(result.armor).toEqual(["light", "medium", "heavy", "shields"]);
+    expect(result.languages).toEqual(["common", "elvish"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// toggleToolProficiencyChoice
+// ---------------------------------------------------------------------------
+describe("toggleToolProficiencyChoice", () => {
+  const base: Proficiencies = { ...EMPTY_PROFICIENCIES };
+
+  it("adds a tool when under the max", () => {
+    const result = toggleToolProficiencyChoice(base, "bard", "drum");
+    expect(result.toolChoices).toEqual(["drum"]);
+  });
+
+  it("removes a tool that is already selected", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum", "flute"] };
+    const result = toggleToolProficiencyChoice(prev, "bard", "drum");
+    expect(result.toolChoices).toEqual(["flute"]);
+  });
+
+  it("does not add beyond the max (bard gets 3)", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum", "flute", "lute"] };
+    const result = toggleToolProficiencyChoice(prev, "bard", "lyre");
+    expect(result).toBe(prev);
+  });
+
+  it("returns unchanged proficiencies for a class without tool choices", () => {
+    const result = toggleToolProficiencyChoice(base, "fighter", "drum");
+    expect(result).toBe(base);
+  });
+
+  it("returns unchanged proficiencies for empty class", () => {
+    const result = toggleToolProficiencyChoice(base, "", "drum");
+    expect(result).toBe(base);
+  });
+
+  it("rejects a tool not in the class toolChoices.from list and warns", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = toggleToolProficiencyChoice(base, "bard", "thievestools");
+    expect(result).toBe(base);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("thievestools"));
+  });
+
+  it("rejects a tool already in auto-granted tools and warns", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prev: Proficiencies = { ...base, tools: ["herbalismkit"] };
+    const result = toggleToolProficiencyChoice(prev, "bard", "herbalismkit");
+    expect(result).toBe(prev);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("herbalismkit"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// toggleLanguageProficiencyChoice
+// ---------------------------------------------------------------------------
+describe("toggleLanguageProficiencyChoice", () => {
+  const base: Proficiencies = { ...EMPTY_PROFICIENCIES };
+
+  it("adds a language when under the max", () => {
+    const result = toggleLanguageProficiencyChoice(base, "human", "elvish");
+    expect(result.languageChoices).toEqual(["elvish"]);
+  });
+
+  it("removes a language that is already selected", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["elvish"] };
+    const result = toggleLanguageProficiencyChoice(prev, "human", "elvish");
+    expect(result.languageChoices).toEqual([]);
+  });
+
+  it("does not add beyond the max (human gets 1)", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["elvish"] };
+    const result = toggleLanguageProficiencyChoice(prev, "human", "dwarvish");
+    expect(result).toBe(prev);
+  });
+
+  it("returns unchanged proficiencies for a race without language choices", () => {
+    const result = toggleLanguageProficiencyChoice(base, "tiefling", "elvish");
+    expect(result).toBe(base);
+  });
+
+  it("returns unchanged proficiencies for empty race", () => {
+    const result = toggleLanguageProficiencyChoice(base, "", "elvish");
+    expect(result).toBe(base);
+  });
+
+  it("rejects a language already in auto-granted languages and warns", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prev: Proficiencies = { ...base, languages: ["common", "elvish"] };
+    const result = toggleLanguageProficiencyChoice(prev, "halfelf", "elvish");
+    expect(result).toBe(prev);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("elvish"));
   });
 });

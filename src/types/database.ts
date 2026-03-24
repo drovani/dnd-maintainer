@@ -1,5 +1,7 @@
-import type { DndGender, RaceId, ClassId, AlignmentId } from '@/lib/dnd-helpers'
+import type { AlignmentId, ClassId, DndGender, Proficiencies, RaceId } from '@/lib/dnd-helpers'
 import type { ThemeId } from '@/lib/theme'
+
+export type { Proficiencies }
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
@@ -107,6 +109,7 @@ export interface Character {
   abilities: AbilityScores
   saving_throws?: Record<string, { proficient: boolean }> | null
   skills: Record<string, { proficient: boolean; expertise: boolean }> | null
+  proficiencies: Proficiencies | null
   features: Feature[] | null
   equipment: EquipmentItem[] | null
   spells: {

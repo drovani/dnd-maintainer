@@ -93,6 +93,7 @@
       "abilities": "Abilities",
       "skills": "Skills",
       "features": "Features",
+      "proficiencies": "Proficiencies",
       "equipment": "Equipment",
       "spells": "Spells",
       "backstory": "Backstory"
@@ -166,6 +167,22 @@
       "chooseSkills": "Choose {{count}} skill from your class list.",
       "chooseSkills_plural": "Choose {{count}} skills from your class list.",
       "selected": "{{count}} / {{max}} selected"
+    },
+    "proficiencies": {
+      "selectClassFirst": "Please select a class in the Basics step before viewing proficiencies.",
+      "selectRaceFirst": "Please select a race in the Basics step before viewing languages.",
+      "armorProficiencies": "Armor Proficiencies",
+      "weaponProficiencies": "Weapon Proficiencies",
+      "toolProficiencies": "Tool Proficiencies",
+      "languages": "Languages",
+      "chooseTools": "Choose {{count}} tool proficiency from the list below.",
+      "chooseTools_plural": "Choose {{count}} tool proficiencies from the list below.",
+      "chooseLanguages": "Choose {{count}} additional language.",
+      "chooseLanguages_plural": "Choose {{count}} additional languages.",
+      "selected": "{{count}} / {{max}} selected",
+      "noProficiencies": "None",
+      "fromClass": "From class",
+      "fromRace": "From race"
     },
     "spells": {
       "basicVersion": "Spell management (basic version)",

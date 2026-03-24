@@ -201,9 +201,12 @@ export function getSpellSlots(className: string, level: number): number[] {
 
 export interface DndRace {
   readonly id: RaceId
-  readonly size: string
+  readonly size: 'Small' | 'Medium'
   readonly speed: number
   readonly abilityBonuses: Partial<Record<AbilityKey, number>>
+  readonly languages: readonly LanguageId[]
+  readonly languageChoices?: number
+  readonly weaponProficiencies?: readonly WeaponProficiencyId[]
 }
 
 export interface DndClass {
@@ -215,6 +218,10 @@ export interface DndClass {
   readonly skillChoices: number
   /** Skills this class can choose from (by skill id). null = can choose from any skill (e.g., Bard). */
   readonly skillPool: readonly SkillId[] | null
+  readonly armorProficiencies: readonly ArmorProficiencyId[]
+  readonly weaponProficiencies: readonly WeaponProficiencyId[]
+  readonly toolProficiencies: readonly ToolProficiencyId[]
+  readonly toolChoices?: { readonly count: number; readonly from: readonly ToolProficiencyId[] }
 }
 
 export interface DndSkill {
@@ -226,6 +233,35 @@ export interface DndBackground {
   readonly id: BackgroundId
 }
 
+export const DND_LANGUAGES = [
+  'common', 'dwarvish', 'elvish', 'giant', 'gnomish', 'goblin', 'halfling', 'orc',
+  'abyssal', 'celestial', 'draconic', 'deepspeech', 'infernal', 'primordial', 'sylvan', 'undercommon',
+] as const
+
+export type LanguageId = (typeof DND_LANGUAGES)[number]
+
+export const DND_ARMOR_PROFICIENCIES = [
+  'light', 'medium', 'medium-nonmetal', 'heavy', 'shields', 'shields-nonmetal',
+] as const
+
+export type ArmorProficiencyId = (typeof DND_ARMOR_PROFICIENCIES)[number]
+
+export const DND_WEAPON_PROFICIENCIES = [
+  'simple', 'martial',
+  'handcrossbow', 'lightcrossbow', 'longsword', 'shortsword', 'rapier', 'shortbow', 'longbow',
+  'battleaxe', 'handaxe', 'lighthammer', 'warhammer',
+  'club', 'dagger', 'dart', 'javelin', 'mace', 'quarterstaff', 'scimitar', 'sickle', 'sling', 'spear',
+] as const
+
+export type WeaponProficiencyId = (typeof DND_WEAPON_PROFICIENCIES)[number]
+
+export const DND_TOOL_PROFICIENCIES = [
+  'thievestools', 'herbalismkit',
+  'bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol',
+] as const
+
+export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number]
+
 // Race ID convention: base races use plain IDs (e.g., 'human', 'tiefling'),
 // subraces use '{base}-{variant}' (e.g., 'dwarf-hill', 'elf-dark'),
 // half-races use 'half{race}' without hyphen (e.g., 'halfelf', 'halforc').
@@ -235,84 +271,103 @@ export const DND_RACES = [
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 2, cha: 1 },
+    languages: ['common', 'draconic'],
   },
   {
     id: 'dwarf-hill',
     size: 'Medium',
     speed: 25,
     abilityBonuses: { con: 2, wis: 1 },
+    languages: ['common', 'dwarvish'],
   },
   {
     id: 'dwarf-mountain',
     size: 'Medium',
     speed: 25,
     abilityBonuses: { con: 2, str: 2 },
+    languages: ['common', 'dwarvish'],
+    weaponProficiencies: ['battleaxe', 'handaxe', 'lighthammer', 'warhammer'],
   },
   {
     id: 'elf-dark',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { dex: 2, cha: 1 },
+    languages: ['common', 'elvish'],
   },
   {
     id: 'elf-high',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { dex: 2, int: 1 },
+    languages: ['common', 'elvish'],
+    weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
   },
   {
     id: 'elf-wood',
     size: 'Medium',
     speed: 35,
     abilityBonuses: { dex: 2, wis: 1 },
+    languages: ['common', 'elvish'],
+    weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
   },
   {
     id: 'gnome-forest',
     size: 'Small',
     speed: 25,
     abilityBonuses: { int: 2, dex: 1 },
+    languages: ['common', 'gnomish'],
   },
   {
     id: 'gnome-rock',
     size: 'Small',
     speed: 25,
     abilityBonuses: { int: 2, con: 1 },
+    languages: ['common', 'gnomish'],
   },
   {
     id: 'halfelf',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1, wis: 1 },
+    languages: ['common', 'elvish'],
+    languageChoices: 1,
   },
   {
     id: 'halforc',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 2, con: 1 },
+    languages: ['common', 'orc'],
   },
   {
     id: 'halfling-lightfoot',
     size: 'Small',
     speed: 25,
     abilityBonuses: { dex: 2, cha: 1 },
+    languages: ['common', 'halfling'],
   },
   {
     id: 'halfling-stout',
     size: 'Small',
     speed: 25,
     abilityBonuses: { dex: 2, con: 1 },
+    languages: ['common', 'halfling'],
   },
   {
     id: 'human',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 },
+    languages: ['common'],
+    languageChoices: 1,
   },
   {
     id: 'tiefling',
     size: 'Medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1 },
+    languages: ['common', 'infernal'],
   },
 ] as const
 
@@ -351,6 +406,9 @@ export const DND_CLASSES = [
     savingThrowProficiencies: ['str', 'con'],
     skillChoices: 2,
     skillPool: ['animalhandling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
+    armorProficiencies: ['light', 'medium', 'shields'],
+    weaponProficiencies: ['simple', 'martial'],
+    toolProficiencies: [],
   },
   {
     id: 'bard',
@@ -360,6 +418,10 @@ export const DND_CLASSES = [
     spellcastingAbility: 'cha',
     skillChoices: 3,
     skillPool: null,
+    armorProficiencies: ['light'],
+    weaponProficiencies: ['simple', 'handcrossbow', 'longsword', 'rapier', 'shortsword'],
+    toolProficiencies: [],
+    toolChoices: { count: 3, from: ['bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol'] },
   },
   {
     id: 'cleric',
@@ -369,6 +431,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'wis',
     skillChoices: 2,
     skillPool: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
+    armorProficiencies: ['light', 'medium', 'shields'],
+    weaponProficiencies: ['simple'],
+    toolProficiencies: [],
   },
   {
     id: 'druid',
@@ -378,6 +443,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'wis',
     skillChoices: 2,
     skillPool: ['arcana', 'animalhandling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival'],
+    armorProficiencies: ['light', 'medium-nonmetal', 'shields-nonmetal'],
+    weaponProficiencies: ['club', 'dagger', 'dart', 'javelin', 'mace', 'quarterstaff', 'scimitar', 'sickle', 'sling', 'spear'],
+    toolProficiencies: ['herbalismkit'],
   },
   {
     id: 'fighter',
@@ -386,6 +454,9 @@ export const DND_CLASSES = [
     savingThrowProficiencies: ['str', 'con'],
     skillChoices: 2,
     skillPool: ['acrobatics', 'animalhandling', 'athletics', 'history', 'insight', 'intimidation', 'perception', 'survival'],
+    armorProficiencies: ['light', 'medium', 'heavy', 'shields'],
+    weaponProficiencies: ['simple', 'martial'],
+    toolProficiencies: [],
   },
   {
     id: 'monk',
@@ -394,6 +465,9 @@ export const DND_CLASSES = [
     savingThrowProficiencies: ['str', 'dex'],
     skillChoices: 2,
     skillPool: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
+    armorProficiencies: [],
+    weaponProficiencies: ['simple', 'shortsword'],
+    toolProficiencies: [],
   },
   {
     id: 'paladin',
@@ -403,6 +477,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'cha',
     skillChoices: 2,
     skillPool: ['athletics', 'insight', 'intimidation', 'medicine', 'persuasion', 'religion'],
+    armorProficiencies: ['light', 'medium', 'heavy', 'shields'],
+    weaponProficiencies: ['simple', 'martial'],
+    toolProficiencies: [],
   },
   {
     id: 'ranger',
@@ -412,6 +489,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'wis',
     skillChoices: 3,
     skillPool: ['animalhandling', 'athletics', 'insight', 'investigation', 'nature', 'perception', 'stealth', 'survival'],
+    armorProficiencies: ['light', 'medium', 'shields'],
+    weaponProficiencies: ['simple', 'martial'],
+    toolProficiencies: [],
   },
   {
     id: 'rogue',
@@ -420,6 +500,9 @@ export const DND_CLASSES = [
     savingThrowProficiencies: ['dex', 'int'],
     skillChoices: 4,
     skillPool: ['acrobatics', 'athletics', 'deception', 'insight', 'intimidation', 'investigation', 'perception', 'performance', 'persuasion', 'sleightofhand', 'stealth'],
+    armorProficiencies: ['light'],
+    weaponProficiencies: ['simple', 'handcrossbow', 'longsword', 'rapier', 'shortsword'],
+    toolProficiencies: ['thievestools'],
   },
   {
     id: 'sorcerer',
@@ -429,6 +512,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'cha',
     skillChoices: 2,
     skillPool: ['arcana', 'deception', 'insight', 'intimidation', 'persuasion', 'religion'],
+    armorProficiencies: [],
+    weaponProficiencies: ['dagger', 'dart', 'sling', 'quarterstaff', 'lightcrossbow'],
+    toolProficiencies: [],
   },
   {
     id: 'warlock',
@@ -438,6 +524,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'cha',
     skillChoices: 2,
     skillPool: ['arcana', 'deception', 'history', 'intimidation', 'investigation', 'nature', 'religion'],
+    armorProficiencies: ['light'],
+    weaponProficiencies: ['simple'],
+    toolProficiencies: [],
   },
   {
     id: 'wizard',
@@ -447,6 +536,9 @@ export const DND_CLASSES = [
     spellcastingAbility: 'int',
     skillChoices: 2,
     skillPool: ['arcana', 'history', 'insight', 'investigation', 'medicine', 'religion'],
+    armorProficiencies: [],
+    weaponProficiencies: ['dagger', 'dart', 'sling', 'quarterstaff', 'lightcrossbow'],
+    toolProficiencies: [],
   },
 ] as const
 
@@ -625,6 +717,85 @@ export function getBaseRaceId(raceId: string): string {
 
   return raceId
 }
+
+export interface Proficiencies {
+  readonly armor: readonly ArmorProficiencyId[]
+  readonly weapons: readonly WeaponProficiencyId[]
+  readonly tools: readonly ToolProficiencyId[]
+  readonly toolChoices: readonly ToolProficiencyId[]
+  readonly languages: readonly LanguageId[]
+  readonly languageChoices: readonly LanguageId[]
+}
+
+const EMPTY_PROFICIENCIES: Proficiencies = {
+  armor: [], weapons: [], tools: [], toolChoices: [], languages: [], languageChoices: [],
+}
+
+export function computeProficiencies(
+  classId: ClassId | '',
+  raceId: RaceId | '',
+  prev: Proficiencies,
+  classChanged: boolean,
+  raceChanged: boolean,
+): Proficiencies {
+  if (!classChanged && !raceChanged) return prev
+  const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
+  const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId)
+  const raceWeapons: WeaponProficiencyId[] = race?.weaponProficiencies ? [...race.weaponProficiencies] : []
+  return {
+    armor: cls ? [...cls.armorProficiencies] : [],
+    weapons: [...new Set([...(cls ? [...cls.weaponProficiencies] : []), ...raceWeapons])],
+    tools: cls ? [...cls.toolProficiencies] : [],
+    toolChoices: classChanged ? [] : prev.toolChoices,
+    languages: race ? [...race.languages] : [],
+    languageChoices: raceChanged ? [] : prev.languageChoices,
+  }
+}
+
+export function toggleToolProficiencyChoice(
+  proficiencies: Proficiencies,
+  classId: ClassId | '',
+  toolId: ToolProficiencyId,
+): Proficiencies {
+  const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
+  if (!cls?.toolChoices) return proficiencies
+  if (!cls.toolChoices.from.includes(toolId)) {
+    console.warn(`toggleToolProficiencyChoice: "${toolId}" is not in ${cls.id} toolChoices.from`)
+    return proficiencies
+  }
+  if (proficiencies.tools.includes(toolId)) {
+    console.warn(`toggleToolProficiencyChoice: "${toolId}" is already auto-granted`)
+    return proficiencies
+  }
+  const current = proficiencies.toolChoices
+  if (current.includes(toolId)) {
+    return { ...proficiencies, toolChoices: current.filter((t) => t !== toolId) }
+  }
+  if (current.length >= cls.toolChoices.count) return proficiencies
+  return { ...proficiencies, toolChoices: [...current, toolId] }
+}
+
+export function toggleLanguageProficiencyChoice(
+  proficiencies: Proficiencies,
+  raceId: RaceId | '',
+  langId: LanguageId,
+): Proficiencies {
+  const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId)
+  const maxChoices = race?.languageChoices ?? 0
+  if (maxChoices === 0) return proficiencies
+  if (proficiencies.languages.includes(langId)) {
+    console.warn(`toggleLanguageProficiencyChoice: "${langId}" is already auto-granted`)
+    return proficiencies
+  }
+  const current = proficiencies.languageChoices
+  if (current.includes(langId)) {
+    return { ...proficiencies, languageChoices: current.filter((l) => l !== langId) }
+  }
+  if (current.length >= maxChoices) return proficiencies
+  return { ...proficiencies, languageChoices: [...current, langId] }
+}
+
+export { EMPTY_PROFICIENCIES }
 
 export function generateCharacterName(raceId: string, gender: DndGender): string | null {
   const baseId = getBaseRaceId(raceId)
