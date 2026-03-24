@@ -719,12 +719,12 @@ export function getBaseRaceId(raceId: string): string {
 }
 
 export interface Proficiencies {
-  armor: ArmorProficiencyId[]
-  weapons: WeaponProficiencyId[]
-  tools: ToolProficiencyId[]
-  toolChoices: ToolProficiencyId[]
-  languages: LanguageId[]
-  languageChoices: LanguageId[]
+  readonly armor: readonly ArmorProficiencyId[]
+  readonly weapons: readonly WeaponProficiencyId[]
+  readonly tools: readonly ToolProficiencyId[]
+  readonly toolChoices: readonly ToolProficiencyId[]
+  readonly languages: readonly LanguageId[]
+  readonly languageChoices: readonly LanguageId[]
 }
 
 const EMPTY_PROFICIENCIES: Proficiencies = {
@@ -759,6 +759,7 @@ export function toggleToolProficiencyChoice(
 ): Proficiencies {
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
   if (!cls?.toolChoices) return proficiencies
+  if (!cls.toolChoices.from.includes(toolId)) return proficiencies
   const current = proficiencies.toolChoices
   if (current.includes(toolId)) {
     return { ...proficiencies, toolChoices: current.filter((t) => t !== toolId) }

@@ -7,7 +7,7 @@ import type {
 import type { ThemeId } from "@/lib/theme";
 
 import type { Proficiencies } from "@/lib/dnd-helpers";
-export type { Proficiencies } from "@/lib/dnd-helpers";
+export type { Proficiencies };
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {

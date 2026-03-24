@@ -2,13 +2,13 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { DND_CLASSES, DND_LANGUAGES, DND_RACES } from '@/lib/dnd-helpers'
-import type { DndClass, DndRace, LanguageId, ToolProficiencyId } from '@/lib/dnd-helpers'
+import type { ClassId, DndClass, DndRace, LanguageId, RaceId, ToolProficiencyId } from '@/lib/dnd-helpers'
 import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
 
 interface ProficienciesStepProps {
-  characterClass: string
-  race: string
+  characterClass: ClassId | ''
+  race: RaceId | ''
   proficiencies: CharacterData['proficiencies']
   onToolChoiceToggle: (tool: ToolProficiencyId) => void
   onLanguageChoiceToggle: (language: LanguageId) => void

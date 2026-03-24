@@ -24,7 +24,7 @@ import {
   toggleLanguageProficiencyChoice,
   toggleToolProficiencyChoice,
 } from "@/lib/dnd-helpers";
-import type { Proficiencies } from "@/lib/dnd-helpers";
+import type { DndClass, Proficiencies } from "@/lib/dnd-helpers";
 
 // ---------------------------------------------------------------------------
 // getAbilityModifier
@@ -326,6 +326,43 @@ describe("DND_RACES language data integrity", () => {
   });
 });
 
+describe("DND_CLASSES proficiency data integrity", () => {
+  it("all class armorProficiencies exist in DND_ARMOR_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      for (const armor of cls.armorProficiencies) {
+        expect(DND_ARMOR_PROFICIENCIES).toContain(armor);
+      }
+    }
+  });
+
+  it("all class weaponProficiencies exist in DND_WEAPON_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      for (const weapon of cls.weaponProficiencies) {
+        expect(DND_WEAPON_PROFICIENCIES).toContain(weapon);
+      }
+    }
+  });
+
+  it("all class toolProficiencies exist in DND_TOOL_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      for (const tool of cls.toolProficiencies) {
+        expect(DND_TOOL_PROFICIENCIES).toContain(tool);
+      }
+    }
+  });
+
+  it("all class toolChoices.from entries exist in DND_TOOL_PROFICIENCIES", () => {
+    for (const cls of DND_CLASSES) {
+      const c = cls as DndClass;
+      if (c.toolChoices) {
+        for (const tool of c.toolChoices.from) {
+          expect(DND_TOOL_PROFICIENCIES).toContain(tool);
+        }
+      }
+    }
+  });
+});
+
 // ---------------------------------------------------------------------------
 // computeProficiencies
 // ---------------------------------------------------------------------------
@@ -399,6 +436,15 @@ describe("computeProficiencies", () => {
     expect(result.tools).toEqual([]);
     expect(result.languages).toEqual([]);
   });
+
+  it("resets both toolChoices and languageChoices when both class and race change", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum", "flute"], languageChoices: ["giant"] };
+    const result = computeProficiencies("fighter", "halfelf", prev, true, true);
+    expect(result.toolChoices).toEqual([]);
+    expect(result.languageChoices).toEqual([]);
+    expect(result.armor).toEqual(["light", "medium", "heavy", "shields"]);
+    expect(result.languages).toEqual(["common", "elvish"]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -431,6 +477,11 @@ describe("toggleToolProficiencyChoice", () => {
 
   it("returns unchanged proficiencies for empty class", () => {
     const result = toggleToolProficiencyChoice(base, "", "drum");
+    expect(result).toBe(base);
+  });
+
+  it("rejects a tool not in the class toolChoices.from list", () => {
+    const result = toggleToolProficiencyChoice(base, "bard", "thievestools");
     expect(result).toBe(base);
   });
 });
