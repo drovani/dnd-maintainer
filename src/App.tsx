@@ -10,6 +10,7 @@ import SessionList from '@/pages/SessionList'
 import SessionDetail from '@/pages/SessionDetail'
 import NotesPage from '@/pages/NotesPage'
 import ExportData from '@/pages/ExportData'
+import SettingsTheme from '@/pages/SettingsTheme'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/campaign/:id/session/:sessionId" element={<SessionDetail />} />
           <Route path="/campaign/:id/notes" element={<NotesPage />} />
           <Route path="/export" element={<ExportData />} />
+          <Route path="/settings/theme" element={<SettingsTheme />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

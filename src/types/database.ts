@@ -1,4 +1,5 @@
 import type { DndGender, RaceId, ClassId, AlignmentId } from '@/lib/dnd-helpers'
+import type { ThemeId } from '@/lib/theme'
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
@@ -76,6 +77,8 @@ export interface Campaign {
   status: 'active' | 'paused' | 'completed' | 'planning' | null
   image_url?: string | null
   dm_notes?: string | null
+  /** null = inherit global preference; a ThemeId = explicit override for this campaign */
+  theme: ThemeId | null
   archived_at?: string | null
 }
 
@@ -179,7 +182,7 @@ export interface Note {
 }
 
 // Summary types for list views (subset of full types)
-export type CampaignSummary = Pick<Campaign, 'id' | 'name' | 'description' | 'setting' | 'status' | 'created_at' | 'updated_at' | 'archived_at'>
+export type CampaignSummary = Pick<Campaign, 'id' | 'name' | 'description' | 'setting' | 'status' | 'theme' | 'created_at' | 'updated_at' | 'archived_at'>
 export type CharacterSummary = Pick<Character, 'id' | 'campaign_id' | 'name' | 'player_name' | 'character_type' | 'is_npc' | 'race' | 'class' | 'subclass' | 'level' | 'hit_points_max' | 'armor_class' | 'updated_at'>
 export type SessionSummary = Pick<Session, 'id' | 'campaign_id' | 'session_number' | 'title' | 'date' | 'summary' | 'experience_awarded' | 'created_at' | 'updated_at'>
 export type EncounterSummary = Pick<Encounter, 'id' | 'campaign_id' | 'session_id' | 'name' | 'description' | 'status' | 'round' | 'created_at' | 'updated_at'>
