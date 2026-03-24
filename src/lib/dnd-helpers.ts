@@ -760,6 +760,7 @@ export function toggleToolProficiencyChoice(
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
   if (!cls?.toolChoices) return proficiencies
   if (!cls.toolChoices.from.includes(toolId)) return proficiencies
+  if (proficiencies.tools.includes(toolId)) return proficiencies
   const current = proficiencies.toolChoices
   if (current.includes(toolId)) {
     return { ...proficiencies, toolChoices: current.filter((t) => t !== toolId) }
@@ -776,6 +777,7 @@ export function toggleLanguageProficiencyChoice(
   const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId)
   const maxChoices = race?.languageChoices ?? 0
   if (maxChoices === 0) return proficiencies
+  if (proficiencies.languages.includes(langId)) return proficiencies
   const current = proficiencies.languageChoices
   if (current.includes(langId)) {
     return { ...proficiencies, languageChoices: current.filter((l) => l !== langId) }

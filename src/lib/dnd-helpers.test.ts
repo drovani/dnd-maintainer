@@ -24,7 +24,7 @@ import {
   toggleLanguageProficiencyChoice,
   toggleToolProficiencyChoice,
 } from "@/lib/dnd-helpers";
-import type { DndClass, Proficiencies } from "@/lib/dnd-helpers";
+import type { DndClass, DndRace, Proficiencies } from "@/lib/dnd-helpers";
 
 // ---------------------------------------------------------------------------
 // getAbilityModifier
@@ -326,6 +326,19 @@ describe("DND_RACES language data integrity", () => {
   });
 });
 
+describe("DND_RACES proficiency data integrity", () => {
+  it("all race weaponProficiencies exist in DND_WEAPON_PROFICIENCIES", () => {
+    for (const race of DND_RACES) {
+      const r = race as DndRace;
+      if (r.weaponProficiencies) {
+        for (const weapon of r.weaponProficiencies) {
+          expect(DND_WEAPON_PROFICIENCIES).toContain(weapon);
+        }
+      }
+    }
+  });
+});
+
 describe("DND_CLASSES proficiency data integrity", () => {
   it("all class armorProficiencies exist in DND_ARMOR_PROFICIENCIES", () => {
     for (const cls of DND_CLASSES) {
@@ -484,6 +497,12 @@ describe("toggleToolProficiencyChoice", () => {
     const result = toggleToolProficiencyChoice(base, "bard", "thievestools");
     expect(result).toBe(base);
   });
+
+  it("rejects a tool already in auto-granted tools", () => {
+    const prev: Proficiencies = { ...base, tools: ["herbalismkit"] };
+    const result = toggleToolProficiencyChoice(prev, "bard", "herbalismkit");
+    expect(result).toBe(prev);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -517,5 +536,11 @@ describe("toggleLanguageProficiencyChoice", () => {
   it("returns unchanged proficiencies for empty race", () => {
     const result = toggleLanguageProficiencyChoice(base, "", "elvish");
     expect(result).toBe(base);
+  });
+
+  it("rejects a language already in auto-granted languages", () => {
+    const prev: Proficiencies = { ...base, languages: ["common", "elvish"] };
+    const result = toggleLanguageProficiencyChoice(prev, "halfelf", "elvish");
+    expect(result).toBe(prev);
   });
 });
