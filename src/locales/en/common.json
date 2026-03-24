@@ -53,6 +53,7 @@
     "sessions": "Sessions",
     "notes": "Notes",
     "exportData": "Export Data",
+    "settings": "Settings",
     "selectCampaign": "Select Campaign",
     "noCampaigns": "No campaigns",
     "campaign": "Campaign"
@@ -63,6 +64,27 @@
     "version": "Campaign Manager v1.0",
     "for5e": "For D&D 5e",
     "viewOnGitHub": "View on GitHub"
+  },
+  "settings": {
+    "title": "Settings",
+    "themeSettings": "Theme Settings",
+    "colorMode": "Color Mode",
+    "colorModeDescription": "Choose how the app appears",
+    "globalTheme": "Global Theme",
+    "globalThemeDescription": "Set the default color theme for all campaigns",
+    "campaignOverrides": "Campaign Overrides",
+    "campaignOverridesDescription": "Set per-campaign theme overrides",
+    "colorModes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "themes": {
+      "default": "Default",
+      "sylvan": "Sylvan",
+      "arcane": "Arcane"
+    },
+    "useGlobalTheme": "Use global theme"
   },
   "characterBuilder": {
     "title": "Create New Character",
@@ -366,7 +388,9 @@
     },
     "toolkit": {
       "title": "Campaign Toolkit"
-    }
+    },
+    "theme": "Campaign Theme",
+    "themeDescription": "Customize the color theme for this campaign"
   },
   "characterType": {
     "pc": "PC",
@@ -438,7 +462,8 @@
     "supabaseStatus": "If running locally, npx supabase status shows the DB is up",
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "errorPrefix": "Error: {{message}}",
-    "saveFailed": "Save failed — your changes may not have been saved"
+    "saveFailed": "Save failed — your changes may not have been saved",
+    "themeNotPersisted": "Theme preference could not be saved. It will reset on next visit."
   },
   "status": {
     "healthy": "healthy",

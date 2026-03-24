@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { ValidationError } from '@/components/ui/validation-error'
+import { ThemePicker } from '@/components/ThemePicker'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
 import { useCharacters } from '@/hooks/useCharacters'
 import { useSessions } from '@/hooks/useSessions'
@@ -10,6 +12,7 @@ import {
   ChevronRight,
   Clock,
   Edit2,
+  Palette,
   Save,
   Scroll,
   Swords,
@@ -546,6 +549,27 @@ export default function CampaignDashboard() {
               </div>
             </Link>
 
+          </div>
+
+          <div className="mt-4">
+            <Card className="hover-lift">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Palette className="size-5 text-muted-foreground" />
+                  <h3 className="font-semibold">{t('campaign.theme')}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">{t('campaign.themeDescription')}</p>
+                <ThemePicker
+                  value={campaign.theme ?? null}
+                  onChange={(newTheme) => updateMutation.mutate({ id: id!, theme: newTheme })}
+                  allowNone
+                  disabled={updateMutation.isPending}
+                />
+                {updateMutation.isError && updateMutation.variables && 'theme' in updateMutation.variables && (
+                  <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

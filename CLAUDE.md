@@ -45,7 +45,7 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 
 ### Routing
 
-All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern.
+All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope.
 
 ### Internationalization (i18n)
 
@@ -69,7 +69,7 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 
 ### Styling
 
-Light theme only. Custom CSS variables for theme colors defined in `src/index.css`. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
+Three color themes (Default/gold, Sylvan/green, Arcane/purple) with light and dark mode. Theme is set via `data-theme` attribute on `<html>`, dark mode via `.dark` class. Theme state managed by `ThemeProvider` in `src/components/ThemeProvider.tsx`. CSS variables for each theme defined in `src/index.css`. Per-campaign theme overrides stored in the `campaigns.theme` DB column. Reusable Tailwind component classes: `.page-container`, `.page-title`, `.hover-lift`, `.grid-2`/`.grid-3`/`.grid-4`.
 
 - Prefer `size-*` over `w-* h-*` for square elements (icons, avatars, etc.) to signal intent that width and height should stay equal.
 
