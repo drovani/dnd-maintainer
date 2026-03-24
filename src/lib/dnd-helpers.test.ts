@@ -374,6 +374,26 @@ describe("DND_CLASSES proficiency data integrity", () => {
       }
     }
   });
+
+  it("toolChoices.from is disjoint from toolProficiencies", () => {
+    for (const cls of DND_CLASSES) {
+      const c = cls as DndClass;
+      if (c.toolChoices) {
+        for (const tool of c.toolChoices.from) {
+          expect(c.toolProficiencies).not.toContain(tool);
+        }
+      }
+    }
+  });
+
+  it("toolChoices.count does not exceed toolChoices.from.length", () => {
+    for (const cls of DND_CLASSES) {
+      const c = cls as DndClass;
+      if (c.toolChoices) {
+        expect(c.toolChoices.count).toBeLessThanOrEqual(c.toolChoices.from.length);
+      }
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -393,6 +413,12 @@ describe("computeProficiencies", () => {
     expect(result.weapons).toEqual(["simple", "martial"]);
     expect(result.tools).toEqual([]);
     expect(result.toolChoices).toEqual([]);
+  });
+
+  it("includes race weapon proficiencies when no class is selected", () => {
+    const result = computeProficiencies("", "dwarf-mountain", base, false, true);
+    expect(result.weapons).toEqual(["battleaxe", "handaxe", "lighthammer", "warhammer"]);
+    expect(result.armor).toEqual([]);
   });
 
   it("computes race languages when race changes", () => {
@@ -493,15 +519,19 @@ describe("toggleToolProficiencyChoice", () => {
     expect(result).toBe(base);
   });
 
-  it("rejects a tool not in the class toolChoices.from list", () => {
+  it("rejects a tool not in the class toolChoices.from list and warns", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const result = toggleToolProficiencyChoice(base, "bard", "thievestools");
     expect(result).toBe(base);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("thievestools"));
   });
 
-  it("rejects a tool already in auto-granted tools", () => {
+  it("rejects a tool already in auto-granted tools and warns", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prev: Proficiencies = { ...base, tools: ["herbalismkit"] };
     const result = toggleToolProficiencyChoice(prev, "bard", "herbalismkit");
     expect(result).toBe(prev);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("herbalismkit"));
   });
 });
 
@@ -538,9 +568,11 @@ describe("toggleLanguageProficiencyChoice", () => {
     expect(result).toBe(base);
   });
 
-  it("rejects a language already in auto-granted languages", () => {
+  it("rejects a language already in auto-granted languages and warns", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prev: Proficiencies = { ...base, languages: ["common", "elvish"] };
     const result = toggleLanguageProficiencyChoice(prev, "halfelf", "elvish");
     expect(result).toBe(prev);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("elvish"));
   });
 });

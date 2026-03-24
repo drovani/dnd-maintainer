@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { act, waitFor } from '@testing-library/react'
+import { EMPTY_PROFICIENCIES } from '@/lib/dnd-helpers'
 import { setupMockReset, withSuppressedRejections, renderHook, createWrapper, supabase, mockQueryResult } from '@/test/hook-test-helpers'
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
@@ -26,7 +27,7 @@ const basePayload = {
   abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 11, cha: 9 },
   saving_throws: {},
   skills: {},
-  proficiencies: null,
+  proficiencies: { ...EMPTY_PROFICIENCIES },
   features: [],
   equipment: [],
   spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },

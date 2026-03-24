@@ -201,7 +201,7 @@ export function getSpellSlots(className: string, level: number): number[] {
 
 export interface DndRace {
   readonly id: RaceId
-  readonly size: string
+  readonly size: 'Small' | 'Medium'
   readonly speed: number
   readonly abilityBonuses: Partial<Record<AbilityKey, number>>
   readonly languages: readonly LanguageId[]
@@ -759,8 +759,14 @@ export function toggleToolProficiencyChoice(
 ): Proficiencies {
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
   if (!cls?.toolChoices) return proficiencies
-  if (!cls.toolChoices.from.includes(toolId)) return proficiencies
-  if (proficiencies.tools.includes(toolId)) return proficiencies
+  if (!cls.toolChoices.from.includes(toolId)) {
+    console.warn(`toggleToolProficiencyChoice: "${toolId}" is not in ${cls.id} toolChoices.from`)
+    return proficiencies
+  }
+  if (proficiencies.tools.includes(toolId)) {
+    console.warn(`toggleToolProficiencyChoice: "${toolId}" is already auto-granted`)
+    return proficiencies
+  }
   const current = proficiencies.toolChoices
   if (current.includes(toolId)) {
     return { ...proficiencies, toolChoices: current.filter((t) => t !== toolId) }
@@ -777,7 +783,10 @@ export function toggleLanguageProficiencyChoice(
   const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId)
   const maxChoices = race?.languageChoices ?? 0
   if (maxChoices === 0) return proficiencies
-  if (proficiencies.languages.includes(langId)) return proficiencies
+  if (proficiencies.languages.includes(langId)) {
+    console.warn(`toggleLanguageProficiencyChoice: "${langId}" is already auto-granted`)
+    return proficiencies
+  }
   const current = proficiencies.languageChoices
   if (current.includes(langId)) {
     return { ...proficiencies, languageChoices: current.filter((l) => l !== langId) }

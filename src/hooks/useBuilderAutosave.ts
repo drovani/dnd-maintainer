@@ -26,7 +26,7 @@ interface BuilderPayload {
   abilities: AbilityScores;
   saving_throws: Record<string, { proficient: boolean }>;
   skills: Record<string, { proficient: boolean; expertise: boolean }>;
-  proficiencies: Proficiencies | null;
+  proficiencies: Proficiencies;
   features: Feature[];
   equipment: EquipmentItem[];
   spells: {
