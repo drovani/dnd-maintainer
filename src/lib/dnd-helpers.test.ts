@@ -1,9 +1,15 @@
 import {
   DND_ALIGNMENTS,
+  DND_ARMOR_PROFICIENCIES,
   DND_BACKGROUNDS,
   DND_CLASSES,
+  DND_LANGUAGES,
   DND_RACES,
   DND_SKILLS,
+  DND_TOOL_PROFICIENCIES,
+  DND_WEAPON_PROFICIENCIES,
+  EMPTY_PROFICIENCIES,
+  computeProficiencies,
   generateCharacterName,
   getAbilityModifier,
   getBaseRaceId,
@@ -15,7 +21,10 @@ import {
   getSpellSlots,
   roll4d6DropLowest,
   rollAbilityScores,
+  toggleLanguageProficiencyChoice,
+  toggleToolProficiencyChoice,
 } from "@/lib/dnd-helpers";
+import type { Proficiencies } from "@/lib/dnd-helpers";
 
 // ---------------------------------------------------------------------------
 // getAbilityModifier
@@ -283,5 +292,179 @@ describe.each<[string, ReadonlyArray<{ readonly id: string }>]>([
     expect(collection.length).toBeGreaterThan(0);
     const ids = collection.map((entry) => entry.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Static data integrity for proficiency/language arrays
+// ---------------------------------------------------------------------------
+describe.each<[string, readonly string[]]>([
+  ["DND_LANGUAGES", DND_LANGUAGES],
+  ["DND_ARMOR_PROFICIENCIES", DND_ARMOR_PROFICIENCIES],
+  ["DND_WEAPON_PROFICIENCIES", DND_WEAPON_PROFICIENCIES],
+  ["DND_TOOL_PROFICIENCIES", DND_TOOL_PROFICIENCIES],
+])("%s", (_label, collection) => {
+  it("has unique entries", () => {
+    expect(collection.length).toBeGreaterThan(0);
+    expect(new Set(collection).size).toBe(collection.length);
+  });
+});
+
+describe("DND_RACES language data integrity", () => {
+  it("every race has at least one language", () => {
+    for (const race of DND_RACES) {
+      expect(race.languages.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("all race languages exist in DND_LANGUAGES", () => {
+    for (const race of DND_RACES) {
+      for (const lang of race.languages) {
+        expect(DND_LANGUAGES).toContain(lang);
+      }
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeProficiencies
+// ---------------------------------------------------------------------------
+describe("computeProficiencies", () => {
+  const base: Proficiencies = { ...EMPTY_PROFICIENCIES };
+
+  it("returns previous proficiencies when neither class nor race changed", () => {
+    const result = computeProficiencies("fighter", "human", base, false, false);
+    expect(result).toBe(base);
+  });
+
+  it("computes class proficiencies when class changes", () => {
+    const result = computeProficiencies("fighter", "", base, true, false);
+    expect(result.armor).toEqual(["light", "medium", "heavy", "shields"]);
+    expect(result.weapons).toEqual(["simple", "martial"]);
+    expect(result.tools).toEqual([]);
+    expect(result.toolChoices).toEqual([]);
+  });
+
+  it("computes race languages when race changes", () => {
+    const result = computeProficiencies("", "human", base, false, true);
+    expect(result.languages).toEqual(["common"]);
+    expect(result.languageChoices).toEqual([]);
+  });
+
+  it("merges class and race weapon proficiencies", () => {
+    const result = computeProficiencies("rogue", "elf-high", base, true, true);
+    // Rogue: simple, handcrossbow, longsword, rapier, shortsword
+    // Elf-High: longsword, shortsword, shortbow, longbow
+    expect(result.weapons).toContain("simple");
+    expect(result.weapons).toContain("shortbow");
+    expect(result.weapons).toContain("longbow");
+  });
+
+  it("deduplicates overlapping weapon proficiencies", () => {
+    const result = computeProficiencies("rogue", "elf-high", base, true, true);
+    const longswordCount = result.weapons.filter((w) => w === "longsword").length;
+    const shortswordCount = result.weapons.filter((w) => w === "shortsword").length;
+    expect(longswordCount).toBe(1);
+    expect(shortswordCount).toBe(1);
+  });
+
+  it("resets toolChoices when class changes", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum"] };
+    const result = computeProficiencies("bard", "human", prev, true, false);
+    expect(result.toolChoices).toEqual([]);
+  });
+
+  it("preserves toolChoices when only race changes", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum"] };
+    const result = computeProficiencies("bard", "halfelf", prev, false, true);
+    expect(result.toolChoices).toEqual(["drum"]);
+  });
+
+  it("resets languageChoices when race changes", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["giant"] };
+    const result = computeProficiencies("fighter", "human", prev, false, true);
+    expect(result.languageChoices).toEqual([]);
+  });
+
+  it("preserves languageChoices when only class changes", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["giant"] };
+    const result = computeProficiencies("fighter", "human", prev, true, false);
+    expect(result.languageChoices).toEqual(["giant"]);
+  });
+
+  it("returns empty arrays when class and race are empty strings", () => {
+    const result = computeProficiencies("", "", base, true, true);
+    expect(result.armor).toEqual([]);
+    expect(result.weapons).toEqual([]);
+    expect(result.tools).toEqual([]);
+    expect(result.languages).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// toggleToolProficiencyChoice
+// ---------------------------------------------------------------------------
+describe("toggleToolProficiencyChoice", () => {
+  const base: Proficiencies = { ...EMPTY_PROFICIENCIES };
+
+  it("adds a tool when under the max", () => {
+    const result = toggleToolProficiencyChoice(base, "bard", "drum");
+    expect(result.toolChoices).toEqual(["drum"]);
+  });
+
+  it("removes a tool that is already selected", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum", "flute"] };
+    const result = toggleToolProficiencyChoice(prev, "bard", "drum");
+    expect(result.toolChoices).toEqual(["flute"]);
+  });
+
+  it("does not add beyond the max (bard gets 3)", () => {
+    const prev: Proficiencies = { ...base, toolChoices: ["drum", "flute", "lute"] };
+    const result = toggleToolProficiencyChoice(prev, "bard", "lyre");
+    expect(result).toBe(prev);
+  });
+
+  it("returns unchanged proficiencies for a class without tool choices", () => {
+    const result = toggleToolProficiencyChoice(base, "fighter", "drum");
+    expect(result).toBe(base);
+  });
+
+  it("returns unchanged proficiencies for empty class", () => {
+    const result = toggleToolProficiencyChoice(base, "", "drum");
+    expect(result).toBe(base);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// toggleLanguageProficiencyChoice
+// ---------------------------------------------------------------------------
+describe("toggleLanguageProficiencyChoice", () => {
+  const base: Proficiencies = { ...EMPTY_PROFICIENCIES };
+
+  it("adds a language when under the max", () => {
+    const result = toggleLanguageProficiencyChoice(base, "human", "elvish");
+    expect(result.languageChoices).toEqual(["elvish"]);
+  });
+
+  it("removes a language that is already selected", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["elvish"] };
+    const result = toggleLanguageProficiencyChoice(prev, "human", "elvish");
+    expect(result.languageChoices).toEqual([]);
+  });
+
+  it("does not add beyond the max (human gets 1)", () => {
+    const prev: Proficiencies = { ...base, languageChoices: ["elvish"] };
+    const result = toggleLanguageProficiencyChoice(prev, "human", "dwarvish");
+    expect(result).toBe(prev);
+  });
+
+  it("returns unchanged proficiencies for a race without language choices", () => {
+    const result = toggleLanguageProficiencyChoice(base, "tiefling", "elvish");
+    expect(result).toBe(base);
+  });
+
+  it("returns unchanged proficiencies for empty race", () => {
+    const result = toggleLanguageProficiencyChoice(base, "", "elvish");
+    expect(result).toBe(base);
   });
 });

@@ -1,14 +1,13 @@
 import type {
   AlignmentId,
-  ArmorProficiencyId,
   ClassId,
   DndGender,
-  LanguageId,
   RaceId,
-  ToolProficiencyId,
-  WeaponProficiencyId,
 } from "@/lib/dnd-helpers";
 import type { ThemeId } from "@/lib/theme";
+
+import type { Proficiencies } from "@/lib/dnd-helpers";
+export type { Proficiencies } from "@/lib/dnd-helpers";
 
 // Ability scores using short-form keys matching DB jsonb schema
 export interface AbilityScores {
@@ -35,16 +34,6 @@ export interface Skill {
   ability: AbilityKey;
   proficient: boolean;
   bonus?: number;
-}
-
-// Proficiencies & Languages
-export interface Proficiencies {
-  armor: ArmorProficiencyId[];
-  weapons: WeaponProficiencyId[];
-  tools: ToolProficiencyId[];
-  toolChoices: ToolProficiencyId[];
-  languages: LanguageId[];
-  languageChoices: LanguageId[];
 }
 
 // Character features and traits

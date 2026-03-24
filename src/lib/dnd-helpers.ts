@@ -240,17 +240,27 @@ export const DND_LANGUAGES = [
 
 export type LanguageId = (typeof DND_LANGUAGES)[number]
 
-export type ArmorProficiencyId = 'light' | 'medium' | 'medium-nonmetal' | 'heavy' | 'shields' | 'shields-nonmetal'
+export const DND_ARMOR_PROFICIENCIES = [
+  'light', 'medium', 'medium-nonmetal', 'heavy', 'shields', 'shields-nonmetal',
+] as const
 
-export type WeaponProficiencyId =
-  | 'simple' | 'martial'
-  | 'handcrossbow' | 'lightcrossbow' | 'longsword' | 'shortsword' | 'rapier' | 'shortbow' | 'longbow'
-  | 'battleaxe' | 'handaxe' | 'lighthammer' | 'warhammer'
-  | 'club' | 'dagger' | 'dart' | 'javelin' | 'mace' | 'quarterstaff' | 'scimitar' | 'sickle' | 'sling' | 'spear'
+export type ArmorProficiencyId = (typeof DND_ARMOR_PROFICIENCIES)[number]
 
-export type ToolProficiencyId =
-  | 'thievestools' | 'herbalismkit'
-  | 'bagpipes' | 'drum' | 'dulcimer' | 'flute' | 'lute' | 'lyre' | 'horn' | 'panflute' | 'shawm' | 'viol'
+export const DND_WEAPON_PROFICIENCIES = [
+  'simple', 'martial',
+  'handcrossbow', 'lightcrossbow', 'longsword', 'shortsword', 'rapier', 'shortbow', 'longbow',
+  'battleaxe', 'handaxe', 'lighthammer', 'warhammer',
+  'club', 'dagger', 'dart', 'javelin', 'mace', 'quarterstaff', 'scimitar', 'sickle', 'sling', 'spear',
+] as const
+
+export type WeaponProficiencyId = (typeof DND_WEAPON_PROFICIENCIES)[number]
+
+export const DND_TOOL_PROFICIENCIES = [
+  'thievestools', 'herbalismkit',
+  'bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol',
+] as const
+
+export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number]
 
 // Race ID convention: base races use plain IDs (e.g., 'human', 'tiefling'),
 // subraces use '{base}-{variant}' (e.g., 'dwarf-hill', 'elf-dark'),
@@ -707,6 +717,73 @@ export function getBaseRaceId(raceId: string): string {
 
   return raceId
 }
+
+export interface Proficiencies {
+  armor: ArmorProficiencyId[]
+  weapons: WeaponProficiencyId[]
+  tools: ToolProficiencyId[]
+  toolChoices: ToolProficiencyId[]
+  languages: LanguageId[]
+  languageChoices: LanguageId[]
+}
+
+const EMPTY_PROFICIENCIES: Proficiencies = {
+  armor: [], weapons: [], tools: [], toolChoices: [], languages: [], languageChoices: [],
+}
+
+export function computeProficiencies(
+  classId: ClassId | '',
+  raceId: RaceId | '',
+  prev: Proficiencies,
+  classChanged: boolean,
+  raceChanged: boolean,
+): Proficiencies {
+  if (!classChanged && !raceChanged) return prev
+  const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
+  const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId)
+  const raceWeapons: WeaponProficiencyId[] = race?.weaponProficiencies ? [...race.weaponProficiencies] : []
+  return {
+    armor: cls ? [...cls.armorProficiencies] : [],
+    weapons: [...new Set([...(cls ? [...cls.weaponProficiencies] : []), ...raceWeapons])],
+    tools: cls ? [...cls.toolProficiencies] : [],
+    toolChoices: classChanged ? [] : prev.toolChoices,
+    languages: race ? [...race.languages] : [],
+    languageChoices: raceChanged ? [] : prev.languageChoices,
+  }
+}
+
+export function toggleToolProficiencyChoice(
+  proficiencies: Proficiencies,
+  classId: ClassId | '',
+  toolId: ToolProficiencyId,
+): Proficiencies {
+  const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId)
+  if (!cls?.toolChoices) return proficiencies
+  const current = proficiencies.toolChoices
+  if (current.includes(toolId)) {
+    return { ...proficiencies, toolChoices: current.filter((t) => t !== toolId) }
+  }
+  if (current.length >= cls.toolChoices.count) return proficiencies
+  return { ...proficiencies, toolChoices: [...current, toolId] }
+}
+
+export function toggleLanguageProficiencyChoice(
+  proficiencies: Proficiencies,
+  raceId: RaceId | '',
+  langId: LanguageId,
+): Proficiencies {
+  const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId)
+  const maxChoices = race?.languageChoices ?? 0
+  if (maxChoices === 0) return proficiencies
+  const current = proficiencies.languageChoices
+  if (current.includes(langId)) {
+    return { ...proficiencies, languageChoices: current.filter((l) => l !== langId) }
+  }
+  if (current.length >= maxChoices) return proficiencies
+  return { ...proficiencies, languageChoices: [...current, langId] }
+}
+
+export { EMPTY_PROFICIENCIES }
 
 export function generateCharacterName(raceId: string, gender: DndGender): string | null {
   const baseId = getBaseRaceId(raceId)

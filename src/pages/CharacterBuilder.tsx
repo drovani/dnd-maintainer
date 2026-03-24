@@ -11,7 +11,7 @@ import {
 } from '@/components/character-builder'
 import type { CharacterData } from '@/components/character-builder'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import { DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, getAbilityModifier } from '@/lib/dnd-helpers'
+import { DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, EMPTY_PROFICIENCIES, computeProficiencies, getAbilityModifier, toggleLanguageProficiencyChoice, toggleToolProficiencyChoice } from '@/lib/dnd-helpers'
 import type { LanguageId, ToolProficiencyId } from '@/lib/dnd-helpers'
 import type { AbilityKey, AbilityScores } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
@@ -45,7 +45,7 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
   abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
   rolledValues: [],
   skills: DND_SKILLS.reduce((acc, s) => ({ ...acc, [s.id]: { proficient: false, expertise: false } }), {}),
-  proficiencies: { armor: [], weapons: [], tools: [], toolChoices: [], languages: [], languageChoices: [] },
+  proficiencies: { ...EMPTY_PROFICIENCIES },
   features: [], equipment: [],
   spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },
   personalityTraits: '', ideals: '', bonds: '', flaws: '', appearance: '', backstory: '',
@@ -162,22 +162,7 @@ export default function CharacterBuilder() {
       }
       // Recompute auto-granted proficiencies when class or race changes
       if (classChanged || raceChanged) {
-        const newCls = DND_CLASSES.find((c) => c.id === next.class)
-        const newRace = DND_RACES.find((r) => r.id === next.race)
-        const raceWeapons = newRace && 'weaponProficiencies' in newRace
-          ? [...newRace.weaponProficiencies]
-          : []
-        next.proficiencies = {
-          armor: newCls ? [...newCls.armorProficiencies] : [],
-          weapons: [
-            ...(newCls ? [...newCls.weaponProficiencies] : []),
-            ...raceWeapons,
-          ],
-          tools: newCls ? [...newCls.toolProficiencies] : [],
-          toolChoices: classChanged ? [] : prev.proficiencies.toolChoices,
-          languages: newRace ? [...newRace.languages] : [],
-          languageChoices: raceChanged ? [] : prev.proficiencies.languageChoices,
-        }
+        next.proficiencies = computeProficiencies(next.class, next.race, prev.proficiencies, classChanged, raceChanged)
       }
       return next
     })
@@ -224,33 +209,17 @@ export default function CharacterBuilder() {
     })
   }
 
-  const toggleToolChoice = (tool: string) => {
+  const handleToolChoiceToggle = (toolId: ToolProficiencyId) => {
     setCharacterData((prev) => {
-      const cls = DND_CLASSES.find((c) => c.id === prev.class)
-      if (!cls || !('toolChoices' in cls)) return prev
-      const { toolChoices: clsToolChoices } = cls
-      const current = prev.proficiencies.toolChoices
-      const toolId = tool as ToolProficiencyId
-      if (current.includes(toolId)) {
-        return { ...prev, proficiencies: { ...prev.proficiencies, toolChoices: current.filter((t) => t !== toolId) } }
-      }
-      if (current.length >= clsToolChoices.count) return prev
-      return { ...prev, proficiencies: { ...prev.proficiencies, toolChoices: [...current, toolId] } }
+      const updated = toggleToolProficiencyChoice(prev.proficiencies, prev.class, toolId)
+      return updated === prev.proficiencies ? prev : { ...prev, proficiencies: updated }
     })
   }
 
-  const toggleLanguageChoice = (lang: string) => {
+  const handleLanguageChoiceToggle = (langId: LanguageId) => {
     setCharacterData((prev) => {
-      const raceData = DND_RACES.find((r) => r.id === prev.race)
-      const maxChoices = raceData && 'languageChoices' in raceData ? (raceData.languageChoices as number) : 0
-      if (maxChoices === 0) return prev
-      const current = prev.proficiencies.languageChoices
-      const langId = lang as LanguageId
-      if (current.includes(langId)) {
-        return { ...prev, proficiencies: { ...prev.proficiencies, languageChoices: current.filter((l) => l !== langId) } }
-      }
-      if (current.length >= maxChoices) return prev
-      return { ...prev, proficiencies: { ...prev.proficiencies, languageChoices: [...current, langId] } }
+      const updated = toggleLanguageProficiencyChoice(prev.proficiencies, prev.race, langId)
+      return updated === prev.proficiencies ? prev : { ...prev, proficiencies: updated }
     })
   }
 
@@ -283,7 +252,7 @@ export default function CharacterBuilder() {
       )
       case 'proficiencies': return (
         <ProficienciesStep characterClass={cd.class} race={cd.race}
-          proficiencies={cd.proficiencies} onToolChoiceToggle={toggleToolChoice} onLanguageChoiceToggle={toggleLanguageChoice} />
+          proficiencies={cd.proficiencies} onToolChoiceToggle={handleToolChoiceToggle} onLanguageChoiceToggle={handleLanguageChoiceToggle} />
       )
       case 'equipment': return (
         <EquipmentStep equipment={cd.equipment} onAdd={addEquipment} onUpdate={updateEquipment} onRemove={removeEquipment} />
