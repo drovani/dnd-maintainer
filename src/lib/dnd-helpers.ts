@@ -201,7 +201,7 @@ export function getSpellSlots(className: string, level: number): number[] {
 
 export interface DndRace {
   readonly id: RaceId
-  readonly size: 'Small' | 'Medium'
+  readonly size: SizeId
   readonly speed: number
   readonly abilityBonuses: Partial<Record<AbilityKey, number>>
   readonly languages: readonly LanguageId[]
@@ -247,6 +247,12 @@ export const DND_CREATURE_TYPES = [
 ] as const
 
 export type CreatureTypeId = (typeof DND_CREATURE_TYPES)[number]
+
+export const DND_SIZES = [
+  'tiny', 'small', 'medium', 'large', 'huge', 'gargantuan',
+] as const
+
+export type SizeId = (typeof DND_SIZES)[number]
 
 export const DND_LANGUAGE_DATA = [
   { id: 'common', category: 'standard', typicalSpeakers: ['humans'], script: 'common' },
@@ -307,21 +313,21 @@ export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number]
 export const DND_RACES = [
   {
     id: 'dragonborn',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { str: 2, cha: 1 },
     languages: ['common', 'draconic'],
   },
   {
     id: 'dwarf-hill',
-    size: 'Medium',
+    size: 'medium',
     speed: 25,
     abilityBonuses: { con: 2, wis: 1 },
     languages: ['common', 'dwarvish'],
   },
   {
     id: 'dwarf-mountain',
-    size: 'Medium',
+    size: 'medium',
     speed: 25,
     abilityBonuses: { con: 2, str: 2 },
     languages: ['common', 'dwarvish'],
@@ -329,14 +335,14 @@ export const DND_RACES = [
   },
   {
     id: 'elf-dark',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { dex: 2, cha: 1 },
     languages: ['common', 'elvish'],
   },
   {
     id: 'elf-high',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { dex: 2, int: 1 },
     languages: ['common', 'elvish'],
@@ -344,7 +350,7 @@ export const DND_RACES = [
   },
   {
     id: 'elf-wood',
-    size: 'Medium',
+    size: 'medium',
     speed: 35,
     abilityBonuses: { dex: 2, wis: 1 },
     languages: ['common', 'elvish'],
@@ -352,21 +358,21 @@ export const DND_RACES = [
   },
   {
     id: 'gnome-forest',
-    size: 'Small',
+    size: 'small',
     speed: 25,
     abilityBonuses: { int: 2, dex: 1 },
     languages: ['common', 'gnomish'],
   },
   {
     id: 'gnome-rock',
-    size: 'Small',
+    size: 'small',
     speed: 25,
     abilityBonuses: { int: 2, con: 1 },
     languages: ['common', 'gnomish'],
   },
   {
     id: 'halfelf',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1, wis: 1 },
     languages: ['common', 'elvish'],
@@ -374,28 +380,28 @@ export const DND_RACES = [
   },
   {
     id: 'halforc',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { str: 2, con: 1 },
     languages: ['common', 'orc'],
   },
   {
     id: 'halfling-lightfoot',
-    size: 'Small',
+    size: 'small',
     speed: 25,
     abilityBonuses: { dex: 2, cha: 1 },
     languages: ['common', 'halfling'],
   },
   {
     id: 'halfling-stout',
-    size: 'Small',
+    size: 'small',
     speed: 25,
     abilityBonuses: { dex: 2, con: 1 },
     languages: ['common', 'halfling'],
   },
   {
     id: 'human',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 },
     languages: ['common'],
@@ -403,7 +409,7 @@ export const DND_RACES = [
   },
   {
     id: 'tiefling',
-    size: 'Medium',
+    size: 'medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1 },
     languages: ['common', 'infernal'],

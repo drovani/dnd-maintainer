@@ -5,6 +5,7 @@ import {
   DND_CLASSES,
   DND_LANGUAGES,
   DND_RACES,
+  DND_SIZES,
   DND_SKILLS,
   DND_TOOL_PROFICIENCIES,
   DND_WEAPON_PROFICIENCIES,
@@ -398,6 +399,19 @@ describe("DND_RACES language data integrity", () => {
     }
   });
 });
+
+describe("DND_RACES size data integrity", () => {
+  it("all race sizes exist in DND_SIZES", () => {
+    for (const race of DND_RACES) {
+      expect(DND_SIZES).toContain(race.size)
+    }
+  })
+  it("every race has a size field", () => {
+    for (const race of DND_RACES) {
+      expect(race.size).toBeDefined()
+    }
+  })
+})
 
 describe("DND_RACES proficiency data integrity", () => {
   it("all race weaponProficiencies exist in DND_WEAPON_PROFICIENCIES", () => {
