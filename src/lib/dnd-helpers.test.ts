@@ -5,6 +5,7 @@ import {
   DND_CLASSES,
   DND_LANGUAGES,
   DND_RACES,
+  DND_SIZES,
   DND_SKILLS,
   DND_TOOL_PROFICIENCIES,
   DND_WEAPON_PROFICIENCIES,
@@ -376,6 +377,7 @@ describe.each<[string, readonly string[]]>([
   ["DND_ARMOR_PROFICIENCIES", DND_ARMOR_PROFICIENCIES],
   ["DND_WEAPON_PROFICIENCIES", DND_WEAPON_PROFICIENCIES],
   ["DND_TOOL_PROFICIENCIES", DND_TOOL_PROFICIENCIES],
+  ["DND_SIZES", DND_SIZES],
 ])("%s", (_label, collection) => {
   it("has unique entries", () => {
     expect(collection.length).toBeGreaterThan(0);
@@ -398,6 +400,14 @@ describe("DND_RACES language data integrity", () => {
     }
   });
 });
+
+describe("DND_RACES size data integrity", () => {
+  it("all race sizes exist in DND_SIZES", () => {
+    for (const race of DND_RACES) {
+      expect(DND_SIZES).toContain(race.size)
+    }
+  })
+})
 
 describe("DND_RACES proficiency data integrity", () => {
   it("all race weaponProficiencies exist in DND_WEAPON_PROFICIENCIES", () => {

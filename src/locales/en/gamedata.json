@@ -220,7 +220,11 @@
     "nonbinary": "Non-Binary"
   },
   "sizes": {
+    "tiny": "Tiny",
     "small": "Small",
-    "medium": "Medium"
+    "medium": "Medium",
+    "large": "Large",
+    "huge": "Huge",
+    "gargantuan": "Gargantuan"
   }
 }
