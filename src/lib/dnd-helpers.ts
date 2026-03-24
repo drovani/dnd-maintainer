@@ -243,30 +243,40 @@ export type LanguageId = (typeof DND_LANGUAGES)[number]
 export type LanguageCategory = 'standard' | 'exotic'
 export type ScriptId = 'common' | 'dwarvish' | 'elvish' | 'draconic' | 'infernal' | 'celestial'
 
+export const DND_CREATURE_TYPES = [
+  'humans', 'dwarves', 'elves', 'gnomes', 'halflings', 'orcs',
+  'ogres', 'giants', 'goblinoids', 'dragons', 'dragonborn',
+  'demons', 'devils', 'celestials', 'elementals',
+  'aboleths', 'cloakers', 'fey', 'underworld-traders',
+] as const
+
+export type CreatureTypeId = (typeof DND_CREATURE_TYPES)[number]
+
 export interface DndLanguage {
   readonly id: LanguageId
   readonly category: LanguageCategory
+  readonly typicalSpeakers: readonly CreatureTypeId[]
   readonly script: ScriptId | null
 }
 
 export const DND_LANGUAGE_DATA: readonly DndLanguage[] = [
-  { id: 'common', category: 'standard', script: 'common' },
-  { id: 'common-sign', category: 'standard', script: null },
-  { id: 'dwarvish', category: 'standard', script: 'dwarvish' },
-  { id: 'elvish', category: 'standard', script: 'elvish' },
-  { id: 'giant', category: 'standard', script: 'dwarvish' },
-  { id: 'gnomish', category: 'standard', script: 'dwarvish' },
-  { id: 'goblin', category: 'standard', script: 'dwarvish' },
-  { id: 'halfling', category: 'standard', script: 'common' },
-  { id: 'orc', category: 'standard', script: 'dwarvish' },
-  { id: 'abyssal', category: 'exotic', script: 'infernal' },
-  { id: 'celestial', category: 'exotic', script: 'celestial' },
-  { id: 'draconic', category: 'exotic', script: 'draconic' },
-  { id: 'deepspeech', category: 'exotic', script: null },
-  { id: 'infernal', category: 'exotic', script: 'infernal' },
-  { id: 'primordial', category: 'exotic', script: 'dwarvish' },
-  { id: 'sylvan', category: 'exotic', script: 'elvish' },
-  { id: 'undercommon', category: 'exotic', script: 'elvish' },
+  { id: 'common', category: 'standard', typicalSpeakers: ['humans'], script: 'common' },
+  { id: 'common-sign', category: 'standard', typicalSpeakers: [], script: null },
+  { id: 'dwarvish', category: 'standard', typicalSpeakers: ['dwarves'], script: 'dwarvish' },
+  { id: 'elvish', category: 'standard', typicalSpeakers: ['elves'], script: 'elvish' },
+  { id: 'giant', category: 'standard', typicalSpeakers: ['ogres', 'giants'], script: 'dwarvish' },
+  { id: 'gnomish', category: 'standard', typicalSpeakers: ['gnomes'], script: 'dwarvish' },
+  { id: 'goblin', category: 'standard', typicalSpeakers: ['goblinoids'], script: 'dwarvish' },
+  { id: 'halfling', category: 'standard', typicalSpeakers: ['halflings'], script: 'common' },
+  { id: 'orc', category: 'standard', typicalSpeakers: ['orcs'], script: 'dwarvish' },
+  { id: 'abyssal', category: 'exotic', typicalSpeakers: ['demons'], script: 'infernal' },
+  { id: 'celestial', category: 'exotic', typicalSpeakers: ['celestials'], script: 'celestial' },
+  { id: 'draconic', category: 'exotic', typicalSpeakers: ['dragons', 'dragonborn'], script: 'draconic' },
+  { id: 'deepspeech', category: 'exotic', typicalSpeakers: ['aboleths', 'cloakers'], script: null },
+  { id: 'infernal', category: 'exotic', typicalSpeakers: ['devils'], script: 'infernal' },
+  { id: 'primordial', category: 'exotic', typicalSpeakers: ['elementals'], script: 'dwarvish' },
+  { id: 'sylvan', category: 'exotic', typicalSpeakers: ['fey'], script: 'elvish' },
+  { id: 'undercommon', category: 'exotic', typicalSpeakers: ['underworld-traders'], script: 'elvish' },
 ] as const
 
 export const DND_ARMOR_PROFICIENCIES = [

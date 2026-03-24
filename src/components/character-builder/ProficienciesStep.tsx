@@ -211,7 +211,7 @@ export function ProficienciesStep({
                                 </Label>
                               </td>
                               <td className="py-1.5 pr-6 text-muted-foreground whitespace-nowrap">
-                                {t(`languageSpeakers.${lang.id}`)}
+                                {lang.typicalSpeakers.map((id) => t(`races.${id}`)).join(', ') || tc('characterBuilder.proficiencies.noScript')}
                               </td>
                               <td className="py-1.5 text-muted-foreground whitespace-nowrap">
                                 {lang.script
