@@ -10,11 +10,13 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 
 - `npm run dev` — start Vite dev server on port 5173
 - `npm run build` — typecheck with `tsc -b` then build with Vite
-- `npm run lint` — ESLint for ts/tsx files
+- `npm run lint` — ESLint with `--max-warnings 0`
 - `npm run preview` — preview production build
 - `npx supabase <command>` — always run Supabase CLI via `npx` (not bare `supabase`)
 - `npm run supabase:reset` — reset the local Supabase database (runs migrations fresh)
-- `npm run supabase:types` — regenerate `supabase/database.types.ts` from current schema. Always run after migration changes and before `typecheck`.
+- `npm run start` — start local Supabase, regenerate types, and launch Vite dev server
+- `npm run stop` — stop the local Supabase instance
+- `npm run supabase:types` — regenerate `src/types/supabase.ts` from current schema. Always run after migration changes and before `typecheck`.
 - `npm run test` — run Vitest unit tests
 - `npm run test:watch` — run tests in watch mode
 - `npm run test:coverage` — run tests with v8 coverage report
@@ -26,6 +28,7 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - **TanStack React Query v5** for server state (client in `src/lib/query-client.ts`)
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (no tailwind.config — uses CSS-first config in `src/index.css`)
 - **Lucide React** for icons
+- **Sonner** for toast notifications
 - **react-i18next** for internationalization (config in `src/lib/i18n.ts`)
 - **ESLint 9** flat config with `eslint-plugin-i18next` to catch untranslated literal strings
 - **Vitest** with jsdom and `@testing-library/react` for unit and hook tests
@@ -39,13 +42,13 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 ### Data Flow
 
 1. **Types**: `src/types/database.ts` — TypeScript interfaces for all domain models (Campaign, Character, Session, Encounter, Note, etc.). These are frontend types; the DB schema lives in `supabase/migrations/`.
-2. **Hooks**: `src/hooks/use*.ts` — CQRS-inspired separation: query hooks for reads (`useCampaigns()`, `useCampaign(id)`), mutation hooks for writes (`useCampaignMutations()` → `{ create, update, archive }`, `useCharacterMutations()` → `{ create, update, remove }`).
+2. **Hooks**: `src/hooks/use*.ts` — CQRS-inspired separation: query hooks for reads (`useCampaigns()`, `useCampaign(id)`), mutation hooks for writes. Campaigns and Characters use grouped mutations (`useCampaignMutations()` → `{ create, update, archive }`, `useCharacterMutations()` → `{ create, update, remove }`). Sessions, Encounters, and Notes use individual mutation hooks (`useCreateSession()`, `useUpdateSession()`, `useDeleteSession()`, etc.). `useBuilderAutosave()` handles character builder draft/finalize.
 3. **Pages**: `src/pages/` — route-level components. All routes are campaign-scoped (`/campaign/:id/...`).
-4. **Components**: `src/components/ui/` — shadcn/ui primitives (Badge, Button, Card, Checkbox, Dialog, Input, Label, Select, Skeleton, Switch, Tabs, Textarea) plus custom AutocompleteInput. `src/components/` — layout components (Layout, Sidebar).
+4. **Components**: `src/components/ui/` — shadcn/ui primitives (Badge, Button, Card, Checkbox, Dialog, Input, Label, Select, Skeleton, Sonner, Switch, Tabs, Textarea, Toggle, ToggleGroup) plus custom AutocompleteInput, GenderToggle, and ValidationError. `src/components/` — layout components (Layout, Sidebar).
 
 ### Routing
 
-All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope.
+All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope. The character builder lives at `/campaign/:id/character/new` with a 7-step wizard (Basics → Abilities → Skills → Proficiencies → Equipment → Spells → Backstory), autosave via `useBuilderAutosave()`, and dedicated step components in `src/components/character-builder/`.
 
 ### Internationalization (i18n)
 
@@ -65,7 +68,7 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 
 ### Database Schema
 
-`supabase/migrations/` defines tables: campaigns, characters, sessions, encounters, notes. Complex data (abilities, equipment, spells, combatants) stored as JSONB columns. All tables cascade-delete from campaigns. Campaigns support soft-delete via `archived_at`. The DB has both `character_type` (source column) and `is_npc` (generated/computed column).
+`supabase/migrations/` defines tables: campaigns, characters, sessions, encounters, notes. Complex data (abilities, equipment, spells, combatants, loot) stored as JSONB columns. All tables cascade-delete from campaigns. Campaigns support soft-delete via `archived_at`. The DB has both `character_type` (source column) and `is_npc` (generated/computed column). Sessions store loot items as JSONB with add/delete/upsert support in `SessionDetail`.
 
 ### Styling
 
@@ -82,7 +85,7 @@ Three color themes (Default/gold, Sylvan/green, Arcane/purple) with light and da
 - **Hook tests**: Use `createWrapper()` from `src/test/wrapper.tsx` as the `renderHook` wrapper. Call `setupMockReset()` at the top of each describe block to reset mock state between tests.
 - **Shared CRUD helpers** (`src/test/hook-test-helpers.ts`): `describeListQuery`, `describeSingleQuery`, `describeCreateMutation`, `describeUpdateMutation`, `describeDeleteMutation` — cover standard success/error/disabled cases. Write inline tests for behavior unique to a hook.
 - **Lib function tests**: Co-locate test file; use `it.each` for pure input/output functions; mock `Math.random` via `vi.spyOn` for random-dependent functions.
-- **Coverage**: v8 provider; includes `src/lib/**` and `src/hooks/**`; excludes `supabase.ts`, `query-client.ts`, `i18n.ts`.
+- **Coverage**: v8 provider; includes `src/lib/**` and `src/hooks/**`; excludes `query-client.ts`, `i18n.ts`.
 
 ## Environment Variables
 
