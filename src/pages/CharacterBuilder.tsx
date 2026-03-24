@@ -53,6 +53,7 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
 
 export default function CharacterBuilder() {
   const { t } = useTranslation('common')
+  const { t: tg } = useTranslation('gamedata')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
@@ -223,6 +224,13 @@ export default function CharacterBuilder() {
     })
   }
 
+  const handleLanguageRandomize = (languages: LanguageId[]) => {
+    setCharacterData((prev) => ({
+      ...prev,
+      proficiencies: { ...prev.proficiencies, languageChoices: languages },
+    }))
+  }
+
   const addEquipment = () => setCharacterData((prev) => ({
     ...prev, equipment: [...prev.equipment, { id: crypto.randomUUID(), name: '', quantity: 1, weight: 0, equipped: false }],
   }))
@@ -252,7 +260,7 @@ export default function CharacterBuilder() {
       )
       case 'proficiencies': return (
         <ProficienciesStep characterClass={cd.class} race={cd.race}
-          proficiencies={cd.proficiencies} onToolChoiceToggle={handleToolChoiceToggle} onLanguageChoiceToggle={handleLanguageChoiceToggle} />
+          proficiencies={cd.proficiencies} onToolChoiceToggle={handleToolChoiceToggle} onLanguageChoiceToggle={handleLanguageChoiceToggle} onLanguageRandomize={handleLanguageRandomize} />
       )
       case 'equipment': return (
         <EquipmentStep equipment={cd.equipment} onAdd={addEquipment} onUpdate={updateEquipment} onRemove={removeEquipment} />
@@ -302,6 +310,19 @@ export default function CharacterBuilder() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Character Summary */}
+        <div className="mb-4 text-center text-lg text-muted-foreground h-7">
+          {characterData.name && selectedRace && selectedClass && (
+            <>
+              <span className="font-semibold text-foreground">{characterData.name}</span>
+              {' · '}
+              {tg(`races.${selectedRace.id}`)}
+              {' · '}
+              {tg(`classes.${selectedClass.id}`)}
+            </>
+          )}
         </div>
 
         {/* Step Content */}

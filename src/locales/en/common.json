@@ -1,4 +1,5 @@
 {
+  "none": "—",
   "buttons": {
     "save": "Save",
     "saving": "Saving...",
@@ -175,8 +176,11 @@
       "weaponProficiencies": "Weapon Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
       "languages": "Languages",
+      "typicalSpeakers": "Typical Speakers",
+      "script": "Script",
       "chooseTools": "Choose {{count}} tool proficiency from the list below.",
       "chooseTools_plural": "Choose {{count}} tool proficiencies from the list below.",
+      "randomizeLanguage": "Roll random language (d12)",
       "chooseLanguages": "Choose {{count}} additional language.",
       "chooseLanguages_plural": "Choose {{count}} additional languages.",
       "selected": "{{count}} / {{max}} selected",
@@ -189,7 +193,9 @@
       "cantrips": "Cantrips (comma-separated)"
     },
     "equipment": {
-      "equipped": "Equipped"
+      "equipped": "Equipped",
+      "quantity": "Qty",
+      "weight": "Weight (lb)"
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",

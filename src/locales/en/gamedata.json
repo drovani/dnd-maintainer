@@ -19,6 +19,27 @@
     "human": "Human",
     "tiefling": "Tiefling"
   },
+  "creatureTypes": {
+    "aboleths": "Aboleths",
+    "celestials": "Celestials",
+    "cloakers": "Cloakers",
+    "demons": "Demons",
+    "devils": "Devils",
+    "dragonborn": "Dragonborn",
+    "dragons": "Dragons",
+    "dwarves": "Dwarves",
+    "elementals": "Elementals",
+    "elves": "Elves",
+    "fey": "Fey creatures",
+    "giants": "Giants",
+    "gnomes": "Gnomes",
+    "goblinoids": "Goblinoids",
+    "halflings": "Halflings",
+    "humans": "Humans",
+    "ogres": "Ogres",
+    "orcs": "Orcs",
+    "underworld-traders": "Underworld traders"
+  },
   "classes": {
     "barbarian": "Barbarian",
     "bard": "Bard",
@@ -117,6 +138,7 @@
   },
   "languages": {
     "common": "Common",
+    "common-sign": "Common Sign Language",
     "dwarvish": "Dwarvish",
     "elvish": "Elvish",
     "giant": "Giant",
@@ -132,6 +154,18 @@
     "primordial": "Primordial",
     "sylvan": "Sylvan",
     "undercommon": "Undercommon"
+  },
+  "languageCategories": {
+    "standard": "Standard Languages",
+    "exotic": "Exotic Languages"
+  },
+  "languageScripts": {
+    "common": "Common",
+    "dwarvish": "Dwarvish",
+    "elvish": "Elvish",
+    "draconic": "Draconic",
+    "infernal": "Infernal",
+    "celestial": "Celestial"
   },
   "armor": {
     "light": "Light",
