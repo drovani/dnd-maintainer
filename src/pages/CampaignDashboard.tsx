@@ -565,7 +565,7 @@ export default function CampaignDashboard() {
                   allowNone
                   disabled={updateMutation.isPending}
                 />
-                {updateMutation.isError && (
+                {updateMutation.isError && updateMutation.variables && 'theme' in updateMutation.variables && (
                   <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
                 )}
               </CardContent>

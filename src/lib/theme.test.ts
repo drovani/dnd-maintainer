@@ -235,24 +235,32 @@ describe('localStorage exception handling', () => {
     warnSpy.mockRestore();
   });
 
-  it('writeStoredTheme does not throw when localStorage throws', () => {
+  it('writeStoredTheme returns false and does not throw when localStorage throws', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
     });
-    expect(() => writeStoredTheme('arcane')).not.toThrow();
+    expect(writeStoredTheme('arcane')).toBe(false);
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
     warnSpy.mockRestore();
   });
 
-  it('writeStoredColorMode does not throw when localStorage throws', () => {
+  it('writeStoredTheme returns true on success', () => {
+    expect(writeStoredTheme('sylvan')).toBe(true);
+  });
+
+  it('writeStoredColorMode returns false and does not throw when localStorage throws', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
     });
-    expect(() => writeStoredColorMode('dark')).not.toThrow();
+    expect(writeStoredColorMode('dark')).toBe(false);
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
     warnSpy.mockRestore();
+  });
+
+  it('writeStoredColorMode returns true on success', () => {
+    expect(writeStoredColorMode('light')).toBe(true);
   });
 });
 
@@ -280,5 +288,22 @@ describe('index.html theme constants sync', () => {
   it('storage keys in index.html match STORAGE_KEYS', () => {
     expect(indexHtml).toContain(`localStorage.getItem('${STORAGE_KEYS.colorMode}')`);
     expect(indexHtml).toContain(`localStorage.getItem('${STORAGE_KEYS.theme}')`);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DB migration sync check — CHECK constraint must match THEME_IDS
+// ---------------------------------------------------------------------------
+describe('DB migration theme CHECK constraint sync', () => {
+  const migrationSql = fs.readFileSync(
+    path.resolve(__dirname, '../../supabase/migrations/00007_add_campaign_theme.sql'),
+    'utf-8',
+  );
+
+  it('CHECK constraint values match THEME_IDS', () => {
+    const match = migrationSql.match(/CHECK\s*\(theme\s+IN\s*\(([^)]+)\)\)/i);
+    expect(match).not.toBeNull();
+    const dbValues = match![1].replace(/'/g, '').split(',').map(s => s.trim());
+    expect(dbValues).toEqual([...THEME_IDS]);
   });
 });

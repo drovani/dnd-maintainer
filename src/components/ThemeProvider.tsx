@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
+import { toast } from 'sonner';
+import i18next from 'i18next';
 import {
   type ColorMode,
   type ResolvedMode,
@@ -49,15 +51,19 @@ export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.
   const systemPrefersDark = useSyncExternalStore(subscribeToSystemPreference, getSystemPrefersDark);
   const resolvedMode = deriveResolvedMode(colorMode, systemPrefersDark);
 
+  const warnPersistenceFailed = useCallback(() => {
+    toast.warning(i18next.t('errors.themeNotPersisted', { ns: 'common' }));
+  }, []);
+
   const setTheme = useCallback((id: ThemeId) => {
     setThemeState(id);
-    writeStoredTheme(id);
-  }, []);
+    if (!writeStoredTheme(id)) warnPersistenceFailed();
+  }, [warnPersistenceFailed]);
 
   const setColorMode = useCallback((mode: ColorMode) => {
     setColorModeState(mode);
-    writeStoredColorMode(mode);
-  }, []);
+    if (!writeStoredColorMode(mode)) warnPersistenceFailed();
+  }, [warnPersistenceFailed]);
 
   const effectiveTheme = campaignThemeOverride ?? theme;
 

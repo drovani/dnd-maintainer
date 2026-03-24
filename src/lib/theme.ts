@@ -35,11 +35,13 @@ export function readStoredTheme(): ThemeId {
   }
 }
 
-export function writeStoredTheme(id: ThemeId): void {
+export function writeStoredTheme(id: ThemeId): boolean {
   try {
     localStorage.setItem(STORAGE_KEYS.theme, id);
+    return true;
   } catch (err) {
     console.warn('[theme] Failed to persist theme to localStorage:', err);
+    return false;
   }
 }
 
@@ -53,11 +55,13 @@ export function readStoredColorMode(): ColorMode {
   }
 }
 
-export function writeStoredColorMode(mode: ColorMode): void {
+export function writeStoredColorMode(mode: ColorMode): boolean {
   try {
     localStorage.setItem(STORAGE_KEYS.colorMode, mode);
+    return true;
   } catch (err) {
     console.warn('[theme] Failed to persist color mode to localStorage:', err);
+    return false;
   }
 }
 

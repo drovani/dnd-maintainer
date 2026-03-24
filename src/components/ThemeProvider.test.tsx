@@ -31,6 +31,22 @@ describe('default values', () => {
   });
 });
 
+describe('hydration from localStorage', () => {
+  it('reads persisted theme on mount', () => {
+    localStorage.setItem('dnd-theme', 'arcane');
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    expect(result.current.theme).toBe('arcane');
+    expect(result.current.effectiveTheme).toBe('arcane');
+  });
+
+  it('reads persisted color mode on mount', () => {
+    localStorage.setItem('dnd-color-mode', 'dark');
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    expect(result.current.colorMode).toBe('dark');
+    expect(result.current.resolvedMode).toBe('dark');
+  });
+});
+
 describe('setTheme', () => {
   it('updates theme and persists to localStorage', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
@@ -41,12 +57,13 @@ describe('setTheme', () => {
 });
 
 describe('setColorMode', () => {
-  it('updates color mode and resolvedMode', () => {
+  it('updates color mode, resolvedMode, and persists to localStorage', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     act(() => result.current.setColorMode('dark'));
     expect(result.current.colorMode).toBe('dark');
     expect(result.current.resolvedMode).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('dnd-color-mode')).toBe('dark');
   });
 
   it('updates to light mode', () => {

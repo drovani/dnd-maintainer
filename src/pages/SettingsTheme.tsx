@@ -1,11 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Sun, Moon, Monitor, RefreshCw } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemePicker } from '@/components/ThemePicker';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns';
+import { useCampaigns } from '@/hooks/useCampaigns';
+import { supabase } from '@/lib/supabase';
 import type { ThemeId } from '@/lib/theme';
+import type { CampaignSummary } from '@/types/database';
 import { cn } from '@/lib/utils';
 
 const COLOR_MODE_OPTIONS = [
@@ -14,15 +17,46 @@ const COLOR_MODE_OPTIONS = [
   { mode: 'system' as const, icon: Monitor, labelKey: 'settings.colorModes.system' as const },
 ];
 
+function CampaignThemeRow({ campaign }: { campaign: CampaignSummary }): React.JSX.Element {
+  const { t } = useTranslation('common');
+  const queryClient = useQueryClient();
+
+  const updateTheme = useMutation({
+    mutationFn: async (newTheme: ThemeId | null) => {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ theme: newTheme })
+        .eq('id', campaign.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', campaign.id] });
+    },
+  });
+
+  return (
+    <div className="rounded-lg border border-border p-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{campaign.name}</span>
+        <ThemePicker
+          value={campaign.theme ?? null}
+          onChange={(id) => updateTheme.mutate(id)}
+          allowNone
+          disabled={updateTheme.isPending}
+        />
+      </div>
+      {updateTheme.isError && (
+        <p className="text-sm text-destructive">{t('errors.saveFailed')}</p>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsTheme(): React.JSX.Element {
   const { t } = useTranslation('common');
   const { theme, setTheme, colorMode, setColorMode } = useTheme();
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
-  const { update } = useCampaignMutations();
-
-  const handleCampaignThemeChange = (campaignId: string, newTheme: ThemeId | null): void => {
-    update.mutate({ id: campaignId, theme: newTheme });
-  };
 
   return (
     <div className="page-container">
@@ -95,26 +129,9 @@ export default function SettingsTheme(): React.JSX.Element {
             <p className="text-sm text-muted-foreground">{t('nav.noCampaigns')}</p>
           ) : (
             <div className="space-y-4">
-              {campaigns.map((campaign) => {
-                const isMutatingThis = update.isPending && update.variables?.id === campaign.id;
-                const hasErrorForThis = update.isError && update.variables?.id === campaign.id;
-                return (
-                  <div key={campaign.id} className="rounded-lg border border-border p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{campaign.name}</span>
-                      <ThemePicker
-                        value={campaign.theme ?? null}
-                        onChange={(id) => handleCampaignThemeChange(campaign.id, id)}
-                        allowNone
-                        disabled={isMutatingThis}
-                      />
-                    </div>
-                    {hasErrorForThis && (
-                      <p className="text-sm text-destructive">{t('errors.saveFailed')}</p>
-                    )}
-                  </div>
-                );
-              })}
+              {campaigns.map((campaign) => (
+                <CampaignThemeRow key={campaign.id} campaign={campaign} />
+              ))}
             </div>
           )}
         </section>

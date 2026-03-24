@@ -445,7 +445,8 @@
     "supabaseStatus": "If running locally, npx supabase status shows the DB is up",
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "errorPrefix": "Error: {{message}}",
-    "saveFailed": "Save failed — your changes may not have been saved"
+    "saveFailed": "Save failed — your changes may not have been saved",
+    "themeNotPersisted": "Theme preference could not be saved. It will reset on next visit."
   },
   "status": {
     "healthy": "healthy",

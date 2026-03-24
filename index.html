@@ -24,7 +24,8 @@
         document.documentElement.setAttribute('data-theme', theme);
       }
     } catch (e) {
-      // Storage unavailable; ThemeProvider will apply theme once React mounts
+      console.warn('[theme] Inline bootstrap failed:', e);
+      // ThemeProvider will apply theme once React mounts
     }
   })();
 </script>
