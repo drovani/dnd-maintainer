@@ -377,6 +377,7 @@ describe.each<[string, readonly string[]]>([
   ["DND_ARMOR_PROFICIENCIES", DND_ARMOR_PROFICIENCIES],
   ["DND_WEAPON_PROFICIENCIES", DND_WEAPON_PROFICIENCIES],
   ["DND_TOOL_PROFICIENCIES", DND_TOOL_PROFICIENCIES],
+  ["DND_SIZES", DND_SIZES],
 ])("%s", (_label, collection) => {
   it("has unique entries", () => {
     expect(collection.length).toBeGreaterThan(0);
@@ -404,11 +405,6 @@ describe("DND_RACES size data integrity", () => {
   it("all race sizes exist in DND_SIZES", () => {
     for (const race of DND_RACES) {
       expect(DND_SIZES).toContain(race.size)
-    }
-  })
-  it("every race has a size field", () => {
-    for (const race of DND_RACES) {
-      expect(race.size).toBeDefined()
     }
   })
 })
