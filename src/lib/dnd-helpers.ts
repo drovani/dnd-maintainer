@@ -233,8 +233,6 @@ export interface DndBackground {
   readonly id: BackgroundId
 }
 
-export type LanguageCategory = 'standard' | 'exotic'
-
 export const DND_SCRIPTS = [
   'common', 'dwarvish', 'elvish', 'draconic', 'infernal', 'celestial',
 ] as const
@@ -252,7 +250,7 @@ export type CreatureTypeId = (typeof DND_CREATURE_TYPES)[number]
 
 export const DND_LANGUAGE_DATA = [
   { id: 'common', category: 'standard', typicalSpeakers: ['humans'], script: 'common' },
-  { id: 'common-sign', category: 'standard', typicalSpeakers: [] as CreatureTypeId[], script: null },
+  { id: 'common-sign', category: 'standard', typicalSpeakers: [] as readonly CreatureTypeId[], script: null },
   { id: 'dwarvish', category: 'standard', typicalSpeakers: ['dwarves'], script: 'dwarvish' },
   { id: 'elvish', category: 'standard', typicalSpeakers: ['elves'], script: 'elvish' },
   { id: 'giant', category: 'standard', typicalSpeakers: ['ogres', 'giants'], script: 'dwarvish' },
@@ -271,6 +269,7 @@ export const DND_LANGUAGE_DATA = [
 ] as const
 
 export type LanguageId = (typeof DND_LANGUAGE_DATA)[number]['id']
+export type LanguageCategory = (typeof DND_LANGUAGE_DATA)[number]['category']
 export const DND_LANGUAGES: readonly LanguageId[] = DND_LANGUAGE_DATA.map((l) => l.id)
 
 export interface DndLanguage {

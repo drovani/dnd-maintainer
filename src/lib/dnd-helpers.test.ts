@@ -266,7 +266,9 @@ describe("rollRandomLanguages", () => {
     ] as const;
     // Only halfling and orc remain in the table
     const result = rollRandomLanguages(5, exclude);
-    expect(result.length).toBeLessThanOrEqual(2);
+    expect(result).toHaveLength(2);
+    expect(result).toContain("halfling");
+    expect(result).toContain("orc");
   });
 
   it("returns empty array when all languages are excluded", () => {
