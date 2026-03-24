@@ -30,22 +30,28 @@ export function EquipmentStep({ equipment, onAdd, onUpdate, onRemove }: Equipmen
                 placeholder={t('characterBuilder.placeholders.itemName')}
               />
               <div className="grid grid-cols-3 gap-2">
-                <Input
-                  type="number"
-                  min="1"
-                  value={item.quantity}
-                  onChange={(e) => onUpdate(item.id, { quantity: parseIntOrDefault(e.target.value, 1) })}
-                  placeholder={t('characterBuilder.placeholders.quantity')}
-                />
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={item.weight}
-                  onChange={(e) => onUpdate(item.id, { weight: parseFloat(e.target.value) || 0 })}
-                  placeholder={t('characterBuilder.placeholders.weight')}
-                />
-                <Label htmlFor={`equip-${item.id}`} className="flex items-center gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor={`qty-${item.id}`}>{t('characterBuilder.equipment.quantity')}</Label>
+                  <Input
+                    id={`qty-${item.id}`}
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => onUpdate(item.id, { quantity: parseIntOrDefault(e.target.value, 1) })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor={`weight-${item.id}`}>{t('characterBuilder.equipment.weight')}</Label>
+                  <Input
+                    id={`weight-${item.id}`}
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={item.weight}
+                    onChange={(e) => onUpdate(item.id, { weight: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <Label htmlFor={`equip-${item.id}`} className="flex items-center gap-2 self-end pb-2">
                   <Checkbox
                     id={`equip-${item.id}`}
                     checked={item.equipped}

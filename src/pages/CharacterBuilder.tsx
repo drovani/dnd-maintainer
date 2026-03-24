@@ -53,6 +53,7 @@ const INITIAL_CHARACTER_DATA: CharacterData = {
 
 export default function CharacterBuilder() {
   const { t } = useTranslation('common')
+  const { t: tg } = useTranslation('gamedata')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
@@ -309,6 +310,19 @@ export default function CharacterBuilder() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Character Summary */}
+        <div className="mb-4 text-center text-lg text-muted-foreground h-7">
+          {characterData.name && selectedRace && selectedClass && (
+            <>
+              <span className="font-semibold text-foreground">{characterData.name}</span>
+              {' · '}
+              {tg(`races.${selectedRace.id}`)}
+              {' · '}
+              {tg(`classes.${selectedClass.id}`)}
+            </>
+          )}
         </div>
 
         {/* Step Content */}

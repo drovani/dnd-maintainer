@@ -193,7 +193,9 @@
       "cantrips": "Cantrips (comma-separated)"
     },
     "equipment": {
-      "equipped": "Equipped"
+      "equipped": "Equipped",
+      "quantity": "Qty",
+      "weight": "Weight (lb)"
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",
