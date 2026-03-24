@@ -21,6 +21,8 @@ import {
   getSpellSlots,
   roll4d6DropLowest,
   rollAbilityScores,
+  rollRandomLanguage,
+  rollRandomLanguages,
   toggleLanguageProficiencyChoice,
   toggleToolProficiencyChoice,
 } from "@/lib/dnd-helpers";
@@ -204,6 +206,75 @@ describe("rollAbilityScores", () => {
         expect(scores[j]).toBeGreaterThanOrEqual(scores[j + 1]);
       }
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// rollRandomLanguage / rollRandomLanguages
+// ---------------------------------------------------------------------------
+describe("rollRandomLanguage", () => {
+  it("returns a valid language id", () => {
+    const result = rollRandomLanguage([]);
+    expect(result).not.toBeNull();
+    expect(DND_LANGUAGES).toContain(result);
+  });
+
+  it("excludes specified languages", () => {
+    const exclude = ["dwarvish", "elvish", "halfling"] as const;
+    for (let i = 0; i < 50; i++) {
+      const result = rollRandomLanguage(exclude);
+      expect(exclude).not.toContain(result);
+    }
+  });
+
+  it("returns null when all table languages are excluded", () => {
+    const allTableLanguages = [
+      "common-sign", "draconic", "dwarvish", "elvish", "giant",
+      "gnomish", "goblin", "halfling", "orc",
+    ] as const;
+    expect(rollRandomLanguage(allTableLanguages)).toBeNull();
+  });
+
+  it("respects weighted probabilities — dwarvish (weight 2) more likely than giant (weight 1)", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    // roll=0 should select first entry: common-sign (weight 1)
+    expect(rollRandomLanguage([])).toBe("common-sign");
+  });
+
+  it("selects last entry when roll lands at the end", () => {
+    // Total weight = 12, mock to just below 1 → roll = 11 → last entry (orc)
+    vi.spyOn(Math, "random").mockReturnValue(0.9999);
+    expect(rollRandomLanguage([])).toBe("orc");
+  });
+});
+
+describe("rollRandomLanguages", () => {
+  it("returns the requested number of languages", () => {
+    const result = rollRandomLanguages(2, []);
+    expect(result).toHaveLength(2);
+  });
+
+  it("does not return duplicates", () => {
+    const result = rollRandomLanguages(5, []);
+    expect(new Set(result).size).toBe(result.length);
+  });
+
+  it("returns fewer than requested when table is exhausted", () => {
+    const exclude = [
+      "common-sign", "draconic", "dwarvish", "elvish", "giant",
+      "gnomish", "goblin",
+    ] as const;
+    // Only halfling and orc remain in the table
+    const result = rollRandomLanguages(5, exclude);
+    expect(result.length).toBeLessThanOrEqual(2);
+  });
+
+  it("returns empty array when all languages are excluded", () => {
+    const allTableLanguages = [
+      "common-sign", "draconic", "dwarvish", "elvish", "giant",
+      "gnomish", "goblin", "halfling", "orc",
+    ] as const;
+    expect(rollRandomLanguages(3, allTableLanguages)).toEqual([]);
   });
 });
 

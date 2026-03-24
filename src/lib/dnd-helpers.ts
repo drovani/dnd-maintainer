@@ -233,15 +233,13 @@ export interface DndBackground {
   readonly id: BackgroundId
 }
 
-export const DND_LANGUAGES = [
-  'common', 'common-sign', 'dwarvish', 'elvish', 'giant', 'gnomish', 'goblin', 'halfling', 'orc',
-  'abyssal', 'celestial', 'draconic', 'deepspeech', 'infernal', 'primordial', 'sylvan', 'undercommon',
+export type LanguageCategory = 'standard' | 'exotic'
+
+export const DND_SCRIPTS = [
+  'common', 'dwarvish', 'elvish', 'draconic', 'infernal', 'celestial',
 ] as const
 
-export type LanguageId = (typeof DND_LANGUAGES)[number]
-
-export type LanguageCategory = 'standard' | 'exotic'
-export type ScriptId = 'common' | 'dwarvish' | 'elvish' | 'draconic' | 'infernal' | 'celestial'
+export type ScriptId = (typeof DND_SCRIPTS)[number]
 
 export const DND_CREATURE_TYPES = [
   'humans', 'dwarves', 'elves', 'gnomes', 'halflings', 'orcs',
@@ -252,16 +250,9 @@ export const DND_CREATURE_TYPES = [
 
 export type CreatureTypeId = (typeof DND_CREATURE_TYPES)[number]
 
-export interface DndLanguage {
-  readonly id: LanguageId
-  readonly category: LanguageCategory
-  readonly typicalSpeakers: readonly CreatureTypeId[]
-  readonly script: ScriptId | null
-}
-
-export const DND_LANGUAGE_DATA: readonly DndLanguage[] = [
+export const DND_LANGUAGE_DATA = [
   { id: 'common', category: 'standard', typicalSpeakers: ['humans'], script: 'common' },
-  { id: 'common-sign', category: 'standard', typicalSpeakers: [], script: null },
+  { id: 'common-sign', category: 'standard', typicalSpeakers: [] as CreatureTypeId[], script: null },
   { id: 'dwarvish', category: 'standard', typicalSpeakers: ['dwarves'], script: 'dwarvish' },
   { id: 'elvish', category: 'standard', typicalSpeakers: ['elves'], script: 'elvish' },
   { id: 'giant', category: 'standard', typicalSpeakers: ['ogres', 'giants'], script: 'dwarvish' },
@@ -278,6 +269,16 @@ export const DND_LANGUAGE_DATA: readonly DndLanguage[] = [
   { id: 'sylvan', category: 'exotic', typicalSpeakers: ['fey'], script: 'elvish' },
   { id: 'undercommon', category: 'exotic', typicalSpeakers: ['underworld-traders'], script: 'elvish' },
 ] as const
+
+export type LanguageId = (typeof DND_LANGUAGE_DATA)[number]['id']
+export const DND_LANGUAGES: readonly LanguageId[] = DND_LANGUAGE_DATA.map((l) => l.id)
+
+export interface DndLanguage {
+  readonly id: LanguageId
+  readonly category: LanguageCategory
+  readonly typicalSpeakers: readonly CreatureTypeId[]
+  readonly script: ScriptId | null
+}
 
 export const DND_ARMOR_PROFICIENCIES = [
   'light', 'medium', 'medium-nonmetal', 'heavy', 'shields', 'shields-nonmetal',
@@ -679,30 +680,38 @@ export function getPointBuyEquivalent(scores: number[]): number {
   }, 0)
 }
 
-// SRD d12 random language table (standard languages only)
-const RANDOM_LANGUAGE_TABLE: readonly { readonly min: number; readonly max: number; readonly id: LanguageId }[] = [
-  { min: 1, max: 1, id: 'common-sign' },
-  { min: 2, max: 2, id: 'draconic' },
-  { min: 3, max: 4, id: 'dwarvish' },
-  { min: 5, max: 6, id: 'elvish' },
-  { min: 7, max: 7, id: 'giant' },
-  { min: 8, max: 8, id: 'gnomish' },
-  { min: 9, max: 9, id: 'goblin' },
-  { min: 10, max: 11, id: 'halfling' },
-  { min: 12, max: 12, id: 'orc' },
+// SRD d12 random language table (standard languages only, weights sum to 12)
+const RANDOM_LANGUAGE_TABLE: readonly { readonly id: LanguageId; readonly weight: number }[] = [
+  { id: 'common-sign', weight: 1 },
+  { id: 'draconic', weight: 1 },
+  { id: 'dwarvish', weight: 2 },
+  { id: 'elvish', weight: 2 },
+  { id: 'giant', weight: 1 },
+  { id: 'gnomish', weight: 1 },
+  { id: 'goblin', weight: 1 },
+  { id: 'halfling', weight: 2 },
+  { id: 'orc', weight: 1 },
 ]
 
 export function rollRandomLanguage(exclude: readonly LanguageId[]): LanguageId | null {
   const available = RANDOM_LANGUAGE_TABLE.filter((entry) => !exclude.includes(entry.id))
   if (available.length === 0) return null
-  const totalWeight = available.reduce((sum, e) => sum + (e.max - e.min + 1), 0)
+  const totalWeight = available.reduce((sum, e) => sum + e.weight, 0)
   let roll = Math.floor(Math.random() * totalWeight)
   for (const entry of available) {
-    const weight = entry.max - entry.min + 1
-    if (roll < weight) return entry.id
-    roll -= weight
+    if (roll < entry.weight) return entry.id
+    roll -= entry.weight
   }
   return available[available.length - 1].id
+}
+
+export function rollRandomLanguages(count: number, exclude: readonly LanguageId[]): LanguageId[] {
+  const rolled: LanguageId[] = []
+  for (let i = 0; i < count; i++) {
+    const lang = rollRandomLanguage([...exclude, ...rolled])
+    if (lang) rolled.push(lang)
+  }
+  return rolled
 }
 
 export function roll4d6DropLowest(): number {

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import type { ClassId, DndClass, DndLanguage, DndRace, LanguageCategory, LanguageId, RaceId, ToolProficiencyId } from '@/lib/dnd-helpers'
-import { DND_CLASSES, DND_LANGUAGE_DATA, DND_RACES, rollRandomLanguage } from '@/lib/dnd-helpers'
+import { DND_CLASSES, DND_LANGUAGE_DATA, DND_RACES, rollRandomLanguages } from '@/lib/dnd-helpers'
 import { Dices } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { CharacterData } from './types'
@@ -162,12 +162,7 @@ export function ProficienciesStep({
                     size="sm"
                     title={tc('characterBuilder.proficiencies.randomizeLanguage')}
                     onClick={() => {
-                      const exclude = [...autoLanguages]
-                      const rolled: LanguageId[] = []
-                      for (let i = 0; i < languageChoicesMax; i++) {
-                        const lang = rollRandomLanguage([...exclude, ...rolled])
-                        if (lang) rolled.push(lang)
-                      }
+                      const rolled = rollRandomLanguages(languageChoicesMax, autoLanguages)
                       if (rolled.length > 0) onLanguageRandomize(rolled)
                     }}
                   >
@@ -211,12 +206,12 @@ export function ProficienciesStep({
                                 </Label>
                               </td>
                               <td className="py-1.5 pr-6 text-muted-foreground whitespace-nowrap">
-                                {lang.typicalSpeakers.map((id) => t(`races.${id}`)).join(', ') || tc('characterBuilder.proficiencies.noScript')}
+                                {lang.typicalSpeakers.map((id) => t(`creatureTypes.${id}`)).join(', ') || tc('none')}
                               </td>
                               <td className="py-1.5 text-muted-foreground whitespace-nowrap">
                                 {lang.script
                                   ? t(`languageScripts.${lang.script}`)
-                                  : tc('characterBuilder.proficiencies.noScript')}
+                                  : tc('none')}
                               </td>
                             </tr>
                           )

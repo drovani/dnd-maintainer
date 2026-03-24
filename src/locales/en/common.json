@@ -1,4 +1,5 @@
 {
+  "none": "—",
   "buttons": {
     "save": "Save",
     "saving": "Saving...",
@@ -177,7 +178,6 @@
       "languages": "Languages",
       "typicalSpeakers": "Typical Speakers",
       "script": "Script",
-      "noScript": "—",
       "chooseTools": "Choose {{count}} tool proficiency from the list below.",
       "chooseTools_plural": "Choose {{count}} tool proficiencies from the list below.",
       "randomizeLanguage": "Roll random language (d12)",
