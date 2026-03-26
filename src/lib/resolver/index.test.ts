@@ -5,6 +5,7 @@ import type { AbilityKey } from '@/lib/dnd-helpers'
 import { DND_SKILLS } from '@/lib/dnd-helpers'
 import { collectBundles } from '@/lib/sources'
 import type { CharacterBuild } from '@/types/choices'
+import type { GrantBundle } from '@/types/sources'
 
 const baseInput: ResolverInput = {
   baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
@@ -239,6 +240,36 @@ describe('Human Fighter L1 integration', () => {
   it('no pending choices when all choices resolved', () => {
     const result = resolveCharacter(input)
     expect(result.pendingChoices).toHaveLength(0)
+  })
+
+  it('has pending ability-choice when no decision provided', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'race', id: 'human' },
+        grants: [{ type: 'ability-choice', key: 'ability-choice:race:human:0', count: 1, bonus: 1, from: null }],
+      },
+    ]
+    const result = resolveCharacter({ ...baseInput, bundles })
+    const pending = result.pendingChoices.find((c) => c.type === 'ability-choice')
+    expect(pending).toBeDefined()
+    expect(pending?.choiceKey).toBe('ability-choice:race:human:0')
+  })
+
+  it('has pending ability-choice when decision is wrong type', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'race', id: 'human' },
+        grants: [{ type: 'ability-choice', key: 'ability-choice:race:human:0', count: 1, bonus: 1, from: null }],
+      },
+    ]
+    // Provide a wrong-type decision for the same key
+    const choices = {
+      'ability-choice:race:human:0': { type: 'skill-choice' as const, skills: ['athletics'] as const },
+    }
+    const result = resolveCharacter({ ...baseInput, bundles, choices })
+    const pending = result.pendingChoices.find((c) => c.type === 'ability-choice')
+    expect(pending).toBeDefined()
+    expect(pending?.choiceKey).toBe('ability-choice:race:human:0')
   })
 
   it('has pending skill choice when not resolved', () => {

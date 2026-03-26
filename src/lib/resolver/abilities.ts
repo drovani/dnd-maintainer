@@ -3,7 +3,7 @@ import type { AbilityScores } from '@/types/database'
 import type { GrantBundle, SourceTag } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 import type { ResolvedAbility } from '@/types/resolved'
-import type { AbilityBonusGrant, AbilityChoiceGrant } from '@/types/grants'
+
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 
 export function resolveAbilities(
@@ -19,12 +19,12 @@ export function resolveAbilities(
   }
 
   // Direct ability-bonus grants
-  for (const { grant, source } of collectGrantsByType<AbilityBonusGrant>(bundles, 'ability-bonus')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'ability-bonus')) {
     bonusList[grant.ability].push({ value: grant.bonus, source })
   }
 
   // Ability-choice grants — look up the decision in choices
-  for (const { grant, source } of collectGrantsByType<AbilityChoiceGrant>(bundles, 'ability-choice')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'ability-choice')) {
     const decision = choices[grant.key]
     if (decision?.type === 'ability-choice') {
       for (const ability of decision.abilities) {

@@ -55,6 +55,20 @@ describe('resolveHp', () => {
     // Level 1: 10+0=10, Level 2: null roll → avg = floor(10/2)+1=6, 6+0=6, total 16
     expect(resolveHp(bundles, [null], 0, 2).max).toBe(16)
   })
+
+  it('negative CON modifier reduces HP at each level', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'hit-die', die: 8 }],
+      },
+    ]
+    // CON 8 → modifier -1
+    // Level 1: 8 + (-1) = 7
+    expect(resolveHp(bundles, [], -1, 1).max).toBe(7)
+    // Level 2: 7 + (roll 4 + (-1)) = 7 + 3 = 10
+    expect(resolveHp(bundles, [4], -1, 2).max).toBe(10)
+  })
 })
 
 describe('resolveSpeed', () => {
@@ -156,5 +170,22 @@ describe('resolveAc', () => {
     const result = resolveAc(bundles, 0)
     expect(result.effective).toBe(12)
     expect(result.bonuses).toHaveLength(1)
+  })
+
+  it('takes highest base AC when both armored and natural grants present', () => {
+    // armored: 10 + 2 = 12, natural: 15 → highest wins (15)
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
+      },
+      {
+        source: { origin: 'race', id: 'human' },
+        grants: [{ type: 'armor-class', calculation: { mode: 'natural', baseAc: 15 } }],
+      },
+    ]
+    const result = resolveAc(bundles, 2)
+    expect(result.calculations).toHaveLength(2)
+    expect(result.effective).toBe(15)
   })
 })

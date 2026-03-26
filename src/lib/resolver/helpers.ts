@@ -6,15 +6,17 @@ export type TaggedGrant<G extends Grant> = {
   readonly source: SourceTag
 }
 
-export function collectGrantsByType<G extends Grant>(
+type GrantByType = { [G in Grant as G['type']]: G }
+
+export function collectGrantsByType<T extends Grant['type']>(
   bundles: readonly GrantBundle[],
-  type: G['type'],
-): readonly TaggedGrant<G>[] {
-  const result: TaggedGrant<G>[] = []
+  type: T,
+): readonly { grant: GrantByType[T]; source: SourceTag }[] {
+  const result: { grant: GrantByType[T]; source: SourceTag }[] = []
   for (const bundle of bundles) {
     for (const grant of bundle.grants) {
       if (grant.type === type) {
-        result.push({ grant: grant as G, source: bundle.source })
+        result.push({ grant: grant as GrantByType[T], source: bundle.source })
       }
     }
   }

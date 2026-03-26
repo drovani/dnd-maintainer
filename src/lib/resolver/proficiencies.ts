@@ -2,7 +2,7 @@ import { DND_SKILLS } from '@/lib/dnd-helpers'
 import type { AbilityKey, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
 import type { GrantBundle, SourceTag } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
-import type { ProficiencyGrant, ProficiencyChoiceGrant } from '@/types/grants'
+
 import type { ResolvedAbility, ResolvedSkill, Sourced, PendingChoice } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 
@@ -14,7 +14,7 @@ export function resolveSavingThrows(
   const keys: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
   const proficientAbilities = new Map<AbilityKey, SourceTag[]>()
-  for (const { grant, source } of collectGrantsByType<ProficiencyGrant>(bundles, 'proficiency')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency')) {
     if (grant.category === 'saving-throw') {
       const existing = proficientAbilities.get(grant.id) ?? []
       existing.push(source)
@@ -44,7 +44,7 @@ export function resolveSkills(
   const proficientSkills = new Map<SkillId, SourceTag[]>()
 
   // Direct skill proficiency grants
-  for (const { grant, source } of collectGrantsByType<ProficiencyGrant>(bundles, 'proficiency')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency')) {
     if (grant.category === 'skill') {
       const existing = proficientSkills.get(grant.id) ?? []
       existing.push(source)
@@ -53,7 +53,7 @@ export function resolveSkills(
   }
 
   // Skill choice grants — look up decisions
-  for (const { grant, source } of collectGrantsByType<ProficiencyChoiceGrant>(bundles, 'proficiency-choice')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
     if (grant.category === 'skill') {
       const decision = choices[grant.key]
       if (decision?.type === 'skill-choice') {
@@ -99,28 +99,45 @@ export function resolveProficiencies(
   const pendingChoices: PendingChoice[] = []
 
   // Direct proficiency grants
-  for (const { grant, source } of collectGrantsByType<ProficiencyGrant>(bundles, 'proficiency')) {
-    if (grant.category === 'armor') {
-      const existing = armorMap.get(grant.id) ?? []
-      existing.push(source)
-      armorMap.set(grant.id, existing)
-    } else if (grant.category === 'weapon') {
-      const existing = weaponMap.get(grant.id) ?? []
-      existing.push(source)
-      weaponMap.set(grant.id, existing)
-    } else if (grant.category === 'tool') {
-      const existing = toolMap.get(grant.id) ?? []
-      existing.push(source)
-      toolMap.set(grant.id, existing)
-    } else if (grant.category === 'language') {
-      const existing = languageMap.get(grant.id) ?? []
-      existing.push(source)
-      languageMap.set(grant.id, existing)
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency')) {
+    switch (grant.category) {
+      case 'armor': {
+        const existing = armorMap.get(grant.id) ?? []
+        existing.push(source)
+        armorMap.set(grant.id, existing)
+        break
+      }
+      case 'weapon': {
+        const existing = weaponMap.get(grant.id) ?? []
+        existing.push(source)
+        weaponMap.set(grant.id, existing)
+        break
+      }
+      case 'tool': {
+        const existing = toolMap.get(grant.id) ?? []
+        existing.push(source)
+        toolMap.set(grant.id, existing)
+        break
+      }
+      case 'language': {
+        const existing = languageMap.get(grant.id) ?? []
+        existing.push(source)
+        languageMap.set(grant.id, existing)
+        break
+      }
+      case 'saving-throw':
+        break
+      case 'skill':
+        break
+      default: {
+        const _exhaustive: never = grant
+        throw new Error(`Unhandled proficiency category: ${JSON.stringify(_exhaustive)}`)
+      }
     }
   }
 
   // Choice grants for tool and language categories
-  for (const { grant, source } of collectGrantsByType<ProficiencyChoiceGrant>(bundles, 'proficiency-choice')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
     if (grant.category === 'tool') {
       const decision = choices[grant.key]
       if (decision?.type === 'tool-choice') {

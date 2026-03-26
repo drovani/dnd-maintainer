@@ -3,7 +3,7 @@ import type { AbilityScores } from '@/types/database'
 import type { GrantBundle } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 import type { ResolvedCharacter, PendingChoice } from '@/types/resolved'
-import type { HitDie, HitDieGrant, AbilityChoiceGrant, ProficiencyChoiceGrant } from '@/types/grants'
+import type { HitDie } from '@/types/grants'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 import { resolveAbilities } from '@/lib/resolver/abilities'
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies'
@@ -37,7 +37,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const spellcasting = resolveSpellcasting(bundles)
 
   // Build hitDie array from hit-die grants
-  const hitDieGrants = collectGrantsByType<HitDieGrant>(bundles, 'hit-die')
+  const hitDieGrants = collectGrantsByType(bundles, 'hit-die')
   const hitDieMap = new Map<HitDie, number>()
   for (const { grant } of hitDieGrants) {
     hitDieMap.set(grant.die, (hitDieMap.get(grant.die) ?? 0) + 1)
@@ -48,9 +48,9 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const pendingChoices: PendingChoice[] = [...proficiencies.pendingChoices]
 
   // Unresolved ability-choice grants
-  for (const { grant, source } of collectGrantsByType<AbilityChoiceGrant>(bundles, 'ability-choice')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'ability-choice')) {
     const decision = choices[grant.key]
-    if (!decision) {
+    if (!decision || decision.type !== 'ability-choice') {
       pendingChoices.push({
         type: 'ability-choice',
         choiceKey: grant.key,
@@ -63,10 +63,10 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   }
 
   // Unresolved skill-choice grants
-  for (const { grant, source } of collectGrantsByType<ProficiencyChoiceGrant>(bundles, 'proficiency-choice')) {
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
     if (grant.category === 'skill') {
       const decision = choices[grant.key]
-      if (!decision) {
+      if (!decision || decision.type !== 'skill-choice') {
         pendingChoices.push({
           type: 'skill-choice',
           choiceKey: grant.key,

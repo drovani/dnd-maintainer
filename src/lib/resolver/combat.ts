@@ -1,5 +1,4 @@
 import type { GrantBundle, SourceTag } from '@/types/sources'
-import type { HitDieGrant, SpeedGrant, ArmorClassGrant, AcBonusGrant } from '@/types/grants'
 import type { ResolvedArmorClass, Sourced } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 
@@ -11,7 +10,7 @@ export function resolveHp(
 ): { readonly max: number } {
   if (level === 0) return { max: 0 }
 
-  const hitDieGrants = collectGrantsByType<HitDieGrant>(bundles, 'hit-die')
+  const hitDieGrants = collectGrantsByType(bundles, 'hit-die')
   if (hitDieGrants.length === 0) return { max: 0 }
 
   // Use the first hit die found (multi-class would need more logic)
@@ -31,7 +30,7 @@ export function resolveHp(
 }
 
 export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Record<string, Sourced<number>>> {
-  const speedGrants = collectGrantsByType<SpeedGrant>(bundles, 'speed')
+  const speedGrants = collectGrantsByType(bundles, 'speed')
 
   // Group by mode, taking highest value per mode
   const bestPerMode = new Map<string, { value: number; sources: SourceTag[] }>()
@@ -55,19 +54,29 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Record<s
 }
 
 export function resolveAc(bundles: readonly GrantBundle[], dexModifier: number): ResolvedArmorClass {
-  const acGrants = collectGrantsByType<ArmorClassGrant>(bundles, 'armor-class')
-  const acBonusGrants = collectGrantsByType<AcBonusGrant>(bundles, 'ac-bonus')
+  const acGrants = collectGrantsByType(bundles, 'armor-class')
+  const acBonusGrants = collectGrantsByType(bundles, 'ac-bonus')
 
   const calculations: { readonly mode: 'armored' | 'unarmored' | 'natural'; readonly baseValue: number; readonly source: SourceTag }[] = []
 
   for (const { grant, source } of acGrants) {
     const calc = grant.calculation
-    if (calc.mode === 'armored') {
-      calculations.push({ mode: 'armored', baseValue: 10 + dexModifier, source })
-    } else if (calc.mode === 'natural') {
-      calculations.push({ mode: 'natural', baseValue: calc.baseAc, source })
+    switch (calc.mode) {
+      case 'armored':
+        calculations.push({ mode: 'armored', baseValue: 10 + dexModifier, source })
+        break
+      case 'natural':
+        calculations.push({ mode: 'natural', baseValue: calc.baseAc, source })
+        break
+      case 'unarmored':
+        // Basic unarmored: 10 + DEX modifier (barbarian/monk formulas extend this)
+        calculations.push({ mode: 'unarmored', baseValue: 10 + dexModifier, source })
+        break
+      default: {
+        const _exhaustive: never = calc
+        throw new Error(`Unhandled AC calculation mode: ${JSON.stringify(_exhaustive)}`)
+      }
     }
-    // unarmored formulas (barbarian, monk) not needed for Sprint 1
   }
 
   const bonuses = acBonusGrants.map(({ grant, source }) => ({
