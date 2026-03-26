@@ -93,16 +93,19 @@ function CharacterBuilderInner() {
   const latestPayloadRef = useRef<AutosavePayload>({ character, rows, resolved })
   latestPayloadRef.current = { character, rows, resolved }
 
-  // Autosave when isDirty changes to true — debounced 500ms
+  // Required fields before any draft can be saved
+  const hasRequiredFields = !!character.name && !!character.race && !!character.class && !!character.background
+
+  // Autosave when isDirty changes to true — debounced 500ms, only if required fields present
   useEffect(() => {
-    if (!isDirty) return
+    if (!isDirty || !hasRequiredFields) return
     const timer = setTimeout(() => {
       saveDraft(latestPayloadRef.current)
         .then(() => markSaved())
         .catch((err: unknown) => console.error('Autosave failed:', err))
     }, 500)
     return () => clearTimeout(timer)
-  }, [isDirty, saveDraft, markSaved])
+  }, [isDirty, hasRequiredFields, saveDraft, markSaved])
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
 
@@ -116,11 +119,18 @@ function CharacterBuilderInner() {
     !!character.background &&
     (resolved?.pendingChoices.length ?? 0) === 0
 
+  // Can only leave Basics step once required fields are filled
+  const canLeavBasics = hasRequiredFields
+
   const goToStep = (targetStep: StepType) => {
-    const payload: AutosavePayload = { character, rows, resolved }
-    saveDraft(payload)
-      .then(() => markSaved())
-      .catch((err) => console.error('Autosave failed during step navigation:', err))
+    const targetIndex = STEPS.findIndex((s) => s.id === targetStep)
+    if (targetIndex > 0 && !canLeavBasics) return
+    if (hasRequiredFields) {
+      const payload: AutosavePayload = { character, rows, resolved }
+      saveDraft(payload)
+        .then(() => markSaved())
+        .catch((err) => console.error('Autosave failed during step navigation:', err))
+    }
     setCurrentStep(targetStep)
   }
 
@@ -128,6 +138,7 @@ function CharacterBuilderInner() {
   const goPrevStep = () => { if (currentStepIndex > 0) goToStep(STEPS[currentStepIndex - 1].id) }
 
   const handleFinalize = async () => {
+    if (!hasRequiredFields) return
     setIsFinalizing(true)
     setFinalizeError(null)
     try {
@@ -159,12 +170,15 @@ function CharacterBuilderInner() {
                 <div className="flex flex-col items-center">
                   <button
                     onClick={() => goToStep(step.id)}
+                    disabled={index > 0 && !canLeavBasics}
                     className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${
                       index === currentStepIndex
                         ? 'bg-primary text-primary-foreground'
                         : index < currentStepIndex
                           ? 'bg-green-600 text-white'
-                          : 'bg-muted text-muted-foreground'
+                          : index > 0 && !canLeavBasics
+                            ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+                            : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     {index + 1}
@@ -238,7 +252,7 @@ function CharacterBuilderInner() {
             {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
             {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
             {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep}>{t('buttons.next')} <ChevronRight size={16} /></Button>
+              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeavBasics}>{t('buttons.next')} <ChevronRight size={16} /></Button>
             )}
             <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing}>
               <Save className="size-4" />
