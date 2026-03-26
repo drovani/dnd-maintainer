@@ -16,7 +16,7 @@ import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacter
 import { useCharacter } from '@/hooks/useCharacters'
 import type { Character } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers'
@@ -89,14 +89,20 @@ function CharacterBuilderInner() {
     return () => clearTimeout(timer)
   }, [saveStatus, clearStatus])
 
-  // Autosave when isDirty changes to true
+  // Keep a ref to the latest payload so the debounced save always uses fresh data
+  const latestPayloadRef = useRef<AutosavePayload>({ character, rows, resolved })
+  latestPayloadRef.current = { character, rows, resolved }
+
+  // Autosave when isDirty changes to true — debounced 500ms
   useEffect(() => {
     if (!isDirty) return
-    const payload: AutosavePayload = { character, rows, resolved }
-    saveDraft(payload)
-      .then(() => markSaved())
-      .catch((err) => console.error('Autosave failed:', err))
-  }, [isDirty]) // eslint-disable-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      saveDraft(latestPayloadRef.current)
+        .then(() => markSaved())
+        .catch((err: unknown) => console.error('Autosave failed:', err))
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [isDirty, saveDraft, markSaved])
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
 
@@ -302,6 +308,7 @@ export default function CharacterBuilder() {
 
   return (
     <CharacterProvider
+      key={characterId ?? 'new'}
       initialCharacter={initialCharacter}
       initialRows={initialRows}
       initialEquippedItems={initialEquippedItems}

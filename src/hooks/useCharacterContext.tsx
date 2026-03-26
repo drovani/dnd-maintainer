@@ -81,7 +81,8 @@ function tryDeriveBuild(
       rows,
       equippedItems,
     )
-  } catch {
+  } catch (err) {
+    console.error('Failed to reconstruct character build:', { characterId: character.id, error: err })
     return null
   }
 }
@@ -102,7 +103,8 @@ function tryResolveCharacter(
       choices: build.choices,
       hpRolls: build.hpRolls,
     })
-  } catch {
+  } catch (err) {
+    console.error('Failed to resolve character:', { error: err })
     return null
   }
 }
@@ -183,10 +185,12 @@ export function CharacterProvider({
   }, [])
 
   const makeChoice = useCallback((choiceKey: string, decision: unknown) => {
+    let didChange = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) return prev
+      didChange = true
       const existing = prev[idx]
       const updated: BuildLevelRow = {
         ...existing,
@@ -196,14 +200,16 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    setIsDirty(true)
+    if (didChange) setIsDirty(true)
   }, [])
 
   const clearChoice = useCallback((choiceKey: string) => {
+    let didChange = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) return prev
+      didChange = true
       const existing = prev[idx]
       const newChoices = { ...(existing.choices ?? {}) } as Record<string, unknown>
       delete newChoices[choiceKey]
@@ -212,7 +218,7 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    setIsDirty(true)
+    if (didChange) setIsDirty(true)
   }, [])
 
   const levelUp = useCallback((classId: string, hpRoll: number | null) => {
@@ -238,13 +244,15 @@ export function CharacterProvider({
   }, [])
 
   const levelDown = useCallback(() => {
+    let didChange = false
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       if (levelRows.length === 0) return prev
+      didChange = true
       const maxSeq = levelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
       return prev.filter((r) => r.sequence !== maxSeq)
     })
-    setIsDirty(true)
+    if (didChange) setIsDirty(true)
   }, [])
 
   const markSaved = useCallback(() => {

@@ -81,9 +81,7 @@ export function useBuilderAutosave() {
             // Pre-calculated fields from resolved (or character if resolved unavailable)
             hit_points_max: resolved?.hitPoints.max ?? character.hit_points_max,
             armor_class: resolved?.armorClass.effective ?? character.armor_class,
-            speed: resolved
-              ? (Object.values(resolved.speed)[0]?.value ?? character.speed)
-              : character.speed,
+            speed: resolved?.speed.walk?.value ?? character.speed,
             proficiency_bonus: resolved?.proficiencyBonus ?? character.proficiency_bonus,
           }
 

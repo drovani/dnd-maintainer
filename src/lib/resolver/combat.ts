@@ -20,8 +20,10 @@ export function resolveHp(
   let max = die + conModifier
 
   // Subsequent levels: use rolled values (or average if null)
+  // hpRolls[0] = level 1 slot (unused — level 1 always uses max die)
+  // hpRolls[i] = roll for level i+1
   for (let i = 1; i < level; i++) {
-    const roll = hpRolls[i - 1]
+    const roll = hpRolls[i]
     const value = roll !== null && roll !== undefined ? roll : Math.floor(die / 2) + 1
     max += value + conModifier
   }

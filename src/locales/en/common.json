@@ -123,7 +123,8 @@
       "title": "Choices Required",
       "skillChoice": "Choose {{count}} skill(s)",
       "languageChoice": "Choose {{count}} language(s)",
-      "toolChoice": "Choose {{count}} tool(s)"
+      "toolChoice": "Choose {{count}} tool(s)",
+      "unsupported": "Choice not yet supported: {{type}}"
     },
     "status": {
       "saving": "Saving...",

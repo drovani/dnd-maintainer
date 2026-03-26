@@ -98,7 +98,8 @@ function useResolvedFromBuild(
         choices: build.choices,
         hpRolls: build.hpRolls,
       })
-    } catch {
+    } catch (err) {
+      console.error('Failed to resolve character from build:', { characterId: character?.id, error: err })
       return null
     }
   }, [character, buildRows, equippedItems])
@@ -172,9 +173,7 @@ export default function CharacterSheet() {
 
   // Combat stats — prefer resolved pipeline values, fall back to pre-calculated columns
   const armorClass = resolved?.armorClass.effective ?? character.armor_class
-  const speedValue = resolved
-    ? (Object.values(resolved.speed)[0]?.value ?? character.speed)
-    : character.speed
+  const speedValue = resolved?.speed.walk?.value ?? character.speed
   const maxHP = resolved?.hitPoints.max ?? character.hit_points_max
 
   // Ability scores — use resolved if available, else undefined (skip section)
@@ -412,7 +411,9 @@ export default function CharacterSheet() {
                       className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-50 border border-green-200' : 'bg-muted/50'}`}
                     >
                       <div>
-                        <div className="font-semibold text-foreground">{item.item_id}</div>
+                        <div className="font-semibold text-foreground">
+                          {item.item_id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                        </div>
                         <div className="text-muted-foreground">
                           {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: 0 })}
                         </div>

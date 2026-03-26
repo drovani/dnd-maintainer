@@ -41,8 +41,9 @@ describe('resolveHp', () => {
         grants: [{ type: 'hit-die', die: 10 }],
       },
     ]
+    // hpRolls[0] = level 1 slot (unused), hpRolls[1] = level 2 roll
     // Level 1: 10+2=12, Level 2: roll 7+2=9, total 21
-    expect(resolveHp(bundles, [7], 2, 2).max).toBe(21)
+    expect(resolveHp(bundles, [null, 7], 2, 2).max).toBe(21)
   })
 
   it('uses average (floor die/2 + 1) when roll is null', () => {
@@ -53,7 +54,7 @@ describe('resolveHp', () => {
       },
     ]
     // Level 1: 10+0=10, Level 2: null roll → avg = floor(10/2)+1=6, 6+0=6, total 16
-    expect(resolveHp(bundles, [null], 0, 2).max).toBe(16)
+    expect(resolveHp(bundles, [null, null], 0, 2).max).toBe(16)
   })
 
   it('negative CON modifier reduces HP at each level', () => {
@@ -66,8 +67,9 @@ describe('resolveHp', () => {
     // CON 8 → modifier -1
     // Level 1: 8 + (-1) = 7
     expect(resolveHp(bundles, [], -1, 1).max).toBe(7)
+    // hpRolls[0] = level 1 slot (unused), hpRolls[1] = level 2 roll
     // Level 2: 7 + (roll 4 + (-1)) = 7 + 3 = 10
-    expect(resolveHp(bundles, [4], -1, 2).max).toBe(10)
+    expect(resolveHp(bundles, [null, 4], -1, 2).max).toBe(10)
   })
 })
 

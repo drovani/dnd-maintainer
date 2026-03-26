@@ -200,7 +200,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
   // Unsupported choice types
   return (
     <p className="text-sm text-muted-foreground italic">
-      {`Choice not yet supported: ${choice.type}`}
+      {tc('characterBuilder.pendingChoices.unsupported', { type: choice.type })}
     </p>
   )
 }
