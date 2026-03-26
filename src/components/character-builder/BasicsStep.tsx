@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { useCharacterContext } from '@/hooks/useCharacterContext'
 import { usePlayerNames } from '@/hooks/useCharacters'
 import {
   DND_BACKGROUNDS,
@@ -27,8 +28,8 @@ import {
   type RaceId,
 } from '@/lib/dnd-helpers'
 import { Wand2 } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { CharacterData } from './types'
 
 // Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
 const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
@@ -37,38 +38,45 @@ const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
   'Lawful Evil': 'le', 'Neutral Evil': 'ne', 'Chaotic Evil': 'ce',
 }
 
-interface BasicsStepProps {
-  characterType: CharacterData['character_type']
-  name: string
-  playerName: string
-  race: CharacterData['race']
-  characterClass: CharacterData['class']
-  background: CharacterData['background']
-  customBackground: string
-  alignment: CharacterData['alignment']
-  level: number
-  gender: CharacterData['gender']
-  fieldErrors: Partial<Record<'name' | 'race' | 'class' | 'gender', boolean>>
-  onChange: (updates: Partial<Pick<CharacterData, 'character_type' | 'player_name' | 'name' | 'race' | 'class' | 'background' | 'custom_background' | 'alignment' | 'level' | 'gender'>>) => void
-}
-
-export function BasicsStep({
-  characterType,
-  name,
-  playerName,
-  race,
-  characterClass,
-  background,
-  customBackground,
-  alignment,
-  level,
-  gender,
-  fieldErrors,
-  onChange,
-}: BasicsStepProps) {
+export function BasicsStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const { data: playerNames = [], isError: playerNamesError } = usePlayerNames()
+  const context = useCharacterContext()
+
+  const { character, rows } = context
+  const [fieldErrors] = useState<Partial<Record<'name' | 'race' | 'class' | 'gender', boolean>>>({})
+
+  const characterType = character.character_type ?? 'pc'
+  const name = character.name ?? ''
+  const playerName = character.player_name ?? ''
+  const race = (character.race ?? '') as RaceId | ''
+  const background = (character.background ?? '') as BackgroundId | ''
+  const alignment = character.alignment ?? ''
+  // custom_background is not on Character type — omit for now
+  const gender = character.gender ?? ''
+
+  // Derive class from level rows (first non-creation row)
+  const levelRows = rows.filter((r) => r.sequence !== 0)
+  const characterClass = (levelRows[0]?.class_id ?? '') as ClassId | ''
+  const level = levelRows.length
+
+  const handleRaceChange = (value: RaceId) => {
+    context.updateCharacter({ race: value })
+  }
+
+  const handleClassChange = (value: ClassId) => {
+    if (levelRows.length === 0) {
+      // First time selecting a class — add level 1 row
+      context.levelUp(value, null)
+    }
+    // If class already exists, we can't easily change it without more complex logic.
+    // For now, only set on first selection (Sprint 3 scope).
+  }
+
+  const handleBackgroundChange = (value: BackgroundId) => {
+    context.updateCharacter({ background: value })
+  }
 
   return (
     <div className="space-y-6">
@@ -79,7 +87,7 @@ export function BasicsStep({
           <Switch
             checked={characterType === 'npc'}
             onCheckedChange={(checked: boolean) =>
-              onChange({
+              context.updateCharacter({
                 character_type: checked ? 'npc' : 'pc',
                 player_name: checked ? '' : playerName,
               })
@@ -99,8 +107,8 @@ export function BasicsStep({
           <span className="text-destructive">*</span>
         </Label>
         <GenderToggle
-          value={gender}
-          onChange={(g) => onChange({ gender: g })}
+          value={gender as DndGender | ''}
+          onChange={(g) => context.updateCharacter({ gender: g })}
           error={fieldErrors.gender}
         />
       </div>
@@ -116,7 +124,7 @@ export function BasicsStep({
             <Input
               id="character-name"
               value={name}
-              onChange={(e) => onChange({ name: e.target.value })}
+              onChange={(e) => context.updateCharacter({ name: e.target.value })}
               placeholder={tc('characterBuilder.placeholders.enterCharacterName')}
               className={fieldErrors.name ? 'border-destructive' : ''}
             />
@@ -127,9 +135,9 @@ export function BasicsStep({
               disabled={!race || !gender}
               title={!race || !gender ? tc('characterBuilder.hints.selectRaceAndGender') : tc('characterBuilder.hints.generateRandomName')}
               onClick={() => {
-                if (!race || !gender) return;
-                const generatedName = generateCharacterName(race, gender as DndGender);
-                if (generatedName) onChange({ name: generatedName });
+                if (!race || !gender) return
+                const generatedName = generateCharacterName(race, gender as DndGender)
+                if (generatedName) context.updateCharacter({ name: generatedName })
               }}
             >
               <Wand2 className="size-4" />
@@ -144,7 +152,7 @@ export function BasicsStep({
               id="player-name"
               suggestions={playerNames}
               value={playerName}
-              onChange={(value) => onChange({ player_name: value })}
+              onChange={(value) => context.updateCharacter({ player_name: value })}
               placeholder={tc('characterBuilder.placeholders.enterPlayerName')}
             />
             {playerNamesError && (
@@ -163,7 +171,7 @@ export function BasicsStep({
             </Label>
             <Select
               value={race || null}
-              onValueChange={(value) => value && onChange({ race: value as RaceId })}
+              onValueChange={(value) => value && handleRaceChange(value as RaceId)}
               items={DND_RACES.map((r) => ({ value: r.id, label: t(`races.${r.id}`) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
@@ -198,7 +206,7 @@ export function BasicsStep({
             </Label>
             <Select
               value={characterClass || null}
-              onValueChange={(value) => value && onChange({ class: value as ClassId })}
+              onValueChange={(value) => value && handleClassChange(value as ClassId)}
               items={DND_CLASSES.map((c) => ({ value: c.id, label: t(`classes.${c.id}`) }))}
             >
               <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
@@ -218,7 +226,7 @@ export function BasicsStep({
             <Label>{tc('characterBuilder.fields.background')}</Label>
             <Select
               value={background || null}
-              onValueChange={(value) => value && onChange({ background: value as BackgroundId })}
+              onValueChange={(value) => value && handleBackgroundChange(value as BackgroundId)}
               items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`, { defaultValue: b.id }) }))}
             >
               <SelectTrigger className="w-full">
@@ -254,7 +262,7 @@ export function BasicsStep({
                     key={alignmentId}
                     type="button"
                     title={t(`alignments.${alignmentId}`)}
-                    onClick={() => onChange({ alignment: alignmentId })}
+                    onClick={() => context.updateCharacter({ alignment: alignmentId })}
                     className={`flex flex-col items-center justify-center border-r border-b border-border px-1 py-1 text-sm transition-colors cursor-pointer last-of-type:border-r-0 nth-[3n]:border-r-0 ${isSelected
                       ? 'bg-primary/10 font-medium'
                       : 'hover:bg-muted/50'
@@ -270,17 +278,7 @@ export function BasicsStep({
         </div>
       </div>
 
-      {background === 'custom' && (
-        <div className="space-y-2">
-          <Label htmlFor="custom-background">{tc('characterBuilder.fields.customBackground')}</Label>
-          <Input
-            id="custom-background"
-            value={customBackground}
-            onChange={(e) => onChange({ custom_background: e.target.value })}
-            placeholder={tc('characterBuilder.placeholders.describeBackground')}
-          />
-        </div>
-      )}
+      {/* custom_background field omitted — not on Character type */}
     </div>
   )
 }

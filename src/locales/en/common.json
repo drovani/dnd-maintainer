@@ -110,7 +110,20 @@
       "alignment": "Alignment",
       "subclass": "Subclass",
       "type": "Type",
-      "customBackground": "Custom Background"
+      "customBackground": "Custom Background",
+      "size": "Size",
+      "age": "Age",
+      "height": "Height",
+      "weight": "Weight",
+      "eyeColor": "Eye Color",
+      "hairColor": "Hair Color",
+      "skinColor": "Skin Color"
+    },
+    "pendingChoices": {
+      "title": "Choices Required",
+      "skillChoice": "Choose {{count}} skill(s)",
+      "languageChoice": "Choose {{count}} language(s)",
+      "toolChoice": "Choose {{count}} tool(s)"
     },
     "status": {
       "saving": "Saving...",
@@ -190,12 +203,14 @@
     },
     "spells": {
       "basicVersion": "Spell management (basic version)",
-      "cantrips": "Cantrips (comma-separated)"
+      "cantrips": "Cantrips (comma-separated)",
+      "noSpellcasting": "No spellcasting for this class"
     },
     "equipment": {
       "equipped": "Equipped",
       "quantity": "Qty",
-      "weight": "Weight (lb)"
+      "weight": "Weight (lb)",
+      "comingSoon": "Equipment management coming soon"
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",
@@ -213,12 +228,14 @@
       "skills": "Skills",
       "combat": "Combat",
       "featuresAndTraits": "Features & Traits",
+      "features": "Features & Traits",
       "equipment": "Equipment",
       "spells": "Spells",
       "personality": "Personality",
       "backstory": "Backstory",
       "appearance": "Appearance",
-      "cantrips": "CANTRIPS"
+      "cantrips": "CANTRIPS",
+      "physicalTraits": "Physical Traits"
     },
     "fields": {
       "class": "Class",
@@ -242,7 +259,8 @@
       "qty": "Qty: {{qty}}",
       "weight": "Wt: {{weight}}",
       "speedFt": "{{value}} ft",
-      "qtyAndWeight": "Qty: {{qty}} | Wt: {{weight}}"
+      "qtyAndWeight": "Qty: {{qty}} | Wt: {{weight}}",
+      "size": "Size"
     },
     "personality": {
       "traits": "Traits",
@@ -458,6 +476,11 @@
     "noCampaignsDescription": "Create a campaign first before exporting data.",
     "selectCampaigns": "Select campaigns to export ({{selected}} of {{total}} selected)",
     "restoreHint": "The exported file can be restored with:"
+  },
+  "provenance": {
+    "race": "Race",
+    "class": "Class",
+    "background": "Background"
   },
   "errors": {
     "loadingCampaigns": "Unable to Load Campaigns",
