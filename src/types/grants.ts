@@ -1,4 +1,4 @@
-import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId } from '@/lib/dnd-helpers'
+import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
 
 // Supporting types
 
@@ -43,6 +43,7 @@ export interface AbilityBonusGrant {
 
 export interface AbilityChoiceGrant {
   readonly type: 'ability-choice'
+  readonly key: string
   readonly count: number
   readonly bonus: number
   readonly from: readonly AbilityKey[] | null
@@ -53,10 +54,13 @@ export type ProficiencyGrant =
   | { readonly type: 'proficiency'; readonly category: 'weapon'; readonly id: WeaponProficiencyId }
   | { readonly type: 'proficiency'; readonly category: 'tool'; readonly id: ToolProficiencyId }
   | { readonly type: 'proficiency'; readonly category: 'skill'; readonly id: SkillId }
+  | { readonly type: 'proficiency'; readonly category: 'saving-throw'; readonly id: AbilityKey }
+  | { readonly type: 'proficiency'; readonly category: 'language'; readonly id: LanguageId }
 
 export interface ProficiencyChoiceGrant {
   readonly type: 'proficiency-choice'
-  readonly category: 'armor' | 'weapon' | 'tool' | 'skill'
+  readonly category: 'armor' | 'weapon' | 'tool' | 'skill' | 'language'
+  readonly key: string
   readonly count: number
   readonly from: readonly string[] | null
 }

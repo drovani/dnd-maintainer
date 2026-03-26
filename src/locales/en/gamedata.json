@@ -212,7 +212,17 @@
     "horn": "Horn",
     "panflute": "Pan Flute",
     "shawm": "Shawm",
-    "viol": "Viol"
+    "viol": "Viol",
+    "vehicles-land": "Land Vehicles",
+    "vehicles-water": "Water Vehicles",
+    "gaming-set-dice": "Dice Set",
+    "gaming-set-cards": "Playing Card Set",
+    "gaming-set-dragonchess": "Dragonchess Set",
+    "gaming-set-three-dragon-ante": "Three-Dragon Ante Set"
+  },
+  "features": {
+    "fighter-fighting-style": "Fighting Style",
+    "fighter-second-wind": "Second Wind"
   },
   "gender": {
     "male": "Male",
