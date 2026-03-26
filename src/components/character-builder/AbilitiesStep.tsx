@@ -45,7 +45,17 @@ export function AbilitiesStep() {
     (creationRow?.base_abilities as AbilityScores | null | undefined) ?? DEFAULT_ABILITIES
 
   // Local UI state for assignment selects and rolling
-  const [abilityAssignments, setAbilityAssignments] = useState<Record<keyof AbilityScores, number | null>>(DEFAULT_ASSIGNMENTS)
+  // Derive initial assignments from saved base abilities so dropdowns persist across step navigation
+  const [abilityAssignments, setAbilityAssignments] = useState<Record<keyof AbilityScores, number | null>>(() => {
+    const hasAssignments = Object.values(baseAbilities).some((v) => v !== 10)
+    if (!hasAssignments) return { ...DEFAULT_ASSIGNMENTS }
+    // Reconstruct assignments from base abilities
+    const assignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
+    for (const key of Object.keys(assignments) as Array<keyof AbilityScores>) {
+      assignments[key] = baseAbilities[key] !== 10 ? baseAbilities[key] : null
+    }
+    return assignments
+  })
   const [rolledValues, setRolledValues] = useState<number[]>([])
   const [isRolling, setIsRolling] = useState<boolean>(false)
   const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
