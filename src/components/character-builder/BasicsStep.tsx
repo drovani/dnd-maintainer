@@ -70,8 +70,8 @@ export function BasicsStep() {
       // First time selecting a class — add level 1 row
       context.levelUp(value, null)
     }
-    // If class already exists, we can't easily change it without more complex logic.
-    // For now, only set on first selection (Sprint 3 scope).
+    // Keep character.class in sync for pre-calculated column and hasRequiredFields check
+    context.updateCharacter({ class: value, level: Math.max(levelRows.length, 1) })
   }
 
   const handleBackgroundChange = (value: BackgroundId) => {
