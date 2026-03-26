@@ -39,7 +39,6 @@ export function reconstructBuild(
   equippedItems: readonly string[],
 ): CharacterBuild {
   if (!character.race) throw new Error('Character is missing required race')
-  if (!character.background) throw new Error('Character is missing required background')
 
   const creationRow = rows.find((r) => r.sequence === 0)
   if (!creationRow) {
@@ -135,7 +134,7 @@ export function reconstructBuild(
 
   return {
     raceId: character.race as RaceId,
-    backgroundId: character.background as BackgroundId,
+    backgroundId: (character.background as BackgroundId) ?? null,
     baseAbilities,
     abilityMethod,
     appliedLevels,

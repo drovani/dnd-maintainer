@@ -127,7 +127,23 @@ export function CharacterProvider({
   children,
 }: CharacterProviderProps): React.JSX.Element {
   const [character, setCharacter] = useState<Character>(initialCharacter)
-  const [rows, setRows] = useState<readonly BuildLevelRow[]>(initialRows)
+  const [rows, setRows] = useState<readonly BuildLevelRow[]>(() => {
+    // Seed a creation row if one doesn't exist so reconstructBuild can always find sequence 0
+    if (initialRows.some((r) => r.sequence === 0)) return initialRows
+    const seedRow: BuildLevelRow = {
+      sequence: 0,
+      base_abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      ability_method: 'standard-array',
+      class_id: null,
+      class_level: null,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: {},
+    }
+    return [seedRow, ...initialRows]
+  })
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 

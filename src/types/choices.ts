@@ -20,7 +20,7 @@ export interface AppliedLevel {
 
 export interface CharacterBuild {
   readonly raceId: RaceId
-  readonly backgroundId: BackgroundId
+  readonly backgroundId: BackgroundId | null
   readonly baseAbilities: AbilityScores
   readonly abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
   readonly appliedLevels: readonly AppliedLevel[]

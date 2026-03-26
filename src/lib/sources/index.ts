@@ -105,8 +105,8 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
   }
 
   // Background
-  const backgroundSource = getBackgroundSource(build.backgroundId)
-  if (backgroundSource) {
+  const backgroundSource = build.backgroundId ? getBackgroundSource(build.backgroundId) : undefined
+  if (backgroundSource && build.backgroundId) {
     const tag: SourceTag = { origin: 'background', id: build.backgroundId }
     bundles.push({ source: tag, grants: backgroundSource.grants })
   }

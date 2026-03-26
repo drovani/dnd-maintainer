@@ -44,10 +44,9 @@ describe('reconstructBuild', () => {
     ).toThrow('Character is missing required race')
   })
 
-  it('throws when background is null', () => {
-    expect(() =>
-      reconstructBuild({ race: 'human', background: null }, [creationRow], []),
-    ).toThrow('Character is missing required background')
+  it('allows null background', () => {
+    const result = reconstructBuild({ race: 'human', background: null }, [creationRow], [])
+    expect(result.backgroundId).toBeNull()
   })
 
   it('assembles CharacterBuild from sequence 0 row', () => {
