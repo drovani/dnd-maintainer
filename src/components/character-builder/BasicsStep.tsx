@@ -244,7 +244,7 @@ export function BasicsStep() {
         </div>
 
         <div className="space-y-2">
-          <Label>{tc('characterBuilder.fields.alignment')}</Label>
+          <Label>{tc('characterBuilder.fields.alignment')} <span className="text-destructive">*</span></Label>
           <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-border">
             {(['good', 'neutral', 'evil'] as const).map((moral) =>
               (['lawful', 'neutral', 'chaotic'] as const).map((ethic) => {
