@@ -1,0 +1,9 @@
+{
+    "explorer.excludeGitIgnore": false,
+    "files.exclude": {
+        "**/.git": true,
+        "**/supabase/.branches": true,
+        "**/supabase/.temp": true,
+        "**/coverage": true
+    }
+}
