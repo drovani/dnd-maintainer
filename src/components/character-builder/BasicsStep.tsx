@@ -104,7 +104,6 @@ export function BasicsStep() {
       <div className="space-y-2">
         <Label>
           {tc('characterBuilder.fields.gender')}
-          <span className="text-destructive">*</span>
         </Label>
         <GenderToggle
           value={gender as DndGender | ''}
