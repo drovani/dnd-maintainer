@@ -1,6 +1,7 @@
 // D&D 5e Helper Functions and Data
 import type { AbilityKey } from '@/types/database'
 
+export type { AbilityKey }
 export type AbilityName = AbilityKey
 
 export function getAbilityModifier(score: number): number {

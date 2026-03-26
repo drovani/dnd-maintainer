@@ -76,9 +76,109 @@ export type Database = {
         }
         Relationships: []
       }
+      character_build_levels: {
+        Row: {
+          ability_method: string | null
+          asi_allocation: Json | null
+          base_abilities: Json | null
+          character_id: string
+          choices: Json
+          class_id: string | null
+          class_level: number | null
+          created_at: string
+          deleted_at: string | null
+          feat_id: string | null
+          hp_roll: number | null
+          id: string
+          sequence: number
+          subclass_id: string | null
+        }
+        Insert: {
+          ability_method?: string | null
+          asi_allocation?: Json | null
+          base_abilities?: Json | null
+          character_id: string
+          choices?: Json
+          class_id?: string | null
+          class_level?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          feat_id?: string | null
+          hp_roll?: number | null
+          id?: string
+          sequence: number
+          subclass_id?: string | null
+        }
+        Update: {
+          ability_method?: string | null
+          asi_allocation?: Json | null
+          base_abilities?: Json | null
+          character_id?: string
+          choices?: Json
+          class_id?: string | null
+          class_level?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          feat_id?: string | null
+          hp_roll?: number | null
+          id?: string
+          sequence?: number
+          subclass_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_build_levels_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      character_items: {
+        Row: {
+          attuned: boolean
+          character_id: string
+          created_at: string
+          equipped: boolean
+          id: string
+          item_id: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          attuned?: boolean
+          character_id: string
+          created_at?: string
+          equipped?: boolean
+          id?: string
+          item_id: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          attuned?: boolean
+          character_id?: string
+          created_at?: string
+          equipped?: boolean
+          id?: string
+          item_id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_items_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       characters: {
         Row: {
-          abilities: Json
+          age: string | null
           alignment: string | null
           appearance: string | null
           armor_class: number | null
@@ -89,38 +189,33 @@ export type Database = {
           character_type: string
           class: string | null
           created_at: string
-          equipment: Json | null
-          experience_points: number
-          features: Json | null
+          eye_color: string | null
           flaws: string | null
           gender: string | null
-          hit_points_current: number | null
+          hair_color: string | null
+          height: string | null
           hit_points_max: number | null
-          hit_points_temp: number
           id: string
           ideals: string | null
-          initiative_bonus: number
           is_active: boolean
-          is_npc: boolean | null
           level: number
           name: string
           notes: string | null
           personality_traits: string | null
           player_name: string | null
           portrait_url: string | null
-          proficiencies: Json | null
-          proficiency_bonus: number
+          proficiency_bonus: number | null
           race: string | null
-          saving_throws: Json | null
-          skills: Json | null
-          speed: number
-          spells: Json | null
+          size: string | null
+          skin_color: string | null
+          speed: number | null
           status: string
           subclass: string | null
           updated_at: string
+          weight: string | null
         }
         Insert: {
-          abilities?: Json
+          age?: string | null
           alignment?: string | null
           appearance?: string | null
           armor_class?: number | null
@@ -131,38 +226,33 @@ export type Database = {
           character_type: string
           class?: string | null
           created_at?: string
-          equipment?: Json | null
-          experience_points?: number
-          features?: Json | null
+          eye_color?: string | null
           flaws?: string | null
           gender?: string | null
-          hit_points_current?: number | null
+          hair_color?: string | null
+          height?: string | null
           hit_points_max?: number | null
-          hit_points_temp?: number
           id?: string
           ideals?: string | null
-          initiative_bonus?: number
           is_active?: boolean
-          is_npc?: boolean | null
           level?: number
           name: string
           notes?: string | null
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
-          proficiencies?: Json | null
-          proficiency_bonus?: number
+          proficiency_bonus?: number | null
           race?: string | null
-          saving_throws?: Json | null
-          skills?: Json | null
-          speed?: number
-          spells?: Json | null
+          size?: string | null
+          skin_color?: string | null
+          speed?: number | null
           status?: string
           subclass?: string | null
           updated_at?: string
+          weight?: string | null
         }
         Update: {
-          abilities?: Json
+          age?: string | null
           alignment?: string | null
           appearance?: string | null
           armor_class?: number | null
@@ -173,35 +263,30 @@ export type Database = {
           character_type?: string
           class?: string | null
           created_at?: string
-          equipment?: Json | null
-          experience_points?: number
-          features?: Json | null
+          eye_color?: string | null
           flaws?: string | null
           gender?: string | null
-          hit_points_current?: number | null
+          hair_color?: string | null
+          height?: string | null
           hit_points_max?: number | null
-          hit_points_temp?: number
           id?: string
           ideals?: string | null
-          initiative_bonus?: number
           is_active?: boolean
-          is_npc?: boolean | null
           level?: number
           name?: string
           notes?: string | null
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
-          proficiencies?: Json | null
-          proficiency_bonus?: number
+          proficiency_bonus?: number | null
           race?: string | null
-          saving_throws?: Json | null
-          skills?: Json | null
-          speed?: number
-          spells?: Json | null
+          size?: string | null
+          skin_color?: string | null
+          speed?: number | null
           status?: string
           subclass?: string | null
           updated_at?: string
+          weight?: string | null
         }
         Relationships: [
           {
