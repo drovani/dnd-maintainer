@@ -74,10 +74,15 @@ export function reconstructBuild(
     )
   }
 
-  const appliedLevels = levelRows.map((row) => ({
-    classId: row.class_id as ClassId,
-    classLevel: row.class_level as number,
-  }))
+  const appliedLevels = levelRows.map((row) => {
+    if (!row.class_id) throw new Error(`Level row sequence ${row.sequence} is missing class_id`)
+    if (row.class_level === null || row.class_level === undefined)
+      throw new Error(`Level row sequence ${row.sequence} is missing class_level`)
+    return {
+      classId: row.class_id as ClassId,
+      classLevel: row.class_level,
+    }
+  })
 
   const hpRolls: (number | null)[] = levelRows.map((row) => row.hp_roll ?? null)
 
@@ -92,8 +97,7 @@ export function reconstructBuild(
   function mergeChoiceEntry(key: string, value: unknown): void {
     const parsed = ChoiceDecisionSchema.safeParse(value)
     if (!parsed.success) {
-      console.warn(`Skipping invalid choice "${key}":`, parsed.error.message)
-      return
+      throw new Error(`Invalid choice "${key}": ${parsed.error.message}`)
     }
     choices[key] = parsed.data as ChoiceDecision
   }
@@ -107,6 +111,10 @@ export function reconstructBuild(
 
   // Process level rows
   for (const row of levelRows) {
+    if (!row.class_id) throw new Error(`Level row sequence ${row.sequence} is missing class_id`)
+    if (row.class_level === null || row.class_level === undefined)
+      throw new Error(`Level row sequence ${row.sequence} is missing class_level`)
+
     if (row.subclass_id !== null) {
       // Use subclass:${classId} format to match sources/index.ts lookup
       const key = `subclass:${row.class_id}`

@@ -233,6 +233,50 @@ describe('reconstructBuild', () => {
     })
   })
 
+  it('throws when choice JSONB contains invalid data', () => {
+    const creationWithBadChoices: BuildLevelRow = {
+      ...creationRow,
+      choices: { bad: { type: 'unknown' } },
+    }
+    expect(() => reconstructBuild(identity, [creationWithBadChoices], [])).toThrow()
+  })
+
+  it('throws when level row is missing class_id', () => {
+    const levelMissingClassId: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: null,
+      class_level: 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassId], [])).toThrow(
+      'missing class_id',
+    )
+  })
+
+  it('throws when level row is missing class_level', () => {
+    const levelMissingClassLevel: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: null,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassLevel], [])).toThrow(
+      'missing class_level',
+    )
+  })
+
   it('equippedItems becomes activeItems', () => {
     const result = reconstructBuild(identity, [creationRow], ['longsword', 'shield'])
     expect(result.activeItems).toEqual(['longsword', 'shield'])
