@@ -1,4 +1,4 @@
-import type { AbilityKey, ClassId } from '@/lib/dnd-helpers'
+import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId } from '@/lib/dnd-helpers'
 
 // Supporting types
 
@@ -48,11 +48,11 @@ export interface AbilityChoiceGrant {
   readonly from: readonly AbilityKey[] | null
 }
 
-export interface ProficiencyGrant {
-  readonly type: 'proficiency'
-  readonly category: 'armor' | 'weapon' | 'tool' | 'skill'
-  readonly id: string
-}
+export type ProficiencyGrant =
+  | { readonly type: 'proficiency'; readonly category: 'armor'; readonly id: ArmorProficiencyId }
+  | { readonly type: 'proficiency'; readonly category: 'weapon'; readonly id: WeaponProficiencyId }
+  | { readonly type: 'proficiency'; readonly category: 'tool'; readonly id: ToolProficiencyId }
+  | { readonly type: 'proficiency'; readonly category: 'skill'; readonly id: SkillId }
 
 export interface ProficiencyChoiceGrant {
   readonly type: 'proficiency-choice'
@@ -63,7 +63,7 @@ export interface ProficiencyChoiceGrant {
 
 export interface SkillExpertiseGrant {
   readonly type: 'skill-expertise'
-  readonly skill: import('@/lib/dnd-helpers').SkillId
+  readonly skill: SkillId
 }
 
 export interface FeatureGrant {
@@ -77,9 +77,11 @@ export interface SpeedGrant {
   readonly value: number
 }
 
+export type HitDie = 4 | 6 | 8 | 10 | 12
+
 export interface HitDieGrant {
   readonly type: 'hit-die'
-  readonly die: number
+  readonly die: HitDie
 }
 
 export interface HpBonusGrant {

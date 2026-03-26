@@ -1,6 +1,7 @@
 import type { ClassId, RaceId, BackgroundId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
+import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
 
 export interface BuildLevelRow {
   readonly sequence: number
@@ -29,11 +30,17 @@ const DEFAULT_ABILITIES: AbilityScores = {
   cha: 10,
 }
 
+const VALID_ABILITY_METHODS = ['standard-array', 'point-buy', 'rolling'] as const
+type AbilityMethod = (typeof VALID_ABILITY_METHODS)[number]
+
 export function reconstructBuild(
   character: CharacterIdentity,
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
 ): CharacterBuild {
+  if (!character.race) throw new Error('Character is missing required race')
+  if (!character.background) throw new Error('Character is missing required background')
+
   const creationRow = rows.find((r) => r.sequence === 0)
   if (!creationRow) {
     throw new Error('Missing creation row (sequence 0)')
@@ -43,14 +50,29 @@ export function reconstructBuild(
     (a, b) => a.sequence - b.sequence,
   )
 
-  const baseAbilities: AbilityScores = creationRow.base_abilities
-    ? (creationRow.base_abilities as AbilityScores)
-    : { ...DEFAULT_ABILITIES }
+  let baseAbilities: AbilityScores
+  if (creationRow.base_abilities) {
+    const parsed = AbilityScoresSchema.safeParse(creationRow.base_abilities)
+    if (!parsed.success) {
+      throw new Error(
+        `Invalid base_abilities in creation row: ${parsed.error.message}`,
+      )
+    }
+    baseAbilities = parsed.data
+  } else {
+    baseAbilities = { ...DEFAULT_ABILITIES }
+  }
 
-  const abilityMethod = (creationRow.ability_method ?? 'standard-array') as
-    | 'standard-array'
-    | 'point-buy'
-    | 'rolling'
+  let abilityMethod: AbilityMethod
+  if (creationRow.ability_method === null) {
+    abilityMethod = 'standard-array'
+  } else if ((VALID_ABILITY_METHODS as readonly string[]).includes(creationRow.ability_method)) {
+    abilityMethod = creationRow.ability_method as AbilityMethod
+  } else {
+    throw new Error(
+      `Invalid ability_method "${creationRow.ability_method}": must be one of ${VALID_ABILITY_METHODS.join(', ')}`,
+    )
+  }
 
   const appliedLevels = levelRows.map((row) => ({
     classId: row.class_id as ClassId,
@@ -66,17 +88,28 @@ export function reconstructBuild(
   // Build choices map
   const choices: Record<string, ChoiceDecision> = {}
 
+  // Helper to safely parse and merge a choices JSONB entry
+  function mergeChoiceEntry(key: string, value: unknown): void {
+    const parsed = ChoiceDecisionSchema.safeParse(value)
+    if (!parsed.success) {
+      console.warn(`Skipping invalid choice "${key}":`, parsed.error.message)
+      return
+    }
+    choices[key] = parsed.data as ChoiceDecision
+  }
+
   // Start with creation row's choices JSONB
   if (creationRow.choices) {
     for (const [key, value] of Object.entries(creationRow.choices)) {
-      choices[key] = value as ChoiceDecision
+      mergeChoiceEntry(key, value)
     }
   }
 
   // Process level rows
   for (const row of levelRows) {
     if (row.subclass_id !== null) {
-      const key = `${row.class_id}-${row.class_level}-subclass`
+      // Use subclass:${classId} format to match sources/index.ts lookup
+      const key = `subclass:${row.class_id}`
       choices[key] = { type: 'subclass', subclassId: row.subclass_id }
     }
 
@@ -87,7 +120,7 @@ export function reconstructBuild(
 
     if (row.choices) {
       for (const [key, value] of Object.entries(row.choices)) {
-        choices[key] = value as ChoiceDecision
+        mergeChoiceEntry(key, value)
       }
     }
   }

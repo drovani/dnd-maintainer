@@ -36,6 +36,18 @@ describe('reconstructBuild', () => {
     )
   })
 
+  it('throws when race is null', () => {
+    expect(() =>
+      reconstructBuild({ race: null, background: 'soldier' }, [creationRow], []),
+    ).toThrow('Character is missing required race')
+  })
+
+  it('throws when background is null', () => {
+    expect(() =>
+      reconstructBuild({ race: 'human', background: null }, [creationRow], []),
+    ).toThrow('Character is missing required background')
+  })
+
   it('assembles CharacterBuild from sequence 0 row', () => {
     const result = reconstructBuild(identity, [creationRow], [])
     expect(result.baseAbilities).toEqual({
@@ -81,7 +93,39 @@ describe('reconstructBuild', () => {
     expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2 })
   })
 
-  it('maps subclass_id into choices', () => {
+  it('sorts rows by sequence regardless of input order', () => {
+    const level1: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const level2: BuildLevelRow = {
+      sequence: 2,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 2,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: 8,
+      choices: null,
+    }
+    // Pass rows out of order
+    const result = reconstructBuild(identity, [creationRow, level2, level1], [])
+    expect(result.appliedLevels).toHaveLength(2)
+    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1 })
+    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2 })
+  })
+
+  it('maps subclass_id into choices using subclass:${classId} key format', () => {
     const level3: BuildLevelRow = {
       sequence: 3,
       base_abilities: null,
@@ -95,7 +139,7 @@ describe('reconstructBuild', () => {
       choices: null,
     }
     const result = reconstructBuild(identity, [creationRow, level3], [])
-    expect(result.choices['fighter-3-subclass']).toEqual({
+    expect(result.choices['subclass:fighter']).toEqual({
       type: 'subclass',
       subclassId: 'champion',
     })
@@ -129,6 +173,63 @@ describe('reconstructBuild', () => {
     expect(result.choices['background-skills']).toEqual({
       type: 'skill-choice',
       skills: ['athletics', 'intimidation'],
+    })
+  })
+
+  it('uses default abilities when base_abilities is null', () => {
+    const creationWithNullAbilities: BuildLevelRow = {
+      ...creationRow,
+      base_abilities: null,
+    }
+    const result = reconstructBuild(identity, [creationWithNullAbilities], [])
+    expect(result.baseAbilities).toEqual({
+      str: 10,
+      dex: 10,
+      con: 10,
+      int: 10,
+      wis: 10,
+      cha: 10,
+    })
+  })
+
+  it('uses default ability method when ability_method is null', () => {
+    const creationWithNullMethod: BuildLevelRow = {
+      ...creationRow,
+      ability_method: null,
+    }
+    const result = reconstructBuild(identity, [creationWithNullMethod], [])
+    expect(result.abilityMethod).toBe('standard-array')
+  })
+
+  it('throws when ability_method is an invalid value', () => {
+    const creationWithBadMethod: BuildLevelRow = {
+      ...creationRow,
+      ability_method: 'invalid-method',
+    }
+    expect(() => reconstructBuild(identity, [creationWithBadMethod], [])).toThrow(
+      'Invalid ability_method',
+    )
+  })
+
+  it('merges level-row choices JSONB into result', () => {
+    const level1WithChoices: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: {
+        'fighter-skills': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      },
+    }
+    const result = reconstructBuild(identity, [creationRow, level1WithChoices], [])
+    expect(result.choices['fighter-skills']).toEqual({
+      type: 'skill-choice',
+      skills: ['athletics', 'perception'],
     })
   })
 

@@ -1,5 +1,5 @@
 import type { AbilityKey, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId, ClassId } from '@/lib/dnd-helpers'
-import type { FeatureDef, DamageTypeId } from '@/types/grants'
+import type { FeatureDef, DamageTypeId, HitDie } from '@/types/grants'
 import type { SourceTag } from '@/types/sources'
 import type { ChoiceKey } from '@/types/choices'
 
@@ -29,7 +29,7 @@ export interface ResolvedFeature {
 }
 
 export interface ResolvedArmorClass {
-  readonly calculations: readonly { readonly mode: string; readonly baseValue: number; readonly source: SourceTag }[]
+  readonly calculations: readonly { readonly mode: 'armored' | 'unarmored' | 'natural'; readonly baseValue: number; readonly source: SourceTag }[]
   readonly bonuses: readonly { readonly value: number; readonly source: SourceTag }[]
   readonly effective: number
 }
@@ -56,7 +56,7 @@ export type PendingChoice =
 
 export interface ResolvedCharacter {
   readonly abilities: Readonly<Record<AbilityKey, ResolvedAbility>>
-  readonly hitDie: readonly { readonly die: number; readonly count: number }[]
+  readonly hitDie: readonly { readonly die: HitDie; readonly count: number }[]
   readonly hitPoints: { readonly max: number }
   readonly speed: Readonly<Record<string, Sourced<number>>>
   readonly initiative: number
