@@ -1,43 +1,52 @@
 /// <reference types="node" />
 import { act, waitFor } from '@testing-library/react'
-import { EMPTY_PROFICIENCIES } from '@/lib/dnd-helpers'
 import { setupMockReset, withSuppressedRejections, renderHook, createWrapper, supabase, mockQueryResult } from '@/test/hook-test-helpers'
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
 
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import type { SaveStatus } from '@/hooks/useBuilderAutosave'
+import type { SaveStatus, AutosavePayload } from '@/hooks/useBuilderAutosave'
 
-const basePayload = {
-  campaign_id: 'camp-1',
-  name: 'Hero Draft',
-  character_type: 'pc' as const,
-  player_name: 'Bob',
-  race: 'human' as const,
-  class: 'fighter' as const,
-  subclass: null,
-  level: 1,
-  background: 'soldier',
-  alignment: 'lg' as const,
-  gender: null,
-  hit_points_max: 10,
-  hit_points_current: 10,
-  armor_class: 16,
-  speed: 30,
-  abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 11, cha: 9 },
-  saving_throws: {},
-  skills: {},
-  proficiencies: { ...EMPTY_PROFICIENCIES },
-  features: [],
-  equipment: [],
-  spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },
-  personality_traits: null,
-  ideals: null,
-  bonds: null,
-  flaws: null,
-  appearance: null,
-  backstory: null,
-  notes: null,
+const basePayload: AutosavePayload = {
+  character: {
+    id: '',
+    created_at: '',
+    updated_at: '',
+    campaign_id: 'camp-1',
+    name: 'Hero Draft',
+    character_type: 'pc' as const,
+    player_name: 'Bob',
+    race: 'human' as const,
+    class: 'fighter' as const,
+    subclass: null,
+    level: 1,
+    background: 'soldier',
+    alignment: 'lg' as const,
+    gender: null,
+    size: 'medium' as const,
+    age: null,
+    height: null,
+    weight: null,
+    eye_color: null,
+    hair_color: null,
+    skin_color: null,
+    hit_points_max: 10,
+    armor_class: 16,
+    speed: 30,
+    proficiency_bonus: 2,
+    personality_traits: null,
+    ideals: null,
+    bonds: null,
+    flaws: null,
+    appearance: null,
+    backstory: null,
+    notes: null,
+    portrait_url: null,
+    is_active: true,
+    status: 'draft' as const,
+  },
+  rows: [],
+  resolved: null,
 }
 
 setupMockReset()
@@ -109,7 +118,7 @@ describe('useBuilderAutosave', () => {
 
       // Second call — should update, not insert
       await act(async () => {
-        await result.current.saveDraft({ ...basePayload, name: 'Updated Name' })
+        await result.current.saveDraft({ ...basePayload, character: { ...basePayload.character, name: 'Updated Name' } })
       })
 
       expect(supabase.insert).not.toHaveBeenCalled()

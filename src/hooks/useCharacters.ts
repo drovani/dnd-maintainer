@@ -61,7 +61,7 @@ export function useCharacterMutations() {
   const queryClient = useQueryClient()
 
   const create = useMutation({
-    mutationFn: async (character: Omit<Character, 'id' | 'created_at' | 'updated_at' | 'is_npc' | 'is_active'>) => {
+    mutationFn: async (character: Omit<Character, 'id' | 'created_at' | 'updated_at' | 'is_active'>) => {
       const { data, error } = await supabase
         .from('characters')
         .insert(character as unknown as TablesInsert<'characters'>)
