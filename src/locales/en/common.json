@@ -124,7 +124,8 @@
       "skillChoice": "Choose {{count}} skill(s)",
       "languageChoice": "Choose {{count}} language(s)",
       "toolChoice": "Choose {{count}} tool(s)",
-      "unsupported": "Choice not yet supported: {{type}}"
+      "unsupported": "Choice not yet supported: {{type}}",
+      "remaining": "remaining"
     },
     "status": {
       "saving": "Saving...",
