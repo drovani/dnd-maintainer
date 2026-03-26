@@ -59,8 +59,16 @@ export function ProficienciesStep() {
     )
   }
 
-  // Set of directly granted language IDs
-  const grantedLanguages = new Set(resolved.languages.map((l) => l.value))
+  // Set of language IDs that are eligible for any choice
+  const choicePoolLanguages = new Set<LanguageId>()
+  for (const lc of languageChoices) {
+    for (const id of lc.from) choicePoolLanguages.add(id)
+  }
+
+  // "Granted" = in resolved.languages AND not in any choice pool (truly fixed grants like Common)
+  const grantedLanguages = new Set<LanguageId>(
+    resolved.languages.filter((l) => !choicePoolLanguages.has(l.value as LanguageId)).map((l) => l.value as LanguageId)
+  )
 
   // Helper to get current selections for a choice
   function getSelectedLanguages(choiceKey: string): readonly LanguageId[] {
@@ -75,14 +83,8 @@ export function ProficienciesStep() {
     return []
   }
 
-  // Build set of language IDs eligible via any choice
-  const choiceLanguageIds = new Set<LanguageId>()
-  for (const lc of languageChoices) {
-    for (const id of lc.from) choiceLanguageIds.add(id)
-  }
-
   // All languages to display: granted + choice pool (deduplicated)
-  const allLanguageIds = new Set<LanguageId>([...grantedLanguages as Set<LanguageId>, ...choiceLanguageIds])
+  const allLanguageIds = new Set<LanguageId>([...grantedLanguages, ...choicePoolLanguages])
 
   // Build set of tool IDs eligible via any choice
   const choiceToolIds = new Set<ToolProficiencyId>()
@@ -90,83 +92,64 @@ export function ProficienciesStep() {
     for (const id of tc.from) choiceToolIds.add(id)
   }
 
-  function renderLanguageTable(category: 'standard' | 'exotic', title: string) {
-    const langs = DND_LANGUAGE_DATA.filter((l) => l.category === category && allLanguageIds.has(l.id as LanguageId))
-    if (langs.length === 0) return null
+  function renderLanguageRow(lang: (typeof DND_LANGUAGE_DATA)[number]) {
+    const langId = lang.id as LanguageId
+    const isGranted = grantedLanguages.has(langId)
+    const choiceForLang = languageChoices.find((lc) => lc.from.includes(langId))
+
+    let checkbox: React.ReactNode = null
+    if (isGranted && !choiceForLang) {
+      checkbox = <Checkbox id={`lang-${langId}`} checked disabled />
+    } else if (choiceForLang) {
+      const selected = getSelectedLanguages(choiceForLang.choiceKey)
+      const isSelected = selected.includes(langId)
+      const atMax = selected.length >= choiceForLang.count
+      const isDisabled = (atMax && !isSelected) || isGranted
+
+      checkbox = (
+        <Checkbox
+          id={`lang-${langId}`}
+          checked={isSelected || isGranted}
+          disabled={isDisabled}
+          onCheckedChange={(checked) => {
+            if (isGranted) return
+            const next = checked
+              ? [...selected, langId]
+              : selected.filter((id) => id !== langId)
+            if (next.length === 0) {
+              context.clearChoice(choiceForLang.choiceKey)
+            } else {
+              context.makeChoice(choiceForLang.choiceKey, { type: 'language-choice', languages: next })
+            }
+          }}
+        />
+      )
+    }
+
+    const speakersText = lang.typicalSpeakers.length > 0
+      ? lang.typicalSpeakers.map((s) => t(`creatureTypes.${s}`)).join(', ')
+      : '—'
+    const scriptText = lang.script ? t(`languageScripts.${lang.script}`) : '—'
 
     return (
-      <div className="mb-4">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{title}</h4>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-xs text-muted-foreground">
-              <th className="py-1.5 w-8" />
-              <th className="py-1.5">{tc('characterBuilder.proficiencies.languageName')}</th>
-              <th className="py-1.5">{tc('characterBuilder.proficiencies.typicalSpeakers')}</th>
-              <th className="py-1.5">{tc('characterBuilder.proficiencies.script')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {langs.map((lang) => {
-              const langId = lang.id as LanguageId
-              const isGranted = grantedLanguages.has(langId)
-              const choiceForLang = languageChoices.find((lc) => lc.from.includes(langId))
-
-              let checkbox: React.ReactNode = null
-              if (isGranted && !choiceForLang) {
-                checkbox = <Checkbox id={`lang-${langId}`} checked disabled />
-              } else if (choiceForLang) {
-                const selected = getSelectedLanguages(choiceForLang.choiceKey)
-                const isSelected = selected.includes(langId)
-                const atMax = selected.length >= choiceForLang.count
-                const isDisabled = (atMax && !isSelected) || isGranted
-
-                checkbox = (
-                  <Checkbox
-                    id={`lang-${langId}`}
-                    checked={isSelected || isGranted}
-                    disabled={isDisabled}
-                    onCheckedChange={(checked) => {
-                      if (isGranted) return
-                      const next = checked
-                        ? [...selected, langId]
-                        : selected.filter((id) => id !== langId)
-                      if (next.length === 0) {
-                        context.clearChoice(choiceForLang.choiceKey)
-                      } else {
-                        context.makeChoice(choiceForLang.choiceKey, { type: 'language-choice', languages: next })
-                      }
-                    }}
-                  />
-                )
-              }
-
-              const speakersText = lang.typicalSpeakers.length > 0
-                ? lang.typicalSpeakers.map((s) => t(`creatures.${s}`, { defaultValue: s })).join(', ')
-                : '—'
-              const scriptText = lang.script ? t(`scripts.${lang.script}`, { defaultValue: lang.script }) : '—'
-
-              return (
-                <tr key={langId} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
-                  <td className="py-1.5 text-center">{checkbox}</td>
-                  <td className="py-1.5">
-                    <label
-                      htmlFor={choiceForLang && !isGranted ? `lang-${langId}` : undefined}
-                      className={choiceForLang && !isGranted ? 'cursor-pointer' : isGranted ? 'text-muted-foreground' : ''}
-                    >
-                      {t(`languages.${langId}`)}
-                    </label>
-                  </td>
-                  <td className="py-1.5 text-muted-foreground">{speakersText}</td>
-                  <td className="py-1.5 text-muted-foreground">{scriptText}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <tr key={langId} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
+        <td className="py-1.5 text-center">{checkbox}</td>
+        <td className="py-1.5">
+          <label
+            htmlFor={choiceForLang && !isGranted ? `lang-${langId}` : undefined}
+            className={choiceForLang && !isGranted ? 'cursor-pointer' : isGranted ? 'text-muted-foreground' : ''}
+          >
+            {t(`languages.${langId}`)}
+          </label>
+        </td>
+        <td className="py-1.5 text-muted-foreground">{speakersText}</td>
+        <td className="py-1.5 text-muted-foreground">{scriptText}</td>
+      </tr>
     )
   }
+
+  const standardLangs = DND_LANGUAGE_DATA.filter((l) => l.category === 'standard' && allLanguageIds.has(l.id as LanguageId))
+  const exoticLangs = DND_LANGUAGE_DATA.filter((l) => l.category === 'exotic' && allLanguageIds.has(l.id as LanguageId))
 
   return (
     <div className="space-y-6">
@@ -289,12 +272,38 @@ export function ProficienciesStep() {
           )
         })}
         {allLanguageIds.size > 0 ? (
-          <>
-            {/* Standard Languages */}
-            {renderLanguageTable('standard', tc('characterBuilder.proficiencies.standardLanguages'))}
-            {/* Exotic Languages */}
-            {renderLanguageTable('exotic', tc('characterBuilder.proficiencies.exoticLanguages'))}
-          </>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-xs text-muted-foreground">
+                <th className="py-1.5 w-8" />
+                <th className="py-1.5">{tc('characterBuilder.proficiencies.languageName')}</th>
+                <th className="py-1.5">{tc('characterBuilder.proficiencies.typicalSpeakers')}</th>
+                <th className="py-1.5">{tc('characterBuilder.proficiencies.script')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {standardLangs.length > 0 && (
+                <>
+                  <tr>
+                    <th colSpan={4} className="pt-3 pb-1 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {t('languageCategories.standard')}
+                    </th>
+                  </tr>
+                  {standardLangs.map(renderLanguageRow)}
+                </>
+              )}
+              {exoticLangs.length > 0 && (
+                <>
+                  <tr>
+                    <th colSpan={4} className="pt-3 pb-1 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {t('languageCategories.exotic')}
+                    </th>
+                  </tr>
+                  {exoticLangs.map(renderLanguageRow)}
+                </>
+              )}
+            </tbody>
+          </table>
         ) : (
           <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.selectRaceFirst')}</p>
         )}
