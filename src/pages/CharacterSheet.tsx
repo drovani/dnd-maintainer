@@ -21,24 +21,28 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
+import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import {
   DND_ALIGNMENTS,
   DND_BACKGROUNDS,
   DND_CLASSES,
   DND_RACE_GROUPS,
   DND_SKILLS,
-  getAbilityModifier,
   getProficiencyBonus,
   type DndGender,
   type DndSkill,
 } from '@/lib/dnd-helpers'
+import { reconstructBuild } from '@/lib/build-reconstruction'
+import { collectBundles } from '@/lib/sources'
+import { resolveCharacter } from '@/lib/resolver'
+import type { ResolvedCharacter } from '@/types/resolved'
 import { Character } from '@/types/database'
-import { Edit2, Minus, Plus, Save } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { Edit2, Save } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
-type EditSection = 'header' | 'abilities' | 'skills' | 'combat' | 'personality' | 'backstory' | 'appearance' | null
+type EditSection = 'header' | 'personality' | 'backstory' | 'appearance' | null
 
 function SectionHeader({ title, onEdit }: { title: string; onEdit: () => void }) {
   const { t } = useTranslation('common')
@@ -72,41 +76,57 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
   )
 }
 
+function useResolvedFromBuild(
+  character: Character | undefined,
+  buildRows: ReturnType<typeof useCharacterBuildLevels>['data'],
+  equippedItems: string[],
+): ResolvedCharacter | null {
+  return useMemo(() => {
+    if (!character || !buildRows || buildRows.length === 0) return null
+    try {
+      const build = reconstructBuild(
+        { race: character.race, background: character.background },
+        buildRows,
+        equippedItems,
+      )
+      const bundles = collectBundles(build)
+      const levelRows = buildRows.filter((r) => r.sequence !== 0)
+      return resolveCharacter({
+        baseAbilities: build.baseAbilities,
+        level: levelRows.length,
+        bundles,
+        choices: build.choices,
+        hpRolls: build.hpRolls,
+      })
+    } catch {
+      return null
+    }
+  }, [character, buildRows, equippedItems])
+}
+
 export default function CharacterSheet() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const { characterId } = useParams<{ id: string; characterId: string }>()
   const [editSection, setEditSection] = useState<EditSection>(null)
-  const [localHP, setLocalHP] = useState<number | null>(null)
-  const hpSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { data: character, isLoading, error } = useCharacter(characterId)
+  const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
+  const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(characterId)
+  const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(characterId)
   const { update: updateMutation } = useCharacterMutations()
+
+  const equippedItems = useMemo(
+    () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
+    [itemsData],
+  )
+
+  const resolved = useResolvedFromBuild(character, buildRows, equippedItems)
 
   const handleUpdate = (updates: Partial<Character>) => {
     if (!characterId) return
     updateMutation.mutate({ id: characterId, ...updates }, {
       onSuccess: () => setEditSection(null),
     })
-  }
-
-  // localHP is only set during active editing; otherwise derive from server data
-  const currentHP = localHP ?? character?.hit_points_current ?? 0
-  const maxHP = character?.hit_points_max ?? 0
-
-  const updateHP = (delta: number) => {
-    if (!character || !characterId) return
-    const newHP = Math.max(0, Math.min(maxHP, currentHP + delta))
-    setLocalHP(newHP)
-
-    // Debounce the save to handle rapid clicks
-    if (hpSaveTimer.current) clearTimeout(hpSaveTimer.current)
-    hpSaveTimer.current = setTimeout(() => {
-      updateMutation.mutate({ id: characterId, hit_points_current: newHP }, {
-        onSuccess: () => { setLocalHP(null) },
-        onError: () => { setLocalHP(null) },
-      })
-    }, 500)
   }
 
   const skillsByAbility = useMemo(() => {
@@ -119,6 +139,8 @@ export default function CharacterSheet() {
       {} as Record<string, DndSkill[]>
     )
   }, [])
+
+  const isLoading = characterLoading || rowsLoading || itemsLoading
 
   if (isLoading) {
     return (
@@ -146,7 +168,19 @@ export default function CharacterSheet() {
   }
 
   const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
-  const profBonus = getProficiencyBonus(character.level)
+  const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level)
+
+  // Combat stats — prefer resolved pipeline values, fall back to pre-calculated columns
+  const armorClass = resolved?.armorClass.effective ?? character.armor_class
+  const speedValue = resolved
+    ? (Object.values(resolved.speed)[0]?.value ?? character.speed)
+    : character.speed
+  const maxHP = resolved?.hitPoints.max ?? character.hit_points_max
+
+  // Ability scores — use resolved if available, else undefined (skip section)
+  const abilities = resolved?.abilities
+  const skills = resolved?.skills
+  const savingThrows = resolved?.savingThrows
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -220,145 +254,114 @@ export default function CharacterSheet() {
           {/* Left Column: Abilities & Skills */}
           <div className="lg:col-span-1 space-y-6">
             {/* Ability Scores */}
-            <div className="bg-card border rounded-lg p-6">
-              <SectionHeader title={tc('characterSheet.sections.abilities')} onEdit={() => setEditSection('abilities')} />
-              <div className="space-y-3">
-                {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
-                  const score = character.abilities[ability]
-                  const modifier = getAbilityModifier(score)
-                  return (
-                    <div key={ability} className="bg-muted/50 p-3 rounded border">
-                      <div className="text-xs text-muted-foreground mb-1">{t(`abilities.${ability}`)}</div>
-                      <div className="flex items-end justify-between">
-                        <div className="text-sm font-bold text-foreground">{score}</div>
-                        <div
-                          className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}
-                        >
-                          {modifier >= 0 ? '+' : ''}{modifier}
+            {abilities && (
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.abilities')}</h2>
+                <div className="space-y-3">
+                  {(Object.keys(abilities) as Array<keyof typeof abilities>).map((ability) => {
+                    const resolvedAbility = abilities[ability]
+                    const modifier = resolvedAbility.modifier
+                    return (
+                      <div key={ability} className="bg-muted/50 p-3 rounded border">
+                        <div className="text-xs text-muted-foreground mb-1">{t(`abilities.${ability}`)}</div>
+                        <div className="flex items-end justify-between">
+                          <div className="text-sm font-bold text-foreground">{resolvedAbility.total}</div>
+                          <div
+                            className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                          >
+                            {modifier >= 0 ? '+' : ''}{modifier}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Saving Throws */}
-            <div className="bg-card border rounded-lg p-6">
-              <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.savingThrows')}</h2>
-              <div className="space-y-2 text-sm">
-                {(Object.keys(character.abilities) as Array<keyof typeof character.abilities>).map((ability) => {
-                  const modifier = getAbilityModifier(character.abilities[ability])
-                  return (
-                    <div key={ability} className="flex justify-between text-foreground">
-                      <span>{t(`abilities.${ability}`)}</span>
-                      <span className="font-mono font-bold">
-                        {modifier >= 0 ? '+' : ''}{modifier}
-                      </span>
-                    </div>
-                  )
-                })}
+            {savingThrows && (
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.savingThrows')}</h2>
+                <div className="space-y-2 text-sm">
+                  {(Object.keys(savingThrows) as Array<keyof typeof savingThrows>).map((ability) => {
+                    const save = savingThrows[ability]
+                    return (
+                      <div key={ability} className="flex justify-between text-foreground">
+                        <span className={save.proficient ? 'font-bold' : ''}>{t(`abilities.${ability}`)}</span>
+                        <span className="font-mono font-bold">
+                          {save.bonus >= 0 ? '+' : ''}{save.bonus}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Skills */}
-            <div className="bg-card border rounded-lg p-6">
-              <SectionHeader title={tc('characterSheet.sections.skills')} onEdit={() => setEditSection('skills')} />
-              <div className="space-y-1 text-xs">
-                {Object.entries(skillsByAbility).map(([ability, skills]) => {
-                  const abilityKey = ability as keyof typeof character.abilities
-                  return (
-                  <div key={ability}>
-                    <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${abilityKey}`)}</div>
-                    {skills.map((skill) => {
-                      const skillData = character.skills?.[skill.id] ?? { proficient: false, expertise: false }
-                      const abilityMod = getAbilityModifier(
-                        character.abilities[abilityKey]
-                      )
-                      let bonus = abilityMod
-                      if (skillData.proficient) bonus += profBonus
-                      if (skillData.expertise) bonus += profBonus
+            {skills && (
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
+                <div className="space-y-1 text-xs">
+                  {Object.entries(skillsByAbility).map(([ability, skillList]) => {
+                    return (
+                      <div key={ability}>
+                        <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${ability as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'}`)}</div>
+                        {skillList.map((skill) => {
+                          const resolvedSkill = skills[skill.id as keyof typeof skills]
+                          if (!resolvedSkill) return null
+                          const bonus = resolvedSkill.bonus
 
-                      return (
-                        <div key={skill.id} className="flex justify-between text-foreground py-1">
-                          <span className={skillData.proficient ? 'font-bold' : ''}>
-                            {t(`skills.${skill.id}`)}
-                          </span>
-                          <span
-                            className={`font-mono ${skillData.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
-                          >
-                            {bonus >= 0 ? '+' : ''}{bonus}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  )
-                })}
+                          return (
+                            <div key={skill.id} className="flex justify-between text-foreground py-1">
+                              <span className={resolvedSkill.proficient ? 'font-bold' : ''}>
+                                {t(`skills.${skill.id}`)}
+                              </span>
+                              <span
+                                className={`font-mono ${resolvedSkill.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
+                              >
+                                {bonus >= 0 ? '+' : ''}{bonus}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Center Column: Combat & Features */}
           <div className="lg:col-span-1 space-y-6">
             {/* Combat Stats */}
             <div className="bg-card border-2 border-destructive/30 rounded-lg p-6">
-              <SectionHeader title={tc('characterSheet.sections.combat')} onEdit={() => setEditSection('combat')} />
+              <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.combat')}</h2>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-muted/50 p-4 rounded border text-center">
                   <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.armorClass')}</div>
-                  <div className="text-4xl font-bold text-foreground">{character.armor_class}</div>
+                  <div className="text-4xl font-bold text-foreground">{armorClass}</div>
                 </div>
 
                 <div className="bg-muted/50 p-4 rounded border text-center">
                   <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.initiative')}</div>
                   <div className="text-4xl font-bold text-foreground">
-                    {getAbilityModifier(character.abilities.dex) >= 0 ? '+' : ''}
-                    {getAbilityModifier(character.abilities.dex)}
+                    {resolved
+                      ? (resolved.initiative >= 0 ? '+' : '') + resolved.initiative
+                      : (abilities
+                          ? (abilities.dex.modifier >= 0 ? '+' : '') + abilities.dex.modifier
+                          : '—')}
                   </div>
                 </div>
               </div>
 
-              {/* HP Tracker */}
+              {/* HP Display (read-only) */}
               <div className="bg-muted/50 p-4 rounded border mb-4">
                 <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.hitPoints')}</div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="destructive"
-                      size="icon-xs"
-                      onClick={() => updateHP(-1)}
-                    >
-                      <Minus size={16} />
-                    </Button>
-                    <div className="text-2xl font-bold text-red-600 min-w-12 text-center">
-                      {currentHP}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon-xs"
-                      onClick={() => updateHP(1)}
-                      className="text-green-600 border-green-600/30 hover:bg-green-50"
-                    >
-                      <Plus size={16} />
-                    </Button>
-                  </div>
-                  <div className="text-muted-foreground text-sm">/ {maxHP}</div>
-                </div>
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                  <div
-                    className={`h-full transition-all ${currentHP > maxHP * 0.5
-                      ? 'bg-green-600'
-                      : currentHP > maxHP * 0.25
-                        ? 'bg-yellow-500'
-                        : 'bg-red-600'
-                      }`}
-                    style={{
-                      width: `${(currentHP / (maxHP || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
+                <div className="text-2xl font-bold text-red-600">{maxHP ?? '—'}</div>
               </div>
 
               <div className="text-xs text-muted-foreground">
@@ -368,21 +371,27 @@ export default function CharacterSheet() {
                 </div>
                 <div className="flex justify-between py-1">
                   <span>{tc('characterSheet.fields.speed')}</span>
-                  <span className="font-mono font-bold text-foreground">{tc('characterSheet.fields.speedFt', { value: 30 })}</span>
+                  <span className="font-mono font-bold text-foreground">
+                    {speedValue != null ? tc('characterSheet.fields.speedFt', { value: speedValue }) : '—'}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Features */}
-            {character.features && character.features.length > 0 && (
+            {resolved?.features && resolved.features.length > 0 && (
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.featuresAndTraits')}</h2>
                 <div className="space-y-3">
-                  {character.features.map((feature) => (
-                    <div key={feature.id} className="bg-muted/50 p-3 rounded border">
-                      <div className="font-semibold text-foreground text-sm mb-1">{feature.name}</div>
-                      <p className="text-xs text-muted-foreground">{feature.description}</p>
-                      {feature.source && <div className="text-xs text-muted-foreground/70 mt-1">{tc('characterSheet.fields.source', { source: feature.source })}</div>}
+                  {resolved.features.map((resolvedFeature, i) => (
+                    <div key={i} className="bg-muted/50 p-3 rounded border">
+                      <div className="font-semibold text-foreground text-sm mb-1">{resolvedFeature.feature.name}</div>
+                      <p className="text-xs text-muted-foreground">{resolvedFeature.feature.description}</p>
+                      {resolvedFeature.source && (
+                        <div className="text-xs text-muted-foreground/70 mt-1">
+                          {tc('characterSheet.fields.source', { source: resolvedFeature.source.id })}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -393,20 +402,19 @@ export default function CharacterSheet() {
           {/* Right Column: Equipment & Spells */}
           <div className="lg:col-span-1 space-y-6">
             {/* Equipment */}
-            {character.equipment && character.equipment.length > 0 && (
+            {itemsData.length > 0 && (
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.equipment')}</h2>
                 <div className="space-y-2 text-xs">
-                  {character.equipment.map((item) => (
+                  {itemsData.map((item) => (
                     <div
                       key={item.id}
-                      className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-50 border border-green-200' : 'bg-muted/50'
-                        }`}
+                      className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-50 border border-green-200' : 'bg-muted/50'}`}
                     >
                       <div>
-                        <div className="font-semibold text-foreground">{item.name}</div>
+                        <div className="font-semibold text-foreground">{item.item_id}</div>
                         <div className="text-muted-foreground">
-                          {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: item.weight })}
+                          {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: 0 })}
                         </div>
                       </div>
                       {item.equipped && <span className="text-green-600 font-bold">E</span>}
@@ -417,22 +425,20 @@ export default function CharacterSheet() {
             )}
 
             {/* Spells */}
-            {character.spells && character.spells.cantrips.length > 0 && (
+            {resolved?.spellcasting && resolved.spellcasting.cantrips.length > 0 && (
               <div className="bg-card border border-purple-200 rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.spells')}</h2>
                 <div className="space-y-3">
-                  {character.spells.cantrips.length > 0 && (
-                    <div>
-                      <div className="text-xs font-bold text-muted-foreground mb-2">{tc('characterSheet.sections.cantrips')}</div>
-                      <div className="space-y-1">
-                        {character.spells.cantrips.map((cantrip, i) => (
-                          <div key={i} className="text-sm text-foreground">
-                            &bull; {cantrip}
-                          </div>
-                        ))}
-                      </div>
+                  <div>
+                    <div className="text-xs font-bold text-muted-foreground mb-2">{tc('characterSheet.sections.cantrips')}</div>
+                    <div className="space-y-1">
+                      {resolved.spellcasting.cantrips.map((cantrip, i) => (
+                        <div key={i} className="text-sm text-foreground">
+                          &bull; {cantrip}
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             )}
@@ -492,32 +498,6 @@ export default function CharacterSheet() {
       {editSection === 'header' && (
         <EditHeaderDialog
           character={character}
-          onSave={handleUpdate}
-          onClose={() => setEditSection(null)}
-          saving={updateMutation.isPending}
-        />
-      )}
-      {editSection === 'abilities' && (
-        <EditAbilitiesDialog
-          abilities={character.abilities}
-          onSave={(abilities) => handleUpdate({ abilities })}
-          onClose={() => setEditSection(null)}
-          saving={updateMutation.isPending}
-        />
-      )}
-      {editSection === 'skills' && (
-        <EditSkillsDialog
-          skills={character.skills}
-          onSave={(skills) => handleUpdate({ skills })}
-          onClose={() => setEditSection(null)}
-          saving={updateMutation.isPending}
-        />
-      )}
-      {editSection === 'combat' && (
-        <EditCombatDialog
-          armorClass={character.armor_class ?? 10}
-          hpMax={character.hit_points_max ?? 1}
-          hpCurrent={character.hit_points_current ?? 1}
           onSave={handleUpdate}
           onClose={() => setEditSection(null)}
           saving={updateMutation.isPending}
@@ -726,210 +706,6 @@ function EditHeaderDialog({
           onCancel={onClose}
           saving={saving}
         />
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function EditAbilitiesDialog({
-  abilities,
-  onSave,
-  onClose,
-  saving,
-}: {
-  abilities: Character['abilities']
-  onSave: (abilities: Character['abilities']) => void
-  onClose: () => void
-  saving: boolean
-}) {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
-  const [form, setForm] = useState({ ...abilities })
-
-  const updateAbility = (key: keyof typeof form, value: number) =>
-    setForm((prev) => ({ ...prev, [key]: value }))
-
-  const abilityKeys = Object.keys(abilities) as Array<keyof typeof abilities>
-
-  return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{tc('characterSheet.dialogs.editAbilityScores')}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {abilityKeys.map((ability) => (
-            <div key={ability} className="flex items-center gap-4">
-              <Label className="w-28">{t(`abilities.${ability}`)}</Label>
-              <Input
-                type="number"
-                min={1}
-                max={30}
-                value={form[ability]}
-                onChange={(e) => updateAbility(ability, Number(e.target.value))}
-                className="w-20 text-center"
-              />
-              <span className={`text-sm font-mono font-bold w-8 text-center ${getAbilityModifier(form[ability]) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {getAbilityModifier(form[ability]) >= 0 ? '+' : ''}{getAbilityModifier(form[ability])}
-              </span>
-            </div>
-          ))}
-        </div>
-        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function EditSkillsDialog({
-  skills,
-  onSave,
-  onClose,
-  saving,
-}: {
-  skills: Character['skills']
-  onSave: (skills: Character['skills']) => void
-  onClose: () => void
-  saving: boolean
-}) {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
-  const [form, setForm] = useState<Record<string, { proficient: boolean; expertise: boolean }>>(() => {
-    const initial: Record<string, { proficient: boolean; expertise: boolean }> = {}
-    for (const skill of DND_SKILLS) {
-      initial[skill.id] = skills?.[skill.id] ?? { proficient: false, expertise: false }
-    }
-    return initial
-  })
-
-  const toggle = (skillId: string, field: 'proficient' | 'expertise') => {
-    setForm((prev) => {
-      const current = prev[skillId]
-      if (field === 'proficient' && current.proficient) {
-        return { ...prev, [skillId]: { proficient: false, expertise: false } }
-      }
-      if (field === 'expertise' && !current.proficient) {
-        return { ...prev, [skillId]: { proficient: true, expertise: true } }
-      }
-      return { ...prev, [skillId]: { ...current, [field]: !current[field] } }
-    })
-  }
-
-  return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{tc('characterSheet.dialogs.editSkills')}</DialogTitle>
-        </DialogHeader>
-        <div className="text-xs text-muted-foreground mb-4">
-          {tc('characterSheet.hints.skillsProficiency')}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 max-h-96 overflow-y-auto">
-          {DND_SKILLS.map((skill) => {
-            const data = form[skill.id]
-            return (
-              <div key={skill.id} className="flex items-center justify-between py-1.5 border-b">
-                <span className="text-sm text-foreground">{t(`skills.${skill.id}`)}</span>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => toggle(skill.id, 'proficient')}
-                    className={`size-7 rounded text-xs font-bold transition-colors ${
-                      data.proficient
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-accent'
-                    }`}
-                  >
-                    P
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggle(skill.id, 'expertise')}
-                    className={`size-7 rounded text-xs font-bold transition-colors ${
-                      data.expertise
-                        ? 'bg-green-600 text-white'
-                        : 'bg-muted text-muted-foreground hover:bg-accent'
-                    }`}
-                  >
-                    E
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function EditCombatDialog({
-  armorClass,
-  hpMax,
-  hpCurrent,
-  onSave,
-  onClose,
-  saving,
-}: {
-  armorClass: number
-  hpMax: number
-  hpCurrent: number
-  onSave: (updates: { armor_class: number; hit_points_max: number; hit_points_current: number }) => void
-  onClose: () => void
-  saving: boolean
-}) {
-  const { t: tc } = useTranslation('common')
-  const [form, setForm] = useState({ armor_class: armorClass, hit_points_max: hpMax, hit_points_current: hpCurrent })
-
-  const updateMaxHP = (newMax: number) => {
-    setForm((prev) => ({
-      ...prev,
-      hit_points_max: newMax,
-      hit_points_current: Math.min(prev.hit_points_current, newMax),
-    }))
-  }
-
-  return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{tc('characterSheet.dialogs.editCombatStats')}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="combat-ac">{tc('characterSheet.fields.armorClass')}</Label>
-            <Input
-              id="combat-ac"
-              type="number"
-              min={0}
-              value={form.armor_class}
-              onChange={(e) => setForm((prev) => ({ ...prev, armor_class: Number(e.target.value) }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="combat-hp-max">{tc('characterSheet.fields.maxHp')}</Label>
-            <Input
-              id="combat-hp-max"
-              type="number"
-              min={1}
-              value={form.hit_points_max}
-              onChange={(e) => updateMaxHP(Number(e.target.value))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="combat-hp-current">{tc('characterSheet.fields.currentHp')}</Label>
-            <Input
-              id="combat-hp-current"
-              type="number"
-              min={0}
-              max={form.hit_points_max}
-              value={form.hit_points_current}
-              onChange={(e) => setForm((prev) => ({ ...prev, hit_points_current: Number(e.target.value) }))}
-            />
-          </div>
-        </div>
-        <ModalFooter onSave={() => onSave(form)} onCancel={onClose} saving={saving} />
       </DialogContent>
     </Dialog>
   )
