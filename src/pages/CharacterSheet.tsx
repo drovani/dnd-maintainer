@@ -36,11 +36,12 @@ import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles } from '@/lib/sources'
 import { resolveCharacter } from '@/lib/resolver'
 import type { ResolvedCharacter } from '@/types/resolved'
-import { Character } from '@/types/database'
+import type { Character } from '@/types/database'
 import { Edit2, Save } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 
 type EditSection = 'header' | 'personality' | 'backstory' | 'appearance' | null
 
@@ -76,13 +77,18 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
   )
 }
 
+interface ResolvedFromBuild {
+  readonly resolved: ResolvedCharacter | null
+  readonly buildError: string | null
+}
+
 function useResolvedFromBuild(
   character: Character | undefined,
   buildRows: ReturnType<typeof useCharacterBuildLevels>['data'],
   equippedItems: string[],
-): ResolvedCharacter | null {
+): ResolvedFromBuild {
   return useMemo(() => {
-    if (!character || !buildRows || buildRows.length === 0) return null
+    if (!character || !buildRows || buildRows.length === 0) return { resolved: null, buildError: null }
     try {
       const build = reconstructBuild(
         { race: character.race, background: character.background },
@@ -91,16 +97,18 @@ function useResolvedFromBuild(
       )
       const bundles = collectBundles(build)
       const levelRows = buildRows.filter((r) => r.sequence !== 0)
-      return resolveCharacter({
+      const resolved = resolveCharacter({
         baseAbilities: build.baseAbilities,
         level: levelRows.length,
         bundles,
         choices: build.choices,
         hpRolls: build.hpRolls,
       })
+      return { resolved, buildError: null }
     } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
       console.error('Failed to resolve character from build:', { characterId: character?.id, error: err })
-      return null
+      return { resolved: null, buildError: message }
     }
   }, [character, buildRows, equippedItems])
 }
@@ -121,12 +129,13 @@ export default function CharacterSheet() {
     [itemsData],
   )
 
-  const resolved = useResolvedFromBuild(character, buildRows, equippedItems)
+  const { resolved, buildError } = useResolvedFromBuild(character, buildRows, equippedItems)
 
   const handleUpdate = (updates: Partial<Character>) => {
     if (!characterId) return
     updateMutation.mutate({ id: characterId, ...updates }, {
       onSuccess: () => setEditSection(null),
+      onError: () => toast.error(tc('characterSheet.errors.updateFailed')),
     })
   }
 
@@ -168,6 +177,12 @@ export default function CharacterSheet() {
     )
   }
 
+  const buildErrorBanner = buildError ? (
+    <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
+      {tc('characterSheet.errors.buildFailed', { message: buildError })}
+    </div>
+  ) : null
+
   const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
   const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level)
 
@@ -184,6 +199,8 @@ export default function CharacterSheet() {
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto p-8">
+        {buildErrorBanner}
+
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
@@ -700,6 +717,7 @@ function EditHeaderDialog({
               level: Number(form.level),
               race: (form.race || null) as Character['race'],
               class: (form.class || null) as Character['class'],
+              background: (form.background || null) as Character['background'],
               alignment: (form.alignment || null) as Character['alignment'],
               gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
             })

@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Character } from '@/types/database'
+import type { AbilityScores } from '@/types/database'
 import type { BuildLevelRow } from '@/lib/build-reconstruction'
-import type { CharacterBuild } from '@/types/choices'
+import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
 import type { ResolvedCharacter } from '@/types/resolved'
+import type { ClassId } from '@/lib/dnd-helpers'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
 import { resolveCharacter } from '@/lib/resolver/index'
@@ -12,10 +14,10 @@ import { resolveCharacter } from '@/lib/resolver/index'
 // Types
 // ---------------------------------------------------------------------------
 
-interface CreationUpdates {
-  base_abilities?: Record<string, number>
-  ability_method?: string
-  choices?: Record<string, unknown>
+export interface CreationUpdates {
+  base_abilities?: AbilityScores
+  ability_method?: 'standard-array' | 'point-buy' | 'rolling'
+  choices?: Record<string, ChoiceDecision>
 }
 
 interface CharacterContextValue {
@@ -23,12 +25,13 @@ interface CharacterContextValue {
   readonly rows: readonly BuildLevelRow[]
   readonly build: CharacterBuild | null
   readonly resolved: ResolvedCharacter | null
+  readonly buildError: string | null
   readonly isDirty: boolean
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
   updateCreation: (updates: Readonly<CreationUpdates>) => void
-  makeChoice: (choiceKey: string, decision: unknown) => void
+  makeChoice: (choiceKey: string, decision: ChoiceDecision) => void
   clearChoice: (choiceKey: string) => void
-  levelUp: (classId: string, hpRoll: number | null) => void
+  levelUp: (classId: ClassId, hpRoll: number | null) => void
   levelDown: () => void
   markSaved: () => void
 }
@@ -51,7 +54,7 @@ const CharacterContext = createContext<CharacterContextValue | null>(null)
  * Keys with `:class:` go to the matching level row (by class_id embedded in the key).
  * Everything else defaults to sequence-0.
  */
-function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]): number {
+export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]): number {
   const parts = choiceKey.split(':')
   // e.g. "language-choice:race:human:0" or "skill-choice:class:fighter:0"
   const origin = parts[1]
@@ -64,48 +67,56 @@ function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]
     const classId = parts[2]
     // Find the first level row with matching class_id
     const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId)
+    if (!levelRow) {
+      console.warn(`No level row found for class "${classId}" — choice "${choiceKey}" will be stored on creation row`)
+    }
     return levelRow?.sequence ?? 0
   }
 
+  console.warn(`Unknown choice origin "${origin}" in key "${choiceKey}" — defaulting to creation row`)
   return 0
 }
 
-function tryDeriveBuild(
+interface BuildResult {
+  readonly build: CharacterBuild | null
+  readonly resolved: ResolvedCharacter | null
+  readonly error: string | null
+}
+
+function tryDeriveAndResolve(
   character: Character,
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
-): CharacterBuild | null {
+): BuildResult {
+  let build: CharacterBuild | null = null
   try {
-    return reconstructBuild(
+    build = reconstructBuild(
       { race: character.race, background: character.background },
       rows,
       equippedItems,
     )
   } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown build error'
     console.error('Failed to reconstruct character build:', { characterId: character.id, error: err })
-    return null
+    return { build: null, resolved: null, error: message }
   }
-}
 
-function tryResolveCharacter(
-  build: CharacterBuild | null,
-  rows: readonly BuildLevelRow[],
-): ResolvedCharacter | null {
-  if (!build) return null
   try {
     const bundles = collectBundles(build)
     const levelRows = rows.filter((r) => r.sequence !== 0)
     const level = levelRows.length
-    return resolveCharacter({
+    const resolved = resolveCharacter({
       baseAbilities: build.baseAbilities,
       level,
       bundles,
       choices: build.choices,
       hpRolls: build.hpRolls,
     })
+    return { build, resolved, error: null }
   } catch (err) {
-    console.error('Failed to resolve character:', { error: err })
-    return null
+    const message = err instanceof Error ? err.message : 'Unknown resolver error'
+    console.error('Failed to resolve character:', { characterId: character.id, error: err })
+    return { build, resolved: null, error: message }
   }
 }
 
@@ -147,8 +158,10 @@ export function CharacterProvider({
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
-  const build = useMemo(() => tryDeriveBuild(character, rows, equippedItems), [character, rows, equippedItems])
-  const resolved = useMemo(() => tryResolveCharacter(build, rows), [build, rows])
+  const { build, resolved, error: buildError } = useMemo(
+    () => tryDeriveAndResolve(character, rows, equippedItems),
+    [character, rows, equippedItems],
+  )
 
   const updateCharacter = useCallback((updates: Readonly<Partial<Character>>) => {
     setCharacter((prev) => {
@@ -172,7 +185,7 @@ export function CharacterProvider({
         // No creation row exists yet — create one
         const newRow: BuildLevelRow = {
           sequence: 0,
-          base_abilities: (updates.base_abilities as Record<string, number>) ?? null,
+          base_abilities: updates.base_abilities ?? null,
           ability_method: updates.ability_method ?? null,
           class_id: null,
           class_level: null,
@@ -180,17 +193,17 @@ export function CharacterProvider({
           asi_allocation: null,
           feat_id: null,
           hp_roll: null,
-          choices: (updates.choices as Record<string, unknown>) ?? null,
+          choices: updates.choices ?? null,
         }
         return [...prev, newRow]
       }
       const existing = prev[creationIdx]
       const updated: BuildLevelRow = {
         ...existing,
-        ...(updates.base_abilities !== undefined ? { base_abilities: updates.base_abilities as Record<string, number> } : {}),
+        ...(updates.base_abilities !== undefined ? { base_abilities: updates.base_abilities } : {}),
         ...(updates.ability_method !== undefined ? { ability_method: updates.ability_method } : {}),
         ...(updates.choices !== undefined
-          ? { choices: { ...(existing.choices ?? {}), ...updates.choices } as Record<string, unknown> }
+          ? { choices: { ...(existing.choices ?? {}), ...updates.choices } }
           : {}),
       }
       const next = [...prev]
@@ -200,17 +213,20 @@ export function CharacterProvider({
     setIsDirty(true)
   }, [])
 
-  const makeChoice = useCallback((choiceKey: string, decision: unknown) => {
+  const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
     let didChange = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
-      if (idx === -1) return prev
+      if (idx === -1) {
+        console.warn(`Choice "${choiceKey}" targets sequence ${targetSeq} but no row exists`)
+        return prev
+      }
       didChange = true
       const existing = prev[idx]
       const updated: BuildLevelRow = {
         ...existing,
-        choices: { ...(existing.choices ?? {}), [choiceKey]: decision } as Record<string, unknown>,
+        choices: { ...(existing.choices ?? {}), [choiceKey]: decision },
       }
       const next = [...prev]
       next[idx] = updated
@@ -224,10 +240,13 @@ export function CharacterProvider({
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
-      if (idx === -1) return prev
+      if (idx === -1) {
+        console.warn(`Choice "${choiceKey}" targets sequence ${targetSeq} but no row exists`)
+        return prev
+      }
       didChange = true
       const existing = prev[idx]
-      const newChoices = { ...(existing.choices ?? {}) } as Record<string, unknown>
+      const newChoices = { ...(existing.choices ?? {}) }
       delete newChoices[choiceKey]
       const updated: BuildLevelRow = { ...existing, choices: newChoices }
       const next = [...prev]
@@ -237,7 +256,7 @@ export function CharacterProvider({
     if (didChange) setIsDirty(true)
   }, [])
 
-  const levelUp = useCallback((classId: string, hpRoll: number | null) => {
+  const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       const classLevelCount = levelRows.filter((r) => r.class_id === classId).length
@@ -281,6 +300,7 @@ export function CharacterProvider({
       rows,
       build,
       resolved,
+      buildError,
       isDirty,
       updateCharacter,
       updateCreation,
@@ -290,7 +310,7 @@ export function CharacterProvider({
       levelDown,
       markSaved,
     }),
-    [character, rows, build, resolved, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, markSaved],
+    [character, rows, build, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

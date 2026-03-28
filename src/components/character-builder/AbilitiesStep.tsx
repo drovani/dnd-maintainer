@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useCharacterContext } from '@/hooks/useCharacterContext'
+import { useCharacterContext, type CreationUpdates } from '@/hooks/useCharacterContext'
 import {
   getAbilityModifier,
   getPointBuyCost,
@@ -42,7 +42,7 @@ export function AbilitiesStep() {
   const abilityMethod: AbilityMethod =
     (creationRow?.ability_method as AbilityMethod | null | undefined) ?? 'standard-array'
   const baseAbilities: AbilityScores =
-    (creationRow?.base_abilities as AbilityScores | null | undefined) ?? DEFAULT_ABILITIES
+    creationRow?.base_abilities ?? DEFAULT_ABILITIES
 
   // Local UI state for assignment selects and rolling
   // Derive initial assignments from saved base abilities so dropdowns persist across step navigation
@@ -69,7 +69,7 @@ export function AbilitiesStep() {
   }, [])
 
   const updateAbility = (ability: keyof AbilityScores, value: number) => {
-    const updated = { ...baseAbilities, [ability]: value }
+    const updated: AbilityScores = { ...baseAbilities, [ability]: value }
     context.updateCreation({ base_abilities: updated })
   }
 
@@ -134,7 +134,7 @@ export function AbilitiesStep() {
         const resetAbilities: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
         const resetAssignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
         setAbilityAssignments(resetAssignments)
-        onAbilitiesChangeRef.current({ base_abilities: resetAbilities as unknown as Record<string, number> })
+        onAbilitiesChangeRef.current({ base_abilities: resetAbilities })
         setIsRolling(false)
       }
     }, 80)
@@ -260,7 +260,7 @@ export function AbilitiesStep() {
     }
     setDisplayedRolls([])
     setIsRolling(false)
-    context.updateCreation({ ability_method: val })
+    context.updateCreation({ ability_method: val as CreationUpdates['ability_method'] })
   }
 
   return (

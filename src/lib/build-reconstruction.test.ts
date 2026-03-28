@@ -237,7 +237,7 @@ describe('reconstructBuild', () => {
   it('throws when choice JSONB contains invalid data', () => {
     const creationWithBadChoices: BuildLevelRow = {
       ...creationRow,
-      choices: { bad: { type: 'unknown' } },
+      choices: { bad: { type: 'unknown' } } as unknown as BuildLevelRow['choices'],
     }
     expect(() => reconstructBuild(identity, [creationWithBadChoices], [])).toThrow()
   })

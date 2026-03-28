@@ -69,6 +69,10 @@ export function BasicsStep() {
     if (levelRows.length === 0) {
       // First time selecting a class — add level 1 row
       context.levelUp(value, null)
+    } else if (levelRows[0]?.class_id !== value) {
+      // Class changed — remove old level row and add new one with correct class_id
+      context.levelDown()
+      context.levelUp(value, null)
     }
     // Keep character.class in sync for pre-calculated column and hasRequiredFields check
     context.updateCharacter({ class: value, level: Math.max(levelRows.length, 1) })

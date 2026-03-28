@@ -57,13 +57,12 @@ export type ProficiencyGrant =
   | { readonly type: 'proficiency'; readonly category: 'saving-throw'; readonly id: AbilityKey }
   | { readonly type: 'proficiency'; readonly category: 'language'; readonly id: LanguageId }
 
-export interface ProficiencyChoiceGrant {
-  readonly type: 'proficiency-choice'
-  readonly category: 'armor' | 'weapon' | 'tool' | 'skill' | 'language'
-  readonly key: string
-  readonly count: number
-  readonly from: readonly string[] | null
-}
+export type ProficiencyChoiceGrant =
+  | { readonly type: 'proficiency-choice'; readonly category: 'armor'; readonly key: string; readonly count: number; readonly from: readonly ArmorProficiencyId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'weapon'; readonly key: string; readonly count: number; readonly from: readonly WeaponProficiencyId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'tool'; readonly key: string; readonly count: number; readonly from: readonly ToolProficiencyId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'skill'; readonly key: string; readonly count: number; readonly from: readonly SkillId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'language'; readonly key: string; readonly count: number; readonly from: readonly LanguageId[] | null }
 
 export interface SkillExpertiseGrant {
   readonly type: 'skill-expertise'
@@ -75,9 +74,11 @@ export interface FeatureGrant {
   readonly feature: FeatureDef
 }
 
+export type SpeedMode = 'walk' | 'fly' | 'swim' | 'climb' | 'burrow'
+
 export interface SpeedGrant {
   readonly type: 'speed'
-  readonly mode: 'walk' | 'fly' | 'swim' | 'climb' | 'burrow'
+  readonly mode: SpeedMode
   readonly value: number
 }
 

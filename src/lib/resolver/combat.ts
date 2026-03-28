@@ -1,3 +1,4 @@
+import type { SpeedMode } from '@/types/grants'
 import type { GrantBundle, SourceTag } from '@/types/sources'
 import type { ResolvedArmorClass, Sourced } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
@@ -31,11 +32,11 @@ export function resolveHp(
   return { max }
 }
 
-export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Record<string, Sourced<number>>> {
+export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<Record<SpeedMode, Sourced<number>>>> {
   const speedGrants = collectGrantsByType(bundles, 'speed')
 
   // Group by mode, taking highest value per mode
-  const bestPerMode = new Map<string, { value: number; sources: SourceTag[] }>()
+  const bestPerMode = new Map<SpeedMode, { value: number; sources: SourceTag[] }>()
 
   for (const { grant, source } of speedGrants) {
     const existing = bestPerMode.get(grant.mode)
@@ -48,7 +49,7 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Record<s
     }
   }
 
-  const result: Record<string, Sourced<number>> = {}
+  const result: Partial<Record<SpeedMode, Sourced<number>>> = {}
   for (const [mode, { value, sources }] of bestPerMode) {
     result[mode] = { value, sources }
   }

@@ -151,7 +151,7 @@ describe('Human Fighter L1 integration', () => {
   it('walk speed = 30', () => {
     const result = resolveCharacter(input)
     expect(result.speed.walk).toBeDefined()
-    expect(result.speed.walk.value).toBe(30)
+    expect(result.speed.walk!.value).toBe(30)
   })
 
   it('proficiency bonus = 2 at level 1', () => {

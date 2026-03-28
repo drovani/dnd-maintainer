@@ -1,6 +1,12 @@
 import type { AbilityKey, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId, BackgroundId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 
+/**
+ * Choice key format: `category:origin:id:index`
+ * - origin: 'race' | 'background' | 'class'
+ * - Determines which build row (sequence) stores the decision
+ * - e.g. "skill-choice:class:fighter:0", "language-choice:race:human:0"
+ */
 export type ChoiceKey = string
 
 export type ChoiceDecision =

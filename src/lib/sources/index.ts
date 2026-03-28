@@ -62,6 +62,8 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
   if (raceSource) {
     const tag: SourceTag = { origin: 'race', id: build.raceId }
     bundles.push({ source: tag, grants: raceSource.grants })
+  } else {
+    console.warn(`No source data found for race "${build.raceId}" — race grants will be empty`)
   }
 
   // Class levels — count levels per class in order
@@ -73,12 +75,14 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
 
   for (const [classId, levelCount] of classCounts) {
     const classSource = getClassSource(classId)
-    if (classSource) {
-      for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
-        const level = i + 1
-        const tag: SourceTag = { origin: 'class', id: classId, level }
-        bundles.push({ source: tag, grants: classSource.levels[i].grants })
-      }
+    if (!classSource) {
+      console.warn(`No source data found for class "${classId}" — class grants will be empty`)
+      continue
+    }
+    for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
+      const level = i + 1
+      const tag: SourceTag = { origin: 'class', id: classId, level }
+      bundles.push({ source: tag, grants: classSource.levels[i].grants })
     }
   }
 

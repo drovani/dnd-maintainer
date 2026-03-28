@@ -1,11 +1,19 @@
-import type { ClassId, RaceId, BackgroundId } from '@/lib/dnd-helpers'
+import type { BackgroundId, ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
 
+/**
+ * A single row from `character_build_levels`.
+ *
+ * - **sequence === 0**: Creation row — carries `base_abilities`, `ability_method`,
+ *   and race/background choices. `class_id` and `class_level` are null.
+ * - **sequence > 0**: Level row — carries `class_id`, `class_level`, and class
+ *   choices. `base_abilities` and `ability_method` are null.
+ */
 export interface BuildLevelRow {
   readonly sequence: number
-  readonly base_abilities: Record<string, number> | null
+  readonly base_abilities: AbilityScores | null
   readonly ability_method: string | null
   readonly class_id: string | null
   readonly class_level: number | null
@@ -13,12 +21,16 @@ export interface BuildLevelRow {
   readonly asi_allocation: Record<string, number> | null
   readonly feat_id: string | null
   readonly hp_roll: number | null
-  readonly choices: Record<string, unknown> | null
+  readonly choices: Record<string, ChoiceDecision> | null
+}
+
+export function isCreationRow(row: BuildLevelRow): boolean {
+  return row.sequence === 0
 }
 
 export interface CharacterIdentity {
-  readonly race: string | null
-  readonly background: string | null
+  readonly race: RaceId | null
+  readonly background: BackgroundId | null
 }
 
 const DEFAULT_ABILITIES: AbilityScores = {
@@ -134,7 +146,7 @@ export function reconstructBuild(
 
   return {
     raceId: character.race as RaceId,
-    backgroundId: (character.background as BackgroundId) ?? null,
+    backgroundId: character.background ?? null,
     baseAbilities,
     abilityMethod,
     appliedLevels,

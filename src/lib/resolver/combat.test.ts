@@ -88,7 +88,7 @@ describe('resolveSpeed', () => {
     ]
     const result = resolveSpeed(bundles)
     expect(result.walk).toBeDefined()
-    expect(result.walk.value).toBe(30)
+    expect(result.walk!.value).toBe(30)
   })
 
   it('takes highest value when same mode appears multiple times', () => {
@@ -103,7 +103,7 @@ describe('resolveSpeed', () => {
       },
     ]
     const result = resolveSpeed(bundles)
-    expect(result.walk.value).toBe(40)
+    expect(result.walk!.value).toBe(40)
   })
 
   it('handles multiple speed modes independently', () => {
@@ -117,8 +117,8 @@ describe('resolveSpeed', () => {
       },
     ]
     const result = resolveSpeed(bundles)
-    expect(result.walk.value).toBe(30)
-    expect(result.swim.value).toBe(30)
+    expect(result.walk!.value).toBe(30)
+    expect(result.swim!.value).toBe(30)
   })
 })
 
@@ -172,6 +172,21 @@ describe('resolveAc', () => {
     const result = resolveAc(bundles, 0)
     expect(result.effective).toBe(12)
     expect(result.bonuses).toHaveLength(1)
+  })
+
+  it('unarmored mode: 10 + DEX modifier', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } }],
+      },
+    ]
+    // DEX 16 → mod +3, unarmored AC = 10 + 3 = 13
+    const result = resolveAc(bundles, 3)
+    expect(result.calculations).toHaveLength(1)
+    expect(result.calculations[0].mode).toBe('unarmored')
+    expect(result.calculations[0].baseValue).toBe(13)
+    expect(result.effective).toBe(13)
   })
 
   it('takes highest base AC when both armored and natural grants present', () => {

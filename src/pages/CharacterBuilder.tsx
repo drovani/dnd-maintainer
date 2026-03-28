@@ -81,7 +81,7 @@ function CharacterBuilderInner() {
   const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
 
   const context = useCharacterContext()
-  const { character, rows, resolved, isDirty, markSaved } = context
+  const { character, rows, resolved, buildError, isDirty, markSaved } = context
 
   useEffect(() => {
     if (saveStatus !== 'saved') return
@@ -102,7 +102,7 @@ function CharacterBuilderInner() {
     const timer = setTimeout(() => {
       saveDraft(latestPayloadRef.current)
         .then(() => markSaved())
-        .catch((err: unknown) => console.error('Autosave failed:', err))
+        .catch(() => { /* error state handled by useBuilderAutosave */ })
     }, 500)
     return () => clearTimeout(timer)
   }, [isDirty, hasRequiredFields, saveDraft, markSaved])
@@ -129,7 +129,7 @@ function CharacterBuilderInner() {
       const payload: AutosavePayload = { character, rows, resolved }
       saveDraft(payload)
         .then(() => markSaved())
-        .catch((err) => console.error('Autosave failed during step navigation:', err))
+        .catch(() => { /* error state handled by useBuilderAutosave */ })
     }
     setCurrentStep(targetStep)
   }
@@ -220,6 +220,12 @@ function CharacterBuilderInner() {
           </CardContent>
         </Card>
 
+        {buildError && (
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
+            {t('characterSheet.errors.buildFailed', { message: buildError })}
+          </div>
+        )}
+
         {(finalizeError || saveStatus === 'error') && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
             <span>
@@ -233,7 +239,9 @@ function CharacterBuilderInner() {
                 size="sm"
                 onClick={() => {
                   const payload: AutosavePayload = { character, rows, resolved }
-                  saveDraft(payload).catch((err) => console.error('Retry save failed:', err))
+                  saveDraft(payload)
+                    .then(() => markSaved())
+                    .catch(() => { /* error state handled by useBuilderAutosave */ })
                 }}
               >
                 {t('buttons.retrySave')}

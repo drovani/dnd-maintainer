@@ -288,7 +288,9 @@
       "subclassPlaceholder": "e.g. Champion, Arcane Trickster"
     },
     "errors": {
-      "loadingCharacter": "Error loading character: {{error}}"
+      "loadingCharacter": "Error loading character: {{error}}",
+      "buildFailed": "Failed to compute character build: {{message}}",
+      "updateFailed": "Failed to save changes. Please try again."
     }
   },
   "characterList": {
