@@ -23,9 +23,16 @@ export interface ParsedChoiceKey {
 
 export function parseChoiceKey(key: ChoiceKey | string): ParsedChoiceKey {
   const parts = key.split(':')
+  if (parts.length !== 4) {
+    throw new Error(`Malformed choice key "${key}": expected 4 colon-separated segments, got ${parts.length}`)
+  }
+  const origin = parts[1]
+  if (origin !== 'race' && origin !== 'background' && origin !== 'class') {
+    throw new Error(`Invalid choice key origin "${origin}" in key "${key}"`)
+  }
   return {
     category: parts[0],
-    origin: parts[1] as ChoiceOrigin,
+    origin,
     id: parts[2],
     index: Number(parts[3]),
   }

@@ -15,9 +15,13 @@ interface LevelUpDialogProps {
   readonly onConfirm: (hpRoll: number) => void
   /** The hit die sides (e.g. 10 for d10). Used to roll and compute average. */
   readonly hitDie: number
+  /** The translated class name (e.g. "Fighter"). */
+  readonly className: string
+  /** The class level the character will advance to. */
+  readonly targetLevel: number
 }
 
-export function LevelUpDialog({ open, onOpenChange, onConfirm, hitDie }: LevelUpDialogProps) {
+export function LevelUpDialog({ open, onOpenChange, onConfirm, hitDie, className, targetLevel }: LevelUpDialogProps) {
   const { t } = useTranslation('common')
   const [rolledValue, setRolledValue] = useState<number | null>(null)
 
@@ -43,7 +47,7 @@ export function LevelUpDialog({ open, onOpenChange, onConfirm, hitDie }: LevelUp
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('characterSheet.levelManagement.levelUpTitle')}</DialogTitle>
+          <DialogTitle>{t('characterSheet.levelManagement.levelUpTitle', { className, level: targetLevel })}</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">

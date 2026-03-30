@@ -102,7 +102,7 @@ describe('collectBundles', () => {
     expect(() => collectBundles(unknownBuild)).not.toThrow()
   })
 
-  it('returns 4 bundles for Fighter L3 without subclass decision', () => {
+  it('returns 5 bundles for Fighter L3 without subclass decision', () => {
     const l3Build: CharacterBuild = {
       ...humanFighterL1Build,
       levels: [

@@ -18,6 +18,7 @@ const creationRow: BuildLevelRow = {
   feat_id: null,
   hp_roll: null,
   choices: null,
+  deleted_at: null,
 }
 
 describe('reconstructBuild', () => {
@@ -33,6 +34,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: 10,
       choices: null,
+      deleted_at: null,
     }
     expect(() => reconstructBuild(identity, [levelRow], [])).toThrow(
       'Missing creation row (sequence 0)',
@@ -76,6 +78,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const level2: BuildLevelRow = {
       sequence: 2,
@@ -88,6 +91,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: 8,
       choices: null,
+      deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
     expect(result.appliedLevels).toHaveLength(2)
@@ -107,6 +111,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const level2: BuildLevelRow = {
       sequence: 2,
@@ -119,6 +124,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: 8,
       choices: null,
+      deleted_at: null,
     }
     // Pass rows out of order
     const result = reconstructBuild(identity, [creationRow, level2, level1], [])
@@ -139,6 +145,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: 6,
       choices: null,
+      deleted_at: null,
     }
     const expectedKey = createChoiceKey('subclass', 'class', 'fighter', 0)
     const result = reconstructBuild(identity, [creationRow, level3], [])
@@ -160,6 +167,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: 7,
       choices: null,
+      deleted_at: null,
     }
     const expectedKey = createChoiceKey('asi', 'class', 'fighter', 0)
     const result = reconstructBuild(identity, [creationRow, level4], [])
@@ -229,6 +237,7 @@ describe('reconstructBuild', () => {
       choices: {
         'fighter-skills': { type: 'skill-choice', skills: ['athletics', 'perception'] },
       },
+      deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, level1WithChoices], [])
     expect(result.choices['fighter-skills']).toEqual({
@@ -257,6 +266,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     } as unknown as BuildLevelRow
     expect(() => reconstructBuild(identity, [creationRow, levelMissingClassId], [])).toThrow()
   })
@@ -271,6 +281,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     expect(() => reconstructBuild(identity, [creationRow, levelBadClassId], [])).toThrow('Unknown class ID')
   })
@@ -292,6 +303,7 @@ describe('reconstructBuild', () => {
       feat_id: 'alert',
       hp_roll: 5,
       choices: null,
+      deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, levelWithFeat], [])
     expect(result.feats).toEqual(['alert'])
@@ -309,6 +321,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const level2: BuildLevelRow = {
       sequence: 2,
@@ -321,6 +334,7 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: 8,
       choices: null,
+      deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
     expect(result.hpRolls).toEqual([null, 8])
@@ -346,6 +360,7 @@ describe('Human Fighter Level 1 round-trip', () => {
         feat_id: null,
         asi_allocation: null,
         choices: {},
+        deleted_at: null,
       },
       {
         sequence: 1,
@@ -360,6 +375,7 @@ describe('Human Fighter Level 1 round-trip', () => {
         choices: {
           'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
         },
+        deleted_at: null,
       },
     ]
 

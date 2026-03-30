@@ -229,6 +229,7 @@ describe('useBuilderAutosave', () => {
         feat_id: null,
         hp_roll: null,
         choices: {},
+        deleted_at: null,
       }
 
       const payload: AutosavePayload = {
@@ -264,6 +265,7 @@ describe('useBuilderAutosave', () => {
         feat_id: null,
         hp_roll: null,
         choices: {},
+        deleted_at: null,
       }
 
       const payload: AutosavePayload = {
@@ -325,6 +327,7 @@ describe('useBuilderAutosave', () => {
         feat_id: null,
         hp_roll: null,
         choices: {},
+        deleted_at: null,
       }
 
       const payload: AutosavePayload = {
@@ -359,6 +362,7 @@ describe('useBuilderAutosave', () => {
         feat_id: null,
         hp_roll: null,
         choices: {},
+        deleted_at: null,
       }
 
       const levelRow = {
@@ -372,6 +376,7 @@ describe('useBuilderAutosave', () => {
         feat_id: null,
         hp_roll: null,
         choices: {},
+        deleted_at: null,
       }
 
       const payload: AutosavePayload = {

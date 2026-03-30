@@ -310,8 +310,9 @@
       "takeAverage": "Take Average",
       "takeAverageHint": "Take {{value}} HP (average)",
       "hpRollPrompt": "How would you like to determine hit points?",
-      "levelUpTitle": "Level Up",
-      "currentLevel": "Current Level"
+      "levelUpTitle": "Increase to {{className}} Level {{level}}",
+      "currentLevel": "Current Level",
+      "levelUpSuccess": "Advanced to level {{level}}"
     },
     "asi": {
       "asiTitle": "Ability Score Improvement",
@@ -325,7 +326,8 @@
     },
     "subclassPicker": {
       "chooseSubclass": "Choose Subclass",
-      "subclassDescription": "Select a subclass for your {{className}}"
+      "subclassDescription": "Select a subclass for your {{className}}",
+      "noSubclassesAvailable": "No subclasses are available for this class yet."
     },
     "warnings": {
       "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"

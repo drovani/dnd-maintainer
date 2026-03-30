@@ -39,11 +39,12 @@ export function resolveAbilities(
     if (decision?.type === 'asi') {
       const totalAllocated = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0)
       if (totalAllocated > grant.points) {
-        console.warn(`ASI allocation for "${grant.key}" uses ${totalAllocated} points but grant allows ${grant.points}`)
+        console.warn(`ASI allocation for "${grant.key}" uses ${totalAllocated} points but grant allows ${grant.points} — skipping`)
+        continue
       }
       for (const [ability, value] of Object.entries(decision.allocation)) {
         if (value !== undefined && value > 0) {
-          bonusList[ability as AbilityKey].push({ value: Math.min(value, grant.points), source })
+          bonusList[ability as AbilityKey].push({ value, source })
         }
       }
     }

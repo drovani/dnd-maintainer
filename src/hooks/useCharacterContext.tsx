@@ -32,6 +32,7 @@ interface CharacterContextValue {
   readonly bundles: readonly GrantBundle[]
   readonly resolved: ResolvedCharacter | null
   readonly buildError: string | null
+  readonly buildWarnings: readonly string[]
   readonly isDirty: boolean
   readonly hasDeletedRows: boolean
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
@@ -79,7 +80,6 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
     return levelRow?.sequence ?? 0
   }
 
-  console.warn(`Unknown choice origin "${origin}" in key "${choiceKey}" — defaulting to creation row`)
   return 0
 }
 
@@ -123,9 +123,9 @@ function findGrantRowIndex(
 }
 
 type BuildResult =
-  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null }
-  | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
-  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
+  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null; readonly warnings: readonly string[] }
+  | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
+  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
 
 function tryDeriveAndResolve(
   character: Character,
@@ -145,7 +145,7 @@ function tryDeriveAndResolve(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error'
     console.error('Failed to reconstruct character build:', { characterId: character.id, error: err })
-    return { status: 'build-error', build: null, bundles: [], resolved: null, error: message }
+    return { status: 'build-error', build: null, bundles: [], resolved: null, error: message, warnings: [] }
   }
 
   const { bundles, warnings } = collectBundles(build)
@@ -163,11 +163,11 @@ function tryDeriveAndResolve(
       choices: build.choices,
       hpRolls: build.hpRolls,
     })
-    return { status: 'ok', build, bundles, resolved, error: null }
+    return { status: 'ok', build, bundles, resolved, error: null, warnings }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown resolver error'
     console.error('Failed to resolve character:', { characterId: character.id, error: err })
-    return { status: 'resolve-error', build, bundles, resolved: null, error: message }
+    return { status: 'resolve-error', build, bundles, resolved: null, error: message, warnings }
   }
 }
 
@@ -203,13 +203,14 @@ export function CharacterProvider({
       feat_id: null,
       hp_roll: null,
       choices: {},
+      deleted_at: null,
     }
     return [seedRow, ...initialRows]
   })
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
-  const { build, bundles, resolved, error: buildError } = useMemo(
+  const { build, bundles, resolved, error: buildError, warnings: buildWarnings } = useMemo(
     () => tryDeriveAndResolve(character, rows, equippedItems),
     [character, rows, equippedItems],
   )
@@ -250,6 +251,7 @@ export function CharacterProvider({
           feat_id: null,
           hp_roll: null,
           choices: updates.choices ?? null,
+          deleted_at: null,
         }
         return [...prev, newRow]
       }
@@ -284,7 +286,7 @@ export function CharacterProvider({
           }
           return next
         }
-        // Fall through to normal choice storage if promoted column routing failed
+        console.warn(`makeChoice: could not route ${decision.type} decision for key "${choiceKey}" to dedicated column — falling through to JSONB storage`)
       }
 
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
@@ -326,6 +328,7 @@ export function CharacterProvider({
           next[targetIdx] = { ...next[targetIdx], choices: newChoices }
           return next
         }
+        console.warn(`clearChoice: could not find dedicated column row for key "${choiceKey}" — falling through to JSONB clear`)
       }
 
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
@@ -381,6 +384,7 @@ export function CharacterProvider({
         feat_id: null,
         hp_roll: hpRoll,
         choices: null,
+        deleted_at: null,
       }
       return [...prev, newRow]
     })
@@ -451,6 +455,7 @@ export function CharacterProvider({
       bundles,
       resolved,
       buildError,
+      buildWarnings,
       isDirty,
       hasDeletedRows,
       updateCharacter,
@@ -463,7 +468,7 @@ export function CharacterProvider({
       replaceLevel,
       markSaved,
     }),
-    [character, rows, build, bundles, resolved, buildError, isDirty, hasDeletedRows, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
+    [character, rows, build, bundles, resolved, buildError, buildWarnings, isDirty, hasDeletedRows, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

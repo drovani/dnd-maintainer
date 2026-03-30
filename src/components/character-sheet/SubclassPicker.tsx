@@ -32,6 +32,11 @@ export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
         </p>
       </CardHeader>
       <CardContent className="space-y-2">
+        {subclasses.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            {tc('characterSheet.subclassPicker.noSubclassesAvailable')}
+          </p>
+        )}
         {subclasses.map((sc) => {
           const isSelected = selected === sc.id
           return (

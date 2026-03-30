@@ -20,6 +20,7 @@ const creationRow: BuildLevelRow = {
   feat_id: null,
   hp_roll: null,
   choices: null,
+  deleted_at: null,
 }
 
 const fighterLevel1: BuildLevelRow = {
@@ -33,6 +34,7 @@ const fighterLevel1: BuildLevelRow = {
   feat_id: null,
   hp_roll: null,
   choices: null,
+  deleted_at: null,
 }
 
 const wizardLevel2: BuildLevelRow = {
@@ -46,6 +48,7 @@ const wizardLevel2: BuildLevelRow = {
   feat_id: null,
   hp_roll: null,
   choices: null,
+  deleted_at: null,
 }
 
 const rows = [creationRow, fighterLevel1, wizardLevel2] as const
@@ -71,8 +74,8 @@ describe('resolveChoiceSequence', () => {
     expect(resolveChoiceSequence('skill-choice:class:rogue:0', rows)).toBe(0)
   })
 
-  it('falls back to sequence 0 for unknown origins', () => {
-    expect(resolveChoiceSequence('skill-choice:unknown:foo:0', rows)).toBe(0)
+  it('throws for unknown origins', () => {
+    expect(() => resolveChoiceSequence('skill-choice:unknown:foo:0', rows)).toThrow('Invalid choice key origin')
   })
 })
 
@@ -228,7 +231,7 @@ describe('CharacterProvider', () => {
     // No level rows to soft-delete — creation row untouched
     expect(result.current.rows).toHaveLength(1)
     expect(result.current.rows[0].sequence).toBe(0)
-    expect(result.current.rows[0].deleted_at).toBeUndefined()
+    expect(result.current.rows[0].deleted_at).toBeNull()
   })
 
   it('hasDeletedRows is true after levelDown and false when no soft-deleted rows exist', () => {
@@ -259,6 +262,7 @@ describe('CharacterProvider', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2]),
@@ -350,6 +354,7 @@ describe('CharacterProvider', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const fighterLevel3: BuildLevelRow = {
       sequence: 3,
@@ -362,6 +367,7 @@ describe('CharacterProvider', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3]),
@@ -392,6 +398,7 @@ describe('CharacterProvider', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const fighterLevel3: BuildLevelRow = {
       sequence: 3,
@@ -404,6 +411,7 @@ describe('CharacterProvider', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const fighterLevel4: BuildLevelRow = {
       sequence: 4,
@@ -416,6 +424,7 @@ describe('CharacterProvider', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
+      deleted_at: null,
     }
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3, fighterLevel4]),

@@ -89,7 +89,8 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
   const [editSection, setEditSection] = useState<EditSection>(null)
 
   const { update: updateMutation } = useCharacterMutations()
-  const { resolved, buildError } = useCharacterContext()
+  const { resolved, buildError, buildWarnings } = useCharacterContext()
+  const resolvedLevel = resolved?.hitDie.reduce((sum, hd) => sum + hd.count, 0) ?? character.level
 
   const handleUpdate = (updates: Partial<Character>) => {
     updateMutation.mutate({ id: characterId, ...updates }, {
@@ -115,6 +116,12 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     </div>
   ) : null
 
+  const buildWarningBanner = buildWarnings.length > 0 ? (
+    <div className="mb-6 p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/40 rounded-lg text-amber-700 dark:text-amber-400 text-sm">
+      {tc('characterSheet.warnings.buildIncomplete', { message: buildWarnings.join('; ') })}
+    </div>
+  ) : null
+
   const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
   const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level)
 
@@ -134,6 +141,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto p-8">
         {buildErrorBanner}
+        {buildWarningBanner}
 
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
@@ -162,7 +170,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
             </div>
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.level')}</span>
-              <p className="text-foreground font-semibold">{character.level}</p>
+              <p className="text-foreground font-semibold">{resolvedLevel}</p>
             </div>
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.race')}</span>
