@@ -9,18 +9,19 @@ import {
   SkillsStep,
   SpellsStep,
 } from '@/components/character-builder'
-import type { CharacterData } from '@/components/character-builder'
+import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import { DND_ALIGNMENTS, DND_CLASSES, DND_RACES, DND_SKILLS, EMPTY_PROFICIENCIES, computeProficiencies, getAbilityModifier, toggleLanguageProficiencyChoice, toggleToolProficiencyChoice } from '@/lib/dnd-helpers'
-import type { LanguageId, ToolProficiencyId } from '@/lib/dnd-helpers'
-import type { AbilityKey, AbilityScores } from '@/types/database'
+import type { AutosavePayload } from '@/hooks/useBuilderAutosave'
+import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
+import { useCharacter } from '@/hooks/useCharacters'
+import type { Character } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers'
 
 type StepType = 'basics' | 'abilities' | 'skills' | 'proficiencies' | 'equipment' | 'spells' | 'backstory'
-type RequiredField = 'name' | 'race' | 'class' | 'gender'
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' }, { id: 'abilities' },
@@ -29,40 +30,58 @@ const STEPS: { id: StepType }[] = [
   { id: 'backstory' },
 ]
 
-const REQUIRED_FIELDS: { field: RequiredField; step: StepType }[] = [
-  { field: 'name', step: 'basics' },
-  { field: 'race', step: 'basics' },
-  { field: 'class', step: 'basics' },
-  { field: 'gender', step: 'basics' },
-]
-
-const INITIAL_CHARACTER_DATA: CharacterData = {
-  name: '', player_name: '', character_type: 'pc',
-  race: '', class: '', level: 1,
-  background: '', custom_background: '', alignment: DND_ALIGNMENTS[4].id, gender: '',
-  abilityMethod: 'standard-array',
-  abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
-  abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
-  rolledValues: [],
-  skills: DND_SKILLS.reduce((acc, s) => ({ ...acc, [s.id]: { proficient: false, expertise: false } }), {}),
-  proficiencies: { ...EMPTY_PROFICIENCIES },
-  features: [], equipment: [],
-  spells: { cantrips: [], spellsByLevel: {}, spellSlots: {} },
-  personalityTraits: '', ideals: '', bonds: '', flaws: '', appearance: '', backstory: '',
+function buildSeedCharacter(campaignId: string): Character {
+  return {
+    id: '',
+    campaign_id: campaignId,
+    name: '',
+    player_name: null,
+    character_type: 'pc',
+    race: null,
+    class: null,
+    subclass: null,
+    level: 0,
+    background: null,
+    alignment: null,
+    gender: null,
+    size: null,
+    age: null,
+    height: null,
+    weight: null,
+    eye_color: null,
+    hair_color: null,
+    skin_color: null,
+    hit_points_max: null,
+    armor_class: null,
+    speed: null,
+    proficiency_bonus: null,
+    personality_traits: null,
+    ideals: null,
+    bonds: null,
+    flaws: null,
+    appearance: null,
+    backstory: null,
+    notes: null,
+    portrait_url: null,
+    is_active: true,
+    status: 'draft',
+    created_at: '',
+    updated_at: '',
+  }
 }
 
-export default function CharacterBuilder() {
+function CharacterBuilderInner() {
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
   const { id: campaignId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
-  const [characterData, setCharacterData] = useState<CharacterData>(INITIAL_CHARACTER_DATA)
-  const [visitedSteps, setVisitedSteps] = useState<Set<StepType>>(new Set())
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<RequiredField, boolean>>>({})
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [finalizeError, setFinalizeError] = useState<string | null>(null)
   const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
+
+  const context = useCharacterContext()
+  const { character, rows, resolved, buildError, isDirty, markSaved } = context
 
   useEffect(() => {
     if (saveStatus !== 'saved') return
@@ -70,65 +89,56 @@ export default function CharacterBuilder() {
     return () => clearTimeout(timer)
   }, [saveStatus, clearStatus])
 
+  // Keep a ref to the latest payload so the debounced save always uses fresh data
+  const latestPayloadRef = useRef<AutosavePayload>({ character, rows, resolved })
+  latestPayloadRef.current = { character, rows, resolved }
+
+  // Required fields before any draft can be saved
+  const hasRequiredFields = !!character.name && !!character.race && !!character.class && !!character.alignment
+
+  // Autosave when isDirty changes to true — debounced 500ms, only if required fields present
+  useEffect(() => {
+    if (!isDirty || !hasRequiredFields) return
+    const timer = setTimeout(() => {
+      saveDraft(latestPayloadRef.current)
+        .then(() => markSaved())
+        .catch((err: unknown) => {
+          // saveDraft sets saveStatus='error' internally;
+          // log here in case the .then() chain itself fails
+          console.warn('Autosave chain error:', err)
+        })
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [isDirty, hasRequiredFields, saveDraft, markSaved])
+
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
-  const selectedClass = DND_CLASSES.find((c) => c.id === characterData.class)
-  const selectedRace = DND_RACES.find((r) => r.id === characterData.race)
-  const racialBonuses: Partial<Record<AbilityKey, number>> = selectedRace?.abilityBonuses ?? {}
-  const conWithRacial = characterData.abilities.con + (racialBonuses.con ?? 0)
-  const dexWithRacial = characterData.abilities.dex + (racialBonuses.dex ?? 0)
-  const calculatedHp = selectedClass
-    ? selectedClass.hitDie + getAbilityModifier(conWithRacial)
-    : null
-  const calculatedAc = 10 + getAbilityModifier(dexWithRacial)
 
-  const buildPayload = () => {
-    if (!campaignId) throw new Error('Cannot save: no campaign ID in URL')
-    return {
-      campaign_id: campaignId,
-      name: characterData.name, character_type: characterData.character_type,
-      player_name: characterData.player_name || null,
-      race: selectedRace?.id ?? null, class: selectedClass?.id ?? null,
-      subclass: null, level: characterData.level,
-      background: characterData.custom_background || characterData.background || null,
-      alignment: characterData.alignment || null,
-      gender: (characterData.gender || null) as 'male' | 'female' | null,
-      hit_points_max: calculatedHp ?? 0, hit_points_current: calculatedHp ?? 0, armor_class: calculatedAc,
-      speed: selectedRace?.speed ?? 30, abilities: characterData.abilities,
-      saving_throws: Object.fromEntries(
-        (selectedClass?.savingThrowProficiencies ?? []).map((a) => [a, { proficient: true }])
-      ),
-      skills: characterData.skills, proficiencies: characterData.proficiencies,
-      features: characterData.features,
-      equipment: characterData.equipment, spells: characterData.spells,
-      personality_traits: characterData.personalityTraits || null,
-      ideals: characterData.ideals || null, bonds: characterData.bonds || null,
-      flaws: characterData.flaws || null, appearance: characterData.appearance || null,
-      backstory: characterData.backstory || null, notes: null,
-    }
-  }
+  const selectedRace = character.race ? DND_RACES.find((r) => r.id === character.race) : null
+  const selectedClass = character.class ? DND_CLASSES.find((c) => c.id === character.class) : null
 
-  const validateStep = (step: StepType) => {
-    setFieldErrors((prev) => {
-      const errors = { ...prev }
-      for (const { field, step: fs } of REQUIRED_FIELDS) {
-        if (fs === step) errors[field] = !characterData[field]
-      }
-      return errors
-    })
-  }
+  const isReadyToFinalize =
+    !!character.name &&
+    !!character.race &&
+    !!character.class &&
+    !!character.background &&
+    (resolved?.pendingChoices.length ?? 0) === 0
 
-  const stepHasErrors = (step: StepType) =>
-    visitedSteps.has(step) &&
-    REQUIRED_FIELDS.some(({ field, step: fs }) => fs === step && fieldErrors[field])
-
-  const isReadyToFinalize = REQUIRED_FIELDS.every(({ field }) => !!characterData[field])
+  // Can only leave Basics step once required fields are filled
+  const canLeaveBasics = hasRequiredFields
 
   const goToStep = (targetStep: StepType) => {
-    const id = STEPS[currentStepIndex].id
-    setVisitedSteps((prev) => new Set([...prev, id]))
-    validateStep(id)
-    // useBuilderAutosave sets saveStatus to 'error' internally; catch prevents unhandled rejection
-    saveDraft(buildPayload()).catch((err) => console.error('Autosave failed during step navigation:', err))
+    const targetIndex = STEPS.findIndex((s) => s.id === targetStep)
+    if (targetIndex > 0 && !canLeaveBasics) return
+    if (hasRequiredFields) {
+      const payload: AutosavePayload = { character, rows, resolved }
+      saveDraft(payload)
+        .then(() => markSaved())
+        .catch((err: unknown) => {
+          // saveDraft sets saveStatus='error' internally;
+          // log here in case the .then() chain itself fails
+          console.warn('Autosave chain error:', err)
+        })
+    }
     setCurrentStep(targetStep)
   }
 
@@ -136,144 +146,18 @@ export default function CharacterBuilder() {
   const goPrevStep = () => { if (currentStepIndex > 0) goToStep(STEPS[currentStepIndex - 1].id) }
 
   const handleFinalize = async () => {
+    if (!hasRequiredFields) return
     setIsFinalizing(true)
     setFinalizeError(null)
     try {
-      const id = await finalize(buildPayload())
+      const payload: AutosavePayload = { character, rows, resolved }
+      const id = await finalize(payload)
       navigate(`/campaign/${campaignId}/character/${id}`)
     } catch (err) {
       console.error('Character finalization failed:', err)
       setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'))
     } finally {
       setIsFinalizing(false)
-    }
-  }
-
-  const updateBasics = (updates: Partial<CharacterData>) => {
-    for (const key of Object.keys(updates)) {
-      if (key in fieldErrors) setFieldErrors((prev) => ({ ...prev, [key as RequiredField]: false }))
-    }
-    setCharacterData((prev) => {
-      const next = { ...prev, ...updates }
-      const classChanged = 'class' in updates && updates.class !== prev.class
-      const raceChanged = 'race' in updates && updates.race !== prev.race
-      // Reset skill selections when class changes — each class has a different available skill pool
-      if (classChanged) {
-        next.skills = Object.fromEntries(DND_SKILLS.map((s) => [s.id, { proficient: false, expertise: false }]))
-      }
-      // Recompute auto-granted proficiencies when class or race changes
-      if (classChanged || raceChanged) {
-        next.proficiencies = computeProficiencies(next.class, next.race, prev.proficiencies, classChanged, raceChanged)
-      }
-      return next
-    })
-  }
-
-  const updateBackstory = (updates: Partial<CharacterData>) => {
-    setCharacterData((prev) => ({ ...prev, ...updates }))
-  }
-
-  const resetAbilitiesForMethod = (method: CharacterData['abilityMethod']) => {
-    const d = method === 'point-buy' ? 8 : 10
-    setCharacterData((prev) => ({
-      ...prev, abilityMethod: method,
-      abilities: { str: d, dex: d, con: d, int: d, wis: d, cha: d },
-      abilityAssignments: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
-      rolledValues: method === 'rolling' ? prev.rolledValues : [],
-    }))
-  }
-
-  const handleAbilitiesChange = (
-    abilities: AbilityScores,
-    assignments: Record<string, number | null>,
-    rolledValues?: number[]
-  ) => {
-    setCharacterData((prev) => ({
-      ...prev, abilities, abilityAssignments: assignments,
-      ...(rolledValues !== undefined ? { rolledValues } : {}),
-    }))
-  }
-
-  const toggleSkillProficiency = (skillId: string) => {
-    setCharacterData((prev) => {
-      const cls = DND_CLASSES.find((c) => c.id === prev.class)
-      if (!cls) return prev
-      const skillExists = DND_SKILLS.some((s) => s.id === skillId)
-      if (!skillExists) return prev
-      const inPool = cls.skillPool === null || (cls.skillPool as readonly string[]).includes(skillId)
-      if (!inPool) return prev
-      const current = prev.skills[skillId]
-      if (!current) { console.warn(`Skill data missing for "${skillId}" — possible state desync`); return prev }
-      if (current.proficient) return { ...prev, skills: { ...prev.skills, [skillId]: { proficient: false, expertise: false } } }
-      if (Object.values(prev.skills).filter((s) => s.proficient).length >= cls.skillChoices) return prev
-      return { ...prev, skills: { ...prev.skills, [skillId]: { proficient: true, expertise: false } } }
-    })
-  }
-
-  const handleToolChoiceToggle = (toolId: ToolProficiencyId) => {
-    setCharacterData((prev) => {
-      const updated = toggleToolProficiencyChoice(prev.proficiencies, prev.class, toolId)
-      return updated === prev.proficiencies ? prev : { ...prev, proficiencies: updated }
-    })
-  }
-
-  const handleLanguageChoiceToggle = (langId: LanguageId) => {
-    setCharacterData((prev) => {
-      const updated = toggleLanguageProficiencyChoice(prev.proficiencies, prev.race, langId)
-      return updated === prev.proficiencies ? prev : { ...prev, proficiencies: updated }
-    })
-  }
-
-  const handleLanguageRandomize = (languages: LanguageId[]) => {
-    setCharacterData((prev) => ({
-      ...prev,
-      proficiencies: { ...prev.proficiencies, languageChoices: languages },
-    }))
-  }
-
-  const addEquipment = () => setCharacterData((prev) => ({
-    ...prev, equipment: [...prev.equipment, { id: crypto.randomUUID(), name: '', quantity: 1, weight: 0, equipped: false }],
-  }))
-  const updateEquipment = (id: string, updates: Partial<CharacterData['equipment'][0]>) =>
-    setCharacterData((prev) => ({ ...prev, equipment: prev.equipment.map((e) => e.id === id ? { ...e, ...updates } : e) }))
-  const removeEquipment = (id: string) =>
-    setCharacterData((prev) => ({ ...prev, equipment: prev.equipment.filter((e) => e.id !== id) }))
-
-  const renderStep = () => {
-    const cd = characterData
-    switch (currentStep) {
-      case 'basics': return (
-        <BasicsStep characterType={cd.character_type} name={cd.name} playerName={cd.player_name}
-          race={cd.race} characterClass={cd.class} background={cd.background}
-          customBackground={cd.custom_background} alignment={cd.alignment}
-          level={cd.level} gender={cd.gender} fieldErrors={fieldErrors} onChange={updateBasics} />
-      )
-      case 'abilities': return (
-        <AbilitiesStep abilityMethod={cd.abilityMethod} abilities={cd.abilities}
-          abilityAssignments={cd.abilityAssignments} rolledValues={cd.rolledValues}
-          racialBonuses={racialBonuses} selectedRace={selectedRace}
-          onMethodChange={resetAbilitiesForMethod} onAbilitiesChange={handleAbilitiesChange} />
-      )
-      case 'skills': return (
-        <SkillsStep characterClass={cd.class} level={cd.level} skills={cd.skills}
-          abilities={cd.abilities} racialBonuses={racialBonuses} onSkillToggle={toggleSkillProficiency} />
-      )
-      case 'proficiencies': return (
-        <ProficienciesStep characterClass={cd.class} race={cd.race}
-          proficiencies={cd.proficiencies} onToolChoiceToggle={handleToolChoiceToggle} onLanguageChoiceToggle={handleLanguageChoiceToggle} onLanguageRandomize={handleLanguageRandomize} />
-      )
-      case 'equipment': return (
-        <EquipmentStep equipment={cd.equipment} onAdd={addEquipment} onUpdate={updateEquipment} onRemove={removeEquipment} />
-      )
-      case 'spells': return (
-        <SpellsStep spells={cd.spells} onSpellsChange={(spells) => setCharacterData((prev) => ({ ...prev, spells }))} />
-      )
-      case 'backstory': return (
-        <BackstoryStep personalityTraits={cd.personalityTraits} ideals={cd.ideals} bonds={cd.bonds}
-          flaws={cd.flaws} appearance={cd.appearance} backstory={cd.backstory} onChange={updateBackstory} />
-      )
-      default:
-        return <p className="text-destructive">{t('characterBuilder.errors.unknownStep', { step: currentStep })}</p>
     }
   }
 
@@ -294,11 +178,16 @@ export default function CharacterBuilder() {
                 <div className="flex flex-col items-center">
                   <button
                     onClick={() => goToStep(step.id)}
+                    disabled={index > 0 && !canLeaveBasics}
                     className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-                      index === currentStepIndex ? 'bg-primary text-primary-foreground'
-                        : stepHasErrors(step.id) ? 'bg-destructive text-destructive-foreground'
-                        : index < currentStepIndex ? 'bg-green-600 text-white'
-                        : 'bg-muted text-muted-foreground'}`}
+                      index === currentStepIndex
+                        ? 'bg-primary text-primary-foreground'
+                        : index < currentStepIndex
+                          ? 'bg-green-600 text-white'
+                          : index > 0 && !canLeaveBasics
+                            ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+                            : 'bg-muted text-muted-foreground'
+                    }`}
                   >
                     {index + 1}
                   </button>
@@ -314,9 +203,9 @@ export default function CharacterBuilder() {
 
         {/* Character Summary */}
         <div className="mb-4 text-center text-lg text-muted-foreground h-7">
-          {characterData.name && selectedRace && selectedClass && (
+          {character.name && selectedRace && selectedClass && (
             <>
-              <span className="font-semibold text-foreground">{characterData.name}</span>
+              <span className="font-semibold text-foreground">{character.name}</span>
               {' · '}
               {tg(`races.${selectedRace.id}`)}
               {' · '}
@@ -329,18 +218,44 @@ export default function CharacterBuilder() {
         <Card className="mb-8">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold mb-6">{t(`characterBuilder.steps.${STEPS[currentStepIndex].id}`)}</h2>
-            {renderStep()}
+            {currentStep === 'basics' && <BasicsStep />}
+            {currentStep === 'abilities' && <AbilitiesStep />}
+            {currentStep === 'skills' && <SkillsStep />}
+            {currentStep === 'proficiencies' && <ProficienciesStep />}
+            {currentStep === 'equipment' && <EquipmentStep />}
+            {currentStep === 'spells' && <SpellsStep />}
+            {currentStep === 'backstory' && <BackstoryStep />}
           </CardContent>
         </Card>
+
+        {buildError && (
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
+            {t('characterSheet.errors.buildFailed', { message: buildError })}
+          </div>
+        )}
 
         {(finalizeError || saveStatus === 'error') && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
             <span>
-              {finalizeError ? t('characterBuilder.errors.failedToFinalize', { message: finalizeError }) : t('characterBuilder.errors.failedToSaveDraft')}
+              {finalizeError
+                ? t('characterBuilder.errors.failedToFinalize', { message: finalizeError })
+                : t('characterBuilder.errors.failedToSaveDraft')}
             </span>
             {saveStatus === 'error' && (
-              <Button variant="outline" size="sm" onClick={() => /* saveStatus updated by useBuilderAutosave; catch prevents unhandled rejection */
-                  saveDraft(buildPayload()).catch((err) => console.error('Retry save failed:', err))}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const payload: AutosavePayload = { character, rows, resolved }
+                  saveDraft(payload)
+                    .then(() => markSaved())
+                    .catch((err: unknown) => {
+                      // saveDraft sets saveStatus='error' internally;
+                      // log here in case the .then() chain itself fails
+                      console.warn('Autosave chain error:', err)
+                    })
+                }}
+              >
                 {t('buttons.retrySave')}
               </Button>
             )}
@@ -357,7 +272,7 @@ export default function CharacterBuilder() {
             {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
             {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
             {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep}>{t('buttons.next')} <ChevronRight size={16} /></Button>
+              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeaveBasics}>{t('buttons.next')} <ChevronRight size={16} /></Button>
             )}
             <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing}>
               <Save className="size-4" />
@@ -367,5 +282,72 @@ export default function CharacterBuilder() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CharacterBuilder() {
+  const { id: campaignId, characterId } = useParams<{ id: string; characterId: string }>()
+  const { t } = useTranslation('common')
+
+  const isNew = !characterId
+  const { data: existingCharacter, isLoading: characterLoading, error: characterError } = useCharacter(
+    isNew ? undefined : characterId
+  )
+  const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(
+    isNew ? undefined : characterId
+  )
+  const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(
+    isNew ? undefined : characterId
+  )
+
+  if (!campaignId) {
+    return (
+      <div className="page-container">
+        <p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p>
+      </div>
+    )
+  }
+
+  const isLoading = !isNew && (characterLoading || rowsLoading || itemsLoading)
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="page-container">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 w-48 bg-muted rounded" />
+            <div className="h-12 w-full bg-muted rounded" />
+            <div className="h-96 w-full bg-muted rounded" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isNew && (characterError || !existingCharacter)) {
+    return (
+      <div className="page-container">
+        <p className="text-destructive">
+          {t('characterSheet.errors.loadingCharacter', { error: String(characterError) })}
+        </p>
+      </div>
+    )
+  }
+
+  const initialCharacter = isNew ? buildSeedCharacter(campaignId) : existingCharacter!
+  const initialRows = isNew ? [] : buildRows
+  const initialEquippedItems: string[] = isNew
+    ? []
+    : itemsData.filter((item: { equipped?: boolean; item_id?: string }) => item.equipped).map((item: { item_id?: string }) => item.item_id ?? '')
+
+  return (
+    <CharacterProvider
+      key={characterId ?? 'new'}
+      initialCharacter={initialCharacter}
+      initialRows={initialRows}
+      initialEquippedItems={initialEquippedItems}
+    >
+      <CharacterBuilderInner />
+    </CharacterProvider>
   )
 }

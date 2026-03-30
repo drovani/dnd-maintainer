@@ -6,7 +6,8 @@ const validBuild = {
   backgroundId: 'soldier',
   baseAbilities: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
   abilityMethod: 'standard-array' as const,
-  appliedLevels: [{ classId: 'fighter', classLevel: 1 }],
+  levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
+  appliedLevels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
   choices: {},
   feats: [],
   activeItems: [],
@@ -55,6 +56,7 @@ describe('CharacterBuildSchema', () => {
       backgroundId: 'soldier',
       baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       abilityMethod: 'standard-array' as const,
+      levels: [],
       appliedLevels: [],
       choices: {},
       feats: [],
@@ -67,38 +69,30 @@ describe('CharacterBuildSchema', () => {
 })
 
 describe('CharacterBuildSchemaStrict', () => {
-  it('rejects mismatched hpRolls and appliedLevels lengths', () => {
+  it('rejects non-null hpRoll on first level', () => {
     const result = CharacterBuildSchemaStrict.safeParse({
       ...validBuild,
-      appliedLevels: [{ classId: 'fighter', classLevel: 1 }],
-      hpRolls: [null, 8], // 2 rolls but 1 level
+      levels: [{ classId: 'fighter', classLevel: 1, hpRoll: 10 }],
+      appliedLevels: [{ classId: 'fighter', classLevel: 1, hpRoll: 10 }],
+      hpRolls: [10],
     })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain('hpRolls length must match appliedLevels length')
-    }
-  })
-
-  it('rejects non-null hpRolls[0]', () => {
-    const result = CharacterBuildSchemaStrict.safeParse({
-      ...validBuild,
-      appliedLevels: [{ classId: 'fighter', classLevel: 1 }],
-      hpRolls: [10], // first roll should be null
-    })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain('hpRolls[0] must be null (level 1 uses max die)')
+      expect(messages).toContain('levels[0].hpRoll must be null (level 1 uses max die)')
     }
   })
 
   it('rejects non-sequential classLevels', () => {
     const result = CharacterBuildSchemaStrict.safeParse({
       ...validBuild,
+      levels: [
+        { classId: 'fighter', classLevel: 1, hpRoll: null },
+        { classId: 'fighter', classLevel: 3, hpRoll: 8 },
+      ],
       appliedLevels: [
-        { classId: 'fighter', classLevel: 1 },
-        { classId: 'fighter', classLevel: 3 }, // skips level 2
+        { classId: 'fighter', classLevel: 1, hpRoll: null },
+        { classId: 'fighter', classLevel: 3, hpRoll: 8 },
       ],
       hpRolls: [null, 8],
     })
@@ -112,10 +106,15 @@ describe('CharacterBuildSchemaStrict', () => {
   it('accepts valid multi-class build', () => {
     const result = CharacterBuildSchemaStrict.safeParse({
       ...validBuild,
+      levels: [
+        { classId: 'fighter', classLevel: 1, hpRoll: null },
+        { classId: 'fighter', classLevel: 2, hpRoll: 8 },
+        { classId: 'rogue', classLevel: 1, hpRoll: 6 },
+      ],
       appliedLevels: [
-        { classId: 'fighter', classLevel: 1 },
-        { classId: 'fighter', classLevel: 2 },
-        { classId: 'rogue', classLevel: 1 },
+        { classId: 'fighter', classLevel: 1, hpRoll: null },
+        { classId: 'fighter', classLevel: 2, hpRoll: 8 },
+        { classId: 'rogue', classLevel: 1, hpRoll: 6 },
       ],
       hpRolls: [null, 8, 6],
     })

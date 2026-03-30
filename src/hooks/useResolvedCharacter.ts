@@ -9,10 +9,13 @@ import { collectBundles } from '@/lib/sources'
 export function useResolvedCharacter(build: CharacterBuild | null): ResolvedCharacter | null {
   return useMemo(() => {
     if (!build) return null
-    const bundles = collectBundles(build)
+    const { bundles, warnings } = collectBundles(build)
+    if (warnings.length > 0) {
+      console.warn('collectBundles warnings:', warnings)
+    }
     return resolveCharacter({
       baseAbilities: build.baseAbilities,
-      level: build.appliedLevels.length,
+      level: build.levels.length,
       bundles,
       choices: build.choices,
       hpRolls: build.hpRolls,

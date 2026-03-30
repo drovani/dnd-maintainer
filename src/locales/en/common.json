@@ -110,7 +110,22 @@
       "alignment": "Alignment",
       "subclass": "Subclass",
       "type": "Type",
-      "customBackground": "Custom Background"
+      "customBackground": "Custom Background",
+      "size": "Size",
+      "age": "Age",
+      "height": "Height",
+      "weight": "Weight",
+      "eyeColor": "Eye Color",
+      "hairColor": "Hair Color",
+      "skinColor": "Skin Color"
+    },
+    "pendingChoices": {
+      "title": "Choices Required",
+      "skillChoice": "Choose {{count}} skill(s)",
+      "languageChoice": "Choose {{count}} language(s)",
+      "toolChoice": "Choose {{count}} tool(s)",
+      "unsupported": "Choice not yet supported: {{type}}",
+      "remaining": "remaining"
     },
     "status": {
       "saving": "Saving...",
@@ -122,6 +137,7 @@
       "chooseRace": "Choose a race",
       "chooseClass": "Choose a class",
       "chooseBackground": "Choose a background",
+      "enterCustomBackground": "Enter your custom background...",
       "describeBackground": "Describe your background briefly",
       "personalityTraits": "Describe personality traits...",
       "ideals": "What ideals does your character hold...",
@@ -176,6 +192,9 @@
       "weaponProficiencies": "Weapon Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
       "languages": "Languages",
+      "standardLanguages": "Standard Languages",
+      "exoticLanguages": "Exotic Languages",
+      "languageName": "Language",
       "typicalSpeakers": "Typical Speakers",
       "script": "Script",
       "chooseTools": "Choose {{count}} tool proficiency from the list below.",
@@ -190,12 +209,14 @@
     },
     "spells": {
       "basicVersion": "Spell management (basic version)",
-      "cantrips": "Cantrips (comma-separated)"
+      "cantrips": "Cantrips (comma-separated)",
+      "noSpellcasting": "No spellcasting for this class"
     },
     "equipment": {
       "equipped": "Equipped",
       "quantity": "Qty",
-      "weight": "Weight (lb)"
+      "weight": "Weight (lb)",
+      "comingSoon": "Equipment management coming soon"
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",
@@ -213,12 +234,14 @@
       "skills": "Skills",
       "combat": "Combat",
       "featuresAndTraits": "Features & Traits",
+      "features": "Features & Traits",
       "equipment": "Equipment",
       "spells": "Spells",
       "personality": "Personality",
       "backstory": "Backstory",
       "appearance": "Appearance",
-      "cantrips": "CANTRIPS"
+      "cantrips": "CANTRIPS",
+      "physicalTraits": "Physical Traits"
     },
     "fields": {
       "class": "Class",
@@ -242,7 +265,8 @@
       "qty": "Qty: {{qty}}",
       "weight": "Wt: {{weight}}",
       "speedFt": "{{value}} ft",
-      "qtyAndWeight": "Qty: {{qty}} | Wt: {{weight}}"
+      "qtyAndWeight": "Qty: {{qty}} | Wt: {{weight}}",
+      "size": "Size"
     },
     "personality": {
       "traits": "Traits",
@@ -264,8 +288,25 @@
       "leaveEmptyForNpcs": "Leave empty for NPCs",
       "subclassPlaceholder": "e.g. Champion, Arcane Trickster"
     },
+    "emptyState": {
+      "abilities": "Complete the character builder to see ability scores.",
+      "skills": "Complete the character builder to see skills.",
+      "savingThrows": "Complete the character builder to see saving throws.",
+      "combat": "Complete the character builder to see combat stats."
+    },
+    "buildError": {
+      "abilities": "Unable to compute ability scores: {{message}}",
+      "skills": "Unable to compute skills: {{message}}",
+      "savingThrows": "Unable to compute saving throws: {{message}}",
+      "combat": "Unable to compute combat stats: {{message}}"
+    },
+    "warnings": {
+      "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"
+    },
     "errors": {
-      "loadingCharacter": "Error loading character: {{error}}"
+      "loadingCharacter": "Error loading character: {{error}}",
+      "buildFailed": "Failed to compute character build: {{message}}",
+      "updateFailed": "Failed to save changes. Please try again."
     }
   },
   "characterList": {
@@ -459,7 +500,16 @@
     "selectCampaigns": "Select campaigns to export ({{selected}} of {{total}} selected)",
     "restoreHint": "The exported file can be restored with:"
   },
+  "provenance": {
+    "race": "Race",
+    "class": "Class",
+    "background": "Background"
+  },
   "errors": {
+    "choiceSaveFailed": "Failed to save choice — please try again",
+    "choiceClearFailed": "Failed to clear choice — please try again",
+    "levelReplaceFailed": "Failed to replace class level — please try again",
+    "orphanedRowCleanupFailed": "Some outdated build data could not be removed — it will be retried on next save",
     "loadingCampaigns": "Unable to Load Campaigns",
     "loadingCampaignsDescription": "Failed to connect after multiple attempts. Please verify:",
     "supabaseRunning": "The Supabase project is running and accessible",

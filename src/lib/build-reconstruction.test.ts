@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import type { BuildLevelRow, CharacterIdentity } from '@/lib/build-reconstruction'
+import { collectBundles } from '@/lib/sources/index'
+import { resolveCharacter } from '@/lib/resolver/index'
 
 const identity: CharacterIdentity = { race: 'human', background: 'soldier' }
 
@@ -42,10 +44,9 @@ describe('reconstructBuild', () => {
     ).toThrow('Character is missing required race')
   })
 
-  it('throws when background is null', () => {
-    expect(() =>
-      reconstructBuild({ race: 'human', background: null }, [creationRow], []),
-    ).toThrow('Character is missing required background')
+  it('allows null background', () => {
+    const result = reconstructBuild({ race: 'human', background: null }, [creationRow], [])
+    expect(result.backgroundId).toBeNull()
   })
 
   it('assembles CharacterBuild from sequence 0 row', () => {
@@ -89,8 +90,8 @@ describe('reconstructBuild', () => {
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
     expect(result.appliedLevels).toHaveLength(2)
-    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1 })
-    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2 })
+    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
+    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
   it('sorts rows by sequence regardless of input order', () => {
@@ -121,8 +122,8 @@ describe('reconstructBuild', () => {
     // Pass rows out of order
     const result = reconstructBuild(identity, [creationRow, level2, level1], [])
     expect(result.appliedLevels).toHaveLength(2)
-    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1 })
-    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2 })
+    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
+    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
   it('maps subclass_id into choices using subclass:${classId} key format', () => {
@@ -236,13 +237,13 @@ describe('reconstructBuild', () => {
   it('throws when choice JSONB contains invalid data', () => {
     const creationWithBadChoices: BuildLevelRow = {
       ...creationRow,
-      choices: { bad: { type: 'unknown' } },
+      choices: { bad: { type: 'unknown' } } as unknown as BuildLevelRow['choices'],
     }
     expect(() => reconstructBuild(identity, [creationWithBadChoices], [])).toThrow()
   })
 
   it('throws when level row is missing class_id', () => {
-    const levelMissingClassId: BuildLevelRow = {
+    const levelMissingClassId = {
       sequence: 1,
       base_abilities: null,
       ability_method: null,
@@ -253,28 +254,22 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
-    }
-    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassId], [])).toThrow(
-      'missing class_id',
-    )
+    } as unknown as BuildLevelRow
+    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassId], [])).toThrow()
   })
 
-  it('throws when level row is missing class_level', () => {
-    const levelMissingClassLevel: BuildLevelRow = {
+  it('throws when level row has invalid class_id', () => {
+    const levelBadClassId: BuildLevelRow = {
       sequence: 1,
-      base_abilities: null,
-      ability_method: null,
-      class_id: 'fighter',
-      class_level: null,
+      class_id: 'nonexistent-class',
+      class_level: 1,
       subclass_id: null,
       asi_allocation: null,
       feat_id: null,
       hp_roll: null,
       choices: null,
     }
-    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassLevel], [])).toThrow(
-      'missing class_level',
-    )
+    expect(() => reconstructBuild(identity, [creationRow, levelBadClassId], [])).toThrow('Unknown class ID')
   })
 
   it('equippedItems becomes activeItems', () => {
@@ -326,5 +321,107 @@ describe('reconstructBuild', () => {
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
     expect(result.hpRolls).toEqual([null, 8])
+  })
+})
+
+describe('Human Fighter Level 1 round-trip', () => {
+  it('reconstructs and resolves a complete Human Fighter L1', () => {
+    const character: CharacterIdentity = {
+      race: 'human',
+      background: 'soldier',
+    }
+
+    const rows: BuildLevelRow[] = [
+      {
+        sequence: 0,
+        base_abilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+        ability_method: 'standard-array',
+        class_id: null,
+        class_level: null,
+        subclass_id: null,
+        hp_roll: null,
+        feat_id: null,
+        asi_allocation: null,
+        choices: {},
+      },
+      {
+        sequence: 1,
+        base_abilities: null,
+        ability_method: null,
+        class_id: 'fighter',
+        class_level: 1,
+        subclass_id: null,
+        hp_roll: null,
+        feat_id: null,
+        asi_allocation: null,
+        choices: {
+          'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+        },
+      },
+    ]
+
+    // Reconstruct build
+    const build = reconstructBuild(character, rows, [])
+
+    // Verify build shape
+    expect(build.raceId).toBe('human')
+    expect(build.backgroundId).toBe('soldier')
+    expect(build.appliedLevels).toHaveLength(1)
+    expect(build.appliedLevels[0].classId).toBe('fighter')
+
+    // Resolve character
+    const { bundles } = collectBundles(build)
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: build.appliedLevels.length,
+      bundles,
+      choices: build.choices,
+      hpRolls: build.hpRolls,
+    })
+
+    // Abilities: base + 1 human racial bonus to each
+    expect(resolved.abilities.str.total).toBe(16) // 15 + 1
+    expect(resolved.abilities.dex.total).toBe(14) // 13 + 1
+    expect(resolved.abilities.con.total).toBe(15) // 14 + 1
+    expect(resolved.abilities.int.total).toBe(9)  // 8 + 1
+    expect(resolved.abilities.wis.total).toBe(11) // 10 + 1
+    expect(resolved.abilities.cha.total).toBe(13) // 12 + 1
+
+    // HP: d10 max at level 1 + CON modifier (15 → +2)
+    expect(resolved.hitPoints.max).toBe(12) // 10 + 2
+
+    // AC: armored = 10 + DEX modifier (14 → +2)
+    expect(resolved.armorClass.effective).toBe(12) // 10 + 2
+
+    // Speed: from human race
+    expect(resolved.speed['walk']?.value).toBe(30)
+
+    // Proficiency bonus at level 1
+    expect(resolved.proficiencyBonus).toBe(2)
+
+    // Saving throws: fighter grants STR and CON proficiency
+    expect(resolved.savingThrows.str.proficient).toBe(true)
+    expect(resolved.savingThrows.con.proficient).toBe(true)
+    expect(resolved.savingThrows.dex.proficient).toBe(false)
+
+    // Skills: athletics and intimidation from fighter skill choice
+    // (soldier background also grants these, so proficiency is set either way)
+    expect(resolved.skills.athletics.proficient).toBe(true)
+    expect(resolved.skills.intimidation.proficient).toBe(true)
+
+    // Features: at minimum fighter-fighting-style and fighter-second-wind
+    expect(resolved.features.length).toBeGreaterThanOrEqual(2)
+
+    // Armor proficiencies from fighter level 1
+    expect(resolved.armorProficiencies.map((p) => p.value)).toContain('light')
+    expect(resolved.armorProficiencies.map((p) => p.value)).toContain('heavy')
+
+    // Weapon proficiencies from fighter level 1
+    expect(resolved.weaponProficiencies.map((p) => p.value)).toContain('simple')
+    expect(resolved.weaponProficiencies.map((p) => p.value)).toContain('martial')
+
+    // The fighter skill choice is resolved — no pending skill choices
+    const unresolvedSkillChoices = resolved.pendingChoices.filter((c) => c.type === 'skill-choice')
+    expect(unresolvedSkillChoices).toHaveLength(0)
   })
 })

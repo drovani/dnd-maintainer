@@ -1,4 +1,4 @@
-import type { RaceId, ClassId, BackgroundId } from '@/lib/dnd-helpers'
+import { isBackgroundId, type RaceId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers'
 import type {
   RaceSource,
   ClassSource,
@@ -54,31 +54,45 @@ export function getItemSource(id: string): ItemSource | undefined {
   return ITEM_SOURCES.find((i) => i.id === id)
 }
 
-export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
+export interface CollectBundlesResult {
+  readonly bundles: readonly GrantBundle[]
+  readonly warnings: readonly string[]
+}
+
+export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   const bundles: GrantBundle[] = []
+  const warnings: string[] = []
 
   // Race
   const raceSource = getRaceSource(build.raceId)
   if (raceSource) {
     const tag: SourceTag = { origin: 'race', id: build.raceId }
     bundles.push({ source: tag, grants: raceSource.grants })
+  } else {
+    const msg = `No source data found for race "${build.raceId}" — race grants will be empty`
+    warnings.push(msg)
+    console.warn(msg)
   }
 
   // Class levels — count levels per class in order
   const classCounts = new Map<ClassId, number>()
-  for (const applied of build.appliedLevels) {
-    const prev = classCounts.get(applied.classId) ?? 0
-    classCounts.set(applied.classId, prev + 1)
+  for (const level of build.levels) {
+    const prev = classCounts.get(level.classId) ?? 0
+    classCounts.set(level.classId, prev + 1)
   }
 
   for (const [classId, levelCount] of classCounts) {
     const classSource = getClassSource(classId)
-    if (classSource) {
-      for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
-        const level = i + 1
-        const tag: SourceTag = { origin: 'class', id: classId, level }
-        bundles.push({ source: tag, grants: classSource.levels[i].grants })
-      }
+    if (!classSource) {
+      const msg = `No source data found for class "${classId}" — class grants will be empty`
+      warnings.push(msg)
+      console.warn(msg)
+      continue
+    }
+    for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
+      const level = i + 1
+      const tag: SourceTag = { origin: 'class', id: classId, level }
+      bundles.push({ source: tag, grants: classSource.levels[i].grants })
     }
   }
 
@@ -104,11 +118,13 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
     }
   }
 
-  // Background
-  const backgroundSource = getBackgroundSource(build.backgroundId)
-  if (backgroundSource) {
-    const tag: SourceTag = { origin: 'background', id: build.backgroundId }
-    bundles.push({ source: tag, grants: backgroundSource.grants })
+  // Background (only predefined backgrounds have grant sources)
+  if (build.backgroundId && isBackgroundId(build.backgroundId)) {
+    const backgroundSource = getBackgroundSource(build.backgroundId)
+    if (backgroundSource) {
+      const tag: SourceTag = { origin: 'background', id: build.backgroundId }
+      bundles.push({ source: tag, grants: backgroundSource.grants })
+    }
   }
 
   // Feats
@@ -129,5 +145,5 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
     }
   }
 
-  return bundles
+  return { bundles, warnings }
 }

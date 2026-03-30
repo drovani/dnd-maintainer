@@ -19,7 +19,7 @@ INSERT INTO campaigns (id, name, description, setting) VALUES
 
 INSERT INTO characters (
     id, campaign_id, name, character_type, player_name, race, class, subclass,
-    level, background, alignment, gender, hit_points_max, armor_class,
+    level, background, alignment, gender, size, hit_points_max, armor_class,
     speed, proficiency_bonus, personality_traits, ideals, bonds, flaws,
     appearance, backstory
 ) VALUES
@@ -36,6 +36,7 @@ INSERT INTO characters (
     'soldier',
     'lg',
     'male',
+    'medium',
     12,
     16,
     30,
@@ -60,6 +61,7 @@ INSERT INTO characters (
     'sage',
     'cg',
     'female',
+    'medium',
     6,
     12,
     30,
@@ -78,7 +80,7 @@ INSERT INTO characters (
 
 INSERT INTO characters (
     id, campaign_id, name, character_type, race, class, level, alignment, gender,
-    appearance, backstory
+    size, appearance, backstory
 ) VALUES
 (
     '550e8400-e29b-41d4-a716-446655440003'::uuid,
@@ -90,6 +92,7 @@ INSERT INTO characters (
     2,
     'lg',
     'male',
+    'medium',
     'A weathered human in his 50s with a graying beard and a missing arm (lost in battle with goblins).',
     'A former adventurer and mercenary who now works as a merchant lord. Seeks the party''s aid in finding Gundren Rockseeker.'
 ),
@@ -103,12 +106,13 @@ INSERT INTO characters (
     3,
     'ce',
     'male',
+    'medium',
     'A towering half-orc with battle scars and a cruel sneer. Wears armor fashioned from dark iron.',
     'The half-orc warlord who captured Gundren on behalf of the Black Spider. Cunning and brutal, he commands goblins through fear.'
 );
 INSERT INTO characters (
     id, campaign_id, name, character_type, player_name, race, class, subclass,
-    level, background, alignment, hit_points_max, armor_class, speed, proficiency_bonus,
+    level, background, alignment, size, hit_points_max, armor_class, speed, proficiency_bonus,
     notes, personality_traits, ideals, bonds, flaws, appearance, backstory,
     portrait_url, is_active, status, gender, created_at, updated_at
 ) VALUES
@@ -124,6 +128,7 @@ INSERT INTO characters (
     1,
     'Gutsy Striver',
     'lg',
+    'small',
     12,
     10,
     25,
@@ -251,6 +256,50 @@ INSERT INTO notes (
     'lore',
     ARRAY['magic', 'dwarves', 'treasure'],
     false
+);
+
+-- ============================================================================
+-- CHARACTER BUILD LEVELS
+-- ============================================================================
+
+-- Braxus Ironforge (Human Fighter Level 1)
+INSERT INTO character_build_levels (character_id, sequence, base_abilities, ability_method, choices)
+VALUES (
+    '550e8400-e29b-41d4-a716-446655440001'::uuid,
+    0,
+    '{"str": 15, "dex": 13, "con": 14, "int": 8, "wis": 10, "cha": 12}'::jsonb,
+    'standard-array',
+    '{}'::jsonb
+);
+
+INSERT INTO character_build_levels (character_id, sequence, class_id, class_level, hp_roll, choices)
+VALUES (
+    '550e8400-e29b-41d4-a716-446655440001'::uuid,
+    1,
+    'fighter',
+    1,
+    null,
+    '{"skill-choice:class:fighter:0": {"type": "skill-choice", "skills": ["athletics", "intimidation"]}}'::jsonb
+);
+
+-- Seraphina Thorngage (Halfling-Stout Paladin Level 1)
+INSERT INTO character_build_levels (character_id, sequence, base_abilities, ability_method, choices)
+VALUES (
+    '6e52661f-d630-4242-8dbb-539f12060fa5'::uuid,
+    0,
+    '{"str": 15, "dex": 10, "con": 14, "int": 8, "wis": 12, "cha": 13}'::jsonb,
+    'standard-array',
+    '{}'::jsonb
+);
+
+INSERT INTO character_build_levels (character_id, sequence, class_id, class_level, hp_roll, choices)
+VALUES (
+    '6e52661f-d630-4242-8dbb-539f12060fa5'::uuid,
+    1,
+    'paladin',
+    1,
+    null,
+    '{}'::jsonb
 );
 
 -- ============================================================================
