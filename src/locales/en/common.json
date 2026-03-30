@@ -137,6 +137,7 @@
       "chooseRace": "Choose a race",
       "chooseClass": "Choose a class",
       "chooseBackground": "Choose a background",
+      "enterCustomBackground": "Enter your custom background...",
       "describeBackground": "Describe your background briefly",
       "personalityTraits": "Describe personality traits...",
       "ideals": "What ideals does your character hold...",
@@ -298,6 +299,9 @@
       "skills": "Unable to compute skills: {{message}}",
       "savingThrows": "Unable to compute saving throws: {{message}}",
       "combat": "Unable to compute combat stats: {{message}}"
+    },
+    "warnings": {
+      "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"
     },
     "errors": {
       "loadingCharacter": "Error loading character: {{error}}",

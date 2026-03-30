@@ -21,8 +21,8 @@ import {
   DND_RACE_GROUPS,
   DND_RACES,
   generateCharacterName,
+  isBackgroundId,
   type AlignmentId,
-  type BackgroundId,
   type ClassId,
   type DndGender,
   type RaceId,
@@ -49,9 +49,8 @@ export function BasicsStep() {
   const name = character.name ?? ''
   const playerName = character.player_name ?? ''
   const race = (character.race ?? '') as RaceId | ''
-  const background = (character.background ?? '') as BackgroundId | ''
+  const background = character.background ?? ''
   const alignment = character.alignment ?? ''
-  // custom_background is not on Character type — omit for now
   const gender = character.gender ?? ''
 
   // Derive class from level rows (first non-creation row)
@@ -75,7 +74,7 @@ export function BasicsStep() {
     context.updateCharacter({ class: value, level: Math.max(levelRows.length, 1) })
   }
 
-  const handleBackgroundChange = (value: BackgroundId) => {
+  const handleBackgroundChange = (value: string) => {
     context.updateCharacter({ background: value })
   }
 
@@ -222,22 +221,40 @@ export function BasicsStep() {
 
           <div className="space-y-2">
             <Label>{tc('characterBuilder.fields.background')}</Label>
-            <Select
-              value={background || null}
-              onValueChange={(value) => value && handleBackgroundChange(value as BackgroundId)}
-              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`, { defaultValue: b.id }) }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_BACKGROUNDS.map((bg) => (
-                  <SelectItem key={bg.id} value={bg.id}>
-                    {t(`backgrounds.${bg.id}`, { defaultValue: bg.id })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {(() => {
+              const isCustom = background !== '' && (!isBackgroundId(background) || background === 'custom')
+              const dropdownValue = isCustom ? 'custom' : (background || null)
+              return (
+                <>
+                  <Select
+                    value={dropdownValue}
+                    onValueChange={(value) => {
+                      if (!value) return
+                      handleBackgroundChange(value)
+                    }}
+                    items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DND_BACKGROUNDS.map((bg) => (
+                        <SelectItem key={bg.id} value={bg.id}>
+                          {t(`backgrounds.${bg.id}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {isCustom && (
+                    <Input
+                      placeholder={tc('characterBuilder.placeholders.enterCustomBackground')}
+                      value={background === 'custom' ? '' : background}
+                      onChange={(e) => handleBackgroundChange(e.target.value || 'custom')}
+                    />
+                  )}
+                </>
+              )
+            })()}
           </div>
         </div>
 
@@ -276,7 +293,6 @@ export function BasicsStep() {
         </div>
       </div>
 
-      {/* custom_background field omitted — not on Character type */}
     </div>
   )
 }

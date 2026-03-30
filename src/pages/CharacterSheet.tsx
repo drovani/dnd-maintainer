@@ -29,6 +29,7 @@ import {
   DND_RACE_GROUPS,
   DND_SKILLS,
   getProficiencyBonus,
+  isBackgroundId,
   type DndGender,
   type DndSkill,
 } from '@/lib/dnd-helpers'
@@ -80,6 +81,7 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
 interface ResolvedFromBuild {
   readonly resolved: ResolvedCharacter | null
   readonly buildError: string | null
+  readonly buildWarnings: string | null
 }
 
 function useResolvedFromBuild(
@@ -88,7 +90,7 @@ function useResolvedFromBuild(
   equippedItems: string[],
 ): ResolvedFromBuild {
   return useMemo(() => {
-    if (!character || !buildRows || buildRows.length === 0) return { resolved: null, buildError: null }
+    if (!character || !buildRows || buildRows.length === 0) return { resolved: null, buildError: null, buildWarnings: null }
 
     // Phase 1: Reconstruct build
     let build: ReturnType<typeof reconstructBuild>
@@ -101,7 +103,7 @@ function useResolvedFromBuild(
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error('Build reconstruction failed:', message)
-      return { resolved: null, buildError: message }
+      return { resolved: null, buildError: message, buildWarnings: null }
     }
 
     // Phase 2: Resolve character
@@ -119,11 +121,11 @@ function useResolvedFromBuild(
         hpRolls: build.hpRolls,
       })
       const buildWarning = warnings.length > 0 ? warnings.join('; ') : null
-      return { resolved, buildError: buildWarning }
+      return { resolved, buildError: null, buildWarnings: buildWarning }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error('Character resolution failed:', message)
-      return { resolved: null, buildError: message }
+      return { resolved: null, buildError: message, buildWarnings: null }
     }
   }, [character, buildRows, equippedItems])
 }
@@ -144,7 +146,7 @@ export default function CharacterSheet() {
     [itemsData],
   )
 
-  const { resolved, buildError } = useResolvedFromBuild(character, buildRows, equippedItems)
+  const { resolved, buildError, buildWarnings } = useResolvedFromBuild(character, buildRows, equippedItems)
 
   const handleUpdate = (updates: Partial<Character>) => {
     if (!characterId) return
@@ -198,6 +200,12 @@ export default function CharacterSheet() {
     </div>
   ) : null
 
+  const buildWarningBanner = buildWarnings ? (
+    <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/50 rounded-lg text-amber-700 dark:text-amber-400 text-sm">
+      {tc('characterSheet.warnings.buildIncomplete', { message: buildWarnings })}
+    </div>
+  ) : null
+
   const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
   const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level)
 
@@ -215,6 +223,7 @@ export default function CharacterSheet() {
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto p-8">
         {buildErrorBanner}
+        {buildWarningBanner}
 
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
@@ -254,7 +263,9 @@ export default function CharacterSheet() {
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.background')}</span>
               <p className="text-foreground font-semibold">
-                {character.background ? t(`backgrounds.${character.background}`, { defaultValue: character.background }) : ''}
+                {character.background
+                      ? (isBackgroundId(character.background) ? t(`backgrounds.${character.background}`) : character.background)
+                      : ''}
               </p>
             </div>
             <div>
@@ -715,19 +726,35 @@ function EditHeaderDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.background')}</Label>
-            <Select value={form.background} onValueChange={(val) => val && update('background', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_BACKGROUNDS.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}`, { defaultValue: b.id })}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {(() => {
+            const bg = form.background ?? ''
+            const isCustom = bg !== '' && (!isBackgroundId(bg) || bg === 'custom')
+            return (
+              <div className="space-y-2">
+                <Label>{tc('characterSheet.fields.background')}</Label>
+                <Select
+                  value={isCustom ? 'custom' : (form.background ?? undefined)}
+                  onValueChange={(val) => val && update('background', val)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DND_BACKGROUNDS.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}`)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isCustom && (
+                  <Input
+                    placeholder={tc('characterBuilder.placeholders.enterCustomBackground')}
+                    value={bg === 'custom' ? '' : bg}
+                    onChange={(e) => update('background', e.target.value || 'custom')}
+                  />
+                )}
+              </div>
+            )
+          })()}
           <div className="space-y-2">
             <Label>{tc('characterSheet.fields.alignment')}</Label>
             <Select value={form.alignment} onValueChange={(val) => val && update('alignment', val)}>

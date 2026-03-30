@@ -1,4 +1,4 @@
-import type { AlignmentId, BackgroundId, ClassId, DndGender, Proficiencies, RaceId, SizeId } from '@/lib/dnd-helpers'
+import type { AlignmentId, ClassId, DndGender, Proficiencies, RaceId, SizeId } from '@/lib/dnd-helpers'
 import type { ThemeId } from '@/lib/theme'
 
 export type { Proficiencies }
@@ -42,7 +42,7 @@ export interface Character {
   class: ClassId | null
   subclass: string | null
   level: number
-  background: BackgroundId | null
+  background: string | null
   alignment: AlignmentId | null
   gender: DndGender | null
   size: SizeId | null

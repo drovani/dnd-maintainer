@@ -1,5 +1,5 @@
 import { DND_CLASSES } from '@/lib/dnd-helpers'
-import type { BackgroundId, ClassId, RaceId } from '@/lib/dnd-helpers'
+import type { ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
@@ -50,7 +50,7 @@ export function isCreationRow(row: BuildLevelRow): row is CreationRow {
 
 export interface CharacterIdentity {
   readonly race: RaceId | null
-  readonly background: BackgroundId | null
+  readonly background: string | null
 }
 
 const DEFAULT_ABILITIES: AbilityScores = {

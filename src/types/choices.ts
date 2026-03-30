@@ -1,4 +1,4 @@
-import type { AbilityKey, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId, BackgroundId } from '@/lib/dnd-helpers'
+import type { AbilityKey, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 
 /**
@@ -38,7 +38,7 @@ export interface AppliedLevel {
 
 export interface CharacterBuild {
   readonly raceId: RaceId
-  readonly backgroundId: BackgroundId | null
+  readonly backgroundId: string | null
   readonly baseAbilities: AbilityScores
   readonly abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
   readonly levels: readonly BuildLevel[]

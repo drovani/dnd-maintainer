@@ -1,4 +1,4 @@
-import type { RaceId, ClassId, BackgroundId } from '@/lib/dnd-helpers'
+import { isBackgroundId, type RaceId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers'
 import type {
   RaceSource,
   ClassSource,
@@ -118,11 +118,13 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     }
   }
 
-  // Background
-  const backgroundSource = build.backgroundId ? getBackgroundSource(build.backgroundId) : undefined
-  if (backgroundSource && build.backgroundId) {
-    const tag: SourceTag = { origin: 'background', id: build.backgroundId }
-    bundles.push({ source: tag, grants: backgroundSource.grants })
+  // Background (only predefined backgrounds have grant sources)
+  if (build.backgroundId && isBackgroundId(build.backgroundId)) {
+    const backgroundSource = getBackgroundSource(build.backgroundId)
+    if (backgroundSource) {
+      const tag: SourceTag = { origin: 'background', id: build.backgroundId }
+      bundles.push({ source: tag, grants: backgroundSource.grants })
+    }
   }
 
   // Feats
