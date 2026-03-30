@@ -300,6 +300,25 @@
       "savingThrows": "Unable to compute saving throws: {{message}}",
       "combat": "Unable to compute combat stats: {{message}}"
     },
+    "levelManagement": {
+      "levelUp": "Level Up",
+      "levelDown": "Level Down",
+      "undoLevelDown": "Undo Level Down",
+      "rollHp": "Roll HP",
+      "takeAverage": "Take Average",
+      "hpRollPrompt": "How would you like to determine hit points?",
+      "levelUpTitle": "Level Up",
+      "currentLevel": "Current Level"
+    },
+    "asi": {
+      "asiTitle": "Ability Score Improvement",
+      "asiPointsRemaining": "Points Remaining: {{points}}",
+      "asiDescription": "Allocate {{points}} points among your ability scores. No score can exceed 20."
+    },
+    "subclassPicker": {
+      "chooseSubclass": "Choose Subclass",
+      "subclassDescription": "Select a subclass for your {{className}}"
+    },
     "warnings": {
       "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"
     },

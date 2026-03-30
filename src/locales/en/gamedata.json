@@ -228,7 +228,22 @@
     "fighter-second-wind": {
       "name": "Second Wind",
       "description": "You have a limited well of stamina that you can draw on to protect yourself from harm."
+    },
+    "fighter-action-surge": {
+      "name": "Action Surge",
+      "description": "On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again."
+    },
+    "fighter-extra-attack": {
+      "name": "Extra Attack",
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    "champion-improved-critical": {
+      "name": "Improved Critical",
+      "description": "Your weapon attacks score a critical hit on a roll of 19 or 20."
     }
+  },
+  "subclasses": {
+    "champion": "Champion"
   },
   "gender": {
     "male": "Male",
