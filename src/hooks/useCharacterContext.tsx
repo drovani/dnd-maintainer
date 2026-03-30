@@ -219,7 +219,6 @@ export function CharacterProvider({
   }, [])
 
   const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
-    let changed = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
@@ -228,7 +227,6 @@ export function CharacterProvider({
         toast.error(i18next.t('common:errors.choiceSaveFailed'))
         return prev
       }
-      changed = true
       const existing = prev[idx]
       const updated: BuildLevelRow = {
         ...existing,
@@ -238,11 +236,10 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    if (changed) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const clearChoice = useCallback((choiceKey: string) => {
-    let changed = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
@@ -251,7 +248,6 @@ export function CharacterProvider({
         toast.error(i18next.t('common:errors.choiceClearFailed'))
         return prev
       }
-      changed = true
       const existing = prev[idx]
       const newChoices = { ...(existing.choices ?? {}) }
       delete newChoices[choiceKey]
@@ -260,11 +256,10 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    if (changed) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
-    let changed = false
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       const classLevelCount = levelRows.filter((r) => r.class_id === classId).length
@@ -281,26 +276,22 @@ export function CharacterProvider({
         hp_roll: hpRoll,
         choices: null,
       }
-      changed = true
       return [...prev, newRow]
     })
-    if (changed) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const levelDown = useCallback(() => {
-    let changed = false
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       if (levelRows.length === 0) return prev
-      changed = true
       const maxSeq = levelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
       return prev.filter((r) => r.sequence !== maxSeq)
     })
-    if (changed) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const replaceLevel = useCallback((oldSequence: number, newClassId: string, newSubclassId: string | null) => {
-    let changed = false
     setRows((prev) => {
       const idx = prev.findIndex((r) => r.sequence === oldSequence)
       if (idx === -1) {
@@ -308,7 +299,6 @@ export function CharacterProvider({
         toast.error(i18next.t('common:errors.levelReplaceFailed'))
         return prev
       }
-      changed = true
       const next = [...prev]
       next[idx] = {
         ...next[idx],
@@ -319,7 +309,7 @@ export function CharacterProvider({
       }
       return next
     })
-    if (changed) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const markSaved = useCallback(() => {

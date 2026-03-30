@@ -105,7 +105,7 @@ function CharacterBuilderInner() {
         .catch((err: unknown) => {
           // saveDraft sets saveStatus='error' internally;
           // log here in case the .then() chain itself fails
-          if (err) console.warn('Autosave chain error:', err)
+          console.warn('Autosave chain error:', err)
         })
     }, 500)
     return () => clearTimeout(timer)
@@ -136,7 +136,7 @@ function CharacterBuilderInner() {
         .catch((err: unknown) => {
           // saveDraft sets saveStatus='error' internally;
           // log here in case the .then() chain itself fails
-          if (err) console.warn('Autosave chain error:', err)
+          console.warn('Autosave chain error:', err)
         })
     }
     setCurrentStep(targetStep)
@@ -252,7 +252,7 @@ function CharacterBuilderInner() {
                     .catch((err: unknown) => {
                       // saveDraft sets saveStatus='error' internally;
                       // log here in case the .then() chain itself fails
-                      if (err) console.warn('Autosave chain error:', err)
+                      console.warn('Autosave chain error:', err)
                     })
                 }}
               >

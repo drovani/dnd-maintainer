@@ -71,7 +71,9 @@ export function BasicsStep() {
       context.replaceLevel(levelRows[0].sequence, value, null)
     }
     // Keep character.class in sync for pre-calculated column and hasRequiredFields check
-    context.updateCharacter({ class: value, level: Math.max(levelRows.length, 1) })
+    // levelUp adds a row, replaceLevel swaps in-place — either way, level is at least 1
+    const newLevel = levelRows.length === 0 ? 1 : levelRows.length
+    context.updateCharacter({ class: value, level: newLevel })
   }
 
   const handleBackgroundChange = (value: string) => {
