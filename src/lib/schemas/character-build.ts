@@ -34,7 +34,7 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
 
 export const CharacterBuildSchema = z.object({
   raceId: z.string().min(1),
-  backgroundId: z.string().min(1),
+  backgroundId: z.string().min(1).nullable(),
   baseAbilities: AbilityScoresSchema,
   abilityMethod: z.enum(['standard-array', 'point-buy', 'rolling']),
   levels: z.array(BuildLevelSchema).readonly(),

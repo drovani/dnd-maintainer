@@ -10,6 +10,7 @@ import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
 import { resolveCharacter } from '@/lib/resolver/index'
 import { toast } from 'sonner'
+import i18next from 'i18next'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -103,7 +104,10 @@ function tryDeriveAndResolve(
   }
 
   try {
-    const { bundles } = collectBundles(build)
+    const { bundles, warnings } = collectBundles(build)
+    if (warnings.length > 0) {
+      console.warn('collectBundles warnings:', warnings)
+    }
     const levelRows = rows.filter((r) => r.sequence !== 0)
     const level = levelRows.length
     const resolved = resolveCharacter({
@@ -215,14 +219,16 @@ export function CharacterProvider({
   }, [])
 
   const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
+    let changed = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
         console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
-        toast.error('Failed to save choice — please try again')
+        toast.error(i18next.t('common:errors.choiceSaveFailed'))
         return prev
       }
+      changed = true
       const existing = prev[idx]
       const updated: BuildLevelRow = {
         ...existing,
@@ -232,18 +238,20 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const clearChoice = useCallback((choiceKey: string) => {
+    let changed = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
         console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`)
-        toast.error('Failed to clear choice — please try again')
+        toast.error(i18next.t('common:errors.choiceClearFailed'))
         return prev
       }
+      changed = true
       const existing = prev[idx]
       const newChoices = { ...(existing.choices ?? {}) }
       delete newChoices[choiceKey]
@@ -252,10 +260,11 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
+    let changed = false
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       const classLevelCount = levelRows.filter((r) => r.class_id === classId).length
@@ -272,25 +281,34 @@ export function CharacterProvider({
         hp_roll: hpRoll,
         choices: null,
       }
+      changed = true
       return [...prev, newRow]
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const levelDown = useCallback(() => {
+    let changed = false
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       if (levelRows.length === 0) return prev
+      changed = true
       const maxSeq = levelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
       return prev.filter((r) => r.sequence !== maxSeq)
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const replaceLevel = useCallback((oldSequence: number, newClassId: string, newSubclassId: string | null) => {
+    let changed = false
     setRows((prev) => {
       const idx = prev.findIndex((r) => r.sequence === oldSequence)
-      if (idx === -1) return prev
+      if (idx === -1) {
+        console.warn(`replaceLevel: no row found for sequence ${oldSequence} — level not replaced`)
+        toast.error(i18next.t('common:errors.levelReplaceFailed'))
+        return prev
+      }
+      changed = true
       const next = [...prev]
       next[idx] = {
         ...next[idx],
@@ -301,7 +319,7 @@ export function CharacterProvider({
       }
       return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const markSaved = useCallback(() => {

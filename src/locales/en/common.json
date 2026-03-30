@@ -502,6 +502,10 @@
     "background": "Background"
   },
   "errors": {
+    "choiceSaveFailed": "Failed to save choice — please try again",
+    "choiceClearFailed": "Failed to clear choice — please try again",
+    "levelReplaceFailed": "Failed to replace class level — please try again",
+    "orphanedRowCleanupFailed": "Some outdated build data could not be removed — it will be retried on next save",
     "loadingCampaigns": "Unable to Load Campaigns",
     "loadingCampaignsDescription": "Failed to connect after multiple attempts. Please verify:",
     "supabaseRunning": "The Supabase project is running and accessible",

@@ -5,6 +5,8 @@ import type { ResolvedCharacter } from '@/types/resolved'
 import type { TablesInsert, TablesUpdate } from '@/types/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import i18next from 'i18next'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -108,48 +110,33 @@ export function useBuilderAutosave() {
             queryClient.invalidateQueries({ queryKey: ['characters', character.campaign_id] })
           }
 
-          // Upsert build level rows
-          const creationRow = rows.find((r) => r.sequence === 0)
-          if (creationRow) {
-            const creationUpsert: TablesInsert<'character_build_levels'> = {
-              character_id: savedId,
-              sequence: 0,
-              base_abilities: (creationRow.base_abilities as unknown as TablesInsert<'character_build_levels'>['base_abilities']) ?? null,
-              ability_method: creationRow.ability_method,
-              choices: (creationRow.choices as unknown as TablesInsert<'character_build_levels'>['choices']) ?? {},
-              class_id: null,
-              class_level: null,
-              subclass_id: null,
-              asi_allocation: null,
-              feat_id: null,
-              hp_roll: null,
-            }
-            const { error: creationError } = await supabase
-              .from('character_build_levels')
-              .upsert(creationUpsert, { onConflict: 'character_id,sequence' })
-            if (creationError) throw creationError
-          }
-
-          // Upsert each level row (sequence > 0)
-          const levelRows = rows.filter((r) => r.sequence !== 0)
-          for (const row of levelRows) {
-            const levelUpsert: TablesInsert<'character_build_levels'> = {
+          // Batch upsert all build level rows in a single call
+          const allUpserts: TablesInsert<'character_build_levels'>[] = rows.map((row) => {
+            const isCreation = row.sequence === 0
+            return {
               character_id: savedId,
               sequence: row.sequence,
-              base_abilities: null,
-              ability_method: null,
+              base_abilities: isCreation
+                ? (row.base_abilities as unknown as TablesInsert<'character_build_levels'>['base_abilities']) ?? null
+                : null,
+              ability_method: isCreation ? row.ability_method : null,
               choices: (row.choices as unknown as TablesInsert<'character_build_levels'>['choices']) ?? {},
-              class_id: row.class_id,
-              class_level: row.class_level,
-              subclass_id: row.subclass_id,
-              asi_allocation: (row.asi_allocation as unknown as TablesInsert<'character_build_levels'>['asi_allocation']) ?? null,
-              feat_id: row.feat_id,
-              hp_roll: row.hp_roll,
+              class_id: isCreation ? null : row.class_id,
+              class_level: isCreation ? null : row.class_level,
+              subclass_id: isCreation ? null : row.subclass_id,
+              asi_allocation: isCreation
+                ? null
+                : (row.asi_allocation as unknown as TablesInsert<'character_build_levels'>['asi_allocation']) ?? null,
+              feat_id: isCreation ? null : row.feat_id,
+              hp_roll: isCreation ? null : row.hp_roll,
             }
-            const { error: levelError } = await supabase
+          })
+
+          if (allUpserts.length > 0) {
+            const { error: upsertError } = await supabase
               .from('character_build_levels')
-              .upsert(levelUpsert, { onConflict: 'character_id,sequence' })
-            if (levelError) throw levelError
+              .upsert(allUpserts, { onConflict: 'character_id,sequence' })
+            if (upsertError) throw upsertError
           }
 
           // Clean up orphaned rows (e.g. from class changes that replaced a level row)
@@ -163,6 +150,7 @@ export function useBuilderAutosave() {
 
           if (cleanupError) {
             console.error('Failed to clean up orphaned build rows:', cleanupError)
+            toast.warning(i18next.t('common:errors.orphanedRowCleanupFailed'))
           }
 
           setSaveStatus('saved')

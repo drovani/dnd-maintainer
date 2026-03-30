@@ -124,11 +124,11 @@ function CharacterBuilderInner() {
     (resolved?.pendingChoices.length ?? 0) === 0
 
   // Can only leave Basics step once required fields are filled
-  const canLeavBasics = hasRequiredFields
+  const canLeaveBasics = hasRequiredFields
 
   const goToStep = (targetStep: StepType) => {
     const targetIndex = STEPS.findIndex((s) => s.id === targetStep)
-    if (targetIndex > 0 && !canLeavBasics) return
+    if (targetIndex > 0 && !canLeaveBasics) return
     if (hasRequiredFields) {
       const payload: AutosavePayload = { character, rows, resolved }
       saveDraft(payload)
@@ -178,13 +178,13 @@ function CharacterBuilderInner() {
                 <div className="flex flex-col items-center">
                   <button
                     onClick={() => goToStep(step.id)}
-                    disabled={index > 0 && !canLeavBasics}
+                    disabled={index > 0 && !canLeaveBasics}
                     className={`size-10 rounded-full flex items-center justify-center font-bold transition-colors ${
                       index === currentStepIndex
                         ? 'bg-primary text-primary-foreground'
                         : index < currentStepIndex
                           ? 'bg-green-600 text-white'
-                          : index > 0 && !canLeavBasics
+                          : index > 0 && !canLeaveBasics
                             ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
                             : 'bg-muted text-muted-foreground'
                     }`}
@@ -272,7 +272,7 @@ function CharacterBuilderInner() {
             {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
             {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
             {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeavBasics}>{t('buttons.next')} <ChevronRight size={16} /></Button>
+              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeaveBasics}>{t('buttons.next')} <ChevronRight size={16} /></Button>
             )}
             <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing}>
               <Save className="size-4" />

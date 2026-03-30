@@ -243,12 +243,14 @@ describe('useBuilderAutosave', () => {
       })
 
       expect(supabase.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({ character_id: 'char-new', sequence: 0 }),
+        expect.arrayContaining([
+          expect.objectContaining({ character_id: 'char-new', sequence: 0 }),
+        ]),
         expect.objectContaining({ onConflict: 'character_id,sequence' }),
       )
     })
 
-    it('upserts level rows (sequence > 0) separately', async () => {
+    it('upserts level rows (sequence > 0) in the batch', async () => {
       mockQueryResult.data = { id: 'char-new' }
 
       const levelRow = {
@@ -276,7 +278,9 @@ describe('useBuilderAutosave', () => {
       })
 
       expect(supabase.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({ character_id: 'char-new', sequence: 1, class_id: 'fighter' }),
+        expect.arrayContaining([
+          expect.objectContaining({ character_id: 'char-new', sequence: 1, class_id: 'fighter' }),
+        ]),
         expect.objectContaining({ onConflict: 'character_id,sequence' }),
       )
     })

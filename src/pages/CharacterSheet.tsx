@@ -106,7 +106,10 @@ function useResolvedFromBuild(
 
     // Phase 2: Resolve character
     try {
-      const { bundles } = collectBundles(build)
+      const { bundles, warnings } = collectBundles(build)
+      if (warnings.length > 0) {
+        console.warn('collectBundles warnings:', warnings)
+      }
       const levelRows = buildRows.filter((r) => r.sequence !== 0)
       const resolved = resolveCharacter({
         baseAbilities: build.baseAbilities,
@@ -115,7 +118,8 @@ function useResolvedFromBuild(
         choices: build.choices,
         hpRolls: build.hpRolls,
       })
-      return { resolved, buildError: null }
+      const buildWarning = warnings.length > 0 ? warnings.join('; ') : null
+      return { resolved, buildError: buildWarning }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error('Character resolution failed:', message)

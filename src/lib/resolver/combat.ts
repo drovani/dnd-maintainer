@@ -13,7 +13,6 @@ export function resolveHp(
 
   const hitDieGrants = collectGrantsByType(bundles, 'hit-die')
   if (hitDieGrants.length === 0) {
-    if (level === 0) return { max: 0 }
     throw new Error(`No hit die grants found at level ${level} — check class source data`)
   }
 
