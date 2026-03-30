@@ -302,11 +302,54 @@ VALUES (
     '{}'::jsonb
 );
 
+-- Sebastian (Human Fighter Level 1)
+INSERT INTO characters (
+    id, campaign_id, name, character_type, player_name, race, class,
+    level, background, alignment, gender, size, hit_points_max, armor_class,
+    speed, proficiency_bonus
+) VALUES (
+    '550e8400-e29b-41d4-a716-446655440005'::uuid,
+    '550e8400-e29b-41d4-a716-446655440000'::uuid,
+    'Sebastian',
+    'pc',
+    'Sebastian',
+    'human',
+    'fighter',
+    1,
+    'folkhero',
+    'ng',
+    'male',
+    'medium',
+    12,
+    16,
+    30,
+    2
+);
+
+INSERT INTO character_build_levels (character_id, sequence, base_abilities, ability_method, choices)
+VALUES (
+    '550e8400-e29b-41d4-a716-446655440005'::uuid,
+    0,
+    '{"str": 15, "dex": 12, "con": 14, "int": 8, "wis": 10, "cha": 13}'::jsonb,
+    'standard-array',
+    '{"language-choice:race:human:0": {"type": "language-choice", "languages": ["giant"]}}'::jsonb
+);
+
+INSERT INTO character_build_levels (character_id, sequence, class_id, class_level, hp_roll, choices)
+VALUES (
+    '550e8400-e29b-41d4-a716-446655440005'::uuid,
+    1,
+    'fighter',
+    1,
+    null,
+    '{"skill-choice:class:fighter:0": {"type": "skill-choice", "skills": ["animalhandling", "survival"]}}'::jsonb
+);
+
 -- ============================================================================
 -- Summary
 -- ============================================================================
--- Created campaign: "Lost Mines of Phandelver"
--- Player Characters: Braxus Ironforge (Fighter), Silvara Moonwhisper (Wizard)
--- NPCs: Sildar Hallwinter (Ally), Grol the Destroyer (Villain)
+-- Created campaign: "The Accidental Vanguard"
+-- Player Characters: Braxus Ironforge (Fighter), Silvara Moonwhisper (Wizard), Sebastian (Fighter)
+-- NPCs: Sildar Hallwinter (Ally), Grol the Destroyer (Villain), Seraphina Thorngage (Paladin)
 -- Sample Session: Goblin Ambush encounter
 -- Campaign Notes: Quest hooks and NPC information for DM reference
