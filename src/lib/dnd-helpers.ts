@@ -304,6 +304,8 @@ export type WeaponProficiencyId = (typeof DND_WEAPON_PROFICIENCIES)[number]
 export const DND_TOOL_PROFICIENCIES = [
   'thievestools', 'herbalismkit',
   'bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol',
+  'vehicles-land', 'vehicles-water',
+  'gaming-set-dice', 'gaming-set-cards', 'gaming-set-dragonchess', 'gaming-set-three-dragon-ante',
 ] as const
 
 export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number]
@@ -631,6 +633,12 @@ export const DND_BACKGROUNDS = [
 ] as const
 
 export type BackgroundId = (typeof DND_BACKGROUNDS)[number]['id']
+
+const BACKGROUND_ID_SET: ReadonlySet<string> = new Set(DND_BACKGROUNDS.map(b => b.id))
+
+export function isBackgroundId(value: string): value is BackgroundId {
+  return BACKGROUND_ID_SET.has(value)
+}
 
 export const DND_ALIGNMENTS = [
   { id: 'lg' },

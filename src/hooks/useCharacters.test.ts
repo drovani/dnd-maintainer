@@ -28,21 +28,18 @@ const baseCharacter: Character = {
   level: 3,
   background: 'sage',
   alignment: 'ng',
-  experience_points: 900,
+  gender: null,
+  size: null,
+  age: null,
+  height: null,
+  weight: null,
+  eye_color: null,
+  hair_color: null,
+  skin_color: null,
   hit_points_max: 18,
-  hit_points_current: 18,
-  hit_points_temp: 0,
   armor_class: 12,
   speed: 30,
-  initiative_bonus: 2,
   proficiency_bonus: 2,
-  abilities: { str: 8, dex: 14, con: 12, int: 17, wis: 13, cha: 10 },
-  saving_throws: null,
-  skills: null,
-  proficiencies: null,
-  features: null,
-  equipment: null,
-  spells: null,
   personality_traits: null,
   ideals: null,
   bonds: null,
@@ -51,10 +48,8 @@ const baseCharacter: Character = {
   backstory: null,
   notes: null,
   portrait_url: null,
-  is_npc: false,
   is_active: true,
   status: 'ready',
-  gender: null,
 }
 
 setupMockReset()
@@ -119,7 +114,7 @@ describe('useCharacterMutations', () => {
 
     const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() })
 
-    const { id: _id, created_at: _created_at, updated_at: _updated_at, is_npc: _is_npc, is_active: _is_active, ...createPayload } = baseCharacter
+    const { id: _id, created_at: _created_at, updated_at: _updated_at, is_active: _is_active, ...createPayload } = baseCharacter
     result.current.create.mutate(createPayload)
 
     await waitFor(() => expect(result.current.create.isSuccess).toBe(true))

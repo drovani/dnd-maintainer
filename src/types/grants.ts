@@ -1,4 +1,5 @@
-import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId } from '@/lib/dnd-helpers'
+import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
+import type { ChoiceKey } from '@/types/choices'
 
 // Supporting types
 
@@ -43,6 +44,7 @@ export interface AbilityBonusGrant {
 
 export interface AbilityChoiceGrant {
   readonly type: 'ability-choice'
+  readonly key: ChoiceKey
   readonly count: number
   readonly bonus: number
   readonly from: readonly AbilityKey[] | null
@@ -53,13 +55,15 @@ export type ProficiencyGrant =
   | { readonly type: 'proficiency'; readonly category: 'weapon'; readonly id: WeaponProficiencyId }
   | { readonly type: 'proficiency'; readonly category: 'tool'; readonly id: ToolProficiencyId }
   | { readonly type: 'proficiency'; readonly category: 'skill'; readonly id: SkillId }
+  | { readonly type: 'proficiency'; readonly category: 'saving-throw'; readonly id: AbilityKey }
+  | { readonly type: 'proficiency'; readonly category: 'language'; readonly id: LanguageId }
 
-export interface ProficiencyChoiceGrant {
-  readonly type: 'proficiency-choice'
-  readonly category: 'armor' | 'weapon' | 'tool' | 'skill'
-  readonly count: number
-  readonly from: readonly string[] | null
-}
+export type ProficiencyChoiceGrant =
+  | { readonly type: 'proficiency-choice'; readonly category: 'armor'; readonly key: ChoiceKey; readonly count: number; readonly from: readonly ArmorProficiencyId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'weapon'; readonly key: ChoiceKey; readonly count: number; readonly from: readonly WeaponProficiencyId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'tool'; readonly key: ChoiceKey; readonly count: number; readonly from: readonly ToolProficiencyId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'skill'; readonly key: ChoiceKey; readonly count: number; readonly from: readonly SkillId[] | null }
+  | { readonly type: 'proficiency-choice'; readonly category: 'language'; readonly key: ChoiceKey; readonly count: number; readonly from: readonly LanguageId[] | null }
 
 export interface SkillExpertiseGrant {
   readonly type: 'skill-expertise'
@@ -71,9 +75,11 @@ export interface FeatureGrant {
   readonly feature: FeatureDef
 }
 
+export type SpeedMode = 'walk' | 'fly' | 'swim' | 'climb' | 'burrow'
+
 export interface SpeedGrant {
   readonly type: 'speed'
-  readonly mode: 'walk' | 'fly' | 'swim' | 'climb' | 'burrow'
+  readonly mode: SpeedMode
   readonly value: number
 }
 

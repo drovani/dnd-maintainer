@@ -51,7 +51,7 @@ export default function CampaignList() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('characters')
-        .select('campaign_id, is_npc')
+        .select('campaign_id, character_type')
       if (error) throw error
 
       const counts: Record<string, { pc: number; npc: number }> = {}
@@ -59,7 +59,7 @@ export default function CampaignList() {
         if (!counts[char.campaign_id]) {
           counts[char.campaign_id] = { pc: 0, npc: 0 }
         }
-        if (char.is_npc) {
+        if (char.character_type === 'npc') {
           counts[char.campaign_id].npc++
         } else {
           counts[char.campaign_id].pc++

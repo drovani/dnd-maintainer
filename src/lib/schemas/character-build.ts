@@ -9,6 +9,13 @@ export const AbilityScoresSchema = z.object({
   cha: z.number().int().min(1).max(30),
 })
 
+export const BuildLevelSchema = z.object({
+  classId: z.string().min(1),
+  classLevel: z.number().int().min(1),
+  hpRoll: z.number().int().min(1).nullable(),
+})
+
+/** @deprecated Use BuildLevelSchema instead */
 export const AppliedLevelSchema = z.object({
   classId: z.string().min(1),
   classLevel: z.number().int().min(1),
@@ -27,10 +34,11 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
 
 export const CharacterBuildSchema = z.object({
   raceId: z.string().min(1),
-  backgroundId: z.string().min(1),
+  backgroundId: z.string().min(1).nullable(),
   baseAbilities: AbilityScoresSchema,
   abilityMethod: z.enum(['standard-array', 'point-buy', 'rolling']),
-  appliedLevels: z.array(AppliedLevelSchema).readonly(),
+  levels: z.array(BuildLevelSchema).readonly(),
+  appliedLevels: z.array(BuildLevelSchema).readonly(),
   choices: z.record(z.string(), ChoiceDecisionSchema),
   feats: z.array(z.string()).readonly(),
   activeItems: z.array(z.string()).readonly(),
@@ -38,23 +46,16 @@ export const CharacterBuildSchema = z.object({
 })
 
 export const CharacterBuildSchemaStrict = CharacterBuildSchema.superRefine((data, ctx) => {
-  if (data.hpRolls.length !== data.appliedLevels.length) {
+  if (data.levels.length !== 0 && data.levels[0].hpRoll !== null) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'hpRolls length must match appliedLevels length',
+      message: 'levels[0].hpRoll must be null (level 1 uses max die)',
     })
   }
 
-  if (data.hpRolls.length !== 0 && data.hpRolls[0] !== null) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'hpRolls[0] must be null (level 1 uses max die)',
-    })
-  }
-
-  // Group appliedLevels by classId and verify sequential starting from 1
+  // Group levels by classId and verify sequential starting from 1
   const classLevelMap = new Map<string, number[]>()
-  for (const level of data.appliedLevels) {
+  for (const level of data.levels) {
     const existing = classLevelMap.get(level.classId) ?? []
     existing.push(level.classLevel)
     classLevelMap.set(level.classId, existing)

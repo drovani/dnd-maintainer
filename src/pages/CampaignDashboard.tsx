@@ -87,8 +87,8 @@ export default function CampaignDashboard() {
     handleUpdate({ setting: editedSetting })
   }
 
-  const pcCount = characters.filter((c) => !c.is_npc).length
-  const npcCount = characters.filter((c) => c.is_npc).length
+  const pcCount = characters.filter((c) => c.character_type === 'pc').length
+  const npcCount = characters.filter((c) => c.character_type === 'npc').length
   const lastSession = sessions[0]
   const recentCharacters = characters.slice(0, 5)
 

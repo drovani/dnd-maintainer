@@ -1,28 +1,12 @@
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useCharacterContext } from '@/hooks/useCharacterContext'
 import { useTranslation } from 'react-i18next'
-import type { CharacterData } from './types'
 
-interface BackstoryStepProps {
-  personalityTraits: string
-  ideals: string
-  bonds: string
-  flaws: string
-  appearance: string
-  backstory: string
-  onChange: (updates: Partial<Pick<CharacterData, 'personalityTraits' | 'ideals' | 'bonds' | 'flaws' | 'appearance' | 'backstory'>>) => void
-}
-
-export function BackstoryStep({
-  personalityTraits,
-  ideals,
-  bonds,
-  flaws,
-  appearance,
-  backstory,
-  onChange,
-}: BackstoryStepProps) {
+export function BackstoryStep() {
   const { t } = useTranslation('common')
+  const context = useCharacterContext()
+  const { character } = context
 
   return (
     <div className="space-y-4">
@@ -30,8 +14,8 @@ export function BackstoryStep({
         <Label htmlFor="personality">{t('characterSheet.fields.personalityTraits')}</Label>
         <Textarea
           id="personality"
-          value={personalityTraits}
-          onChange={(e) => onChange({ personalityTraits: e.target.value })}
+          value={character.personality_traits ?? ''}
+          onChange={(e) => context.updateCharacter({ personality_traits: e.target.value })}
           placeholder={t('characterBuilder.placeholders.personalityTraits')}
         />
       </div>
@@ -40,8 +24,8 @@ export function BackstoryStep({
         <Label htmlFor="ideals">{t('characterSheet.personality.ideals')}</Label>
         <Textarea
           id="ideals"
-          value={ideals}
-          onChange={(e) => onChange({ ideals: e.target.value })}
+          value={character.ideals ?? ''}
+          onChange={(e) => context.updateCharacter({ ideals: e.target.value })}
           placeholder={t('characterBuilder.placeholders.ideals')}
         />
       </div>
@@ -50,8 +34,8 @@ export function BackstoryStep({
         <Label htmlFor="bonds">{t('characterSheet.personality.bonds')}</Label>
         <Textarea
           id="bonds"
-          value={bonds}
-          onChange={(e) => onChange({ bonds: e.target.value })}
+          value={character.bonds ?? ''}
+          onChange={(e) => context.updateCharacter({ bonds: e.target.value })}
           placeholder={t('characterBuilder.placeholders.bonds')}
         />
       </div>
@@ -60,8 +44,8 @@ export function BackstoryStep({
         <Label htmlFor="flaws">{t('characterSheet.personality.flaws')}</Label>
         <Textarea
           id="flaws"
-          value={flaws}
-          onChange={(e) => onChange({ flaws: e.target.value })}
+          value={character.flaws ?? ''}
+          onChange={(e) => context.updateCharacter({ flaws: e.target.value })}
           placeholder={t('characterBuilder.placeholders.flaws')}
         />
       </div>
@@ -70,8 +54,8 @@ export function BackstoryStep({
         <Label htmlFor="appearance">{t('characterSheet.sections.appearance')}</Label>
         <Textarea
           id="appearance"
-          value={appearance}
-          onChange={(e) => onChange({ appearance: e.target.value })}
+          value={character.appearance ?? ''}
+          onChange={(e) => context.updateCharacter({ appearance: e.target.value })}
           placeholder={t('characterBuilder.placeholders.appearance')}
         />
       </div>
@@ -80,8 +64,8 @@ export function BackstoryStep({
         <Label htmlFor="backstory">{t('characterSheet.sections.backstory')}</Label>
         <Textarea
           id="backstory"
-          value={backstory}
-          onChange={(e) => onChange({ backstory: e.target.value })}
+          value={character.backstory ?? ''}
+          onChange={(e) => context.updateCharacter({ backstory: e.target.value })}
           placeholder={t('characterBuilder.placeholders.backstory')}
         />
       </div>

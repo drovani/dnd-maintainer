@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { DndRace } from '@/lib/dnd-helpers'
+import { useCharacterContext, type CreationUpdates } from '@/hooks/useCharacterContext'
 import {
   getAbilityModifier,
   getPointBuyCost,
@@ -20,47 +20,48 @@ import {
   POINT_BUY_TOTAL,
   rollAbilityScores,
   STANDARD_ARRAY,
+  DND_RACES,
 } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { CharacterData } from './types'
 
-interface AbilitiesStepProps {
-  abilityMethod: CharacterData['abilityMethod']
-  abilities: AbilityScores
-  abilityAssignments: Record<keyof AbilityScores, number | null>
-  rolledValues: number[]
-  racialBonuses: Partial<AbilityScores>
-  selectedRace: DndRace | undefined
-  onMethodChange: (method: CharacterData['abilityMethod']) => void
-  onAbilitiesChange: (
-    abilities: AbilityScores,
-    assignments: Record<keyof AbilityScores, number | null>,
-    rolledValues?: number[]
-  ) => void
-}
+const DEFAULT_ABILITIES: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+const DEFAULT_ASSIGNMENTS: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
+const VALID_METHODS = ['standard-array', 'point-buy', 'rolling'] as const
+type AbilityMethod = (typeof VALID_METHODS)[number]
 
-export function AbilitiesStep({
-  abilityMethod,
-  abilities,
-  abilityAssignments,
-  rolledValues,
-  racialBonuses,
-  selectedRace,
-  onMethodChange,
-  onAbilitiesChange,
-}: AbilitiesStepProps) {
+export function AbilitiesStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
+  const context = useCharacterContext()
+
+  // Derive ability method and base abilities from creation row
+  const creationRow = context.rows.find((r) => r.sequence === 0)
+  const abilityMethod: AbilityMethod =
+    (creationRow?.ability_method as AbilityMethod | null | undefined) ?? 'standard-array'
+  const baseAbilities: AbilityScores =
+    creationRow?.base_abilities ?? DEFAULT_ABILITIES
+
+  // Local UI state for assignment selects and rolling
+  // Derive initial assignments from saved base abilities so dropdowns persist across step navigation
+  const [abilityAssignments, setAbilityAssignments] = useState<Record<keyof AbilityScores, number | null>>(() => {
+    const hasAssignments = Object.values(baseAbilities).some((v) => v !== 10)
+    if (!hasAssignments) return { ...DEFAULT_ASSIGNMENTS }
+    // Reconstruct assignments from base abilities
+    const assignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
+    for (const key of Object.keys(assignments) as Array<keyof AbilityScores>) {
+      assignments[key] = baseAbilities[key] !== 10 ? baseAbilities[key] : null
+    }
+    return assignments
+  })
+  const [rolledValues, setRolledValues] = useState<number[]>([])
   const [isRolling, setIsRolling] = useState<boolean>(false)
   const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const onAbilitiesChangeRef = useRef(onAbilitiesChange)
-  onAbilitiesChangeRef.current = onAbilitiesChange
 
-  // Cleanup interval on unmount to prevent leaks
+  // Cleanup interval on unmount
   useEffect(() => {
     return () => {
       if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
@@ -68,19 +69,18 @@ export function AbilitiesStep({
   }, [])
 
   const updateAbility = (ability: keyof AbilityScores, value: number) => {
-    onAbilitiesChange({ ...abilities, [ability]: value }, abilityAssignments)
+    const updated: AbilityScores = { ...baseAbilities, [ability]: value }
+    context.updateCreation({ base_abilities: updated })
   }
 
   const assignAbilityScore = (ability: keyof AbilityScores, value: number | null) => {
     const newAssignments = { ...abilityAssignments, [ability]: value }
-    // Only unassign a conflict if the value is used more times than it appears in the pool
     if (value !== null) {
       const pool = abilityMethod === 'standard-array' ? STANDARD_ARRAY : rolledValues
       const poolCount = pool.filter((v) => v === value).length
       const assignedCount = Object.entries(newAssignments)
         .filter(([, val]) => val === value).length
       if (assignedCount > poolCount) {
-        // Unassign the first other ability that has this value
         for (const key of Object.keys(newAssignments) as Array<keyof AbilityScores>) {
           if (key !== ability && newAssignments[key] === value) {
             newAssignments[key] = null
@@ -89,11 +89,12 @@ export function AbilitiesStep({
         }
       }
     }
-    const newAbilities = { ...abilities }
+    setAbilityAssignments(newAssignments)
+    const newAbilities = { ...baseAbilities }
     for (const key of Object.keys(newAbilities) as Array<keyof typeof newAbilities>) {
       newAbilities[key] = (newAssignments[key] as number) ?? 10
     }
-    onAbilitiesChange(newAbilities, newAssignments)
+    context.updateCreation({ base_abilities: newAbilities })
   }
 
   const unassignValue = (value: number) => {
@@ -101,12 +102,16 @@ export function AbilitiesStep({
       .find(([, val]) => val === value)?.[0]
     if (!abilityToUnassign) return
     const newAssignments = { ...abilityAssignments, [abilityToUnassign]: null }
-    const newAbilities = { ...abilities }
+    setAbilityAssignments(newAssignments)
+    const newAbilities = { ...baseAbilities }
     for (const key of Object.keys(newAbilities) as Array<keyof typeof newAbilities>) {
       newAbilities[key] = (newAssignments[key] as number) ?? 10
     }
-    onAbilitiesChange(newAbilities, newAssignments)
+    context.updateCreation({ base_abilities: newAbilities })
   }
+
+  const onAbilitiesChangeRef = useRef(context.updateCreation)
+  onAbilitiesChangeRef.current = context.updateCreation
 
   const handleRollScores = useCallback(() => {
     if (isRolling) return
@@ -125,33 +130,53 @@ export function AbilitiesStep({
       } else {
         if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
         setDisplayedRolls(finalValues)
+        setRolledValues(finalValues)
         const resetAbilities: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
         const resetAssignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
-        onAbilitiesChangeRef.current(resetAbilities, resetAssignments, finalValues)
+        setAbilityAssignments(resetAssignments)
+        onAbilitiesChangeRef.current({ base_abilities: resetAbilities })
         setIsRolling(false)
       }
     }, 80)
   }, [isRolling])
 
   const incrementAbility = (ability: keyof AbilityScores) => {
-    const current = abilities[ability]
+    const current = baseAbilities[ability]
     if (current >= 15) return
     const cost = getPointBuyIncrementCost(current)
-    const spent = Object.values(abilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
+    const spent = Object.values(baseAbilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
     if (POINT_BUY_TOTAL - spent < cost) return
     updateAbility(ability, current + 1)
   }
 
   const decrementAbility = (ability: keyof AbilityScores) => {
-    const current = abilities[ability]
+    const current = baseAbilities[ability]
     if (current <= 8) return
     updateAbility(ability, current - 1)
   }
 
+  // Compute racial bonuses from resolved abilities
+  const racialBonuses: Partial<AbilityScores> = {}
+  if (context.resolved) {
+    for (const key of Object.keys(context.resolved.abilities) as Array<keyof AbilityScores>) {
+      const bonusFromRace = context.resolved.abilities[key].bonuses
+        .filter((b) => b.source.origin === 'race')
+        .reduce((sum, b) => sum + b.value, 0)
+      if (bonusFromRace !== 0) {
+        racialBonuses[key] = bonusFromRace
+      }
+    }
+  }
+
+  // Find selected race
+  const raceId = context.character.race
+  const selectedRace = raceId ? DND_RACES.find((r) => r.id === raceId) : undefined
+
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
-    const baseScore = abilities[ability]
+    const baseScore = baseAbilities[ability]
     const raceBonus = racialBonuses[ability] ?? 0
-    const totalScore = baseScore + raceBonus
+    const resolvedTotal = context.resolved?.abilities[ability].total
+    const totalScore = resolvedTotal ?? (baseScore + raceBonus)
     const modifier = getAbilityModifier(totalScore)
 
     return (
@@ -164,7 +189,12 @@ export function AbilitiesStep({
               <Badge
                 variant="secondary"
                 className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={tc('characterBuilder.abilities.racialBonus', { race: t(`races.${selectedRace.id}`), bonuses: Object.entries(selectedRace.abilityBonuses).map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`).join(', ') })}
+                title={tc('characterBuilder.abilities.racialBonus', {
+                  race: t(`races.${selectedRace.id}`),
+                  bonuses: Object.entries(selectedRace.abilityBonuses)
+                    .map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`)
+                    .join(', '),
+                })}
               >
                 +{raceBonus}
               </Badge>
@@ -214,23 +244,22 @@ export function AbilitiesStep({
     )
   }
 
-  const abilityKeys = Object.keys(abilities) as Array<keyof AbilityScores>
-  const pointsSpent = Object.values(abilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
+  const abilityKeys = Object.keys(baseAbilities) as Array<keyof AbilityScores>
+  const pointsSpent = Object.values(baseAbilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
   const pointsRemaining = POINT_BUY_TOTAL - pointsSpent
   const rollValues = isRolling ? displayedRolls : rolledValues
   const pointBuyEquiv = rolledValues.length > 0 ? getPointBuyEquivalent(rolledValues) : null
   const pointBuyDiff = pointBuyEquiv !== null ? pointBuyEquiv - POINT_BUY_TOTAL : null
 
   const handleMethodChange = (val: string) => {
-    const VALID_METHODS: CharacterData['abilityMethod'][] = ['standard-array', 'point-buy', 'rolling']
-    if (!VALID_METHODS.includes(val as CharacterData['abilityMethod'])) return
+    if (!VALID_METHODS.includes(val as AbilityMethod)) return
     if (rollIntervalRef.current) {
       clearInterval(rollIntervalRef.current)
       rollIntervalRef.current = null
     }
     setDisplayedRolls([])
     setIsRolling(false)
-    onMethodChange(val as CharacterData['abilityMethod'])
+    context.updateCreation({ ability_method: val as CreationUpdates['ability_method'] })
   }
 
   return (
@@ -285,7 +314,7 @@ export function AbilitiesStep({
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             {abilityKeys.map((ability) => {
-              const score = abilities[ability]
+              const score = baseAbilities[ability]
               const canIncrement = score < 15 && pointsRemaining >= getPointBuyIncrementCost(score)
               const canDecrement = score > 8
               const incCost = score < 15 ? getPointBuyIncrementCost(score) : 0
@@ -345,7 +374,6 @@ export function AbilitiesStep({
           {(rollValues.length > 0) && (
             <div className="flex gap-1.5">
               {rollValues.map((v, i) => {
-                // Count how many of this value are assigned vs how many appear up to and including this index
                 const assignedCount = !isRolling ? Object.values(abilityAssignments).filter((a) => a === v).length : 0
                 const poolCountUpToHere = rollValues.slice(0, i + 1).filter((rv) => rv === v).length
                 const isAssigned = assignedCount >= poolCountUpToHere

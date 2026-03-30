@@ -179,7 +179,7 @@ export type Database = {
       characters: {
         Row: {
           age: string | null
-          alignment: string | null
+          alignment: string
           appearance: string | null
           armor_class: number | null
           background: string | null
@@ -216,7 +216,7 @@ export type Database = {
         }
         Insert: {
           age?: string | null
-          alignment?: string | null
+          alignment?: string
           appearance?: string | null
           armor_class?: number | null
           background?: string | null
@@ -253,7 +253,7 @@ export type Database = {
         }
         Update: {
           age?: string | null
-          alignment?: string | null
+          alignment?: string
           appearance?: string | null
           armor_class?: number | null
           background?: string | null

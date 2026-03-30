@@ -2,7 +2,9 @@ import { getProficiencyBonus } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { GrantBundle } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
-import type { ResolvedCharacter } from '@/types/resolved'
+import type { ResolvedCharacter, PendingChoice } from '@/types/resolved'
+import type { HitDie } from '@/types/grants'
+import { collectGrantsByType } from '@/lib/resolver/helpers'
 import { resolveAbilities } from '@/lib/resolver/abilities'
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies'
 import { resolveFeatures } from '@/lib/resolver/features'
@@ -25,18 +27,61 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const conModifier = abilities.con.modifier
   const dexModifier = abilities.dex.modifier
 
-  const savingThrows = resolveSavingThrows(abilities, bundles)
+  const savingThrows = resolveSavingThrows(abilities, bundles, proficiencyBonus)
   const skills = resolveSkills(abilities, bundles, proficiencyBonus, choices)
-  const proficiencies = resolveProficiencies(bundles)
+  const proficiencies = resolveProficiencies(bundles, choices)
   const features = resolveFeatures(bundles)
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level)
   const speed = resolveSpeed(bundles)
-  const armorClass = resolveAc(bundles)
+  const armorClass = resolveAc(bundles, dexModifier)
   const spellcasting = resolveSpellcasting(bundles)
+
+  // Build hitDie array from hit-die grants
+  const hitDieGrants = collectGrantsByType(bundles, 'hit-die')
+  const hitDieMap = new Map<HitDie, number>()
+  for (const { grant } of hitDieGrants) {
+    hitDieMap.set(grant.die, (hitDieMap.get(grant.die) ?? 0) + 1)
+  }
+  const hitDie = Array.from(hitDieMap.entries()).map(([die, count]) => ({ die, count }))
+
+  // Aggregate pending choices
+  const pendingChoices: PendingChoice[] = [...proficiencies.pendingChoices]
+
+  // Unresolved ability-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'ability-choice')) {
+    const decision = choices[grant.key]
+    if (!decision || decision.type !== 'ability-choice') {
+      pendingChoices.push({
+        type: 'ability-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        bonus: grant.bonus,
+        from: grant.from,
+      })
+    }
+  }
+
+  // Unresolved skill-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
+    if (grant.category === 'skill') {
+      const decision = choices[grant.key]
+      if (!decision || decision.type !== 'skill-choice') {
+        pendingChoices.push({
+          type: 'skill-choice',
+          choiceKey: grant.key,
+          source,
+          category: 'skill',
+          count: grant.count,
+          from: grant.from,
+        })
+      }
+    }
+  }
 
   return {
     abilities,
-    hitDie: [],
+    hitDie,
     hitPoints,
     speed,
     initiative: dexModifier,
@@ -52,6 +97,6 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     resistances: [],
     immunities: [],
     spellcasting,
-    pendingChoices: [],
+    pendingChoices,
   }
 }
