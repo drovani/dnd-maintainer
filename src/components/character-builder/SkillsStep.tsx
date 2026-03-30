@@ -25,7 +25,7 @@ export function SkillsStep() {
   // Scan grant bundles for all skill-choice grants (regardless of pending status)
   const skillChoices = useMemo((): readonly SkillChoiceInfo[] => {
     if (!build) return []
-    const bundles = collectBundles(build)
+    const { bundles } = collectBundles(build)
     const choices: SkillChoiceInfo[] = []
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {

@@ -46,9 +46,9 @@ export interface ResolvedSpellcasting {
 
 export type PendingChoice =
   | { readonly type: 'ability-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly bonus: number; readonly from: readonly AbilityKey[] | null }
-  | { readonly type: 'skill-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: 'skill'; readonly count: number; readonly from: readonly string[] | null }
-  | { readonly type: 'tool-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: 'tool'; readonly count: number; readonly from: readonly string[] | null }
-  | { readonly type: 'language-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly string[] | null }
+  | { readonly type: 'skill-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: 'skill'; readonly count: number; readonly from: readonly SkillId[] | null }
+  | { readonly type: 'tool-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: 'tool'; readonly count: number; readonly from: readonly ToolProficiencyId[] | null }
+  | { readonly type: 'language-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly LanguageId[] | null }
   | { readonly type: 'expertise-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly SkillId[] | null }
   | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag }
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }

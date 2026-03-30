@@ -63,7 +63,11 @@ describe('resolveCharacter', () => {
     [1, 2],
     [5, 3],
   ])('proficiencyBonus at level %i is %i', (level, expectedBonus) => {
-    const result = resolveCharacter({ ...baseInput, level })
+    const hitDieBundle: GrantBundle = {
+      source: { origin: 'class', id: 'fighter', level: 1 },
+      grants: [{ type: 'hit-die', die: 10 }],
+    }
+    const result = resolveCharacter({ ...baseInput, level, bundles: [hitDieBundle], hpRolls: [null, ...Array(level - 1).fill(5)] })
     expect(result.proficiencyBonus).toBe(expectedBonus)
   })
 
@@ -91,7 +95,7 @@ describe('Human Fighter L1 integration', () => {
     backgroundId: 'soldier',
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
     abilityMethod: 'standard-array',
-    appliedLevels: [{ classId: 'fighter', classLevel: 1 }],
+    appliedLevels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     choices: {
       // Fighter skill choices (2 from list)
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
@@ -102,12 +106,13 @@ describe('Human Fighter L1 integration', () => {
       // Soldier language choice
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
     },
+    levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     feats: [],
     activeItems: [],
     hpRolls: [],
   }
 
-  const bundles = collectBundles(humanFighterBuild)
+  const { bundles } = collectBundles(humanFighterBuild)
 
   const input: ResolverInput = {
     baseAbilities: humanFighterBuild.baseAbilities,

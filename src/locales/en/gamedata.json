@@ -221,12 +221,14 @@
     "gaming-set-three-dragon-ante": "Three-Dragon Ante Set"
   },
   "features": {
-    "fighter-fighting-style": "Fighting Style",
-    "fighter-second-wind": "Second Wind"
-  },
-  "featureDescriptions": {
-    "fighter-fighting-style": "You adopt a particular style of fighting as your specialty.",
-    "fighter-second-wind": "You have a limited well of stamina that you can draw on to protect yourself from harm."
+    "fighter-fighting-style": {
+      "name": "Fighting Style",
+      "description": "You adopt a particular style of fighting as your specialty."
+    },
+    "fighter-second-wind": {
+      "name": "Second Wind",
+      "description": "You have a limited well of stamina that you can draw on to protect yourself from harm."
+    }
   },
   "gender": {
     "male": "Male",

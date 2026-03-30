@@ -89,13 +89,24 @@ function useResolvedFromBuild(
 ): ResolvedFromBuild {
   return useMemo(() => {
     if (!character || !buildRows || buildRows.length === 0) return { resolved: null, buildError: null }
+
+    // Phase 1: Reconstruct build
+    let build: ReturnType<typeof reconstructBuild>
     try {
-      const build = reconstructBuild(
+      build = reconstructBuild(
         { race: character.race, background: character.background },
         buildRows,
         equippedItems,
       )
-      const bundles = collectBundles(build)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      console.error('Build reconstruction failed:', message)
+      return { resolved: null, buildError: message }
+    }
+
+    // Phase 2: Resolve character
+    try {
+      const { bundles } = collectBundles(build)
       const levelRows = buildRows.filter((r) => r.sequence !== 0)
       const resolved = resolveCharacter({
         baseAbilities: build.baseAbilities,
@@ -107,7 +118,7 @@ function useResolvedFromBuild(
       return { resolved, buildError: null }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Failed to resolve character from build:', { characterId: character?.id, error: err })
+      console.error('Character resolution failed:', message)
       return { resolved: null, buildError: message }
     }
   }, [character, buildRows, equippedItems])
@@ -270,7 +281,7 @@ export default function CharacterSheet() {
           {/* Left Column: Abilities & Skills */}
           <div className="lg:col-span-1 space-y-6">
             {/* Ability Scores */}
-            {abilities && (
+            {abilities ? (
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.abilities')}</h2>
                 <div className="space-y-3">
@@ -293,10 +304,15 @@ export default function CharacterSheet() {
                   })}
                 </div>
               </div>
+            ) : (
+              <div className="bg-card border rounded-lg p-6 text-center text-muted-foreground">
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.abilities')}</h2>
+                <p>{buildError ? tc('characterSheet.buildError.abilities', { message: buildError }) : tc('characterSheet.emptyState.abilities')}</p>
+              </div>
             )}
 
             {/* Saving Throws */}
-            {savingThrows && (
+            {savingThrows ? (
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.savingThrows')}</h2>
                 <div className="space-y-2 text-sm">
@@ -313,10 +329,15 @@ export default function CharacterSheet() {
                   })}
                 </div>
               </div>
+            ) : (
+              <div className="bg-card border rounded-lg p-6 text-center text-muted-foreground">
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.savingThrows')}</h2>
+                <p>{buildError ? tc('characterSheet.buildError.savingThrows', { message: buildError }) : tc('characterSheet.emptyState.savingThrows')}</p>
+              </div>
             )}
 
             {/* Skills */}
-            {skills && (
+            {skills ? (
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
                 <div className="space-y-1 text-xs">
@@ -347,6 +368,11 @@ export default function CharacterSheet() {
                   })}
                 </div>
               </div>
+            ) : (
+              <div className="bg-card border rounded-lg p-6 text-center text-muted-foreground">
+                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
+                <p>{buildError ? tc('characterSheet.buildError.skills', { message: buildError }) : tc('characterSheet.emptyState.skills')}</p>
+              </div>
             )}
           </div>
 
@@ -355,6 +381,12 @@ export default function CharacterSheet() {
             {/* Combat Stats */}
             <div className="bg-card border-2 border-destructive/30 rounded-lg p-6">
               <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.combat')}</h2>
+
+              {!resolved && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  {buildError ? tc('characterSheet.buildError.combat', { message: buildError }) : tc('characterSheet.emptyState.combat')}
+                </p>
+              )}
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-muted/50 p-4 rounded border text-center">
@@ -401,8 +433,12 @@ export default function CharacterSheet() {
                 <div className="space-y-3">
                   {resolved.features.map((resolvedFeature, i) => (
                     <div key={i} className="bg-muted/50 p-3 rounded border">
-                      <div className="font-semibold text-foreground text-sm mb-1">{resolvedFeature.feature.name}</div>
-                      <p className="text-xs text-muted-foreground">{resolvedFeature.feature.description}</p>
+                      <div className="font-semibold text-foreground text-sm mb-1">
+                        {t(`features.${resolvedFeature.feature.id}.name`, { defaultValue: resolvedFeature.feature.name ?? resolvedFeature.feature.id })}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t(`features.${resolvedFeature.feature.id}.description`, { defaultValue: resolvedFeature.feature.description ?? '' })}
+                      </p>
                       {resolvedFeature.source && (
                         <div className="text-xs text-muted-foreground/70 mt-1">
                           {tc('characterSheet.fields.source', { source: resolvedFeature.source.id })}

@@ -1,4 +1,5 @@
 import type { ClassSource } from '@/types/sources'
+import { createChoiceKey } from '@/types/choices'
 
 const EMPTY_LEVEL = { grants: [] } as const
 
@@ -21,7 +22,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           {
             type: 'proficiency-choice',
             category: 'skill',
-            key: 'skill-choice:class:fighter:0',
+            key: createChoiceKey('skill-choice', 'class', 'fighter', 0),
             count: 2,
             from: [
               'acrobatics',

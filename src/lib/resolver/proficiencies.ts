@@ -136,42 +136,57 @@ export function resolveProficiencies(
     }
   }
 
-  // Choice grants for tool and language categories
+  // Choice grants — handle each proficiency-choice category
   for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
-    if (grant.category === 'tool') {
-      const decision = choices[grant.key]
-      if (decision?.type === 'tool-choice') {
-        for (const toolId of decision.tools) {
-          const existing = toolMap.get(toolId) ?? []
-          existing.push(source)
-          toolMap.set(toolId, existing)
+    switch (grant.category) {
+      case 'tool': {
+        const decision = choices[grant.key]
+        if (decision?.type === 'tool-choice') {
+          for (const toolId of decision.tools) {
+            const existing = toolMap.get(toolId) ?? []
+            existing.push(source)
+            toolMap.set(toolId, existing)
+          }
+        } else {
+          pendingChoices.push({
+            type: 'tool-choice',
+            choiceKey: grant.key,
+            source,
+            category: 'tool',
+            count: grant.count,
+            from: grant.from,
+          })
         }
-      } else {
-        pendingChoices.push({
-          type: 'tool-choice',
-          choiceKey: grant.key,
-          source,
-          category: 'tool',
-          count: grant.count,
-          from: grant.from,
-        })
+        break
       }
-    } else if (grant.category === 'language') {
-      const decision = choices[grant.key]
-      if (decision?.type === 'language-choice') {
-        for (const langId of decision.languages) {
-          const existing = languageMap.get(langId) ?? []
-          existing.push(source)
-          languageMap.set(langId, existing)
+      case 'language': {
+        const decision = choices[grant.key]
+        if (decision?.type === 'language-choice') {
+          for (const langId of decision.languages) {
+            const existing = languageMap.get(langId) ?? []
+            existing.push(source)
+            languageMap.set(langId, existing)
+          }
+        } else {
+          pendingChoices.push({
+            type: 'language-choice',
+            choiceKey: grant.key,
+            source,
+            count: grant.count,
+            from: grant.from,
+          })
         }
-      } else {
-        pendingChoices.push({
-          type: 'language-choice',
-          choiceKey: grant.key,
-          source,
-          count: grant.count,
-          from: grant.from,
-        })
+        break
+      }
+      case 'skill':
+        // Handled in resolveSkills()
+        break
+      case 'armor':
+      case 'weapon':
+        // TODO: implement armor/weapon choice handling
+        break
+      default: {
+        throw new Error(`Unhandled proficiency choice category: ${(grant satisfies never as { category: string }).category}`)
       }
     }
   }

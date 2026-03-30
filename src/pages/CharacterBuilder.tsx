@@ -102,7 +102,11 @@ function CharacterBuilderInner() {
     const timer = setTimeout(() => {
       saveDraft(latestPayloadRef.current)
         .then(() => markSaved())
-        .catch(() => { /* error state handled by useBuilderAutosave */ })
+        .catch((err: unknown) => {
+          // saveDraft sets saveStatus='error' internally;
+          // log here in case the .then() chain itself fails
+          if (err) console.warn('Autosave chain error:', err)
+        })
     }, 500)
     return () => clearTimeout(timer)
   }, [isDirty, hasRequiredFields, saveDraft, markSaved])
@@ -129,7 +133,11 @@ function CharacterBuilderInner() {
       const payload: AutosavePayload = { character, rows, resolved }
       saveDraft(payload)
         .then(() => markSaved())
-        .catch(() => { /* error state handled by useBuilderAutosave */ })
+        .catch((err: unknown) => {
+          // saveDraft sets saveStatus='error' internally;
+          // log here in case the .then() chain itself fails
+          if (err) console.warn('Autosave chain error:', err)
+        })
     }
     setCurrentStep(targetStep)
   }
@@ -241,7 +249,11 @@ function CharacterBuilderInner() {
                   const payload: AutosavePayload = { character, rows, resolved }
                   saveDraft(payload)
                     .then(() => markSaved())
-                    .catch(() => { /* error state handled by useBuilderAutosave */ })
+                    .catch((err: unknown) => {
+                      // saveDraft sets saveStatus='error' internally;
+                      // log here in case the .then() chain itself fails
+                      if (err) console.warn('Autosave chain error:', err)
+                    })
                 }}
               >
                 {t('buttons.retrySave')}

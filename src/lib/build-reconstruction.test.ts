@@ -90,8 +90,8 @@ describe('reconstructBuild', () => {
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
     expect(result.appliedLevels).toHaveLength(2)
-    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1 })
-    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2 })
+    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
+    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
   it('sorts rows by sequence regardless of input order', () => {
@@ -122,8 +122,8 @@ describe('reconstructBuild', () => {
     // Pass rows out of order
     const result = reconstructBuild(identity, [creationRow, level2, level1], [])
     expect(result.appliedLevels).toHaveLength(2)
-    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1 })
-    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2 })
+    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
+    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
   it('maps subclass_id into choices using subclass:${classId} key format', () => {
@@ -243,7 +243,7 @@ describe('reconstructBuild', () => {
   })
 
   it('throws when level row is missing class_id', () => {
-    const levelMissingClassId: BuildLevelRow = {
+    const levelMissingClassId = {
       sequence: 1,
       base_abilities: null,
       ability_method: null,
@@ -254,28 +254,22 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: null,
-    }
-    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassId], [])).toThrow(
-      'missing class_id',
-    )
+    } as unknown as BuildLevelRow
+    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassId], [])).toThrow()
   })
 
-  it('throws when level row is missing class_level', () => {
-    const levelMissingClassLevel: BuildLevelRow = {
+  it('throws when level row has invalid class_id', () => {
+    const levelBadClassId: BuildLevelRow = {
       sequence: 1,
-      base_abilities: null,
-      ability_method: null,
-      class_id: 'fighter',
-      class_level: null,
+      class_id: 'nonexistent-class',
+      class_level: 1,
       subclass_id: null,
       asi_allocation: null,
       feat_id: null,
       hp_roll: null,
       choices: null,
     }
-    expect(() => reconstructBuild(identity, [creationRow, levelMissingClassLevel], [])).toThrow(
-      'missing class_level',
-    )
+    expect(() => reconstructBuild(identity, [creationRow, levelBadClassId], [])).toThrow('Unknown class ID')
   })
 
   it('equippedItems becomes activeItems', () => {
@@ -376,7 +370,7 @@ describe('Human Fighter Level 1 round-trip', () => {
     expect(build.appliedLevels[0].classId).toBe('fighter')
 
     // Resolve character
-    const bundles = collectBundles(build)
+    const { bundles } = collectBundles(build)
     const resolved = resolveCharacter({
       baseAbilities: build.baseAbilities,
       level: build.appliedLevels.length,

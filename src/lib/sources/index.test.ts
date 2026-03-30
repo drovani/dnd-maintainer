@@ -16,7 +16,8 @@ const humanFighterL1Build: CharacterBuild = {
   backgroundId: 'soldier' as BackgroundId,
   baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
   abilityMethod: 'standard-array',
-  appliedLevels: [{ classId: 'fighter' as ClassId, classLevel: 1 }],
+  levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+  appliedLevels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
   choices: {},
   feats: [],
   activeItems: [],
@@ -80,7 +81,7 @@ describe('getItemSource', () => {
 
 describe('collectBundles', () => {
   it('returns 3 bundles for Human Fighter L1 build', () => {
-    const bundles = collectBundles(humanFighterL1Build)
+    const { bundles } = collectBundles(humanFighterL1Build)
     // race bundle + class L1 bundle + background bundle = 3
     expect(bundles).toHaveLength(3)
   })
@@ -90,6 +91,7 @@ describe('collectBundles', () => {
       ...humanFighterL1Build,
       raceId: 'gnome-forest' as RaceId,
       backgroundId: 'hermit' as BackgroundId,
+      levels: [],
       appliedLevels: [],
     }
     expect(() => collectBundles(unknownBuild)).not.toThrow()

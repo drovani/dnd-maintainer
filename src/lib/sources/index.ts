@@ -54,8 +54,14 @@ export function getItemSource(id: string): ItemSource | undefined {
   return ITEM_SOURCES.find((i) => i.id === id)
 }
 
-export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
+export interface CollectBundlesResult {
+  readonly bundles: readonly GrantBundle[]
+  readonly warnings: readonly string[]
+}
+
+export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   const bundles: GrantBundle[] = []
+  const warnings: string[] = []
 
   // Race
   const raceSource = getRaceSource(build.raceId)
@@ -63,20 +69,24 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
     const tag: SourceTag = { origin: 'race', id: build.raceId }
     bundles.push({ source: tag, grants: raceSource.grants })
   } else {
-    console.warn(`No source data found for race "${build.raceId}" — race grants will be empty`)
+    const msg = `No source data found for race "${build.raceId}" — race grants will be empty`
+    warnings.push(msg)
+    console.warn(msg)
   }
 
   // Class levels — count levels per class in order
   const classCounts = new Map<ClassId, number>()
-  for (const applied of build.appliedLevels) {
-    const prev = classCounts.get(applied.classId) ?? 0
-    classCounts.set(applied.classId, prev + 1)
+  for (const level of build.levels) {
+    const prev = classCounts.get(level.classId) ?? 0
+    classCounts.set(level.classId, prev + 1)
   }
 
   for (const [classId, levelCount] of classCounts) {
     const classSource = getClassSource(classId)
     if (!classSource) {
-      console.warn(`No source data found for class "${classId}" — class grants will be empty`)
+      const msg = `No source data found for class "${classId}" — class grants will be empty`
+      warnings.push(msg)
+      console.warn(msg)
       continue
     }
     for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
@@ -133,5 +143,5 @@ export function collectBundles(build: CharacterBuild): readonly GrantBundle[] {
     }
   }
 
-  return bundles
+  return { bundles, warnings }
 }

@@ -1,4 +1,5 @@
 import type { RaceSource } from '@/types/sources'
+import { createChoiceKey } from '@/types/choices'
 
 export const RACE_SOURCES: readonly RaceSource[] = [
   {
@@ -17,7 +18,7 @@ export const RACE_SOURCES: readonly RaceSource[] = [
       {
         type: 'proficiency-choice',
         category: 'language',
-        key: 'language-choice:race:human:0',
+        key: createChoiceKey('language-choice', 'race', 'human', 0),
         count: 1,
         from: null,
       },

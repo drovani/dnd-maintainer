@@ -12,7 +12,10 @@ export function resolveHp(
   if (level === 0) return { max: 0 }
 
   const hitDieGrants = collectGrantsByType(bundles, 'hit-die')
-  if (hitDieGrants.length === 0) return { max: 0 }
+  if (hitDieGrants.length === 0) {
+    if (level === 0) return { max: 0 }
+    throw new Error(`No hit die grants found at level ${level} — check class source data`)
+  }
 
   // Use the first hit die found (multi-class would need more logic)
   const die = hitDieGrants[0].grant.die
@@ -21,8 +24,7 @@ export function resolveHp(
   let max = die + conModifier
 
   // Subsequent levels: use rolled values (or average if null)
-  // hpRolls[0] = level 1 slot (unused — level 1 always uses max die)
-  // hpRolls[i] = roll for level i+1
+  // hpRolls is indexed by level row order (0-based). Index 0 is level 1 (skipped -- always max die). Loop starts at index 1 for level 2+.
   for (let i = 1; i < level; i++) {
     const roll = hpRolls[i]
     const value = roll !== null && roll !== undefined ? roll : Math.floor(die / 2) + 1
@@ -72,7 +74,7 @@ export function resolveAc(bundles: readonly GrantBundle[], dexModifier: number):
         calculations.push({ mode: 'natural', baseValue: calc.baseAc, source })
         break
       case 'unarmored':
-        // Basic unarmored: 10 + DEX modifier (barbarian/monk formulas extend this)
+        // Unarmored: 10 + DEX modifier. TODO: barbarian formula should add CON modifier, monk should add WIS modifier.
         calculations.push({ mode: 'unarmored', baseValue: 10 + dexModifier, source })
         break
       default: {

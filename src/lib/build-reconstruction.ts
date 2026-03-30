@@ -1,3 +1,4 @@
+import { DND_CLASSES } from '@/lib/dnd-helpers'
 import type { BackgroundId, ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
@@ -11,20 +12,39 @@ import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/charact
  * - **sequence > 0**: Level row — carries `class_id`, `class_level`, and class
  *   choices. `base_abilities` and `ability_method` are null.
  */
-export interface BuildLevelRow {
-  readonly sequence: number
-  readonly base_abilities: AbilityScores | null
-  readonly ability_method: string | null
-  readonly class_id: string | null
-  readonly class_level: number | null
-  readonly subclass_id: string | null
-  readonly asi_allocation: Record<string, number> | null
-  readonly feat_id: string | null
-  readonly hp_roll: number | null
+interface BaseBuildRow {
+  readonly character_id?: string
   readonly choices: Record<string, ChoiceDecision> | null
+  readonly deleted_at?: string | null
 }
 
-export function isCreationRow(row: BuildLevelRow): boolean {
+export interface CreationRow extends BaseBuildRow {
+  readonly sequence: 0
+  readonly base_abilities: AbilityScores | null
+  readonly ability_method: string | null
+  readonly asi_allocation?: Record<string, number> | null
+  readonly class_id?: string | null
+  readonly class_level?: number | null
+  readonly subclass_id?: string | null
+  readonly hp_roll?: number | null
+  readonly feat_id?: string | null
+}
+
+export interface LevelRow extends BaseBuildRow {
+  readonly sequence: number // > 0
+  readonly class_id: string
+  readonly class_level: number
+  readonly subclass_id: string | null
+  readonly asi_allocation: Record<string, number> | null
+  readonly hp_roll: number | null
+  readonly feat_id: string | null
+  readonly base_abilities?: AbilityScores | null
+  readonly ability_method?: string | null
+}
+
+export type BuildLevelRow = CreationRow | LevelRow
+
+export function isCreationRow(row: BuildLevelRow): row is CreationRow {
   return row.sequence === 0
 }
 
@@ -52,12 +72,12 @@ export function reconstructBuild(
 ): CharacterBuild {
   if (!character.race) throw new Error('Character is missing required race')
 
-  const creationRow = rows.find((r) => r.sequence === 0)
+  const creationRow = rows.find((r): r is CreationRow => isCreationRow(r))
   if (!creationRow) {
     throw new Error('Missing creation row (sequence 0)')
   }
 
-  const levelRows = [...rows.filter((r) => r.sequence !== 0)].sort(
+  const levelRows = [...rows.filter((r): r is LevelRow => !isCreationRow(r))].sort(
     (a, b) => a.sequence - b.sequence,
   )
 
@@ -85,21 +105,22 @@ export function reconstructBuild(
     )
   }
 
-  const appliedLevels = levelRows.map((row) => {
-    if (!row.class_id) throw new Error(`Level row sequence ${row.sequence} is missing class_id`)
-    if (row.class_level === null || row.class_level === undefined)
-      throw new Error(`Level row sequence ${row.sequence} is missing class_level`)
-    return {
-      classId: row.class_id as ClassId,
-      classLevel: row.class_level,
+  function validateClassId(classId: string, sequence: number): ClassId {
+    if (!DND_CLASSES.some(c => c.id === classId)) {
+      throw new Error(`Unknown class ID "${classId}" in build level row sequence ${sequence}`)
     }
-  })
+    return classId as ClassId
+  }
 
-  const hpRolls: (number | null)[] = levelRows.map((row) => row.hp_roll ?? null)
+  const levels = levelRows.map((row) => ({
+    classId: validateClassId(row.class_id, row.sequence),
+    classLevel: row.class_level,
+    hpRoll: row.hp_roll ?? null,
+  }))
 
   const feats: string[] = levelRows
-    .filter((row) => row.feat_id !== null)
-    .map((row) => row.feat_id as string)
+    .filter((row): row is LevelRow & { feat_id: string } => row.feat_id !== null)
+    .map((row) => row.feat_id)
 
   // Build choices map
   const choices: Record<string, ChoiceDecision> = {}
@@ -122,10 +143,6 @@ export function reconstructBuild(
 
   // Process level rows
   for (const row of levelRows) {
-    if (!row.class_id) throw new Error(`Level row sequence ${row.sequence} is missing class_id`)
-    if (row.class_level === null || row.class_level === undefined)
-      throw new Error(`Level row sequence ${row.sequence} is missing class_level`)
-
     if (row.subclass_id !== null) {
       // Use subclass:${classId} format to match sources/index.ts lookup
       const key = `subclass:${row.class_id}`
@@ -149,10 +166,11 @@ export function reconstructBuild(
     backgroundId: character.background ?? null,
     baseAbilities,
     abilityMethod,
-    appliedLevels,
+    levels,
+    appliedLevels: levels,
     choices,
     feats,
     activeItems: equippedItems,
-    hpRolls,
+    hpRolls: levels.map(l => l.hpRoll),
   }
 }

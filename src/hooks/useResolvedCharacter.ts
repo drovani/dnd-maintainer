@@ -9,7 +9,7 @@ import { collectBundles } from '@/lib/sources'
 export function useResolvedCharacter(build: CharacterBuild | null): ResolvedCharacter | null {
   return useMemo(() => {
     if (!build) return null
-    const bundles = collectBundles(build)
+    const { bundles } = collectBundles(build)
     return resolveCharacter({
       baseAbilities: build.baseAbilities,
       level: build.appliedLevels.length,

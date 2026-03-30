@@ -9,6 +9,7 @@ import type { ClassId } from '@/lib/dnd-helpers'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
 import { resolveCharacter } from '@/lib/resolver/index'
+import { toast } from 'sonner'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -33,6 +34,7 @@ interface CharacterContextValue {
   clearChoice: (choiceKey: string) => void
   levelUp: (classId: ClassId, hpRoll: number | null) => void
   levelDown: () => void
+  replaceLevel: (oldSequence: number, newClassId: string, newSubclassId: string | null) => void
   markSaved: () => void
 }
 
@@ -77,18 +79,17 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
   return 0
 }
 
-interface BuildResult {
-  readonly build: CharacterBuild | null
-  readonly resolved: ResolvedCharacter | null
-  readonly error: string | null
-}
+type BuildResult =
+  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly resolved: ResolvedCharacter; readonly error: null }
+  | { readonly status: 'build-error'; readonly build: null; readonly resolved: null; readonly error: string }
+  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly resolved: null; readonly error: string }
 
 function tryDeriveAndResolve(
   character: Character,
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
 ): BuildResult {
-  let build: CharacterBuild | null = null
+  let build: CharacterBuild
   try {
     build = reconstructBuild(
       { race: character.race, background: character.background },
@@ -98,11 +99,11 @@ function tryDeriveAndResolve(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error'
     console.error('Failed to reconstruct character build:', { characterId: character.id, error: err })
-    return { build: null, resolved: null, error: message }
+    return { status: 'build-error', build: null, resolved: null, error: message }
   }
 
   try {
-    const bundles = collectBundles(build)
+    const { bundles } = collectBundles(build)
     const levelRows = rows.filter((r) => r.sequence !== 0)
     const level = levelRows.length
     const resolved = resolveCharacter({
@@ -112,11 +113,11 @@ function tryDeriveAndResolve(
       choices: build.choices,
       hpRolls: build.hpRolls,
     })
-    return { build, resolved, error: null }
+    return { status: 'ok', build, resolved, error: null }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown resolver error'
     console.error('Failed to resolve character:', { characterId: character.id, error: err })
-    return { build, resolved: null, error: message }
+    return { status: 'resolve-error', build, resolved: null, error: message }
   }
 }
 
@@ -214,15 +215,14 @@ export function CharacterProvider({
   }, [])
 
   const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
-    let didChange = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
-        console.warn(`Choice "${choiceKey}" targets sequence ${targetSeq} but no row exists`)
+        console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
+        toast.error('Failed to save choice — please try again')
         return prev
       }
-      didChange = true
       const existing = prev[idx]
       const updated: BuildLevelRow = {
         ...existing,
@@ -232,19 +232,18 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    if (didChange) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const clearChoice = useCallback((choiceKey: string) => {
-    let didChange = false
     setRows((prev) => {
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
-        console.warn(`Choice "${choiceKey}" targets sequence ${targetSeq} but no row exists`)
+        console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`)
+        toast.error('Failed to clear choice — please try again')
         return prev
       }
-      didChange = true
       const existing = prev[idx]
       const newChoices = { ...(existing.choices ?? {}) }
       delete newChoices[choiceKey]
@@ -253,7 +252,7 @@ export function CharacterProvider({
       next[idx] = updated
       return next
     })
-    if (didChange) setIsDirty(true)
+    setIsDirty(true)
   }, [])
 
   const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
@@ -279,15 +278,30 @@ export function CharacterProvider({
   }, [])
 
   const levelDown = useCallback(() => {
-    let didChange = false
     setRows((prev) => {
       const levelRows = prev.filter((r) => r.sequence !== 0)
       if (levelRows.length === 0) return prev
-      didChange = true
       const maxSeq = levelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
       return prev.filter((r) => r.sequence !== maxSeq)
     })
-    if (didChange) setIsDirty(true)
+    setIsDirty(true)
+  }, [])
+
+  const replaceLevel = useCallback((oldSequence: number, newClassId: string, newSubclassId: string | null) => {
+    setRows((prev) => {
+      const idx = prev.findIndex((r) => r.sequence === oldSequence)
+      if (idx === -1) return prev
+      const next = [...prev]
+      next[idx] = {
+        ...next[idx],
+        class_id: newClassId,
+        class_level: 1,
+        subclass_id: newSubclassId,
+        choices: null,
+      }
+      return next
+    })
+    setIsDirty(true)
   }, [])
 
   const markSaved = useCallback(() => {
@@ -308,9 +322,10 @@ export function CharacterProvider({
       clearChoice,
       levelUp,
       levelDown,
+      replaceLevel,
       markSaved,
     }),
-    [character, rows, build, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, markSaved],
+    [character, rows, build, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

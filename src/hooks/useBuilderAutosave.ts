@@ -152,6 +152,19 @@ export function useBuilderAutosave() {
             if (levelError) throw levelError
           }
 
+          // Clean up orphaned rows (e.g. from class changes that replaced a level row)
+          const activeSequences = rows.map((r) => r.sequence)
+          const { error: cleanupError } = await supabase
+            .from('character_build_levels')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('character_id', savedId)
+            .is('deleted_at', null)
+            .not('sequence', 'in', `(${activeSequences.join(',')})`)
+
+          if (cleanupError) {
+            console.error('Failed to clean up orphaned build rows:', cleanupError)
+          }
+
           setSaveStatus('saved')
           return savedId
         } catch (err) {

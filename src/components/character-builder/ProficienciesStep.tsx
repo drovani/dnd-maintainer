@@ -27,7 +27,7 @@ export function ProficienciesStep() {
   // Scan grant bundles for all language-choice and tool-choice grants
   const { languageChoices, toolChoices } = useMemo(() => {
     if (!build) return { languageChoices: [] as ChoiceInfo<LanguageId>[], toolChoices: [] as ChoiceInfo<ToolProficiencyId>[] }
-    const bundles = collectBundles(build)
+    const { bundles } = collectBundles(build)
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
     for (const bundle of bundles) {

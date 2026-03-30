@@ -287,6 +287,18 @@
       "leaveEmptyForNpcs": "Leave empty for NPCs",
       "subclassPlaceholder": "e.g. Champion, Arcane Trickster"
     },
+    "emptyState": {
+      "abilities": "Complete the character builder to see ability scores.",
+      "skills": "Complete the character builder to see skills.",
+      "savingThrows": "Complete the character builder to see saving throws.",
+      "combat": "Complete the character builder to see combat stats."
+    },
+    "buildError": {
+      "abilities": "Unable to compute ability scores: {{message}}",
+      "skills": "Unable to compute skills: {{message}}",
+      "savingThrows": "Unable to compute saving throws: {{message}}",
+      "combat": "Unable to compute combat stats: {{message}}"
+    },
     "errors": {
       "loadingCharacter": "Error loading character: {{error}}",
       "buildFailed": "Failed to compute character build: {{message}}",

@@ -28,7 +28,6 @@ import {
   type RaceId,
 } from '@/lib/dnd-helpers'
 import { Wand2 } from 'lucide-react'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 // Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
@@ -45,7 +44,6 @@ export function BasicsStep() {
   const context = useCharacterContext()
 
   const { character, rows } = context
-  const [fieldErrors] = useState<Partial<Record<'name' | 'race' | 'class' | 'gender', boolean>>>({})
 
   const characterType = character.character_type ?? 'pc'
   const name = character.name ?? ''
@@ -70,9 +68,8 @@ export function BasicsStep() {
       // First time selecting a class — add level 1 row
       context.levelUp(value, null)
     } else if (levelRows[0]?.class_id !== value) {
-      // Class changed — remove old level row and add new one with correct class_id
-      context.levelDown()
-      context.levelUp(value, null)
+      // Class changed — atomically swap the class in the existing row
+      context.replaceLevel(levelRows[0].sequence, value, null)
     }
     // Keep character.class in sync for pre-calculated column and hasRequiredFields check
     context.updateCharacter({ class: value, level: Math.max(levelRows.length, 1) })
@@ -112,7 +109,6 @@ export function BasicsStep() {
         <GenderToggle
           value={gender as DndGender | ''}
           onChange={(g) => context.updateCharacter({ gender: g })}
-          error={fieldErrors.gender}
         />
       </div>
 
@@ -129,7 +125,6 @@ export function BasicsStep() {
               value={name}
               onChange={(e) => context.updateCharacter({ name: e.target.value })}
               placeholder={tc('characterBuilder.placeholders.enterCharacterName')}
-              className={fieldErrors.name ? 'border-destructive' : ''}
             />
             <Button
               type="button"
@@ -177,7 +172,7 @@ export function BasicsStep() {
               onValueChange={(value) => value && handleRaceChange(value as RaceId)}
               items={DND_RACES.map((r) => ({ value: r.id, label: t(`races.${r.id}`) }))}
             >
-              <SelectTrigger className={`w-full ${fieldErrors.race ? 'border-destructive' : ''}`}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseRace')} />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
@@ -212,7 +207,7 @@ export function BasicsStep() {
               onValueChange={(value) => value && handleClassChange(value as ClassId)}
               items={DND_CLASSES.map((c) => ({ value: c.id, label: t(`classes.${c.id}`) }))}
             >
-              <SelectTrigger className={`w-full ${fieldErrors.class ? 'border-destructive' : ''}`}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseClass')} />
               </SelectTrigger>
               <SelectContent>

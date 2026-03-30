@@ -1,4 +1,5 @@
 import type { BackgroundSource } from '@/types/sources'
+import { createChoiceKey } from '@/types/choices'
 
 export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
   {
@@ -10,7 +11,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
       {
         type: 'proficiency-choice',
         category: 'tool',
-        key: 'tool-choice:background:soldier:0',
+        key: createChoiceKey('tool-choice', 'background', 'soldier', 0),
         count: 1,
         from: [
           'gaming-set-dice',
@@ -22,7 +23,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
       {
         type: 'proficiency-choice',
         category: 'language',
-        key: 'language-choice:background:soldier:0',
+        key: createChoiceKey('language-choice', 'background', 'soldier', 0),
         count: 1,
         from: null,
       },

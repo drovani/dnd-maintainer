@@ -171,7 +171,6 @@ export function AbilitiesStep() {
   // Find selected race
   const raceId = context.character.race
   const selectedRace = raceId ? DND_RACES.find((r) => r.id === raceId) : undefined
-  void selectedRace // used in badge title below
 
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
     const baseScore = baseAbilities[ability]

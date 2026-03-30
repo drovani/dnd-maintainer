@@ -9,8 +9,8 @@ describe('resolveHp', () => {
     expect(resolveHp(NO_BUNDLES, [], 0, 0).max).toBe(0)
   })
 
-  it('returns 0 max HP when no hit-die grants', () => {
-    expect(resolveHp(NO_BUNDLES, [], 0, 1).max).toBe(0)
+  it('throws when no hit-die grants at level >= 1', () => {
+    expect(() => resolveHp(NO_BUNDLES, [], 0, 1)).toThrow('No hit die grants found at level 1')
   })
 
   it('level 1: max die + CON modifier', () => {
