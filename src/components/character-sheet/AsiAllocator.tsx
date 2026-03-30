@@ -23,17 +23,20 @@ export function AsiAllocator({ choice, abilities, onDecide }: AsiAllocatorProps)
   const pointsRemaining = choice.points - pointsUsed
 
   const increment = (ability: AbilityKey) => {
-    const current = allocation[ability] ?? 0
-    const currentTotal = abilities[ability].total
-    if (pointsRemaining <= 0) return
-    if (currentTotal + current + 1 > 20) return
-    setAllocation((prev) => ({ ...prev, [ability]: current + 1 }))
+    setAllocation((prev) => {
+      const current = prev[ability] ?? 0
+      const currentTotal = abilities[ability].total
+      const usedPoints = Object.values(prev).reduce((sum, v) => sum + (v ?? 0), 0)
+      if (choice.points - usedPoints <= 0) return prev
+      if (currentTotal + current + 1 > 20) return prev
+      return { ...prev, [ability]: current + 1 }
+    })
   }
 
   const decrement = (ability: AbilityKey) => {
-    const current = allocation[ability] ?? 0
-    if (current <= 0) return
     setAllocation((prev) => {
+      const current = prev[ability] ?? 0
+      if (current <= 0) return prev
       const next = { ...prev, [ability]: current - 1 }
       if (next[ability] === 0) delete next[ability]
       return next
@@ -43,8 +46,6 @@ export function AsiAllocator({ choice, abilities, onDecide }: AsiAllocatorProps)
   const handleConfirm = () => {
     onDecide(choice.choiceKey, allocation)
   }
-
-  const hasAnyAllocation = pointsUsed > 0
 
   return (
     <Card>
@@ -108,7 +109,7 @@ export function AsiAllocator({ choice, abilities, onDecide }: AsiAllocatorProps)
 
         <Button
           className="mt-4 w-full"
-          disabled={!hasAnyAllocation}
+          disabled={pointsRemaining !== 0}
           onClick={handleConfirm}
         >
           {tc('buttons.confirm')}

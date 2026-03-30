@@ -243,7 +243,9 @@ export function CharacterProvider({
 
         // Find which class level contains the matching grant type
         const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
-        if (classSource) {
+        if (!classSource) {
+          console.warn(`makeChoice: no class source found for classId "${classId}" — falling through to normal choice storage`, { choiceKey, decision })
+        } else {
           let grantClassLevel: number | null = null
           for (let i = 0; i < classSource.levels.length; i++) {
             const hasGrant = classSource.levels[i].grants.some((g) => g.type === grantType)
@@ -253,11 +255,15 @@ export function CharacterProvider({
             }
           }
 
-          if (grantClassLevel !== null) {
+          if (grantClassLevel === null) {
+            console.warn(`makeChoice: no grant of type "${grantType}" found in class "${classId}" — falling through to normal choice storage`, { choiceKey, decision })
+          } else {
             const targetIdx = prev.findIndex(
               (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
             )
-            if (targetIdx !== -1) {
+            if (targetIdx === -1) {
+              console.warn(`makeChoice: no active row found for class "${classId}" at class level ${grantClassLevel} — falling through to normal choice storage`, { choiceKey, decision })
+            } else {
               const next = [...prev]
               if (decision.type === 'subclass') {
                 next[targetIdx] = { ...next[targetIdx], subclass_id: decision.subclassId }
@@ -292,6 +298,46 @@ export function CharacterProvider({
 
   const clearChoice = useCallback((choiceKey: string) => {
     setRows((prev) => {
+      // For subclass and ASI decisions, also clear the promoted column on the target level row
+      const parts = choiceKey.split(':')
+      const category = parts[0]
+      const classId = parts[2]
+
+      if (category === 'subclass-choice' || category === 'asi-choice') {
+        const grantType = category === 'subclass-choice' ? 'subclass' : 'asi'
+        const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
+        if (classSource) {
+          let grantClassLevel: number | null = null
+          for (let i = 0; i < classSource.levels.length; i++) {
+            const hasGrant = classSource.levels[i].grants.some((g) => g.type === grantType)
+            if (hasGrant) {
+              grantClassLevel = i + 1
+              break
+            }
+          }
+
+          if (grantClassLevel !== null) {
+            const targetIdx = prev.findIndex(
+              (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
+            )
+            if (targetIdx !== -1) {
+              const next = [...prev]
+              if (grantType === 'subclass') {
+                next[targetIdx] = { ...next[targetIdx], subclass_id: null }
+              } else {
+                next[targetIdx] = { ...next[targetIdx], asi_allocation: null }
+              }
+              // Also remove from choices map on the same row
+              const existing = next[targetIdx]
+              const newChoices = { ...(existing.choices ?? {}) }
+              delete newChoices[choiceKey]
+              next[targetIdx] = { ...existing, choices: newChoices }
+              return next
+            }
+          }
+        }
+      }
+
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
@@ -322,11 +368,13 @@ export function CharacterProvider({
         .sort((a, b) => a.sequence - b.sequence)[0]
 
       if (nextDeletedRow) {
-        // Restore the soft-deleted row instead of appending a new one
-        const idx = prev.findIndex((r) => r.sequence === nextDeletedRow.sequence)
-        const next = [...prev]
-        next[idx] = { ...next[idx], deleted_at: null, hp_roll: hpRoll }
-        return next
+        // Only restore if the class matches; otherwise fall through to appending a new row
+        if (nextDeletedRow.class_id === classId) {
+          const idx = prev.findIndex((r) => r.sequence === nextDeletedRow.sequence)
+          const next = [...prev]
+          next[idx] = { ...next[idx], deleted_at: null, hp_roll: hpRoll }
+          return next
+        }
       }
 
       // No restorable row — append a new one
@@ -373,8 +421,8 @@ export function CharacterProvider({
       const idx = prev.findIndex((r) => r.sequence === maxDeletedSeq)
       if (idx === -1) return prev
       const next = [...prev]
-      // Clear deleted_at — undefined is equivalent to not present for the optional field
-      next[idx] = { ...next[idx], deleted_at: undefined }
+      // Clear deleted_at with null for consistency with the levelUp restore path
+      next[idx] = { ...next[idx], deleted_at: null }
       return next
     })
     setIsDirty(true)

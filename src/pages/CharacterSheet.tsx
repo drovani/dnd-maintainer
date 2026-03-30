@@ -109,18 +109,11 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     )
   }, [])
 
-  // Derive build warnings from context bundles (via resolved state)
-  const buildWarnings: string | null = null
+  // TODO: expose build warnings from CharacterProvider and render here when available
 
   const buildErrorBanner = buildError ? (
     <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
       {tc('characterSheet.errors.buildFailed', { message: buildError })}
-    </div>
-  ) : null
-
-  const buildWarningBanner = buildWarnings ? (
-    <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/50 rounded-lg text-amber-700 dark:text-amber-400 text-sm">
-      {tc('characterSheet.warnings.buildIncomplete', { message: buildWarnings })}
     </div>
   ) : null
 
@@ -141,7 +134,6 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto p-8">
         {buildErrorBanner}
-        {buildWarningBanner}
 
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
