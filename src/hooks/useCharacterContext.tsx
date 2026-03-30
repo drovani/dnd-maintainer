@@ -9,6 +9,7 @@ import type { ClassId } from '@/lib/dnd-helpers'
 import type { GrantBundle } from '@/types/sources'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
+import { CLASS_SOURCES } from '@/lib/sources/classes'
 import { resolveCharacter } from '@/lib/resolver/index'
 import { toast } from 'sonner'
 import i18next from 'i18next'
@@ -31,12 +32,14 @@ interface CharacterContextValue {
   readonly resolved: ResolvedCharacter | null
   readonly buildError: string | null
   readonly isDirty: boolean
+  readonly hasDeletedRows: boolean
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
   updateCreation: (updates: Readonly<CreationUpdates>) => void
   makeChoice: (choiceKey: string, decision: ChoiceDecision) => void
   clearChoice: (choiceKey: string) => void
   levelUp: (classId: ClassId, hpRoll: number | null) => void
   levelDown: () => void
+  undoLevelDown: () => void
   replaceLevel: (oldSequence: number, newClassId: string, newSubclassId: string | null) => void
   markSaved: () => void
 }
@@ -92,11 +95,14 @@ function tryDeriveAndResolve(
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
 ): BuildResult {
+  // Exclude soft-deleted rows before reconstruction
+  const activeRows = rows.filter((r) => r.deleted_at == null)
+
   let build: CharacterBuild
   try {
     build = reconstructBuild(
       { race: character.race, background: character.background },
-      rows,
+      activeRows,
       equippedItems,
     )
   } catch (err) {
@@ -111,7 +117,7 @@ function tryDeriveAndResolve(
   }
 
   try {
-    const levelRows = rows.filter((r) => r.sequence !== 0)
+    const levelRows = activeRows.filter((r) => r.sequence !== 0)
     const level = levelRows.length
     const resolved = resolveCharacter({
       baseAbilities: build.baseAbilities,
@@ -171,6 +177,11 @@ export function CharacterProvider({
     [character, rows, equippedItems],
   )
 
+  const hasDeletedRows = useMemo(
+    () => rows.some((r) => r.deleted_at != null && r.sequence !== 0),
+    [rows],
+  )
+
   const updateCharacter = useCallback((updates: Readonly<Partial<Character>>) => {
     setCharacter((prev) => {
       const next = { ...prev, ...updates }
@@ -223,6 +234,43 @@ export function CharacterProvider({
 
   const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
     setRows((prev) => {
+      // For subclass and ASI decisions, route to the promoted column on the target level row
+      if (decision.type === 'subclass' || decision.type === 'asi') {
+        // Parse choice key to find the class ID: format is `category:origin:classId:index`
+        const parts = choiceKey.split(':')
+        const classId = parts[2]
+        const grantType = decision.type
+
+        // Find which class level contains the matching grant type
+        const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
+        if (classSource) {
+          let grantClassLevel: number | null = null
+          for (let i = 0; i < classSource.levels.length; i++) {
+            const hasGrant = classSource.levels[i].grants.some((g) => g.type === grantType)
+            if (hasGrant) {
+              grantClassLevel = i + 1 // class levels are 1-indexed
+              break
+            }
+          }
+
+          if (grantClassLevel !== null) {
+            const targetIdx = prev.findIndex(
+              (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
+            )
+            if (targetIdx !== -1) {
+              const next = [...prev]
+              if (decision.type === 'subclass') {
+                next[targetIdx] = { ...next[targetIdx], subclass_id: decision.subclassId }
+              } else {
+                next[targetIdx] = { ...next[targetIdx], asi_allocation: decision.allocation as Record<string, number> }
+              }
+              return next
+            }
+          }
+        }
+        // Fall through to normal choice storage if promoted column routing failed
+      }
+
       const targetSeq = resolveChoiceSequence(choiceKey, prev)
       const idx = prev.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
@@ -264,8 +312,25 @@ export function CharacterProvider({
 
   const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
     setRows((prev) => {
-      const levelRows = prev.filter((r) => r.sequence !== 0)
-      const classLevelCount = levelRows.filter((r) => r.class_id === classId).length
+      // Check if there's a soft-deleted row with a higher sequence we can restore
+      const activeRows = prev.filter((r) => r.deleted_at == null)
+      const activeLevelRows = activeRows.filter((r) => r.sequence !== 0)
+      const maxActiveSeq = activeLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
+
+      const nextDeletedRow = prev
+        .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
+        .sort((a, b) => a.sequence - b.sequence)[0]
+
+      if (nextDeletedRow) {
+        // Restore the soft-deleted row instead of appending a new one
+        const idx = prev.findIndex((r) => r.sequence === nextDeletedRow.sequence)
+        const next = [...prev]
+        next[idx] = { ...next[idx], deleted_at: null, hp_roll: hpRoll }
+        return next
+      }
+
+      // No restorable row — append a new one
+      const classLevelCount = activeLevelRows.filter((r) => r.class_id === classId).length
       const maxSeq = prev.reduce((m, r) => Math.max(m, r.sequence), 0)
       const newRow: BuildLevelRow = {
         sequence: maxSeq + 1,
@@ -286,10 +351,31 @@ export function CharacterProvider({
 
   const levelDown = useCallback(() => {
     setRows((prev) => {
-      const levelRows = prev.filter((r) => r.sequence !== 0)
-      if (levelRows.length === 0) return prev
-      const maxSeq = levelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
-      return prev.filter((r) => r.sequence !== maxSeq)
+      // Only consider active (non-deleted) level rows
+      const activeLevelRows = prev.filter((r) => r.sequence !== 0 && r.deleted_at == null)
+      if (activeLevelRows.length === 0) return prev
+      const maxActiveSeq = activeLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
+      const idx = prev.findIndex((r) => r.sequence === maxActiveSeq)
+      if (idx === -1) return prev
+      const next = [...prev]
+      next[idx] = { ...next[idx], deleted_at: new Date().toISOString() }
+      return next
+    })
+    setIsDirty(true)
+  }, [])
+
+  const undoLevelDown = useCallback(() => {
+    setRows((prev) => {
+      // Find the most recently soft-deleted non-creation row (highest sequence with deleted_at set)
+      const deletedLevelRows = prev.filter((r) => r.sequence !== 0 && r.deleted_at != null)
+      if (deletedLevelRows.length === 0) return prev
+      const maxDeletedSeq = deletedLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
+      const idx = prev.findIndex((r) => r.sequence === maxDeletedSeq)
+      if (idx === -1) return prev
+      const next = [...prev]
+      // Clear deleted_at — undefined is equivalent to not present for the optional field
+      next[idx] = { ...next[idx], deleted_at: undefined }
+      return next
     })
     setIsDirty(true)
   }, [])
@@ -328,16 +414,18 @@ export function CharacterProvider({
       resolved,
       buildError,
       isDirty,
+      hasDeletedRows,
       updateCharacter,
       updateCreation,
       makeChoice,
       clearChoice,
       levelUp,
       levelDown,
+      undoLevelDown,
       replaceLevel,
       markSaved,
     }),
-    [character, rows, build, bundles, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, replaceLevel, markSaved],
+    [character, rows, build, bundles, resolved, buildError, isDirty, hasDeletedRows, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

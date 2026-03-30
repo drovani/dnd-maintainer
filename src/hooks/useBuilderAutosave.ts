@@ -129,6 +129,7 @@ export function useBuilderAutosave() {
                 : (row.asi_allocation as unknown as TablesInsert<'character_build_levels'>['asi_allocation']) ?? null,
               feat_id: isCreation ? null : row.feat_id,
               hp_roll: isCreation ? null : row.hp_roll,
+              deleted_at: row.deleted_at ?? null,
             }
           })
 

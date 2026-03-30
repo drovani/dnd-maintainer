@@ -196,7 +196,7 @@ describe('CharacterProvider', () => {
     expect(levelRows[0].sequence).toBe(1)
   })
 
-  it('levelDown removes the highest-sequence level row', () => {
+  it('levelDown soft-deletes the highest-sequence active level row', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
@@ -208,11 +208,14 @@ describe('CharacterProvider', () => {
       result.current.levelDown()
     })
 
-    expect(result.current.rows).toHaveLength(1)
-    expect(result.current.rows[0].sequence).toBe(0)
+    // Row count unchanged — row is soft-deleted, not removed
+    expect(result.current.rows).toHaveLength(2)
+    const levelRow = result.current.rows.find((r) => r.sequence === 1)
+    expect(levelRow?.deleted_at).toBeTruthy()
+    expect(result.current.isDirty).toBe(true)
   })
 
-  it('levelDown does not remove creation row', () => {
+  it('levelDown does not affect creation row', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow]),
@@ -222,8 +225,212 @@ describe('CharacterProvider', () => {
       result.current.levelDown()
     })
 
+    // No level rows to soft-delete — creation row untouched
     expect(result.current.rows).toHaveLength(1)
     expect(result.current.rows[0].sequence).toBe(0)
+    expect(result.current.rows[0].deleted_at).toBeUndefined()
+  })
+
+  it('hasDeletedRows is true after levelDown and false when no soft-deleted rows exist', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    expect(result.current.hasDeletedRows).toBe(false)
+
+    act(() => {
+      result.current.levelDown()
+    })
+
+    expect(result.current.hasDeletedRows).toBe(true)
+  })
+
+  it('undoLevelDown clears deleted_at on the most recently soft-deleted row', () => {
+    const character = buildSeedCharacter()
+    const fighterLevel2: BuildLevelRow = {
+      sequence: 2,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 2,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2]),
+    })
+
+    act(() => {
+      result.current.levelDown()
+    })
+
+    // sequence 2 should be soft-deleted
+    expect(result.current.rows.find((r) => r.sequence === 2)?.deleted_at).toBeTruthy()
+    expect(result.current.hasDeletedRows).toBe(true)
+
+    act(() => {
+      result.current.undoLevelDown()
+    })
+
+    // sequence 2 should be restored
+    expect(result.current.rows.find((r) => r.sequence === 2)?.deleted_at).toBeFalsy()
+    expect(result.current.hasDeletedRows).toBe(false)
+  })
+
+  it('undoLevelDown is a no-op when no soft-deleted rows exist', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    const rowsBefore = result.current.rows
+
+    act(() => {
+      result.current.undoLevelDown()
+    })
+
+    expect(result.current.rows).toEqual(rowsBefore)
+  })
+
+  it('levelUp restores a soft-deleted row instead of appending a new one', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    act(() => {
+      result.current.levelDown()
+    })
+
+    expect(result.current.rows).toHaveLength(2)
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+
+    act(() => {
+      result.current.levelUp('fighter', 8)
+    })
+
+    // Should still be 2 rows (restored, not appended)
+    expect(result.current.rows).toHaveLength(2)
+    const restoredRow = result.current.rows.find((r) => r.sequence === 1)
+    expect(restoredRow?.deleted_at).toBeFalsy()
+    expect(restoredRow?.hp_roll).toBe(8)
+  })
+
+  it('build reconstruction excludes soft-deleted rows', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    // Before levelDown: build should reflect 1 level
+    expect(result.current.build?.levels).toHaveLength(1)
+
+    act(() => {
+      result.current.levelDown()
+    })
+
+    // After soft-delete: build should reflect 0 levels (deleted row excluded)
+    expect(result.current.build?.levels).toHaveLength(0)
+  })
+
+  it('makeChoice with subclass decision sets subclass_id on the Fighter L3 row', () => {
+    const character = buildSeedCharacter()
+    const fighterLevel2: BuildLevelRow = {
+      sequence: 2,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 2,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const fighterLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 3,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3]),
+    })
+
+    act(() => {
+      result.current.makeChoice('subclass:class:fighter:0', {
+        type: 'subclass',
+        subclassId: 'champion',
+      })
+    })
+
+    // subclass_id should be set on the Fighter L3 row (sequence 3)
+    const l3Row = result.current.rows.find((r) => r.sequence === 3)
+    expect(l3Row?.subclass_id).toBe('champion')
+  })
+
+  it('makeChoice with asi decision sets asi_allocation on the Fighter L4 row', () => {
+    const character = buildSeedCharacter()
+    const fighterLevel2: BuildLevelRow = {
+      sequence: 2,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 2,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const fighterLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 3,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const fighterLevel4: BuildLevelRow = {
+      sequence: 4,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 4,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+    }
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3, fighterLevel4]),
+    })
+
+    act(() => {
+      result.current.makeChoice('asi:class:fighter:0', {
+        type: 'asi',
+        allocation: { str: 2 },
+      })
+    })
+
+    // asi_allocation should be set on the Fighter L4 row (sequence 4)
+    const l4Row = result.current.rows.find((r) => r.sequence === 4)
+    expect(l4Row?.asi_allocation).toEqual({ str: 2 })
   })
 
   it('makeChoice stores decision on the correct row', () => {
