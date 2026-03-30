@@ -6,7 +6,6 @@ import {
   DND_SKILLS,
   type SkillId,
 } from '@/lib/dnd-helpers'
-import { collectBundles } from '@/lib/sources'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -20,12 +19,11 @@ export function SkillsStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const context = useCharacterContext()
-  const { resolved, build } = context
+  const { resolved, build, bundles } = context
 
   // Scan grant bundles for all skill-choice grants (regardless of pending status)
   const skillChoices = useMemo((): readonly SkillChoiceInfo[] => {
-    if (!build) return []
-    const { bundles } = collectBundles(build)
+    if (bundles.length === 0) return []
     const choices: SkillChoiceInfo[] = []
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {
@@ -39,7 +37,7 @@ export function SkillsStep() {
       }
     }
     return choices
-  }, [build])
+  }, [bundles])
 
   if (!resolved) {
     return (

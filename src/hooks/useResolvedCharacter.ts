@@ -15,7 +15,7 @@ export function useResolvedCharacter(build: CharacterBuild | null): ResolvedChar
     }
     return resolveCharacter({
       baseAbilities: build.baseAbilities,
-      level: build.appliedLevels.length,
+      level: build.levels.length,
       bundles,
       choices: build.choices,
       hpRolls: build.hpRolls,

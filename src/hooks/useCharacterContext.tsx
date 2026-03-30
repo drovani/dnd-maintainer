@@ -6,6 +6,7 @@ import type { BuildLevelRow } from '@/lib/build-reconstruction'
 import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
 import type { ResolvedCharacter } from '@/types/resolved'
 import type { ClassId } from '@/lib/dnd-helpers'
+import type { GrantBundle } from '@/types/sources'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
 import { resolveCharacter } from '@/lib/resolver/index'
@@ -26,6 +27,7 @@ interface CharacterContextValue {
   readonly character: Character
   readonly rows: readonly BuildLevelRow[]
   readonly build: CharacterBuild | null
+  readonly bundles: readonly GrantBundle[]
   readonly resolved: ResolvedCharacter | null
   readonly buildError: string | null
   readonly isDirty: boolean
@@ -81,9 +83,9 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
 }
 
 type BuildResult =
-  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly resolved: ResolvedCharacter; readonly error: null }
-  | { readonly status: 'build-error'; readonly build: null; readonly resolved: null; readonly error: string }
-  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly resolved: null; readonly error: string }
+  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null }
+  | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
+  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
 
 function tryDeriveAndResolve(
   character: Character,
@@ -100,14 +102,15 @@ function tryDeriveAndResolve(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error'
     console.error('Failed to reconstruct character build:', { characterId: character.id, error: err })
-    return { status: 'build-error', build: null, resolved: null, error: message }
+    return { status: 'build-error', build: null, bundles: [], resolved: null, error: message }
+  }
+
+  const { bundles, warnings } = collectBundles(build)
+  if (warnings.length > 0) {
+    console.warn('collectBundles warnings:', warnings)
   }
 
   try {
-    const { bundles, warnings } = collectBundles(build)
-    if (warnings.length > 0) {
-      console.warn('collectBundles warnings:', warnings)
-    }
     const levelRows = rows.filter((r) => r.sequence !== 0)
     const level = levelRows.length
     const resolved = resolveCharacter({
@@ -117,11 +120,11 @@ function tryDeriveAndResolve(
       choices: build.choices,
       hpRolls: build.hpRolls,
     })
-    return { status: 'ok', build, resolved, error: null }
+    return { status: 'ok', build, bundles, resolved, error: null }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown resolver error'
     console.error('Failed to resolve character:', { characterId: character.id, error: err })
-    return { status: 'resolve-error', build, resolved: null, error: message }
+    return { status: 'resolve-error', build, bundles, resolved: null, error: message }
   }
 }
 
@@ -163,7 +166,7 @@ export function CharacterProvider({
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
-  const { build, resolved, error: buildError } = useMemo(
+  const { build, bundles, resolved, error: buildError } = useMemo(
     () => tryDeriveAndResolve(character, rows, equippedItems),
     [character, rows, equippedItems],
   )
@@ -321,6 +324,7 @@ export function CharacterProvider({
       character,
       rows,
       build,
+      bundles,
       resolved,
       buildError,
       isDirty,
@@ -333,7 +337,7 @@ export function CharacterProvider({
       replaceLevel,
       markSaved,
     }),
-    [character, rows, build, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, replaceLevel, markSaved],
+    [character, rows, build, bundles, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

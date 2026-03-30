@@ -8,7 +8,6 @@ import {
   type LanguageId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
-import { collectBundles } from '@/lib/sources'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -22,12 +21,11 @@ export function ProficienciesStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const context = useCharacterContext()
-  const { resolved, build } = context
+  const { resolved, build, bundles } = context
 
   // Scan grant bundles for all language-choice and tool-choice grants
   const { languageChoices, toolChoices } = useMemo(() => {
-    if (!build) return { languageChoices: [] as ChoiceInfo<LanguageId>[], toolChoices: [] as ChoiceInfo<ToolProficiencyId>[] }
-    const { bundles } = collectBundles(build)
+    if (bundles.length === 0) return { languageChoices: [] as ChoiceInfo<LanguageId>[], toolChoices: [] as ChoiceInfo<ToolProficiencyId>[] }
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
     for (const bundle of bundles) {
@@ -49,7 +47,7 @@ export function ProficienciesStep() {
       }
     }
     return { languageChoices: lc, toolChoices: tc }
-  }, [build])
+  }, [bundles])
 
   if (!resolved) {
     return (
