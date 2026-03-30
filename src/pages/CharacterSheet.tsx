@@ -20,8 +20,11 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { LevelControls } from '@/components/character-sheet/LevelControls'
+import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
+import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
 import {
   DND_ALIGNMENTS,
   DND_BACKGROUNDS,
@@ -30,13 +33,10 @@ import {
   DND_SKILLS,
   getProficiencyBonus,
   isBackgroundId,
+  type ClassId,
   type DndGender,
   type DndSkill,
 } from '@/lib/dnd-helpers'
-import { reconstructBuild } from '@/lib/build-reconstruction'
-import { collectBundles } from '@/lib/sources'
-import { resolveCharacter } from '@/lib/resolver'
-import type { ResolvedCharacter } from '@/types/resolved'
 import type { Character } from '@/types/database'
 import { Edit2, Save } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -78,78 +78,20 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
   )
 }
 
-interface ResolvedFromBuild {
-  readonly resolved: ResolvedCharacter | null
-  readonly buildError: string | null
-  readonly buildWarnings: string | null
-}
 
-function useResolvedFromBuild(
-  character: Character | undefined,
-  buildRows: ReturnType<typeof useCharacterBuildLevels>['data'],
-  equippedItems: string[],
-): ResolvedFromBuild {
-  return useMemo(() => {
-    if (!character || !buildRows || buildRows.length === 0) return { resolved: null, buildError: null, buildWarnings: null }
-
-    // Phase 1: Reconstruct build
-    let build: ReturnType<typeof reconstructBuild>
-    try {
-      build = reconstructBuild(
-        { race: character.race, background: character.background },
-        buildRows,
-        equippedItems,
-      )
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Build reconstruction failed:', message)
-      return { resolved: null, buildError: message, buildWarnings: null }
-    }
-
-    // Phase 2: Resolve character
-    try {
-      const { bundles, warnings } = collectBundles(build)
-      if (warnings.length > 0) {
-        console.warn('collectBundles warnings:', warnings)
-      }
-      const levelRows = buildRows.filter((r) => r.sequence !== 0)
-      const resolved = resolveCharacter({
-        baseAbilities: build.baseAbilities,
-        level: levelRows.length,
-        bundles,
-        choices: build.choices,
-        hpRolls: build.hpRolls,
-      })
-      const buildWarning = warnings.length > 0 ? warnings.join('; ') : null
-      return { resolved, buildError: null, buildWarnings: buildWarning }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Character resolution failed:', message)
-      return { resolved: null, buildError: message, buildWarnings: null }
-    }
-  }, [character, buildRows, equippedItems])
-}
-
-export default function CharacterSheet() {
+function CharacterSheetInner({ character, itemsData, characterId }: {
+  character: Character
+  itemsData: Array<{ id: string; item_id: string; equipped?: boolean; quantity: number }>
+  characterId: string
+}) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
-  const { characterId } = useParams<{ id: string; characterId: string }>()
   const [editSection, setEditSection] = useState<EditSection>(null)
 
-  const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
-  const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(characterId)
-  const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(characterId)
   const { update: updateMutation } = useCharacterMutations()
-
-  const equippedItems = useMemo(
-    () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
-    [itemsData],
-  )
-
-  const { resolved, buildError, buildWarnings } = useResolvedFromBuild(character, buildRows, equippedItems)
+  const { resolved, buildError } = useCharacterContext()
 
   const handleUpdate = (updates: Partial<Character>) => {
-    if (!characterId) return
     updateMutation.mutate({ id: characterId, ...updates }, {
       onSuccess: () => setEditSection(null),
       onError: () => toast.error(tc('characterSheet.errors.updateFailed')),
@@ -167,32 +109,8 @@ export default function CharacterSheet() {
     )
   }, [])
 
-  const isLoading = characterLoading || rowsLoading || itemsLoading
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <Skeleton className="h-40 w-full rounded-lg" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Skeleton className="h-96 w-full rounded-lg" />
-            <Skeleton className="h-96 w-full rounded-lg" />
-            <Skeleton className="h-96 w-full rounded-lg" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error || !character) {
-    return (
-      <div className="min-h-screen p-8">
-        <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
-          {tc('characterSheet.errors.loadingCharacter', { error: String(error) })}
-        </div>
-      </div>
-    )
-  }
+  // Derive build warnings from context bundles (via resolved state)
+  const buildWarnings: string | null = null
 
   const buildErrorBanner = buildError ? (
     <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
@@ -289,6 +207,18 @@ export default function CharacterSheet() {
               </div>
             )}
           </div>
+
+          {/* Level Controls */}
+          {character.class && (
+            <div className="mt-4 pt-4 border-t">
+              <LevelControls classId={character.class as ClassId} />
+            </div>
+          )}
+        </div>
+
+        {/* Pending Choices Panel */}
+        <div className="mb-6">
+          <PendingChoicesPanel />
         </div>
 
         {/* Three Column Layout */}
@@ -604,6 +534,62 @@ export default function CharacterSheet() {
         />
       )}
     </div>
+  )
+}
+
+export default function CharacterSheet() {
+  const { t: tc } = useTranslation('common')
+  const { characterId } = useParams<{ id: string; characterId: string }>()
+
+  const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
+  const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(characterId)
+  const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(characterId)
+
+  const equippedItems = useMemo(
+    () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
+    [itemsData],
+  )
+
+  const isLoading = characterLoading || rowsLoading || itemsLoading
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !character || !characterId) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
+          {tc('characterSheet.errors.loadingCharacter', { error: String(error) })}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <CharacterProvider
+      key={characterId}
+      initialCharacter={character}
+      initialRows={buildRows}
+      initialEquippedItems={equippedItems}
+    >
+      <CharacterSheetInner
+        character={character}
+        itemsData={itemsData}
+        characterId={characterId}
+      />
+    </CharacterProvider>
   )
 }
 

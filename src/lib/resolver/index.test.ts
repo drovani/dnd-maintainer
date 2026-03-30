@@ -324,7 +324,7 @@ describe('Pending ASI and Subclass choices', () => {
     const result = resolveCharacter({
       ...baseInput,
       bundles,
-      choices: { [asiKey]: { type: 'asi', allocation: { str: 2 } } },
+      choices: { [asiKey]: { type: 'asi', allocation: { str: 2 } } as const },
     })
     const pending = result.pendingChoices.find((c) => c.type === 'asi')
     expect(pending).toBeUndefined()
@@ -356,7 +356,7 @@ describe('Pending ASI and Subclass choices', () => {
     const result = resolveCharacter({
       ...baseInput,
       bundles,
-      choices: { [subclassKey]: { type: 'subclass', subclassId: 'champion' } },
+      choices: { [subclassKey]: { type: 'subclass', subclassId: 'champion' } as const },
     })
     const pending = result.pendingChoices.find((c) => c.type === 'subclass')
     expect(pending).toBeUndefined()

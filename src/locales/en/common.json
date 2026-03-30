@@ -46,7 +46,8 @@
     "rollScores": "Roll Scores",
     "updateNote": "Update Note",
     "createNote": "Create Note",
-    "close": "Close"
+    "close": "Close",
+    "confirm": "Confirm"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -305,7 +306,9 @@
       "levelDown": "Level Down",
       "undoLevelDown": "Undo Level Down",
       "rollHp": "Roll HP",
+      "rollHpHint": "Roll a d{{die}} for HP",
       "takeAverage": "Take Average",
+      "takeAverageHint": "Take {{value}} HP (average)",
       "hpRollPrompt": "How would you like to determine hit points?",
       "levelUpTitle": "Level Up",
       "currentLevel": "Current Level"
@@ -313,7 +316,12 @@
     "asi": {
       "asiTitle": "Ability Score Improvement",
       "asiPointsRemaining": "Points Remaining: {{points}}",
-      "asiDescription": "Allocate {{points}} points among your ability scores. No score can exceed 20."
+      "asiDescription": "Allocate {{points}} points among your ability scores. No score can exceed 20.",
+      "decreaseAbility": "Decrease {{ability}}",
+      "increaseAbility": "Increase {{ability}}"
+    },
+    "pendingChoices": {
+      "description": "{{count}} choice(s) require your attention."
     },
     "subclassPicker": {
       "chooseSubclass": "Choose Subclass",
