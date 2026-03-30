@@ -148,28 +148,6 @@ describe('reconstructBuild', () => {
     })
   })
 
-  it('subclass choice key matches createChoiceKey output exactly', () => {
-    const level3: BuildLevelRow = {
-      sequence: 3,
-      base_abilities: null,
-      ability_method: null,
-      class_id: 'fighter',
-      class_level: 3,
-      subclass_id: 'champion',
-      asi_allocation: null,
-      feat_id: null,
-      hp_roll: 6,
-      choices: null,
-    }
-    const result = reconstructBuild(identity, [creationRow, level3], [])
-    // Key must be 'subclass:class:fighter:0' — same as createChoiceKey('subclass', 'class', 'fighter', 0)
-    expect(createChoiceKey('subclass', 'class', 'fighter', 0)).toBe('subclass:class:fighter:0')
-    expect(result.choices['subclass:class:fighter:0']).toEqual({
-      type: 'subclass',
-      subclassId: 'champion',
-    })
-  })
-
   it('maps asi_allocation into choices using createChoiceKey format', () => {
     const level4: BuildLevelRow = {
       sequence: 4,
@@ -186,25 +164,6 @@ describe('reconstructBuild', () => {
     const expectedKey = createChoiceKey('asi', 'class', 'fighter', 0)
     const result = reconstructBuild(identity, [creationRow, level4], [])
     expect(result.choices[expectedKey]).toEqual({ type: 'asi', allocation: { str: 2 } })
-  })
-
-  it('ASI choice key matches createChoiceKey output exactly', () => {
-    const level4: BuildLevelRow = {
-      sequence: 4,
-      base_abilities: null,
-      ability_method: null,
-      class_id: 'fighter',
-      class_level: 4,
-      subclass_id: null,
-      asi_allocation: { str: 2 },
-      feat_id: null,
-      hp_roll: 7,
-      choices: null,
-    }
-    const result = reconstructBuild(identity, [creationRow, level4], [])
-    // Key must be 'asi:class:fighter:0' — same as createChoiceKey('asi', 'class', 'fighter', 0)
-    expect(createChoiceKey('asi', 'class', 'fighter', 0)).toBe('asi:class:fighter:0')
-    expect(result.choices['asi:class:fighter:0']).toEqual({ type: 'asi', allocation: { str: 2 } })
   })
 
   it('merges choices from JSONB', () => {

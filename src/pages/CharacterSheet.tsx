@@ -109,8 +109,6 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     )
   }, [])
 
-  // TODO: expose build warnings from CharacterProvider and render here when available
-
   const buildErrorBanner = buildError ? (
     <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
       {tc('characterSheet.errors.buildFailed', { message: buildError })}
@@ -120,7 +118,9 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
   const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
   const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level)
 
-  // Combat stats — prefer resolved pipeline values, fall back to pre-calculated columns
+  // Combat stats — prefer resolved pipeline values, fall back to pre-calculated DB columns.
+  // When buildError is set and resolved is null, these are stale values from the database.
+  const isStale = buildError !== null && resolved === null
   const armorClass = resolved?.armorClass.effective ?? character.armor_class
   const speedValue = resolved?.speed.walk?.value ?? character.speed
   const maxHP = resolved?.hitPoints.max ?? character.hit_points_max
@@ -326,7 +326,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               )}
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-muted/50 p-4 rounded border text-center">
+                <div className={`bg-muted/50 p-4 rounded border text-center ${isStale ? 'opacity-50' : ''}`}>
                   <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.armorClass')}</div>
                   <div className="text-4xl font-bold text-foreground">{armorClass}</div>
                 </div>
@@ -344,12 +344,12 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               </div>
 
               {/* HP Display (read-only) */}
-              <div className="bg-muted/50 p-4 rounded border mb-4">
+              <div className={`bg-muted/50 p-4 rounded border mb-4 ${isStale ? 'opacity-50' : ''}`}>
                 <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.hitPoints')}</div>
                 <div className="text-2xl font-bold text-red-600">{maxHP ?? '—'}</div>
               </div>
 
-              <div className="text-xs text-muted-foreground">
+              <div className={`text-xs text-muted-foreground ${isStale ? 'opacity-50' : ''}`}>
                 <div className="flex justify-between py-1">
                   <span>{tc('characterSheet.fields.proficiencyBonus')}</span>
                   <span className="font-mono font-bold text-foreground">+{profBonus}</span>
@@ -534,8 +534,8 @@ export default function CharacterSheet() {
   const { characterId } = useParams<{ id: string; characterId: string }>()
 
   const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
-  const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(characterId)
-  const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(characterId)
+  const { data: buildRows = [], isLoading: rowsLoading, error: rowsError } = useCharacterBuildLevels(characterId)
+  const { data: itemsData = [], isLoading: itemsLoading, error: itemsError } = useCharacterItems(characterId)
 
   const equippedItems = useMemo(
     () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
@@ -559,11 +559,11 @@ export default function CharacterSheet() {
     )
   }
 
-  if (error || !character || !characterId) {
+  if (error || rowsError || itemsError || !character || !characterId) {
     return (
       <div className="min-h-screen p-8">
         <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
-          {tc('characterSheet.errors.loadingCharacter', { error: String(error) })}
+          {tc('characterSheet.errors.loadingCharacter', { error: String(error ?? rowsError ?? itemsError) })}
         </div>
       </div>
     )

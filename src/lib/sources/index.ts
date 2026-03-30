@@ -128,6 +128,10 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
               bundles.push({ source: tag, grants: feature.grants })
             }
           }
+        } else {
+          const msg = `No source data found for subclass "${subclassDecision.subclassId}" — subclass features will be empty`
+          warnings.push(msg)
+          console.warn(msg)
         }
       }
     }

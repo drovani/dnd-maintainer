@@ -16,7 +16,7 @@ import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/charact
 interface BaseBuildRow {
   readonly character_id?: string
   readonly choices: Record<string, ChoiceDecision> | null
-  readonly deleted_at?: string | null
+  readonly deleted_at: string | null
 }
 
 export interface CreationRow extends BaseBuildRow {

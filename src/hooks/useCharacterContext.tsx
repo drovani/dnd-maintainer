@@ -4,6 +4,7 @@ import type { Character } from '@/types/database'
 import type { AbilityScores } from '@/types/database'
 import type { BuildLevelRow } from '@/lib/build-reconstruction'
 import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
+import { parseChoiceKey } from '@/types/choices'
 import type { ResolvedCharacter } from '@/types/resolved'
 import type { ClassId } from '@/lib/dnd-helpers'
 import type { GrantBundle } from '@/types/sources'
@@ -63,16 +64,13 @@ const CharacterContext = createContext<CharacterContextValue | null>(null)
  * Everything else defaults to sequence-0.
  */
 export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]): number {
-  const parts = choiceKey.split(':')
-  // e.g. "language-choice:race:human:0" or "skill-choice:class:fighter:0"
-  const origin = parts[1]
+  const { origin, id: classId } = parseChoiceKey(choiceKey)
 
   if (origin === 'race' || origin === 'background') {
     return 0
   }
 
   if (origin === 'class') {
-    const classId = parts[2]
     // Find the first level row with matching class_id
     const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId)
     if (!levelRow) {
@@ -86,8 +84,11 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
 }
 
 /**
- * Find the row index for a promoted column (subclass or ASI) on a class level row.
- * Returns the index into `rows` if found, or -1 if the grant type or row cannot be located.
+ * Find the row index where a subclass_id or asi_allocation should be written
+ * as a dedicated column (rather than in the JSONB choices column).
+ *
+ * Returns the index into `rows` if found, or -1 if the class source, grant type,
+ * or active row cannot be located.
  */
 function findGrantRowIndex(
   classId: string,
@@ -95,7 +96,10 @@ function findGrantRowIndex(
   rows: readonly BuildLevelRow[],
 ): number {
   const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
-  if (!classSource) return -1
+  if (!classSource) {
+    console.warn(`findGrantRowIndex: no class source for "${classId}"`)
+    return -1
+  }
 
   let grantClassLevel: number | null = null
   for (let i = 0; i < classSource.levels.length; i++) {
@@ -104,11 +108,18 @@ function findGrantRowIndex(
       break
     }
   }
-  if (grantClassLevel === null) return -1
+  if (grantClassLevel === null) {
+    console.warn(`findGrantRowIndex: no ${grantType} grant found in class "${classId}" source data`)
+    return -1
+  }
 
-  return rows.findIndex(
+  const idx = rows.findIndex(
     (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
   )
+  if (idx === -1) {
+    console.warn(`findGrantRowIndex: no active row at class level ${grantClassLevel} for class "${classId}"`)
+  }
+  return idx
 }
 
 type BuildResult =
@@ -260,9 +271,9 @@ export function CharacterProvider({
 
   const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
     setRows((prev) => {
-      // For subclass and ASI decisions, route to the promoted column on the target level row
+      // For subclass and ASI decisions, route to the dedicated column on the target level row
       if (decision.type === 'subclass' || decision.type === 'asi') {
-        const classId = choiceKey.split(':')[2]
+        const { id: classId } = parseChoiceKey(choiceKey)
         const targetIdx = findGrantRowIndex(classId, decision.type, prev)
         if (targetIdx !== -1) {
           const next = [...prev]
@@ -297,12 +308,11 @@ export function CharacterProvider({
 
   const clearChoice = useCallback((choiceKey: string) => {
     setRows((prev) => {
-      // For subclass and ASI decisions, also clear the promoted column on the target level row
-      const category = choiceKey.split(':')[0]
+      // For subclass and ASI decisions, also clear the dedicated column on the target level row
+      const { category, id: classId } = parseChoiceKey(choiceKey)
 
-      if (category === 'subclass-choice' || category === 'asi-choice') {
-        const classId = choiceKey.split(':')[2]
-        const grantType = category === 'subclass-choice' ? 'subclass' as const : 'asi' as const
+      if (category === 'subclass' || category === 'asi') {
+        const grantType = category === 'subclass' ? 'subclass' as const : 'asi' as const
         const targetIdx = findGrantRowIndex(classId, grantType, prev)
         if (targetIdx !== -1) {
           const next = [...prev]
@@ -401,7 +411,7 @@ export function CharacterProvider({
       const idx = prev.findIndex((r) => r.sequence === maxDeletedSeq)
       if (idx === -1) return prev
       const next = [...prev]
-      // Clear deleted_at with null for consistency with the levelUp restore path
+      // Restore the row by clearing its deleted_at timestamp
       next[idx] = { ...next[idx], deleted_at: null }
       return next
     })

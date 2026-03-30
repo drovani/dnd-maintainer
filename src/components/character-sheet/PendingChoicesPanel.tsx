@@ -18,33 +18,41 @@ function PendingChoiceRow({
   onDecide: (key: string, decision: ChoiceDecision) => void
   onClear: (key: string) => void
 }) {
-  const { resolved, makeChoice } = useCharacterContext()
+  const { resolved } = useCharacterContext()
+  const { t: tc } = useTranslation('common')
 
   if (choice.type === 'subclass') {
     return (
       <SubclassPicker
         choice={choice}
         onDecide={(choiceKey, subclassId) =>
-          makeChoice(choiceKey, { type: 'subclass', subclassId })
+          onDecide(choiceKey, { type: 'subclass', subclassId })
         }
       />
     )
   }
 
   if (choice.type === 'asi') {
-    if (!resolved) return null
+    if (!resolved) {
+      return (
+        <Card className="opacity-60">
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            {tc('characterSheet.asi.asiTitle')}
+          </CardContent>
+        </Card>
+      )
+    }
     return (
       <AsiAllocator
         choice={choice}
         abilities={resolved.abilities}
         onDecide={(choiceKey, allocation) =>
-          makeChoice(choiceKey, { type: 'asi', allocation })
+          onDecide(choiceKey, { type: 'asi', allocation })
         }
       />
     )
   }
 
-  // Delegate to existing ChoicePicker for skill/language/tool/ability choices
   return (
     <ChoicePicker
       choice={choice}

@@ -21,9 +21,9 @@ export function LevelControls({ classId }: LevelControlsProps) {
 
   const classData = DND_CLASSES.find((c) => c.id === classId)
   if (!classData) {
-    console.warn(`LevelControls: classId "${classId}" not found in DND_CLASSES — falling back to hitDie 8`)
+    throw new Error(`LevelControls: classId "${classId}" not found in DND_CLASSES — this is a data integrity error`)
   }
-  const hitDie = classData?.hitDie ?? 8
+  const hitDie = classData.hitDie
 
   const handleConfirmLevelUp = (hpRoll: number) => {
     levelUp(classId, hpRoll)

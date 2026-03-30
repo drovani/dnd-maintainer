@@ -14,6 +14,23 @@ export function createChoiceKey(category: string, origin: ChoiceOrigin, id: stri
   return `${category}:${origin}:${id}:${index}`
 }
 
+export interface ParsedChoiceKey {
+  readonly category: string
+  readonly origin: ChoiceOrigin
+  readonly id: string
+  readonly index: number
+}
+
+export function parseChoiceKey(key: ChoiceKey | string): ParsedChoiceKey {
+  const parts = key.split(':')
+  return {
+    category: parts[0],
+    origin: parts[1] as ChoiceOrigin,
+    id: parts[2],
+    index: Number(parts[3]),
+  }
+}
+
 export type ChoiceDecision =
   | { readonly type: 'ability-choice'; readonly abilities: readonly AbilityKey[] }
   | { readonly type: 'skill-choice'; readonly skills: readonly SkillId[] }
