@@ -85,6 +85,32 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
   return 0
 }
 
+/**
+ * Find the row index for a promoted column (subclass or ASI) on a class level row.
+ * Returns the index into `rows` if found, or -1 if the grant type or row cannot be located.
+ */
+function findGrantRowIndex(
+  classId: string,
+  grantType: 'subclass' | 'asi',
+  rows: readonly BuildLevelRow[],
+): number {
+  const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
+  if (!classSource) return -1
+
+  let grantClassLevel: number | null = null
+  for (let i = 0; i < classSource.levels.length; i++) {
+    if (classSource.levels[i].grants.some((g) => g.type === grantType)) {
+      grantClassLevel = i + 1
+      break
+    }
+  }
+  if (grantClassLevel === null) return -1
+
+  return rows.findIndex(
+    (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
+  )
+}
+
 type BuildResult =
   | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null }
   | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
@@ -236,43 +262,16 @@ export function CharacterProvider({
     setRows((prev) => {
       // For subclass and ASI decisions, route to the promoted column on the target level row
       if (decision.type === 'subclass' || decision.type === 'asi') {
-        // Parse choice key to find the class ID: format is `category:origin:classId:index`
-        const parts = choiceKey.split(':')
-        const classId = parts[2]
-        const grantType = decision.type
-
-        // Find which class level contains the matching grant type
-        const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
-        if (!classSource) {
-          console.warn(`makeChoice: no class source found for classId "${classId}" — falling through to normal choice storage`, { choiceKey, decision })
-        } else {
-          let grantClassLevel: number | null = null
-          for (let i = 0; i < classSource.levels.length; i++) {
-            const hasGrant = classSource.levels[i].grants.some((g) => g.type === grantType)
-            if (hasGrant) {
-              grantClassLevel = i + 1 // class levels are 1-indexed
-              break
-            }
-          }
-
-          if (grantClassLevel === null) {
-            console.warn(`makeChoice: no grant of type "${grantType}" found in class "${classId}" — falling through to normal choice storage`, { choiceKey, decision })
+        const classId = choiceKey.split(':')[2]
+        const targetIdx = findGrantRowIndex(classId, decision.type, prev)
+        if (targetIdx !== -1) {
+          const next = [...prev]
+          if (decision.type === 'subclass') {
+            next[targetIdx] = { ...next[targetIdx], subclass_id: decision.subclassId }
           } else {
-            const targetIdx = prev.findIndex(
-              (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
-            )
-            if (targetIdx === -1) {
-              console.warn(`makeChoice: no active row found for class "${classId}" at class level ${grantClassLevel} — falling through to normal choice storage`, { choiceKey, decision })
-            } else {
-              const next = [...prev]
-              if (decision.type === 'subclass') {
-                next[targetIdx] = { ...next[targetIdx], subclass_id: decision.subclassId }
-              } else {
-                next[targetIdx] = { ...next[targetIdx], asi_allocation: decision.allocation as Record<string, number> }
-              }
-              return next
-            }
+            next[targetIdx] = { ...next[targetIdx], asi_allocation: decision.allocation as Record<string, number> }
           }
+          return next
         }
         // Fall through to normal choice storage if promoted column routing failed
       }
@@ -299,42 +298,23 @@ export function CharacterProvider({
   const clearChoice = useCallback((choiceKey: string) => {
     setRows((prev) => {
       // For subclass and ASI decisions, also clear the promoted column on the target level row
-      const parts = choiceKey.split(':')
-      const category = parts[0]
-      const classId = parts[2]
+      const category = choiceKey.split(':')[0]
 
       if (category === 'subclass-choice' || category === 'asi-choice') {
-        const grantType = category === 'subclass-choice' ? 'subclass' : 'asi'
-        const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
-        if (classSource) {
-          let grantClassLevel: number | null = null
-          for (let i = 0; i < classSource.levels.length; i++) {
-            const hasGrant = classSource.levels[i].grants.some((g) => g.type === grantType)
-            if (hasGrant) {
-              grantClassLevel = i + 1
-              break
-            }
+        const classId = choiceKey.split(':')[2]
+        const grantType = category === 'subclass-choice' ? 'subclass' as const : 'asi' as const
+        const targetIdx = findGrantRowIndex(classId, grantType, prev)
+        if (targetIdx !== -1) {
+          const next = [...prev]
+          if (grantType === 'subclass') {
+            next[targetIdx] = { ...next[targetIdx], subclass_id: null }
+          } else {
+            next[targetIdx] = { ...next[targetIdx], asi_allocation: null }
           }
-
-          if (grantClassLevel !== null) {
-            const targetIdx = prev.findIndex(
-              (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
-            )
-            if (targetIdx !== -1) {
-              const next = [...prev]
-              if (grantType === 'subclass') {
-                next[targetIdx] = { ...next[targetIdx], subclass_id: null }
-              } else {
-                next[targetIdx] = { ...next[targetIdx], asi_allocation: null }
-              }
-              // Also remove from choices map on the same row
-              const existing = next[targetIdx]
-              const newChoices = { ...(existing.choices ?? {}) }
-              delete newChoices[choiceKey]
-              next[targetIdx] = { ...existing, choices: newChoices }
-              return next
-            }
-          }
+          const newChoices = { ...(next[targetIdx].choices ?? {}) }
+          delete newChoices[choiceKey]
+          next[targetIdx] = { ...next[targetIdx], choices: newChoices }
+          return next
         }
       }
 
