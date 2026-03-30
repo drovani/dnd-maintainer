@@ -9,6 +9,7 @@ import type {
   GrantBundle,
   SourceTag,
 } from '@/types/sources'
+import type { SubclassGrant } from '@/types/grants'
 import type { CharacterBuild } from '@/types/choices'
 import { RACE_SOURCES } from '@/lib/sources/races'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
@@ -98,20 +99,34 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
 
   // Subclass features
   for (const [classId, levelCount] of classCounts) {
-    const subclassChoiceKey = `subclass:${classId}`
-    const subclassDecision = build.choices[subclassChoiceKey]
-    if (subclassDecision?.type === 'subclass') {
-      const subclassSource = getSubclassSource(subclassDecision.subclassId)
-      if (subclassSource) {
-        for (const feature of subclassSource.features) {
-          if (feature.classLevel <= levelCount) {
-            const tag: SourceTag = {
-              origin: 'subclass',
-              id: subclassDecision.subclassId,
-              classId,
-              level: feature.classLevel,
+    const classSource = getClassSource(classId)
+    if (!classSource) continue
+
+    // Collect subclass grants from class levels up to levelCount
+    const subclassGrants: SubclassGrant[] = []
+    for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
+      for (const grant of classSource.levels[i].grants) {
+        if (grant.type === 'subclass') {
+          subclassGrants.push(grant as SubclassGrant)
+        }
+      }
+    }
+
+    for (const subclassGrant of subclassGrants) {
+      const subclassDecision = build.choices[subclassGrant.key]
+      if (subclassDecision?.type === 'subclass') {
+        const subclassSource = getSubclassSource(subclassDecision.subclassId)
+        if (subclassSource) {
+          for (const feature of subclassSource.features) {
+            if (feature.classLevel <= levelCount) {
+              const tag: SourceTag = {
+                origin: 'subclass',
+                id: subclassDecision.subclassId,
+                classId,
+                level: feature.classLevel,
+              }
+              bundles.push({ source: tag, grants: feature.grants })
             }
-            bundles.push({ source: tag, grants: feature.grants })
           }
         }
       }

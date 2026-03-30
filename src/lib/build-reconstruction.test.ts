@@ -3,6 +3,7 @@ import { reconstructBuild } from '@/lib/build-reconstruction'
 import type { BuildLevelRow, CharacterIdentity } from '@/lib/build-reconstruction'
 import { collectBundles } from '@/lib/sources/index'
 import { resolveCharacter } from '@/lib/resolver/index'
+import { createChoiceKey } from '@/types/choices'
 
 const identity: CharacterIdentity = { race: 'human', background: 'soldier' }
 
@@ -126,7 +127,28 @@ describe('reconstructBuild', () => {
     expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
-  it('maps subclass_id into choices using subclass:${classId} key format', () => {
+  it('maps subclass_id into choices using createChoiceKey format', () => {
+    const level3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 3,
+      subclass_id: 'champion',
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: 6,
+      choices: null,
+    }
+    const expectedKey = createChoiceKey('subclass', 'class', 'fighter', 0)
+    const result = reconstructBuild(identity, [creationRow, level3], [])
+    expect(result.choices[expectedKey]).toEqual({
+      type: 'subclass',
+      subclassId: 'champion',
+    })
+  })
+
+  it('subclass choice key matches createChoiceKey output exactly', () => {
     const level3: BuildLevelRow = {
       sequence: 3,
       base_abilities: null,
@@ -140,13 +162,33 @@ describe('reconstructBuild', () => {
       choices: null,
     }
     const result = reconstructBuild(identity, [creationRow, level3], [])
-    expect(result.choices['subclass:fighter']).toEqual({
+    // Key must be 'subclass:class:fighter:0' — same as createChoiceKey('subclass', 'class', 'fighter', 0)
+    expect(createChoiceKey('subclass', 'class', 'fighter', 0)).toBe('subclass:class:fighter:0')
+    expect(result.choices['subclass:class:fighter:0']).toEqual({
       type: 'subclass',
       subclassId: 'champion',
     })
   })
 
-  it('maps asi_allocation into choices', () => {
+  it('maps asi_allocation into choices using createChoiceKey format', () => {
+    const level4: BuildLevelRow = {
+      sequence: 4,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 4,
+      subclass_id: null,
+      asi_allocation: { str: 2 },
+      feat_id: null,
+      hp_roll: 7,
+      choices: null,
+    }
+    const expectedKey = createChoiceKey('asi', 'class', 'fighter', 0)
+    const result = reconstructBuild(identity, [creationRow, level4], [])
+    expect(result.choices[expectedKey]).toEqual({ type: 'asi', allocation: { str: 2 } })
+  })
+
+  it('ASI choice key matches createChoiceKey output exactly', () => {
     const level4: BuildLevelRow = {
       sequence: 4,
       base_abilities: null,
@@ -160,7 +202,9 @@ describe('reconstructBuild', () => {
       choices: null,
     }
     const result = reconstructBuild(identity, [creationRow, level4], [])
-    expect(result.choices['fighter-4-asi']).toEqual({ type: 'asi', allocation: { str: 2 } })
+    // Key must be 'asi:class:fighter:0' — same as createChoiceKey('asi', 'class', 'fighter', 0)
+    expect(createChoiceKey('asi', 'class', 'fighter', 0)).toBe('asi:class:fighter:0')
+    expect(result.choices['asi:class:fighter:0']).toEqual({ type: 'asi', allocation: { str: 2 } })
   })
 
   it('merges choices from JSONB', () => {

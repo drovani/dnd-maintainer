@@ -79,6 +79,32 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved ASI grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'asi')) {
+    const decision = choices[grant.key]
+    if (!decision || decision.type !== 'asi') {
+      pendingChoices.push({
+        type: 'asi',
+        choiceKey: grant.key,
+        source,
+        points: grant.points,
+      })
+    }
+  }
+
+  // Unresolved subclass grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'subclass')) {
+    const decision = choices[grant.key]
+    if (!decision || decision.type !== 'subclass') {
+      pendingChoices.push({
+        type: 'subclass',
+        choiceKey: grant.key,
+        source,
+        classId: grant.classId,
+      })
+    }
+  }
+
   return {
     abilities,
     hitDie,

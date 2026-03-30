@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { resolveCharacter } from '@/lib/resolver'
 import type { ResolverInput } from '@/lib/resolver'
-import type { AbilityKey } from '@/lib/dnd-helpers'
+import type { AbilityKey, ClassId } from '@/lib/dnd-helpers'
 import { DND_SKILLS } from '@/lib/dnd-helpers'
 import { collectBundles } from '@/lib/sources'
 import type { CharacterBuild } from '@/types/choices'
+import { createChoiceKey } from '@/types/choices'
 import type { GrantBundle } from '@/types/sources'
 
 const baseInput: ResolverInput = {
@@ -290,5 +291,168 @@ describe('Human Fighter L1 integration', () => {
     const skillPending = result.pendingChoices.find((c) => c.type === 'skill-choice')
     expect(skillPending).toBeDefined()
     expect(skillPending?.choiceKey).toBe('skill-choice:class:fighter:0')
+  })
+})
+
+describe('Pending ASI and Subclass choices', () => {
+  const asiKey = createChoiceKey('asi', 'class', 'fighter', 0)
+  const subclassKey = createChoiceKey('subclass', 'class', 'fighter', 0)
+
+  it('emits pending ASI when no decision is provided', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [{ type: 'asi', key: asiKey, points: 2 }],
+      },
+    ]
+    const result = resolveCharacter({ ...baseInput, bundles })
+    const pending = result.pendingChoices.find((c) => c.type === 'asi')
+    expect(pending).toBeDefined()
+    expect(pending?.choiceKey).toBe(asiKey)
+    if (pending?.type === 'asi') {
+      expect(pending.points).toBe(2)
+    }
+  })
+
+  it('does not emit pending ASI when decision is resolved', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [{ type: 'asi', key: asiKey, points: 2 }],
+      },
+    ]
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles,
+      choices: { [asiKey]: { type: 'asi', allocation: { str: 2 } } },
+    })
+    const pending = result.pendingChoices.find((c) => c.type === 'asi')
+    expect(pending).toBeUndefined()
+  })
+
+  it('emits pending subclass when no decision is provided', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 3 },
+        grants: [{ type: 'subclass', classId: 'fighter' as ClassId, key: subclassKey }],
+      },
+    ]
+    const result = resolveCharacter({ ...baseInput, bundles })
+    const pending = result.pendingChoices.find((c) => c.type === 'subclass')
+    expect(pending).toBeDefined()
+    expect(pending?.choiceKey).toBe(subclassKey)
+    if (pending?.type === 'subclass') {
+      expect(pending.classId).toBe('fighter')
+    }
+  })
+
+  it('does not emit pending subclass when decision is resolved', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 3 },
+        grants: [{ type: 'subclass', classId: 'fighter' as ClassId, key: subclassKey }],
+      },
+    ]
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles,
+      choices: { [subclassKey]: { type: 'subclass', subclassId: 'champion' } },
+    })
+    const pending = result.pendingChoices.find((c) => c.type === 'subclass')
+    expect(pending).toBeUndefined()
+  })
+})
+
+describe('Human Fighter L5 integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'fighter', 0)
+  const asiKey = createChoiceKey('asi', 'class', 'fighter', 0)
+
+  const fighterL5Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    appliedLevels: [
+      { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
+      { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
+      { classId: 'fighter' as ClassId, classLevel: 4, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 5, hpRoll: 9 },
+    ],
+    levels: [
+      { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
+      { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
+      { classId: 'fighter' as ClassId, classLevel: 4, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 5, hpRoll: 9 },
+    ],
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      [subclassKey]: { type: 'subclass', subclassId: 'champion' },
+      [asiKey]: { type: 'asi', allocation: { str: 2 } },
+    },
+    feats: [],
+    activeItems: [],
+    hpRolls: [null, 8, 7, 6, 9],
+  }
+
+  const { bundles } = collectBundles(fighterL5Build)
+
+  const input: ResolverInput = {
+    baseAbilities: fighterL5Build.baseAbilities,
+    level: 5,
+    bundles,
+    choices: fighterL5Build.choices,
+    hpRolls: fighterL5Build.hpRolls,
+  }
+
+  it('proficiency bonus = 3 at level 5', () => {
+    const result = resolveCharacter(input)
+    expect(result.proficiencyBonus).toBe(3)
+  })
+
+  it('applies ASI +2 STR on top of base + human bonus', () => {
+    const result = resolveCharacter(input)
+    // base 15 + human +1 + ASI +2 = 18
+    expect(result.abilities.str.total).toBe(18)
+  })
+
+  it('has fighter-action-surge feature (level 2)', () => {
+    const result = resolveCharacter(input)
+    const featureIds = result.features.map((f) => f.feature.id)
+    expect(featureIds).toContain('fighter-action-surge')
+  })
+
+  it('has fighter-extra-attack feature (level 5)', () => {
+    const result = resolveCharacter(input)
+    const featureIds = result.features.map((f) => f.feature.id)
+    expect(featureIds).toContain('fighter-extra-attack')
+  })
+
+  it('has champion-improved-critical feature (subclass level 3)', () => {
+    const result = resolveCharacter(input)
+    const featureIds = result.features.map((f) => f.feature.id)
+    expect(featureIds).toContain('champion-improved-critical')
+  })
+
+  it('no pending choices when all choices are resolved', () => {
+    const result = resolveCharacter(input)
+    expect(result.pendingChoices).toHaveLength(0)
+  })
+
+  it('has pending ASI and subclass when those choices are missing', () => {
+    const incompleteChoices = {
+      'skill-choice:class:fighter:0': { type: 'skill-choice' as const, skills: ['athletics', 'perception'] as const },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'tool-choice:background:soldier:0': { type: 'tool-choice' as const, tools: ['gaming-set-dice'] as const },
+      'language-choice:background:soldier:0': { type: 'language-choice' as const, languages: ['dwarvish'] as const },
+    }
+    const result = resolveCharacter({ ...input, choices: incompleteChoices })
+    const pendingTypes = result.pendingChoices.map((c) => c.type)
+    expect(pendingTypes).toContain('asi')
+    expect(pendingTypes).toContain('subclass')
   })
 })

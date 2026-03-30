@@ -124,11 +124,14 @@ export interface SpellGrant {
 
 export interface AsiGrant {
   readonly type: 'asi'
+  readonly key: ChoiceKey
+  readonly points: number
 }
 
 export interface SubclassGrant {
   readonly type: 'subclass'
   readonly classId: ClassId
+  readonly key: ChoiceKey
 }
 
 export interface EquipmentGrant {

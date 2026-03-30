@@ -117,4 +117,88 @@ describe('resolveAbilities', () => {
       expect(result[key].total).toBe(10)
     }
   })
+
+  it('applies ASI allocation when decision exists', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [
+          {
+            type: 'asi',
+            key: 'asi:class:fighter:0',
+            points: 2,
+          },
+        ],
+      },
+    ]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'asi:class:fighter:0': { type: 'asi', allocation: { str: 2 } },
+    }
+    const result = resolveAbilities(BASE, bundles, choices)
+    expect(result.str.total).toBe(12) // 10 + 2
+    expect(result.dex.total).toBe(10) // unchanged
+  })
+
+  it('caps ability total at 20 for ASI allocation', () => {
+    const highBase = { ...BASE, str: 19 }
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [
+          {
+            type: 'asi',
+            key: 'asi:class:fighter:0',
+            points: 2,
+          },
+        ],
+      },
+    ]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'asi:class:fighter:0': { type: 'asi', allocation: { str: 2 } },
+    }
+    const result = resolveAbilities(highBase, bundles, choices)
+    expect(result.str.total).toBe(20) // capped at 20
+    expect(result.str.modifier).toBe(5)
+  })
+
+  it('does not apply ASI when no decision exists', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [
+          {
+            type: 'asi',
+            key: 'asi:class:fighter:0',
+            points: 2,
+          },
+        ],
+      },
+    ]
+    const result = resolveAbilities(BASE, bundles, NO_CHOICES)
+    for (const key of ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const) {
+      expect(result[key].total).toBe(10)
+    }
+  })
+
+  it('applies ASI allocation split across two abilities', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [
+          {
+            type: 'asi',
+            key: 'asi:class:fighter:0',
+            points: 2,
+          },
+        ],
+      },
+    ]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'asi:class:fighter:0': { type: 'asi', allocation: { str: 1, dex: 1 } },
+    }
+    const result = resolveAbilities(BASE, bundles, choices)
+    expect(result.str.total).toBe(11)
+    expect(result.dex.total).toBe(11)
+    expect(result.con.total).toBe(10)
+  })
 })

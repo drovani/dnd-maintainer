@@ -50,7 +50,7 @@ export type PendingChoice =
   | { readonly type: 'tool-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: 'tool'; readonly count: number; readonly from: readonly ToolProficiencyId[] | null }
   | { readonly type: 'language-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly LanguageId[] | null }
   | { readonly type: 'expertise-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly SkillId[] | null }
-  | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag }
+  | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly points: number }
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }
   | { readonly type: 'equipment-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[] }
 
