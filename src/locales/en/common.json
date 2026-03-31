@@ -312,7 +312,7 @@
       "hpRollPrompt": "How would you like to determine hit points?",
       "levelUpTitle": "Increase to {{className}} Level {{level}}",
       "currentLevel": "Current Level",
-      "levelUpSuccess": "Advanced to level {{level}}"
+      "levelUpSuccess": "Advanced to {{className}} Level {{level}}"
     },
     "asi": {
       "asiTitle": "Ability Score Improvement",

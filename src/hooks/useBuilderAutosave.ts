@@ -29,8 +29,8 @@ export interface AutosavePayload {
  * `finalize` saves the draft then promotes status from 'draft' to 'ready'.
  * `clearStatus` transitions 'saved' back to 'idle' (preserves 'error').
  */
-export function useBuilderAutosave() {
-  const characterIdRef = useRef<string | null>(null)
+export function useBuilderAutosave(existingCharacterId?: string) {
+  const characterIdRef = useRef<string | null>(existingCharacterId ?? null)
   const savingRef = useRef<Promise<string> | null>(null)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const queryClient = useQueryClient()
@@ -52,6 +52,9 @@ export function useBuilderAutosave() {
         try {
           const { character, rows, resolved } = payload
 
+          // Derive level from active (non-deleted) level rows
+          const activeLevel = rows.filter((r) => r.sequence !== 0 && r.deleted_at == null).length
+
           // Build the characters table payload — identity + physical + narrative + computed fields from resolver
           const characterPayload = {
             campaign_id: character.campaign_id,
@@ -61,7 +64,7 @@ export function useBuilderAutosave() {
             race: character.race,
             class: character.class,
             subclass: character.subclass,
-            level: character.level,
+            level: activeLevel || character.level,
             background: character.background,
             alignment: character.alignment,
             gender: character.gender,

@@ -14,11 +14,10 @@ interface LevelControlsProps {
 
 export function LevelControls({ classId }: LevelControlsProps) {
   const { t } = useTranslation('common')
-  const { resolved, hasDeletedRows, levelUp, levelDown, undoLevelDown } = useCharacterContext()
+  const { level, hasDeletedRows, levelUp, levelDown, undoLevelDown } = useCharacterContext()
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const currentLevel = resolved?.hitDie.reduce((sum, hd) => sum + hd.count, 0) ?? 0
-  const canLevelDown = currentLevel > 1
+  const canLevelDown = level > 1
 
   const { t: tg } = useTranslation('gamedata')
 
@@ -28,14 +27,11 @@ export function LevelControls({ classId }: LevelControlsProps) {
   }
   const hitDie = classData.hitDie
   const className = tg(`classes.${classId}`)
-
-  // Compute the next class level (how many levels of this class + 1)
-  const currentClassLevel = resolved?.hitDie.find((hd) => hd.die === hitDie)?.count ?? 0
-  const targetLevel = currentClassLevel + 1
+  const targetLevel = level + 1
 
   const handleConfirmLevelUp = (hpRoll: number) => {
     levelUp(classId, hpRoll)
-    toast.success(t('characterSheet.levelManagement.levelUpSuccess', { level: targetLevel }))
+    toast.success(t('characterSheet.levelManagement.levelUpSuccess', { level: targetLevel, className }))
   }
 
   return (

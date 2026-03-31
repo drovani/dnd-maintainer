@@ -39,10 +39,12 @@ import {
 } from '@/lib/dnd-helpers'
 import type { Character } from '@/types/database'
 import { Edit2, Save } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
+import type { AutosavePayload } from '@/hooks/useBuilderAutosave'
 
 type EditSection = 'header' | 'personality' | 'backstory' | 'appearance' | null
 
@@ -89,8 +91,24 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
   const [editSection, setEditSection] = useState<EditSection>(null)
 
   const { update: updateMutation } = useCharacterMutations()
-  const { resolved, buildError, buildWarnings } = useCharacterContext()
-  const resolvedLevel = resolved?.hitDie.reduce((sum, hd) => sum + hd.count, 0) ?? character.level
+  const { character: ctxCharacter, rows, resolved, buildError, buildWarnings, level: resolvedLevel, isDirty, markSaved } = useCharacterContext()
+  const { saveDraft } = useBuilderAutosave(characterId)
+
+  // Autosave when isDirty (level up/down, choices, etc.)
+  const latestPayloadRef = useRef<AutosavePayload>({ character: ctxCharacter, rows, resolved })
+  latestPayloadRef.current = { character: ctxCharacter, rows, resolved }
+
+  useEffect(() => {
+    if (!isDirty) return
+    const timer = setTimeout(() => {
+      saveDraft(latestPayloadRef.current)
+        .then(() => markSaved())
+        .catch((err: unknown) => {
+          console.warn('Autosave chain error:', err)
+        })
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [isDirty, saveDraft, markSaved])
 
   const handleUpdate = (updates: Partial<Character>) => {
     updateMutation.mutate({ id: characterId, ...updates }, {

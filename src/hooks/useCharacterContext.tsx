@@ -34,6 +34,7 @@ interface CharacterContextValue {
   readonly buildError: string | null
   readonly buildWarnings: readonly string[]
   readonly isDirty: boolean
+  readonly level: number
   readonly hasDeletedRows: boolean
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
   updateCreation: (updates: Readonly<CreationUpdates>) => void
@@ -213,6 +214,11 @@ export function CharacterProvider({
   const { build, bundles, resolved, error: buildError, warnings: buildWarnings } = useMemo(
     () => tryDeriveAndResolve(character, rows, equippedItems),
     [character, rows, equippedItems],
+  )
+
+  const level = useMemo(
+    () => rows.filter((r) => r.sequence !== 0 && r.deleted_at == null).length,
+    [rows],
   )
 
   const hasDeletedRows = useMemo(
@@ -457,6 +463,7 @@ export function CharacterProvider({
       buildError,
       buildWarnings,
       isDirty,
+      level,
       hasDeletedRows,
       updateCharacter,
       updateCreation,
