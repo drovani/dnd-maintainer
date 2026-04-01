@@ -136,7 +136,7 @@ describe('collectBundles', () => {
         { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
       ],
       choices: {
-        [subclassKey]: { type: 'subclass', subclassId: 'champion' },
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' },
       },
     }
     const { bundles } = collectBundles(l3BuildWithChampion)

@@ -442,6 +442,124 @@ describe('CharacterProvider', () => {
     expect(l4Row?.asi_allocation).toEqual({ str: 2 })
   })
 
+  it('clearChoice for subclass nulls the dedicated column on the correct row', () => {
+    const character = buildSeedCharacter()
+    const fighterLevel2: BuildLevelRow = {
+      sequence: 2,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 2,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+    const fighterLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 3,
+      subclass_id: 'champion',
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3]),
+    })
+
+    act(() => {
+      result.current.clearChoice('subclass:class:fighter:0')
+    })
+
+    const l3Row = result.current.rows.find((r) => r.sequence === 3)
+    expect(l3Row?.subclass_id).toBeNull()
+  })
+
+  it('clearChoice for ASI nulls the dedicated column on the correct row', () => {
+    const character = buildSeedCharacter()
+    const fighterLevel2: BuildLevelRow = {
+      sequence: 2,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 2,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+    const fighterLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 3,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+    const fighterLevel4: BuildLevelRow = {
+      sequence: 4,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 4,
+      subclass_id: null,
+      asi_allocation: { str: 2 },
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3, fighterLevel4]),
+    })
+
+    act(() => {
+      result.current.clearChoice('asi:class:fighter:0')
+    })
+
+    const l4Row = result.current.rows.find((r) => r.sequence === 4)
+    expect(l4Row?.asi_allocation).toBeNull()
+  })
+
+  it('levelUp with class mismatch on soft-deleted row appends a new row', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    // Soft-delete the fighter row
+    act(() => {
+      result.current.levelDown()
+    })
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+
+    // Level up as wizard — should NOT restore the fighter row
+    act(() => {
+      result.current.levelUp('wizard', 6)
+    })
+
+    // Fighter row remains soft-deleted, new wizard row appended
+    expect(result.current.rows).toHaveLength(3)
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+    const wizardRow = result.current.rows.find((r) => r.sequence === 2)
+    expect(wizardRow?.class_id).toBe('wizard')
+    expect(wizardRow?.deleted_at).toBeNull()
+  })
+
   it('makeChoice stores decision on the correct row', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {

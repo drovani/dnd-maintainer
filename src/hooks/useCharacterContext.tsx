@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { Character } from '@/types/database'
 import type { AbilityScores } from '@/types/database'
 import type { BuildLevelRow } from '@/lib/build-reconstruction'
-import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
+import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
 import { parseChoiceKey } from '@/types/choices'
 import type { ResolvedCharacter } from '@/types/resolved'
 import type { ClassId } from '@/lib/dnd-helpers'
@@ -38,8 +38,8 @@ interface CharacterContextValue {
   readonly hasDeletedRows: boolean
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
   updateCreation: (updates: Readonly<CreationUpdates>) => void
-  makeChoice: (choiceKey: string, decision: ChoiceDecision) => void
-  clearChoice: (choiceKey: string) => void
+  makeChoice: (choiceKey: ChoiceKey, decision: ChoiceDecision) => void
+  clearChoice: (choiceKey: ChoiceKey) => void
   levelUp: (classId: ClassId, hpRoll: number | null) => void
   levelDown: () => void
   undoLevelDown: () => void
@@ -63,7 +63,7 @@ const CharacterContext = createContext<CharacterContextValue | null>(null)
  * Key format: `category:origin:id:index`
  * Keys with `:race:` or `:background:` go to sequence-0.
  * Keys with `:class:` go to the matching level row (by class_id embedded in the key).
- * Everything else defaults to sequence-0.
+ * Unknown origins cause `parseChoiceKey` to throw.
  */
 export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]): number {
   const { origin, id: classId } = parseChoiceKey(choiceKey)
@@ -277,52 +277,69 @@ export function CharacterProvider({
     setIsDirty(true)
   }, [])
 
-  const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
+  const makeChoice = useCallback((choiceKey: ChoiceKey, decision: ChoiceDecision) => {
+    let changed = false
     setRows((prev) => {
-      // For subclass and ASI decisions, route to the dedicated column on the target level row
-      if (decision.type === 'subclass' || decision.type === 'asi') {
-        const { id: classId } = parseChoiceKey(choiceKey)
-        const targetIdx = findGrantRowIndex(classId, decision.type, prev)
-        if (targetIdx !== -1) {
+      try {
+        // For subclass and ASI decisions, route to the dedicated column on the target level row
+        if (decision.type === 'subclass' || decision.type === 'asi') {
+          const { id: classId } = parseChoiceKey(choiceKey)
+          const targetIdx = findGrantRowIndex(classId, decision.type, prev)
+          if (targetIdx === -1) {
+            console.error(`makeChoice: could not route ${decision.type} decision for key "${choiceKey}" to dedicated column`)
+            toast.error(i18next.t('common:errors.choiceSaveFailed'))
+            return prev
+          }
           const next = [...prev]
           if (decision.type === 'subclass') {
             next[targetIdx] = { ...next[targetIdx], subclass_id: decision.subclassId }
           } else {
             next[targetIdx] = { ...next[targetIdx], asi_allocation: decision.allocation as Record<string, number> }
           }
+          changed = true
           return next
         }
-        console.warn(`makeChoice: could not route ${decision.type} decision for key "${choiceKey}" to dedicated column — falling through to JSONB storage`)
-      }
 
-      const targetSeq = resolveChoiceSequence(choiceKey, prev)
-      const idx = prev.findIndex((r) => r.sequence === targetSeq)
-      if (idx === -1) {
-        console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
+        const targetSeq = resolveChoiceSequence(choiceKey, prev)
+        const idx = prev.findIndex((r) => r.sequence === targetSeq)
+        if (idx === -1) {
+          console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
+          toast.error(i18next.t('common:errors.choiceSaveFailed'))
+          return prev
+        }
+        const existing = prev[idx]
+        const updated: BuildLevelRow = {
+          ...existing,
+          choices: { ...(existing.choices ?? {}), [choiceKey]: decision },
+        }
+        const next = [...prev]
+        next[idx] = updated
+        changed = true
+        return next
+      } catch (err) {
+        console.error('makeChoice: malformed choice key', { choiceKey, error: err })
         toast.error(i18next.t('common:errors.choiceSaveFailed'))
         return prev
       }
-      const existing = prev[idx]
-      const updated: BuildLevelRow = {
-        ...existing,
-        choices: { ...(existing.choices ?? {}), [choiceKey]: decision },
-      }
-      const next = [...prev]
-      next[idx] = updated
-      return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
-  const clearChoice = useCallback((choiceKey: string) => {
+  const clearChoice = useCallback((choiceKey: ChoiceKey) => {
+    let changed = false
     setRows((prev) => {
-      // For subclass and ASI decisions, also clear the dedicated column on the target level row
-      const { category, id: classId } = parseChoiceKey(choiceKey)
+      try {
+        const { category, id: classId } = parseChoiceKey(choiceKey)
 
-      if (category === 'subclass' || category === 'asi') {
-        const grantType = category === 'subclass' ? 'subclass' as const : 'asi' as const
-        const targetIdx = findGrantRowIndex(classId, grantType, prev)
-        if (targetIdx !== -1) {
+        // For subclass and ASI decisions, clear the dedicated column on the target level row
+        if (category === 'subclass' || category === 'asi') {
+          const grantType = category === 'subclass' ? 'subclass' as const : 'asi' as const
+          const targetIdx = findGrantRowIndex(classId, grantType, prev)
+          if (targetIdx === -1) {
+            console.error(`clearChoice: could not find dedicated column row for key "${choiceKey}"`)
+            toast.error(i18next.t('common:errors.choiceClearFailed'))
+            return prev
+          }
           const next = [...prev]
           if (grantType === 'subclass') {
             next[targetIdx] = { ...next[targetIdx], subclass_id: null }
@@ -332,34 +349,46 @@ export function CharacterProvider({
           const newChoices = { ...(next[targetIdx].choices ?? {}) }
           delete newChoices[choiceKey]
           next[targetIdx] = { ...next[targetIdx], choices: newChoices }
+          changed = true
           return next
         }
-        console.warn(`clearChoice: could not find dedicated column row for key "${choiceKey}" — falling through to JSONB clear`)
-      }
 
-      const targetSeq = resolveChoiceSequence(choiceKey, prev)
-      const idx = prev.findIndex((r) => r.sequence === targetSeq)
-      if (idx === -1) {
-        console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`)
+        const targetSeq = resolveChoiceSequence(choiceKey, prev)
+        const idx = prev.findIndex((r) => r.sequence === targetSeq)
+        if (idx === -1) {
+          console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`)
+          toast.error(i18next.t('common:errors.choiceClearFailed'))
+          return prev
+        }
+        const existing = prev[idx]
+        const newChoices = { ...(existing.choices ?? {}) }
+        delete newChoices[choiceKey]
+        const updated: BuildLevelRow = { ...existing, choices: newChoices }
+        const next = [...prev]
+        next[idx] = updated
+        changed = true
+        return next
+      } catch (err) {
+        console.error('clearChoice: malformed choice key', { choiceKey, error: err })
         toast.error(i18next.t('common:errors.choiceClearFailed'))
         return prev
       }
-      const existing = prev[idx]
-      const newChoices = { ...(existing.choices ?? {}) }
-      delete newChoices[choiceKey]
-      const updated: BuildLevelRow = { ...existing, choices: newChoices }
-      const next = [...prev]
-      next[idx] = updated
-      return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
+    let changed = false
     setRows((prev) => {
       // Check if there's a soft-deleted row with a higher sequence we can restore
       const activeRows = prev.filter((r) => r.deleted_at == null)
       const activeLevelRows = activeRows.filter((r) => r.sequence !== 0)
+
+      if (activeLevelRows.length >= 20) {
+        toast.warning(i18next.t('common:characterSheet.levelManagement.maxLevelReached'))
+        return prev
+      }
+
       const maxActiveSeq = activeLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
 
       const nextDeletedRow = prev
@@ -372,6 +401,7 @@ export function CharacterProvider({
           const idx = prev.findIndex((r) => r.sequence === nextDeletedRow.sequence)
           const next = [...prev]
           next[idx] = { ...next[idx], deleted_at: null, hp_roll: hpRoll }
+          changed = true
           return next
         }
       }
@@ -392,12 +422,14 @@ export function CharacterProvider({
         choices: null,
         deleted_at: null,
       }
+      changed = true
       return [...prev, newRow]
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const levelDown = useCallback(() => {
+    let changed = false
     setRows((prev) => {
       // Only consider active (non-deleted) level rows
       const activeLevelRows = prev.filter((r) => r.sequence !== 0 && r.deleted_at == null)
@@ -407,12 +439,14 @@ export function CharacterProvider({
       if (idx === -1) return prev
       const next = [...prev]
       next[idx] = { ...next[idx], deleted_at: new Date().toISOString() }
+      changed = true
       return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const undoLevelDown = useCallback(() => {
+    let changed = false
     setRows((prev) => {
       // Find the most recently soft-deleted non-creation row (highest sequence with deleted_at set)
       const deletedLevelRows = prev.filter((r) => r.sequence !== 0 && r.deleted_at != null)
@@ -423,9 +457,10 @@ export function CharacterProvider({
       const next = [...prev]
       // Restore the row by clearing its deleted_at timestamp
       next[idx] = { ...next[idx], deleted_at: null }
+      changed = true
       return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
   }, [])
 
   const replaceLevel = useCallback((oldSequence: number, newClassId: string, newSubclassId: string | null) => {
@@ -475,7 +510,7 @@ export function CharacterProvider({
       replaceLevel,
       markSaved,
     }),
-    [character, rows, build, bundles, resolved, buildError, buildWarnings, isDirty, hasDeletedRows, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
+    [character, rows, build, bundles, resolved, buildError, buildWarnings, isDirty, level, hasDeletedRows, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

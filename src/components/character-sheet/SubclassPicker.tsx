@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses'
 import type { PendingChoice } from '@/types/resolved'
+import type { ChoiceKey } from '@/types/choices'
 import { useTranslation } from 'react-i18next'
 
 interface SubclassPickerProps {
   readonly choice: Extract<PendingChoice, { type: 'subclass' }>
-  readonly onDecide: (choiceKey: string, subclassId: string) => void
+  readonly onDecide: (choiceKey: ChoiceKey, subclassId: string) => void
 }
 
 export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {

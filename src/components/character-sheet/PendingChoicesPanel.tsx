@@ -4,7 +4,7 @@ import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import type { PendingChoice } from '@/types/resolved'
-import type { ChoiceDecision } from '@/types/choices'
+import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
 import { useTranslation } from 'react-i18next'
 
 function PendingChoiceRow({
@@ -15,8 +15,8 @@ function PendingChoiceRow({
 }: {
   choice: PendingChoice
   currentDecision: ChoiceDecision | undefined
-  onDecide: (key: string, decision: ChoiceDecision) => void
-  onClear: (key: string) => void
+  onDecide: (key: ChoiceKey, decision: ChoiceDecision) => void
+  onClear: (key: ChoiceKey) => void
 }) {
   const { resolved } = useCharacterContext()
   const { t: tc } = useTranslation('common')
@@ -73,11 +73,11 @@ export function PendingChoicesPanel() {
 
   const choices = build?.choices ?? {}
 
-  const handleDecide = (key: string, decision: ChoiceDecision) => {
+  const handleDecide = (key: ChoiceKey, decision: ChoiceDecision) => {
     makeChoice(key, decision)
   }
 
-  const handleClear = (key: string) => {
+  const handleClear = (key: ChoiceKey) => {
     clearChoice(key)
   }
 

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 interface LevelControlsProps {
-  /** The class to level up into. For Phase 2, this is always the character's current class. */
+  /** The class to level up into. Determines hit die and class-level progression. */
   readonly classId: ClassId
 }
 
@@ -17,6 +17,7 @@ export function LevelControls({ classId }: LevelControlsProps) {
   const { level, hasDeletedRows, levelUp, levelDown, undoLevelDown } = useCharacterContext()
   const [dialogOpen, setDialogOpen] = useState(false)
 
+  const canLevelUp = level < 20
   const canLevelDown = level > 1
 
   const { t: tg } = useTranslation('gamedata')
@@ -37,7 +38,7 @@ export function LevelControls({ classId }: LevelControlsProps) {
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => setDialogOpen(true)}>
+        <Button size="sm" onClick={() => setDialogOpen(true)} disabled={!canLevelUp}>
           {t('characterSheet.levelManagement.levelUp')}
         </Button>
 

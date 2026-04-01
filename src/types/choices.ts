@@ -68,7 +68,7 @@ export interface CharacterBuild {
   readonly levels: readonly BuildLevel[]
   /** @deprecated Use levels instead */
   readonly appliedLevels: readonly BuildLevel[]
-  readonly choices: Readonly<Record<string, ChoiceDecision>>
+  readonly choices: Readonly<Record<ChoiceKey, ChoiceDecision>>
   readonly feats: readonly string[]
   readonly activeItems: readonly string[]
   /** @deprecated Use levels[i].hpRoll instead */

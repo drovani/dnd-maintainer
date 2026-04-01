@@ -178,11 +178,11 @@ describe('reconstructBuild', () => {
     const creationWithChoices: BuildLevelRow = {
       ...creationRow,
       choices: {
-        'background-skills': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+        'skill-choice:background:soldier:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
       },
     }
     const result = reconstructBuild(identity, [creationWithChoices], [])
-    expect(result.choices['background-skills']).toEqual({
+    expect(result.choices['skill-choice:background:soldier:0']).toEqual({
       type: 'skill-choice',
       skills: ['athletics', 'intimidation'],
     })
@@ -235,12 +235,12 @@ describe('reconstructBuild', () => {
       feat_id: null,
       hp_roll: null,
       choices: {
-        'fighter-skills': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+        'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
       },
       deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, level1WithChoices], [])
-    expect(result.choices['fighter-skills']).toEqual({
+    expect(result.choices['skill-choice:class:fighter:0']).toEqual({
       type: 'skill-choice',
       skills: ['athletics', 'perception'],
     })

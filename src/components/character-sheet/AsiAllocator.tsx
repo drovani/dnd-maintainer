@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { AbilityKey } from '@/lib/dnd-helpers'
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved'
+import type { ChoiceKey } from '@/types/choices'
 import { useTranslation } from 'react-i18next'
 
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -10,7 +11,7 @@ const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 
 interface AsiAllocatorProps {
   readonly choice: Extract<PendingChoice, { type: 'asi' }>
   readonly abilities: ResolvedCharacter['abilities']
-  readonly onDecide: (choiceKey: string, allocation: Partial<Record<AbilityKey, number>>) => void
+  readonly onDecide: (choiceKey: ChoiceKey, allocation: Partial<Record<AbilityKey, number>>) => void
 }
 
 export function AsiAllocator({ choice, abilities, onDecide }: AsiAllocatorProps) {

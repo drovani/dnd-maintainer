@@ -1,6 +1,7 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
+import type { ChoiceKey } from '@/types/choices'
 import {
   ABILITY_ABBREVIATIONS,
   DND_SKILLS,
@@ -10,7 +11,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface SkillChoiceInfo {
-  readonly choiceKey: string
+  readonly choiceKey: ChoiceKey
   readonly count: number
   readonly from: readonly SkillId[]
 }
@@ -54,7 +55,7 @@ export function SkillsStep() {
   }
 
   // Get current selections for a choice
-  const getSelectedSkills = (choiceKey: string): readonly SkillId[] => {
+  const getSelectedSkills = (choiceKey: ChoiceKey): readonly SkillId[] => {
     const decision = build?.choices[choiceKey]
     if (decision?.type === 'skill-choice') return decision.skills
     return []

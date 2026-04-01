@@ -96,7 +96,9 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
 
   // Autosave when isDirty (level up/down, choices, etc.)
   const latestPayloadRef = useRef<AutosavePayload>({ character: ctxCharacter, rows, resolved })
-  latestPayloadRef.current = { character: ctxCharacter, rows, resolved }
+  useEffect(() => {
+    latestPayloadRef.current = { character: ctxCharacter, rows, resolved }
+  })
 
   useEffect(() => {
     if (!isDirty) return
@@ -104,11 +106,12 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
       saveDraft(latestPayloadRef.current)
         .then(() => markSaved())
         .catch((err: unknown) => {
-          console.warn('Autosave chain error:', err)
+          console.error('Autosave failed:', err)
+          toast.error(tc('characterBuilder.errors.failedToSaveDraft'))
         })
     }, 500)
     return () => clearTimeout(timer)
-  }, [isDirty, saveDraft, markSaved])
+  }, [isDirty, saveDraft, markSaved, tc])
 
   const handleUpdate = (updates: Partial<Character>) => {
     updateMutation.mutate({ id: characterId, ...updates }, {
@@ -183,7 +186,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               <span className="text-muted-foreground">{tc('characterSheet.fields.class')}</span>
               <p className="text-foreground font-semibold">
                 {character.class ? t(`classes.${character.class}`, { defaultValue: character.class }) : ''}
-                {character.subclass ? ` (${character.subclass})` : ''}
+                {character.subclass ? ` (${t(`subclasses.${character.subclass}`, { defaultValue: character.subclass })})` : ''}
               </p>
             </div>
             <div>

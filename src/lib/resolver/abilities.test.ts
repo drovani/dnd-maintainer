@@ -161,6 +161,29 @@ describe('resolveAbilities', () => {
     expect(result.str.modifier).toBe(5)
   })
 
+  it('skips ASI allocation when total exceeds grant points', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 4 },
+        grants: [
+          {
+            type: 'asi',
+            key: 'asi:class:fighter:0',
+            points: 2,
+          },
+        ],
+      },
+    ]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'asi:class:fighter:0': { type: 'asi', allocation: { str: 2, dex: 1 } },
+    }
+    const result = resolveAbilities(BASE, bundles, choices)
+    // Over-allocated (3 > 2 points) — entire allocation is skipped
+    for (const key of ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const) {
+      expect(result[key].total).toBe(10)
+    }
+  })
+
   it('does not apply ASI when no decision exists', () => {
     const bundles: GrantBundle[] = [
       {

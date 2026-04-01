@@ -1,7 +1,7 @@
 import { DND_CLASSES } from '@/lib/dnd-helpers'
 import type { ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
-import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
+import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
 import { createChoiceKey } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
 
@@ -124,10 +124,10 @@ export function reconstructBuild(
     .map((row) => row.feat_id)
 
   // Build choices map
-  const choices: Record<string, ChoiceDecision> = {}
+  const choices: Record<ChoiceKey, ChoiceDecision> = {} as Record<ChoiceKey, ChoiceDecision>
 
   // Helper to safely parse and merge a choices JSONB entry
-  function mergeChoiceEntry(key: string, value: unknown): void {
+  function mergeChoiceEntry(key: ChoiceKey, value: unknown): void {
     const parsed = ChoiceDecisionSchema.safeParse(value)
     if (!parsed.success) {
       throw new Error(`Invalid choice "${key}": ${parsed.error.message}`)
@@ -138,7 +138,7 @@ export function reconstructBuild(
   // Start with creation row's choices JSONB
   if (creationRow.choices) {
     for (const [key, value] of Object.entries(creationRow.choices)) {
-      mergeChoiceEntry(key, value)
+      mergeChoiceEntry(key as ChoiceKey, value)
     }
   }
 
@@ -156,7 +156,7 @@ export function reconstructBuild(
 
     if (row.choices) {
       for (const [key, value] of Object.entries(row.choices)) {
-        mergeChoiceEntry(key, value)
+        mergeChoiceEntry(key as ChoiceKey, value)
       }
     }
   }

@@ -64,7 +64,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             race: character.race,
             class: character.class,
             subclass: character.subclass,
-            level: activeLevel || character.level,
+            level: activeLevel > 0 ? activeLevel : character.level,
             background: character.background,
             alignment: character.alignment,
             gender: character.gender,
