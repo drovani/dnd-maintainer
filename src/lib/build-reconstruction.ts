@@ -2,7 +2,7 @@ import { DND_CLASSES } from '@/lib/dnd-helpers'
 import type { ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
-import { createChoiceKey } from '@/types/choices'
+import { createChoiceKey, parseChoiceKey } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
 
 /**
@@ -126,6 +126,12 @@ export function reconstructBuild(
   // Build choices map
   const choices: Record<ChoiceKey, ChoiceDecision> = {} as Record<ChoiceKey, ChoiceDecision>
 
+  // Helper to validate a JSONB choice key from the DB
+  function validateChoiceKey(key: string): ChoiceKey {
+    parseChoiceKey(key) // throws on malformed keys
+    return key as ChoiceKey
+  }
+
   // Helper to safely parse and merge a choices JSONB entry
   function mergeChoiceEntry(key: ChoiceKey, value: unknown): void {
     const parsed = ChoiceDecisionSchema.safeParse(value)
@@ -138,7 +144,7 @@ export function reconstructBuild(
   // Start with creation row's choices JSONB
   if (creationRow.choices) {
     for (const [key, value] of Object.entries(creationRow.choices)) {
-      mergeChoiceEntry(key as ChoiceKey, value)
+      mergeChoiceEntry(validateChoiceKey(key), value)
     }
   }
 
@@ -156,7 +162,7 @@ export function reconstructBuild(
 
     if (row.choices) {
       for (const [key, value] of Object.entries(row.choices)) {
-        mergeChoiceEntry(key as ChoiceKey, value)
+        mergeChoiceEntry(validateChoiceKey(key), value)
       }
     }
   }

@@ -72,16 +72,12 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
     return 0
   }
 
-  if (origin === 'class') {
-    // Find the first level row with matching class_id
-    const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId)
-    if (!levelRow) {
-      console.warn(`No level row found for class "${classId}" — choice "${choiceKey}" will be stored on creation row`)
-    }
-    return levelRow?.sequence ?? 0
+  // origin === 'class' — parseChoiceKey guarantees no other values
+  const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId)
+  if (!levelRow) {
+    console.warn(`No level row found for class "${classId}" — choice "${choiceKey}" will be stored on creation row`)
   }
-
-  return 0
+  return levelRow?.sequence ?? 0
 }
 
 /**
@@ -279,6 +275,7 @@ export function CharacterProvider({
 
   const makeChoice = useCallback((choiceKey: ChoiceKey, decision: ChoiceDecision) => {
     let changed = false
+    let failed = false
     setRows((prev) => {
       try {
         // For subclass and ASI decisions, route to the dedicated column on the target level row
@@ -287,7 +284,7 @@ export function CharacterProvider({
           const targetIdx = findGrantRowIndex(classId, decision.type, prev)
           if (targetIdx === -1) {
             console.error(`makeChoice: could not route ${decision.type} decision for key "${choiceKey}" to dedicated column`)
-            toast.error(i18next.t('common:errors.choiceSaveFailed'))
+            failed = true
             return prev
           }
           const next = [...prev]
@@ -304,7 +301,7 @@ export function CharacterProvider({
         const idx = prev.findIndex((r) => r.sequence === targetSeq)
         if (idx === -1) {
           console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
-          toast.error(i18next.t('common:errors.choiceSaveFailed'))
+          failed = true
           return prev
         }
         const existing = prev[idx]
@@ -318,15 +315,17 @@ export function CharacterProvider({
         return next
       } catch (err) {
         console.error('makeChoice: malformed choice key', { choiceKey, error: err })
-        toast.error(i18next.t('common:errors.choiceSaveFailed'))
+        failed = true
         return prev
       }
     })
     if (changed) setIsDirty(true)
+    if (failed) toast.error(i18next.t('common:errors.choiceSaveFailed'))
   }, [])
 
   const clearChoice = useCallback((choiceKey: ChoiceKey) => {
     let changed = false
+    let failed = false
     setRows((prev) => {
       try {
         const { category, id: classId } = parseChoiceKey(choiceKey)
@@ -337,7 +336,7 @@ export function CharacterProvider({
           const targetIdx = findGrantRowIndex(classId, grantType, prev)
           if (targetIdx === -1) {
             console.error(`clearChoice: could not find dedicated column row for key "${choiceKey}"`)
-            toast.error(i18next.t('common:errors.choiceClearFailed'))
+            failed = true
             return prev
           }
           const next = [...prev]
@@ -357,7 +356,7 @@ export function CharacterProvider({
         const idx = prev.findIndex((r) => r.sequence === targetSeq)
         if (idx === -1) {
           console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`)
-          toast.error(i18next.t('common:errors.choiceClearFailed'))
+          failed = true
           return prev
         }
         const existing = prev[idx]
@@ -370,22 +369,24 @@ export function CharacterProvider({
         return next
       } catch (err) {
         console.error('clearChoice: malformed choice key', { choiceKey, error: err })
-        toast.error(i18next.t('common:errors.choiceClearFailed'))
+        failed = true
         return prev
       }
     })
     if (changed) setIsDirty(true)
+    if (failed) toast.error(i18next.t('common:errors.choiceClearFailed'))
   }, [])
 
   const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
     let changed = false
+    let atMaxLevel = false
     setRows((prev) => {
       // Check if there's a soft-deleted row with a higher sequence we can restore
       const activeRows = prev.filter((r) => r.deleted_at == null)
       const activeLevelRows = activeRows.filter((r) => r.sequence !== 0)
 
       if (activeLevelRows.length >= 20) {
-        toast.warning(i18next.t('common:characterSheet.levelManagement.maxLevelReached'))
+        atMaxLevel = true
         return prev
       }
 
@@ -426,6 +427,7 @@ export function CharacterProvider({
       return [...prev, newRow]
     })
     if (changed) setIsDirty(true)
+    if (atMaxLevel) toast.warning(i18next.t('common:characterSheet.levelManagement.maxLevelReached'))
   }, [])
 
   const levelDown = useCallback(() => {
@@ -464,11 +466,13 @@ export function CharacterProvider({
   }, [])
 
   const replaceLevel = useCallback((oldSequence: number, newClassId: string, newSubclassId: string | null) => {
+    let changed = false
+    let failed = false
     setRows((prev) => {
       const idx = prev.findIndex((r) => r.sequence === oldSequence)
       if (idx === -1) {
         console.warn(`replaceLevel: no row found for sequence ${oldSequence} — level not replaced`)
-        toast.error(i18next.t('common:errors.levelReplaceFailed'))
+        failed = true
         return prev
       }
       const next = [...prev]
@@ -479,9 +483,11 @@ export function CharacterProvider({
         subclass_id: newSubclassId,
         choices: null,
       }
+      changed = true
       return next
     })
-    setIsDirty(true)
+    if (changed) setIsDirty(true)
+    if (failed) toast.error(i18next.t('common:errors.levelReplaceFailed'))
   }, [])
 
   const markSaved = useCallback(() => {
