@@ -84,8 +84,10 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   // Unresolved or invalid ASI grants
   for (const { grant, source } of collectGrantsByType(bundles, 'asi')) {
     const decision = choices[grant.key]
-    const isValid = decision?.type === 'asi'
-      && Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0) <= grant.points
+    const totalAllocated = decision?.type === 'asi'
+      ? Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0)
+      : 0
+    const isValid = decision?.type === 'asi' && totalAllocated > 0 && totalAllocated <= grant.points
     if (!isValid) {
       pendingChoices.push({
         type: 'asi',
