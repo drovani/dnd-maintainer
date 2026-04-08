@@ -63,10 +63,10 @@ describe('reconstructBuild', () => {
       cha: 8,
     })
     expect(result.abilityMethod).toBe('standard-array')
-    expect(result.appliedLevels).toHaveLength(0)
+    expect(result.levels).toHaveLength(0)
   })
 
-  it('maps level rows to appliedLevels', () => {
+  it('maps level rows to levels', () => {
     const level1: BuildLevelRow = {
       sequence: 1,
       base_abilities: null,
@@ -94,9 +94,9 @@ describe('reconstructBuild', () => {
       deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
-    expect(result.appliedLevels).toHaveLength(2)
-    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
-    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
+    expect(result.levels).toHaveLength(2)
+    expect(result.levels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
+    expect(result.levels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
   it('sorts rows by sequence regardless of input order', () => {
@@ -128,9 +128,9 @@ describe('reconstructBuild', () => {
     }
     // Pass rows out of order
     const result = reconstructBuild(identity, [creationRow, level2, level1], [])
-    expect(result.appliedLevels).toHaveLength(2)
-    expect(result.appliedLevels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
-    expect(result.appliedLevels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
+    expect(result.levels).toHaveLength(2)
+    expect(result.levels[0]).toEqual({ classId: 'fighter', classLevel: 1, hpRoll: null })
+    expect(result.levels[1]).toEqual({ classId: 'fighter', classLevel: 2, hpRoll: 8 })
   })
 
   it('maps subclass_id into choices using createChoiceKey format', () => {
@@ -337,7 +337,7 @@ describe('reconstructBuild', () => {
       deleted_at: null,
     }
     const result = reconstructBuild(identity, [creationRow, level1, level2], [])
-    expect(result.hpRolls).toEqual([null, 8])
+    expect(result.levels.map((l) => l.hpRoll)).toEqual([null, 8])
   })
 })
 
@@ -385,17 +385,17 @@ describe('Human Fighter Level 1 round-trip', () => {
     // Verify build shape
     expect(build.raceId).toBe('human')
     expect(build.backgroundId).toBe('soldier')
-    expect(build.appliedLevels).toHaveLength(1)
-    expect(build.appliedLevels[0].classId).toBe('fighter')
+    expect(build.levels).toHaveLength(1)
+    expect(build.levels[0].classId).toBe('fighter')
 
     // Resolve character
     const { bundles } = collectBundles(build)
     const resolved = resolveCharacter({
       baseAbilities: build.baseAbilities,
-      level: build.appliedLevels.length,
+      level: build.levels.length,
       bundles,
       choices: build.choices,
-      hpRolls: build.hpRolls,
+      levels: build.levels,
     })
 
     // Abilities: base + 1 human racial bonus to each

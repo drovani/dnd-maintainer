@@ -2,6 +2,7 @@ import { DND_CLASSES } from '@/lib/dnd-helpers'
 import type { ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
+import type { SubclassId } from '@/types/sources'
 import { createChoiceKey, parseChoiceKey } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
 
@@ -152,7 +153,7 @@ export function reconstructBuild(
   for (const row of levelRows) {
     if (row.subclass_id !== null) {
       const key = createChoiceKey('subclass', 'class', row.class_id, 0)
-      choices[key] = { type: 'subclass', subclassId: row.subclass_id }
+      choices[key] = { type: 'subclass', subclassId: row.subclass_id as SubclassId }
     }
 
     if (row.asi_allocation !== null) {
@@ -173,10 +174,8 @@ export function reconstructBuild(
     baseAbilities,
     abilityMethod,
     levels,
-    appliedLevels: levels,
     choices,
     feats,
     activeItems: equippedItems,
-    hpRolls: levels.map(l => l.hpRoll),
   }
 }

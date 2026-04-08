@@ -6,7 +6,7 @@ import { DND_SKILLS } from '@/lib/dnd-helpers'
 import { collectBundles } from '@/lib/sources'
 import type { CharacterBuild } from '@/types/choices'
 import { createChoiceKey } from '@/types/choices'
-import type { GrantBundle } from '@/types/sources'
+import type { GrantBundle, SubclassId } from '@/types/sources'
 
 const baseInput: ResolverInput = {
   baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
@@ -96,7 +96,6 @@ describe('Human Fighter L1 integration', () => {
     backgroundId: 'soldier',
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
     abilityMethod: 'standard-array',
-    appliedLevels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     choices: {
       // Fighter skill choices (2 from list)
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
@@ -110,7 +109,6 @@ describe('Human Fighter L1 integration', () => {
     levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     feats: [],
     activeItems: [],
-    hpRolls: [],
   }
 
   const { bundles } = collectBundles(humanFighterBuild)
@@ -120,7 +118,7 @@ describe('Human Fighter L1 integration', () => {
     level: 1,
     bundles,
     choices: humanFighterBuild.choices,
-    hpRolls: humanFighterBuild.hpRolls,
+    levels: humanFighterBuild.levels,
   }
 
   it('has correct ability totals with +1 human racial bonus to each', () => {
@@ -356,7 +354,7 @@ describe('Pending ASI and Subclass choices', () => {
     const result = resolveCharacter({
       ...baseInput,
       bundles,
-      choices: { [subclassKey]: { type: 'subclass', subclassId: 'champion' } as const },
+      choices: { [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId } },
     })
     const pending = result.pendingChoices.find((c) => c.type === 'subclass')
     expect(pending).toBeUndefined()
@@ -372,13 +370,6 @@ describe('Human Fighter L5 integration', () => {
     backgroundId: 'soldier',
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
     abilityMethod: 'standard-array',
-    appliedLevels: [
-      { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
-      { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
-      { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
-      { classId: 'fighter' as ClassId, classLevel: 4, hpRoll: 6 },
-      { classId: 'fighter' as ClassId, classLevel: 5, hpRoll: 9 },
-    ],
     levels: [
       { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
       { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
@@ -391,12 +382,11 @@ describe('Human Fighter L5 integration', () => {
       'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
-      [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
       [asiKey]: { type: 'asi' as const, allocation: { str: 2 } },
     },
     feats: [],
     activeItems: [],
-    hpRolls: [null, 8, 7, 6, 9],
   }
 
   const { bundles } = collectBundles(fighterL5Build)
@@ -406,7 +396,7 @@ describe('Human Fighter L5 integration', () => {
     level: 5,
     bundles,
     choices: fighterL5Build.choices,
-    hpRolls: fighterL5Build.hpRolls,
+    levels: fighterL5Build.levels,
   }
 
   it('proficiency bonus = 3 at level 5', () => {

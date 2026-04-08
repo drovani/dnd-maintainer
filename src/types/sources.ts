@@ -7,10 +7,12 @@ import type {
 } from '@/lib/dnd-helpers'
 import type { Grant } from '@/types/grants'
 
+export type SubclassId = 'champion' | 'battlemaster' | 'eldritchknight'
+
 export type SourceTag =
   | { readonly origin: 'race'; readonly id: RaceId }
   | { readonly origin: 'class'; readonly id: ClassId; readonly level: number }
-  | { readonly origin: 'subclass'; readonly id: string; readonly classId: ClassId; readonly level: number }
+  | { readonly origin: 'subclass'; readonly id: SubclassId; readonly classId: ClassId; readonly level: number }
   | { readonly origin: 'background'; readonly id: BackgroundId }
   | { readonly origin: 'feat'; readonly id: string }
   | { readonly origin: 'item'; readonly id: string }
@@ -43,7 +45,7 @@ export interface SubclassFeature {
 }
 
 export interface SubclassSource {
-  readonly id: string
+  readonly id: SubclassId
   readonly classId: ClassId
   readonly features: readonly SubclassFeature[]
 }

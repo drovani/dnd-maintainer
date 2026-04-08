@@ -16,11 +16,13 @@ export interface ResolverInput {
   readonly level: number
   readonly bundles: readonly GrantBundle[]
   readonly choices: Readonly<Record<ChoiceKey, ChoiceDecision>>
-  readonly hpRolls: readonly (number | null)[]
+  readonly hpRolls?: readonly (number | null)[]
+  readonly levels?: readonly { readonly hpRoll: number | null }[]
 }
 
 export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
-  const { baseAbilities, level, bundles, choices, hpRolls } = input
+  const { baseAbilities, level, bundles, choices } = input
+  const hpRolls = input.hpRolls ?? input.levels?.map((l) => l.hpRoll) ?? []
 
   const proficiencyBonus = getProficiencyBonus(level)
   const abilities = resolveAbilities(baseAbilities, bundles, choices)
@@ -79,10 +81,12 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
-  // Unresolved ASI grants
+  // Unresolved or invalid ASI grants
   for (const { grant, source } of collectGrantsByType(bundles, 'asi')) {
     const decision = choices[grant.key]
-    if (!decision || decision.type !== 'asi') {
+    const isValid = decision?.type === 'asi'
+      && Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0) <= grant.points
+    if (!isValid) {
       pendingChoices.push({
         type: 'asi',
         choiceKey: grant.key,

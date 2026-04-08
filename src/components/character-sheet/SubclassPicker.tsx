@@ -4,17 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses'
 import type { PendingChoice } from '@/types/resolved'
 import type { ChoiceKey } from '@/types/choices'
+import type { SubclassId } from '@/types/sources'
 import { useTranslation } from 'react-i18next'
 
 interface SubclassPickerProps {
   readonly choice: Extract<PendingChoice, { type: 'subclass' }>
-  readonly onDecide: (choiceKey: ChoiceKey, subclassId: string) => void
+  readonly onDecide: (choiceKey: ChoiceKey, subclassId: SubclassId) => void
 }
 
 export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<SubclassId | null>(null)
 
   const subclasses = SUBCLASS_SOURCES.filter((sc) => sc.classId === choice.classId)
   const className = t(`classes.${choice.classId}`, { defaultValue: choice.classId })
@@ -50,7 +51,7 @@ export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
               }`}
             >
               <span className="text-sm text-foreground">
-                {t(`subclasses.${sc.id}`, { defaultValue: sc.id })}
+                {t(`subclasses.${sc.id}`)}
               </span>
             </button>
           )

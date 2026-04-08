@@ -72,12 +72,12 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
     return 0
   }
 
-  // origin === 'class' — parseChoiceKey guarantees no other values
-  const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId)
+  // origin === 'class' — find the first active level row for this class
+  const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId && r.deleted_at == null)
   if (!levelRow) {
-    console.warn(`No level row found for class "${classId}" — choice "${choiceKey}" will be stored on creation row`)
+    throw new Error(`No active level row found for class "${classId}" — cannot store choice "${choiceKey}"`)
   }
-  return levelRow?.sequence ?? 0
+  return levelRow.sequence
 }
 
 /**
@@ -90,31 +90,37 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
 function findGrantRowIndex(
   classId: string,
   grantType: 'subclass' | 'asi',
+  grantIndex: number,
   rows: readonly BuildLevelRow[],
 ): number {
   const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
   if (!classSource) {
-    console.warn(`findGrantRowIndex: no class source for "${classId}"`)
+    console.error(`findGrantRowIndex: no class source for "${classId}"`)
     return -1
   }
 
-  let grantClassLevel: number | null = null
+  // Collect all class levels that have a matching grant type, then pick the Nth one
+  const matchingClassLevels: number[] = []
   for (let i = 0; i < classSource.levels.length; i++) {
     if (classSource.levels[i].grants.some((g) => g.type === grantType)) {
-      grantClassLevel = i + 1
-      break
+      matchingClassLevels.push(i + 1)
     }
   }
-  if (grantClassLevel === null) {
-    console.warn(`findGrantRowIndex: no ${grantType} grant found in class "${classId}" source data`)
+  if (matchingClassLevels.length === 0) {
+    console.error(`findGrantRowIndex: no ${grantType} grant found in class "${classId}" source data`)
+    return -1
+  }
+  if (grantIndex >= matchingClassLevels.length) {
+    console.error(`findGrantRowIndex: grant index ${grantIndex} exceeds available ${grantType} grants (${matchingClassLevels.length}) for class "${classId}"`)
     return -1
   }
 
+  const grantClassLevel = matchingClassLevels[grantIndex]
   const idx = rows.findIndex(
     (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
   )
   if (idx === -1) {
-    console.warn(`findGrantRowIndex: no active row at class level ${grantClassLevel} for class "${classId}"`)
+    console.error(`findGrantRowIndex: no active row at class level ${grantClassLevel} for class "${classId}"`)
   }
   return idx
 }
@@ -158,7 +164,7 @@ function tryDeriveAndResolve(
       level,
       bundles,
       choices: build.choices,
-      hpRolls: build.hpRolls,
+      levels: build.levels,
     })
     return { status: 'ok', build, bundles, resolved, error: null, warnings }
   } catch (err) {
@@ -280,8 +286,8 @@ export function CharacterProvider({
       try {
         // For subclass and ASI decisions, route to the dedicated column on the target level row
         if (decision.type === 'subclass' || decision.type === 'asi') {
-          const { id: classId } = parseChoiceKey(choiceKey)
-          const targetIdx = findGrantRowIndex(classId, decision.type, prev)
+          const { id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
+          const targetIdx = findGrantRowIndex(classId, decision.type, grantIndex, prev)
           if (targetIdx === -1) {
             console.error(`makeChoice: could not route ${decision.type} decision for key "${choiceKey}" to dedicated column`)
             failed = true
@@ -333,7 +339,8 @@ export function CharacterProvider({
         // For subclass and ASI decisions, clear the dedicated column on the target level row
         if (category === 'subclass' || category === 'asi') {
           const grantType = category === 'subclass' ? 'subclass' as const : 'asi' as const
-          const targetIdx = findGrantRowIndex(classId, grantType, prev)
+          const { index: grantIndex } = parseChoiceKey(choiceKey)
+          const targetIdx = findGrantRowIndex(classId, grantType, grantIndex, prev)
           if (targetIdx === -1) {
             console.error(`clearChoice: could not find dedicated column row for key "${choiceKey}"`)
             failed = true

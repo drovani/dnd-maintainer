@@ -3,6 +3,7 @@ import type {
   RaceSource,
   ClassSource,
   SubclassSource,
+  SubclassId,
   BackgroundSource,
   FeatSource,
   ItemSource,
@@ -22,6 +23,7 @@ export type {
   RaceSource,
   ClassSource,
   SubclassSource,
+  SubclassId,
   BackgroundSource,
   FeatSource,
   ItemSource,
@@ -39,7 +41,7 @@ export function getClassSource(id: ClassId): ClassSource | undefined {
   return CLASS_SOURCES.find((c) => c.id === id)
 }
 
-export function getSubclassSource(id: string): SubclassSource | undefined {
+export function getSubclassSource(id: SubclassId): SubclassSource | undefined {
   return SUBCLASS_SOURCES.find((s) => s.id === id)
 }
 

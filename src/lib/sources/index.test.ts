@@ -11,6 +11,7 @@ import {
 import type { CharacterBuild } from '@/types/choices'
 import { createChoiceKey } from '@/types/choices'
 import type { RaceId, BackgroundId, ClassId } from '@/lib/dnd-helpers'
+import type { SubclassId } from '@/types/sources'
 
 const humanFighterL1Build: CharacterBuild = {
   raceId: 'human' as RaceId,
@@ -18,11 +19,9 @@ const humanFighterL1Build: CharacterBuild = {
   baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
   abilityMethod: 'standard-array',
   levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
-  appliedLevels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
   choices: {},
   feats: [],
   activeItems: [],
-  hpRolls: [],
 }
 
 describe('getRaceSource', () => {
@@ -58,7 +57,7 @@ describe('getSubclassSource', () => {
   })
 
   it('returns undefined for unknown subclass', () => {
-    expect(getSubclassSource('unknown-subclass')).toBeUndefined()
+    expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined()
   })
 })
 
@@ -97,7 +96,6 @@ describe('collectBundles', () => {
       raceId: 'gnome-forest' as RaceId,
       backgroundId: 'hermit' as BackgroundId,
       levels: [],
-      appliedLevels: [],
     }
     expect(() => collectBundles(unknownBuild)).not.toThrow()
   })
@@ -106,11 +104,6 @@ describe('collectBundles', () => {
     const l3Build: CharacterBuild = {
       ...humanFighterL1Build,
       levels: [
-        { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
-        { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
-        { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
-      ],
-      appliedLevels: [
         { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
         { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
         { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
@@ -130,13 +123,8 @@ describe('collectBundles', () => {
         { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
         { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
       ],
-      appliedLevels: [
-        { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
-        { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
-        { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
-      ],
       choices: {
-        [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' },
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
       },
     }
     const { bundles } = collectBundles(l3BuildWithChampion)
@@ -152,5 +140,25 @@ describe('collectBundles', () => {
     if (grant.type === 'feature') {
       expect(grant.feature.id).toBe('champion-improved-critical')
     }
+  })
+
+  it('excludes subclass features above character level', () => {
+    // Champion has features at classLevel 3, 7, 10, 15, 18
+    // A L3 fighter should only get the L3 feature, not L7+
+    const subclassKey = createChoiceKey('subclass', 'class', 'fighter', 0)
+    const l3BuildWithChampion: CharacterBuild = {
+      ...humanFighterL1Build,
+      levels: [
+        { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 8 },
+        { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 7 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
+      },
+    }
+    const { bundles } = collectBundles(l3BuildWithChampion)
+    const subclassBundles = bundles.filter((b) => b.source.origin === 'subclass')
+    expect(subclassBundles).toHaveLength(1) // only L3 feature, not L7, L10, L15, L18
   })
 })

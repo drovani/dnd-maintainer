@@ -70,8 +70,8 @@ describe('resolveChoiceSequence', () => {
     expect(resolveChoiceSequence('skill-choice:class:wizard:0', rows)).toBe(2)
   })
 
-  it('falls back to sequence 0 when class has no matching level row', () => {
-    expect(resolveChoiceSequence('skill-choice:class:rogue:0', rows)).toBe(0)
+  it('throws when class has no matching active level row', () => {
+    expect(() => resolveChoiceSequence('skill-choice:class:rogue:0', rows)).toThrow('No active level row found')
   })
 
   it('throws for unknown origins', () => {
@@ -560,6 +560,35 @@ describe('CharacterProvider', () => {
     expect(wizardRow?.deleted_at).toBeNull()
   })
 
+  it('does not level past 20 (max level guard)', () => {
+    const character = buildSeedCharacter()
+    const levelRows: BuildLevelRow[] = Array.from({ length: 20 }, (_, i) => ({
+      sequence: i + 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: i + 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: i === 0 ? null : 6,
+      choices: null,
+      deleted_at: null,
+    }))
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, ...levelRows]),
+    })
+
+    expect(result.current.level).toBe(20)
+
+    act(() => {
+      result.current.levelUp('fighter', 6)
+    })
+
+    // Still 20 — no new row added
+    expect(result.current.level).toBe(20)
+  })
+
   it('makeChoice stores decision on the correct row', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {
@@ -697,7 +726,7 @@ describe('CharacterProvider', () => {
       expect(creation?.choices).toHaveProperty('skill-choice:background:soldier:0')
     })
 
-    it('creates a new creation row when none exists (creationIdx === -1 branch)', () => {
+    it('updates auto-seeded creation row with new abilities', () => {
       const character = buildSeedCharacter()
       // Pass only a level row — no creation row at sequence 0.
       // Note: CharacterProvider seeds a creation row normally, so we need to

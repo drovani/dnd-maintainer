@@ -39,7 +39,7 @@ import {
 } from '@/lib/dnd-helpers'
 import type { Character } from '@/types/database'
 import { Edit2, Save } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -93,6 +93,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
   const { update: updateMutation } = useCharacterMutations()
   const { character: ctxCharacter, rows, resolved, buildError, buildWarnings, level: resolvedLevel, isDirty, markSaved } = useCharacterContext()
   const { saveDraft } = useBuilderAutosave(characterId)
+  const [saveFailed, setSaveFailed] = useState(false)
 
   // Autosave when isDirty (level up/down, choices, etc.)
   const latestPayloadRef = useRef<AutosavePayload>({ character: ctxCharacter, rows, resolved })
@@ -100,18 +101,22 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     latestPayloadRef.current = { character: ctxCharacter, rows, resolved }
   })
 
+  const doSave = useCallback(() => {
+    setSaveFailed(false)
+    saveDraft(latestPayloadRef.current)
+      .then(() => markSaved())
+      .catch((err: unknown) => {
+        console.error('Autosave failed:', err)
+        setSaveFailed(true)
+        toast.error(tc('characterBuilder.errors.failedToSaveDraft'))
+      })
+  }, [saveDraft, markSaved, tc])
+
   useEffect(() => {
     if (!isDirty) return
-    const timer = setTimeout(() => {
-      saveDraft(latestPayloadRef.current)
-        .then(() => markSaved())
-        .catch((err: unknown) => {
-          console.error('Autosave failed:', err)
-          toast.error(tc('characterBuilder.errors.failedToSaveDraft'))
-        })
-    }, 500)
+    const timer = setTimeout(doSave, 500)
     return () => clearTimeout(timer)
-  }, [isDirty, saveDraft, markSaved, tc])
+  }, [isDirty, doSave])
 
   const handleUpdate = (updates: Partial<Character>) => {
     updateMutation.mutate({ id: characterId, ...updates }, {
@@ -163,6 +168,14 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
       <div className="max-w-7xl mx-auto p-8">
         {buildErrorBanner}
         {buildWarningBanner}
+        {saveFailed && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
+            <span>{tc('errors.saveFailed')}</span>
+            <Button variant="outline" size="sm" onClick={doSave}>
+              {tc('buttons.retrySave')}
+            </Button>
+          </div>
+        )}
 
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
@@ -230,7 +243,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
           </div>
 
           {/* Level Controls */}
-          {character.class && (
+          {character.class && DND_CLASSES.some((c) => c.id === character.class) && (
             <div className="mt-4 pt-4 border-t">
               <LevelControls classId={character.class as ClassId} />
             </div>

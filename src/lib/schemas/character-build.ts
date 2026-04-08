@@ -15,11 +15,6 @@ export const BuildLevelSchema = z.object({
   hpRoll: z.number().int().min(1).nullable(),
 })
 
-/** @deprecated Use BuildLevelSchema instead */
-export const AppliedLevelSchema = z.object({
-  classId: z.string().min(1),
-  classLevel: z.number().int().min(1),
-})
 
 export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('ability-choice'), abilities: z.array(z.string()).readonly() }),
@@ -38,11 +33,9 @@ export const CharacterBuildSchema = z.object({
   baseAbilities: AbilityScoresSchema,
   abilityMethod: z.enum(['standard-array', 'point-buy', 'rolling']),
   levels: z.array(BuildLevelSchema).readonly(),
-  appliedLevels: z.array(BuildLevelSchema).readonly(),
   choices: z.record(z.string(), ChoiceDecisionSchema),
   feats: z.array(z.string()).readonly(),
   activeItems: z.array(z.string()).readonly(),
-  hpRolls: z.array(z.number().int().min(1).nullable()).readonly(),
 })
 
 export const CharacterBuildSchemaStrict = CharacterBuildSchema.superRefine((data, ctx) => {

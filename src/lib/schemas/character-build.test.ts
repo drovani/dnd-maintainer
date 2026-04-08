@@ -7,11 +7,9 @@ const validBuild = {
   baseAbilities: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
   abilityMethod: 'standard-array' as const,
   levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
-  appliedLevels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
   choices: {},
   feats: [],
   activeItems: [],
-  hpRolls: [null],
 }
 
 describe('CharacterBuildSchema', () => {
@@ -57,11 +55,9 @@ describe('CharacterBuildSchema', () => {
       baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       abilityMethod: 'standard-array' as const,
       levels: [],
-      appliedLevels: [],
       choices: {},
       feats: [],
       activeItems: [],
-      hpRolls: [],
     }
     const result = CharacterBuildSchema.safeParse(emptyBuild)
     expect(result.success).toBe(true)
@@ -73,8 +69,6 @@ describe('CharacterBuildSchemaStrict', () => {
     const result = CharacterBuildSchemaStrict.safeParse({
       ...validBuild,
       levels: [{ classId: 'fighter', classLevel: 1, hpRoll: 10 }],
-      appliedLevels: [{ classId: 'fighter', classLevel: 1, hpRoll: 10 }],
-      hpRolls: [10],
     })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -90,11 +84,6 @@ describe('CharacterBuildSchemaStrict', () => {
         { classId: 'fighter', classLevel: 1, hpRoll: null },
         { classId: 'fighter', classLevel: 3, hpRoll: 8 },
       ],
-      appliedLevels: [
-        { classId: 'fighter', classLevel: 1, hpRoll: null },
-        { classId: 'fighter', classLevel: 3, hpRoll: 8 },
-      ],
-      hpRolls: [null, 8],
     })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -111,12 +100,6 @@ describe('CharacterBuildSchemaStrict', () => {
         { classId: 'fighter', classLevel: 2, hpRoll: 8 },
         { classId: 'rogue', classLevel: 1, hpRoll: 6 },
       ],
-      appliedLevels: [
-        { classId: 'fighter', classLevel: 1, hpRoll: null },
-        { classId: 'fighter', classLevel: 2, hpRoll: 8 },
-        { classId: 'rogue', classLevel: 1, hpRoll: 6 },
-      ],
-      hpRolls: [null, 8, 6],
     })
     expect(result.success).toBe(true)
   })

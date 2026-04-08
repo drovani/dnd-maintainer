@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getSubclassSource } from '@/lib/sources'
+import type { SubclassId } from '@/types/sources'
 
 describe('getSubclassSource — Champion', () => {
   it('returns defined for champion', () => {
@@ -44,6 +45,6 @@ describe('getSubclassSource — Champion', () => {
 
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
-    expect(getSubclassSource('unknown-subclass')).toBeUndefined()
+    expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined()
   })
 })

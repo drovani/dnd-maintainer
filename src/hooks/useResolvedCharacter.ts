@@ -18,7 +18,7 @@ export function useResolvedCharacter(build: CharacterBuild | null): ResolvedChar
       level: build.levels.length,
       bundles,
       choices: build.choices,
-      hpRolls: build.hpRolls,
+      levels: build.levels,
     })
   }, [build])
 }
