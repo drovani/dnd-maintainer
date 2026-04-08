@@ -325,6 +325,44 @@ describe('CharacterProvider', () => {
     expect(restoredRow?.hp_roll).toBe(8)
   })
 
+  it('levelUp clears choices on restored soft-deleted row so user gets fresh prompts', () => {
+    const fighterLevel3WithSubclass: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 3,
+      subclass_id: 'champion',
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: 6,
+      choices: null,
+      deleted_at: null,
+    }
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel3WithSubclass]),
+    })
+
+    // Soft-delete level 3
+    act(() => {
+      result.current.levelDown()
+    })
+    expect(result.current.rows.find((r) => r.sequence === 3)?.deleted_at).toBeTruthy()
+
+    // Restore it
+    act(() => {
+      result.current.levelUp('fighter', 5)
+    })
+
+    const restored = result.current.rows.find((r) => r.sequence === 3)
+    expect(restored?.deleted_at).toBeNull()
+    expect(restored?.hp_roll).toBe(5)
+    expect(restored?.subclass_id).toBeNull()
+    expect(restored?.asi_allocation).toBeNull()
+    expect(restored?.choices).toBeNull()
+  })
+
   it('build reconstruction excludes soft-deleted rows', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {

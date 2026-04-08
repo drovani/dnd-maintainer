@@ -406,7 +406,14 @@ export function CharacterProvider({
         if (nextDeletedRow.class_id === classId) {
           const idx = prev.findIndex((r) => r.sequence === nextDeletedRow.sequence)
           const next = [...prev]
-          next[idx] = { ...next[idx], deleted_at: null, hp_roll: hpRoll }
+          next[idx] = {
+            ...next[idx],
+            deleted_at: null,
+            hp_roll: hpRoll,
+            subclass_id: null,
+            asi_allocation: null,
+            choices: null,
+          }
           changed = true
           return next
         }

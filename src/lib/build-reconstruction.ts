@@ -5,6 +5,7 @@ import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
 import type { SubclassId } from '@/types/sources'
 import { createChoiceKey, parseChoiceKey } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
+import { CLASS_SOURCES } from '@/lib/sources/classes'
 
 /**
  * A single row from `character_build_levels`.
@@ -157,7 +158,22 @@ export function reconstructBuild(
     }
 
     if (row.asi_allocation !== null) {
-      const key = createChoiceKey('asi', 'class', row.class_id, 0)
+      const classSource = CLASS_SOURCES.find((cs) => cs.id === row.class_id)
+      let asiGrantIndex = 0
+      if (classSource) {
+        // Count how many ASI-granting levels come before this one (0-indexed levels array)
+        let count = 0
+        for (let i = 0; i < classSource.levels.length; i++) {
+          if (classSource.levels[i].grants.some((g) => g.type === 'asi')) {
+            if (i + 1 === row.class_level) {
+              asiGrantIndex = count
+              break
+            }
+            count++
+          }
+        }
+      }
+      const key = createChoiceKey('asi', 'class', row.class_id, asiGrantIndex)
       choices[key] = { type: 'asi', allocation: row.asi_allocation }
     }
 

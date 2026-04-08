@@ -218,7 +218,10 @@
     "gaming-set-dice": "Dice Set",
     "gaming-set-cards": "Playing Card Set",
     "gaming-set-dragonchess": "Dragonchess Set",
-    "gaming-set-three-dragon-ante": "Three-Dragon Ante Set"
+    "gaming-set-three-dragon-ante": "Three-Dragon Ante Set",
+    "smithstools": "Smith's Tools",
+    "brewersupplies": "Brewer's Supplies",
+    "masonstools": "Mason's Tools"
   },
   "features": {
     "fighter-fighting-style": {
@@ -300,6 +303,18 @@
     "eldritchknight-improved-war-magic": {
       "name": "Improved War Magic",
       "description": "When you cast a spell (not just a cantrip), you can make one weapon attack as a bonus action."
+    },
+    "dwarf-darkvision": {
+      "name": "Darkvision",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "dwarf-dwarven-resilience": {
+      "name": "Dwarven Resilience",
+      "description": "You have advantage on saving throws against poison, and you have resistance against poison damage."
+    },
+    "dwarf-stonecunning": {
+      "name": "Stonecunning",
+      "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus."
     }
   },
   "subclasses": {

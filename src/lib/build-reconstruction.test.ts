@@ -174,6 +174,40 @@ describe('reconstructBuild', () => {
     expect(result.choices[expectedKey]).toEqual({ type: 'asi', allocation: { str: 2 } })
   })
 
+  it('maps multiple asi_allocations to distinct grant indices (fighter levels 4 and 6)', () => {
+    const level4: BuildLevelRow = {
+      sequence: 4,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 4,
+      subclass_id: null,
+      asi_allocation: { str: 2 },
+      feat_id: null,
+      hp_roll: 7,
+      choices: null,
+      deleted_at: null,
+    }
+    const level6: BuildLevelRow = {
+      sequence: 6,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 6,
+      subclass_id: null,
+      asi_allocation: { cha: 2 },
+      feat_id: null,
+      hp_roll: 5,
+      choices: null,
+      deleted_at: null,
+    }
+    const result = reconstructBuild(identity, [creationRow, level4, level6], [])
+    const key0 = createChoiceKey('asi', 'class', 'fighter', 0)
+    const key1 = createChoiceKey('asi', 'class', 'fighter', 1)
+    expect(result.choices[key0]).toEqual({ type: 'asi', allocation: { str: 2 } })
+    expect(result.choices[key1]).toEqual({ type: 'asi', allocation: { cha: 2 } })
+  })
+
   it('merges choices from JSONB', () => {
     const creationWithChoices: BuildLevelRow = {
       ...creationRow,

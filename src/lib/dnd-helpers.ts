@@ -303,6 +303,7 @@ export type WeaponProficiencyId = (typeof DND_WEAPON_PROFICIENCIES)[number]
 
 export const DND_TOOL_PROFICIENCIES = [
   'thievestools', 'herbalismkit',
+  'smithstools', 'brewersupplies', 'masonstools',
   'bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol',
   'vehicles-land', 'vehicles-water',
   'gaming-set-dice', 'gaming-set-cards', 'gaming-set-dragonchess', 'gaming-set-three-dragon-ante',
