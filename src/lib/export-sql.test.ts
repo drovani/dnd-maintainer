@@ -141,6 +141,16 @@ describe('buildInsertStatement', () => {
     const sql = buildInsertStatement('campaigns', row, columns)
     expect(sql).toBe("INSERT INTO campaigns (id, description) VALUES ('abc', NULL) ON CONFLICT (id) DO NOTHING;")
   })
+
+  it('uses custom conflict target when provided', () => {
+    const columns: readonly { readonly name: string; readonly type: ColumnType }[] = [
+      { name: 'character_id', type: 'uuid' },
+      { name: 'sequence', type: 'integer' },
+    ]
+    const row = { character_id: 'char-1', sequence: 0 }
+    const sql = buildInsertStatement('character_build_levels', row, columns, '(character_id, sequence)')
+    expect(sql).toBe("INSERT INTO character_build_levels (character_id, sequence) VALUES ('char-1', 0) ON CONFLICT (character_id, sequence) DO NOTHING;")
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -153,6 +163,8 @@ describe('generateSeedSql', () => {
     sessions: [],
     encounters: [],
     notes: [],
+    character_build_levels: [],
+    character_items: [],
   }
 
   it('wraps output in BEGIN/COMMIT transaction', () => {
@@ -197,7 +209,9 @@ describe('generateSeedSql', () => {
     const data: ExportData = {
       ...emptyData,
       campaigns: [{ id: 'c1', name: 'Camp', description: null, setting: null, status: 'active', image_url: null, dm_notes: null, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }],
-      characters: [{ id: 'ch1', campaign_id: 'c1', name: 'Hero', character_type: 'pc', player_name: null, race: 'human', class: 'fighter', subclass: null, level: 1, background: null, alignment: null, experience_points: 0, hit_points_max: 10, hit_points_current: 10, hit_points_temp: null, armor_class: 10, speed: 30, initiative_bonus: 0, proficiency_bonus: 2, abilities: null, saving_throws: null, skills: null, features: null, equipment: null, spells: null, notes: null, personality_traits: null, ideals: null, bonds: null, flaws: null, appearance: null, backstory: null, portrait_url: null, is_active: true, status: 'draft', gender: null, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }],
+      characters: [{ id: 'ch1', campaign_id: 'c1', name: 'Hero', character_type: 'pc', player_name: null, race: 'human', class: 'fighter', subclass: null, level: 1, background: null, alignment: null, hit_points_max: 10, armor_class: 10, speed: 30, proficiency_bonus: 2, notes: null, personality_traits: null, ideals: null, bonds: null, flaws: null, appearance: null, backstory: null, portrait_url: null, is_active: true, status: 'draft', gender: null, size: 'medium', age: null, height: null, weight: null, eye_color: null, hair_color: null, skin_color: null, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }],
+      character_build_levels: [],
+      character_items: [],
     }
     const sql = generateSeedSql(data)
     const campaignPos = sql.indexOf('INSERT INTO campaigns')

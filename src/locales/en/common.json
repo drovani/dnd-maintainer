@@ -336,7 +336,17 @@
     "errors": {
       "loadingCharacter": "Error loading character: {{error}}",
       "buildFailed": "Failed to compute character build: {{message}}",
-      "updateFailed": "Failed to save changes. Please try again."
+      "updateFailed": "Failed to save changes. Please try again.",
+      "archiveFailed": "Failed to archive character. Please try again.",
+      "deleteFailed": "Failed to delete character. Please try again."
+    },
+    "actions": {
+      "archiveTitle": "Archive Character",
+      "archiveConfirm": "Are you sure you want to archive {{name}}? The character will be hidden from the active list but can be restored later.",
+      "deleteTitle": "Delete Character",
+      "deleteConfirm": "Are you sure you want to permanently delete {{name}}? This action cannot be undone.",
+      "archiveSuccess": "{{name}} has been archived.",
+      "deleteSuccess": "{{name}} has been deleted."
     }
   },
   "characterList": {

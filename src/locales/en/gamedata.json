@@ -237,23 +237,84 @@
       "name": "Extra Attack",
       "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
     },
+    "fighter-indomitable": {
+      "name": "Indomitable",
+      "description": "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest."
+    },
     "champion-improved-critical": {
       "name": "Improved Critical",
       "description": "Your weapon attacks score a critical hit on a roll of 19 or 20."
     },
+    "champion-remarkable-athlete": {
+      "name": "Remarkable Athlete",
+      "description": "Add half your proficiency bonus (round up) to any STR, DEX, or CON checks that don't already use your proficiency bonus."
+    },
+    "champion-additional-fighting-style": {
+      "name": "Additional Fighting Style",
+      "description": "Choose a second Fighting Style."
+    },
+    "champion-superior-critical": {
+      "name": "Superior Critical",
+      "description": "Your weapon attacks score a critical hit on a roll of 18–20."
+    },
+    "champion-survivor": {
+      "name": "Survivor",
+      "description": "At the start of each of your turns, regain hit points equal to 5 + CON mod if you have no more than half your hit points left."
+    },
     "battlemaster-combat-superiority": {
       "name": "Combat Superiority",
-      "description": "You learn three maneuvers of your choice. You have four superiority dice, which are d8s. A superiority die is expended when you use it. You regain all expended superiority dice when you finish a short or long rest."
+      "description": "Learn three maneuvers and gain four superiority dice (d8s) to fuel them."
+    },
+    "battlemaster-know-your-enemy": {
+      "name": "Know Your Enemy",
+      "description": "Study a creature for 1 minute to learn how it compares to you in two characteristics."
+    },
+    "battlemaster-improved-combat-superiority": {
+      "name": "Improved Combat Superiority",
+      "description": "Superiority dice become d10s."
+    },
+    "battlemaster-relentless": {
+      "name": "Relentless",
+      "description": "When you roll initiative and have no superiority dice remaining, you regain one."
+    },
+    "battlemaster-superior-combat-superiority": {
+      "name": "Superior Combat Superiority",
+      "description": "Superiority dice become d12s."
     },
     "eldritchknight-spellcasting": {
       "name": "Spellcasting",
-      "description": "You learn to cast spells drawn from the wizard spell list. You learn two cantrips and three 1st-level wizard spells. Intelligence is your spellcasting ability for your wizard spells."
+      "description": "Learn two cantrips and three 1st-level wizard spells. Intelligence is your spellcasting ability."
+    },
+    "eldritchknight-war-magic": {
+      "name": "War Magic",
+      "description": "When you use your action to cast a cantrip, you can make one weapon attack as a bonus action."
+    },
+    "eldritchknight-eldritch-strike": {
+      "name": "Eldritch Strike",
+      "description": "When you hit a creature with a weapon attack, it has disadvantage on the next saving throw against a spell you cast."
+    },
+    "eldritchknight-arcane-charge": {
+      "name": "Arcane Charge",
+      "description": "When you use Action Surge, you can teleport up to 30 feet to an unoccupied space you can see."
+    },
+    "eldritchknight-improved-war-magic": {
+      "name": "Improved War Magic",
+      "description": "When you cast a spell (not just a cantrip), you can make one weapon attack as a bonus action."
     }
   },
   "subclasses": {
-    "champion": "Champion",
-    "battlemaster": "Battle Master",
-    "eldritchknight": "Eldritch Knight"
+    "champion": {
+      "name": "Champion",
+      "description": "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
+    },
+    "battlemaster": {
+      "name": "Battle Master",
+      "description": "Those who emulate the Battle Master archetype employ martial techniques passed down through generations. A Battle Master uses superiority dice to fuel special maneuvers that grant tactical advantage in combat."
+    },
+    "eldritchknight": {
+      "name": "Eldritch Knight",
+      "description": "The Eldritch Knight combines martial prowess with careful study of magic. These fighters learn to cast spells from the wizard spell list, weaving magic into their weapon strikes and defenses."
+    }
   },
   "gender": {
     "male": "Male",

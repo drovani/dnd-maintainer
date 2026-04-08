@@ -29,11 +29,12 @@ describe('getSubclassSource — Champion', () => {
     }
   })
 
-  it('champion level 7 feature has no grants (placeholder)', () => {
+  it('champion level 7 feature grants remarkable athlete', () => {
     const source = getSubclassSource('champion')
     const level7Feature = source?.features.find((f) => f.classLevel === 7)
     expect(level7Feature).toBeDefined()
-    expect(level7Feature?.grants).toHaveLength(0)
+    expect(level7Feature?.grants).toHaveLength(1)
+    expect(level7Feature?.grants[0]).toMatchObject({ type: 'feature', feature: { id: 'champion-remarkable-athlete' } })
   })
 
   it('champion feature classLevels are 3, 7, 10, 15, 18', () => {

@@ -12,9 +12,7 @@ import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
@@ -26,22 +24,18 @@ import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
 import {
-  DND_ALIGNMENTS,
-  DND_BACKGROUNDS,
   DND_CLASSES,
-  DND_RACE_GROUPS,
   DND_SKILLS,
   getProficiencyBonus,
   isBackgroundId,
   type ClassId,
   type DndGender,
-  type DndSkill,
 } from '@/lib/dnd-helpers'
 import type { Character } from '@/types/database'
-import { Edit2, Save } from 'lucide-react'
+import { Archive, Edit2, Save, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
 import type { AutosavePayload } from '@/hooks/useBuilderAutosave'
@@ -90,7 +84,10 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
   const { t: tc } = useTranslation('common')
   const [editSection, setEditSection] = useState<EditSection>(null)
 
-  const { update: updateMutation } = useCharacterMutations()
+  const navigate = useNavigate()
+  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null)
+
+  const { update: updateMutation, remove: removeMutation } = useCharacterMutations()
   const { character: ctxCharacter, rows, resolved, buildError, buildWarnings, level: resolvedLevel, isDirty, markSaved } = useCharacterContext()
   const { saveDraft } = useBuilderAutosave(characterId)
   const [saveFailed, setSaveFailed] = useState(false)
@@ -126,16 +123,27 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     })
   }
 
-  const skillsByAbility = useMemo(() => {
-    return DND_SKILLS.reduce(
-      (acc, skill) => {
-        if (!acc[skill.ability]) acc[skill.ability] = []
-        acc[skill.ability].push(skill)
-        return acc
+  const handleArchive = () => {
+    updateMutation.mutate({ id: characterId, is_active: false }, {
+      onSuccess: () => {
+        setConfirmAction(null)
+        toast.success(tc('characterSheet.actions.archiveSuccess', { name: character.name }))
+        navigate(`/campaign/${character.campaign_id}/characters`)
       },
-      {} as Record<string, DndSkill[]>
-    )
-  }, [])
+      onError: () => toast.error(tc('characterSheet.errors.archiveFailed')),
+    })
+  }
+
+  const handleDelete = () => {
+    removeMutation.mutate({ id: characterId, campaignId: character.campaign_id }, {
+      onSuccess: () => {
+        setConfirmAction(null)
+        toast.success(tc('characterSheet.actions.deleteSuccess', { name: character.name }))
+        navigate(`/campaign/${character.campaign_id}/characters`)
+      },
+      onError: () => toast.error(tc('characterSheet.errors.deleteFailed')),
+    })
+  }
 
   const buildErrorBanner = buildError ? (
     <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
@@ -185,14 +193,33 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               <div className="text-sm text-muted-foreground mb-1">{tc('characterSheet.title')}</div>
               <h1 className="text-3xl font-bold text-foreground">{character.name}</h1>
             </div>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setEditSection('header')}
-              title={tc('characterSheet.dialogs.editCharacterInfo')}
-            >
-              <Edit2 size={16} />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setEditSection('header')}
+                title={tc('characterSheet.dialogs.editCharacterInfo')}
+              >
+                <Edit2 size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setConfirmAction('archive')}
+                title={tc('buttons.archive')}
+              >
+                <Archive size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setConfirmAction('delete')}
+                title={tc('buttons.delete')}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -200,7 +227,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               <span className="text-muted-foreground">{tc('characterSheet.fields.class')}</span>
               <p className="text-foreground font-semibold">
                 {character.class ? t(`classes.${character.class}`, { defaultValue: character.class }) : ''}
-                {character.subclass ? ` (${t(`subclasses.${character.subclass}`, { defaultValue: character.subclass })})` : ''}
+                {character.subclass ? ` (${t(`subclasses.${character.subclass}.name`, { defaultValue: character.subclass })})` : ''}
               </p>
             </div>
             <div>
@@ -321,31 +348,28 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
                 <div className="space-y-1 text-xs">
-                  {Object.entries(skillsByAbility).map(([ability, skillList]) => {
-                    return (
-                      <div key={ability}>
-                        <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${ability as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'}`)}</div>
-                        {skillList.map((skill) => {
-                          const resolvedSkill = skills[skill.id as keyof typeof skills]
-                          if (!resolvedSkill) return null
-                          const bonus = resolvedSkill.bonus
+                  {[...DND_SKILLS]
+                    .sort((a, b) => t(`skills.${a.id}`).localeCompare(t(`skills.${b.id}`)))
+                    .map((skill) => {
+                      const resolvedSkill = skills[skill.id as keyof typeof skills]
+                      if (!resolvedSkill) return null
+                      const bonus = resolvedSkill.bonus
+                      const abbrev = t(`abilityAbbreviations.${skill.ability}`)
 
-                          return (
-                            <div key={skill.id} className="flex justify-between text-foreground py-1">
-                              <span className={resolvedSkill.proficient ? 'font-bold' : ''}>
-                                {t(`skills.${skill.id}`)}
-                              </span>
-                              <span
-                                className={`font-mono ${resolvedSkill.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
-                              >
-                                {bonus >= 0 ? '+' : ''}{bonus}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )
-                  })}
+                      return (
+                        <div key={skill.id} className="flex items-center justify-between text-foreground py-1">
+                          <span className={resolvedSkill.proficient ? 'font-bold' : ''}>
+                            {t(`skills.${skill.id}`)}
+                            <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
+                          </span>
+                          <span
+                            className={`font-mono ${resolvedSkill.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
+                          >
+                            {bonus >= 0 ? '+' : ''}{bonus}
+                          </span>
+                        </div>
+                      )
+                    })}
                 </div>
               </div>
             ) : (
@@ -421,7 +445,17 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                       </p>
                       {resolvedFeature.source && (
                         <div className="text-xs text-muted-foreground/70 mt-1">
-                          {tc('characterSheet.fields.source', { source: resolvedFeature.source.id })}
+                          {tc('characterSheet.fields.source', {
+                            source: resolvedFeature.source.origin === 'class'
+                              ? t(`classes.${resolvedFeature.source.id}`)
+                              : resolvedFeature.source.origin === 'subclass'
+                                ? t(`subclasses.${resolvedFeature.source.id}.name`)
+                                : resolvedFeature.source.origin === 'race'
+                                  ? t(`races.${resolvedFeature.source.id}`)
+                                  : resolvedFeature.source.origin === 'background'
+                                    ? t(`backgrounds.${resolvedFeature.source.id}`)
+                                    : resolvedFeature.source.id
+                          })}
                         </div>
                       )}
                     </div>
@@ -568,6 +602,38 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
           saving={updateMutation.isPending}
         />
       )}
+
+      {/* Archive / Delete Confirmation */}
+      {confirmAction && (
+        <Dialog open onOpenChange={(open) => { if (!open) setConfirmAction(null) }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {confirmAction === 'archive'
+                  ? tc('characterSheet.actions.archiveTitle')
+                  : tc('characterSheet.actions.deleteTitle')}
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              {confirmAction === 'archive'
+                ? tc('characterSheet.actions.archiveConfirm', { name: character.name })
+                : tc('characterSheet.actions.deleteConfirm', { name: character.name })}
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmAction(null)}>
+                {tc('buttons.cancel')}
+              </Button>
+              <Button
+                variant={confirmAction === 'delete' ? 'destructive' : 'default'}
+                onClick={confirmAction === 'archive' ? handleArchive : handleDelete}
+                pending={updateMutation.isPending || removeMutation.isPending}
+              >
+                {confirmAction === 'archive' ? tc('buttons.archive') : tc('buttons.delete')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
@@ -641,18 +707,11 @@ function EditHeaderDialog({
   onClose: () => void
   saving: boolean
 }) {
-  const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({
     name: character.name,
     player_name: character.player_name ?? '',
     character_type: character.character_type,
-    race: character.race ?? '',
-    class: character.class ?? '',
-    subclass: character.subclass ?? '',
-    level: character.level,
-    background: character.background ?? '',
-    alignment: character.alignment ?? '',
     gender: (character.gender ?? '') as DndGender | '',
   })
 
@@ -661,7 +720,7 @@ function EditHeaderDialog({
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{tc('characterSheet.dialogs.editCharacterInfo')}</DialogTitle>
         </DialogHeader>
@@ -688,104 +747,11 @@ function EditHeaderDialog({
             <Label>{tc('characterSheet.fields.type')}</Label>
             <Select value={form.character_type} onValueChange={(val) => update('character_type', val as 'pc' | 'npc')}>
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>{tc(`characterType.${form.character_type}`)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pc">{tc('characterType.pc')}</SelectItem>
                 <SelectItem value="npc">{tc('characterType.npc')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.class')}</Label>
-            <Select value={form.class} onValueChange={(val) => val && update('class', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_CLASSES.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{t(`classes.${c.id}`)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="char-subclass">{tc('characterBuilder.fields.subclass')}</Label>
-            <Input
-              id="char-subclass"
-              value={form.subclass}
-              onChange={(e) => update('subclass', e.target.value)}
-              placeholder={tc('characterSheet.hints.subclassPlaceholder')}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="char-level">{tc('characterSheet.fields.level')}</Label>
-            <Input
-              id="char-level"
-              type="number"
-              min={1}
-              max={20}
-              value={form.level}
-              onChange={(e) => update('level', Number(e.target.value))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.race')}</Label>
-            <Select value={form.race} onValueChange={(val) => val && update('race', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_RACE_GROUPS.map((group) => (
-                  <SelectGroup key={group.id}>
-                    <SelectLabel>{t(`races.${group.id}`)}</SelectLabel>
-                    {group.options.map((opt) => (
-                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}`)}</SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {(() => {
-            const bg = form.background ?? ''
-            const isCustom = bg !== '' && (!isBackgroundId(bg) || bg === 'custom')
-            return (
-              <div className="space-y-2">
-                <Label>{tc('characterSheet.fields.background')}</Label>
-                <Select
-                  value={isCustom ? 'custom' : (form.background ?? undefined)}
-                  onValueChange={(val) => val && update('background', val)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DND_BACKGROUNDS.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}`)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isCustom && (
-                  <Input
-                    placeholder={tc('characterBuilder.placeholders.enterCustomBackground')}
-                    value={bg === 'custom' ? '' : bg}
-                    onChange={(e) => update('background', e.target.value || 'custom')}
-                  />
-                )}
-              </div>
-            )
-          })()}
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.alignment')}</Label>
-            <Select value={form.alignment} onValueChange={(val) => val && update('alignment', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_ALIGNMENTS.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{t(`alignments.${a.id}`)}</SelectItem>
-                ))}
               </SelectContent>
             </Select>
           </div>
@@ -802,11 +768,6 @@ function EditHeaderDialog({
             onSave({
               ...form,
               player_name: form.player_name || null,
-              level: Number(form.level),
-              race: (form.race || null) as Character['race'],
-              class: (form.class || null) as Character['class'],
-              background: (form.background || null) as Character['background'],
-              alignment: (form.alignment || null) as Character['alignment'],
               gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
             })
           }

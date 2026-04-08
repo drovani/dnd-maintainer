@@ -33,7 +33,7 @@ export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
           {tc('characterSheet.subclassPicker.subclassDescription', { className })}
         </p>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
         {subclasses.length === 0 && (
           <p className="text-sm text-muted-foreground">
             {tc('characterSheet.subclassPicker.noSubclassesAvailable')}
@@ -41,18 +41,40 @@ export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
         )}
         {subclasses.map((sc) => {
           const isSelected = selected === sc.id
+
           return (
             <button
               key={sc.id}
               type="button"
               onClick={() => setSelected(sc.id)}
-              className={`w-full rounded-lg border p-3 text-left transition-colors hover:bg-muted/50 ${
-                isSelected ? 'border-primary bg-primary/5 font-semibold' : 'border-border bg-muted/20'
+              className={`w-full rounded-lg border p-4 text-left transition-colors hover:bg-muted/50 ${
+                isSelected ? 'border-primary bg-primary/5' : 'border-border bg-muted/20'
               }`}
             >
-              <span className="text-sm text-foreground">
-                {t(`subclasses.${sc.id}`)}
-              </span>
+              <div className={`text-sm text-foreground ${isSelected ? 'font-semibold' : ''}`}>
+                {t(`subclasses.${sc.id}.name`)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t(`subclasses.${sc.id}.description`)}
+              </p>
+              {isSelected && (
+                <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                  {sc.features.flatMap((f) =>
+                    f.grants
+                      .filter((g): g is Extract<typeof g, { type: 'feature' }> => g.type === 'feature')
+                      .map((g) => (
+                        <li key={g.feature.id}>
+                          <span className="font-semibold">
+                            {t(`features.${g.feature.id}.name`, { defaultValue: g.feature.id })}
+                          </span>
+                          {` (Lv. ${f.classLevel}) `}
+                          &mdash;{' '}
+                          {t(`features.${g.feature.id}.description`, { defaultValue: '' })}
+                        </li>
+                      ))
+                  )}
+                </ul>
+              )}
             </button>
           )
         })}
