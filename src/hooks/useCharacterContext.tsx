@@ -289,7 +289,6 @@ export function CharacterProvider({
           const { id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
           const targetIdx = findGrantRowIndex(classId, decision.type, grantIndex, prev)
           if (targetIdx === -1) {
-            console.error(`makeChoice: could not route ${decision.type} decision for key "${choiceKey}" to dedicated column`)
             failed = true
             return prev
           }
@@ -342,7 +341,6 @@ export function CharacterProvider({
           const { index: grantIndex } = parseChoiceKey(choiceKey)
           const targetIdx = findGrantRowIndex(classId, grantType, grantIndex, prev)
           if (targetIdx === -1) {
-            console.error(`clearChoice: could not find dedicated column row for key "${choiceKey}"`)
             failed = true
             return prev
           }

@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import { CharacterProvider, useCharacterContext, resolveChoiceSequence } from '@/hooks/useCharacterContext'
 import type { BuildLevelRow } from '@/lib/build-reconstruction'
 import type { Character } from '@/types/database'
+import type { ChoiceKey } from '@/types/choices'
 import type { ReactNode } from 'react'
 
 // ---------------------------------------------------------------------------
@@ -642,6 +643,23 @@ describe('CharacterProvider', () => {
 
     const creationRowResult = result.current.rows.find((r) => r.sequence === 0)
     expect(creationRowResult?.choices).not.toHaveProperty('language-choice:race:human:0')
+  })
+
+  it('makeChoice with malformed key is a no-op', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    const rowsBefore = result.current.rows
+
+    act(() => {
+      result.current.makeChoice('bad-key' as ChoiceKey, { type: 'skill-choice', skills: ['athletics'] })
+    })
+
+    // Rows unchanged — choice was not saved
+    expect(result.current.rows).toBe(rowsBefore)
+    expect(result.current.isDirty).toBe(false)
   })
 
   it('markSaved clears isDirty', () => {

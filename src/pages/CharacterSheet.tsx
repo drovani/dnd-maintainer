@@ -101,15 +101,16 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
     latestPayloadRef.current = { character: ctxCharacter, rows, resolved }
   })
 
-  const doSave = useCallback(() => {
+  const doSave = useCallback(async () => {
     setSaveFailed(false)
-    saveDraft(latestPayloadRef.current)
-      .then(() => markSaved())
-      .catch((err: unknown) => {
-        console.error('Autosave failed:', err)
-        setSaveFailed(true)
-        toast.error(tc('characterBuilder.errors.failedToSaveDraft'))
-      })
+    try {
+      await saveDraft(latestPayloadRef.current)
+      markSaved()
+    } catch (err: unknown) {
+      console.error('Autosave failed:', err)
+      setSaveFailed(true)
+      toast.error(tc('characterBuilder.errors.failedToSaveDraft'))
+    }
   }, [saveDraft, markSaved, tc])
 
   useEffect(() => {
