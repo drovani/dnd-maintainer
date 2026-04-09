@@ -10,7 +10,7 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import { isThemeId } from '@/lib/theme';
 
 export function Layout() {
-  const { id: campaignId } = useParams<{ id: string }>();
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -18,11 +18,11 @@ export function Layout() {
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
   const { setCampaignThemeOverride } = useTheme();
 
-  // campaignId from URL is the source of truth; no state sync needed
-  const selectedCampaignId = campaignId;
+  // Find the current campaign by slug
+  const currentCampaign = campaigns?.find(c => c.slug === campaignSlug);
 
   // Find the current campaign's theme from the already-loaded campaigns list
-  const currentCampaignTheme = campaigns?.find(c => c.id === selectedCampaignId)?.theme;
+  const currentCampaignTheme = currentCampaign?.theme;
 
   useEffect(() => {
     if (currentCampaignTheme && isThemeId(currentCampaignTheme)) {
@@ -33,8 +33,8 @@ export function Layout() {
     return () => setCampaignThemeOverride(null);
   }, [currentCampaignTheme, setCampaignThemeOverride]);
 
-  const handleSelectCampaign = (id: string) => {
-    navigate(`/campaign/${id}`);
+  const handleSelectCampaign = (slug: string) => {
+    navigate(`/campaign/${slug}`);
   };
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export function Layout() {
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar
         campaigns={campaigns}
-        selectedCampaignId={selectedCampaignId}
+        selectedCampaignSlug={campaignSlug}
         onSelectCampaign={handleSelectCampaign}
         isCollapsed={isCollapsed}
         onToggleCollapse={setIsCollapsed}
@@ -95,7 +95,7 @@ export function Layout() {
               </div>
             </div>
           ) : (
-            <Outlet context={{ selectedCampaignId }} />
+            <Outlet context={{ campaignSlug, campaignId: currentCampaign?.id } satisfies { campaignSlug: string | undefined; campaignId: string | undefined }} />
           )}
         </div>
       </main>

@@ -20,19 +20,19 @@ export function useCampaigns() {
   })
 }
 
-export function useCampaign(id: string | undefined) {
+export function useCampaign(slug: string | undefined) {
   return useQuery({
-    queryKey: ['campaign', id],
+    queryKey: ['campaign', slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')
         .select(CAMPAIGN_DETAIL_COLS)
-        .eq('id', id!)
+        .or(`slug.eq.${slug},previous_slugs.cs.{"${slug}"}`)
         .single()
       if (error) throw error
       return data as unknown as Campaign
     },
-    enabled: !!id,
+    enabled: !!slug,
   })
 }
 
@@ -70,7 +70,7 @@ export function useCampaignMutations() {
     },
     onSuccess: (data) => {
       invalidate()
-      queryClient.setQueryData(['campaign', data.id], data)
+      queryClient.setQueryData(['campaign', data.slug], data)
     },
   })
 

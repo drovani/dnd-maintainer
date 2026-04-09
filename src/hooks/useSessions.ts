@@ -21,19 +21,19 @@ export function useSessions(campaignId: string) {
   });
 }
 
-export function useSession(id: string) {
+export function useSession(slug: string) {
   return useQuery({
-    queryKey: ['session', id],
+    queryKey: ['session', slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('sessions')
         .select(SESSION_DETAIL_COLS)
-        .eq('id', id)
+        .or(`slug.eq.${slug},previous_slugs.cs.{"${slug}"}`)
         .single();
       if (error) throw error;
       return data as unknown as Session;
     },
-    enabled: !!id,
+    enabled: !!slug,
   });
 }
 
@@ -72,7 +72,7 @@ export function useUpdateSession() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', data.campaign_id] });
-      queryClient.invalidateQueries({ queryKey: ['session', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['session', data.slug] });
     },
   });
 }

@@ -22,19 +22,19 @@ export function useCharacters(campaignId: string) {
   })
 }
 
-export function useCharacter(id: string | undefined) {
+export function useCharacter(slug: string | undefined) {
   return useQuery({
-    queryKey: ['character', id],
+    queryKey: ['character', slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('characters')
         .select(CHARACTER_DETAIL_COLS)
-        .eq('id', id!)
+        .or(`slug.eq.${slug},previous_slugs.cs.{"${slug}"}`)
         .single()
       if (error) throw error
       return data as unknown as Character
     },
-    enabled: !!id,
+    enabled: !!slug,
   })
 }
 
@@ -88,7 +88,7 @@ export function useCharacterMutations() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['characters', data.campaign_id] })
-      queryClient.invalidateQueries({ queryKey: ['character', data.id] })
+      queryClient.invalidateQueries({ queryKey: ['character', data.slug] })
     },
   })
 

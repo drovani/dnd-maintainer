@@ -14,6 +14,7 @@ import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
 import type { AutosavePayload } from '@/hooks/useBuilderAutosave'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import { useCharacter } from '@/hooks/useCharacters'
+import { useCampaignContext } from '@/hooks/useCampaignContext'
 import type { Character } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -75,7 +76,8 @@ function buildSeedCharacter(campaignId: string): Character {
 function CharacterBuilderInner() {
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
-  const { id: campaignId } = useParams<{ id: string }>()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>()
+  const { campaignId } = useCampaignContext()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
   const [isFinalizing, setIsFinalizing] = useState(false)
@@ -153,8 +155,8 @@ function CharacterBuilderInner() {
     setFinalizeError(null)
     try {
       const payload: AutosavePayload = { character, rows, resolved }
-      const id = await finalize(payload)
-      navigate(`/campaign/${campaignId}/character/${id}`)
+      const slug = await finalize(payload)
+      navigate(`/campaign/${campaignSlug}/character/${slug}`)
     } catch (err) {
       console.error('Character finalization failed:', err)
       setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'))
@@ -163,7 +165,7 @@ function CharacterBuilderInner() {
     }
   }
 
-  if (!campaignId) {
+  if (!campaignId || !campaignSlug) {
     return <div className="page-container"><p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p></div>
   }
 
@@ -288,21 +290,22 @@ function CharacterBuilderInner() {
 }
 
 export default function CharacterBuilder() {
-  const { id: campaignId, characterId } = useParams<{ id: string; characterId: string }>()
+  const { campaignSlug, characterSlug } = useParams<{ campaignSlug: string; characterSlug: string }>()
+  const { campaignId } = useCampaignContext()
   const { t } = useTranslation('common')
 
-  const isNew = !characterId
+  const isNew = !characterSlug
   const { data: existingCharacter, isLoading: characterLoading, error: characterError } = useCharacter(
-    isNew ? undefined : characterId
+    isNew ? undefined : characterSlug
   )
   const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(
-    isNew ? undefined : characterId
+    isNew ? undefined : existingCharacter?.id
   )
   const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(
-    isNew ? undefined : characterId
+    isNew ? undefined : existingCharacter?.id
   )
 
-  if (!campaignId) {
+  if (!campaignId || !campaignSlug) {
     return (
       <div className="page-container">
         <p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p>
@@ -326,7 +329,7 @@ export default function CharacterBuilder() {
     )
   }
 
-  if (!isNew && (characterError || !existingCharacter)) {
+  if (!isNew && (characterError || !existingCharacter || !existingCharacter.id)) {
     return (
       <div className="page-container">
         <p className="text-destructive">
@@ -344,7 +347,7 @@ export default function CharacterBuilder() {
 
   return (
     <CharacterProvider
-      key={characterId ?? 'new'}
+      key={characterSlug ?? 'new'}
       initialCharacter={initialCharacter}
       initialRows={initialRows}
       initialEquippedItems={initialEquippedItems}

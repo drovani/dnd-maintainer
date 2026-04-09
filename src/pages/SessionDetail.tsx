@@ -41,9 +41,9 @@ interface LootEntry {
 
 export default function SessionDetail() {
   const { t } = useTranslation('common')
-  const { id: campaignId, sessionId } = useParams<{
-    id: string
-    sessionId: string
+  const { campaignSlug, sessionSlug } = useParams<{
+    campaignSlug: string
+    sessionSlug: string
   }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -81,29 +81,29 @@ export default function SessionDetail() {
   })
 
   // Fetch session
-  const { data: session, isLoading, error } = useSession(sessionId!)
+  const { data: session, isLoading, error } = useSession(sessionSlug!)
 
   // DM notes and loot are stored on the session itself
   const sessionNotes = (session as unknown as Record<string, unknown>)?.notes as string ?? ''
   const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? []
 
-  // Fetch linked encounters
-  const { data: encounters = [] } = useSessionEncounters(sessionId!)
+  // Fetch linked encounters (by session UUID once loaded)
+  const { data: encounters = [] } = useSessionEncounters(session?.id)
 
   // Update session mutation
   const updateSessionMutation = useMutation({
     mutationFn: async (updates: Partial<Session>) => {
-      if (!sessionId) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required')
 
       const { error } = await supabase
         .from('sessions')
         .update(updates as unknown as TablesUpdate<'sessions'>)
-        .eq('id', sessionId)
+        .eq('id', session.id)
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
       toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
   })
@@ -111,17 +111,17 @@ export default function SessionDetail() {
   // Update DM notes mutation (stored on sessions.notes column)
   const updateDmNotesMutation = useMutation({
     mutationFn: async (content: string) => {
-      if (!sessionId) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required')
 
       const { error } = await supabase
         .from('sessions')
         .update({ notes: content.trim() || null })
-        .eq('id', sessionId)
+        .eq('id', session.id)
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
       toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
     },
   })
@@ -129,38 +129,38 @@ export default function SessionDetail() {
   // Upsert loot mutation (stored on sessions.loot JSONB column)
   const upsertLootMutation = useMutation({
     mutationFn: async (lootEntry: LootEntry) => {
-      if (!sessionId) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required')
 
       const updatedLoot = [...loot.filter((l) => l.id !== lootEntry.id), lootEntry]
       const { error } = await supabase
         .from('sessions')
         .update({ loot: updatedLoot as unknown as Json })
-        .eq('id', sessionId)
+        .eq('id', session.id)
 
       if (error) throw error
     },
     onSuccess: (_data, lootEntry) => {
       setLoot(prev => [...prev.filter(l => l.id !== lootEntry.id), lootEntry])
-      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
     },
   })
 
   // Delete loot mutation
   const deleteLootMutation = useMutation({
     mutationFn: async (lootId: string) => {
-      if (!sessionId) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required')
 
       const updatedLoot = loot.filter((l) => l.id !== lootId)
       const { error } = await supabase
         .from('sessions')
         .update({ loot: updatedLoot as unknown as Json })
-        .eq('id', sessionId)
+        .eq('id', session.id)
 
       if (error) throw error
     },
     onSuccess: (_data, lootId) => {
       setLoot(prev => prev.filter(l => l.id !== lootId))
-      queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
     },
   })
 
@@ -556,7 +556,7 @@ export default function SessionDetail() {
             </h2>
             <button
               onClick={() =>
-                navigate(`/campaign/${campaignId}/encounter/new?session=${sessionId}`)
+                navigate(`/campaign/${campaignSlug}/encounter/new?session=${session?.id}`)
               }
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
@@ -575,7 +575,7 @@ export default function SessionDetail() {
                 <div
                   key={encounter.id}
                   onClick={() =>
-                    navigate(`/campaign/${campaignId}/encounter/${encounter.id}`)
+                    navigate(`/campaign/${campaignSlug}/encounter/${encounter.id}`)
                   }
                   className="bg-muted hover:bg-muted/50 rounded-lg p-4 cursor-pointer transition-colors"
                 >

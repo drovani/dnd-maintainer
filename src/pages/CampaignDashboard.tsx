@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ValidationError } from '@/components/ui/validation-error'
 import { ThemePicker } from '@/components/ThemePicker'
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
+import { useCampaignContext } from '@/hooks/useCampaignContext'
 import { useCharacters } from '@/hooks/useCharacters'
 import { useSessions } from '@/hooks/useSessions'
 import {
@@ -24,7 +25,8 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 export default function CampaignDashboard() {
-  const { id } = useParams<{ id: string }>()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>()
+  const { campaignId } = useCampaignContext()
   const navigate = useNavigate()
 
   const [isEditingName, setIsEditingName] = useState(false)
@@ -38,20 +40,20 @@ export default function CampaignDashboard() {
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
 
-  const { data: campaign, isLoading: campaignLoading } = useCampaign(id)
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignSlug)
   const { update: updateMutation } = useCampaignMutations()
 
-  // Fetch characters for this campaign
-  const { data: charactersRaw = [], error: charactersError } = useCharacters(id!)
+  // Fetch characters for this campaign (by UUID for FK queries)
+  const { data: charactersRaw = [], error: charactersError } = useCharacters(campaignId!)
   const characters = useMemo(
     () => [...charactersRaw].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
     [charactersRaw]
   )
 
-  // Fetch sessions for this campaign (hook already sorts by date DESC)
-  const { data: sessions = [], error: sessionsError } = useSessions(id!)
+  // Fetch sessions for this campaign (by UUID for FK queries)
+  const { data: sessions = [], error: sessionsError } = useSessions(campaignId!)
 
-  if (!id) {
+  if (!campaignSlug) {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="text-center">
@@ -62,7 +64,7 @@ export default function CampaignDashboard() {
   }
 
   const handleUpdate = (updates: Record<string, string>) => {
-    updateMutation.mutate({ id, ...updates }, {
+    updateMutation.mutate({ id: campaign!.id, ...updates }, {
       onSuccess: () => {
         setIsEditingName(false)
         setIsEditingDescription(false)
@@ -314,7 +316,7 @@ export default function CampaignDashboard() {
                     {t('campaign.stats.characters')}
                   </h3>
                   <Link
-                    to={`/campaign/${id}/characters`}
+                    to={`/campaign/${campaignSlug}/characters`}
                     className="text-primary hover:text-foreground"
                   >
                     <ChevronRight className="size-5" />
@@ -352,7 +354,7 @@ export default function CampaignDashboard() {
                     {t('campaign.stats.sessions')}
                   </h3>
                   <Link
-                    to={`/campaign/${id}/sessions`}
+                    to={`/campaign/${campaignSlug}/sessions`}
                     className="text-primary hover:text-foreground"
                   >
                     <ChevronRight className="size-5" />
@@ -374,7 +376,7 @@ export default function CampaignDashboard() {
                     {t('campaign.stats.notes')}
                   </h3>
                   <Link
-                    to={`/campaign/${id}/notes`}
+                    to={`/campaign/${campaignSlug}/notes`}
                     className="text-primary hover:text-foreground"
                   >
                     <ChevronRight className="size-5" />
@@ -422,7 +424,7 @@ export default function CampaignDashboard() {
                   </div>
 
                   <Link
-                    to={`/campaign/${id}/sessions`}
+                    to={`/campaign/${campaignSlug}/sessions`}
                     className="block text-primary hover:text-foreground text-sm font-semibold transition-colors"
                   >
                     {t('campaign.activity.viewAllSessions')}
@@ -433,7 +435,7 @@ export default function CampaignDashboard() {
                   <BookOpen className="size-8 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">{t('campaign.activity.noSessions')}</p>
                   <Link
-                    to={`/campaign/${id}/sessions`}
+                    to={`/campaign/${campaignSlug}/sessions`}
                     className="text-primary hover:text-foreground text-sm font-semibold mt-3 inline-block transition-colors"
                   >
                     {t('campaign.activity.createFirstSession')}
@@ -458,7 +460,7 @@ export default function CampaignDashboard() {
                   {recentCharacters.map((char) => (
                     <Link
                       key={char.id}
-                      to={`/campaign/${id}/character/${char.id}`}
+                      to={`/campaign/${campaignSlug}/character/${char.slug}`}
                       className="block bg-muted/50 hover:bg-muted rounded-lg p-4 border border-border hover:border-border transition-all group"
                     >
                       <div className="flex items-center justify-between">
@@ -482,7 +484,7 @@ export default function CampaignDashboard() {
 
                   {characters.length > recentCharacters.length && (
                     <Link
-                      to={`/campaign/${id}/characters`}
+                      to={`/campaign/${campaignSlug}/characters`}
                       className="block text-primary hover:text-foreground text-sm font-semibold transition-colors mt-4"
                     >
                       {t('campaign.party.viewAllCharacters', { count: characters.length })}
@@ -494,7 +496,7 @@ export default function CampaignDashboard() {
                   <Users className="size-8 text-muted-foreground/50 mx-auto mb-3" />
                   <p className="text-muted-foreground">{t('campaign.party.noCharacters')}</p>
                   <Link
-                    to={`/campaign/${id}/character/new`}
+                    to={`/campaign/${campaignSlug}/character/new`}
                     className="text-primary hover:text-foreground text-sm font-semibold mt-3 inline-block transition-colors"
                   >
                     {t('campaign.party.createCharacter')}
@@ -512,7 +514,7 @@ export default function CampaignDashboard() {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
-              to={`/campaign/${id}/characters`}
+              to={`/campaign/${campaignSlug}/characters`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
               <Users className="size-6 text-primary" />
@@ -525,7 +527,7 @@ export default function CampaignDashboard() {
             </Link>
 
             <Link
-              to={`/campaign/${id}/sessions`}
+              to={`/campaign/${campaignSlug}/sessions`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
               <BookOpen className="size-6 text-primary" />
@@ -538,7 +540,7 @@ export default function CampaignDashboard() {
             </Link>
 
             <Link
-              to={`/campaign/${id}/notes`}
+              to={`/campaign/${campaignSlug}/notes`}
               className="flex items-center gap-3 bg-muted hover:bg-muted hover:border-border border border-border rounded-lg p-4 transition-all group"
             >
               <Scroll className="size-6 text-primary" />
@@ -561,7 +563,7 @@ export default function CampaignDashboard() {
                 <p className="text-sm text-muted-foreground mb-3">{t('campaign.themeDescription')}</p>
                 <ThemePicker
                   value={campaign.theme ?? null}
-                  onChange={(newTheme) => updateMutation.mutate({ id: id!, theme: newTheme })}
+                  onChange={(newTheme) => updateMutation.mutate({ id: campaign!.id, theme: newTheme })}
                   allowNone
                   disabled={updateMutation.isPending}
                 />

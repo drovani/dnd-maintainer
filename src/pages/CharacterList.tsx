@@ -1,4 +1,5 @@
 import { useCharacters } from '@/hooks/useCharacters'
+import { useCampaignContext } from '@/hooks/useCampaignContext'
 import { Plus, Search, User, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +11,8 @@ type SortType = 'name' | 'level' | 'class' | 'updated'
 export default function CharacterList() {
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
-  const { id: campaignId } = useParams<{ id: string }>()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>()
+  const { campaignId } = useCampaignContext()
   const navigate = useNavigate()
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [sortBy, setSortBy] = useState<SortType>('name')
@@ -86,7 +88,7 @@ export default function CharacterList() {
             </p>
           </div>
           <button
-            onClick={() => navigate(`/campaign/${campaignId}/character/new`)}
+            onClick={() => navigate(`/campaign/${campaignSlug}/character/new`)}
             className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             <Plus size={20} />
@@ -167,7 +169,7 @@ export default function CharacterList() {
             <Users size={48} className="mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">{t('characterList.noCharactersFound')}</p>
             <button
-              onClick={() => navigate(`/campaign/${campaignId}/character/new`)}
+              onClick={() => navigate(`/campaign/${campaignSlug}/character/new`)}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
             >
               <Plus size={20} />
@@ -181,7 +183,7 @@ export default function CharacterList() {
                 key={character.id}
                 onClick={() =>
                   navigate(
-                    `/campaign/${campaignId}/character/${character.id}`
+                    `/campaign/${campaignSlug}/character/${character.slug}`
                   )
                 }
                 className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${character.character_type === 'pc'

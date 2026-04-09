@@ -85,6 +85,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
   const [editSection, setEditSection] = useState<EditSection>(null)
 
   const navigate = useNavigate()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>()
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null)
 
   const { update: updateMutation, remove: removeMutation } = useCharacterMutations()
@@ -128,7 +129,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
       onSuccess: () => {
         setConfirmAction(null)
         toast.success(tc('characterSheet.actions.archiveSuccess', { name: character.name }))
-        navigate(`/campaign/${character.campaign_id}/characters`)
+        navigate(`/campaign/${campaignSlug}/characters`)
       },
       onError: () => toast.error(tc('characterSheet.errors.archiveFailed')),
     })
@@ -139,7 +140,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
       onSuccess: () => {
         setConfirmAction(null)
         toast.success(tc('characterSheet.actions.deleteSuccess', { name: character.name }))
-        navigate(`/campaign/${character.campaign_id}/characters`)
+        navigate(`/campaign/${campaignSlug}/characters`)
       },
       onError: () => toast.error(tc('characterSheet.errors.deleteFailed')),
     })
@@ -615,11 +616,11 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
 
 export default function CharacterSheet() {
   const { t: tc } = useTranslation('common')
-  const { characterId } = useParams<{ id: string; characterId: string }>()
+  const { characterSlug } = useParams<{ campaignSlug: string; characterSlug: string }>()
 
-  const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
-  const { data: buildRows = [], isLoading: rowsLoading, error: rowsError } = useCharacterBuildLevels(characterId)
-  const { data: itemsData = [], isLoading: itemsLoading, error: itemsError } = useCharacterItems(characterId)
+  const { data: character, isLoading: characterLoading, error } = useCharacter(characterSlug)
+  const { data: buildRows = [], isLoading: rowsLoading, error: rowsError } = useCharacterBuildLevels(character?.id)
+  const { data: itemsData = [], isLoading: itemsLoading, error: itemsError } = useCharacterItems(character?.id)
 
   const equippedItems = useMemo(
     () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
@@ -643,7 +644,7 @@ export default function CharacterSheet() {
     )
   }
 
-  if (error || rowsError || itemsError || !character || !characterId) {
+  if (error || rowsError || itemsError || !character || !characterSlug) {
     return (
       <div className="min-h-screen p-8">
         <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
@@ -655,7 +656,7 @@ export default function CharacterSheet() {
 
   return (
     <CharacterProvider
-      key={characterId}
+      key={character.id}
       initialCharacter={character}
       initialRows={buildRows}
       initialEquippedItems={equippedItems}
@@ -663,7 +664,7 @@ export default function CharacterSheet() {
       <CharacterSheetInner
         character={character}
         itemsData={itemsData}
-        characterId={characterId}
+        characterId={character.id}
       />
     </CharacterProvider>
   )

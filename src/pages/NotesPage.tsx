@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+import { useCampaignContext } from '@/hooks/useCampaignContext'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -45,7 +45,7 @@ const CATEGORIES: { value: NoteCategory; icon: React.ReactNode }[] = [
 ]
 
 export default function NotesPage() {
-  const { id: campaignId } = useParams<{ id: string }>()
+  const { campaignId } = useCampaignContext()
   const queryClient = useQueryClient()
   const { t } = useTranslation('common')
 

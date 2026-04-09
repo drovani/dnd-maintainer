@@ -161,24 +161,24 @@ describe('useBuilderAutosave', () => {
   })
 
   describe('finalize', () => {
-    it('calls saveDraft then updates status to ready and returns id', async () => {
-      mockQueryResult.data = { id: 'char-new' }
+    it('calls saveDraft then updates status to ready and returns slug', async () => {
+      mockQueryResult.data = { id: 'char-new', slug: 'hero-draft' }
 
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      let returnedId: string | undefined
+      let returnedSlug: string | undefined
       await act(async () => {
-        returnedId = await result.current.finalize(basePayload)
+        returnedSlug = await result.current.finalize(basePayload)
       })
 
-      expect(returnedId).toBe('char-new')
+      expect(returnedSlug).toBe('hero-draft')
       expect(supabase.update).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'ready' })
       )
     })
 
     it('sets saveStatus to saved after successful finalize', async () => {
-      mockQueryResult.data = { id: 'char-new' }
+      mockQueryResult.data = { id: 'char-new', slug: 'hero-draft' }
 
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 

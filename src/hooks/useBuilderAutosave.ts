@@ -104,11 +104,11 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             const { data, error } = await supabase
               .from('characters')
               .insert(insertPayload as unknown as TablesInsert<'characters'>)
-              .select('id')
+              .select('id, slug')
               .single()
             if (error) throw error
             if (!data?.id) throw new Error('Insert succeeded but no character ID was returned')
-            savedId = (data as { id: string }).id
+            savedId = (data as { id: string; slug: string }).id
             characterIdRef.current = savedId
             queryClient.invalidateQueries({ queryKey: ['characters', character.campaign_id] })
           }
@@ -182,13 +182,16 @@ export function useBuilderAutosave(existingCharacterId?: string) {
     async (payload: AutosavePayload): Promise<string> => {
       const id = await saveDraft(payload)
       try {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('characters')
           .update({ status: 'ready' } as unknown as TablesUpdate<'characters'>)
           .eq('id', id)
+          .select('slug')
+          .single()
         if (error) throw error
+        if (!data?.slug) throw new Error('Finalize succeeded but no character slug was returned')
         queryClient.invalidateQueries({ queryKey: ['characters', payload.character.campaign_id] })
-        return id
+        return (data as { slug: string }).slug
       } catch (err) {
         setSaveStatus('error')
         console.error('Failed to finalize character (draft was saved):', err)
