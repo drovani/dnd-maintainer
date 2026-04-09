@@ -98,6 +98,28 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved fighting-style-choice grants
+  const allFightingStyleDecisions: string[] = []
+  for (const { grant } of collectGrantsByType(bundles, 'fighting-style-choice')) {
+    const decision = choices[grant.key]
+    if (decision?.type === 'fighting-style-choice') {
+      allFightingStyleDecisions.push(...decision.styles)
+    }
+  }
+  for (const { grant, source } of collectGrantsByType(bundles, 'fighting-style-choice')) {
+    const decision = choices[grant.key]
+    if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) {
+      pendingChoices.push({
+        type: 'fighting-style-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: grant.from,
+        alreadyChosen: allFightingStyleDecisions as import('@/lib/dnd-helpers').FightingStyleId[],
+      })
+    }
+  }
+
   // Unresolved subclass grants
   for (const { grant, source } of collectGrantsByType(bundles, 'subclass')) {
     const decision = choices[grant.key]

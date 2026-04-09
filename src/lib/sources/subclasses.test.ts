@@ -44,6 +44,15 @@ describe('getSubclassSource — Champion', () => {
     })
   })
 
+  it('champion level 10 grants a fighting-style-choice', () => {
+    const source = getSubclassSource('champion')
+    const level10Feature = source?.features.find((f) => f.classLevel === 10)
+    expect(level10Feature).toBeDefined()
+    expect(level10Feature?.grants).toHaveLength(1)
+    const grant = level10Feature?.grants[0]
+    expect(grant?.type).toBe('fighting-style-choice')
+  })
+
   it('champion feature classLevels are 3, 7, 10, 15, 18', () => {
     const source = getSubclassSource('champion')
     const levels = source?.features.map((f) => f.classLevel)

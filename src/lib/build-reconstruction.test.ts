@@ -408,6 +408,7 @@ describe('Human Fighter Level 1 round-trip', () => {
         asi_allocation: null,
         choices: {
           'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+          'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
         },
         deleted_at: null,
       },
@@ -444,7 +445,7 @@ describe('Human Fighter Level 1 round-trip', () => {
     expect(resolved.hitPoints.max).toBe(12) // 10 + 2
 
     // AC: armored = 10 + DEX modifier (14 → +2)
-    expect(resolved.armorClass.effective).toBe(12) // 10 + 2
+    expect(resolved.armorClass.effective).toBe(13) // 10 + 2 (DEX) + 1 (Defense style)
 
     // Speed: from human race
     expect(resolved.speed['walk']?.value).toBe(30)
@@ -462,8 +463,11 @@ describe('Human Fighter Level 1 round-trip', () => {
     expect(resolved.skills.athletics.proficient).toBe(true)
     expect(resolved.skills.intimidation.proficient).toBe(true)
 
-    // Features: at minimum fighter-fighting-style and fighter-second-wind
+    // Features: chosen fighting style (defense) and fighter-second-wind
     expect(resolved.features.length).toBeGreaterThanOrEqual(2)
+    const featureIds = resolved.features.map((f) => f.feature.id)
+    expect(featureIds).toContain('fighting-style-defense')
+    expect(featureIds).toContain('fighter-second-wind')
 
     // Armor proficiencies from fighter level 1
     expect(resolved.armorProficiencies.map((p) => p.value)).toContain('light')

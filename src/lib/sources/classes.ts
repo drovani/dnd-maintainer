@@ -1,5 +1,6 @@
 import type { ClassSource } from '@/types/sources'
 import { createChoiceKey } from '@/types/choices'
+import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers'
 
 const EMPTY_LEVEL = { grants: [] } as const
 
@@ -36,7 +37,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             ],
           },
           { type: 'armor-class', calculation: { mode: 'armored' } },
-          { type: 'feature', feature: { id: 'fighter-fighting-style' } },
+          { type: 'fighting-style-choice', key: createChoiceKey('fighting-style-choice', 'class', 'fighter', 0), count: 1, from: FIGHTING_STYLE_IDS },
           { type: 'feature', feature: { id: 'fighter-second-wind' } },
         ],
       },

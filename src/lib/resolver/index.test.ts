@@ -99,6 +99,8 @@ describe('Human Fighter L1 integration', () => {
     choices: {
       // Fighter skill choices (2 from list)
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      // Fighter fighting style choice
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       // Human language choice
       'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
       // Soldier tool choice
@@ -147,9 +149,9 @@ describe('Human Fighter L1 integration', () => {
     expect(result.hitPoints.max).toBe(12)
   })
 
-  it('AC = 10 + DEX modifier (2) = 12', () => {
+  it('AC = 10 + DEX modifier (2) + Defense style bonus (1) = 13', () => {
     const result = resolveCharacter(input)
-    expect(result.armorClass.effective).toBe(12)
+    expect(result.armorClass.effective).toBe(13)
   })
 
   it('walk speed = 30', () => {
@@ -178,11 +180,11 @@ describe('Human Fighter L1 integration', () => {
     expect(result.savingThrows.str.bonus).toBe(5)
   })
 
-  it('has 2 features: Fighting Style and Second Wind', () => {
+  it('has 2 features: chosen fighting style and Second Wind', () => {
     const result = resolveCharacter(input)
     expect(result.features).toHaveLength(2)
     const featureIds = result.features.map((f) => f.feature.id)
-    expect(featureIds).toContain('fighter-fighting-style')
+    expect(featureIds).toContain('fighting-style-defense')
     expect(featureIds).toContain('fighter-second-wind')
   })
 
@@ -379,6 +381,7 @@ describe('Human Fighter L5 integration', () => {
     ],
     choices: {
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },

@@ -24,6 +24,7 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('expertise-choice'), skills: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('asi'), allocation: z.record(z.string(), z.number()) }),
   z.object({ type: z.literal('subclass'), subclassId: z.string().min(1) }),
+  z.object({ type: z.literal('fighting-style-choice'), styles: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('equipment-choice'), optionIndex: z.number().int().min(0) }),
 ])
 

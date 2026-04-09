@@ -1,4 +1,4 @@
-import type { AbilityKey, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId } from '@/lib/dnd-helpers'
+import type { AbilityKey, FightingStyleId, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { SubclassId } from '@/types/sources'
 import type { AbilityScores } from '@/types/database'
 
@@ -18,6 +18,7 @@ export type ChoiceCategory =
   | 'expertise-choice'
   | 'asi'
   | 'subclass'
+  | 'fighting-style-choice'
   | 'equipment-choice'
 
 export type ChoiceKey = `${ChoiceCategory}:${ChoiceOrigin}:${string}:${number}`
@@ -35,7 +36,7 @@ export interface ParsedChoiceKey {
 
 const VALID_CATEGORIES = new Set<string>([
   'skill-choice', 'tool-choice', 'language-choice', 'ability-choice',
-  'expertise-choice', 'asi', 'subclass', 'equipment-choice',
+  'expertise-choice', 'asi', 'subclass', 'fighting-style-choice', 'equipment-choice',
 ])
 
 export function parseChoiceKey(key: ChoiceKey | string): ParsedChoiceKey {
@@ -71,6 +72,7 @@ export type ChoiceDecision =
   | { readonly type: 'expertise-choice'; readonly skills: readonly SkillId[] }
   | { readonly type: 'asi'; readonly allocation: Partial<Record<AbilityKey, number>> }
   | { readonly type: 'subclass'; readonly subclassId: SubclassId }
+  | { readonly type: 'fighting-style-choice'; readonly styles: readonly FightingStyleId[] }
   | { readonly type: 'equipment-choice'; readonly optionIndex: number }
 
 export interface BuildLevel {

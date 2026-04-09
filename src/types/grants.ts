@@ -1,4 +1,4 @@
-import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
+import type { AbilityKey, ClassId, FightingStyleId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
 import type { ChoiceKey } from '@/types/choices'
 
 // Supporting types
@@ -148,6 +148,13 @@ export interface AbilityCheckBonusGrant {
   readonly featureId: string
 }
 
+export interface FightingStyleChoiceGrant {
+  readonly type: 'fighting-style-choice'
+  readonly key: ChoiceKey
+  readonly count: number
+  readonly from: readonly FightingStyleId[]
+}
+
 export interface EquipmentChoiceGrant {
   readonly type: 'equipment-choice'
   readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[]
@@ -171,5 +178,6 @@ export type Grant =
   | AsiGrant
   | SubclassGrant
   | AbilityCheckBonusGrant
+  | FightingStyleChoiceGrant
   | EquipmentGrant
   | EquipmentChoiceGrant

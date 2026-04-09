@@ -593,6 +593,17 @@ export const DND_CLASSES = [
 
 export type ClassId = (typeof DND_CLASSES)[number]['id']
 
+export const FIGHTING_STYLE_IDS = [
+  'archery',
+  'defense',
+  'dueling',
+  'great-weapon-fighting',
+  'protection',
+  'two-weapon-fighting',
+] as const
+
+export type FightingStyleId = (typeof FIGHTING_STYLE_IDS)[number]
+
 export const DND_SKILLS = [
   { id: 'acrobatics', ability: 'dex' },
   { id: 'animalhandling', ability: 'wis' },

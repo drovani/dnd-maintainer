@@ -10,7 +10,7 @@ import type {
   GrantBundle,
   SourceTag,
 } from '@/types/sources'
-import type { SubclassGrant } from '@/types/grants'
+import type { SubclassGrant, FightingStyleChoiceGrant } from '@/types/grants'
 import type { CharacterBuild } from '@/types/choices'
 import { RACE_SOURCES } from '@/lib/sources/races'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
@@ -18,6 +18,8 @@ import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses'
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds'
 import { FEAT_SOURCES } from '@/lib/sources/feats'
 import { ITEM_SOURCES } from '@/lib/sources/items'
+import { FIGHTING_STYLE_SOURCES, getFightingStyleSource } from '@/lib/sources/fighting-styles'
+import type { FightingStyleId } from '@/lib/dnd-helpers'
 
 export type {
   RaceSource,
@@ -31,7 +33,8 @@ export type {
   SourceTag,
 }
 
-export { RACE_SOURCES, CLASS_SOURCES, SUBCLASS_SOURCES, BACKGROUND_SOURCES, FEAT_SOURCES, ITEM_SOURCES }
+export { RACE_SOURCES, CLASS_SOURCES, SUBCLASS_SOURCES, BACKGROUND_SOURCES, FEAT_SOURCES, ITEM_SOURCES, FIGHTING_STYLE_SOURCES }
+export { getFightingStyleSource }
 
 export function getRaceSource(id: RaceId): RaceSource | undefined {
   return RACE_SOURCES.find((r) => r.id === id)
@@ -134,6 +137,28 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           const msg = `No source data found for subclass "${subclassDecision.subclassId}" — subclass features will be empty`
           warnings.push(msg)
           console.warn(msg)
+        }
+      }
+    }
+  }
+
+  // Fighting style choices — expand chosen styles into grant bundles
+  const allFightingStyleGrants: { grant: FightingStyleChoiceGrant; source: SourceTag }[] = []
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'fighting-style-choice') {
+        allFightingStyleGrants.push({ grant: grant as FightingStyleChoiceGrant, source: bundle.source })
+      }
+    }
+  }
+
+  for (const { grant, source } of allFightingStyleGrants) {
+    const decision = build.choices[grant.key]
+    if (decision?.type === 'fighting-style-choice') {
+      for (const styleId of decision.styles) {
+        const styleSource = getFightingStyleSource(styleId as FightingStyleId)
+        if (styleSource) {
+          bundles.push({ source, grants: styleSource.grants })
         }
       }
     }

@@ -343,6 +343,10 @@
       "subclassDescription": "Select a subclass for your {{className}}",
       "noSubclassesAvailable": "No subclasses are available for this class yet."
     },
+    "fightingStylePicker": {
+      "title": "Choose a Fighting Style",
+      "description": "Select a fighting style to specialize in."
+    },
     "warnings": {
       "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"
     },

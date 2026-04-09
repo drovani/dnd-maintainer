@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
+import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker'
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
@@ -28,6 +29,15 @@ function PendingChoiceRow({
         onDecide={(choiceKey, subclassId) =>
           onDecide(choiceKey, { type: 'subclass', subclassId })
         }
+      />
+    )
+  }
+
+  if (choice.type === 'fighting-style-choice') {
+    return (
+      <FightingStylePicker
+        choice={choice}
+        onDecide={onDecide}
       />
     )
   }
