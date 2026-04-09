@@ -41,7 +41,7 @@ interface CharacterContextValue {
   updateCreation: (updates: Readonly<CreationUpdates>) => void
   makeChoice: (choiceKey: ChoiceKey, decision: ChoiceDecision) => void
   clearChoice: (choiceKey: ChoiceKey) => void
-  levelUp: (classId: ClassId, hpRoll: number | null) => void
+  levelUp: (classId: ClassId, hpRoll: number | null, decisions?: ReadonlyMap<ChoiceKey, ChoiceDecision>) => void
   levelDown: () => void
   undoLevelDown: () => void
   replaceLevel: (oldSequence: number, newClassId: ClassId, newSubclassId: SubclassId | null) => void
@@ -130,6 +130,46 @@ function findGrantRowIndex(
     return { ok: false, error }
   }
   return { ok: true, index: idx }
+}
+
+/**
+ * Apply a single choice decision onto a mutable rows array.
+ * Returns an error string on failure, or null on success.
+ */
+function applyDecisionToRows(
+  rows: BuildLevelRow[],
+  choiceKey: ChoiceKey,
+  decision: ChoiceDecision,
+): string | null {
+  if (decision.type === 'subclass' || decision.type === 'asi') {
+    const { id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
+    const result = findGrantRowIndex(classId, decision.type, grantIndex, rows)
+    if (!result.ok) return result.error
+    if (decision.type === 'subclass') {
+      rows[result.index] = { ...rows[result.index], subclass_id: decision.subclassId }
+    } else {
+      rows[result.index] = { ...rows[result.index], asi_allocation: decision.allocation as Record<string, number> }
+    }
+    return null
+  }
+
+  const { origin, id: classId } = parseChoiceKey(choiceKey)
+  let targetSeq: number
+  if (origin === 'race' || origin === 'background') {
+    targetSeq = 0
+  } else {
+    const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId && r.deleted_at == null)
+    if (!levelRow) return `No active level row found for class "${classId}"`
+    targetSeq = levelRow.sequence
+  }
+
+  const idx = rows.findIndex((r) => r.sequence === targetSeq)
+  if (idx === -1) return `No row found for sequence ${targetSeq}`
+  rows[idx] = {
+    ...rows[idx],
+    choices: { ...(rows[idx].choices ?? {}), [choiceKey]: decision },
+  }
+  return null
 }
 
 type BuildResult =
@@ -297,55 +337,27 @@ export function CharacterProvider({
 
   const makeChoice = useCallback((choiceKey: ChoiceKey, decision: ChoiceDecision) => {
     try {
-      // For subclass and ASI decisions, route to the dedicated column on the target level row
-      if (decision.type === 'subclass' || decision.type === 'asi') {
-        const { id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
-        const result = findGrantRowIndex(classId, decision.type, grantIndex, rows)
-        if (!result.ok) {
-          toast.error(result.error)
-          return
-        }
-        const next = [...rows]
-        if (decision.type === 'subclass') {
-          next[result.index] = { ...next[result.index], subclass_id: decision.subclassId }
-        } else {
-          next[result.index] = { ...next[result.index], asi_allocation: decision.allocation as Record<string, number> }
-        }
-        setRows(next)
-        setIsDirty(true)
-        return
-      }
-
-      const targetSeq = resolveChoiceSequence(choiceKey, rows)
-      const idx = rows.findIndex((r) => r.sequence === targetSeq)
-      if (idx === -1) {
-        console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
-        toast.error(i18next.t('common:errors.choiceSaveFailed'))
-        return
-      }
-      const existing = rows[idx]
-      const updated: BuildLevelRow = {
-        ...existing,
-        choices: { ...(existing.choices ?? {}), [choiceKey]: decision },
-      }
       const next = [...rows]
-      next[idx] = updated
+      const error = applyDecisionToRows(next, choiceKey, decision)
+      if (error) {
+        toast.error(error)
+        return
+      }
       setRows(next)
       setIsDirty(true)
     } catch (err) {
-      console.error('makeChoice: malformed choice key', { choiceKey, error: err })
+      console.error('makeChoice failed:', { choiceKey, error: err })
       toast.error(i18next.t('common:errors.choiceSaveFailed'))
     }
   }, [rows])
 
   const clearChoice = useCallback((choiceKey: ChoiceKey) => {
     try {
-      const { category, id: classId } = parseChoiceKey(choiceKey)
+      const { category, id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
 
       // For subclass and ASI decisions, clear the dedicated column on the target level row
       if (category === 'subclass' || category === 'asi') {
         const grantType = category === 'subclass' ? 'subclass' as const : 'asi' as const
-        const { index: grantIndex } = parseChoiceKey(choiceKey)
         const result = findGrantRowIndex(classId, grantType, grantIndex, rows)
         if (!result.ok) {
           toast.error(result.error)
@@ -381,12 +393,12 @@ export function CharacterProvider({
       setRows(next)
       setIsDirty(true)
     } catch (err) {
-      console.error('clearChoice: malformed choice key', { choiceKey, error: err })
+      console.error('clearChoice failed:', { choiceKey, error: err })
       toast.error(i18next.t('common:errors.choiceClearFailed'))
     }
   }, [rows])
 
-  const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
+  const levelUp = useCallback((classId: ClassId, hpRoll: number | null, decisions?: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
     // Check if there's a soft-deleted row with a higher sequence we can restore
     const activeRows = rows.filter((r) => r.deleted_at == null)
     const activeLevelRows = activeRows.filter((r) => r.sequence !== 0)
@@ -402,42 +414,51 @@ export function CharacterProvider({
       .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
       .sort((a, b) => a.sequence - b.sequence)[0]
 
-    if (nextDeletedRow) {
-      // Only restore if the class matches; otherwise fall through to appending a new row
-      if (nextDeletedRow.class_id === classId) {
-        const idx = rows.findIndex((r) => r.sequence === nextDeletedRow.sequence)
-        const next = [...rows]
-        next[idx] = {
-          ...next[idx],
-          deleted_at: null,
-          hp_roll: hpRoll,
-          subclass_id: null,
-          asi_allocation: null,
-          choices: null,
+    let next: BuildLevelRow[]
+
+    if (nextDeletedRow && nextDeletedRow.class_id === classId) {
+      // Restore the soft-deleted row
+      const idx = rows.findIndex((r) => r.sequence === nextDeletedRow.sequence)
+      next = [...rows]
+      next[idx] = {
+        ...next[idx],
+        deleted_at: null,
+        hp_roll: hpRoll,
+        subclass_id: null,
+        asi_allocation: null,
+        choices: null,
+      }
+    } else {
+      // No restorable row — append a new one
+      const classLevelCount = activeLevelRows.filter((r) => r.class_id === classId).length
+      const maxSeq = rows.reduce((m, r) => Math.max(m, r.sequence), 0)
+      const newRow: BuildLevelRow = {
+        sequence: maxSeq + 1,
+        base_abilities: null,
+        ability_method: null,
+        class_id: classId,
+        class_level: classLevelCount + 1,
+        subclass_id: null,
+        asi_allocation: null,
+        feat_id: null,
+        hp_roll: hpRoll,
+        choices: null,
+        deleted_at: null,
+      }
+      next = [...rows, newRow]
+    }
+
+    // Apply any decisions atomically with the level-up
+    if (decisions) {
+      for (const [key, decision] of decisions) {
+        const error = applyDecisionToRows(next, key, decision)
+        if (error) {
+          toast.error(error)
         }
-        setRows(next)
-        setIsDirty(true)
-        return
       }
     }
 
-    // No restorable row — append a new one
-    const classLevelCount = activeLevelRows.filter((r) => r.class_id === classId).length
-    const maxSeq = rows.reduce((m, r) => Math.max(m, r.sequence), 0)
-    const newRow: BuildLevelRow = {
-      sequence: maxSeq + 1,
-      base_abilities: null,
-      ability_method: null,
-      class_id: classId,
-      class_level: classLevelCount + 1,
-      subclass_id: null,
-      asi_allocation: null,
-      feat_id: null,
-      hp_roll: hpRoll,
-      choices: null,
-      deleted_at: null,
-    }
-    setRows([...rows, newRow])
+    setRows(next)
     setIsDirty(true)
   }, [rows])
 

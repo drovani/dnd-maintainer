@@ -26,7 +26,6 @@ export function LevelControls({ classId }: LevelControlsProps) {
     levelUp,
     levelDown,
     undoLevelDown,
-    makeChoice,
   } = useCharacterContext()
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -47,10 +46,7 @@ export function LevelControls({ classId }: LevelControlsProps) {
   )?.subclass_id ?? null) as SubclassId | null
 
   const handleConfirmLevelUp = (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
-    levelUp(classId, hpRoll)
-    for (const [key, decision] of decisions) {
-      makeChoice(key, decision)
-    }
+    levelUp(classId, hpRoll, decisions)
   }
 
   // Button label changes based on whether we're replacing a soft-deleted level
