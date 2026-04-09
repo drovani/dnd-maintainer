@@ -36,6 +36,7 @@ interface CharacterContextValue {
   readonly isDirty: boolean
   readonly level: number
   readonly hasDeletedRows: boolean
+  readonly nextRestoreLevel: number | null
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
   updateCreation: (updates: Readonly<CreationUpdates>) => void
   makeChoice: (choiceKey: ChoiceKey, decision: ChoiceDecision) => void
@@ -227,6 +228,15 @@ export function CharacterProvider({
     () => rows.some((r) => r.deleted_at != null && r.sequence !== 0),
     [rows],
   )
+
+  const nextRestoreLevel = useMemo(() => {
+    const activeRows = rows.filter((r) => r.deleted_at == null)
+    const maxActiveSeq = activeRows.filter((r) => r.sequence !== 0).reduce((m, r) => Math.max(m, r.sequence), 0)
+    const nextDeleted = rows
+      .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
+      .sort((a, b) => a.sequence - b.sequence)[0]
+    return nextDeleted ? level + 1 : null
+  }, [rows, level])
 
   const updateCharacter = useCallback((updates: Readonly<Partial<Character>>) => {
     setCharacter((prev) => {
@@ -462,11 +472,14 @@ export function CharacterProvider({
   const undoLevelDown = useCallback(() => {
     let changed = false
     setRows((prev) => {
-      // Find the most recently soft-deleted non-creation row (highest sequence with deleted_at set)
-      const deletedLevelRows = prev.filter((r) => r.sequence !== 0 && r.deleted_at != null)
-      if (deletedLevelRows.length === 0) return prev
-      const maxDeletedSeq = deletedLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
-      const idx = prev.findIndex((r) => r.sequence === maxDeletedSeq)
+      // Find the next soft-deleted row in ascending sequence order (above the current active max)
+      const activeRows = prev.filter((r) => r.deleted_at == null)
+      const maxActiveSeq = activeRows.filter((r) => r.sequence !== 0).reduce((m, r) => Math.max(m, r.sequence), 0)
+      const nextDeleted = prev
+        .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
+        .sort((a, b) => a.sequence - b.sequence)[0]
+      if (!nextDeleted) return prev
+      const idx = prev.findIndex((r) => r.sequence === nextDeleted.sequence)
       if (idx === -1) return prev
       const next = [...prev]
       // Restore the row by clearing its deleted_at timestamp
@@ -518,6 +531,7 @@ export function CharacterProvider({
       isDirty,
       level,
       hasDeletedRows,
+      nextRestoreLevel,
       updateCharacter,
       updateCreation,
       makeChoice,
@@ -528,7 +542,7 @@ export function CharacterProvider({
       replaceLevel,
       markSaved,
     }),
-    [character, rows, build, bundles, resolved, buildError, buildWarnings, isDirty, level, hasDeletedRows, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
+    [character, rows, build, bundles, resolved, buildError, buildWarnings, isDirty, level, hasDeletedRows, nextRestoreLevel, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

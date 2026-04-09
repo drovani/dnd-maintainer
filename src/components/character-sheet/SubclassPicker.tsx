@@ -10,9 +10,10 @@ import { useTranslation } from 'react-i18next'
 interface SubclassPickerProps {
   readonly choice: Extract<PendingChoice, { type: 'subclass' }>
   readonly onDecide: (choiceKey: ChoiceKey, subclassId: SubclassId) => void
+  readonly confirmLabel?: string
 }
 
-export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
+export function SubclassPicker({ choice, onDecide, confirmLabel }: SubclassPickerProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const [selected, setSelected] = useState<SubclassId | null>(null)
@@ -84,7 +85,7 @@ export function SubclassPicker({ choice, onDecide }: SubclassPickerProps) {
           disabled={!selected}
           onClick={handleConfirm}
         >
-          {tc('buttons.confirm')}
+          {confirmLabel ?? tc('buttons.confirm')}
         </Button>
       </CardContent>
     </Card>

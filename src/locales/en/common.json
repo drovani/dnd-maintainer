@@ -47,7 +47,9 @@
     "updateNote": "Update Note",
     "createNote": "Create Note",
     "close": "Close",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "select": "Select",
+    "selected": "Selected"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -303,8 +305,11 @@
     },
     "levelManagement": {
       "levelUp": "Level Up",
+      "levelUpTo": "Level Up {{className}} to {{level}}",
+      "replaceLevelUp": "Replace {{className}} Level {{level}}",
       "levelDown": "Level Down",
       "undoLevelDown": "Undo Level Down",
+      "restoreLevel": "Restore Level {{level}}",
       "rollHp": "Roll HP",
       "rollHpHint": "Roll a d{{die}} for HP",
       "takeAverage": "Take Average",
@@ -313,14 +318,16 @@
       "levelUpTitle": "Increase to {{className}} Level {{level}}",
       "currentLevel": "Current Level",
       "levelUpSuccess": "Advanced to {{className}} Level {{level}}",
-      "maxLevelReached": "Maximum level (20) reached"
+      "maxLevelReached": "Maximum level (20) reached",
+      "confirmLevelUp": "Confirm Level Up"
     },
     "asi": {
       "asiTitle": "Ability Score Improvement",
       "asiPointsRemaining": "Points Remaining: {{points}}",
       "asiDescription": "Allocate {{points}} points among your ability scores. No score can exceed 20.",
       "decreaseAbility": "Decrease {{ability}}",
-      "increaseAbility": "Increase {{ability}}"
+      "increaseAbility": "Increase {{ability}}",
+      "lockIn": "Lock In"
     },
     "pendingChoices": {
       "description": "{{count}} choice(s) require your attention."

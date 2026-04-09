@@ -12,9 +12,10 @@ interface AsiAllocatorProps {
   readonly choice: Extract<PendingChoice, { type: 'asi' }>
   readonly abilities: ResolvedCharacter['abilities']
   readonly onDecide: (choiceKey: ChoiceKey, allocation: Partial<Record<AbilityKey, number>>) => void
+  readonly confirmLabel?: string
 }
 
-export function AsiAllocator({ choice, abilities, onDecide }: AsiAllocatorProps) {
+export function AsiAllocator({ choice, abilities, onDecide, confirmLabel }: AsiAllocatorProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
 
@@ -113,7 +114,7 @@ export function AsiAllocator({ choice, abilities, onDecide }: AsiAllocatorProps)
           disabled={pointsRemaining !== 0}
           onClick={handleConfirm}
         >
-          {tc('buttons.confirm')}
+          {confirmLabel ?? tc('buttons.confirm')}
         </Button>
       </CardContent>
     </Card>

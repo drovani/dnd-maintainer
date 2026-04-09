@@ -4,6 +4,9 @@ import { LevelUpDialog } from '@/components/character-sheet/LevelUpDialog'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import { DND_CLASSES } from '@/lib/dnd-helpers'
 import type { ClassId } from '@/lib/dnd-helpers'
+import type { ChoiceKey } from '@/types/choices'
+import type { ChoiceDecision } from '@/types/choices'
+import type { SubclassId } from '@/types/sources'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -14,13 +17,22 @@ interface LevelControlsProps {
 
 export function LevelControls({ classId }: LevelControlsProps) {
   const { t } = useTranslation('common')
-  const { level, hasDeletedRows, levelUp, levelDown, undoLevelDown } = useCharacterContext()
+  const { t: tg } = useTranslation('gamedata')
+  const {
+    level,
+    rows,
+    resolved,
+    hasDeletedRows,
+    nextRestoreLevel,
+    levelUp,
+    levelDown,
+    undoLevelDown,
+    makeChoice,
+  } = useCharacterContext()
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const canLevelUp = level < 20
   const canLevelDown = level > 1
-
-  const { t: tg } = useTranslation('gamedata')
 
   const classData = DND_CLASSES.find((c) => c.id === classId)
   if (!classData) {
@@ -30,16 +42,29 @@ export function LevelControls({ classId }: LevelControlsProps) {
   const className = tg(`classes.${classId}`)
   const targetLevel = level + 1
 
-  const handleConfirmLevelUp = (hpRoll: number) => {
+  // Find the current subclass for this class (if any)
+  const currentSubclassId = (rows.find(
+    (r) => r.class_id === classId && r.subclass_id != null && r.deleted_at == null,
+  )?.subclass_id ?? null) as SubclassId | null
+
+  const handleConfirmLevelUp = (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
     levelUp(classId, hpRoll)
+    for (const [key, decision] of decisions) {
+      makeChoice(key, decision)
+    }
     toast.success(t('characterSheet.levelManagement.levelUpSuccess', { level: targetLevel, className }))
   }
+
+  // Button label changes based on whether we're replacing a soft-deleted level
+  const levelUpLabel = hasDeletedRows && nextRestoreLevel != null
+    ? t('characterSheet.levelManagement.replaceLevelUp', { className, level: targetLevel })
+    : t('characterSheet.levelManagement.levelUpTo', { className, level: targetLevel })
 
   return (
     <>
       <div className="flex flex-wrap gap-2">
         <Button size="sm" onClick={() => setDialogOpen(true)} disabled={!canLevelUp}>
-          {t('characterSheet.levelManagement.levelUp')}
+          {levelUpLabel}
         </Button>
 
         {canLevelDown && (
@@ -48,9 +73,9 @@ export function LevelControls({ classId }: LevelControlsProps) {
           </Button>
         )}
 
-        {hasDeletedRows && (
+        {hasDeletedRows && nextRestoreLevel != null && (
           <Button variant="ghost" size="sm" onClick={undoLevelDown}>
-            {t('characterSheet.levelManagement.undoLevelDown')}
+            {t('characterSheet.levelManagement.restoreLevel', { level: nextRestoreLevel })}
           </Button>
         )}
       </div>
@@ -62,6 +87,9 @@ export function LevelControls({ classId }: LevelControlsProps) {
         hitDie={hitDie}
         className={className}
         targetLevel={targetLevel}
+        classId={classId}
+        currentSubclassId={currentSubclassId}
+        currentAbilities={resolved?.abilities ?? null}
       />
     </>
   )
