@@ -157,6 +157,7 @@ export interface FightingStyleChoiceGrant {
 
 export interface EquipmentChoiceGrant {
   readonly type: 'equipment-choice'
+  readonly key: ChoiceKey
   readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[]
 }
 

@@ -7,7 +7,12 @@ import type {
 } from '@/lib/dnd-helpers'
 import type { Grant } from '@/types/grants'
 
-export type SubclassId = 'champion' | 'battlemaster' | 'eldritchknight'
+export const SUBCLASS_IDS = ['champion', 'battlemaster', 'eldritchknight'] as const
+export type SubclassId = (typeof SUBCLASS_IDS)[number]
+
+export function isSubclassId(s: string): s is SubclassId {
+  return (SUBCLASS_IDS as readonly string[]).includes(s)
+}
 
 export type SourceTag =
   | { readonly origin: 'race'; readonly id: RaceId }

@@ -159,6 +159,10 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
         const styleSource = getFightingStyleSource(styleId as FightingStyleId)
         if (styleSource) {
           bundles.push({ source, grants: styleSource.grants })
+        } else {
+          const msg = `No source data found for fighting style "${styleId}"`
+          warnings.push(msg)
+          console.warn(msg)
         }
       }
     }

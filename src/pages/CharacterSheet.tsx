@@ -32,7 +32,7 @@ import {
   type DndGender,
 } from '@/lib/dnd-helpers'
 import type { Character } from '@/types/database'
-import { Archive, Edit2, Save, Trash2 } from 'lucide-react'
+import { Archive, Check, Edit2, Save, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -453,13 +453,14 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                     >
                       <div>
                         <div className="font-semibold text-foreground">
+                          {/* TODO: add item translation keys to gamedata.json and use t(`items.${item.item_id}`) */}
                           {item.item_id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
                         </div>
                         <div className="text-muted-foreground">
                           {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: 0 })}
                         </div>
                       </div>
-                      {item.equipped && <span className="text-green-600 font-bold">E</span>}
+                      {item.equipped && <Check className="size-4 text-green-600" />}
                     </div>
                   ))}
                 </div>

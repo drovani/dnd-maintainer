@@ -8,7 +8,6 @@ import type { ChoiceKey } from '@/types/choices'
 import type { ChoiceDecision } from '@/types/choices'
 import type { SubclassId } from '@/types/sources'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 
 interface LevelControlsProps {
   /** The class to level up into. Determines hit die and class-level progression. */
@@ -52,7 +51,6 @@ export function LevelControls({ classId }: LevelControlsProps) {
     for (const [key, decision] of decisions) {
       makeChoice(key, decision)
     }
-    toast.success(t('characterSheet.levelManagement.levelUpSuccess', { level: targetLevel, className }))
   }
 
   // Button label changes based on whether we're replacing a soft-deleted level

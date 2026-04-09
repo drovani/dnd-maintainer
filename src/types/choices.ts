@@ -1,4 +1,4 @@
-import type { AbilityKey, FightingStyleId, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId } from '@/lib/dnd-helpers'
+import type { AbilityKey, FightingStyleId, SkillId, ToolProficiencyId, LanguageId, ClassId, RaceId, BackgroundId } from '@/lib/dnd-helpers'
 import type { SubclassId } from '@/types/sources'
 import type { AbilityScores } from '@/types/database'
 
@@ -8,18 +8,21 @@ import type { AbilityScores } from '@/types/database'
  * - Determines which build row (sequence) stores the decision
  * - e.g. "skill-choice:class:fighter:0", "language-choice:race:human:0"
  */
-export type ChoiceOrigin = 'race' | 'background' | 'class'
+const CHOICE_ORIGINS = ['race', 'background', 'class'] as const
+export type ChoiceOrigin = (typeof CHOICE_ORIGINS)[number]
 
-export type ChoiceCategory =
-  | 'skill-choice'
-  | 'tool-choice'
-  | 'language-choice'
-  | 'ability-choice'
-  | 'expertise-choice'
-  | 'asi'
-  | 'subclass'
-  | 'fighting-style-choice'
-  | 'equipment-choice'
+const CHOICE_CATEGORIES = [
+  'skill-choice',
+  'tool-choice',
+  'language-choice',
+  'ability-choice',
+  'expertise-choice',
+  'asi',
+  'subclass',
+  'fighting-style-choice',
+  'equipment-choice',
+] as const
+export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number]
 
 export type ChoiceKey = `${ChoiceCategory}:${ChoiceOrigin}:${string}:${number}`
 
@@ -34,10 +37,8 @@ export interface ParsedChoiceKey {
   readonly index: number
 }
 
-const VALID_CATEGORIES = new Set<string>([
-  'skill-choice', 'tool-choice', 'language-choice', 'ability-choice',
-  'expertise-choice', 'asi', 'subclass', 'fighting-style-choice', 'equipment-choice',
-])
+const VALID_CATEGORIES = new Set<string>(CHOICE_CATEGORIES)
+const VALID_ORIGINS = new Set<string>(CHOICE_ORIGINS)
 
 export function parseChoiceKey(key: ChoiceKey | string): ParsedChoiceKey {
   const parts = key.split(':')
@@ -49,7 +50,7 @@ export function parseChoiceKey(key: ChoiceKey | string): ParsedChoiceKey {
     throw new Error(`Invalid choice key category "${category}" in key "${key}"`)
   }
   const origin = parts[1]
-  if (origin !== 'race' && origin !== 'background' && origin !== 'class') {
+  if (!VALID_ORIGINS.has(origin)) {
     throw new Error(`Invalid choice key origin "${origin}" in key "${key}"`)
   }
   const index = Number(parts[3])
@@ -58,7 +59,7 @@ export function parseChoiceKey(key: ChoiceKey | string): ParsedChoiceKey {
   }
   return {
     category: category as ChoiceCategory,
-    origin,
+    origin: origin as ChoiceOrigin,
     id: parts[2],
     index,
   }
@@ -83,7 +84,7 @@ export interface BuildLevel {
 
 export interface CharacterBuild {
   readonly raceId: RaceId
-  readonly backgroundId: string | null
+  readonly backgroundId: BackgroundId | null
   readonly baseAbilities: AbilityScores
   readonly abilityMethod: 'standard-array' | 'point-buy' | 'rolling'
   readonly levels: readonly BuildLevel[]

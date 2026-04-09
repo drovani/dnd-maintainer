@@ -76,7 +76,7 @@ export function SubclassPicker({ choice, onDecide, autoCommit }: SubclassPickerP
                           <span className="font-semibold">
                             {t(`features.${g.feature.id}.name`, { defaultValue: g.feature.id })}
                           </span>
-                          {` (Lv. ${f.classLevel}) `}
+                          {` ${tc('characterSheet.classLevelLabel', { level: f.classLevel })} `}
                           &mdash;{' '}
                           {t(`features.${g.feature.id}.description`, { defaultValue: '' })}
                         </li>

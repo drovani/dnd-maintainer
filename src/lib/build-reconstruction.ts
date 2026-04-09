@@ -1,8 +1,8 @@
-import { DND_CLASSES } from '@/lib/dnd-helpers'
+import { DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers'
 import type { ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
-import type { SubclassId } from '@/types/sources'
+import { isSubclassId } from '@/types/sources'
 import { createChoiceKey, parseChoiceKey } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
@@ -146,15 +146,23 @@ export function reconstructBuild(
   // Start with creation row's choices JSONB
   if (creationRow.choices) {
     for (const [key, value] of Object.entries(creationRow.choices)) {
-      mergeChoiceEntry(validateChoiceKey(key), value)
+      try {
+        mergeChoiceEntry(validateChoiceKey(key), value)
+      } catch (err) {
+        console.warn(`Skipping malformed choice key "${key}" in creation row:`, err)
+      }
     }
   }
 
   // Process level rows
   for (const row of levelRows) {
     if (row.subclass_id !== null) {
-      const key = createChoiceKey('subclass', 'class', row.class_id, 0)
-      choices[key] = { type: 'subclass', subclassId: row.subclass_id as SubclassId }
+      if (!isSubclassId(row.subclass_id)) {
+        console.warn(`Skipping unknown subclass_id "${row.subclass_id}" in build level row sequence ${row.sequence}`)
+      } else {
+        const key = createChoiceKey('subclass', 'class', row.class_id, 0)
+        choices[key] = { type: 'subclass', subclassId: row.subclass_id }
+      }
     }
 
     if (row.asi_allocation !== null) {
@@ -179,14 +187,22 @@ export function reconstructBuild(
 
     if (row.choices) {
       for (const [key, value] of Object.entries(row.choices)) {
-        mergeChoiceEntry(validateChoiceKey(key), value)
+        try {
+          mergeChoiceEntry(validateChoiceKey(key), value)
+        } catch (err) {
+          console.warn(`Skipping malformed choice key "${key}" in level row sequence ${row.sequence}:`, err)
+        }
       }
     }
   }
 
+  const backgroundId = character.background !== null && isBackgroundId(character.background)
+    ? character.background
+    : null
+
   return {
     raceId: character.race as RaceId,
-    backgroundId: character.background ?? null,
+    backgroundId,
     baseAbilities,
     abilityMethod,
     levels,

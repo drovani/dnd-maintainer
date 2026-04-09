@@ -87,7 +87,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     const totalAllocated = decision?.type === 'asi'
       ? Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0)
       : 0
-    const isValid = decision?.type === 'asi' && totalAllocated > 0 && totalAllocated <= grant.points
+    const isValid = decision?.type === 'asi' && totalAllocated === grant.points
     if (!isValid) {
       pendingChoices.push({
         type: 'asi',

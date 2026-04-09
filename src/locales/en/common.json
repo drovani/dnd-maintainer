@@ -309,6 +309,9 @@
       "savingThrows": "Unable to compute saving throws: {{message}}",
       "combat": "Unable to compute combat stats: {{message}}"
     },
+    "levelUp": {
+      "abilitiesUnavailable": "Unable to allocate ability scores. Please fix any build errors first."
+    },
     "levelManagement": {
       "levelUp": "Level Up",
       "levelUpTo": "Level Up {{className}} to {{level}}",
@@ -338,6 +341,7 @@
     "pendingChoices": {
       "description": "{{count}} choice(s) require your attention."
     },
+    "classLevelLabel": "(Lv. {{level}})",
     "subclassPicker": {
       "chooseSubclass": "Choose Subclass",
       "subclassDescription": "Select a subclass for your {{className}}",

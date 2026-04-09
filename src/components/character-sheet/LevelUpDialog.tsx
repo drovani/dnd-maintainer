@@ -16,7 +16,7 @@ import type { AsiGrant, FeatureGrant, SubclassGrant } from '@/types/grants'
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved'
 import type { SubclassId } from '@/types/sources'
 import { Dices } from 'lucide-react'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface LevelUpDialogProps {
@@ -27,7 +27,7 @@ interface LevelUpDialogProps {
   readonly hitDie: number
   /** The translated class name (e.g. "Fighter"). */
   readonly className: string
-  /** The class level the character will advance to. */
+  /** The character level the character will advance to. Currently assumes single-class; multiclass will need per-class level calculation. */
   readonly targetLevel: number
   /** The class being leveled up. */
   readonly classId: ClassId
@@ -57,6 +57,12 @@ export function LevelUpDialog({
   const [hpSelection, setHpSelection] = useState<number | null>(hpAverageGrant)
   const [decisions, setDecisions] = useState<Map<ChoiceKey, ChoiceDecision>>(new Map())
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+    }
+  }, [])
 
   const hpRange = useMemo(() => [1, hitDie] as const, [hitDie])
 
@@ -273,7 +279,11 @@ export function LevelUpDialog({
               onDecide={handleAsiDecide}
               autoCommit
             />
-          ) : null,
+          ) : (
+            <p key={grant.key} className="text-sm text-destructive">
+              {t('characterSheet.levelUp.abilitiesUnavailable')}
+            </p>
+          ),
         )}
 
         <DialogFooter className="gap-2 sm:gap-0">

@@ -301,6 +301,61 @@ describe('CharacterProvider', () => {
     expect(result.current.rows).toEqual(rowsBefore)
   })
 
+  it('nextRestoreLevel returns level+1 after levelDown and null after undoLevelDown', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    // Before soft-delete: no deleted rows, so nextRestoreLevel is null
+    expect(result.current.nextRestoreLevel).toBeNull()
+
+    act(() => {
+      result.current.levelDown()
+    })
+
+    // After levelDown: level is 0, nextRestoreLevel should be 1 (level + 1)
+    expect(result.current.level).toBe(0)
+    expect(result.current.nextRestoreLevel).toBe(1)
+
+    act(() => {
+      result.current.undoLevelDown()
+    })
+
+    // After undoLevelDown: restored, so nextRestoreLevel is null again
+    expect(result.current.level).toBe(1)
+    expect(result.current.nextRestoreLevel).toBeNull()
+  })
+
+  it('makeChoice targeting a soft-deleted level row fails gracefully', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    // Soft-delete the fighter row
+    act(() => {
+      result.current.levelDown()
+    })
+
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+
+    const rowsBefore = result.current.rows
+
+    // Attempt a class-scoped choice targeting the now-deleted fighter row.
+    // resolveChoiceSequence filters for deleted_at == null, so it will throw
+    // (no active level row for 'fighter'), and makeChoice should be a no-op.
+    act(() => {
+      result.current.makeChoice('skill-choice:class:fighter:0', {
+        type: 'skill-choice',
+        skills: ['athletics'],
+      })
+    })
+
+    // Rows should be unchanged — the choice must not have been applied
+    expect(result.current.rows).toEqual(rowsBefore)
+  })
+
   it('levelUp restores a soft-deleted row instead of appending a new one', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {
@@ -597,6 +652,7 @@ describe('CharacterProvider', () => {
     const wizardRow = result.current.rows.find((r) => r.sequence === 2)
     expect(wizardRow?.class_id).toBe('wizard')
     expect(wizardRow?.deleted_at).toBeNull()
+    expect(wizardRow?.class_level).toBe(1)
   })
 
   it('does not level past 20 (max level guard)', () => {
@@ -869,12 +925,12 @@ describe('CharacterProvider', () => {
       })
 
       act(() => {
-        result.current.replaceLevel(1, 'wizard', 'evocation')
+        result.current.replaceLevel(1, 'wizard', 'champion')
       })
 
       const levelRow = result.current.rows.find((r) => r.sequence === 1)
       expect(levelRow?.class_id).toBe('wizard')
-      expect(levelRow?.subclass_id).toBe('evocation')
+      expect(levelRow?.subclass_id).toBe('champion')
     })
 
     it('does nothing when sequence does not exist', () => {

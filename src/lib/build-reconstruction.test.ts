@@ -280,12 +280,16 @@ describe('reconstructBuild', () => {
     })
   })
 
-  it('throws when choice JSONB contains invalid data', () => {
+  it('skips malformed choice keys in JSONB without crashing', () => {
     const creationWithBadChoices: BuildLevelRow = {
       ...creationRow,
       choices: { bad: { type: 'unknown' } } as unknown as BuildLevelRow['choices'],
     }
-    expect(() => reconstructBuild(identity, [creationWithBadChoices], [])).toThrow()
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const result = reconstructBuild(identity, [creationWithBadChoices], [])
+    expect(result.choices).toEqual({})
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('bad'), expect.any(Error))
+    warnSpy.mockRestore()
   })
 
   it('throws when level row is missing class_id', () => {

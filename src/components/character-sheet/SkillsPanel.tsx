@@ -17,10 +17,10 @@ function BreakdownLabel({ type, label }: { type: string; label: string }) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
 
-  if (type === 'ability') return <>{t(`abilities.${label}`)}</>
+  if (type === 'ability') return <>{t(`abilities.${label as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'}`)}</>
   if (type === 'proficiency') return <>{tc('characterSheet.skillBreakdown.proficiency')}</>
   if (type === 'expertise') return <>{tc('characterSheet.skillBreakdown.expertise')}</>
-  return <>{t(`features.${label}.name`)}</>
+  return <>{t(`features.${label}.name`, { defaultValue: label })}</>
 }
 
 export function SkillsPanel({ skills }: SkillsPanelProps) {
