@@ -43,7 +43,10 @@ export function Sidebar({
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false);
 
-  const currentCampaign = campaigns.find((c) => c.slug === (selectedCampaignSlug || campaignSlug));
+  const effectiveSlug = selectedCampaignSlug || campaignSlug;
+  const currentCampaign = campaigns.find(
+    (c) => c.slug === effectiveSlug || c.previous_slugs?.includes(effectiveSlug ?? '')
+  );
 
   return (
     <>

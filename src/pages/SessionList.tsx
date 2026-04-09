@@ -15,6 +15,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
 
@@ -83,6 +84,8 @@ export default function SessionList() {
       })
       if (data?.slug) {
         navigate(`/campaign/${campaignSlug}/session/${data.slug}`)
+      } else {
+        toast.error(t('errors.missingSlug'))
       }
     },
   })

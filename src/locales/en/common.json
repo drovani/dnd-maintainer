@@ -449,7 +449,8 @@
     "description": "Campaign Description",
     "noDescription": "No campaign description",
     "noSetting": "No setting specified",
-    "notFound": "Campaign not found",
+    "notFound": "Campaign Not Found",
+    "notFoundDescription": "This campaign doesn't exist or may have been deleted. Check the URL or go back to your campaign list.",
     "loading": "Loading campaign...",
     "backToCampaigns": "Back to Campaigns",
     "searchPlaceholder": "Search campaigns by name or setting...",
@@ -580,7 +581,8 @@
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "errorPrefix": "Error: {{message}}",
     "saveFailed": "Save failed — your changes may not have been saved",
-    "themeNotPersisted": "Theme preference could not be saved. It will reset on next visit."
+    "themeNotPersisted": "Theme preference could not be saved. It will reset on next visit.",
+    "missingSlug": "Created successfully but could not navigate — please refresh the page."
   },
   "status": {
     "healthy": "healthy",

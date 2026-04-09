@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Trans, useTranslation } from 'react-i18next'
 import { ValidationError } from '@/components/ui/validation-error'
 
@@ -98,6 +99,8 @@ export default function CampaignList() {
         setNameError('')
         if (data?.slug) {
           navigate(`/campaign/${data.slug}`)
+        } else {
+          toast.error(t('errors.missingSlug'))
         }
       },
     })

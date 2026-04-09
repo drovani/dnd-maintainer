@@ -87,7 +87,6 @@ export default function SessionDetail() {
   const sessionNotes = (session as unknown as Record<string, unknown>)?.notes as string ?? ''
   const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? []
 
-  // Fetch linked encounters (by session UUID once loaded)
   const { data: encounters = [] } = useSessionEncounters(session?.id)
 
   // Update session mutation

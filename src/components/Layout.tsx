@@ -23,6 +23,13 @@ export function Layout() {
     c => c.slug === campaignSlug || c.previous_slugs?.includes(campaignSlug ?? '')
   );
 
+  // Redirect from previous slug to canonical slug
+  useEffect(() => {
+    if (currentCampaign && campaignSlug && currentCampaign.slug !== campaignSlug) {
+      navigate(`/campaign/${currentCampaign.slug}`, { replace: true });
+    }
+  }, [currentCampaign, campaignSlug, navigate]);
+
   // Find the current campaign's theme from the already-loaded campaigns list
   const currentCampaignTheme = currentCampaign?.theme;
 
@@ -93,6 +100,17 @@ export function Layout() {
                 <Button onClick={() => refetch()}>
                   <RefreshCw className="size-4" />
                   {t('buttons.tryAgain')}
+                </Button>
+              </div>
+            </div>
+          ) : campaignSlug && !currentCampaign ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="max-w-md mx-auto p-6 rounded-lg border bg-card text-center space-y-4">
+                <AlertTriangle className="size-12 text-destructive mx-auto" />
+                <h2 className="text-xl font-bold text-foreground">{t('campaign.notFound')}</h2>
+                <p className="text-muted-foreground text-sm">{t('campaign.notFoundDescription')}</p>
+                <Button onClick={() => navigate('/')}>
+                  {t('campaign.backToCampaigns')}
                 </Button>
               </div>
             </div>

@@ -25,13 +25,15 @@ $$;
 -- Slug generation function
 -- ============================================================================
 
+-- STABLE: pure computation with no table lookups, but STABLE (not IMMUTABLE)
+-- so Postgres won't cache results across plan invalidations if we ever change the algorithm.
 CREATE OR REPLACE FUNCTION generate_slug(entity_name text, entity_id uuid)
 RETURNS text
 LANGUAGE plpgsql
-IMMUTABLE
+STABLE
 AS $$
 DECLARE
-  hex4        text;
+  hex8        text;
   cleaned     text;
   all_words   text[];
   stop_words  text[] := ARRAY['a','an','the','of','in','on','at','to','for','and','or','but','with','by','from'];
@@ -40,12 +42,12 @@ DECLARE
   base        text;
   result      text;
 BEGIN
-  -- 4-hex suffix derived from the UUID
-  hex4 := substring(replace(entity_id::text, '-', '') FROM 1 FOR 4);
+  -- 8-hex disambiguator derived from the start of the UUID
+  hex8 := substring(replace(entity_id::text, '-', '') FROM 1 FOR 8);
 
   -- Fallback for NULL or blank names
   IF entity_name IS NULL OR trim(entity_name) = '' THEN
-    RETURN 'draft-' || hex4;
+    RETURN 'draft-' || hex8;
   END IF;
 
   -- Lowercase and replace non-alphanumeric (except spaces/hyphens) with space
@@ -81,15 +83,15 @@ BEGIN
   ELSIF array_length(usable, 1) = 1 THEN
     base := usable[1];
   ELSE
-    RETURN 'draft-' || hex4;
+    RETURN 'draft-' || hex8;
   END IF;
 
   -- Truncate base to 15 chars, append suffix
   base   := substring(base FROM 1 FOR 15);
-  result := base || '-' || hex4;
+  result := base || '-' || hex8;
 
-  -- Total max 20 chars (15 base + 1 dash + 4 hex = 20)
-  RETURN substring(result FROM 1 FOR 20);
+  -- Total max 24 chars (15 base + 1 dash + 8 hex = 24)
+  RETURN substring(result FROM 1 FOR 24);
 END;
 $$;
 
@@ -109,7 +111,7 @@ BEGIN
 
   ELSIF TG_OP = 'UPDATE' THEN
     IF OLD.name IS DISTINCT FROM NEW.name THEN
-      -- Archive the old slug into previous_slugs (avoid duplicates)
+      -- Preserve old slugs so previous URLs continue to resolve via lookup
       IF OLD.slug <> '' AND NOT (OLD.slug = ANY(NEW.previous_slugs)) THEN
         NEW.previous_slugs := NEW.previous_slugs || OLD.slug;
       END IF;

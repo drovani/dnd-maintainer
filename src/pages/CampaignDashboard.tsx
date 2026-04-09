@@ -43,17 +43,15 @@ export default function CampaignDashboard() {
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignSlug)
   const { update: updateMutation } = useCampaignMutations()
 
-  // Fetch characters for this campaign (by UUID for FK queries)
   const { data: charactersRaw = [], error: charactersError } = useCharacters(campaignId!)
   const characters = useMemo(
     () => [...charactersRaw].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
     [charactersRaw]
   )
 
-  // Fetch sessions for this campaign (by UUID for FK queries)
   const { data: sessions = [], error: sessionsError } = useSessions(campaignId!)
 
-  if (!campaignSlug) {
+  if (!campaignSlug || !campaignId) {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="text-center">
