@@ -10,16 +10,24 @@ import { useTranslation } from 'react-i18next'
 interface SubclassPickerProps {
   readonly choice: Extract<PendingChoice, { type: 'subclass' }>
   readonly onDecide: (choiceKey: ChoiceKey, subclassId: SubclassId) => void
-  readonly confirmLabel?: string
+  /** When true, calls onDecide immediately on selection and hides the confirm button. */
+  readonly autoCommit?: boolean
 }
 
-export function SubclassPicker({ choice, onDecide, confirmLabel }: SubclassPickerProps) {
+export function SubclassPicker({ choice, onDecide, autoCommit }: SubclassPickerProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const [selected, setSelected] = useState<SubclassId | null>(null)
 
   const subclasses = SUBCLASS_SOURCES.filter((sc) => sc.classId === choice.classId)
   const className = t(`classes.${choice.classId}`, { defaultValue: choice.classId })
+
+  const handleSelect = (id: SubclassId) => {
+    setSelected(id)
+    if (autoCommit) {
+      onDecide(choice.choiceKey, id)
+    }
+  }
 
   const handleConfirm = () => {
     if (!selected) return
@@ -47,7 +55,7 @@ export function SubclassPicker({ choice, onDecide, confirmLabel }: SubclassPicke
             <button
               key={sc.id}
               type="button"
-              onClick={() => setSelected(sc.id)}
+              onClick={() => handleSelect(sc.id)}
               className={`w-full rounded-lg border p-4 text-left transition-colors hover:bg-muted/50 ${
                 isSelected ? 'border-primary bg-primary/5' : 'border-border bg-muted/20'
               }`}
@@ -80,13 +88,15 @@ export function SubclassPicker({ choice, onDecide, confirmLabel }: SubclassPicke
           )
         })}
 
-        <Button
-          className="mt-4 w-full"
-          disabled={!selected}
-          onClick={handleConfirm}
-        >
-          {confirmLabel ?? tc('buttons.confirm')}
-        </Button>
+        {!autoCommit && (
+          <Button
+            className="mt-4 w-full"
+            disabled={!selected}
+            onClick={handleConfirm}
+          >
+            {tc('buttons.confirm')}
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

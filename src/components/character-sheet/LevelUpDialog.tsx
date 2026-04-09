@@ -254,7 +254,7 @@ export function LevelUpDialog({
               classId: grant.classId,
             } satisfies Extract<PendingChoice, { type: 'subclass' }>}
             onDecide={handleSubclassDecide}
-            confirmLabel={t('characterSheet.asi.lockIn')}
+            autoCommit
           />
         ))}
 
