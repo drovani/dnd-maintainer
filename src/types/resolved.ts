@@ -15,11 +15,18 @@ export interface ResolvedAbility {
   readonly modifier: number
 }
 
+export interface SkillBonusComponent {
+  readonly type: 'ability' | 'proficiency' | 'expertise' | 'ability-check-bonus'
+  readonly value: number
+  readonly label: string
+}
+
 export interface ResolvedSkill {
   readonly ability: AbilityKey
   readonly proficient: boolean
   readonly expertise: boolean
   readonly bonus: number
+  readonly breakdown: readonly SkillBonusComponent[]
   readonly sources: readonly SourceTag[]
 }
 

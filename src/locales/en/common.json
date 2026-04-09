@@ -286,6 +286,12 @@
       "editBackstory": "Edit Backstory",
       "editAppearance": "Edit Appearance"
     },
+    "skillBreakdown": {
+      "proficiency": "Proficiency",
+      "expertise": "Expertise",
+      "expandAll": "Expand All",
+      "collapseAll": "Collapse All"
+    },
     "hints": {
       "skillsProficiency": "Click P for proficiency, E for expertise.",
       "leaveEmptyForNpcs": "Leave empty for NPCs",

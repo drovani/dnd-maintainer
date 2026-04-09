@@ -162,6 +162,103 @@ describe('resolveSkills', () => {
       expect(result[key].proficient).toBe(false)
     }
   })
+
+  it('builds breakdown with ability modifier and proficiency', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'proficiency', category: 'skill', id: 'athletics' }],
+      },
+    ]
+    const result = resolveSkills(POSITIVE_ABILITIES, bundles, 2, NO_CHOICES)
+    // STR 16 → mod 3, proficient +2
+    expect(result.athletics.breakdown).toEqual([
+      { type: 'ability', value: 3, label: 'str' },
+      { type: 'proficiency', value: 2, label: 'proficiency' },
+    ])
+  })
+
+  it('builds breakdown with only ability modifier when not proficient', () => {
+    const result = resolveSkills(POSITIVE_ABILITIES, NO_BUNDLES, 2, NO_CHOICES)
+    // DEX 14 → mod 2, not proficient
+    expect(result.acrobatics.breakdown).toEqual([
+      { type: 'ability', value: 2, label: 'dex' },
+    ])
+  })
+
+  it('applies ability-check-bonus to non-proficient skills for matching abilities', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'champion', classId: 'fighter', level: 7 },
+        grants: [
+          { type: 'ability-check-bonus', abilities: ['str', 'dex', 'con'], value: 'half-proficiency', onlyWhenNotProficient: true, featureId: 'champion-remarkable-athlete' },
+        ],
+      },
+    ]
+    const result = resolveSkills(POSITIVE_ABILITIES, bundles, 2, NO_CHOICES)
+    // STR 16 → mod 3, not proficient, half prof (ceil(2/2)) = 1
+    expect(result.athletics.bonus).toBe(4)
+    expect(result.athletics.breakdown).toEqual([
+      { type: 'ability', value: 3, label: 'str' },
+      { type: 'ability-check-bonus', value: 1, label: 'champion-remarkable-athlete' },
+    ])
+  })
+
+  it('does not apply ability-check-bonus when already proficient and onlyWhenNotProficient', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'proficiency', category: 'skill', id: 'athletics' }],
+      },
+      {
+        source: { origin: 'subclass', id: 'champion', classId: 'fighter', level: 7 },
+        grants: [
+          { type: 'ability-check-bonus', abilities: ['str', 'dex', 'con'], value: 'half-proficiency', onlyWhenNotProficient: true, featureId: 'champion-remarkable-athlete' },
+        ],
+      },
+    ]
+    const result = resolveSkills(POSITIVE_ABILITIES, bundles, 2, NO_CHOICES)
+    // STR 16 → mod 3, proficient +2 = 5 (no half-prof added)
+    expect(result.athletics.bonus).toBe(5)
+    expect(result.athletics.breakdown).toEqual([
+      { type: 'ability', value: 3, label: 'str' },
+      { type: 'proficiency', value: 2, label: 'proficiency' },
+    ])
+  })
+
+  it('does not apply ability-check-bonus to non-matching abilities', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'champion', classId: 'fighter', level: 7 },
+        grants: [
+          { type: 'ability-check-bonus', abilities: ['str', 'dex', 'con'], value: 'half-proficiency', onlyWhenNotProficient: true, featureId: 'champion-remarkable-athlete' },
+        ],
+      },
+    ]
+    const result = resolveSkills(POSITIVE_ABILITIES, bundles, 2, NO_CHOICES)
+    // Arcana uses INT — should not get the bonus
+    expect(result.arcana.bonus).toBe(-1)
+    expect(result.arcana.breakdown).toEqual([
+      { type: 'ability', value: -1, label: 'int' },
+    ])
+  })
+
+  it('scales ability-check-bonus with proficiency bonus (half, rounded up)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'champion', classId: 'fighter', level: 7 },
+        grants: [
+          { type: 'ability-check-bonus', abilities: ['str', 'dex', 'con'], value: 'half-proficiency', onlyWhenNotProficient: true, featureId: 'champion-remarkable-athlete' },
+        ],
+      },
+    ]
+    // Prof bonus 3 → half = ceil(3/2) = 2
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 3, NO_CHOICES)
+    expect(result.athletics.bonus).toBe(2)
+    expect(result.athletics.breakdown[1]).toEqual(
+      { type: 'ability-check-bonus', value: 2, label: 'champion-remarkable-athlete' },
+    )
+  })
 })
 
 describe('resolveProficiencies', () => {

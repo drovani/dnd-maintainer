@@ -20,12 +20,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { LevelControls } from '@/components/character-sheet/LevelControls'
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel'
+import { SkillsPanel } from '@/components/character-sheet/SkillsPanel'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
 import {
   DND_CLASSES,
-  DND_SKILLS,
   getProficiencyBonus,
   isBackgroundId,
   type ClassId,
@@ -345,33 +345,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
 
             {/* Skills */}
             {skills ? (
-              <div className="bg-card border rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
-                <div className="space-y-1 text-xs">
-                  {[...DND_SKILLS]
-                    .sort((a, b) => t(`skills.${a.id}`).localeCompare(t(`skills.${b.id}`)))
-                    .map((skill) => {
-                      const resolvedSkill = skills[skill.id as keyof typeof skills]
-                      if (!resolvedSkill) return null
-                      const bonus = resolvedSkill.bonus
-                      const abbrev = t(`abilityAbbreviations.${skill.ability}`)
-
-                      return (
-                        <div key={skill.id} className="flex items-center justify-between text-foreground py-1">
-                          <span className={resolvedSkill.proficient ? 'font-bold' : ''}>
-                            {t(`skills.${skill.id}`)}
-                            <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
-                          </span>
-                          <span
-                            className={`font-mono ${resolvedSkill.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
-                          >
-                            {bonus >= 0 ? '+' : ''}{bonus}
-                          </span>
-                        </div>
-                      )
-                    })}
-                </div>
-              </div>
+              <SkillsPanel skills={skills} />
             ) : (
               <div className="bg-card border rounded-lg p-6 text-center text-muted-foreground">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>

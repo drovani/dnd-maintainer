@@ -6,7 +6,10 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
     classId: 'fighter',
     features: [
       { classLevel: 3, grants: [{ type: 'feature', feature: { id: 'champion-improved-critical' } }] },
-      { classLevel: 7, grants: [{ type: 'feature', feature: { id: 'champion-remarkable-athlete' } }] },
+      { classLevel: 7, grants: [
+        { type: 'feature', feature: { id: 'champion-remarkable-athlete' } },
+        { type: 'ability-check-bonus', abilities: ['str', 'dex', 'con'], value: 'half-proficiency', onlyWhenNotProficient: true, featureId: 'champion-remarkable-athlete' },
+      ] },
       { classLevel: 10, grants: [{ type: 'feature', feature: { id: 'champion-additional-fighting-style' } }] },
       { classLevel: 15, grants: [{ type: 'feature', feature: { id: 'champion-superior-critical' } }] },
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'champion-survivor' } }] },

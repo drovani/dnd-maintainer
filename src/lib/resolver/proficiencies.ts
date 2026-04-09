@@ -3,7 +3,7 @@ import type { AbilityKey, SkillId, ArmorProficiencyId, WeaponProficiencyId, Tool
 import type { GrantBundle, SourceTag } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 
-import type { ResolvedAbility, ResolvedSkill, Sourced, PendingChoice } from '@/types/resolved'
+import type { ResolvedAbility, ResolvedSkill, SkillBonusComponent, Sourced, PendingChoice } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 
 export function resolveSavingThrows(
@@ -66,16 +66,49 @@ export function resolveSkills(
     }
   }
 
+  // Collect ability-check-bonus grants
+  const abilityCheckBonuses = collectGrantsByType(bundles, 'ability-check-bonus')
+
   const result = {} as Record<SkillId, ResolvedSkill>
   for (const skill of DND_SKILLS) {
     const ability = skill.ability as AbilityKey
     const sources = proficientSkills.get(skill.id) ?? []
     const proficient = sources.length > 0
+
+    const breakdown: SkillBonusComponent[] = []
+    let bonus = 0
+
+    // Ability modifier
+    const abilityMod = abilities[ability].modifier
+    breakdown.push({ type: 'ability', value: abilityMod, label: ability })
+    bonus += abilityMod
+
+    // Proficiency bonus
+    if (proficient) {
+      breakdown.push({ type: 'proficiency', value: proficiencyBonus, label: 'proficiency' })
+      bonus += proficiencyBonus
+    }
+
+    // Ability-check-bonus grants (e.g., Remarkable Athlete)
+    for (const { grant } of abilityCheckBonuses) {
+      if (!grant.abilities.includes(ability)) continue
+      if (grant.onlyWhenNotProficient && proficient) continue
+
+      const bonusValue = grant.value === 'half-proficiency'
+        ? Math.ceil(proficiencyBonus / 2)
+        : 0
+      if (bonusValue > 0) {
+        breakdown.push({ type: 'ability-check-bonus', value: bonusValue, label: grant.featureId })
+        bonus += bonusValue
+      }
+    }
+
     result[skill.id] = {
       ability,
       proficient,
       expertise: false,
-      bonus: abilities[ability].modifier + (proficient ? proficiencyBonus : 0),
+      bonus,
+      breakdown,
       sources,
     }
   }

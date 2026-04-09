@@ -43,7 +43,8 @@ describe('getGrantsForLevel', () => {
   it('returns subclass feature at higher level with subclass chosen', () => {
     const preview = getGrantsForLevel('fighter', 7, 'champion')
     expect(preview.classGrants).toHaveLength(0)
-    expect(preview.subclassGrants).toHaveLength(1)
+    expect(preview.subclassGrants).toHaveLength(2)
     expect(preview.subclassGrants[0].type).toBe('feature')
+    expect(preview.subclassGrants[1].type).toBe('ability-check-bonus')
   })
 })

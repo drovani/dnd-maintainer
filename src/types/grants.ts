@@ -140,6 +140,14 @@ export interface EquipmentGrant {
   readonly quantity: number
 }
 
+export interface AbilityCheckBonusGrant {
+  readonly type: 'ability-check-bonus'
+  readonly abilities: readonly AbilityKey[]
+  readonly value: 'half-proficiency'
+  readonly onlyWhenNotProficient: boolean
+  readonly featureId: string
+}
+
 export interface EquipmentChoiceGrant {
   readonly type: 'equipment-choice'
   readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[]
@@ -162,5 +170,6 @@ export type Grant =
   | SpellGrant
   | AsiGrant
   | SubclassGrant
+  | AbilityCheckBonusGrant
   | EquipmentGrant
   | EquipmentChoiceGrant
