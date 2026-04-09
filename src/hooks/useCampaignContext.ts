@@ -1,9 +1,8 @@
 import { useOutletContext } from 'react-router-dom';
 
-export interface CampaignContext {
-  campaignSlug: string | undefined;
-  campaignId: string | undefined;
-}
+export type CampaignContext =
+  | { campaignSlug: string; campaignId: string }
+  | { campaignSlug: undefined; campaignId: undefined };
 
 /**
  * Returns the current campaign's slug and ID from Layout's outlet context.

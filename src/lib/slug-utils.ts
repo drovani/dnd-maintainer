@@ -1,10 +1,10 @@
-/** Matches lowercase alphanumeric slugs: no leading/trailing/consecutive hyphens, max 128 chars. */
+/** Matches lowercase alphanumeric slugs: no leading/trailing hyphens, max 128 chars. */
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 const MAX_SLUG_LENGTH = 128;
 
 /**
  * Validates that a slug contains only lowercase letters, digits, and hyphens.
- * Rejects leading/trailing/consecutive hyphens and lengths over 128 chars.
+ * Rejects leading/trailing hyphens and lengths over 128 chars.
  * Throws if the slug is empty or contains characters that could inject PostgREST operators.
  */
 export function validateSlug(slug: string): string {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Sidebar } from './Sidebar';
@@ -12,6 +12,7 @@ import { isThemeId } from '@/lib/theme';
 export function Layout() {
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { t } = useTranslation('common');
@@ -23,12 +24,16 @@ export function Layout() {
     c => c.slug === campaignSlug || c.previous_slugs?.includes(campaignSlug ?? '')
   );
 
-  // Redirect from previous slug to canonical slug
+  // Redirect from previous slug to canonical slug, preserving the path suffix
   useEffect(() => {
     if (currentCampaign && campaignSlug && currentCampaign.slug !== campaignSlug) {
-      navigate(`/campaign/${currentCampaign.slug}`, { replace: true });
+      const canonicalPath = location.pathname.replace(
+        `/campaign/${campaignSlug}`,
+        `/campaign/${currentCampaign.slug}`
+      );
+      navigate(canonicalPath, { replace: true });
     }
-  }, [currentCampaign, campaignSlug, navigate]);
+  }, [currentCampaign, campaignSlug, navigate, location.pathname]);
 
   // Find the current campaign's theme from the already-loaded campaigns list
   const currentCampaignTheme = currentCampaign?.theme;
@@ -115,7 +120,7 @@ export function Layout() {
               </div>
             </div>
           ) : (
-            <Outlet context={{ campaignSlug, campaignId: currentCampaign?.id } satisfies { campaignSlug: string | undefined; campaignId: string | undefined }} />
+            <Outlet context={{ campaignSlug, campaignId: currentCampaign?.id } as import('@/hooks/useCampaignContext').CampaignContext} />
           )}
         </div>
       </main>
