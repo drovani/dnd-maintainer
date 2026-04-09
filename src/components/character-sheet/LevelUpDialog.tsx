@@ -246,7 +246,7 @@ export function LevelUpDialog({
               } satisfies Extract<PendingChoice, { type: 'asi' }>}
               abilities={currentAbilities}
               onDecide={handleAsiDecide}
-              confirmLabel={t('characterSheet.asi.lockIn')}
+              autoCommit
             />
           ) : null,
         )}

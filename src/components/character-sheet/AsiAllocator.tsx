@@ -12,10 +12,11 @@ interface AsiAllocatorProps {
   readonly choice: Extract<PendingChoice, { type: 'asi' }>
   readonly abilities: ResolvedCharacter['abilities']
   readonly onDecide: (choiceKey: ChoiceKey, allocation: Partial<Record<AbilityKey, number>>) => void
-  readonly confirmLabel?: string
+  /** When true, calls onDecide on every +/- click and hides the confirm button. */
+  readonly autoCommit?: boolean
 }
 
-export function AsiAllocator({ choice, abilities, onDecide, confirmLabel }: AsiAllocatorProps) {
+export function AsiAllocator({ choice, abilities, onDecide, autoCommit }: AsiAllocatorProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
 
@@ -24,25 +25,27 @@ export function AsiAllocator({ choice, abilities, onDecide, confirmLabel }: AsiA
   const pointsUsed = Object.values(allocation).reduce((sum, v) => sum + (v ?? 0), 0)
   const pointsRemaining = choice.points - pointsUsed
 
+  const applyChange = (next: Partial<Record<AbilityKey, number>>) => {
+    setAllocation(next)
+    if (autoCommit) {
+      onDecide(choice.choiceKey, next)
+    }
+  }
+
   const increment = (ability: AbilityKey) => {
-    setAllocation((prev) => {
-      const current = prev[ability] ?? 0
-      const currentTotal = abilities[ability].total
-      const usedPoints = Object.values(prev).reduce((sum, v) => sum + (v ?? 0), 0)
-      if (choice.points - usedPoints <= 0) return prev
-      if (currentTotal + current + 1 > 20) return prev
-      return { ...prev, [ability]: current + 1 }
-    })
+    const current = allocation[ability] ?? 0
+    const currentTotal = abilities[ability].total
+    if (pointsRemaining <= 0) return
+    if (currentTotal + current + 1 > 20) return
+    applyChange({ ...allocation, [ability]: current + 1 })
   }
 
   const decrement = (ability: AbilityKey) => {
-    setAllocation((prev) => {
-      const current = prev[ability] ?? 0
-      if (current <= 0) return prev
-      const next = { ...prev, [ability]: current - 1 }
-      if (next[ability] === 0) delete next[ability]
-      return next
-    })
+    const current = allocation[ability] ?? 0
+    if (current <= 0) return
+    const next = { ...allocation, [ability]: current - 1 }
+    if (next[ability] === 0) delete next[ability]
+    applyChange(next)
   }
 
   const handleConfirm = () => {
@@ -109,13 +112,15 @@ export function AsiAllocator({ choice, abilities, onDecide, confirmLabel }: AsiA
           )
         })}
 
-        <Button
-          className="mt-4 w-full"
-          disabled={pointsRemaining !== 0}
-          onClick={handleConfirm}
-        >
-          {confirmLabel ?? tc('buttons.confirm')}
-        </Button>
+        {!autoCommit && (
+          <Button
+            className="mt-4 w-full"
+            disabled={pointsRemaining !== 0}
+            onClick={handleConfirm}
+          >
+            {tc('buttons.confirm')}
+          </Button>
+        )}
       </CardContent>
     </Card>
   )
