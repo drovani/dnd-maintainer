@@ -19,6 +19,8 @@ interface ColumnDef {
 const TABLE_COLUMNS = {
   campaigns: [
     { name: 'id', type: 'uuid' },
+    { name: 'slug', type: 'text' },
+    { name: 'previous_slugs', type: 'text[]' },
     { name: 'name', type: 'text' },
     { name: 'description', type: 'text' },
     { name: 'setting', type: 'text' },
@@ -30,6 +32,8 @@ const TABLE_COLUMNS = {
   ],
   characters: [
     { name: 'id', type: 'uuid' },
+    { name: 'slug', type: 'text' },
+    { name: 'previous_slugs', type: 'text[]' },
     { name: 'campaign_id', type: 'uuid' },
     { name: 'name', type: 'text' },
     { name: 'character_type', type: 'text' },
@@ -67,9 +71,11 @@ const TABLE_COLUMNS = {
   ],
   sessions: [
     { name: 'id', type: 'uuid' },
+    { name: 'slug', type: 'text' },
+    { name: 'previous_slugs', type: 'text[]' },
     { name: 'campaign_id', type: 'uuid' },
     { name: 'session_number', type: 'integer' },
-    { name: 'title', type: 'text' },
+    { name: 'name', type: 'text' },
     { name: 'date', type: 'date' },
     { name: 'summary', type: 'text' },
     { name: 'notes', type: 'text' },

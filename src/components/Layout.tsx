@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Sidebar } from './Sidebar';
@@ -10,19 +10,33 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import { isThemeId } from '@/lib/theme';
 
 export function Layout() {
-  const { id: campaignId } = useParams<{ id: string }>();
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { t } = useTranslation('common');
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
   const { setCampaignThemeOverride } = useTheme();
 
-  // campaignId from URL is the source of truth; no state sync needed
-  const selectedCampaignId = campaignId;
+  // Find the current campaign by current or previous slug
+  const currentCampaign = campaigns?.find(
+    c => c.slug === campaignSlug || c.previous_slugs?.includes(campaignSlug ?? '')
+  );
+
+  // Redirect from previous slug to canonical slug, preserving the path suffix
+  useEffect(() => {
+    if (currentCampaign && campaignSlug && currentCampaign.slug !== campaignSlug) {
+      const canonicalPath = location.pathname.replace(
+        `/campaign/${campaignSlug}`,
+        `/campaign/${currentCampaign.slug}`
+      );
+      navigate(canonicalPath, { replace: true });
+    }
+  }, [currentCampaign, campaignSlug, navigate, location.pathname]);
 
   // Find the current campaign's theme from the already-loaded campaigns list
-  const currentCampaignTheme = campaigns?.find(c => c.id === selectedCampaignId)?.theme;
+  const currentCampaignTheme = currentCampaign?.theme;
 
   useEffect(() => {
     if (currentCampaignTheme && isThemeId(currentCampaignTheme)) {
@@ -33,8 +47,8 @@ export function Layout() {
     return () => setCampaignThemeOverride(null);
   }, [currentCampaignTheme, setCampaignThemeOverride]);
 
-  const handleSelectCampaign = (id: string) => {
-    navigate(`/campaign/${id}`);
+  const handleSelectCampaign = (slug: string) => {
+    navigate(`/campaign/${slug}`);
   };
 
   useEffect(() => {
@@ -52,7 +66,7 @@ export function Layout() {
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar
         campaigns={campaigns}
-        selectedCampaignId={selectedCampaignId}
+        selectedCampaignSlug={campaignSlug}
         onSelectCampaign={handleSelectCampaign}
         isCollapsed={isCollapsed}
         onToggleCollapse={setIsCollapsed}
@@ -94,8 +108,19 @@ export function Layout() {
                 </Button>
               </div>
             </div>
+          ) : campaignSlug && !currentCampaign ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="max-w-md mx-auto p-6 rounded-lg border bg-card text-center space-y-4">
+                <AlertTriangle className="size-12 text-destructive mx-auto" />
+                <h2 className="text-xl font-bold text-foreground">{t('campaign.notFound')}</h2>
+                <p className="text-muted-foreground text-sm">{t('campaign.notFoundDescription')}</p>
+                <Button onClick={() => navigate('/')}>
+                  {t('campaign.backToCampaigns')}
+                </Button>
+              </div>
+            </div>
           ) : (
-            <Outlet context={{ selectedCampaignId }} />
+            <Outlet context={{ campaignSlug, campaignId: currentCampaign?.id } as import('@/hooks/useCampaignContext').CampaignContext} />
           )}
         </div>
       </main>

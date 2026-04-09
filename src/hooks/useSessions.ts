@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Session, SessionSummary } from '@/types/database';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { SESSION_SUMMARY_COLS, SESSION_DETAIL_COLS } from '@/lib/query-columns';
+import { validateSlug } from '@/lib/slug-utils';
 
 
 export function useSessions(campaignId: string) {
@@ -21,19 +22,20 @@ export function useSessions(campaignId: string) {
   });
 }
 
-export function useSession(id: string) {
+export function useSession(slug: string | undefined) {
   return useQuery({
-    queryKey: ['session', id],
+    queryKey: ['session', slug],
     queryFn: async () => {
+      const safe = validateSlug(slug!);
       const { data, error } = await supabase
         .from('sessions')
         .select(SESSION_DETAIL_COLS)
-        .eq('id', id)
+        .or(`slug.eq.${safe},previous_slugs.cs.{"${safe}"}`)
         .single();
       if (error) throw error;
       return data as unknown as Session;
     },
-    enabled: !!id,
+    enabled: !!slug,
   });
 }
 
@@ -72,7 +74,8 @@ export function useUpdateSession() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sessions', data.campaign_id] });
-      queryClient.invalidateQueries({ queryKey: ['session', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['session'] });
+      queryClient.setQueryData(['session', data.slug], data);
     },
   });
 }

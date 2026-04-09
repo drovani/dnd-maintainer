@@ -18,13 +18,13 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<CampaignList />} />
-          <Route path="/campaign/:id" element={<CampaignDashboard />} />
-          <Route path="/campaign/:id/characters" element={<CharacterList />} />
-          <Route path="/campaign/:id/character/new" element={<CharacterBuilder />} />
-          <Route path="/campaign/:id/character/:characterId" element={<CharacterSheet />} />
-          <Route path="/campaign/:id/sessions" element={<SessionList />} />
-          <Route path="/campaign/:id/session/:sessionId" element={<SessionDetail />} />
-          <Route path="/campaign/:id/notes" element={<NotesPage />} />
+          <Route path="/campaign/:campaignSlug" element={<CampaignDashboard />} />
+          <Route path="/campaign/:campaignSlug/characters" element={<CharacterList />} />
+          <Route path="/campaign/:campaignSlug/character/new" element={<CharacterBuilder />} />
+          <Route path="/campaign/:campaignSlug/character/:characterSlug" element={<CharacterSheet />} />
+          <Route path="/campaign/:campaignSlug/sessions" element={<SessionList />} />
+          <Route path="/campaign/:campaignSlug/session/:sessionSlug" element={<SessionDetail />} />
+          <Route path="/campaign/:campaignSlug/notes" element={<NotesPage />} />
           <Route path="/export" element={<ExportData />} />
           <Route path="/settings/theme" element={<SettingsTheme />} />
         </Route>

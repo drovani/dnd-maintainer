@@ -16,6 +16,8 @@ import type { Campaign } from '@/types/database'
 
 const baseCampaign: Campaign = {
   id: 'camp-1',
+  slug: 'test-campaign-camp',
+  previous_slugs: [],
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
   name: 'Test Campaign',
@@ -45,6 +47,26 @@ describeSingleQuery(
   'camp-1',
   undefined,
 )
+
+describe('useCampaign slug query pattern', () => {
+  it('queries by slug using .or() with both slug and previous_slugs', async () => {
+    mockQueryResult.data = baseCampaign
+
+    const { result } = renderHook(() => useCampaign('test-slug'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(supabase.or).toHaveBeenCalledWith(
+      'slug.eq.test-slug,previous_slugs.cs.{"test-slug"}'
+    )
+  })
+
+  it('throws when slug contains invalid characters', async () => {
+    const { result } = renderHook(() => useCampaign('bad,slug'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error).toBeInstanceOf(Error)
+  })
+})
 
 describe('useCampaignMutations', () => {
   it('create inserts with status planning', async () => {

@@ -94,7 +94,7 @@ CREATE TABLE sessions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     campaign_id uuid NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     session_number integer NOT NULL,
-    title text,
+    name text,
     date date,
     summary text,
     notes text,

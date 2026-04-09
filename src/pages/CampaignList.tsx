@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Trans, useTranslation } from 'react-i18next'
 import { ValidationError } from '@/components/ui/validation-error'
 
@@ -96,8 +97,10 @@ export default function CampaignList() {
         setShowNewCampaignForm(false)
         setNewCampaign({ name: '', setting: '', description: '' })
         setNameError('')
-        if (data?.id) {
-          navigate(`/campaign/${data.id}`)
+        if (data?.slug) {
+          navigate(`/campaign/${data.slug}`)
+        } else {
+          toast.error(t('errors.missingSlug'))
         }
       },
     })
@@ -278,7 +281,7 @@ export default function CampaignList() {
                 <div
                   key={campaign.id}
                   className="group bg-card border rounded-lg p-6 transition-all hover:shadow-md hover:border-ring cursor-pointer"
-                  onClick={() => navigate(`/campaign/${campaign.id}`)}
+                  onClick={() => navigate(`/campaign/${campaign.slug}`)}
                 >
                   {/* Campaign Header */}
                   <div className="flex items-start justify-between mb-4">

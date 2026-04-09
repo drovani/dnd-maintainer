@@ -10,6 +10,8 @@ import type { SaveStatus, AutosavePayload } from '@/hooks/useBuilderAutosave'
 const basePayload: AutosavePayload = {
   character: {
     id: '',
+    slug: '',
+    previous_slugs: [],
     created_at: '',
     updated_at: '',
     campaign_id: 'camp-1',
@@ -159,24 +161,24 @@ describe('useBuilderAutosave', () => {
   })
 
   describe('finalize', () => {
-    it('calls saveDraft then updates status to ready and returns id', async () => {
-      mockQueryResult.data = { id: 'char-new' }
+    it('calls saveDraft then updates status to ready and returns slug', async () => {
+      mockQueryResult.data = { id: 'char-new', slug: 'hero-draft' }
 
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
-      let returnedId: string | undefined
+      let returnedSlug: string | undefined
       await act(async () => {
-        returnedId = await result.current.finalize(basePayload)
+        returnedSlug = await result.current.finalize(basePayload)
       })
 
-      expect(returnedId).toBe('char-new')
+      expect(returnedSlug).toBe('hero-draft')
       expect(supabase.update).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'ready' })
       )
     })
 
     it('sets saveStatus to saved after successful finalize', async () => {
-      mockQueryResult.data = { id: 'char-new' }
+      mockQueryResult.data = { id: 'char-new', slug: 'hero-draft' }
 
       const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
 
@@ -185,6 +187,31 @@ describe('useBuilderAutosave', () => {
       })
 
       expect(result.current.saveStatus).toBe<SaveStatus>('saved')
+    })
+
+    it('throws and sets saveStatus to error when finalize response has no slug', async () => {
+      expect.assertions(2)
+      // saveDraft insert returns an id; the ready-update returns data without a slug field
+      let callIndex = 0
+      supabase.then = (resolve, reject) => {
+        callIndex++
+        if (callIndex === 1) {
+          return Promise.resolve({ data: { id: 'char-new' }, error: null }).then(resolve, reject)
+        }
+        return Promise.resolve({ data: { id: 'char-new' }, error: null }).then(resolve, reject)
+      }
+
+      const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
+
+      await withSuppressedRejections(async () => {
+        await act(async () => {
+          await result.current.finalize(basePayload).catch((err: Error) => {
+            expect(err.message).toMatch(/no character slug was returned/)
+          })
+        })
+
+        await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'))
+      })
     })
 
     it('sets saveStatus to error when the status update fails', async () => {

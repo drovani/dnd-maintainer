@@ -2,7 +2,7 @@ export const mockQueryResult: { data: unknown; error: unknown } = { data: null, 
 
 const methods = [
   'from', 'select', 'insert', 'update', 'delete', 'upsert',
-  'eq', 'neq', 'is', 'not', 'order', 'single', 'maybeSingle',
+  'eq', 'neq', 'is', 'not', 'or', 'order', 'single', 'maybeSingle',
   'limit', 'range', 'contains', 'match', 'gte', 'lte', 'gt', 'lt',
   'like', 'ilike', 'in', 'textSearch',
 ] as const

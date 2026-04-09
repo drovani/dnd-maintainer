@@ -1,6 +1,7 @@
 import { parseIntOrDefault } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useSessions } from '@/hooks/useSessions'
+import { useCampaignContext } from '@/hooks/useCampaignContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
@@ -14,18 +15,20 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ValidationError } from '@/components/ui/validation-error'
 
 export default function SessionList() {
   const { t } = useTranslation('common')
-  const { id: campaignId } = useParams<{ id: string }>()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>()
+  const { campaignId } = useCampaignContext()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [showNewSessionForm, setShowNewSessionForm] = useState(false)
   const [newSession, setNewSession] = useState({
-    title: '',
+    name: '',
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
   })
@@ -60,7 +63,7 @@ export default function SessionList() {
         .insert([
           {
             campaign_id: campaignId,
-            title: session.title,
+            name: session.name,
             session_number: session.session_number,
             date: session.date,
           },
@@ -75,17 +78,21 @@ export default function SessionList() {
       setShowNewSessionForm(false)
       setTitleError('')
       setNewSession({
-        title: '',
+        name: '',
         session_number: Math.max(...sessions.map(s => s.session_number), 0) + 1,
         date: new Date().toISOString().split('T')[0],
       })
-      navigate(`/campaign/${campaignId}/session/${data.id}`)
+      if (data?.slug) {
+        navigate(`/campaign/${campaignSlug}/session/${data.slug}`)
+      } else {
+        toast.error(t('errors.missingSlug'))
+      }
     },
   })
 
   const handleCreateSession = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newSession.title.trim()) {
+    if (!newSession.name.trim()) {
       setTitleError(t('validation.titleRequired'))
       return
     }
@@ -99,7 +106,7 @@ export default function SessionList() {
 
   const filteredSessions = sortedSessions.filter((session) =>
     searchTerm.trim() === '' ? true :
-      session.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      session.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const formatDate = (dateString: string) => {
@@ -181,10 +188,10 @@ export default function SessionList() {
                 <div className="flex flex-col gap-1">
                   <input
                     type="text"
-                    value={newSession.title}
+                    value={newSession.name}
                     onChange={(e) => {
                       setTitleError('')
-                      setNewSession({ ...newSession, title: e.target.value })
+                      setNewSession({ ...newSession, name: e.target.value })
                     }}
                     placeholder={t('sessions.placeholderTitle')}
                     className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -293,7 +300,7 @@ export default function SessionList() {
                 {/* Session card */}
                 <div
                   onClick={() =>
-                    navigate(`/campaign/${campaignId}/session/${session.id}`)
+                    navigate(`/campaign/${campaignSlug}/session/${session.slug}`)
                   }
                   className="group flex gap-6 pb-8 cursor-pointer"
                 >
@@ -311,7 +318,7 @@ export default function SessionList() {
                             {t('sessions.sessionLabel', { number: session.session_number })}
                           </span>
                           <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                            {session.title}
+                            {session.name}
                           </h3>
                         </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">

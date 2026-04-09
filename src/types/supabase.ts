@@ -43,7 +43,9 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          previous_slugs: string[]
           setting: string | null
+          slug: string
           status: string | null
           theme: string | null
           updated_at: string
@@ -56,7 +58,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          previous_slugs?: string[]
           setting?: string | null
+          slug?: string
           status?: string | null
           theme?: string | null
           updated_at?: string
@@ -69,7 +73,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          previous_slugs?: string[]
           setting?: string | null
+          slug?: string
           status?: string | null
           theme?: string | null
           updated_at?: string
@@ -204,10 +210,12 @@ export type Database = {
           personality_traits: string | null
           player_name: string | null
           portrait_url: string | null
+          previous_slugs: string[]
           proficiency_bonus: number | null
           race: string | null
           size: string | null
           skin_color: string | null
+          slug: string
           speed: number | null
           status: string
           subclass: string | null
@@ -241,10 +249,12 @@ export type Database = {
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
+          previous_slugs?: string[]
           proficiency_bonus?: number | null
           race?: string | null
           size?: string | null
           skin_color?: string | null
+          slug?: string
           speed?: number | null
           status?: string
           subclass?: string | null
@@ -278,10 +288,12 @@ export type Database = {
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
+          previous_slugs?: string[]
           proficiency_bonus?: number | null
           race?: string | null
           size?: string | null
           skin_color?: string | null
+          slug?: string
           speed?: number | null
           status?: string
           subclass?: string | null
@@ -407,10 +419,12 @@ export type Database = {
           experience_awarded: number
           id: string
           loot: Json | null
+          name: string | null
           notes: string | null
+          previous_slugs: string[]
           session_number: number
+          slug: string
           summary: string | null
-          title: string | null
           updated_at: string
         }
         Insert: {
@@ -420,10 +434,12 @@ export type Database = {
           experience_awarded?: number
           id?: string
           loot?: Json | null
+          name?: string | null
           notes?: string | null
+          previous_slugs?: string[]
           session_number: number
+          slug?: string
           summary?: string | null
-          title?: string | null
           updated_at?: string
         }
         Update: {
@@ -433,10 +449,12 @@ export type Database = {
           experience_awarded?: number
           id?: string
           loot?: Json | null
+          name?: string | null
           notes?: string | null
+          previous_slugs?: string[]
           session_number?: number
+          slug?: string
           summary?: string | null
-          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -454,7 +472,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_slug: {
+        Args: { entity_id: string; entity_name: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

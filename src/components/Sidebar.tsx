@@ -1,4 +1,4 @@
-import { Campaign } from '@/types/database';
+import { CampaignSummary } from '@/types/database';
 import {
   BookOpen,
   ChevronDown,
@@ -18,9 +18,9 @@ import { Link, NavLink, useParams } from 'react-router-dom';
 import { Button } from './ui/button';
 
 export interface SidebarProps {
-  campaigns: Campaign[];
-  selectedCampaignId?: string;
-  onSelectCampaign: (id: string) => void;
+  campaigns: CampaignSummary[];
+  selectedCampaignSlug?: string;
+  onSelectCampaign: (slug: string) => void;
   isCollapsed: boolean;
   onToggleCollapse: (collapsed: boolean) => void;
 }
@@ -34,16 +34,19 @@ const NAV_ITEMS = [
 
 export function Sidebar({
   campaigns,
-  selectedCampaignId,
+  selectedCampaignSlug,
   onSelectCampaign,
   isCollapsed,
   onToggleCollapse,
 }: SidebarProps) {
   const { t } = useTranslation('common');
-  const { id: campaignId } = useParams<{ id: string }>();
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false);
 
-  const currentCampaign = campaigns.find((c) => c.id === (selectedCampaignId || campaignId));
+  const effectiveSlug = selectedCampaignSlug || campaignSlug;
+  const currentCampaign = campaigns.find(
+    (c) => c.slug === effectiveSlug || c.previous_slugs?.includes(effectiveSlug ?? '')
+  );
 
   return (
     <>
@@ -143,13 +146,13 @@ export function Sidebar({
                     <button
                       key={campaign.id}
                       onClick={() => {
-                        onSelectCampaign(campaign.id);
+                        onSelectCampaign(campaign.slug);
                         setShowCampaignDropdown(false);
                       }}
                       className={`
                         w-full text-left px-3 py-2 text-sm
                         hover:bg-accent transition-colors
-                        ${campaign.id === currentCampaign?.id ? 'bg-accent text-accent-foreground font-medium' : 'text-popover-foreground'}
+                        ${campaign.slug === currentCampaign?.slug ? 'bg-accent text-accent-foreground font-medium' : 'text-popover-foreground'}
                       `}
                     >
                       {campaign.name}
@@ -167,7 +170,7 @@ export function Sidebar({
             const Icon = item.icon;
             const disabled = !currentCampaign;
             const fullPath = currentCampaign
-              ? `/campaign/${currentCampaign.id}${item.path}`
+              ? `/campaign/${currentCampaign.slug}${item.path}`
               : '#';
 
             if (disabled) {

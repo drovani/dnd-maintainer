@@ -21,14 +21,14 @@ export function useEncounters(campaignId: string) {
   });
 }
 
-export function useSessionEncounters(sessionId: string) {
+export function useSessionEncounters(sessionId: string | undefined) {
   return useQuery({
     queryKey: ['encounters', 'session', sessionId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('encounters')
         .select(ENCOUNTER_SUMMARY_COLS)
-        .eq('session_id', sessionId)
+        .eq('session_id', sessionId!)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return (data || []) as unknown as EncounterSummary[];
