@@ -87,6 +87,8 @@ describe('resolveChoiceSequence', () => {
 function buildSeedCharacter(overrides: Partial<Character> = {}): Character {
   return {
     id: 'test-char',
+    slug: 'test-character-test',
+    previous_slugs: [],
     campaign_id: 'test-campaign',
     name: 'Test Character',
     player_name: null,

@@ -1,4 +1,4 @@
-import { Campaign } from '@/types/database';
+import { CampaignSummary } from '@/types/database';
 import {
   BookOpen,
   ChevronDown,
@@ -18,7 +18,7 @@ import { Link, NavLink, useParams } from 'react-router-dom';
 import { Button } from './ui/button';
 
 export interface SidebarProps {
-  campaigns: Campaign[];
+  campaigns: CampaignSummary[];
   selectedCampaignId?: string;
   onSelectCampaign: (id: string) => void;
   isCollapsed: boolean;

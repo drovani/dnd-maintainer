@@ -16,6 +16,8 @@ import type { Campaign } from '@/types/database'
 
 const baseCampaign: Campaign = {
   id: 'camp-1',
+  slug: 'test-campaign-camp',
+  previous_slugs: [],
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
   name: 'Test Campaign',

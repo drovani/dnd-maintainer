@@ -404,7 +404,7 @@ export default function CampaignDashboard() {
                       {t('campaign.activity.lastSessionPlayed')}
                     </p>
                     <p className="text-primary font-bold text-lg mt-1">
-                      {t('sessionDetail.sessionHeading', { number: lastSession.session_number, title: lastSession.title })}
+                      {t('sessionDetail.sessionHeading', { number: lastSession.session_number, title: lastSession.name })}
                     </p>
                     <p className="text-muted-foreground text-sm mt-2">
                       {lastSession.date ? new Date(lastSession.date).toLocaleDateString(undefined, {

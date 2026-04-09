@@ -10,6 +10,8 @@ import type { SaveStatus, AutosavePayload } from '@/hooks/useBuilderAutosave'
 const basePayload: AutosavePayload = {
   character: {
     id: '',
+    slug: '',
+    previous_slugs: [],
     created_at: '',
     updated_at: '',
     campaign_id: 'camp-1',

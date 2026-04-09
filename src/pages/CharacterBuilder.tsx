@@ -33,6 +33,8 @@ const STEPS: { id: StepType }[] = [
 function buildSeedCharacter(campaignId: string): Character {
   return {
     id: '',
+    slug: '',
+    previous_slugs: [],
     campaign_id: campaignId,
     name: '',
     player_name: null,

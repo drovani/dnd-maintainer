@@ -60,7 +60,7 @@ export default function SessionDetail() {
 
   const [formInitialized, setFormInitialized] = useState(false)
   const [formData, setFormData] = useState<Partial<Session>>({
-    title: '',
+    name: '',
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
     summary: '',
@@ -301,7 +301,7 @@ export default function SessionDetail() {
             {t('buttons.backToSessions')}
           </button>
           <h1 className="text-4xl font-bold text-foreground">
-            {t('sessionDetail.sessionHeading', { number: formData.session_number, title: formData.title })}
+            {t('sessionDetail.sessionHeading', { number: formData.session_number, title: formData.name })}
           </h1>
           <p className="text-muted-foreground mt-2">{formatDate(formData.date || '')}</p>
         </div>
@@ -323,8 +323,8 @@ export default function SessionDetail() {
               </label>
               <input
                 type="text"
-                value={formData.title || ''}
-                onChange={(e) => handleFieldChange('title', e.target.value)}
+                value={formData.name || ''}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
                 className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 placeholder={t('sessionDetail.placeholderTitle')}
               />

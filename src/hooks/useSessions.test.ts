@@ -16,11 +16,13 @@ import type { Session } from '@/types/database'
 
 const baseSession: Session = {
   id: 'sess-1',
+  slug: 'first-adventure-sess',
+  previous_slugs: [],
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
   campaign_id: 'camp-1',
   session_number: 1,
-  title: 'The First Adventure',
+  name: 'The First Adventure',
   date: '2024-01-15',
   summary: null,
   experience_awarded: 300,

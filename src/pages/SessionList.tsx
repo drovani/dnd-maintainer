@@ -99,7 +99,7 @@ export default function SessionList() {
 
   const filteredSessions = sortedSessions.filter((session) =>
     searchTerm.trim() === '' ? true :
-      session.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      session.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const formatDate = (dateString: string) => {
@@ -311,7 +311,7 @@ export default function SessionList() {
                             {t('sessions.sessionLabel', { number: session.session_number })}
                           </span>
                           <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                            {session.title}
+                            {session.name}
                           </h3>
                         </div>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">

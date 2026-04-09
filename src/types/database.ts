@@ -17,6 +17,8 @@ export type AbilityKey = keyof AbilityScores
 
 export interface Campaign {
   id: string
+  slug: string
+  previous_slugs: string[]
   created_at: string
   updated_at: string
   name: string
@@ -32,6 +34,8 @@ export interface Campaign {
 
 export interface Character {
   id: string
+  slug: string
+  previous_slugs: string[]
   created_at: string
   updated_at: string
   campaign_id: string
@@ -96,11 +100,13 @@ export interface Encounter {
 
 export interface Session {
   id: string
+  slug: string
+  previous_slugs: string[]
   created_at: string
   updated_at: string
   campaign_id: string
   session_number: number
-  title: string | null
+  name: string | null
   date: string | null
   summary?: string | null
   experience_awarded: number
@@ -122,8 +128,8 @@ export interface Note {
 }
 
 // Summary types for list views (subset of full types)
-export type CampaignSummary = Pick<Campaign, 'id' | 'name' | 'description' | 'setting' | 'status' | 'theme' | 'created_at' | 'updated_at' | 'archived_at'>
-export type CharacterSummary = Pick<Character, 'id' | 'campaign_id' | 'name' | 'player_name' | 'character_type' | 'race' | 'class' | 'subclass' | 'level' | 'hit_points_max' | 'armor_class' | 'updated_at'>
-export type SessionSummary = Pick<Session, 'id' | 'campaign_id' | 'session_number' | 'title' | 'date' | 'summary' | 'experience_awarded' | 'created_at' | 'updated_at'>
+export type CampaignSummary = Pick<Campaign, 'id' | 'slug' | 'name' | 'description' | 'setting' | 'status' | 'theme' | 'created_at' | 'updated_at' | 'archived_at'>
+export type CharacterSummary = Pick<Character, 'id' | 'slug' | 'campaign_id' | 'name' | 'player_name' | 'character_type' | 'race' | 'class' | 'subclass' | 'level' | 'hit_points_max' | 'armor_class' | 'updated_at'>
+export type SessionSummary = Pick<Session, 'id' | 'slug' | 'campaign_id' | 'session_number' | 'name' | 'date' | 'summary' | 'experience_awarded' | 'created_at' | 'updated_at'>
 export type EncounterSummary = Pick<Encounter, 'id' | 'campaign_id' | 'session_id' | 'name' | 'description' | 'status' | 'round' | 'created_at' | 'updated_at'>
 export type NoteSummary = Pick<Note, 'id' | 'campaign_id' | 'title' | 'category' | 'tags' | 'is_pinned' | 'created_at' | 'updated_at'>
