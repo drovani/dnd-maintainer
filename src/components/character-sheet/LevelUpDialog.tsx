@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react'
+import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
+import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
 import { Button } from '@/components/ui/button'
+import { RollingNumber } from '@/components/ui/rolling-number'
 import {
   Dialog,
   DialogContent,
@@ -7,16 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
-import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
-import { getGrantsForLevel } from '@/lib/sources/level-grants'
 import type { ClassId } from '@/lib/dnd-helpers'
+import { getGrantsForLevel } from '@/lib/sources/level-grants'
+import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
+import type { AsiGrant, FeatureGrant, SubclassGrant } from '@/types/grants'
+import type { PendingChoice, ResolvedCharacter } from '@/types/resolved'
 import type { SubclassId } from '@/types/sources'
-import type { ChoiceKey } from '@/types/choices'
-import type { ChoiceDecision } from '@/types/choices'
-import type { PendingChoice } from '@/types/resolved'
-import type { ResolvedCharacter } from '@/types/resolved'
-import type { AsiGrant, SubclassGrant, FeatureGrant } from '@/types/grants'
+import { Dices } from 'lucide-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface LevelUpDialogProps {
@@ -52,10 +52,13 @@ export function LevelUpDialog({
   const { t: tg } = useTranslation('gamedata')
 
   const [rolledValue, setRolledValue] = useState<number | null>(null)
+  const [isRolling, setIsRolling] = useState<boolean>(false)
   const [hpSelection, setHpSelection] = useState<number | null>(null)
   const [decisions, setDecisions] = useState<Map<ChoiceKey, ChoiceDecision>>(new Map())
+  const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const average = Math.floor(hitDie / 2) + 1
+  const hpRange = useMemo(() => [1, hitDie] as const, [hitDie])
 
   const preview = useMemo(
     () => getGrantsForLevel(classId, targetLevel, currentSubclassId),
@@ -93,10 +96,25 @@ export function LevelUpDialog({
 
   const canConfirm = hpSelection !== null && allChoicesMade
 
-  const handleRoll = () => {
-    const result = Math.floor(Math.random() * hitDie) + 1
-    setRolledValue(result)
-  }
+  const handleRoll = useCallback(() => {
+    if (isRolling) return
+    setIsRolling(true)
+    setHpSelection(null)
+
+    const finalValue = Math.floor(Math.random() * hitDie) + 1
+    let ticks = 0
+    const totalTicks = 12
+
+    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+    rollIntervalRef.current = setInterval(() => {
+      ticks++
+      if (ticks >= totalTicks) {
+        if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+        setRolledValue(finalValue)
+        setIsRolling(false)
+      }
+    }, 60)
+  }, [isRolling, hitDie])
 
   const handleSelectHp = (value: number) => {
     setHpSelection(value)
@@ -110,7 +128,9 @@ export function LevelUpDialog({
   }
 
   const resetState = () => {
+    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
     setRolledValue(null)
+    setIsRolling(false)
     setHpSelection(null)
     setDecisions(new Map())
   }
@@ -165,56 +185,61 @@ export function LevelUpDialog({
             {t('characterSheet.levelManagement.hpRollPrompt')}
           </p>
 
-          {/* Roll HP option */}
-          <div className={`flex items-center justify-between gap-4 rounded-lg border p-3 ${
-            hpSelection !== null && hpSelection === rolledValue ? 'border-primary bg-primary/5' : 'bg-muted/30'
-          }`}>
-            <div>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Roll HP option */}
+            <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection !== null && hpSelection === rolledValue ? 'border-primary bg-primary/5' : 'bg-muted/30'
+              }`}>
               <p className="text-sm font-medium text-foreground">
                 {t('characterSheet.levelManagement.rollHp')}
               </p>
               <p className="text-xs text-muted-foreground">
                 {t('characterSheet.levelManagement.rollHpHint', { die: hitDie })}
               </p>
-              {rolledValue !== null && (
-                <p className="mt-1 text-lg font-bold text-foreground">{rolledValue}</p>
+              {(isRolling || rolledValue !== null) && (
+                <RollingNumber
+                  value={rolledValue}
+                  isRolling={isRolling}
+                  range={hpRange}
+                  className="text-lg font-bold text-foreground tabular-nums"
+                />
               )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button variant="outline" size="sm" onClick={handleRoll}>
-                {t('characterSheet.levelManagement.rollHp')}
-              </Button>
-              {rolledValue !== null && (
-                <Button
-                  size="sm"
-                  variant={hpSelection === rolledValue ? 'default' : 'outline'}
-                  onClick={() => handleSelectHp(rolledValue)}
-                >
-                  {hpSelection === rolledValue ? t('buttons.selected') : t('buttons.select')}
+              <div className="flex flex-row gap-1 mt-auto">
+                <Button variant="outline" size="sm" onClick={handleRoll} disabled={isRolling}>
+                  <Dices className={`size-4 mr-1 ${isRolling ? 'animate-spin' : ''}`} />
+                  {rolledValue !== null && !isRolling
+                    ? t('buttons.reRoll')
+                    : t('characterSheet.levelManagement.rollHp')}
                 </Button>
-              )}
+                {rolledValue !== null && !isRolling && (
+                  <Button
+                    size="sm"
+                    variant={hpSelection === rolledValue ? 'default' : 'outline'}
+                    onClick={() => handleSelectHp(rolledValue)}
+                  >
+                    {hpSelection === rolledValue ? t('buttons.selected') : t('buttons.select')}
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Take average option */}
-          <div className={`flex items-center justify-between gap-4 rounded-lg border p-3 ${
-            hpSelection === average ? 'border-primary bg-primary/5' : 'bg-muted/30'
-          }`}>
-            <div>
+            {/* Take average option */}
+            <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection === average ? 'border-primary bg-primary/5' : 'bg-muted/30'
+              }`}>
               <p className="text-sm font-medium text-foreground">
                 {t('characterSheet.levelManagement.takeAverage')}
               </p>
               <p className="text-xs text-muted-foreground">
                 {t('characterSheet.levelManagement.takeAverageHint', { value: average })}
               </p>
+              <Button
+                className="mt-auto"
+                variant={hpSelection === average ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSelectHp(average)}
+              >
+                {hpSelection === average ? t('buttons.selected') : t('buttons.select')}
+              </Button>
             </div>
-            <Button
-              variant={hpSelection === average ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleSelectHp(average)}
-            >
-              {hpSelection === average ? t('buttons.selected') : t('buttons.select')}
-            </Button>
           </div>
         </div>
 
