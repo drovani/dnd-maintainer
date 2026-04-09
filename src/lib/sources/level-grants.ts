@@ -19,6 +19,9 @@ export function getGrantsForLevel(
   subclassId: SubclassId | null,
 ): LevelGrantPreview {
   const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
+  if (!classSource) {
+    console.warn(`getGrantsForLevel: no class source for "${classId}"`)
+  }
   const classGrants = classSource?.levels[targetClassLevel - 1]?.grants ?? []
 
   let subclassGrants: readonly Grant[] = []

@@ -46,8 +46,9 @@ function PendingChoiceRow({
     if (!resolved) {
       return (
         <Card className="opacity-60">
-          <CardContent className="p-4 text-sm text-muted-foreground">
-            {tc('characterSheet.asi.asiTitle')}
+          <CardContent className="p-4 space-y-1">
+            <p className="text-sm text-muted-foreground">{tc('characterSheet.asi.asiTitle')}</p>
+            <p className="text-xs text-destructive">{tc('characterSheet.levelUp.abilitiesUnavailable')}</p>
           </CardContent>
         </Card>
       )

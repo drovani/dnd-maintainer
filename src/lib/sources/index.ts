@@ -183,6 +183,10 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     if (featSource) {
       const tag: SourceTag = { origin: 'feat', id: featId }
       bundles.push({ source: tag, grants: featSource.grants })
+    } else {
+      const msg = `No source data found for feat "${featId}" — feat grants will be empty`
+      warnings.push(msg)
+      console.warn(msg)
     }
   }
 
@@ -192,6 +196,10 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     if (itemSource) {
       const tag: SourceTag = { origin: 'item', id: itemId }
       bundles.push({ source: tag, grants: itemSource.grants })
+    } else {
+      const msg = `No source data found for item "${itemId}" — item grants will be empty`
+      warnings.push(msg)
+      console.warn(msg)
     }
   }
 
