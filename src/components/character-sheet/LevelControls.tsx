@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { LevelUpDialog } from '@/components/character-sheet/LevelUpDialog'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import { DND_CLASSES } from '@/lib/dnd-helpers'
-import type { ClassId } from '@/lib/dnd-helpers'
+import type { ClassId, FightingStyleId } from '@/lib/dnd-helpers'
 import type { ChoiceKey } from '@/types/choices'
 import type { ChoiceDecision } from '@/types/choices'
 import type { SubclassId } from '@/types/sources'
@@ -45,6 +45,21 @@ export function LevelControls({ classId }: LevelControlsProps) {
     (r) => r.class_id === classId && r.subclass_id != null && r.deleted_at == null,
   )?.subclass_id ?? null) as SubclassId | null
 
+  // Collect already-chosen fighting styles from existing build choices
+  const alreadyChosenStyles = useMemo((): readonly FightingStyleId[] => {
+    const styles: FightingStyleId[] = []
+    for (const row of rows) {
+      if (row.choices) {
+        for (const decision of Object.values(row.choices)) {
+          if (decision.type === 'fighting-style-choice') {
+            styles.push(...(decision.styles as FightingStyleId[]))
+          }
+        }
+      }
+    }
+    return styles
+  }, [rows])
+
   const handleConfirmLevelUp = (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
     levelUp(classId, hpRoll, decisions)
   }
@@ -84,6 +99,7 @@ export function LevelControls({ classId }: LevelControlsProps) {
         classId={classId}
         currentSubclassId={currentSubclassId}
         currentAbilities={resolved?.abilities ?? null}
+        alreadyChosenStyles={alreadyChosenStyles}
       />
     </>
   )

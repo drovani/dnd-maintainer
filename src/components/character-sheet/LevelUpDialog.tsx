@@ -1,4 +1,5 @@
 import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
+import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker'
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,9 +13,10 @@ import { RollingNumber } from '@/components/ui/rolling-number'
 import type { ClassId } from '@/lib/dnd-helpers'
 import { getGrantsForLevel } from '@/lib/sources/level-grants'
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
-import type { AsiGrant, FeatureGrant, SubclassGrant } from '@/types/grants'
+import type { AsiGrant, FeatureGrant, FightingStyleChoiceGrant, SubclassGrant } from '@/types/grants'
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved'
 import type { SubclassId } from '@/types/sources'
+import type { FightingStyleId } from '@/lib/dnd-helpers'
 import { Dices } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -35,6 +37,8 @@ interface LevelUpDialogProps {
   readonly currentSubclassId: SubclassId | null
   /** Current resolved abilities (needed for ASI allocator). */
   readonly currentAbilities: ResolvedCharacter['abilities'] | null
+  /** Fighting styles already chosen by the character (to exclude from picker). */
+  readonly alreadyChosenStyles: readonly FightingStyleId[]
 }
 
 export function LevelUpDialog({
@@ -47,6 +51,7 @@ export function LevelUpDialog({
   classId,
   currentSubclassId,
   currentAbilities,
+  alreadyChosenStyles,
 }: LevelUpDialogProps) {
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
@@ -85,6 +90,11 @@ export function LevelUpDialog({
     return preview.classGrants.filter((g): g is SubclassGrant => g.type === 'subclass')
   }, [preview])
 
+  const fightingStyleGrants = useMemo(() => {
+    const allGrants = [...preview.classGrants, ...preview.subclassGrants]
+    return allGrants.filter((g): g is FightingStyleChoiceGrant => g.type === 'fighting-style-choice')
+  }, [preview])
+
   // Check if all required choices are made
   const allChoicesMade = useMemo(() => {
     for (const grant of asiGrants) {
@@ -97,8 +107,12 @@ export function LevelUpDialog({
       const decision = decisions.get(grant.key)
       if (!decision || decision.type !== 'subclass') return false
     }
+    for (const grant of fightingStyleGrants) {
+      const decision = decisions.get(grant.key)
+      if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) return false
+    }
     return true
-  }, [asiGrants, subclassGrants, decisions])
+  }, [asiGrants, subclassGrants, fightingStyleGrants, decisions])
 
   const canConfirm = hpSelection !== null && allChoicesMade
 
@@ -261,6 +275,28 @@ export function LevelUpDialog({
             } satisfies Extract<PendingChoice, { type: 'subclass' }>}
             onDecide={handleSubclassDecide}
             autoCommit
+          />
+        ))}
+
+        {/* Fighting style choice */}
+        {fightingStyleGrants.map((grant) => (
+          <FightingStylePicker
+            key={grant.key}
+            choice={{
+              type: 'fighting-style-choice',
+              choiceKey: grant.key,
+              source: { origin: 'class', id: classId, level: targetLevel },
+              count: grant.count,
+              from: grant.from,
+              alreadyChosen: alreadyChosenStyles,
+            } satisfies Extract<PendingChoice, { type: 'fighting-style-choice' }>}
+            onDecide={(choiceKey, decision) => {
+              setDecisions((prev) => {
+                const next = new Map(prev)
+                next.set(choiceKey, decision)
+                return next
+              })
+            }}
           />
         ))}
 
