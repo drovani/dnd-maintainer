@@ -303,6 +303,7 @@ export type WeaponProficiencyId = (typeof DND_WEAPON_PROFICIENCIES)[number]
 
 export const DND_TOOL_PROFICIENCIES = [
   'thievestools', 'herbalismkit',
+  'smithstools', 'brewersupplies', 'masonstools',
   'bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol',
   'vehicles-land', 'vehicles-water',
   'gaming-set-dice', 'gaming-set-cards', 'gaming-set-dragonchess', 'gaming-set-three-dragon-ante',
@@ -591,6 +592,17 @@ export const DND_CLASSES = [
 ] as const
 
 export type ClassId = (typeof DND_CLASSES)[number]['id']
+
+export const FIGHTING_STYLE_IDS = [
+  'archery',
+  'defense',
+  'dueling',
+  'great-weapon-fighting',
+  'protection',
+  'two-weapon-fighting',
+] as const
+
+export type FightingStyleId = (typeof FIGHTING_STYLE_IDS)[number]
 
 export const DND_SKILLS = [
   { id: 'acrobatics', ability: 'dex' },

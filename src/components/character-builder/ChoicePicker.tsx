@@ -8,15 +8,15 @@ import {
   type SkillId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
-import type { ChoiceDecision } from '@/types/choices'
+import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
 import type { PendingChoice } from '@/types/resolved'
 import { useTranslation } from 'react-i18next'
 
 interface ChoicePickerProps {
   readonly choice: PendingChoice
   readonly currentDecision: ChoiceDecision | undefined
-  readonly onDecide: (key: string, decision: ChoiceDecision) => void
-  readonly onClear: (key: string) => void
+  readonly onDecide: (key: ChoiceKey, decision: ChoiceDecision) => void
+  readonly onClear: (key: ChoiceKey) => void
 }
 
 const ALL_SKILL_IDS: readonly SkillId[] = DND_SKILLS.map((s) => s.id)

@@ -3,12 +3,14 @@ import type { ReactNode } from 'react'
 import type { Character } from '@/types/database'
 import type { AbilityScores } from '@/types/database'
 import type { BuildLevelRow } from '@/lib/build-reconstruction'
-import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
+import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
+import { parseChoiceKey } from '@/types/choices'
 import type { ResolvedCharacter } from '@/types/resolved'
 import type { ClassId } from '@/lib/dnd-helpers'
-import type { GrantBundle } from '@/types/sources'
+import type { GrantBundle, SubclassId } from '@/types/sources'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
+import { CLASS_SOURCES } from '@/lib/sources/classes'
 import { resolveCharacter } from '@/lib/resolver/index'
 import { toast } from 'sonner'
 import i18next from 'i18next'
@@ -20,7 +22,7 @@ import i18next from 'i18next'
 export interface CreationUpdates {
   base_abilities?: AbilityScores
   ability_method?: 'standard-array' | 'point-buy' | 'rolling'
-  choices?: Record<string, ChoiceDecision>
+  choices?: Record<ChoiceKey, ChoiceDecision>
 }
 
 interface CharacterContextValue {
@@ -30,14 +32,19 @@ interface CharacterContextValue {
   readonly bundles: readonly GrantBundle[]
   readonly resolved: ResolvedCharacter | null
   readonly buildError: string | null
+  readonly buildWarnings: readonly string[]
   readonly isDirty: boolean
+  readonly level: number
+  readonly hasDeletedRows: boolean
+  readonly nextRestoreLevel: number | null
   updateCharacter: (updates: Readonly<Partial<Character>>) => void
   updateCreation: (updates: Readonly<CreationUpdates>) => void
-  makeChoice: (choiceKey: string, decision: ChoiceDecision) => void
-  clearChoice: (choiceKey: string) => void
-  levelUp: (classId: ClassId, hpRoll: number | null) => void
+  makeChoice: (choiceKey: ChoiceKey, decision: ChoiceDecision) => void
+  clearChoice: (choiceKey: ChoiceKey) => void
+  levelUp: (classId: ClassId, hpRoll: number | null, decisions?: ReadonlyMap<ChoiceKey, ChoiceDecision>) => void
   levelDown: () => void
-  replaceLevel: (oldSequence: number, newClassId: string, newSubclassId: string | null) => void
+  undoLevelDown: () => void
+  replaceLevel: (oldSequence: number, newClassId: ClassId, newSubclassId: SubclassId | null) => void
   markSaved: () => void
 }
 
@@ -57,52 +64,138 @@ const CharacterContext = createContext<CharacterContextValue | null>(null)
  * Key format: `category:origin:id:index`
  * Keys with `:race:` or `:background:` go to sequence-0.
  * Keys with `:class:` go to the matching level row (by class_id embedded in the key).
- * Everything else defaults to sequence-0.
+ * Unknown origins cause `parseChoiceKey` to throw.
+ * Also throws if origin is 'class' but no active level row exists for the specified class.
  */
 export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]): number {
-  const parts = choiceKey.split(':')
-  // e.g. "language-choice:race:human:0" or "skill-choice:class:fighter:0"
-  const origin = parts[1]
+  const { origin, id: classId } = parseChoiceKey(choiceKey)
 
   if (origin === 'race' || origin === 'background') {
     return 0
   }
 
-  if (origin === 'class') {
-    const classId = parts[2]
-    // Find the first level row with matching class_id
-    const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId)
-    if (!levelRow) {
-      console.warn(`No level row found for class "${classId}" — choice "${choiceKey}" will be stored on creation row`)
-    }
-    return levelRow?.sequence ?? 0
+  // origin === 'class' — find the first active level row for this class
+  const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId && r.deleted_at == null)
+  if (!levelRow) {
+    throw new Error(`No active level row found for class "${classId}" — cannot store choice "${choiceKey}"`)
+  }
+  return levelRow.sequence
+}
+
+/**
+ * Find the row index where a subclass_id or asi_allocation should be written
+ * as a dedicated column (rather than in the JSONB choices column).
+ *
+ * Returns `{ index }` if found, or `{ index: -1, error }` with a descriptive
+ * message if the class source, grant type, or active row cannot be located.
+ */
+function findGrantRowIndex(
+  classId: string,
+  grantType: 'subclass' | 'asi',
+  grantIndex: number,
+  rows: readonly BuildLevelRow[],
+): { ok: true; index: number } | { ok: false; error: string } {
+  const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
+  if (!classSource) {
+    const error = `No class source found for "${classId}"`
+    console.error(`findGrantRowIndex: ${error}`)
+    return { ok: false, error }
   }
 
-  console.warn(`Unknown choice origin "${origin}" in key "${choiceKey}" — defaulting to creation row`)
-  return 0
+  // Collect all class levels that have a matching grant type, then pick the Nth one
+  const matchingClassLevels: number[] = []
+  for (let i = 0; i < classSource.levels.length; i++) {
+    if (classSource.levels[i].grants.some((g) => g.type === grantType)) {
+      matchingClassLevels.push(i + 1)
+    }
+  }
+  if (matchingClassLevels.length === 0) {
+    const error = `No ${grantType} grant found in class "${classId}" source data`
+    console.error(`findGrantRowIndex: ${error}`)
+    return { ok: false, error }
+  }
+  if (grantIndex >= matchingClassLevels.length) {
+    const error = `Grant index ${grantIndex} exceeds available ${grantType} grants (${matchingClassLevels.length}) for class "${classId}"`
+    console.error(`findGrantRowIndex: ${error}`)
+    return { ok: false, error }
+  }
+
+  const grantClassLevel = matchingClassLevels[grantIndex]
+  const idx = rows.findIndex(
+    (r) => r.sequence !== 0 && r.class_id === classId && r.class_level === grantClassLevel && r.deleted_at == null,
+  )
+  if (idx === -1) {
+    const error = `No active row at class level ${grantClassLevel} for class "${classId}" — character may not be high enough level`
+    console.error(`findGrantRowIndex: ${error}`)
+    return { ok: false, error }
+  }
+  return { ok: true, index: idx }
+}
+
+/**
+ * Apply a single choice decision onto a mutable rows array.
+ * Returns an error string on failure, or null on success.
+ */
+function applyDecisionToRows(
+  rows: BuildLevelRow[],
+  choiceKey: ChoiceKey,
+  decision: ChoiceDecision,
+): string | null {
+  if (decision.type === 'subclass' || decision.type === 'asi') {
+    const { id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
+    const result = findGrantRowIndex(classId, decision.type, grantIndex, rows)
+    if (!result.ok) return result.error
+    if (decision.type === 'subclass') {
+      rows[result.index] = { ...rows[result.index], subclass_id: decision.subclassId }
+    } else {
+      rows[result.index] = { ...rows[result.index], asi_allocation: decision.allocation as Record<string, number> }
+    }
+    return null
+  }
+
+  const { origin, id: classId } = parseChoiceKey(choiceKey)
+  let targetSeq: number
+  if (origin === 'race' || origin === 'background') {
+    targetSeq = 0
+  } else {
+    const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId && r.deleted_at == null)
+    if (!levelRow) return `No active level row found for class "${classId}"`
+    targetSeq = levelRow.sequence
+  }
+
+  const idx = rows.findIndex((r) => r.sequence === targetSeq)
+  if (idx === -1) return `No row found for sequence ${targetSeq}`
+  rows[idx] = {
+    ...rows[idx],
+    choices: { ...(rows[idx].choices ?? {}), [choiceKey]: decision },
+  }
+  return null
 }
 
 type BuildResult =
-  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null }
-  | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
-  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string }
+  | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null; readonly warnings: readonly string[] }
+  | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
+  | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
 
 function tryDeriveAndResolve(
   character: Character,
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
 ): BuildResult {
+  // Exclude soft-deleted rows before reconstruction
+  const activeRows = rows.filter((r) => r.deleted_at == null)
+
   let build: CharacterBuild
   try {
     build = reconstructBuild(
       { race: character.race, background: character.background },
-      rows,
+      activeRows,
       equippedItems,
     )
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error'
     console.error('Failed to reconstruct character build:', { characterId: character.id, error: err })
-    return { status: 'build-error', build: null, bundles: [], resolved: null, error: message }
+    return { status: 'build-error', build: null, bundles: [], resolved: null, error: message, warnings: [] }
   }
 
   const { bundles, warnings } = collectBundles(build)
@@ -111,20 +204,20 @@ function tryDeriveAndResolve(
   }
 
   try {
-    const levelRows = rows.filter((r) => r.sequence !== 0)
+    const levelRows = activeRows.filter((r) => r.sequence !== 0)
     const level = levelRows.length
     const resolved = resolveCharacter({
       baseAbilities: build.baseAbilities,
       level,
       bundles,
       choices: build.choices,
-      hpRolls: build.hpRolls,
+      levels: build.levels,
     })
-    return { status: 'ok', build, bundles, resolved, error: null }
+    return { status: 'ok', build, bundles, resolved, error: null, warnings }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown resolver error'
     console.error('Failed to resolve character:', { characterId: character.id, error: err })
-    return { status: 'resolve-error', build, bundles, resolved: null, error: message }
+    return { status: 'resolve-error', build, bundles, resolved: null, error: message, warnings }
   }
 }
 
@@ -160,16 +253,36 @@ export function CharacterProvider({
       feat_id: null,
       hp_roll: null,
       choices: {},
+      deleted_at: null,
     }
     return [seedRow, ...initialRows]
   })
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
-  const { build, bundles, resolved, error: buildError } = useMemo(
+  const { build, bundles, resolved, error: buildError, warnings: buildWarnings } = useMemo(
     () => tryDeriveAndResolve(character, rows, equippedItems),
     [character, rows, equippedItems],
   )
+
+  const level = useMemo(
+    () => rows.filter((r) => r.sequence !== 0 && r.deleted_at == null).length,
+    [rows],
+  )
+
+  const hasDeletedRows = useMemo(
+    () => rows.some((r) => r.deleted_at != null && r.sequence !== 0),
+    [rows],
+  )
+
+  const nextRestoreLevel = useMemo(() => {
+    const activeRows = rows.filter((r) => r.deleted_at == null)
+    const maxActiveSeq = activeRows.filter((r) => r.sequence !== 0).reduce((m, r) => Math.max(m, r.sequence), 0)
+    const nextDeleted = rows
+      .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
+      .sort((a, b) => a.sequence - b.sequence)[0]
+    return nextDeleted ? level + 1 : null
+  }, [rows, level])
 
   const updateCharacter = useCallback((updates: Readonly<Partial<Character>>) => {
     setCharacter((prev) => {
@@ -202,6 +315,7 @@ export function CharacterProvider({
           feat_id: null,
           hp_roll: null,
           choices: updates.choices ?? null,
+          deleted_at: null,
         }
         return [...prev, newRow]
       }
@@ -221,52 +335,103 @@ export function CharacterProvider({
     setIsDirty(true)
   }, [])
 
-  const makeChoice = useCallback((choiceKey: string, decision: ChoiceDecision) => {
-    setRows((prev) => {
-      const targetSeq = resolveChoiceSequence(choiceKey, prev)
-      const idx = prev.findIndex((r) => r.sequence === targetSeq)
-      if (idx === -1) {
-        console.warn(`makeChoice: no row found for key "${choiceKey}" — choice not saved`)
-        toast.error(i18next.t('common:errors.choiceSaveFailed'))
-        return prev
+  const makeChoice = useCallback((choiceKey: ChoiceKey, decision: ChoiceDecision) => {
+    try {
+      const next = [...rows]
+      const error = applyDecisionToRows(next, choiceKey, decision)
+      if (error) {
+        toast.error(error)
+        return
       }
-      const existing = prev[idx]
-      const updated: BuildLevelRow = {
-        ...existing,
-        choices: { ...(existing.choices ?? {}), [choiceKey]: decision },
-      }
-      const next = [...prev]
-      next[idx] = updated
-      return next
-    })
-    setIsDirty(true)
-  }, [])
+      setRows(next)
+      setIsDirty(true)
+    } catch (err) {
+      console.error('makeChoice failed:', { choiceKey, error: err })
+      toast.error(i18next.t('common:errors.choiceSaveFailed'))
+    }
+  }, [rows])
 
-  const clearChoice = useCallback((choiceKey: string) => {
-    setRows((prev) => {
-      const targetSeq = resolveChoiceSequence(choiceKey, prev)
-      const idx = prev.findIndex((r) => r.sequence === targetSeq)
+  const clearChoice = useCallback((choiceKey: ChoiceKey) => {
+    try {
+      const { category, id: classId, index: grantIndex } = parseChoiceKey(choiceKey)
+
+      // For subclass and ASI decisions, clear the dedicated column on the target level row
+      if (category === 'subclass' || category === 'asi') {
+        const grantType = category === 'subclass' ? 'subclass' as const : 'asi' as const
+        const result = findGrantRowIndex(classId, grantType, grantIndex, rows)
+        if (!result.ok) {
+          toast.error(result.error)
+          return
+        }
+        const next = [...rows]
+        if (grantType === 'subclass') {
+          next[result.index] = { ...next[result.index], subclass_id: null }
+        } else {
+          next[result.index] = { ...next[result.index], asi_allocation: null }
+        }
+        const newChoices = { ...(next[result.index].choices ?? {}) }
+        delete newChoices[choiceKey]
+        next[result.index] = { ...next[result.index], choices: newChoices }
+        setRows(next)
+        setIsDirty(true)
+        return
+      }
+
+      const targetSeq = resolveChoiceSequence(choiceKey, rows)
+      const idx = rows.findIndex((r) => r.sequence === targetSeq)
       if (idx === -1) {
         console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`)
         toast.error(i18next.t('common:errors.choiceClearFailed'))
-        return prev
+        return
       }
-      const existing = prev[idx]
+      const existing = rows[idx]
       const newChoices = { ...(existing.choices ?? {}) }
       delete newChoices[choiceKey]
       const updated: BuildLevelRow = { ...existing, choices: newChoices }
-      const next = [...prev]
+      const next = [...rows]
       next[idx] = updated
-      return next
-    })
-    setIsDirty(true)
-  }, [])
+      setRows(next)
+      setIsDirty(true)
+    } catch (err) {
+      console.error('clearChoice failed:', { choiceKey, error: err })
+      toast.error(i18next.t('common:errors.choiceClearFailed'))
+    }
+  }, [rows])
 
-  const levelUp = useCallback((classId: ClassId, hpRoll: number | null) => {
-    setRows((prev) => {
-      const levelRows = prev.filter((r) => r.sequence !== 0)
-      const classLevelCount = levelRows.filter((r) => r.class_id === classId).length
-      const maxSeq = prev.reduce((m, r) => Math.max(m, r.sequence), 0)
+  const levelUp = useCallback((classId: ClassId, hpRoll: number | null, decisions?: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
+    // Check if there's a soft-deleted row with a higher sequence we can restore
+    const activeRows = rows.filter((r) => r.deleted_at == null)
+    const activeLevelRows = activeRows.filter((r) => r.sequence !== 0)
+
+    if (activeLevelRows.length >= 20) {
+      toast.warning(i18next.t('common:characterSheet.levelManagement.maxLevelReached'))
+      return
+    }
+
+    const maxActiveSeq = activeLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
+
+    const nextDeletedRow = rows
+      .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
+      .sort((a, b) => a.sequence - b.sequence)[0]
+
+    let next: BuildLevelRow[]
+
+    if (nextDeletedRow && nextDeletedRow.class_id === classId) {
+      // Restore the soft-deleted row
+      const idx = rows.findIndex((r) => r.sequence === nextDeletedRow.sequence)
+      next = [...rows]
+      next[idx] = {
+        ...next[idx],
+        deleted_at: null,
+        hp_roll: hpRoll,
+        subclass_id: null,
+        asi_allocation: null,
+        choices: null,
+      }
+    } else {
+      // No restorable row — append a new one
+      const classLevelCount = activeLevelRows.filter((r) => r.class_id === classId).length
+      const maxSeq = rows.reduce((m, r) => Math.max(m, r.sequence), 0)
       const newRow: BuildLevelRow = {
         sequence: maxSeq + 1,
         base_abilities: null,
@@ -278,42 +443,73 @@ export function CharacterProvider({
         feat_id: null,
         hp_roll: hpRoll,
         choices: null,
+        deleted_at: null,
       }
-      return [...prev, newRow]
-    })
+      next = [...rows, newRow]
+    }
+
+    // Apply any decisions atomically with the level-up
+    if (decisions) {
+      for (const [key, decision] of decisions) {
+        const error = applyDecisionToRows(next, key, decision)
+        if (error) {
+          toast.error(error)
+        }
+      }
+    }
+
+    setRows(next)
     setIsDirty(true)
-  }, [])
+  }, [rows])
 
   const levelDown = useCallback(() => {
-    setRows((prev) => {
-      const levelRows = prev.filter((r) => r.sequence !== 0)
-      if (levelRows.length === 0) return prev
-      const maxSeq = levelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
-      return prev.filter((r) => r.sequence !== maxSeq)
-    })
+    // Only consider active (non-deleted) level rows
+    const activeLevelRows = rows.filter((r) => r.sequence !== 0 && r.deleted_at == null)
+    if (activeLevelRows.length === 0) return
+    const maxActiveSeq = activeLevelRows.reduce((m, r) => Math.max(m, r.sequence), 0)
+    const idx = rows.findIndex((r) => r.sequence === maxActiveSeq)
+    if (idx === -1) return
+    const next = [...rows]
+    next[idx] = { ...next[idx], deleted_at: new Date().toISOString() }
+    setRows(next)
     setIsDirty(true)
-  }, [])
+  }, [rows])
 
-  const replaceLevel = useCallback((oldSequence: number, newClassId: string, newSubclassId: string | null) => {
-    setRows((prev) => {
-      const idx = prev.findIndex((r) => r.sequence === oldSequence)
-      if (idx === -1) {
-        console.warn(`replaceLevel: no row found for sequence ${oldSequence} — level not replaced`)
-        toast.error(i18next.t('common:errors.levelReplaceFailed'))
-        return prev
-      }
-      const next = [...prev]
-      next[idx] = {
-        ...next[idx],
-        class_id: newClassId,
-        class_level: 1,
-        subclass_id: newSubclassId,
-        choices: null,
-      }
-      return next
-    })
+  const undoLevelDown = useCallback(() => {
+    // Find the next soft-deleted row in ascending sequence order (above the current active max)
+    const activeRows = rows.filter((r) => r.deleted_at == null)
+    const maxActiveSeq = activeRows.filter((r) => r.sequence !== 0).reduce((m, r) => Math.max(m, r.sequence), 0)
+    const nextDeleted = rows
+      .filter((r) => r.sequence !== 0 && r.deleted_at != null && r.sequence > maxActiveSeq)
+      .sort((a, b) => a.sequence - b.sequence)[0]
+    if (!nextDeleted) return
+    const idx = rows.findIndex((r) => r.sequence === nextDeleted.sequence)
+    if (idx === -1) return
+    const next = [...rows]
+    // Restore the row by clearing its deleted_at timestamp
+    next[idx] = { ...next[idx], deleted_at: null }
+    setRows(next)
     setIsDirty(true)
-  }, [])
+  }, [rows])
+
+  const replaceLevel = useCallback((oldSequence: number, newClassId: ClassId, newSubclassId: SubclassId | null) => {
+    const idx = rows.findIndex((r) => r.sequence === oldSequence)
+    if (idx === -1) {
+      console.warn(`replaceLevel: no row found for sequence ${oldSequence} — level not replaced`)
+      toast.error(i18next.t('common:errors.levelReplaceFailed'))
+      return
+    }
+    const next = [...rows]
+    next[idx] = {
+      ...next[idx],
+      class_id: newClassId,
+      class_level: 1,
+      subclass_id: newSubclassId,
+      choices: null,
+    }
+    setRows(next)
+    setIsDirty(true)
+  }, [rows])
 
   const markSaved = useCallback(() => {
     setIsDirty(false)
@@ -327,17 +523,22 @@ export function CharacterProvider({
       bundles,
       resolved,
       buildError,
+      buildWarnings,
       isDirty,
+      level,
+      hasDeletedRows,
+      nextRestoreLevel,
       updateCharacter,
       updateCreation,
       makeChoice,
       clearChoice,
       levelUp,
       levelDown,
+      undoLevelDown,
       replaceLevel,
       markSaved,
     }),
-    [character, rows, build, bundles, resolved, buildError, isDirty, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, replaceLevel, markSaved],
+    [character, rows, build, bundles, resolved, buildError, buildWarnings, isDirty, level, hasDeletedRows, nextRestoreLevel, updateCharacter, updateCreation, makeChoice, clearChoice, levelUp, levelDown, undoLevelDown, replaceLevel, markSaved],
   )
 
   return <CharacterContext.Provider value={value}>{children}</CharacterContext.Provider>

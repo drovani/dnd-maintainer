@@ -1,8 +1,11 @@
-import { DND_CLASSES } from '@/lib/dnd-helpers'
+import { DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers'
 import type { ClassId, RaceId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
-import type { CharacterBuild, ChoiceDecision } from '@/types/choices'
+import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices'
+import { isSubclassId } from '@/types/sources'
+import { createChoiceKey, parseChoiceKey } from '@/types/choices'
 import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/character-build'
+import { CLASS_SOURCES } from '@/lib/sources/classes'
 
 /**
  * A single row from `character_build_levels`.
@@ -15,7 +18,7 @@ import { AbilityScoresSchema, ChoiceDecisionSchema } from '@/lib/schemas/charact
 interface BaseBuildRow {
   readonly character_id?: string
   readonly choices: Record<string, ChoiceDecision> | null
-  readonly deleted_at?: string | null
+  readonly deleted_at: string | null
 }
 
 export interface CreationRow extends BaseBuildRow {
@@ -123,10 +126,16 @@ export function reconstructBuild(
     .map((row) => row.feat_id)
 
   // Build choices map
-  const choices: Record<string, ChoiceDecision> = {}
+  const choices: Record<ChoiceKey, ChoiceDecision> = {} as Record<ChoiceKey, ChoiceDecision>
+
+  // Helper to validate a JSONB choice key from the DB
+  function validateChoiceKey(key: string): ChoiceKey {
+    parseChoiceKey(key) // throws on malformed keys
+    return key as ChoiceKey
+  }
 
   // Helper to safely parse and merge a choices JSONB entry
-  function mergeChoiceEntry(key: string, value: unknown): void {
+  function mergeChoiceEntry(key: ChoiceKey, value: unknown): void {
     const parsed = ChoiceDecisionSchema.safeParse(value)
     if (!parsed.success) {
       throw new Error(`Invalid choice "${key}": ${parsed.error.message}`)
@@ -137,40 +146,68 @@ export function reconstructBuild(
   // Start with creation row's choices JSONB
   if (creationRow.choices) {
     for (const [key, value] of Object.entries(creationRow.choices)) {
-      mergeChoiceEntry(key, value)
+      try {
+        mergeChoiceEntry(validateChoiceKey(key), value)
+      } catch (err) {
+        console.warn(`Skipping malformed choice key "${key}" in creation row:`, err)
+      }
     }
   }
 
   // Process level rows
   for (const row of levelRows) {
     if (row.subclass_id !== null) {
-      // Use subclass:${classId} format to match sources/index.ts lookup
-      const key = `subclass:${row.class_id}`
-      choices[key] = { type: 'subclass', subclassId: row.subclass_id }
+      if (!isSubclassId(row.subclass_id)) {
+        console.warn(`Skipping unknown subclass_id "${row.subclass_id}" in build level row sequence ${row.sequence}`)
+      } else {
+        const key = createChoiceKey('subclass', 'class', row.class_id, 0)
+        choices[key] = { type: 'subclass', subclassId: row.subclass_id }
+      }
     }
 
     if (row.asi_allocation !== null) {
-      const key = `${row.class_id}-${row.class_level}-asi`
+      const classSource = CLASS_SOURCES.find((cs) => cs.id === row.class_id)
+      let asiGrantIndex = 0
+      if (classSource) {
+        // Count how many ASI-granting levels come before this one (0-indexed levels array)
+        let count = 0
+        for (let i = 0; i < classSource.levels.length; i++) {
+          if (classSource.levels[i].grants.some((g) => g.type === 'asi')) {
+            if (i + 1 === row.class_level) {
+              asiGrantIndex = count
+              break
+            }
+            count++
+          }
+        }
+      }
+      const key = createChoiceKey('asi', 'class', row.class_id, asiGrantIndex)
       choices[key] = { type: 'asi', allocation: row.asi_allocation }
     }
 
     if (row.choices) {
       for (const [key, value] of Object.entries(row.choices)) {
-        mergeChoiceEntry(key, value)
+        try {
+          mergeChoiceEntry(validateChoiceKey(key), value)
+        } catch (err) {
+          console.warn(`Skipping malformed choice key "${key}" in level row sequence ${row.sequence}:`, err)
+        }
       }
     }
   }
 
+  const backgroundId = character.background !== null && isBackgroundId(character.background)
+    ? character.background
+    : null
+
   return {
     raceId: character.race as RaceId,
-    backgroundId: character.background ?? null,
+    backgroundId,
     baseAbilities,
     abilityMethod,
     levels,
-    appliedLevels: levels,
     choices,
     feats,
     activeItems: equippedItems,
-    hpRolls: levels.map(l => l.hpRoll),
   }
 }

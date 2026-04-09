@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { RollingNumber } from '@/components/ui/rolling-number'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import {
@@ -58,7 +59,6 @@ export function AbilitiesStep() {
   })
   const [rolledValues, setRolledValues] = useState<number[]>([])
   const [isRolling, setIsRolling] = useState<boolean>(false)
-  const [displayedRolls, setDisplayedRolls] = useState<number[]>([])
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Cleanup interval on unmount
@@ -116,7 +116,6 @@ export function AbilitiesStep() {
   const handleRollScores = useCallback(() => {
     if (isRolling) return
     setIsRolling(true)
-    setDisplayedRolls(Array.from({ length: 6 }, () => Math.floor(Math.random() * 13) + 3))
 
     const finalValues = rollAbilityScores()
     let ticks = 0
@@ -125,11 +124,8 @@ export function AbilitiesStep() {
     if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
     rollIntervalRef.current = setInterval(() => {
       ticks++
-      if (ticks < totalTicks) {
-        setDisplayedRolls(Array.from({ length: 6 }, () => Math.floor(Math.random() * 13) + 3))
-      } else {
+      if (ticks >= totalTicks) {
         if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
-        setDisplayedRolls(finalValues)
         setRolledValues(finalValues)
         const resetAbilities: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
         const resetAssignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
@@ -137,7 +133,7 @@ export function AbilitiesStep() {
         onAbilitiesChangeRef.current({ base_abilities: resetAbilities })
         setIsRolling(false)
       }
-    }, 80)
+    }, 60)
   }, [isRolling])
 
   const incrementAbility = (ability: keyof AbilityScores) => {
@@ -247,7 +243,6 @@ export function AbilitiesStep() {
   const abilityKeys = Object.keys(baseAbilities) as Array<keyof AbilityScores>
   const pointsSpent = Object.values(baseAbilities).reduce((sum, s) => sum + getPointBuyCost(s), 0)
   const pointsRemaining = POINT_BUY_TOTAL - pointsSpent
-  const rollValues = isRolling ? displayedRolls : rolledValues
   const pointBuyEquiv = rolledValues.length > 0 ? getPointBuyEquivalent(rolledValues) : null
   const pointBuyDiff = pointBuyEquiv !== null ? pointBuyEquiv - POINT_BUY_TOTAL : null
 
@@ -257,7 +252,6 @@ export function AbilitiesStep() {
       clearInterval(rollIntervalRef.current)
       rollIntervalRef.current = null
     }
-    setDisplayedRolls([])
     setIsRolling(false)
     context.updateCreation({ ability_method: val as CreationUpdates['ability_method'] })
   }
@@ -371,23 +365,30 @@ export function AbilitiesStep() {
               </Button>
             </div>
           </div>
-          {(rollValues.length > 0) && (
+          {(isRolling || rolledValues.length > 0) && (
             <div className="flex gap-1.5">
-              {rollValues.map((v, i) => {
-                const assignedCount = !isRolling ? Object.values(abilityAssignments).filter((a) => a === v).length : 0
-                const poolCountUpToHere = rollValues.slice(0, i + 1).filter((rv) => rv === v).length
-                const isAssigned = assignedCount >= poolCountUpToHere
-                return (
-                  <Badge
-                    key={i}
-                    variant={isAssigned ? 'outline' : 'default'}
-                    className={`text-xs select-none transition-all duration-100 ${isAssigned ? 'opacity-30 cursor-pointer hover:opacity-60' : 'cursor-default'} ${isRolling ? 'animate-pulse' : ''}`}
-                    onClick={isAssigned && !isRolling ? () => unassignValue(v) : undefined}
-                  >
-                    {v}
-                  </Badge>
-                )
-              })}
+              {isRolling
+                ? Array.from({ length: 6 }, (_, i) => (
+                    <Badge key={i} variant="default" className="text-xs select-none tabular-nums">
+                      <RollingNumber value={null} isRolling range={[3, 18]} />
+                    </Badge>
+                  ))
+                : rolledValues.map((v, i) => {
+                    const assignedCount = Object.values(abilityAssignments).filter((a) => a === v).length
+                    const poolCountUpToHere = rolledValues.slice(0, i + 1).filter((rv) => rv === v).length
+                    const isAssigned = assignedCount >= poolCountUpToHere
+                    return (
+                      <Badge
+                        key={i}
+                        variant={isAssigned ? 'outline' : 'default'}
+                        className={`text-xs select-none transition-all duration-100 ${isAssigned ? 'opacity-30 cursor-pointer hover:opacity-60' : 'cursor-default'}`}
+                        onClick={isAssigned ? () => unassignValue(v) : undefined}
+                      >
+                        {v}
+                      </Badge>
+                    )
+                  })
+              }
             </div>
           )}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">

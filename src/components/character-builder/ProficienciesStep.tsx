@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
+import type { ChoiceKey } from '@/types/choices'
 import {
   DND_LANGUAGE_DATA,
   DND_LANGUAGES,
@@ -12,7 +13,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface ChoiceInfo<T> {
-  readonly choiceKey: string
+  readonly choiceKey: ChoiceKey
   readonly count: number
   readonly from: readonly T[]
 }
@@ -69,13 +70,13 @@ export function ProficienciesStep() {
   )
 
   // Helper to get current selections for a choice
-  function getSelectedLanguages(choiceKey: string): readonly LanguageId[] {
+  function getSelectedLanguages(choiceKey: ChoiceKey): readonly LanguageId[] {
     const decision = build?.choices[choiceKey]
     if (decision?.type === 'language-choice') return decision.languages
     return []
   }
 
-  function getSelectedTools(choiceKey: string): readonly ToolProficiencyId[] {
+  function getSelectedTools(choiceKey: ChoiceKey): readonly ToolProficiencyId[] {
     const decision = build?.choices[choiceKey]
     if (decision?.type === 'tool-choice') return decision.tools
     return []

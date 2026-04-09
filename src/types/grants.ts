@@ -1,4 +1,4 @@
-import type { AbilityKey, ClassId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
+import type { AbilityKey, ClassId, FightingStyleId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
 import type { ChoiceKey } from '@/types/choices'
 
 // Supporting types
@@ -124,11 +124,14 @@ export interface SpellGrant {
 
 export interface AsiGrant {
   readonly type: 'asi'
+  readonly key: ChoiceKey
+  readonly points: number
 }
 
 export interface SubclassGrant {
   readonly type: 'subclass'
   readonly classId: ClassId
+  readonly key: ChoiceKey
 }
 
 export interface EquipmentGrant {
@@ -137,8 +140,24 @@ export interface EquipmentGrant {
   readonly quantity: number
 }
 
+export interface AbilityCheckBonusGrant {
+  readonly type: 'ability-check-bonus'
+  readonly abilities: readonly AbilityKey[]
+  readonly value: 'half-proficiency'
+  readonly onlyWhenNotProficient: boolean
+  readonly featureId: string
+}
+
+export interface FightingStyleChoiceGrant {
+  readonly type: 'fighting-style-choice'
+  readonly key: ChoiceKey
+  readonly count: number
+  readonly from: readonly FightingStyleId[]
+}
+
 export interface EquipmentChoiceGrant {
   readonly type: 'equipment-choice'
+  readonly key: ChoiceKey
   readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[]
 }
 
@@ -159,5 +178,7 @@ export type Grant =
   | SpellGrant
   | AsiGrant
   | SubclassGrant
+  | AbilityCheckBonusGrant
+  | FightingStyleChoiceGrant
   | EquipmentGrant
   | EquipmentChoiceGrant

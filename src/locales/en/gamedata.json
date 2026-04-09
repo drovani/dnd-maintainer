@@ -218,7 +218,10 @@
     "gaming-set-dice": "Dice Set",
     "gaming-set-cards": "Playing Card Set",
     "gaming-set-dragonchess": "Dragonchess Set",
-    "gaming-set-three-dragon-ante": "Three-Dragon Ante Set"
+    "gaming-set-three-dragon-ante": "Three-Dragon Ante Set",
+    "smithstools": "Smith's Tools",
+    "brewersupplies": "Brewer's Supplies",
+    "masonstools": "Mason's Tools"
   },
   "features": {
     "fighter-fighting-style": {
@@ -228,6 +231,154 @@
     "fighter-second-wind": {
       "name": "Second Wind",
       "description": "You have a limited well of stamina that you can draw on to protect yourself from harm."
+    },
+    "fighter-action-surge": {
+      "name": "Action Surge",
+      "description": "On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again."
+    },
+    "fighter-extra-attack": {
+      "name": "Extra Attack",
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    "fighter-indomitable": {
+      "name": "Indomitable",
+      "description": "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest."
+    },
+    "champion-improved-critical": {
+      "name": "Improved Critical",
+      "description": "Your weapon attacks score a critical hit on a roll of 19 or 20."
+    },
+    "champion-remarkable-athlete": {
+      "name": "Remarkable Athlete",
+      "description": "Add half your proficiency bonus (round up) to any STR, DEX, or CON checks that don't already use your proficiency bonus."
+    },
+    "champion-additional-fighting-style": {
+      "name": "Additional Fighting Style",
+      "description": "Choose a second Fighting Style."
+    },
+    "champion-superior-critical": {
+      "name": "Superior Critical",
+      "description": "Your weapon attacks score a critical hit on a roll of 18–20."
+    },
+    "champion-survivor": {
+      "name": "Survivor",
+      "description": "At the start of each of your turns, regain hit points equal to 5 + CON mod if you have no more than half your hit points left."
+    },
+    "battlemaster-combat-superiority": {
+      "name": "Combat Superiority",
+      "description": "Learn three maneuvers and gain four superiority dice (d8s) to fuel them."
+    },
+    "battlemaster-know-your-enemy": {
+      "name": "Know Your Enemy",
+      "description": "Study a creature for 1 minute to learn how it compares to you in two characteristics."
+    },
+    "battlemaster-improved-combat-superiority": {
+      "name": "Improved Combat Superiority",
+      "description": "Superiority dice become d10s."
+    },
+    "battlemaster-relentless": {
+      "name": "Relentless",
+      "description": "When you roll initiative and have no superiority dice remaining, you regain one."
+    },
+    "battlemaster-superior-combat-superiority": {
+      "name": "Superior Combat Superiority",
+      "description": "Superiority dice become d12s."
+    },
+    "eldritchknight-spellcasting": {
+      "name": "Spellcasting",
+      "description": "Learn two cantrips and three 1st-level wizard spells. Intelligence is your spellcasting ability."
+    },
+    "eldritchknight-war-magic": {
+      "name": "War Magic",
+      "description": "When you use your action to cast a cantrip, you can make one weapon attack as a bonus action."
+    },
+    "eldritchknight-eldritch-strike": {
+      "name": "Eldritch Strike",
+      "description": "When you hit a creature with a weapon attack, it has disadvantage on the next saving throw against a spell you cast."
+    },
+    "eldritchknight-arcane-charge": {
+      "name": "Arcane Charge",
+      "description": "When you use Action Surge, you can teleport up to 30 feet to an unoccupied space you can see."
+    },
+    "eldritchknight-improved-war-magic": {
+      "name": "Improved War Magic",
+      "description": "When you cast a spell (not just a cantrip), you can make one weapon attack as a bonus action."
+    },
+    "fighting-style-archery": {
+      "name": "Fighting Style: Archery",
+      "description": "You gain a +2 bonus to attack rolls you make with ranged weapons."
+    },
+    "fighting-style-defense": {
+      "name": "Fighting Style: Defense",
+      "description": "While you are wearing armor, you gain a +1 bonus to AC."
+    },
+    "fighting-style-dueling": {
+      "name": "Fighting Style: Dueling",
+      "description": "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."
+    },
+    "fighting-style-great-weapon-fighting": {
+      "name": "Fighting Style: Great Weapon Fighting",
+      "description": "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll."
+    },
+    "fighting-style-protection": {
+      "name": "Fighting Style: Protection",
+      "description": "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."
+    },
+    "fighting-style-two-weapon-fighting": {
+      "name": "Fighting Style: Two-Weapon Fighting",
+      "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
+    },
+    "dwarf-darkvision": {
+      "name": "Darkvision",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "dwarf-dwarven-resilience": {
+      "name": "Dwarven Resilience",
+      "description": "You have advantage on saving throws against poison, and you have resistance against poison damage."
+    },
+    "dwarf-stonecunning": {
+      "name": "Stonecunning",
+      "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus."
+    }
+  },
+  "subclasses": {
+    "champion": {
+      "name": "Champion",
+      "description": "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
+    },
+    "battlemaster": {
+      "name": "Battle Master",
+      "description": "Those who emulate the Battle Master archetype employ martial techniques passed down through generations. A Battle Master uses superiority dice to fuel special maneuvers that grant tactical advantage in combat."
+    },
+    "eldritchknight": {
+      "name": "Eldritch Knight",
+      "description": "The Eldritch Knight combines martial prowess with careful study of magic. These fighters learn to cast spells from the wizard spell list, weaving magic into their weapon strikes and defenses."
+    }
+  },
+  "fightingStyles": {
+    "archery": {
+      "name": "Archery",
+      "description": "You gain a +2 bonus to attack rolls you make with ranged weapons."
+    },
+    "defense": {
+      "name": "Defense",
+      "description": "While you are wearing armor, you gain a +1 bonus to AC."
+    },
+    "dueling": {
+      "name": "Dueling",
+      "description": "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."
+    },
+    "great-weapon-fighting": {
+      "name": "Great Weapon Fighting",
+      "description": "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll. The weapon must have the two-handed or versatile property."
+    },
+    "protection": {
+      "name": "Protection",
+      "description": "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."
+    },
+    "two-weapon-fighting": {
+      "name": "Two-Weapon Fighting",
+      "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
     }
   },
   "gender": {

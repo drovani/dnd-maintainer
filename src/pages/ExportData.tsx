@@ -73,12 +73,36 @@ export default function ExportData() {
         throw new Error('No campaign data returned. This may be a permissions issue — check that RLS policies allow read access.');
       }
 
+      // Fetch character-scoped tables using the character IDs we just retrieved
+      const characterIds = (charactersRes.data ?? []).map((c) => (c as Record<string, unknown>).id as string);
+      let buildLevelsData: Record<string, unknown>[] = [];
+      let itemsData: Record<string, unknown>[] = [];
+
+      if (characterIds.length > 0) {
+        const [buildLevelsRes, itemsRes] = await Promise.all([
+          supabase.from('character_build_levels').select('*').in('character_id', characterIds).is('deleted_at', null).order('character_id').order('sequence'),
+          supabase.from('character_items').select('*').in('character_id', characterIds),
+        ]);
+
+        if (buildLevelsRes.error) {
+          throw new Error(`Failed to fetch data:\ncharacter_build_levels: ${buildLevelsRes.error.message}`);
+        }
+        if (itemsRes.error) {
+          throw new Error(`Failed to fetch data:\ncharacter_items: ${itemsRes.error.message}`);
+        }
+
+        buildLevelsData = (buildLevelsRes.data ?? []) as Record<string, unknown>[];
+        itemsData = (itemsRes.data ?? []) as Record<string, unknown>[];
+      }
+
       const data: ExportDataType = {
         campaigns: campaignsRes.data,
         characters: charactersRes.data ?? [],
         sessions: sessionsRes.data ?? [],
         encounters: encountersRes.data ?? [],
         notes: notesRes.data ?? [],
+        character_build_levels: buildLevelsData,
+        character_items: itemsData,
       };
 
       const sql = generateSeedSql(data);

@@ -46,7 +46,10 @@
     "rollScores": "Roll Scores",
     "updateNote": "Update Note",
     "createNote": "Create Note",
-    "close": "Close"
+    "close": "Close",
+    "confirm": "Confirm",
+    "select": "Select",
+    "selected": "Selected"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -283,6 +286,12 @@
       "editBackstory": "Edit Backstory",
       "editAppearance": "Edit Appearance"
     },
+    "skillBreakdown": {
+      "proficiency": "Proficiency",
+      "expertise": "Expertise",
+      "expandAll": "Expand All",
+      "collapseAll": "Collapse All"
+    },
     "hints": {
       "skillsProficiency": "Click P for proficiency, E for expertise.",
       "leaveEmptyForNpcs": "Leave empty for NPCs",
@@ -300,13 +309,65 @@
       "savingThrows": "Unable to compute saving throws: {{message}}",
       "combat": "Unable to compute combat stats: {{message}}"
     },
+    "levelUp": {
+      "abilitiesUnavailable": "Unable to allocate ability scores. Please fix any build errors first."
+    },
+    "levelManagement": {
+      "levelUp": "Level Up",
+      "levelUpTo": "Level Up {{className}} to {{level}}",
+      "replaceLevelUp": "Replace {{className}} Level {{level}}",
+      "levelDown": "Level Down",
+      "undoLevelDown": "Undo Level Down",
+      "restoreLevel": "Restore Level {{level}}",
+      "rollHp": "Roll HP",
+      "rollHpHint": "Roll a d{{die}} for HP",
+      "takeAverage": "Take Average",
+      "takeAverageHint": "Take {{value}} HP (average)",
+      "hpRollPrompt": "How would you like to determine hit points?",
+      "levelUpTitle": "Increase to {{className}} Level {{level}}",
+      "currentLevel": "Current Level",
+      "levelUpSuccess": "Advanced to {{className}} Level {{level}}",
+      "maxLevelReached": "Maximum level (20) reached",
+      "confirmLevelUp": "Confirm Level Up"
+    },
+    "asi": {
+      "asiTitle": "Ability Score Improvement",
+      "asiPointsRemaining": "Points Remaining: {{points}}",
+      "asiDescription": "Allocate {{points}} points among your ability scores. No score can exceed 20.",
+      "decreaseAbility": "Decrease {{ability}}",
+      "increaseAbility": "Increase {{ability}}",
+      "lockIn": "Lock In"
+    },
+    "pendingChoices": {
+      "description": "{{count}} choice(s) require your attention."
+    },
+    "classLevelLabel": "(Lv. {{level}})",
+    "subclassPicker": {
+      "chooseSubclass": "Choose Subclass",
+      "subclassDescription": "Select a subclass for your {{className}}",
+      "noSubclassesAvailable": "No subclasses are available for this class yet."
+    },
+    "fightingStylePicker": {
+      "title": "Choose a Fighting Style",
+      "description": "Select a fighting style to specialize in."
+    },
     "warnings": {
       "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"
     },
     "errors": {
       "loadingCharacter": "Error loading character: {{error}}",
       "buildFailed": "Failed to compute character build: {{message}}",
-      "updateFailed": "Failed to save changes. Please try again."
+      "updateFailed": "Failed to save changes. Please try again.",
+      "archiveFailed": "Failed to archive character. Please try again.",
+      "deleteFailed": "Failed to delete character. Please try again."
+    },
+    "actions": {
+      "archiveTitle": "Archive Character",
+      "archiveConfirm": "Are you sure you want to archive {{name}}? The character will be hidden from the active list but can be restored later.",
+      "deleteTitle": "Delete Character",
+      "deleteConfirm": "Are you sure you want to permanently delete {{name}}? This action cannot be undone.",
+      "archiveSuccess": "{{name}} has been archived.",
+      "deleteSuccess": "{{name}} has been deleted."
     }
   },
   "characterList": {

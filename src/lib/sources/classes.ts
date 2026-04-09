@@ -1,5 +1,6 @@
 import type { ClassSource } from '@/types/sources'
 import { createChoiceKey } from '@/types/choices'
+import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers'
 
 const EMPTY_LEVEL = { grants: [] } as const
 
@@ -36,18 +37,18 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             ],
           },
           { type: 'armor-class', calculation: { mode: 'armored' } },
-          { type: 'feature', feature: { id: 'fighter-fighting-style' } },
+          { type: 'fighting-style-choice', key: createChoiceKey('fighting-style-choice', 'class', 'fighter', 0), count: 1, from: FIGHTING_STYLE_IDS },
           { type: 'feature', feature: { id: 'fighter-second-wind' } },
         ],
       },
+      { grants: [{ type: 'feature', feature: { id: 'fighter-action-surge' } }] },
+      { grants: [{ type: 'subclass', classId: 'fighter', key: createChoiceKey('subclass', 'class', 'fighter', 0) }] },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 0), points: 2 }] },
+      { grants: [{ type: 'feature', feature: { id: 'fighter-extra-attack' } }] },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 1), points: 2 }] },
       EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 2), points: 2 }] },
+      { grants: [{ type: 'feature', feature: { id: 'fighter-indomitable' } }] },
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,

@@ -6,6 +6,8 @@ export type ExportData = Readonly<{
   sessions: readonly Record<string, unknown>[];
   encounters: readonly Record<string, unknown>[];
   notes: readonly Record<string, unknown>[];
+  character_build_levels: readonly Record<string, unknown>[];
+  character_items: readonly Record<string, unknown>[];
 }>;
 
 interface ColumnDef {
@@ -38,20 +40,10 @@ const TABLE_COLUMNS = {
     { name: 'level', type: 'integer' },
     { name: 'background', type: 'text' },
     { name: 'alignment', type: 'text' },
-    { name: 'experience_points', type: 'integer' },
     { name: 'hit_points_max', type: 'integer' },
-    { name: 'hit_points_current', type: 'integer' },
-    { name: 'hit_points_temp', type: 'integer' },
     { name: 'armor_class', type: 'integer' },
     { name: 'speed', type: 'integer' },
-    { name: 'initiative_bonus', type: 'integer' },
     { name: 'proficiency_bonus', type: 'integer' },
-    { name: 'abilities', type: 'jsonb' },
-    { name: 'saving_throws', type: 'jsonb' },
-    { name: 'skills', type: 'jsonb' },
-    { name: 'features', type: 'jsonb' },
-    { name: 'equipment', type: 'jsonb' },
-    { name: 'spells', type: 'jsonb' },
     { name: 'notes', type: 'text' },
     { name: 'personality_traits', type: 'text' },
     { name: 'ideals', type: 'text' },
@@ -63,7 +55,13 @@ const TABLE_COLUMNS = {
     { name: 'is_active', type: 'boolean' },
     { name: 'status', type: 'text' },
     { name: 'gender', type: 'text' },
-    // is_npc is a GENERATED ALWAYS column and must not appear in INSERT statements
+    { name: 'size', type: 'text' },
+    { name: 'age', type: 'text' },
+    { name: 'height', type: 'text' },
+    { name: 'weight', type: 'text' },
+    { name: 'eye_color', type: 'text' },
+    { name: 'hair_color', type: 'text' },
+    { name: 'skin_color', type: 'text' },
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],
@@ -104,12 +102,43 @@ const TABLE_COLUMNS = {
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],
+  character_build_levels: [
+    { name: 'id', type: 'uuid' },
+    { name: 'character_id', type: 'uuid' },
+    { name: 'sequence', type: 'integer' },
+    { name: 'base_abilities', type: 'jsonb' },
+    { name: 'ability_method', type: 'text' },
+    { name: 'class_id', type: 'text' },
+    { name: 'class_level', type: 'integer' },
+    { name: 'subclass_id', type: 'text' },
+    { name: 'asi_allocation', type: 'jsonb' },
+    { name: 'feat_id', type: 'text' },
+    { name: 'hp_roll', type: 'integer' },
+    { name: 'choices', type: 'jsonb' },
+    { name: 'deleted_at', type: 'timestamptz' },
+    { name: 'created_at', type: 'timestamptz' },
+  ],
+  character_items: [
+    { name: 'id', type: 'uuid' },
+    { name: 'character_id', type: 'uuid' },
+    { name: 'item_id', type: 'text' },
+    { name: 'quantity', type: 'integer' },
+    { name: 'equipped', type: 'boolean' },
+    { name: 'attuned', type: 'boolean' },
+    { name: 'created_at', type: 'timestamptz' },
+    { name: 'updated_at', type: 'timestamptz' },
+  ],
 } as const satisfies Readonly<Record<string, readonly ColumnDef[]>>;
 
 type TableName = keyof typeof TABLE_COLUMNS;
 
 // Order matters: parent tables before children for foreign key constraints
-const TABLE_ORDER: readonly TableName[] = ['campaigns', 'characters', 'sessions', 'encounters', 'notes'] as const satisfies readonly TableName[];
+const TABLE_ORDER: readonly TableName[] = ['campaigns', 'characters', 'sessions', 'encounters', 'notes', 'character_build_levels', 'character_items'] as const satisfies readonly TableName[];
+
+// Tables with non-standard unique constraints for ON CONFLICT
+const CONFLICT_TARGETS: Partial<Record<TableName, string>> = {
+  character_build_levels: '(character_id, sequence)',
+};
 
 export function escapeSqlString(value: string): string {
   return value.replace(/\0/g, '').replace(/'/g, "''");
@@ -161,10 +190,11 @@ export function buildInsertStatement(
   table: string,
   row: Record<string, unknown>,
   columns: readonly ColumnDef[],
+  conflictTarget: string = '(id)',
 ): string {
   const colNames = columns.map((c) => c.name).join(', ');
   const values = columns.map((c) => escapeSqlValue(row[c.name], c.type)).join(', ');
-  return `INSERT INTO ${table} (${colNames}) VALUES (${values}) ON CONFLICT (id) DO NOTHING;`;
+  return `INSERT INTO ${table} (${colNames}) VALUES (${values}) ON CONFLICT ${conflictTarget} DO NOTHING;`;
 }
 
 export function generateSeedSql(data: ExportData): string {
@@ -188,9 +218,10 @@ export function generateSeedSql(data: ExportData): string {
     }
 
     const columns = TABLE_COLUMNS[table];
+    const conflictTarget = CONFLICT_TARGETS[table] ?? '(id)';
     lines.push(`-- ${table}`);
     for (const row of rows) {
-      lines.push(buildInsertStatement(table, row as Record<string, unknown>, columns));
+      lines.push(buildInsertStatement(table, row as Record<string, unknown>, columns, conflictTarget));
     }
     lines.push('');
   }

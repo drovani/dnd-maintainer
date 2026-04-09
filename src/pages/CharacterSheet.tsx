@@ -12,37 +12,33 @@ import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { LevelControls } from '@/components/character-sheet/LevelControls'
+import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel'
+import { SkillsPanel } from '@/components/character-sheet/SkillsPanel'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
+import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
 import {
-  DND_ALIGNMENTS,
-  DND_BACKGROUNDS,
   DND_CLASSES,
-  DND_RACE_GROUPS,
-  DND_SKILLS,
   getProficiencyBonus,
   isBackgroundId,
+  type ClassId,
   type DndGender,
-  type DndSkill,
 } from '@/lib/dnd-helpers'
-import { reconstructBuild } from '@/lib/build-reconstruction'
-import { collectBundles } from '@/lib/sources'
-import { resolveCharacter } from '@/lib/resolver'
-import type { ResolvedCharacter } from '@/types/resolved'
 import type { Character } from '@/types/database'
-import { Edit2, Save } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Archive, Check, Edit2, Save, Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
+import type { AutosavePayload } from '@/hooks/useBuilderAutosave'
 
 type EditSection = 'header' | 'personality' | 'backstory' | 'appearance' | null
 
@@ -78,120 +74,75 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
   )
 }
 
-interface ResolvedFromBuild {
-  readonly resolved: ResolvedCharacter | null
-  readonly buildError: string | null
-  readonly buildWarnings: string | null
-}
 
-function useResolvedFromBuild(
-  character: Character | undefined,
-  buildRows: ReturnType<typeof useCharacterBuildLevels>['data'],
-  equippedItems: string[],
-): ResolvedFromBuild {
-  return useMemo(() => {
-    if (!character || !buildRows || buildRows.length === 0) return { resolved: null, buildError: null, buildWarnings: null }
-
-    // Phase 1: Reconstruct build
-    let build: ReturnType<typeof reconstructBuild>
-    try {
-      build = reconstructBuild(
-        { race: character.race, background: character.background },
-        buildRows,
-        equippedItems,
-      )
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Build reconstruction failed:', message)
-      return { resolved: null, buildError: message, buildWarnings: null }
-    }
-
-    // Phase 2: Resolve character
-    try {
-      const { bundles, warnings } = collectBundles(build)
-      if (warnings.length > 0) {
-        console.warn('collectBundles warnings:', warnings)
-      }
-      const levelRows = buildRows.filter((r) => r.sequence !== 0)
-      const resolved = resolveCharacter({
-        baseAbilities: build.baseAbilities,
-        level: levelRows.length,
-        bundles,
-        choices: build.choices,
-        hpRolls: build.hpRolls,
-      })
-      const buildWarning = warnings.length > 0 ? warnings.join('; ') : null
-      return { resolved, buildError: null, buildWarnings: buildWarning }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Character resolution failed:', message)
-      return { resolved: null, buildError: message, buildWarnings: null }
-    }
-  }, [character, buildRows, equippedItems])
-}
-
-export default function CharacterSheet() {
+function CharacterSheetInner({ character, itemsData, characterId }: {
+  character: Character
+  itemsData: Array<{ id: string; item_id: string; equipped?: boolean; quantity: number }>
+  characterId: string
+}) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
-  const { characterId } = useParams<{ id: string; characterId: string }>()
   const [editSection, setEditSection] = useState<EditSection>(null)
 
-  const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
-  const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(characterId)
-  const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(characterId)
-  const { update: updateMutation } = useCharacterMutations()
+  const navigate = useNavigate()
+  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null)
 
-  const equippedItems = useMemo(
-    () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
-    [itemsData],
-  )
+  const { update: updateMutation, remove: removeMutation } = useCharacterMutations()
+  const { character: ctxCharacter, rows, resolved, buildError, buildWarnings, level: resolvedLevel, isDirty, markSaved } = useCharacterContext()
+  const { saveDraft } = useBuilderAutosave(characterId)
+  const [saveFailed, setSaveFailed] = useState(false)
 
-  const { resolved, buildError, buildWarnings } = useResolvedFromBuild(character, buildRows, equippedItems)
+  // Autosave when isDirty (level up/down, choices, etc.)
+  const latestPayloadRef = useRef<AutosavePayload>({ character: ctxCharacter, rows, resolved })
+  useEffect(() => {
+    latestPayloadRef.current = { character: ctxCharacter, rows, resolved }
+  })
+
+  const doSave = useCallback(async () => {
+    setSaveFailed(false)
+    try {
+      await saveDraft(latestPayloadRef.current)
+      markSaved()
+    } catch (err: unknown) {
+      console.error('Autosave failed:', err)
+      setSaveFailed(true)
+      toast.error(tc('characterBuilder.errors.failedToSaveDraft'))
+    }
+  }, [saveDraft, markSaved, tc])
+
+  useEffect(() => {
+    if (!isDirty) return
+    const timer = setTimeout(doSave, 500)
+    return () => clearTimeout(timer)
+  }, [isDirty, doSave])
 
   const handleUpdate = (updates: Partial<Character>) => {
-    if (!characterId) return
     updateMutation.mutate({ id: characterId, ...updates }, {
       onSuccess: () => setEditSection(null),
       onError: () => toast.error(tc('characterSheet.errors.updateFailed')),
     })
   }
 
-  const skillsByAbility = useMemo(() => {
-    return DND_SKILLS.reduce(
-      (acc, skill) => {
-        if (!acc[skill.ability]) acc[skill.ability] = []
-        acc[skill.ability].push(skill)
-        return acc
+  const handleArchive = () => {
+    updateMutation.mutate({ id: characterId, is_active: false }, {
+      onSuccess: () => {
+        setConfirmAction(null)
+        toast.success(tc('characterSheet.actions.archiveSuccess', { name: character.name }))
+        navigate(`/campaign/${character.campaign_id}/characters`)
       },
-      {} as Record<string, DndSkill[]>
-    )
-  }, [])
-
-  const isLoading = characterLoading || rowsLoading || itemsLoading
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <Skeleton className="h-40 w-full rounded-lg" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Skeleton className="h-96 w-full rounded-lg" />
-            <Skeleton className="h-96 w-full rounded-lg" />
-            <Skeleton className="h-96 w-full rounded-lg" />
-          </div>
-        </div>
-      </div>
-    )
+      onError: () => toast.error(tc('characterSheet.errors.archiveFailed')),
+    })
   }
 
-  if (error || !character) {
-    return (
-      <div className="min-h-screen p-8">
-        <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
-          {tc('characterSheet.errors.loadingCharacter', { error: String(error) })}
-        </div>
-      </div>
-    )
+  const handleDelete = () => {
+    removeMutation.mutate({ id: characterId, campaignId: character.campaign_id }, {
+      onSuccess: () => {
+        setConfirmAction(null)
+        toast.success(tc('characterSheet.actions.deleteSuccess', { name: character.name }))
+        navigate(`/campaign/${character.campaign_id}/characters`)
+      },
+      onError: () => toast.error(tc('characterSheet.errors.deleteFailed')),
+    })
   }
 
   const buildErrorBanner = buildError ? (
@@ -200,16 +151,18 @@ export default function CharacterSheet() {
     </div>
   ) : null
 
-  const buildWarningBanner = buildWarnings ? (
-    <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/50 rounded-lg text-amber-700 dark:text-amber-400 text-sm">
-      {tc('characterSheet.warnings.buildIncomplete', { message: buildWarnings })}
+  const buildWarningBanner = buildWarnings.length > 0 ? (
+    <div className="mb-6 p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/40 rounded-lg text-amber-700 dark:text-amber-400 text-sm">
+      {tc('characterSheet.warnings.buildIncomplete', { message: buildWarnings.join('; ') })}
     </div>
   ) : null
 
   const alignmentName = character.alignment ? t(`alignments.${character.alignment}`, { defaultValue: character.alignment }) : ''
   const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level)
 
-  // Combat stats — prefer resolved pipeline values, fall back to pre-calculated columns
+  // Combat stats — prefer resolved pipeline values, fall back to pre-calculated DB columns.
+  // When buildError is set and resolved is null, these are stale values from the database.
+  const isStale = buildError !== null && resolved === null
   const armorClass = resolved?.armorClass.effective ?? character.armor_class
   const speedValue = resolved?.speed.walk?.value ?? character.speed
   const maxHP = resolved?.hitPoints.max ?? character.hit_points_max
@@ -224,6 +177,14 @@ export default function CharacterSheet() {
       <div className="max-w-7xl mx-auto p-8">
         {buildErrorBanner}
         {buildWarningBanner}
+        {saveFailed && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm flex items-center justify-between">
+            <span>{tc('errors.saveFailed')}</span>
+            <Button variant="outline" size="sm" onClick={doSave}>
+              {tc('buttons.retrySave')}
+            </Button>
+          </div>
+        )}
 
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
@@ -232,14 +193,33 @@ export default function CharacterSheet() {
               <div className="text-sm text-muted-foreground mb-1">{tc('characterSheet.title')}</div>
               <h1 className="text-3xl font-bold text-foreground">{character.name}</h1>
             </div>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setEditSection('header')}
-              title={tc('characterSheet.dialogs.editCharacterInfo')}
-            >
-              <Edit2 size={16} />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setEditSection('header')}
+                title={tc('characterSheet.dialogs.editCharacterInfo')}
+              >
+                <Edit2 size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setConfirmAction('archive')}
+                title={tc('buttons.archive')}
+              >
+                <Archive size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setConfirmAction('delete')}
+                title={tc('buttons.delete')}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -247,12 +227,12 @@ export default function CharacterSheet() {
               <span className="text-muted-foreground">{tc('characterSheet.fields.class')}</span>
               <p className="text-foreground font-semibold">
                 {character.class ? t(`classes.${character.class}`, { defaultValue: character.class }) : ''}
-                {character.subclass ? ` (${character.subclass})` : ''}
+                {character.subclass ? ` (${t(`subclasses.${character.subclass}.name`, { defaultValue: character.subclass })})` : ''}
               </p>
             </div>
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.level')}</span>
-              <p className="text-foreground font-semibold">{character.level}</p>
+              <p className="text-foreground font-semibold">{resolvedLevel}</p>
             </div>
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.race')}</span>
@@ -289,6 +269,18 @@ export default function CharacterSheet() {
               </div>
             )}
           </div>
+
+          {/* Level Controls */}
+          {character.class && DND_CLASSES.some((c) => c.id === character.class) && (
+            <div className="mt-4 pt-4 border-t">
+              <LevelControls classId={character.class as ClassId} />
+            </div>
+          )}
+        </div>
+
+        {/* Pending Choices Panel */}
+        <div className="mb-6">
+          <PendingChoicesPanel />
         </div>
 
         {/* Three Column Layout */}
@@ -353,36 +345,7 @@ export default function CharacterSheet() {
 
             {/* Skills */}
             {skills ? (
-              <div className="bg-card border rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
-                <div className="space-y-1 text-xs">
-                  {Object.entries(skillsByAbility).map(([ability, skillList]) => {
-                    return (
-                      <div key={ability}>
-                        <div className="text-muted-foreground font-semibold mt-2 mb-1">{t(`abilities.${ability as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'}`)}</div>
-                        {skillList.map((skill) => {
-                          const resolvedSkill = skills[skill.id as keyof typeof skills]
-                          if (!resolvedSkill) return null
-                          const bonus = resolvedSkill.bonus
-
-                          return (
-                            <div key={skill.id} className="flex justify-between text-foreground py-1">
-                              <span className={resolvedSkill.proficient ? 'font-bold' : ''}>
-                                {t(`skills.${skill.id}`)}
-                              </span>
-                              <span
-                                className={`font-mono ${resolvedSkill.expertise ? 'text-green-600 font-bold' : 'text-muted-foreground'}`}
-                              >
-                                {bonus >= 0 ? '+' : ''}{bonus}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+              <SkillsPanel skills={skills} />
             ) : (
               <div className="bg-card border rounded-lg p-6 text-center text-muted-foreground">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.skills')}</h2>
@@ -404,7 +367,7 @@ export default function CharacterSheet() {
               )}
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-muted/50 p-4 rounded border text-center">
+                <div className={`bg-muted/50 p-4 rounded border text-center ${isStale ? 'opacity-50' : ''}`}>
                   <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.armorClass')}</div>
                   <div className="text-4xl font-bold text-foreground">{armorClass}</div>
                 </div>
@@ -422,12 +385,12 @@ export default function CharacterSheet() {
               </div>
 
               {/* HP Display (read-only) */}
-              <div className="bg-muted/50 p-4 rounded border mb-4">
+              <div className={`bg-muted/50 p-4 rounded border mb-4 ${isStale ? 'opacity-50' : ''}`}>
                 <div className="text-xs text-muted-foreground mb-2">{tc('characterSheet.fields.hitPoints')}</div>
                 <div className="text-2xl font-bold text-red-600">{maxHP ?? '—'}</div>
               </div>
 
-              <div className="text-xs text-muted-foreground">
+              <div className={`text-xs text-muted-foreground ${isStale ? 'opacity-50' : ''}`}>
                 <div className="flex justify-between py-1">
                   <span>{tc('characterSheet.fields.proficiencyBonus')}</span>
                   <span className="font-mono font-bold text-foreground">+{profBonus}</span>
@@ -456,7 +419,17 @@ export default function CharacterSheet() {
                       </p>
                       {resolvedFeature.source && (
                         <div className="text-xs text-muted-foreground/70 mt-1">
-                          {tc('characterSheet.fields.source', { source: resolvedFeature.source.id })}
+                          {tc('characterSheet.fields.source', {
+                            source: resolvedFeature.source.origin === 'class'
+                              ? t(`classes.${resolvedFeature.source.id}`)
+                              : resolvedFeature.source.origin === 'subclass'
+                                ? t(`subclasses.${resolvedFeature.source.id}.name`)
+                                : resolvedFeature.source.origin === 'race'
+                                  ? t(`races.${resolvedFeature.source.id}`)
+                                  : resolvedFeature.source.origin === 'background'
+                                    ? t(`backgrounds.${resolvedFeature.source.id}`)
+                                    : resolvedFeature.source.id
+                          })}
                         </div>
                       )}
                     </div>
@@ -480,13 +453,14 @@ export default function CharacterSheet() {
                     >
                       <div>
                         <div className="font-semibold text-foreground">
+                          {/* TODO: add item translation keys to gamedata.json and use t(`items.${item.item_id}`) */}
                           {item.item_id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
                         </div>
                         <div className="text-muted-foreground">
                           {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: 0 })}
                         </div>
                       </div>
-                      {item.equipped && <span className="text-green-600 font-bold">E</span>}
+                      {item.equipped && <Check className="size-4 text-green-600" />}
                     </div>
                   ))}
                 </div>
@@ -603,7 +577,95 @@ export default function CharacterSheet() {
           saving={updateMutation.isPending}
         />
       )}
+
+      {/* Archive / Delete Confirmation */}
+      {confirmAction && (
+        <Dialog open onOpenChange={(open) => { if (!open) setConfirmAction(null) }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {confirmAction === 'archive'
+                  ? tc('characterSheet.actions.archiveTitle')
+                  : tc('characterSheet.actions.deleteTitle')}
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              {confirmAction === 'archive'
+                ? tc('characterSheet.actions.archiveConfirm', { name: character.name })
+                : tc('characterSheet.actions.deleteConfirm', { name: character.name })}
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmAction(null)}>
+                {tc('buttons.cancel')}
+              </Button>
+              <Button
+                variant={confirmAction === 'delete' ? 'destructive' : 'default'}
+                onClick={confirmAction === 'archive' ? handleArchive : handleDelete}
+                pending={updateMutation.isPending || removeMutation.isPending}
+              >
+                {confirmAction === 'archive' ? tc('buttons.archive') : tc('buttons.delete')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
+  )
+}
+
+export default function CharacterSheet() {
+  const { t: tc } = useTranslation('common')
+  const { characterId } = useParams<{ id: string; characterId: string }>()
+
+  const { data: character, isLoading: characterLoading, error } = useCharacter(characterId)
+  const { data: buildRows = [], isLoading: rowsLoading, error: rowsError } = useCharacterBuildLevels(characterId)
+  const { data: itemsData = [], isLoading: itemsLoading, error: itemsError } = useCharacterItems(characterId)
+
+  const equippedItems = useMemo(
+    () => itemsData.filter((item) => item.equipped).map((item) => item.item_id),
+    [itemsData],
+  )
+
+  const isLoading = characterLoading || rowsLoading || itemsLoading
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || rowsError || itemsError || !character || !characterId) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="rounded-lg bg-destructive/10 border border-destructive/50 p-4 text-destructive">
+          {tc('characterSheet.errors.loadingCharacter', { error: String(error ?? rowsError ?? itemsError) })}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <CharacterProvider
+      key={characterId}
+      initialCharacter={character}
+      initialRows={buildRows}
+      initialEquippedItems={equippedItems}
+    >
+      <CharacterSheetInner
+        character={character}
+        itemsData={itemsData}
+        characterId={characterId}
+      />
+    </CharacterProvider>
   )
 }
 
@@ -620,18 +682,11 @@ function EditHeaderDialog({
   onClose: () => void
   saving: boolean
 }) {
-  const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const [form, setForm] = useState({
     name: character.name,
     player_name: character.player_name ?? '',
     character_type: character.character_type,
-    race: character.race ?? '',
-    class: character.class ?? '',
-    subclass: character.subclass ?? '',
-    level: character.level,
-    background: character.background ?? '',
-    alignment: character.alignment ?? '',
     gender: (character.gender ?? '') as DndGender | '',
   })
 
@@ -640,7 +695,7 @@ function EditHeaderDialog({
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{tc('characterSheet.dialogs.editCharacterInfo')}</DialogTitle>
         </DialogHeader>
@@ -667,104 +722,11 @@ function EditHeaderDialog({
             <Label>{tc('characterSheet.fields.type')}</Label>
             <Select value={form.character_type} onValueChange={(val) => update('character_type', val as 'pc' | 'npc')}>
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>{tc(`characterType.${form.character_type}`)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pc">{tc('characterType.pc')}</SelectItem>
                 <SelectItem value="npc">{tc('characterType.npc')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.class')}</Label>
-            <Select value={form.class} onValueChange={(val) => val && update('class', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_CLASSES.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{t(`classes.${c.id}`)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="char-subclass">{tc('characterBuilder.fields.subclass')}</Label>
-            <Input
-              id="char-subclass"
-              value={form.subclass}
-              onChange={(e) => update('subclass', e.target.value)}
-              placeholder={tc('characterSheet.hints.subclassPlaceholder')}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="char-level">{tc('characterSheet.fields.level')}</Label>
-            <Input
-              id="char-level"
-              type="number"
-              min={1}
-              max={20}
-              value={form.level}
-              onChange={(e) => update('level', Number(e.target.value))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.race')}</Label>
-            <Select value={form.race} onValueChange={(val) => val && update('race', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_RACE_GROUPS.map((group) => (
-                  <SelectGroup key={group.id}>
-                    <SelectLabel>{t(`races.${group.id}`)}</SelectLabel>
-                    {group.options.map((opt) => (
-                      <SelectItem key={String(opt.value)} value={String(opt.value)}>{t(`races.${opt.value}`)}</SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {(() => {
-            const bg = form.background ?? ''
-            const isCustom = bg !== '' && (!isBackgroundId(bg) || bg === 'custom')
-            return (
-              <div className="space-y-2">
-                <Label>{tc('characterSheet.fields.background')}</Label>
-                <Select
-                  value={isCustom ? 'custom' : (form.background ?? undefined)}
-                  onValueChange={(val) => val && update('background', val)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DND_BACKGROUNDS.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{t(`backgrounds.${b.id}`)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isCustom && (
-                  <Input
-                    placeholder={tc('characterBuilder.placeholders.enterCustomBackground')}
-                    value={bg === 'custom' ? '' : bg}
-                    onChange={(e) => update('background', e.target.value || 'custom')}
-                  />
-                )}
-              </div>
-            )
-          })()}
-          <div className="space-y-2">
-            <Label>{tc('characterSheet.fields.alignment')}</Label>
-            <Select value={form.alignment} onValueChange={(val) => val && update('alignment', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_ALIGNMENTS.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>{t(`alignments.${a.id}`)}</SelectItem>
-                ))}
               </SelectContent>
             </Select>
           </div>
@@ -781,11 +743,6 @@ function EditHeaderDialog({
             onSave({
               ...form,
               player_name: form.player_name || null,
-              level: Number(form.level),
-              race: (form.race || null) as Character['race'],
-              class: (form.class || null) as Character['class'],
-              background: (form.background || null) as Character['background'],
-              alignment: (form.alignment || null) as Character['alignment'],
               gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
             })
           }
