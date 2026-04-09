@@ -81,7 +81,9 @@ export default function SessionList() {
         session_number: Math.max(...sessions.map(s => s.session_number), 0) + 1,
         date: new Date().toISOString().split('T')[0],
       })
-      navigate(`/campaign/${campaignSlug}/session/${data.slug}`)
+      if (data?.slug) {
+        navigate(`/campaign/${campaignSlug}/session/${data.slug}`)
+      }
     },
   })
 

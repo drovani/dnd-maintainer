@@ -189,6 +189,31 @@ describe('useBuilderAutosave', () => {
       expect(result.current.saveStatus).toBe<SaveStatus>('saved')
     })
 
+    it('throws and sets saveStatus to error when finalize response has no slug', async () => {
+      expect.assertions(2)
+      // saveDraft insert returns an id; the ready-update returns data without a slug field
+      let callIndex = 0
+      supabase.then = (resolve, reject) => {
+        callIndex++
+        if (callIndex === 1) {
+          return Promise.resolve({ data: { id: 'char-new' }, error: null }).then(resolve, reject)
+        }
+        return Promise.resolve({ data: { id: 'char-new' }, error: null }).then(resolve, reject)
+      }
+
+      const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() })
+
+      await withSuppressedRejections(async () => {
+        await act(async () => {
+          await result.current.finalize(basePayload).catch((err: Error) => {
+            expect(err.message).toMatch(/no character slug was returned/)
+          })
+        })
+
+        await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'))
+      })
+    })
+
     it('sets saveStatus to error when the status update fails', async () => {
       expect.assertions(2)
       // saveDraft insert succeeds; the ready-update fails.

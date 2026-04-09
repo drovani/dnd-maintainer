@@ -18,8 +18,10 @@ export function Layout() {
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
   const { setCampaignThemeOverride } = useTheme();
 
-  // Find the current campaign by slug
-  const currentCampaign = campaigns?.find(c => c.slug === campaignSlug);
+  // Find the current campaign by current or previous slug
+  const currentCampaign = campaigns?.find(
+    c => c.slug === campaignSlug || c.previous_slugs?.includes(campaignSlug ?? '')
+  );
 
   // Find the current campaign's theme from the already-loaded campaigns list
   const currentCampaignTheme = currentCampaign?.theme;

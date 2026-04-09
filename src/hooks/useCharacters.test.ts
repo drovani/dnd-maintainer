@@ -72,6 +72,26 @@ describeSingleQuery(
   undefined,
 )
 
+describe('useCharacter slug query pattern', () => {
+  it('queries by slug using .or() with both slug and previous_slugs', async () => {
+    mockQueryResult.data = baseCharacter
+
+    const { result } = renderHook(() => useCharacter('aria-silverw-char'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(supabase.or).toHaveBeenCalledWith(
+      'slug.eq.aria-silverw-char,previous_slugs.cs.{"aria-silverw-char"}'
+    )
+  })
+
+  it('throws when slug contains invalid characters', async () => {
+    const { result } = renderHook(() => useCharacter('bad,slug'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error).toBeInstanceOf(Error)
+  })
+})
+
 describe('usePlayerNames', () => {
   it('returns sorted unique player names', async () => {
     mockQueryResult.data = [

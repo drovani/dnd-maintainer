@@ -48,6 +48,26 @@ describeSingleQuery(
   undefined,
 )
 
+describe('useCampaign slug query pattern', () => {
+  it('queries by slug using .or() with both slug and previous_slugs', async () => {
+    mockQueryResult.data = baseCampaign
+
+    const { result } = renderHook(() => useCampaign('test-slug'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(supabase.or).toHaveBeenCalledWith(
+      'slug.eq.test-slug,previous_slugs.cs.{"test-slug"}'
+    )
+  })
+
+  it('throws when slug contains invalid characters', async () => {
+    const { result } = renderHook(() => useCampaign('bad,slug'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error).toBeInstanceOf(Error)
+  })
+})
+
 describe('useCampaignMutations', () => {
   it('create inserts with status planning', async () => {
     mockQueryResult.data = { ...baseCampaign, status: 'planning' }

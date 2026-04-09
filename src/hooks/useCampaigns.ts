@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Campaign, CampaignSummary } from '@/types/database'
 import { CAMPAIGN_SUMMARY_COLS, CAMPAIGN_DETAIL_COLS } from '@/lib/query-columns'
+import { validateSlug } from '@/lib/slug-utils'
 
 // --- Queries ---
 
@@ -24,10 +25,11 @@ export function useCampaign(slug: string | undefined) {
   return useQuery({
     queryKey: ['campaign', slug],
     queryFn: async () => {
+      const safe = validateSlug(slug!)
       const { data, error } = await supabase
         .from('campaigns')
         .select(CAMPAIGN_DETAIL_COLS)
-        .or(`slug.eq.${slug},previous_slugs.cs.{"${slug}"}`)
+        .or(`slug.eq.${safe},previous_slugs.cs.{"${safe}"}`)
         .single()
       if (error) throw error
       return data as unknown as Campaign
@@ -70,6 +72,7 @@ export function useCampaignMutations() {
     },
     onSuccess: (data) => {
       invalidate()
+      queryClient.invalidateQueries({ queryKey: ['campaign'] })
       queryClient.setQueryData(['campaign', data.slug], data)
     },
   })

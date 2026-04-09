@@ -81,7 +81,7 @@ export default function SessionDetail() {
   })
 
   // Fetch session
-  const { data: session, isLoading, error } = useSession(sessionSlug!)
+  const { data: session, isLoading, error } = useSession(sessionSlug)
 
   // DM notes and loot are stored on the session itself
   const sessionNotes = (session as unknown as Record<string, unknown>)?.notes as string ?? ''

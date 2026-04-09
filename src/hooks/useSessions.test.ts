@@ -6,7 +6,10 @@ import {
   describeUpdateMutation,
   describeDeleteMutation,
   renderHook,
+  waitFor,
   createWrapper,
+  supabase,
+  mockQueryResult,
 } from '@/test/hook-test-helpers'
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
@@ -42,11 +45,31 @@ describeListQuery(
 
 describeSingleQuery(
   'useSession',
-  (id) => renderHook(() => useSession(id as string), { wrapper: createWrapper() }),
+  (id) => renderHook(() => useSession(id as string | undefined), { wrapper: createWrapper() }),
   baseSession,
   'sess-1',
-  '',
+  undefined,
 )
+
+describe('useSession slug query pattern', () => {
+  it('queries by slug using .or() with both slug and previous_slugs', async () => {
+    mockQueryResult.data = baseSession
+
+    const { result } = renderHook(() => useSession('first-adventure-sess'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(supabase.or).toHaveBeenCalledWith(
+      'slug.eq.first-adventure-sess,previous_slugs.cs.{"first-adventure-sess"}'
+    )
+  })
+
+  it('throws when slug contains invalid characters', async () => {
+    const { result } = renderHook(() => useSession('bad,slug'), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error).toBeInstanceOf(Error)
+  })
+})
 
 const { id: _id, created_at: _created_at, updated_at: _updated_at, ...createSessionPayload } = baseSession
 
