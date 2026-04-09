@@ -1,7 +1,6 @@
 import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
 import { Button } from '@/components/ui/button'
-import { RollingNumber } from '@/components/ui/rolling-number'
 import {
   Dialog,
   DialogContent,
@@ -9,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { RollingNumber } from '@/components/ui/rolling-number'
 import type { ClassId } from '@/lib/dnd-helpers'
 import { getGrantsForLevel } from '@/lib/sources/level-grants'
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
@@ -50,14 +50,14 @@ export function LevelUpDialog({
 }: LevelUpDialogProps) {
   const { t } = useTranslation('common')
   const { t: tg } = useTranslation('gamedata')
+  const hpAverageGrant = Math.floor(hitDie / 2) + 1
 
   const [rolledValue, setRolledValue] = useState<number | null>(null)
   const [isRolling, setIsRolling] = useState<boolean>(false)
-  const [hpSelection, setHpSelection] = useState<number | null>(null)
+  const [hpSelection, setHpSelection] = useState<number | null>(hpAverageGrant)
   const [decisions, setDecisions] = useState<Map<ChoiceKey, ChoiceDecision>>(new Map())
   const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const average = Math.floor(hitDie / 2) + 1
   const hpRange = useMemo(() => [1, hitDie] as const, [hitDie])
 
   const preview = useMemo(
@@ -186,6 +186,24 @@ export function LevelUpDialog({
           </p>
 
           <div className="grid grid-cols-2 gap-2">
+            {/* Take average option */}
+            <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection === hpAverageGrant ? 'border-primary bg-primary/5' : 'bg-muted/30'
+              }`}>
+              <p className="text-sm font-medium text-foreground">
+                {t('characterSheet.levelManagement.takeAverage')}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('characterSheet.levelManagement.takeAverageHint', { value: hpAverageGrant })}
+              </p>
+              <Button
+                className="mt-auto"
+                variant={hpSelection === hpAverageGrant ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSelectHp(hpAverageGrant)}
+              >
+                {hpSelection === hpAverageGrant ? t('buttons.selected') : t('buttons.select')}
+              </Button>
+            </div>
             {/* Roll HP option */}
             <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection !== null && hpSelection === rolledValue ? 'border-primary bg-primary/5' : 'bg-muted/30'
               }`}>
@@ -222,24 +240,6 @@ export function LevelUpDialog({
               </div>
             </div>
 
-            {/* Take average option */}
-            <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection === average ? 'border-primary bg-primary/5' : 'bg-muted/30'
-              }`}>
-              <p className="text-sm font-medium text-foreground">
-                {t('characterSheet.levelManagement.takeAverage')}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t('characterSheet.levelManagement.takeAverageHint', { value: average })}
-              </p>
-              <Button
-                className="mt-auto"
-                variant={hpSelection === average ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectHp(average)}
-              >
-                {hpSelection === average ? t('buttons.selected') : t('buttons.select')}
-              </Button>
-            </div>
           </div>
         </div>
 
