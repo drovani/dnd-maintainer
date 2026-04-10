@@ -13,7 +13,6 @@ vi.mock('react-i18next', () => ({
 
 const LONGSWORD_ATTACK: ResolvedAttack = {
   weaponId: 'longsword',
-  name: 'longsword',
   attackBonus: 5,
   attackBreakdown: [
     { type: 'ability', value: 3, label: 'str' },
@@ -29,7 +28,6 @@ const LONGSWORD_ATTACK: ResolvedAttack = {
 
 const LONGBOW_ATTACK: ResolvedAttack = {
   weaponId: 'longbow',
-  name: 'longbow',
   attackBonus: 6,
   attackBreakdown: [
     { type: 'ability', value: 2, label: 'dex' },
