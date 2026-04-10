@@ -1,3 +1,159 @@
 import type { ItemSource } from '@/types/sources'
+import type { ItemDef, WeaponDef, ArmorDef, GearDef, PackDef } from '@/types/items'
 
 export const ITEM_SOURCES: readonly ItemSource[] = []
+
+// ---------------------------------------------------------------------------
+// Weapon Catalog
+// ---------------------------------------------------------------------------
+
+export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[] = [
+  // Simple melee
+  { type: 'weapon', id: 'club', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'bludgeoning', properties: ['light'], weight: 2, costGp: 0.1 },
+  { type: 'weapon', id: 'dagger', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'piercing', properties: ['finesse', 'light', 'thrown'], weight: 1, costGp: 2, normalRange: 20, longRange: 60 },
+  { type: 'weapon', id: 'greatclub', category: 'simple', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: ['two-handed'], weight: 10, costGp: 0.2 },
+  { type: 'weapon', id: 'handaxe', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'slashing', properties: ['light', 'thrown'], weight: 2, costGp: 5, normalRange: 20, longRange: 60 },
+  { type: 'weapon', id: 'javelin', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown'], weight: 2, costGp: 0.5, normalRange: 30, longRange: 120 },
+  { type: 'weapon', id: 'light-hammer', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'bludgeoning', properties: ['light', 'thrown'], weight: 2, costGp: 2, normalRange: 20, longRange: 60 },
+  { type: 'weapon', id: 'mace', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'bludgeoning', properties: [], weight: 4, costGp: 5 },
+  { type: 'weapon', id: 'quarterstaff', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'bludgeoning', properties: ['versatile'], weight: 4, costGp: 0.2, versatileDice: '1d8' },
+  { type: 'weapon', id: 'sickle', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'slashing', properties: ['light'], weight: 2, costGp: 1 },
+  { type: 'weapon', id: 'spear', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown', 'versatile'], weight: 3, costGp: 1, normalRange: 20, longRange: 60, versatileDice: '1d8' },
+  // Simple ranged
+  { type: 'weapon', id: 'light-crossbow', category: 'simple', range: 'ranged', damageDice: '1d8', damageType: 'piercing', properties: ['ammunition', 'loading', 'two-handed'], weight: 5, costGp: 25, normalRange: 80, longRange: 320 },
+  { type: 'weapon', id: 'dart', category: 'simple', range: 'ranged', damageDice: '1d4', damageType: 'piercing', properties: ['finesse', 'thrown'], weight: 0.25, costGp: 0.05, normalRange: 20, longRange: 60 },
+  { type: 'weapon', id: 'shortbow', category: 'simple', range: 'ranged', damageDice: '1d6', damageType: 'piercing', properties: ['ammunition', 'two-handed'], weight: 2, costGp: 25, normalRange: 80, longRange: 320 },
+  { type: 'weapon', id: 'sling', category: 'simple', range: 'ranged', damageDice: '1d4', damageType: 'bludgeoning', properties: ['ammunition'], weight: 0, costGp: 0.1, normalRange: 30, longRange: 120 },
+  // Martial melee
+  { type: 'weapon', id: 'battleaxe', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'slashing', properties: ['versatile'], weight: 4, costGp: 10, versatileDice: '1d10' },
+  { type: 'weapon', id: 'flail', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: [], weight: 2, costGp: 10 },
+  { type: 'weapon', id: 'glaive', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'slashing', properties: ['heavy', 'reach', 'two-handed'], weight: 6, costGp: 20 },
+  { type: 'weapon', id: 'greataxe', category: 'martial', range: 'melee', damageDice: '1d12', damageType: 'slashing', properties: ['heavy', 'two-handed'], weight: 7, costGp: 30 },
+  { type: 'weapon', id: 'greatsword', category: 'martial', range: 'melee', damageDice: '2d6', damageType: 'slashing', properties: ['heavy', 'two-handed'], weight: 6, costGp: 50 },
+  { type: 'weapon', id: 'halberd', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'slashing', properties: ['heavy', 'reach', 'two-handed'], weight: 6, costGp: 20 },
+  { type: 'weapon', id: 'lance', category: 'martial', range: 'melee', damageDice: '1d12', damageType: 'piercing', properties: ['reach', 'special'], weight: 6, costGp: 10 },
+  { type: 'weapon', id: 'longsword', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'slashing', properties: ['versatile'], weight: 3, costGp: 15, versatileDice: '1d10' },
+  { type: 'weapon', id: 'maul', category: 'martial', range: 'melee', damageDice: '2d6', damageType: 'bludgeoning', properties: ['heavy', 'two-handed'], weight: 10, costGp: 10 },
+  { type: 'weapon', id: 'morningstar', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: [], weight: 4, costGp: 15 },
+  { type: 'weapon', id: 'pike', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'piercing', properties: ['heavy', 'reach', 'two-handed'], weight: 18, costGp: 5 },
+  { type: 'weapon', id: 'rapier', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: ['finesse'], weight: 2, costGp: 25 },
+  { type: 'weapon', id: 'scimitar', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'slashing', properties: ['finesse', 'light'], weight: 3, costGp: 25 },
+  { type: 'weapon', id: 'shortsword', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['finesse', 'light'], weight: 2, costGp: 10 },
+  { type: 'weapon', id: 'trident', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown', 'versatile'], weight: 4, costGp: 5, normalRange: 20, longRange: 60, versatileDice: '1d8' },
+  { type: 'weapon', id: 'war-pick', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: [], weight: 2, costGp: 5 },
+  { type: 'weapon', id: 'warhammer', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: ['versatile'], weight: 2, costGp: 15, versatileDice: '1d10' },
+  { type: 'weapon', id: 'whip', category: 'martial', range: 'melee', damageDice: '1d4', damageType: 'slashing', properties: ['finesse', 'reach'], weight: 3, costGp: 2 },
+  // Martial ranged
+  { type: 'weapon', id: 'blowgun', category: 'martial', range: 'ranged', damageDice: '1d1', damageType: 'piercing', properties: ['ammunition', 'loading'], weight: 1, costGp: 10, normalRange: 25, longRange: 100 },
+  { type: 'weapon', id: 'hand-crossbow', category: 'martial', range: 'ranged', damageDice: '1d6', damageType: 'piercing', properties: ['ammunition', 'light', 'loading'], weight: 3, costGp: 75, normalRange: 30, longRange: 120 },
+  { type: 'weapon', id: 'heavy-crossbow', category: 'martial', range: 'ranged', damageDice: '1d10', damageType: 'piercing', properties: ['ammunition', 'heavy', 'loading', 'two-handed'], weight: 18, costGp: 50, normalRange: 100, longRange: 400 },
+  { type: 'weapon', id: 'longbow', category: 'martial', range: 'ranged', damageDice: '1d8', damageType: 'piercing', properties: ['ammunition', 'heavy', 'two-handed'], weight: 2, costGp: 50, normalRange: 150, longRange: 600 },
+  { type: 'weapon', id: 'net', category: 'martial', range: 'ranged', damageDice: '1d1', damageType: 'bludgeoning', properties: ['special', 'thrown'], weight: 3, costGp: 1, normalRange: 5, longRange: 15 },
+]
+
+// ---------------------------------------------------------------------------
+// Armor Catalog
+// ---------------------------------------------------------------------------
+
+export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] = [
+  // Light armor
+  { type: 'armor', id: 'padded', category: 'light', baseAc: 11, maxDexBonus: null, stealthDisadvantage: true, strengthRequirement: 0, weight: 8, costGp: 5 },
+  { type: 'armor', id: 'leather', category: 'light', baseAc: 11, maxDexBonus: null, stealthDisadvantage: false, strengthRequirement: 0, weight: 10, costGp: 10 },
+  { type: 'armor', id: 'studded-leather', category: 'light', baseAc: 12, maxDexBonus: null, stealthDisadvantage: false, strengthRequirement: 0, weight: 13, costGp: 45 },
+  // Medium armor
+  { type: 'armor', id: 'hide', category: 'medium', baseAc: 12, maxDexBonus: 2, stealthDisadvantage: false, strengthRequirement: 0, weight: 12, costGp: 10 },
+  { type: 'armor', id: 'chain-shirt', category: 'medium', baseAc: 13, maxDexBonus: 2, stealthDisadvantage: false, strengthRequirement: 0, weight: 20, costGp: 50 },
+  { type: 'armor', id: 'scale-mail', category: 'medium', baseAc: 14, maxDexBonus: 2, stealthDisadvantage: true, strengthRequirement: 0, weight: 45, costGp: 50 },
+  { type: 'armor', id: 'breastplate', category: 'medium', baseAc: 14, maxDexBonus: 2, stealthDisadvantage: false, strengthRequirement: 0, weight: 20, costGp: 400 },
+  { type: 'armor', id: 'half-plate', category: 'medium', baseAc: 15, maxDexBonus: 2, stealthDisadvantage: true, strengthRequirement: 0, weight: 40, costGp: 750 },
+  // Heavy armor
+  { type: 'armor', id: 'ring-mail', category: 'heavy', baseAc: 14, maxDexBonus: 0, stealthDisadvantage: true, strengthRequirement: 0, weight: 40, costGp: 30 },
+  { type: 'armor', id: 'chain-mail', category: 'heavy', baseAc: 16, maxDexBonus: 0, stealthDisadvantage: true, strengthRequirement: 13, weight: 55, costGp: 75 },
+  { type: 'armor', id: 'splint', category: 'heavy', baseAc: 17, maxDexBonus: 0, stealthDisadvantage: true, strengthRequirement: 15, weight: 60, costGp: 200 },
+  { type: 'armor', id: 'plate', category: 'heavy', baseAc: 18, maxDexBonus: 0, stealthDisadvantage: true, strengthRequirement: 15, weight: 65, costGp: 1500 },
+  // Shield
+  { type: 'armor', id: 'shield', category: 'shield', baseAc: 2, maxDexBonus: null, stealthDisadvantage: false, strengthRequirement: 0, weight: 6, costGp: 10 },
+]
+
+// ---------------------------------------------------------------------------
+// Gear Catalog
+// ---------------------------------------------------------------------------
+
+export const GEAR_CATALOG: readonly ({ readonly type: 'gear' } & GearDef)[] = [
+  { type: 'gear', id: 'arrows-20', weight: 1, costGp: 1 },
+  { type: 'gear', id: 'bolts-20', weight: 1.5, costGp: 1 },
+  { type: 'gear', id: 'sling-bullets-20', weight: 1.5, costGp: 0.04 },
+  { type: 'gear', id: 'blowgun-needles-50', weight: 1, costGp: 1 },
+  { type: 'gear', id: 'insignia-of-rank', weight: 0, costGp: 0 },
+  { type: 'gear', id: 'common-clothes', weight: 3, costGp: 0.5 },
+  { type: 'gear', id: 'pouch', weight: 1, costGp: 0.5 },
+  { type: 'gear', id: 'backpack', weight: 5, costGp: 2 },
+  { type: 'gear', id: 'bedroll', weight: 7, costGp: 1 },
+  { type: 'gear', id: 'mess-kit', weight: 1, costGp: 0.2 },
+  { type: 'gear', id: 'tinderbox', weight: 1, costGp: 0.5 },
+  { type: 'gear', id: 'torches-10', weight: 10, costGp: 0.1 },
+  { type: 'gear', id: 'rations-10', weight: 20, costGp: 5 },
+  { type: 'gear', id: 'waterskin', weight: 5, costGp: 0.2 },
+  { type: 'gear', id: 'hemp-rope-50ft', weight: 10, costGp: 1 },
+  { type: 'gear', id: 'crowbar', weight: 5, costGp: 2 },
+  { type: 'gear', id: 'hammer', weight: 3, costGp: 1 },
+  { type: 'gear', id: 'pitons-10', weight: 2.5, costGp: 0.5 },
+  { type: 'gear', id: 'hooded-lantern', weight: 2, costGp: 5 },
+  { type: 'gear', id: 'oil-flasks-2', weight: 2, costGp: 0.2 },
+]
+
+// ---------------------------------------------------------------------------
+// Pack Catalog
+// ---------------------------------------------------------------------------
+
+export const PACK_CATALOG: readonly ({ readonly type: 'pack' } & PackDef)[] = [
+  {
+    type: 'pack',
+    id: 'explorers-pack',
+    costGp: 10,
+    contents: [
+      { itemId: 'backpack', quantity: 1 },
+      { itemId: 'bedroll', quantity: 1 },
+      { itemId: 'mess-kit', quantity: 1 },
+      { itemId: 'tinderbox', quantity: 1 },
+      { itemId: 'torches-10', quantity: 1 },
+      { itemId: 'rations-10', quantity: 1 },
+      { itemId: 'waterskin', quantity: 1 },
+      { itemId: 'hemp-rope-50ft', quantity: 1 },
+    ],
+  },
+  {
+    type: 'pack',
+    id: 'dungeoneers-pack',
+    costGp: 12,
+    contents: [
+      { itemId: 'backpack', quantity: 1 },
+      { itemId: 'crowbar', quantity: 1 },
+      { itemId: 'hammer', quantity: 1 },
+      { itemId: 'pitons-10', quantity: 1 },
+      { itemId: 'hooded-lantern', quantity: 1 },
+      { itemId: 'oil-flasks-2', quantity: 1 },
+      { itemId: 'rations-10', quantity: 1 },
+      { itemId: 'tinderbox', quantity: 1 },
+      { itemId: 'waterskin', quantity: 1 },
+      { itemId: 'hemp-rope-50ft', quantity: 1 },
+    ],
+  },
+]
+
+// ---------------------------------------------------------------------------
+// Combined catalog and lookup
+// ---------------------------------------------------------------------------
+
+export const ITEM_CATALOG: readonly ItemDef[] = [
+  ...WEAPON_CATALOG,
+  ...ARMOR_CATALOG,
+  ...GEAR_CATALOG,
+  ...PACK_CATALOG,
+]
+
+const ITEM_MAP: ReadonlyMap<string, ItemDef> = new Map(ITEM_CATALOG.map((item) => [item.id, item]))
+
+export function getItemDef(id: string): ItemDef | undefined {
+  return ITEM_MAP.get(id)
+}
