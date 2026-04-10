@@ -11,7 +11,7 @@ import type {
 } from '@/types/resolved'
 import type { ResolvedAbility } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
-import { getItemDef } from '@/lib/sources/items'
+import { getItemDef, requireItemDef } from '@/lib/sources/items'
 import type { WeaponProficiencyId } from '@/lib/dnd-helpers'
 
 export function resolveEquipment(
@@ -22,11 +22,11 @@ export function resolveEquipment(
   const items: ResolvedEquipmentItem[] = []
   const pendingChoices: PendingChoice[] = []
 
-  // Direct equipment grants
+  // Direct equipment grants — use requireItemDef for fail-fast on trusted source data
   for (const { grant, source } of collectGrantsByType(bundles, 'equipment')) {
     items.push({
       itemId: grant.itemId,
-      itemDef: getItemDef(grant.itemId),
+      itemDef: requireItemDef(grant.itemId),
       quantity: grant.quantity,
       source,
       equipped: equippedItemIds.includes(grant.itemId),
@@ -38,16 +38,24 @@ export function resolveEquipment(
     const decision = choices[grant.key]
     if (decision?.type === 'equipment-choice') {
       const chosenOption = grant.options[decision.optionIndex]
-      if (chosenOption) {
-        for (const { itemId, quantity } of chosenOption) {
-          items.push({
-            itemId,
-            itemDef: getItemDef(itemId),
-            quantity,
-            source,
-            equipped: equippedItemIds.includes(itemId),
-          })
-        }
+      // Re-prompt if the stored optionIndex is out of range (stale persisted data)
+      if (!chosenOption || decision.optionIndex >= grant.options.length) {
+        pendingChoices.push({
+          type: 'equipment-choice',
+          choiceKey: grant.key,
+          source,
+          options: grant.options,
+        })
+        continue
+      }
+      for (const { itemId, quantity } of chosenOption) {
+        items.push({
+          itemId,
+          itemDef: requireItemDef(itemId),
+          quantity,
+          source,
+          equipped: equippedItemIds.includes(itemId),
+        })
       }
     } else {
       pendingChoices.push({
@@ -70,7 +78,7 @@ export function resolveAttacks(
   fightingStyleIds: readonly string[],
 ): readonly ResolvedAttack[] {
   const equippedWeapons = equippedItems.filter(
-    (item) => item.equipped && item.itemDef?.type === 'weapon',
+    (item) => item.equipped && item.itemDef.type === 'weapon',
   )
 
   const hasArchery = fightingStyleIds.includes('archery')
@@ -78,7 +86,7 @@ export function resolveAttacks(
 
   // Count equipped one-handed melee weapons (no two-handed) for Dueling check
   const oneHandedMeleeCount = equippedWeapons.filter((item) => {
-    if (item.itemDef?.type !== 'weapon') return false
+    if (item.itemDef.type !== 'weapon') return false
     return item.itemDef.range === 'melee' && !item.itemDef.properties.includes('two-handed')
   }).length
 
@@ -86,7 +94,7 @@ export function resolveAttacks(
 
   for (const equippedItem of equippedWeapons) {
     const weapon = equippedItem.itemDef
-    if (weapon?.type !== 'weapon') continue
+    if (weapon.type !== 'weapon') continue
 
     // Determine attack ability: ranged → DEX, melee → STR, finesse → max(STR, DEX)
     let attackAbility: AbilityKey
@@ -100,9 +108,9 @@ export function resolveAttacks(
 
     const abilityMod = abilities[attackAbility].modifier
 
-    // Check proficiency
+    // Check proficiency using the explicit weaponProficiencyId field
     const proficient = weaponProficiencies.some(
-      (p) => p.value === weapon.id || p.value === weapon.category,
+      (p) => p.value === weapon.weaponProficiencyId || p.value === weapon.category,
     )
 
     // Build attack breakdown
@@ -130,12 +138,8 @@ export function resolveAttacks(
     const attackBonus = attackBreakdown.reduce((sum, c) => sum + c.value, 0)
     const damageBonus = damageBreakdown.reduce((sum, c) => sum + c.value, 0)
 
-    // Derive item name from gamedata translation key (used as display name)
-    const name = weapon.id
-
     attacks.push({
       weaponId: weapon.id,
-      name,
       attackBonus,
       attackBreakdown,
       damageDice: weapon.damageDice,
@@ -152,28 +156,45 @@ export function resolveAttacks(
   return attacks
 }
 
+/**
+ * Returns the AC contribution from equipped armor items.
+ * - `totalBase`: the armor's base AC plus clamped DEX contribution (null when no body armor is equipped)
+ * - `shieldBonus`: 2 when a shield is equipped, 0 otherwise
+ * Returns null only when nothing armor-related is equipped at all.
+ */
 export function resolveEquippedArmorAc(
   equippedItems: readonly ResolvedEquipmentItem[],
   dexModifier: number,
-): { readonly baseAc: number; readonly shieldBonus: number } | null {
-  const equippedArmor = equippedItems.find(
-    (item) => item.equipped && item.itemDef?.type === 'armor' && item.itemDef.category !== 'shield',
+): { readonly totalBase: number | null; readonly shieldBonus: number } | null {
+  const equippedShield = equippedItems.find(
+    (item) => item.equipped && item.itemDef.type === 'armor' && item.itemDef.category === 'shield',
+  )
+  const shieldBonus = equippedShield ? 2 : 0
+
+  const equippedBodyArmor = equippedItems.find(
+    (item) => item.equipped && item.itemDef.type === 'armor' && item.itemDef.category !== 'shield',
   )
 
-  if (!equippedArmor || equippedArmor.itemDef?.type !== 'armor') return null
+  if (!equippedBodyArmor && !equippedShield) return null
 
-  const armor = equippedArmor.itemDef
+  if (!equippedBodyArmor) {
+    // Shield only — caller uses its own base calculation but adds shieldBonus
+    return { totalBase: null, shieldBonus }
+  }
+
+  const armor = equippedBodyArmor.itemDef
+  if (armor.type !== 'armor') return { totalBase: null, shieldBonus }
+
   const dexContribution =
     armor.maxDexBonus === null
       ? dexModifier
       : Math.min(dexModifier, armor.maxDexBonus)
 
-  const baseAc = armor.baseAc + dexContribution
-
-  const equippedShield = equippedItems.find(
-    (item) => item.equipped && item.itemDef?.type === 'armor' && item.itemDef.category === 'shield',
-  )
-  const shieldBonus = equippedShield ? 2 : 0
-
-  return { baseAc, shieldBonus }
+  return { totalBase: armor.baseAc + dexContribution, shieldBonus }
 }
+
+/**
+ * Looks up an item definition without throwing — safe for UI-side optional lookups.
+ * Re-exported here so callers can import from a single location.
+ */
+export { getItemDef }

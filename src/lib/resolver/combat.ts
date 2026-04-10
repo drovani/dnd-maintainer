@@ -60,7 +60,7 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
 export function resolveAc(
   bundles: readonly GrantBundle[],
   dexModifier: number,
-  equippedArmor?: { readonly baseAc: number; readonly shieldBonus: number } | null,
+  equippedArmor?: { readonly totalBase: number | null; readonly shieldBonus: number } | null,
 ): ResolvedArmorClass {
   const acGrants = collectGrantsByType(bundles, 'armor-class')
   const acBonusGrants = collectGrantsByType(bundles, 'ac-bonus')
@@ -71,8 +71,8 @@ export function resolveAc(
     const calc = grant.calculation
     switch (calc.mode) {
       case 'armored': {
-        // When equipped armor is provided, use its baseAc instead of 10 + DEX
-        const baseValue = equippedArmor != null ? equippedArmor.baseAc : 10 + dexModifier
+        // When equipped body armor provides a totalBase, use it; otherwise fall back to 10 + DEX (unequipped)
+        const baseValue = equippedArmor?.totalBase != null ? equippedArmor.totalBase : 10 + dexModifier
         calculations.push({ mode: 'armored', baseValue, source })
         break
       }
@@ -95,7 +95,7 @@ export function resolveAc(
     source,
   }))
 
-  // Add shield bonus when equipped armor has a shield
+  // Add shield bonus whenever a shield is equipped, regardless of body armor
   if (equippedArmor != null && equippedArmor.shieldBonus > 0) {
     bonuses.push({
       value: equippedArmor.shieldBonus,
