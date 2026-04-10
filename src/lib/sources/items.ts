@@ -9,46 +9,46 @@ export const ITEM_SOURCES: readonly ItemSource[] = []
 
 export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[] = [
   // Simple melee
-  { type: 'weapon', id: 'club', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'bludgeoning', properties: ['light'], weight: 2, costGp: 0.1 },
-  { type: 'weapon', id: 'dagger', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'piercing', properties: ['finesse', 'light', 'thrown'], weight: 1, costGp: 2, normalRange: 20, longRange: 60 },
-  { type: 'weapon', id: 'greatclub', category: 'simple', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: ['two-handed'], weight: 10, costGp: 0.2 },
-  { type: 'weapon', id: 'handaxe', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'slashing', properties: ['light', 'thrown'], weight: 2, costGp: 5, normalRange: 20, longRange: 60 },
-  { type: 'weapon', id: 'javelin', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown'], weight: 2, costGp: 0.5, normalRange: 30, longRange: 120 },
-  { type: 'weapon', id: 'light-hammer', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'bludgeoning', properties: ['light', 'thrown'], weight: 2, costGp: 2, normalRange: 20, longRange: 60 },
-  { type: 'weapon', id: 'mace', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'bludgeoning', properties: [], weight: 4, costGp: 5 },
-  { type: 'weapon', id: 'quarterstaff', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'bludgeoning', properties: ['versatile'], weight: 4, costGp: 0.2, versatileDice: '1d8' },
-  { type: 'weapon', id: 'sickle', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'slashing', properties: ['light'], weight: 2, costGp: 1 },
-  { type: 'weapon', id: 'spear', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown', 'versatile'], weight: 3, costGp: 1, normalRange: 20, longRange: 60, versatileDice: '1d8' },
+  { type: 'weapon', id: 'club', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'bludgeoning', properties: ['light'], weight: 2, costGp: 0.1, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'dagger', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'piercing', properties: ['finesse', 'light', 'thrown'], weight: 1, costGp: 2, normalRange: 20, longRange: 60, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'greatclub', category: 'simple', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: ['two-handed'], weight: 10, costGp: 0.2, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'handaxe', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'slashing', properties: ['light', 'thrown'], weight: 2, costGp: 5, normalRange: 20, longRange: 60, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'javelin', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown'], weight: 2, costGp: 0.5, normalRange: 30, longRange: 120, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'light-hammer', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'bludgeoning', properties: ['light', 'thrown'], weight: 2, costGp: 2, normalRange: 20, longRange: 60, weaponProficiencyId: 'lighthammer' },
+  { type: 'weapon', id: 'mace', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'bludgeoning', properties: [], weight: 4, costGp: 5, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'quarterstaff', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'bludgeoning', properties: ['versatile'], weight: 4, costGp: 0.2, versatileDice: '1d8', weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'sickle', category: 'simple', range: 'melee', damageDice: '1d4', damageType: 'slashing', properties: ['light'], weight: 2, costGp: 1, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'spear', category: 'simple', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown', 'versatile'], weight: 3, costGp: 1, normalRange: 20, longRange: 60, versatileDice: '1d8', weaponProficiencyId: 'simple' },
   // Simple ranged
-  { type: 'weapon', id: 'light-crossbow', category: 'simple', range: 'ranged', damageDice: '1d8', damageType: 'piercing', properties: ['ammunition', 'loading', 'two-handed'], weight: 5, costGp: 25, normalRange: 80, longRange: 320 },
-  { type: 'weapon', id: 'dart', category: 'simple', range: 'ranged', damageDice: '1d4', damageType: 'piercing', properties: ['finesse', 'thrown'], weight: 0.25, costGp: 0.05, normalRange: 20, longRange: 60 },
-  { type: 'weapon', id: 'shortbow', category: 'simple', range: 'ranged', damageDice: '1d6', damageType: 'piercing', properties: ['ammunition', 'two-handed'], weight: 2, costGp: 25, normalRange: 80, longRange: 320 },
-  { type: 'weapon', id: 'sling', category: 'simple', range: 'ranged', damageDice: '1d4', damageType: 'bludgeoning', properties: ['ammunition'], weight: 0, costGp: 0.1, normalRange: 30, longRange: 120 },
+  { type: 'weapon', id: 'light-crossbow', category: 'simple', range: 'ranged', damageDice: '1d8', damageType: 'piercing', properties: ['ammunition', 'loading', 'two-handed'], weight: 5, costGp: 25, normalRange: 80, longRange: 320, weaponProficiencyId: 'lightcrossbow' },
+  { type: 'weapon', id: 'dart', category: 'simple', range: 'ranged', damageDice: '1d4', damageType: 'piercing', properties: ['finesse', 'thrown'], weight: 0.25, costGp: 0.05, normalRange: 20, longRange: 60, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'shortbow', category: 'simple', range: 'ranged', damageDice: '1d6', damageType: 'piercing', properties: ['ammunition', 'two-handed'], weight: 2, costGp: 25, normalRange: 80, longRange: 320, weaponProficiencyId: 'simple' },
+  { type: 'weapon', id: 'sling', category: 'simple', range: 'ranged', damageDice: '1d4', damageType: 'bludgeoning', properties: ['ammunition'], weight: 0, costGp: 0.1, normalRange: 30, longRange: 120, weaponProficiencyId: 'simple' },
   // Martial melee
-  { type: 'weapon', id: 'battleaxe', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'slashing', properties: ['versatile'], weight: 4, costGp: 10, versatileDice: '1d10' },
-  { type: 'weapon', id: 'flail', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: [], weight: 2, costGp: 10 },
-  { type: 'weapon', id: 'glaive', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'slashing', properties: ['heavy', 'reach', 'two-handed'], weight: 6, costGp: 20 },
-  { type: 'weapon', id: 'greataxe', category: 'martial', range: 'melee', damageDice: '1d12', damageType: 'slashing', properties: ['heavy', 'two-handed'], weight: 7, costGp: 30 },
-  { type: 'weapon', id: 'greatsword', category: 'martial', range: 'melee', damageDice: '2d6', damageType: 'slashing', properties: ['heavy', 'two-handed'], weight: 6, costGp: 50 },
-  { type: 'weapon', id: 'halberd', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'slashing', properties: ['heavy', 'reach', 'two-handed'], weight: 6, costGp: 20 },
-  { type: 'weapon', id: 'lance', category: 'martial', range: 'melee', damageDice: '1d12', damageType: 'piercing', properties: ['reach', 'special'], weight: 6, costGp: 10 },
-  { type: 'weapon', id: 'longsword', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'slashing', properties: ['versatile'], weight: 3, costGp: 15, versatileDice: '1d10' },
-  { type: 'weapon', id: 'maul', category: 'martial', range: 'melee', damageDice: '2d6', damageType: 'bludgeoning', properties: ['heavy', 'two-handed'], weight: 10, costGp: 10 },
-  { type: 'weapon', id: 'morningstar', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: [], weight: 4, costGp: 15 },
-  { type: 'weapon', id: 'pike', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'piercing', properties: ['heavy', 'reach', 'two-handed'], weight: 18, costGp: 5 },
-  { type: 'weapon', id: 'rapier', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: ['finesse'], weight: 2, costGp: 25 },
-  { type: 'weapon', id: 'scimitar', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'slashing', properties: ['finesse', 'light'], weight: 3, costGp: 25 },
-  { type: 'weapon', id: 'shortsword', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['finesse', 'light'], weight: 2, costGp: 10 },
-  { type: 'weapon', id: 'trident', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown', 'versatile'], weight: 4, costGp: 5, normalRange: 20, longRange: 60, versatileDice: '1d8' },
-  { type: 'weapon', id: 'war-pick', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: [], weight: 2, costGp: 5 },
-  { type: 'weapon', id: 'warhammer', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: ['versatile'], weight: 2, costGp: 15, versatileDice: '1d10' },
-  { type: 'weapon', id: 'whip', category: 'martial', range: 'melee', damageDice: '1d4', damageType: 'slashing', properties: ['finesse', 'reach'], weight: 3, costGp: 2 },
+  { type: 'weapon', id: 'battleaxe', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'slashing', properties: ['versatile'], weight: 4, costGp: 10, versatileDice: '1d10', weaponProficiencyId: 'battleaxe' },
+  { type: 'weapon', id: 'flail', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: [], weight: 2, costGp: 10, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'glaive', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'slashing', properties: ['heavy', 'reach', 'two-handed'], weight: 6, costGp: 20, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'greataxe', category: 'martial', range: 'melee', damageDice: '1d12', damageType: 'slashing', properties: ['heavy', 'two-handed'], weight: 7, costGp: 30, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'greatsword', category: 'martial', range: 'melee', damageDice: '2d6', damageType: 'slashing', properties: ['heavy', 'two-handed'], weight: 6, costGp: 50, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'halberd', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'slashing', properties: ['heavy', 'reach', 'two-handed'], weight: 6, costGp: 20, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'lance', category: 'martial', range: 'melee', damageDice: '1d12', damageType: 'piercing', properties: ['reach', 'special'], weight: 6, costGp: 10, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'longsword', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'slashing', properties: ['versatile'], weight: 3, costGp: 15, versatileDice: '1d10', weaponProficiencyId: 'longsword' },
+  { type: 'weapon', id: 'maul', category: 'martial', range: 'melee', damageDice: '2d6', damageType: 'bludgeoning', properties: ['heavy', 'two-handed'], weight: 10, costGp: 10, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'morningstar', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: [], weight: 4, costGp: 15, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'pike', category: 'martial', range: 'melee', damageDice: '1d10', damageType: 'piercing', properties: ['heavy', 'reach', 'two-handed'], weight: 18, costGp: 5, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'rapier', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: ['finesse'], weight: 2, costGp: 25, weaponProficiencyId: 'rapier' },
+  { type: 'weapon', id: 'scimitar', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'slashing', properties: ['finesse', 'light'], weight: 3, costGp: 25, weaponProficiencyId: 'scimitar' },
+  { type: 'weapon', id: 'shortsword', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['finesse', 'light'], weight: 2, costGp: 10, weaponProficiencyId: 'shortsword' },
+  { type: 'weapon', id: 'trident', category: 'martial', range: 'melee', damageDice: '1d6', damageType: 'piercing', properties: ['thrown', 'versatile'], weight: 4, costGp: 5, normalRange: 20, longRange: 60, versatileDice: '1d8', weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'war-pick', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'piercing', properties: [], weight: 2, costGp: 5, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'warhammer', category: 'martial', range: 'melee', damageDice: '1d8', damageType: 'bludgeoning', properties: ['versatile'], weight: 2, costGp: 15, versatileDice: '1d10', weaponProficiencyId: 'warhammer' },
+  { type: 'weapon', id: 'whip', category: 'martial', range: 'melee', damageDice: '1d4', damageType: 'slashing', properties: ['finesse', 'reach'], weight: 3, costGp: 2, weaponProficiencyId: 'martial' },
   // Martial ranged
-  { type: 'weapon', id: 'blowgun', category: 'martial', range: 'ranged', damageDice: '1d1', damageType: 'piercing', properties: ['ammunition', 'loading'], weight: 1, costGp: 10, normalRange: 25, longRange: 100 },
-  { type: 'weapon', id: 'hand-crossbow', category: 'martial', range: 'ranged', damageDice: '1d6', damageType: 'piercing', properties: ['ammunition', 'light', 'loading'], weight: 3, costGp: 75, normalRange: 30, longRange: 120 },
-  { type: 'weapon', id: 'heavy-crossbow', category: 'martial', range: 'ranged', damageDice: '1d10', damageType: 'piercing', properties: ['ammunition', 'heavy', 'loading', 'two-handed'], weight: 18, costGp: 50, normalRange: 100, longRange: 400 },
-  { type: 'weapon', id: 'longbow', category: 'martial', range: 'ranged', damageDice: '1d8', damageType: 'piercing', properties: ['ammunition', 'heavy', 'two-handed'], weight: 2, costGp: 50, normalRange: 150, longRange: 600 },
-  { type: 'weapon', id: 'net', category: 'martial', range: 'ranged', damageDice: '1d1', damageType: 'bludgeoning', properties: ['special', 'thrown'], weight: 3, costGp: 1, normalRange: 5, longRange: 15 },
+  { type: 'weapon', id: 'blowgun', category: 'martial', range: 'ranged', damageDice: '1d1', damageType: 'piercing', properties: ['ammunition', 'loading'], weight: 1, costGp: 10, normalRange: 25, longRange: 100, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'hand-crossbow', category: 'martial', range: 'ranged', damageDice: '1d6', damageType: 'piercing', properties: ['ammunition', 'light', 'loading'], weight: 3, costGp: 75, normalRange: 30, longRange: 120, weaponProficiencyId: 'handcrossbow' },
+  { type: 'weapon', id: 'heavy-crossbow', category: 'martial', range: 'ranged', damageDice: '1d10', damageType: 'piercing', properties: ['ammunition', 'heavy', 'loading', 'two-handed'], weight: 18, costGp: 50, normalRange: 100, longRange: 400, weaponProficiencyId: 'martial' },
+  { type: 'weapon', id: 'longbow', category: 'martial', range: 'ranged', damageDice: '1d8', damageType: 'piercing', properties: ['ammunition', 'heavy', 'two-handed'], weight: 2, costGp: 50, normalRange: 150, longRange: 600, weaponProficiencyId: 'longbow' },
+  { type: 'weapon', id: 'net', category: 'martial', range: 'ranged', damageDice: '1d1', damageType: 'bludgeoning', properties: ['special', 'thrown'], weight: 3, costGp: 1, normalRange: 5, longRange: 15, weaponProficiencyId: 'martial' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -156,6 +156,15 @@ const ITEM_MAP: ReadonlyMap<string, ItemDef> = new Map(ITEM_CATALOG.map((item) =
 
 export function getItemDef(id: string): ItemDef | undefined {
   return ITEM_MAP.get(id)
+}
+
+/** Fail-fast lookup for trusted source data. Throws when the item id is not in the catalog. */
+export function requireItemDef(id: string): ItemDef {
+  const def = ITEM_MAP.get(id)
+  if (def === undefined) {
+    throw new Error(`Unknown item id: "${id}". Check source data or catalog.`)
+  }
+  return def
 }
 
 // Maps ItemDef['type'] → the plural group key used in gamedata.json items.*
