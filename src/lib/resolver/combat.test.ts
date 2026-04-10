@@ -197,7 +197,7 @@ describe('resolveAc', () => {
       },
     ]
     // DEX 16 → mod +3, but chain mail ignores DEX (maxDexBonus 0, baseAc 16)
-    const result = resolveAc(bundles, 3, { baseAc: 16, shieldBonus: 0 })
+    const result = resolveAc(bundles, 3, { totalBase: 16, shieldBonus: 0 })
     expect(result.effective).toBe(16)
     expect(result.calculations[0].baseValue).toBe(16)
   })
@@ -212,7 +212,7 @@ describe('resolveAc', () => {
         ],
       },
     ]
-    const result = resolveAc(bundles, 3, { baseAc: 16, shieldBonus: 0 })
+    const result = resolveAc(bundles, 3, { totalBase: 16, shieldBonus: 0 })
     expect(result.effective).toBe(17)
   })
 
@@ -223,7 +223,7 @@ describe('resolveAc', () => {
         grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
       },
     ]
-    const result = resolveAc(bundles, 3, { baseAc: 16, shieldBonus: 2 })
+    const result = resolveAc(bundles, 3, { totalBase: 16, shieldBonus: 2 })
     expect(result.effective).toBe(18)
     expect(result.bonuses).toHaveLength(1)
     expect(result.bonuses[0].value).toBe(2)

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment'
-import { getItemDef } from '@/lib/sources/items'
+import { requireItemDef } from '@/lib/sources/items'
 import type { GrantBundle } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 import type { ResolvedAbility, ResolvedEquipmentItem } from '@/types/resolved'
@@ -38,7 +38,7 @@ const NO_FIGHTING_STYLES: readonly string[] = []
 function makeEquippedWeapon(weaponId: string): ResolvedEquipmentItem {
   return {
     itemId: weaponId,
-    itemDef: getItemDef(weaponId),
+    itemDef: requireItemDef(weaponId),
     quantity: 1,
     source: { origin: 'class', id: 'fighter', level: 1 },
     equipped: true,
@@ -48,7 +48,7 @@ function makeEquippedWeapon(weaponId: string): ResolvedEquipmentItem {
 function makeEquippedArmor(armorId: string): ResolvedEquipmentItem {
   return {
     itemId: armorId,
-    itemDef: getItemDef(armorId),
+    itemDef: requireItemDef(armorId),
     quantity: 1,
     source: { origin: 'class', id: 'fighter', level: 1 },
     equipped: true,
@@ -136,6 +136,33 @@ describe('resolveEquipment', () => {
     expect(result.items).toHaveLength(0)
     expect(result.pendingChoices).toHaveLength(1)
     expect(result.pendingChoices[0].type).toBe('equipment-choice')
+  })
+
+  it('re-prompts when stored optionIndex is out of range (stale persisted data)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [
+          {
+            type: 'equipment-choice',
+            key: 'equipment-choice:class:fighter:0',
+            options: [
+              [{ itemId: 'chain-mail', quantity: 1 }],
+              [{ itemId: 'leather', quantity: 1 }],
+            ],
+          },
+        ],
+      },
+    ]
+    // optionIndex 5 is out of range — should fall through to pending
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 5 },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(0)
+    expect(result.pendingChoices).toHaveLength(1)
+    expect(result.pendingChoices[0].type).toBe('equipment-choice')
+    expect(result.pendingChoices[0].choiceKey).toBe('equipment-choice:class:fighter:0')
   })
 })
 
@@ -274,23 +301,23 @@ describe('resolveEquippedArmorAc', () => {
     expect(result).toBeNull()
   })
 
-  it('chain mail (baseAc 16, maxDex 0) + DEX 16 → baseAc 16 (DEX ignored)', () => {
+  it('chain mail (baseAc 16, maxDex 0) + DEX 16 → totalBase 16 (DEX ignored)', () => {
     const result = resolveEquippedArmorAc([makeEquippedArmor('chain-mail')], 3)
     expect(result).not.toBeNull()
-    expect(result!.baseAc).toBe(16)
+    expect(result!.totalBase).toBe(16)
     expect(result!.shieldBonus).toBe(0)
   })
 
-  it('chain shirt (baseAc 13, maxDex 2) + DEX 16 (mod +3) → baseAc 15 (capped at 2)', () => {
+  it('chain shirt (baseAc 13, maxDex 2) + DEX 16 (mod +3) → totalBase 15 (capped at 2)', () => {
     const result = resolveEquippedArmorAc([makeEquippedArmor('chain-shirt')], 3)
     expect(result).not.toBeNull()
-    expect(result!.baseAc).toBe(15)
+    expect(result!.totalBase).toBe(15)
   })
 
-  it('leather (baseAc 11, maxDex null) + DEX 16 (mod +3) → baseAc 14 (uncapped)', () => {
+  it('leather (baseAc 11, maxDex null) + DEX 16 (mod +3) → totalBase 14 (uncapped)', () => {
     const result = resolveEquippedArmorAc([makeEquippedArmor('leather')], 3)
     expect(result).not.toBeNull()
-    expect(result!.baseAc).toBe(14)
+    expect(result!.totalBase).toBe(14)
   })
 
   it('shield adds shieldBonus 2', () => {
@@ -300,18 +327,20 @@ describe('resolveEquippedArmorAc', () => {
     )
     expect(result).not.toBeNull()
     expect(result!.shieldBonus).toBe(2)
-    expect(result!.baseAc).toBe(16)
+    expect(result!.totalBase).toBe(16)
   })
 
-  it('shield alone (without body armor) returns null', () => {
+  it('shield alone (without body armor) returns shieldBonus 2 with totalBase null', () => {
     const result = resolveEquippedArmorAc([makeEquippedArmor('shield')], 2)
-    expect(result).toBeNull()
+    expect(result).not.toBeNull()
+    expect(result!.shieldBonus).toBe(2)
+    expect(result!.totalBase).toBeNull()
   })
 
   it('non-equipped item is not counted as armor', () => {
     const notEquipped: ResolvedEquipmentItem = {
       itemId: 'chain-mail',
-      itemDef: getItemDef('chain-mail'),
+      itemDef: requireItemDef('chain-mail'),
       quantity: 1,
       source: { origin: 'class', id: 'fighter', level: 1 },
       equipped: false,
