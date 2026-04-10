@@ -308,6 +308,19 @@
       "expandAll": "Expand All",
       "collapseAll": "Collapse All"
     },
+    "equipment": {
+      "sourceFrom": {
+        "race": "from race",
+        "class": "from class",
+        "subclass": "from subclass",
+        "background": "from background",
+        "feat": "from feat",
+        "item": "from item",
+        "bundle": "from {{id}}",
+        "pack": "from {{id}}",
+        "loot": "loot"
+      }
+    },
     "proficiencies": {
       "armor": "Armor",
       "weapons": "Weapons",

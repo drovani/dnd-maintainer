@@ -1,8 +1,10 @@
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import { getItemDef, getItemNameKey } from '@/lib/sources/items'
+import { BUNDLE_CATEGORIES } from '@/types/items'
 import { useTranslation } from 'react-i18next'
 import { ChoicePicker } from './ChoicePicker'
 import type { ChoiceDecision } from '@/types/choices'
+import type { PendingChoice } from '@/types/resolved'
 
 export function EquipmentStep() {
   const { t } = useTranslation('gamedata')
@@ -10,8 +12,22 @@ export function EquipmentStep() {
   const context = useCharacterContext()
   const { resolved } = context
 
-  const equipmentChoices = resolved?.pendingChoices.filter((c) => c.type === 'equipment-choice') ?? []
   const allEquipment = resolved?.equipment ?? []
+  const allPendingChoices = resolved?.pendingChoices ?? []
+
+  // Separate bundle-choice from other pending choices
+  const bundleChoices = allPendingChoices.filter(
+    (c): c is PendingChoice & { type: 'bundle-choice' } => c.type === 'bundle-choice',
+  )
+  const otherChoices = allPendingChoices.filter((c) => c.type !== 'bundle-choice')
+
+  // Group bundle-choice pending choices by category, preserving fixed section order
+  const bundleChoicesByCategory = Object.fromEntries(
+    BUNDLE_CATEGORIES.map((cat) => [
+      cat,
+      bundleChoices.filter((c) => c.category === cat),
+    ]),
+  ) as Record<(typeof BUNDLE_CATEGORIES)[number], (PendingChoice & { type: 'bundle-choice' })[]>
 
   // Group resolved equipment by type for the summary
   const weapons = allEquipment.filter((e) => e.itemDef.type === 'weapon')
@@ -20,6 +36,8 @@ export function EquipmentStep() {
   const packs = allEquipment.filter((e) => e.itemDef.type === 'pack')
 
   const hasAnyEquipment = allEquipment.length > 0
+  const hasBundleChoices = bundleChoices.length > 0
+  const hasOtherChoices = otherChoices.length > 0
 
   function renderItemName(itemId: string): string {
     const itemDef = getItemDef(itemId)
@@ -29,9 +47,39 @@ export function EquipmentStep() {
 
   return (
     <div className="space-y-6">
-      {equipmentChoices.length > 0 ? (
+      {/* Bundle-choice sections grouped by category */}
+      {hasBundleChoices && (
+        <div className="space-y-6">
+          {BUNDLE_CATEGORIES.map((category) => {
+            const choices = bundleChoicesByCategory[category]
+            if (choices.length === 0) return null
+            return (
+              <div key={category} className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground">
+                  {tc(`characterBuilder.equipment.sections.${category}`)}
+                </h3>
+                {choices.map((choice) => {
+                  const decision = context.build?.choices[choice.choiceKey]
+                  return (
+                    <ChoicePicker
+                      key={choice.choiceKey}
+                      choice={choice}
+                      currentDecision={decision as ChoiceDecision | undefined}
+                      onDecide={(key, d) => context.makeChoice(key, d)}
+                      onClear={(key) => context.clearChoice(key)}
+                    />
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Fallback flat list for non-bundle-choice pending choices (forward compat) */}
+      {hasOtherChoices && (
         <div className="space-y-4">
-          {equipmentChoices.map((choice) => {
+          {otherChoices.map((choice) => {
             const decision = context.build?.choices[choice.choiceKey]
             return (
               <ChoicePicker
@@ -44,12 +92,15 @@ export function EquipmentStep() {
             )
           })}
         </div>
-      ) : (
+      )}
+
+      {!hasBundleChoices && !hasOtherChoices && (
         <p className="text-muted-foreground text-sm">
           {tc('characterBuilder.equipment.comingSoon')}
         </p>
       )}
 
+      {/* Equipment Summary */}
       {hasAnyEquipment && (
         <div className="border-t pt-4">
           <h3 className="text-sm font-semibold text-foreground mb-3">
