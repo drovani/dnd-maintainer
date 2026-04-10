@@ -18,9 +18,11 @@ export const DAMAGE_TYPES = [
   'force',
   'lightning',
   'necrotic',
+  'piercing',
   'poison',
   'psychic',
   'radiant',
+  'slashing',
   'thunder',
 ] as const
 

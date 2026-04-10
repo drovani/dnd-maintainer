@@ -2,7 +2,7 @@ import type { AbilityKey, FightingStyleId, SkillId, ArmorProficiencyId, WeaponPr
 import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants'
 import type { SourceTag } from '@/types/sources'
 import type { ChoiceKey } from '@/types/choices'
-import type { ItemDef, DamageType, WeaponProperty, WeaponRange } from '@/types/items'
+import type { ItemDef, PhysicalDamageType, WeaponProperty, WeaponRange } from '@/types/items'
 
 export interface Sourced<T> {
   readonly value: T
@@ -16,11 +16,16 @@ export interface ResolvedAbility {
   readonly modifier: number
 }
 
-export interface SkillBonusComponent {
-  readonly type: 'ability' | 'proficiency' | 'expertise' | 'ability-check-bonus'
+export interface BonusComponent<TKind extends string> {
+  readonly type: TKind
   readonly value: number
   readonly label: string
 }
+
+export type SkillBonusComponent = BonusComponent<'ability' | 'proficiency' | 'expertise' | 'ability-check-bonus'>
+export type AttackBonusComponent = BonusComponent<'ability' | 'proficiency' | 'fighting-style' | 'magic'>
+export type DamageBonusComponent = BonusComponent<'ability' | 'fighting-style' | 'magic'>
+export type SavingThrowBonusComponent = BonusComponent<'ability' | 'proficiency'>
 
 export interface ResolvedSkill {
   readonly ability: AbilityKey
@@ -33,43 +38,24 @@ export interface ResolvedSkill {
 
 export interface ResolvedEquipmentItem {
   readonly itemId: string
-  readonly itemDef: ItemDef | undefined
+  readonly itemDef: ItemDef
   readonly quantity: number
   readonly source: SourceTag
   readonly equipped: boolean
 }
 
-export interface AttackBonusComponent {
-  readonly type: 'ability' | 'proficiency' | 'fighting-style' | 'magic'
-  readonly value: number
-  readonly label: string
-}
-
-export interface DamageBonusComponent {
-  readonly type: 'ability' | 'fighting-style' | 'magic'
-  readonly value: number
-  readonly label: string
-}
-
 export interface ResolvedAttack {
   readonly weaponId: string
-  readonly name: string
   readonly attackBonus: number
   readonly attackBreakdown: readonly AttackBonusComponent[]
   readonly damageDice: string
   readonly damageBonus: number
   readonly damageBreakdown: readonly DamageBonusComponent[]
-  readonly damageType: DamageType
+  readonly damageType: PhysicalDamageType
   readonly properties: readonly WeaponProperty[]
   readonly range: WeaponRange
   readonly normalRange?: number
   readonly longRange?: number
-}
-
-export interface SavingThrowBonusComponent {
-  readonly type: 'ability' | 'proficiency'
-  readonly value: number
-  readonly label: string
 }
 
 export interface ResolvedFeature {

@@ -1,3 +1,6 @@
+import type { DamageTypeId } from '@/types/grants'
+import type { WeaponProficiencyId } from '@/lib/dnd-helpers'
+
 export const WEAPON_PROPERTIES = [
   'ammunition',
   'finesse',
@@ -14,7 +17,7 @@ export type WeaponProperty = (typeof WEAPON_PROPERTIES)[number]
 
 export type WeaponCategory = 'simple' | 'martial'
 export type WeaponRange = 'melee' | 'ranged'
-export type DamageType = 'bludgeoning' | 'piercing' | 'slashing'
+export type PhysicalDamageType = Extract<DamageTypeId, 'bludgeoning' | 'piercing' | 'slashing'>
 export type ArmorCategory = 'light' | 'medium' | 'heavy' | 'shield'
 
 export interface WeaponDef {
@@ -22,13 +25,15 @@ export interface WeaponDef {
   readonly category: WeaponCategory
   readonly range: WeaponRange
   readonly damageDice: string
-  readonly damageType: DamageType
+  readonly damageType: PhysicalDamageType
   readonly properties: readonly WeaponProperty[]
   readonly weight: number
   readonly costGp: number
   readonly normalRange?: number
   readonly longRange?: number
   readonly versatileDice?: string
+  /** Explicit proficiency ID for use in proficiency checks — may differ from id when id uses hyphens */
+  readonly weaponProficiencyId: WeaponProficiencyId | WeaponCategory
 }
 
 export interface ArmorDef {
