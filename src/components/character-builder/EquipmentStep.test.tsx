@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { EquipmentStep } from '@/components/character-builder/EquipmentStep'
 import type { ResolvedCharacter, PendingChoice } from '@/types/resolved'
 import type { ChoiceKey } from '@/types/choices'
+import { requireItemDef } from '@/lib/sources/items'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -139,7 +140,7 @@ describe('EquipmentStep — category grouping', () => {
       equipment: [
         {
           itemId: 'chain-mail',
-          itemDef: { type: 'armor', id: 'chain-mail', baseAc: 16, maxDexBonus: 0, category: 'heavy', properties: [], weight: 55, costGp: 75 } as import('@/types/items').ItemDef,
+          itemDef: requireItemDef('chain-mail'),
           quantity: 1,
           source: { origin: 'bundle', id: 'fighter-chainmail' },
           equipped: false,
