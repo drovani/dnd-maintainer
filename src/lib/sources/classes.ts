@@ -39,6 +39,38 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'armor-class', calculation: { mode: 'armored' } },
           { type: 'fighting-style-choice', key: createChoiceKey('fighting-style-choice', 'class', 'fighter', 0), count: 1, from: FIGHTING_STYLE_IDS },
           { type: 'feature', feature: { id: 'fighter-second-wind' } },
+          {
+            type: 'equipment-choice',
+            key: createChoiceKey('equipment-choice', 'class', 'fighter', 0),
+            options: [
+              [{ itemId: 'chain-mail', quantity: 1 }],
+              [{ itemId: 'leather', quantity: 1 }, { itemId: 'longbow', quantity: 1 }, { itemId: 'arrows-20', quantity: 1 }],
+            ],
+          },
+          {
+            type: 'equipment-choice',
+            key: createChoiceKey('equipment-choice', 'class', 'fighter', 1),
+            options: [
+              [{ itemId: 'longsword', quantity: 1 }, { itemId: 'shield', quantity: 1 }],
+              [{ itemId: 'longsword', quantity: 2 }],
+            ],
+          },
+          {
+            type: 'equipment-choice',
+            key: createChoiceKey('equipment-choice', 'class', 'fighter', 2),
+            options: [
+              [{ itemId: 'light-crossbow', quantity: 1 }, { itemId: 'bolts-20', quantity: 1 }],
+              [{ itemId: 'handaxe', quantity: 2 }],
+            ],
+          },
+          {
+            type: 'equipment-choice',
+            key: createChoiceKey('equipment-choice', 'class', 'fighter', 3),
+            options: [
+              [{ itemId: 'dungeoneers-pack', quantity: 1 }],
+              [{ itemId: 'explorers-pack', quantity: 1 }],
+            ],
+          },
         ],
       },
       { grants: [{ type: 'feature', feature: { id: 'fighter-action-surge' } }] },

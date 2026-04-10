@@ -27,6 +27,9 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         count: 1,
         from: null,
       },
+      { type: 'equipment', itemId: 'insignia-of-rank', quantity: 1 },
+      { type: 'equipment', itemId: 'common-clothes', quantity: 1 },
+      { type: 'equipment', itemId: 'pouch', quantity: 1 },
     ],
   },
 ]

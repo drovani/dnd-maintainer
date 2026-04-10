@@ -219,7 +219,11 @@
       "equipped": "Equipped",
       "quantity": "Qty",
       "weight": "Weight (lb)",
-      "comingSoon": "Equipment management coming soon"
+      "comingSoon": "Equipment management coming soon",
+      "title": "Equipment",
+      "choiceLabel": "Choose your equipment",
+      "optionSeparator": "or",
+      "summary": "Equipment Summary"
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",
@@ -244,7 +248,9 @@
       "backstory": "Backstory",
       "appearance": "Appearance",
       "cantrips": "CANTRIPS",
-      "physicalTraits": "Physical Traits"
+      "physicalTraits": "Physical Traits",
+      "proficiencies": "Proficiencies",
+      "attacks": "Attacks"
     },
     "fields": {
       "class": "Class",
@@ -291,6 +297,27 @@
       "expertise": "Expertise",
       "expandAll": "Expand All",
       "collapseAll": "Collapse All"
+    },
+    "proficiencies": {
+      "armor": "Armor",
+      "weapons": "Weapons",
+      "tools": "Tools",
+      "languages": "Languages"
+    },
+    "attacks": {
+      "name": "Name",
+      "attackBonus": "ATK",
+      "damage": "Damage",
+      "noAttacks": "No weapons equipped",
+      "range": "Range"
+    },
+    "breakdown": {
+      "base": "Base",
+      "armor": "Armor",
+      "shield": "Shield",
+      "ability": "Ability Modifier",
+      "proficiency": "Proficiency Bonus",
+      "fightingStyle": "Fighting Style"
     },
     "hints": {
       "skillsProficiency": "Click P for proficiency, E for expertise.",
