@@ -28,6 +28,8 @@ import { getItemDef, getItemNameKey } from '@/lib/sources/items'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
+import type { PersistedItem } from '@/lib/resolver/index'
+import type { SourceTag } from '@/types/sources'
 import {
   DND_CLASSES,
   getProficiencyBonus,
@@ -81,7 +83,7 @@ function ModalFooter({ onSave, onCancel, saving }: { onSave: () => void; onCance
 
 function CharacterSheetInner({ character, itemsData, characterId }: {
   character: Character
-  itemsData: Array<{ id: string; item_id: string; equipped?: boolean; quantity: number }>
+  itemsData: Array<{ id: string; item_id: string; equipped?: boolean; quantity: number; source?: unknown }>
   characterId: string
 }) {
   const { t } = useTranslation('gamedata')
@@ -479,6 +481,13 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                       }
                       return ''
                     })()
+                    const itemSource = item.source as SourceTag | null
+                    const sourceLabel = itemSource
+                      ? tc(`characterSheet.equipment.sourceFrom.${itemSource.origin}`, {
+                          id: 'id' in itemSource ? itemSource.id : undefined,
+                          description: 'description' in itemSource ? itemSource.description : undefined,
+                        })
+                      : null
                     return (
                       <div
                         key={item.id}
@@ -491,6 +500,11 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                           <div className="text-muted-foreground">
                             {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: itemDef?.type !== 'pack' ? (itemDef?.weight ?? 0) : 0 })}
                           </div>
+                          {sourceLabel && (
+                            <div className="text-xs text-muted-foreground/70 italic">
+                              {sourceLabel}
+                            </div>
+                          )}
                         </div>
                         {item.equipped && <Check className="size-4 text-green-600" />}
                       </div>
@@ -659,6 +673,18 @@ export default function CharacterSheet() {
     [itemsData],
   )
 
+  const isFinalized = character?.status === 'ready'
+
+  const persistedItems = useMemo<readonly PersistedItem[]>(() => {
+    if (!isFinalized) return []
+    return itemsData.map((item) => ({
+      itemId: item.item_id,
+      quantity: item.quantity,
+      equipped: item.equipped,
+      source: (item.source as SourceTag | null) ?? { origin: 'item' as const, id: item.item_id },
+    }))
+  }, [isFinalized, itemsData])
+
   const isLoading = characterLoading || rowsLoading || itemsLoading
 
   if (isLoading) {
@@ -692,6 +718,8 @@ export default function CharacterSheet() {
       initialCharacter={character}
       initialRows={buildRows}
       initialEquippedItems={equippedItems}
+      initialPersistedItems={isFinalized ? persistedItems : undefined}
+      useDBInventory={isFinalized}
     >
       <CharacterSheetInner
         character={character}

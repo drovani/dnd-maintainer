@@ -11,7 +11,7 @@ import type { GrantBundle, SubclassId } from '@/types/sources'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
-import { resolveCharacter } from '@/lib/resolver/index'
+import { resolveCharacter, type PersistedItem } from '@/lib/resolver/index'
 import { toast } from 'sonner'
 import i18next from 'i18next'
 
@@ -181,6 +181,8 @@ function tryDeriveAndResolve(
   character: Character,
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
+  persistedItems?: readonly PersistedItem[],
+  useDBInventory?: boolean,
 ): BuildResult {
   // Exclude soft-deleted rows before reconstruction
   const activeRows = rows.filter((r) => r.deleted_at == null)
@@ -213,6 +215,8 @@ function tryDeriveAndResolve(
       choices: build.choices,
       levels: build.levels,
       equippedItemIds: equippedItems,
+      persistedItems,
+      useDBInventory,
     })
     return { status: 'ok', build, bundles, resolved, error: null, warnings }
   } catch (err) {
@@ -230,6 +234,8 @@ interface CharacterProviderProps {
   readonly initialCharacter: Character
   readonly initialRows: readonly BuildLevelRow[]
   readonly initialEquippedItems: readonly string[]
+  readonly initialPersistedItems?: readonly PersistedItem[]
+  readonly useDBInventory?: boolean
   readonly children: ReactNode
 }
 
@@ -237,6 +243,8 @@ export function CharacterProvider({
   initialCharacter,
   initialRows,
   initialEquippedItems,
+  initialPersistedItems,
+  useDBInventory,
   children,
 }: CharacterProviderProps): React.JSX.Element {
   const [character, setCharacter] = useState<Character>(initialCharacter)
@@ -265,7 +273,9 @@ export function CharacterProvider({
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
   const { build, bundles, resolved, error: buildError, warnings: buildWarnings } = useMemo(
-    () => tryDeriveAndResolve(character, rows, equippedItems),
+    () => tryDeriveAndResolve(character, rows, equippedItems, initialPersistedItems, useDBInventory),
+    // initialPersistedItems and useDBInventory are stable (set at mount from DB query results)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [character, rows, equippedItems],
   )
 
