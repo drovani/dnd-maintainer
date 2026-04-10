@@ -10,6 +10,7 @@ import {
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
 import { getItemDef, getItemNameKey } from '@/lib/sources/items'
+import { getBundleNameKey, resolveBundleRef } from '@/lib/sources/bundles'
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
 import type { PendingChoice } from '@/types/resolved'
 import { useTranslation } from 'react-i18next'
@@ -190,6 +191,94 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                   className="flex-1 cursor-pointer"
                 >
                   {t(`tools.${toolId}`)}
+                </Label>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  if (choice.type === 'bundle-choice') {
+    const currentBundleId =
+      currentDecision?.type === 'bundle-choice' ? currentDecision.bundleId : undefined
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {tc('characterBuilder.equipment.choiceLabel')}
+          </p>
+          {currentBundleId !== undefined && (
+            <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+              {tc('characterBuilder.equipment.clearSelection')}
+            </Button>
+          )}
+        </div>
+        <div className="space-y-2">
+          {choice.bundleIds.map((bundleId) => {
+            const isSelected = currentBundleId === bundleId
+            let ref: ReturnType<typeof resolveBundleRef> | null = null
+            try {
+              ref = resolveBundleRef(bundleId)
+            } catch {
+              // Unknown bundle/pack — skip rendering this option
+              return null
+            }
+            const optionLabel = ref.contents
+              .map(({ itemId, quantity }) => {
+                const itemDef = getItemDef(itemId)
+                const type = itemDef?.type ?? 'gear'
+                const name = t(getItemNameKey(type, itemId), { defaultValue: itemId })
+                const detail = (() => {
+                  if (itemDef?.type === 'weapon') {
+                    const props = itemDef.properties
+                      .map((p) => t(`weaponProperties.${p}`))
+                      .join(', ')
+                    const dmgType = t(`damageTypes.${itemDef.damageType}`)
+                    return ` (${itemDef.damageDice} ${dmgType}${props ? `, ${props}` : ''})`
+                  }
+                  if (itemDef?.type === 'armor') {
+                    return ` (AC ${itemDef.baseAc})`
+                  }
+                  return ''
+                })()
+                const quantityPrefix = quantity > 1 ? `${quantity}× ` : ''
+                return `${quantityPrefix}${name}${detail}`
+              })
+              .join(` ${tc('characterBuilder.equipment.itemBundleSeparator')} `)
+
+            // For packs, use the item catalog name; for bundles, use the bundle catalog name
+            const bundleName =
+              ref.kind === 'pack'
+                ? t(getItemNameKey('pack', bundleId), { defaultValue: bundleId })
+                : t(getBundleNameKey(bundleId), { defaultValue: bundleId })
+            const displayLabel = ref.kind === 'pack' ? `${bundleName}: ${optionLabel}` : optionLabel
+
+            return (
+              <div
+                key={bundleId}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <input
+                  type="radio"
+                  id={`choice-bundle-${choice.choiceKey}-${bundleId}`}
+                  name={`choice-bundle-${choice.choiceKey}`}
+                  checked={isSelected}
+                  onChange={() =>
+                    onDecide(choice.choiceKey, {
+                      type: 'bundle-choice',
+                      bundleId,
+                    })
+                  }
+                  className="size-4 text-primary"
+                />
+                <Label
+                  htmlFor={`choice-bundle-${choice.choiceKey}-${bundleId}`}
+                  className="flex-1 cursor-pointer"
+                >
+                  {displayLabel}
                 </Label>
               </div>
             )
