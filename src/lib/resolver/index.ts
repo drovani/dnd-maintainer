@@ -1,7 +1,7 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers'
 import type { FightingStyleId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
-import type { GrantBundle } from '@/types/sources'
+import type { GrantBundle, SourceTag } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 import type { ResolvedCharacter, PendingChoice } from '@/types/resolved'
 import type { HitDie } from '@/types/grants'
@@ -12,6 +12,14 @@ import { resolveFeatures } from '@/lib/resolver/features'
 import { resolveHp, resolveSpeed, resolveAc } from '@/lib/resolver/combat'
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting'
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment'
+import { requireItemDef } from '@/lib/sources/items'
+
+export interface PersistedItem {
+  readonly itemId: string
+  readonly quantity: number
+  readonly equipped: boolean
+  readonly source: SourceTag
+}
 
 export interface ResolverInput {
   readonly baseAbilities: AbilityScores
@@ -21,6 +29,8 @@ export interface ResolverInput {
   readonly hpRolls?: readonly (number | null)[]
   readonly levels?: readonly { readonly hpRoll: number | null }[]
   readonly equippedItemIds?: readonly string[]
+  readonly persistedItems?: readonly PersistedItem[]
+  readonly useDBInventory?: boolean
 }
 
 export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
@@ -41,8 +51,10 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const speed = resolveSpeed(bundles)
   const spellcasting = resolveSpellcasting(bundles)
 
-  // Equipment resolution
-  const equipmentResult = resolveEquipment(bundles, choices, equippedItemIds)
+  // Equipment resolution — finalized characters read from DB inventory directly
+  const equipmentResult = input.useDBInventory && input.persistedItems
+    ? resolveEquipmentFromPersisted(input.persistedItems)
+    : resolveEquipment(bundles, choices, equippedItemIds)
   const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier)
   const armorClass = resolveAc(bundles, dexModifier, equippedArmorAc)
 
@@ -189,4 +201,23 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     attacks,
     pendingChoices,
   }
+}
+
+/**
+ * Builds ResolvedEquipmentItem entries directly from persisted DB rows.
+ * Used for finalized characters where inventory is read from character_items
+ * rather than derived from grant processing.
+ */
+function resolveEquipmentFromPersisted(persistedItems: readonly PersistedItem[]): {
+  readonly items: readonly import('@/types/resolved').ResolvedEquipmentItem[]
+  readonly pendingChoices: readonly import('@/types/resolved').PendingChoice[]
+} {
+  const items = persistedItems.map((row) => ({
+    itemId: row.itemId,
+    itemDef: requireItemDef(row.itemId),
+    quantity: row.quantity,
+    source: row.source,
+    equipped: row.equipped,
+  }))
+  return { items, pendingChoices: [] }
 }

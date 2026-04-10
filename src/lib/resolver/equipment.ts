@@ -12,6 +12,7 @@ import type {
 import type { ResolvedAbility } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 import { getItemDef, requireItemDef } from '@/lib/sources/items'
+import { resolveBundleRef } from '@/lib/sources/bundles'
 import type { WeaponProficiencyId } from '@/lib/dnd-helpers'
 
 export function resolveEquipment(
@@ -33,8 +34,11 @@ export function resolveEquipment(
     })
   }
 
-  // Equipment choice grants
+  // Equipment choice grants (deprecated — use bundle-choice instead)
   for (const { grant, source } of collectGrantsByType(bundles, 'equipment-choice')) {
+    if (import.meta.env?.DEV) {
+      console.warn('equipment-choice is deprecated, use bundle-choice instead')
+    }
     const decision = choices[grant.key]
     if (decision?.type === 'equipment-choice') {
       const chosenOption = grant.options[decision.optionIndex]
@@ -63,6 +67,48 @@ export function resolveEquipment(
         choiceKey: grant.key,
         source,
         options: grant.options,
+      })
+    }
+  }
+
+  // Bundle-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'bundle-choice')) {
+    const decision = choices[grant.key]
+    if (decision?.type === 'bundle-choice') {
+      let ref: ReturnType<typeof resolveBundleRef> | undefined
+      try {
+        ref = resolveBundleRef(decision.bundleId)
+      } catch {
+        // Unknown bundleId (stale persisted data) — re-prompt
+        pendingChoices.push({
+          type: 'bundle-choice',
+          choiceKey: grant.key,
+          source,
+          category: grant.category,
+          bundleIds: grant.bundleIds,
+        })
+        continue
+      }
+      const itemSource: import('@/types/sources').SourceTag =
+        ref.kind === 'pack'
+          ? { origin: 'pack', id: decision.bundleId }
+          : { origin: 'bundle', id: decision.bundleId }
+      for (const { itemId, quantity } of ref.contents) {
+        items.push({
+          itemId,
+          itemDef: requireItemDef(itemId),
+          quantity,
+          source: itemSource,
+          equipped: equippedItemIds.includes(itemId),
+        })
+      }
+    } else {
+      pendingChoices.push({
+        type: 'bundle-choice',
+        choiceKey: grant.key,
+        source,
+        category: grant.category,
+        bundleIds: grant.bundleIds,
       })
     }
   }

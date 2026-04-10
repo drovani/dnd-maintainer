@@ -167,6 +167,180 @@ describe('resolveEquipment', () => {
 })
 
 // ---------------------------------------------------------------------------
+// resolveEquipment — bundle-choice branch
+// ---------------------------------------------------------------------------
+
+describe('resolveEquipment bundle-choice', () => {
+  const FIGHTER_SOURCE: GrantBundle['source'] = { origin: 'class', id: 'fighter', level: 1 }
+
+  const makeBundleChoiceBundle = (bundleIds: string[]): GrantBundle => ({
+    source: FIGHTER_SOURCE,
+    grants: [
+      {
+        type: 'bundle-choice',
+        key: 'bundle-choice:class:fighter:0' as ChoiceKey,
+        category: 'loadout',
+        bundleIds,
+      },
+    ],
+  })
+
+  it('expands bundle decision contents with source.origin "bundle"', () => {
+    const bundles = [makeBundleChoiceBundle(['fighter-chainmail', 'fighter-archer-kit'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail' },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0].itemId).toBe('chain-mail')
+    expect(result.items[0].source).toEqual({ origin: 'bundle', id: 'fighter-chainmail' })
+    expect(result.pendingChoices).toHaveLength(0)
+  })
+
+  it('multi-item bundle expands all contents', () => {
+    const bundles = [makeBundleChoiceBundle(['fighter-chainmail', 'fighter-archer-kit'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-archer-kit' },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(3)
+    const ids = result.items.map((i) => i.itemId)
+    expect(ids).toContain('leather')
+    expect(ids).toContain('longbow')
+    expect(ids).toContain('arrows-20')
+    for (const item of result.items) {
+      expect(item.source).toEqual({ origin: 'bundle', id: 'fighter-archer-kit' })
+    }
+  })
+
+  it('pack-type id expands pack contents with source.origin "pack"', () => {
+    const bundles = [makeBundleChoiceBundle(['dungeoneers-pack', 'explorers-pack'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'dungeoneers-pack' },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items.length).toBeGreaterThan(0)
+    const ids = result.items.map((i) => i.itemId)
+    expect(ids).toContain('backpack')
+    for (const item of result.items) {
+      expect(item.source).toEqual({ origin: 'pack', id: 'dungeoneers-pack' })
+    }
+    expect(result.pendingChoices).toHaveLength(0)
+  })
+
+  it('missing decision produces pending choice with correct category and bundleIds', () => {
+    const bundleIds = ['fighter-chainmail', 'fighter-archer-kit']
+    const bundles = [makeBundleChoiceBundle(bundleIds)]
+    const result = resolveEquipment(bundles, NO_CHOICES, NO_EQUIPPED)
+    expect(result.items).toHaveLength(0)
+    expect(result.pendingChoices).toHaveLength(1)
+    const pending = result.pendingChoices[0]
+    expect(pending.type).toBe('bundle-choice')
+    if (pending.type === 'bundle-choice') {
+      expect(pending.category).toBe('loadout')
+      expect(pending.bundleIds).toEqual(bundleIds)
+      expect(pending.choiceKey).toBe('bundle-choice:class:fighter:0')
+    }
+  })
+
+  it('invalid bundleId (unknown) falls through to pending, not a crash', () => {
+    const bundles = [makeBundleChoiceBundle(['fighter-chainmail', 'fighter-archer-kit'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'nonexistent-bundle' },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(0)
+    expect(result.pendingChoices).toHaveLength(1)
+    expect(result.pendingChoices[0].type).toBe('bundle-choice')
+  })
+
+  it('equipment-choice branch still resolves correctly (backward compat)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: FIGHTER_SOURCE,
+        grants: [
+          {
+            type: 'equipment-choice',
+            key: 'equipment-choice:class:fighter:0' as ChoiceKey,
+            options: [
+              [{ itemId: 'chain-mail', quantity: 1 }],
+              [{ itemId: 'leather', quantity: 1 }],
+            ],
+          },
+        ],
+      },
+    ]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0].itemId).toBe('chain-mail')
+    expect(result.pendingChoices).toHaveLength(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// resolveCharacter — useDBInventory path
+// ---------------------------------------------------------------------------
+
+describe('resolveEquipment via useDBInventory', () => {
+  it('builds items from persistedItems and produces no pending choices', async () => {
+    const { resolveCharacter } = await import('@/lib/resolver')
+    const { requireItemDef: rItemDef } = await import('@/lib/sources/items')
+    const input = {
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      level: 0,
+      bundles: [] as GrantBundle[],
+      choices: {} as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+      useDBInventory: true,
+      persistedItems: [
+        { itemId: 'chain-mail', quantity: 1, equipped: true, source: { origin: 'bundle' as const, id: 'fighter-chainmail' } },
+        { itemId: 'longsword', quantity: 1, equipped: true, source: { origin: 'bundle' as const, id: 'longsword-and-shield' } },
+      ],
+    }
+    const result = resolveCharacter(input)
+    expect(result.equipment).toHaveLength(2)
+    expect(result.equipment[0].itemId).toBe('chain-mail')
+    expect(result.equipment[0].source).toEqual({ origin: 'bundle', id: 'fighter-chainmail' })
+    expect(result.equipment[0].equipped).toBe(true)
+    // No pending choices from grants since we bypassed grant processing
+    expect(result.pendingChoices.filter((p) => p.type === 'bundle-choice')).toHaveLength(0)
+    // item defs are populated
+    expect(result.equipment[0].itemDef).toEqual(rItemDef('chain-mail'))
+  })
+
+  it('ignores bundle-choice grants when useDBInventory is true', async () => {
+    const { resolveCharacter } = await import('@/lib/resolver')
+    const { collectBundles } = await import('@/lib/sources')
+    const build = {
+      raceId: 'human' as import('@/lib/dnd-helpers').RaceId,
+      backgroundId: null,
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array' as const,
+      levels: [{ classId: 'fighter' as import('@/lib/dnd-helpers').ClassId, classLevel: 1, hpRoll: null }],
+      choices: {} as Readonly<Record<import('@/types/choices').ChoiceKey, import('@/types/choices').ChoiceDecision>>,
+      feats: [],
+      activeItems: [],
+    }
+    const { bundles } = collectBundles(build)
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      useDBInventory: true,
+      persistedItems: [
+        { itemId: 'longsword', quantity: 1, equipped: false, source: { origin: 'bundle' as const, id: 'longsword-and-shield' } },
+      ],
+    })
+    // Only the one persisted item — the 4 bundle-choice grants are ignored
+    expect(result.equipment).toHaveLength(1)
+    expect(result.equipment[0].itemId).toBe('longsword')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // resolveAttacks
 // ---------------------------------------------------------------------------
 
