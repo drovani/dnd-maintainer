@@ -200,6 +200,7 @@
       "languageName": "Language",
       "typicalSpeakers": "Typical Speakers",
       "script": "Script",
+      "grantedByRace": "Granted",
       "chooseTools": "Choose {{count}} tool proficiency from the list below.",
       "chooseTools_plural": "Choose {{count}} tool proficiencies from the list below.",
       "randomizeLanguage": "Roll random language (d12)",

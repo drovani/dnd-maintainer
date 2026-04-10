@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { BadgeCheckIcon } from 'lucide-react'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import type { ChoiceKey } from '@/types/choices'
 import {
@@ -24,30 +25,33 @@ export function ProficienciesStep() {
   const context = useCharacterContext()
   const { resolved, build, bundles } = context
 
-  // Scan grant bundles for all language-choice and tool-choice grants
-  const { languageChoices, toolChoices } = useMemo(() => {
-    if (bundles.length === 0) return { languageChoices: [] as ChoiceInfo<LanguageId>[], toolChoices: [] as ChoiceInfo<ToolProficiencyId>[] }
+  // Scan grant bundles for all language-choice/tool-choice grants and direct language grants
+  const { languageChoices, toolChoices, grantedLanguages } = useMemo(() => {
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
+    const granted = new Set<LanguageId>()
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {
-        if (grant.type !== 'proficiency-choice') continue
-        if (grant.category === 'language') {
-          lc.push({
-            choiceKey: grant.key,
-            count: grant.count,
-            from: (grant.from ?? DND_LANGUAGES) as readonly LanguageId[],
-          })
-        } else if (grant.category === 'tool') {
-          tc.push({
-            choiceKey: grant.key,
-            count: grant.count,
-            from: (grant.from ?? DND_TOOL_PROFICIENCIES.map((t) => t)) as readonly ToolProficiencyId[],
-          })
+        if (grant.type === 'proficiency' && grant.category === 'language') {
+          granted.add(grant.id as LanguageId)
+        } else if (grant.type === 'proficiency-choice') {
+          if (grant.category === 'language') {
+            lc.push({
+              choiceKey: grant.key,
+              count: grant.count,
+              from: (grant.from ?? DND_LANGUAGES) as readonly LanguageId[],
+            })
+          } else if (grant.category === 'tool') {
+            tc.push({
+              choiceKey: grant.key,
+              count: grant.count,
+              from: (grant.from ?? DND_TOOL_PROFICIENCIES.map((t) => t)) as readonly ToolProficiencyId[],
+            })
+          }
         }
       }
     }
-    return { languageChoices: lc, toolChoices: tc }
+    return { languageChoices: lc, toolChoices: tc, grantedLanguages: granted }
   }, [bundles])
 
   if (!resolved) {
@@ -63,11 +67,6 @@ export function ProficienciesStep() {
   for (const lc of languageChoices) {
     for (const id of lc.from) choicePoolLanguages.add(id)
   }
-
-  // "Granted" = in resolved.languages AND not in any choice pool (truly fixed grants like Common)
-  const grantedLanguages = new Set<LanguageId>(
-    resolved.languages.filter((l) => !choicePoolLanguages.has(l.value as LanguageId)).map((l) => l.value as LanguageId)
-  )
 
   // Helper to get current selections for a choice
   function getSelectedLanguages(choiceKey: ChoiceKey): readonly LanguageId[] {
@@ -97,21 +96,25 @@ export function ProficienciesStep() {
     const choiceForLang = languageChoices.find((lc) => lc.from.includes(langId))
 
     let checkbox: React.ReactNode = null
-    if (isGranted && !choiceForLang) {
-      checkbox = <Checkbox id={`lang-${langId}`} checked disabled />
+    if (isGranted) {
+      checkbox = (
+        <BadgeCheckIcon
+          aria-label={tc('characterBuilder.proficiencies.grantedByRace')}
+          className="flex size-4 shrink-0 text-primary"
+        />
+      )
     } else if (choiceForLang) {
       const selected = getSelectedLanguages(choiceForLang.choiceKey)
       const isSelected = selected.includes(langId)
       const atMax = selected.length >= choiceForLang.count
-      const isDisabled = (atMax && !isSelected) || isGranted
+      const isDisabled = atMax && !isSelected
 
       checkbox = (
         <Checkbox
           id={`lang-${langId}`}
-          checked={isSelected || isGranted}
+          checked={isSelected}
           disabled={isDisabled}
           onCheckedChange={(checked) => {
-            if (isGranted) return
             const next = checked
               ? [...selected, langId]
               : selected.filter((id) => id !== langId)
