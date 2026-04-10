@@ -46,8 +46,8 @@ describe('getClassSource', () => {
 
   it('fighter level 1 has correct grant count', () => {
     const source = getClassSource('fighter' as Parameters<typeof getClassSource>[0])
-    // 4 armor + 2 weapon + 2 saving-throw + 1 skill-choice + 1 armor-class + 2 features + 1 hit-die = 13
-    expect(source?.levels[0].grants).toHaveLength(13)
+    // 1 hit-die + 4 armor + 2 weapon + 2 saving-throw + 1 skill-choice + 1 armor-class + 1 fighting-style-choice + 1 feature + 4 equipment-choice = 17
+    expect(source?.levels[0].grants).toHaveLength(17)
   })
 })
 
@@ -66,8 +66,8 @@ describe('getBackgroundSource', () => {
     const source = getBackgroundSource('soldier' as BackgroundId)
     expect(source).toBeDefined()
     expect(source?.id).toBe('soldier')
-    // 2 skill + 1 tool + 1 tool-choice + 1 language-choice = 5
-    expect(source?.grants).toHaveLength(5)
+    // 2 skill + 1 tool + 1 tool-choice + 1 language-choice + 3 equipment = 8
+    expect(source?.grants).toHaveLength(8)
   })
 })
 

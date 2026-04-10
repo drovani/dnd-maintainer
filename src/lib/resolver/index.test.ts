@@ -107,6 +107,11 @@ describe('Human Fighter L1 integration', () => {
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       // Soldier language choice
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      // Fighter equipment choices
+      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
     },
     levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     feats: [],
@@ -387,6 +392,11 @@ describe('Human Fighter L5 integration', () => {
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
       [asiKey]: { type: 'asi' as const, allocation: { str: 2 } },
+      // Fighter equipment choices
+      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
     },
     feats: [],
     activeItems: [],

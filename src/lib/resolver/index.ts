@@ -10,6 +10,7 @@ import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/
 import { resolveFeatures } from '@/lib/resolver/features'
 import { resolveHp, resolveSpeed, resolveAc } from '@/lib/resolver/combat'
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting'
+import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment'
 
 export interface ResolverInput {
   readonly baseAbilities: AbilityScores
@@ -18,11 +19,13 @@ export interface ResolverInput {
   readonly choices: Readonly<Record<ChoiceKey, ChoiceDecision>>
   readonly hpRolls?: readonly (number | null)[]
   readonly levels?: readonly { readonly hpRoll: number | null }[]
+  readonly equippedItemIds?: readonly string[]
 }
 
 export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const { baseAbilities, level, bundles, choices } = input
   const hpRolls = input.hpRolls ?? input.levels?.map((l) => l.hpRoll) ?? []
+  const equippedItemIds = input.equippedItemIds ?? []
 
   const proficiencyBonus = getProficiencyBonus(level)
   const abilities = resolveAbilities(baseAbilities, bundles, choices)
@@ -35,8 +38,29 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const features = resolveFeatures(bundles)
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level)
   const speed = resolveSpeed(bundles)
-  const armorClass = resolveAc(bundles, dexModifier)
   const spellcasting = resolveSpellcasting(bundles)
+
+  // Equipment resolution
+  const equipmentResult = resolveEquipment(bundles, choices, equippedItemIds)
+  const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier)
+  const armorClass = resolveAc(bundles, dexModifier, equippedArmorAc)
+
+  // Extract chosen fighting style IDs for attack resolver
+  const fightingStyleIds: string[] = []
+  for (const { grant } of collectGrantsByType(bundles, 'fighting-style-choice')) {
+    const decision = choices[grant.key]
+    if (decision?.type === 'fighting-style-choice') {
+      fightingStyleIds.push(...decision.styles)
+    }
+  }
+
+  const attacks = resolveAttacks(
+    equipmentResult.items,
+    abilities,
+    proficiencyBonus,
+    proficiencies.weapon,
+    fightingStyleIds,
+  )
 
   // Build hitDie array from hit-die grants
   const hitDieGrants = collectGrantsByType(bundles, 'hit-die')
@@ -47,7 +71,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const hitDie = Array.from(hitDieMap.entries()).map(([die, count]) => ({ die, count }))
 
   // Aggregate pending choices
-  const pendingChoices: PendingChoice[] = [...proficiencies.pendingChoices]
+  const pendingChoices: PendingChoice[] = [...proficiencies.pendingChoices, ...equipmentResult.pendingChoices]
 
   // Unresolved ability-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'ability-choice')) {
@@ -151,6 +175,8 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     resistances: [],
     immunities: [],
     spellcasting,
+    equipment: equipmentResult.items,
+    attacks,
     pendingChoices,
   }
 }

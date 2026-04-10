@@ -212,6 +212,7 @@ function tryDeriveAndResolve(
       bundles,
       choices: build.choices,
       levels: build.levels,
+      equippedItemIds: equippedItems,
     })
     return { status: 'ok', build, bundles, resolved, error: null, warnings }
   } catch (err) {
