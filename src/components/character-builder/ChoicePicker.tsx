@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import {
@@ -204,9 +205,16 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
 
     return (
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">
-          {tc('characterBuilder.equipment.choiceLabel')}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {tc('characterBuilder.equipment.choiceLabel')}
+          </p>
+          {currentOptionIndex !== undefined && (
+            <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+              {tc('characterBuilder.equipment.clearSelection')}
+            </Button>
+          )}
+        </div>
         <div className="space-y-2">
           {choice.options.map((option, optionIndex) => {
             const isSelected = currentOptionIndex === optionIndex
@@ -233,7 +241,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                 const quantityPrefix = quantity > 1 ? `${quantity}× ` : ''
                 return `${quantityPrefix}${name}${detail}`
               })
-              .join(` ${tc('characterBuilder.equipment.optionSeparator')} `)
+              .join(` ${tc('characterBuilder.equipment.itemBundleSeparator')} `)
 
             return (
               <div

@@ -223,7 +223,8 @@
       "comingSoon": "Equipment management coming soon",
       "title": "Equipment",
       "choiceLabel": "Choose your equipment",
-      "optionSeparator": "or",
+      "itemBundleSeparator": "+",
+      "clearSelection": "Clear",
       "summary": "Equipment Summary"
     },
     "errors": {

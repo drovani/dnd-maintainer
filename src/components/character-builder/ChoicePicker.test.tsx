@@ -123,6 +123,74 @@ describe('ChoicePicker equipment-choice', () => {
     expect(radios.every((r) => !r.checked)).toBe(true)
   })
 
+  it('multi-item option joins items with + separator, not or', () => {
+    const bundleChoice: PendingChoice & { type: 'equipment-choice' } = {
+      type: 'equipment-choice',
+      choiceKey: 'equipment-choice:class:fighter:2' as ChoiceKey,
+      source: FIGHTER_SOURCE,
+      options: [
+        [
+          { itemId: 'leather', quantity: 1 },
+          { itemId: 'longbow', quantity: 1 },
+          { itemId: 'arrow', quantity: 20 },
+        ],
+      ],
+    }
+    render(
+      <ChoicePicker
+        choice={bundleChoice}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    const label = screen.getByRole('radio').closest('div')?.querySelector('label')
+    // mock t() returns the last key segment, so itemBundleSeparator → 'itemBundleSeparator'
+    // confirming it does NOT use the old 'optionSeparator' key (which would render 'optionSeparator')
+    expect(label?.textContent).toContain('itemBundleSeparator')
+    expect(label?.textContent).not.toContain('optionSeparator')
+  })
+
+  it('Clear button does NOT appear when no option is selected', () => {
+    render(
+      <ChoicePicker
+        choice={EQUIPMENT_CHOICE}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /clear/i })).toBeNull()
+  })
+
+  it('Clear button appears when currentDecision.optionIndex === 0', () => {
+    const currentDecision: ChoiceDecision = { type: 'equipment-choice', optionIndex: 0 }
+    render(
+      <ChoicePicker
+        choice={EQUIPMENT_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /clear/i })).toBeTruthy()
+  })
+
+  it('clicking Clear calls onClear with the correct choiceKey', () => {
+    const onClear = vi.fn()
+    const currentDecision: ChoiceDecision = { type: 'equipment-choice', optionIndex: 1 }
+    render(
+      <ChoicePicker
+        choice={EQUIPMENT_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={onClear}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }))
+    expect(onClear).toHaveBeenCalledWith(EQUIPMENT_CHOICE.choiceKey)
+  })
+
   it('weapon option label includes damageDice and damageType', () => {
     render(
       <ChoicePicker
