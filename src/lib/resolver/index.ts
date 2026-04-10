@@ -1,4 +1,5 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers'
+import type { FightingStyleId } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
 import type { GrantBundle } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
@@ -45,12 +46,14 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier)
   const armorClass = resolveAc(bundles, dexModifier, equippedArmorAc)
 
-  // Extract chosen fighting style IDs for attack resolver
-  const fightingStyleIds: string[] = []
+  // Extract chosen fighting style IDs for attack resolver, validating against each grant's from list.
+  // Stale persisted decisions containing removed style IDs are filtered out and re-prompted.
+  const fightingStyleIds: FightingStyleId[] = []
   for (const { grant } of collectGrantsByType(bundles, 'fighting-style-choice')) {
     const decision = choices[grant.key]
     if (decision?.type === 'fighting-style-choice') {
-      fightingStyleIds.push(...decision.styles)
+      const validStyles = decision.styles.filter((s): s is FightingStyleId => grant.from.includes(s as FightingStyleId))
+      fightingStyleIds.push(...validStyles)
     }
   }
 
@@ -122,24 +125,31 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
-  // Unresolved fighting-style-choice grants
-  const allFightingStyleDecisions: string[] = []
-  for (const { grant } of collectGrantsByType(bundles, 'fighting-style-choice')) {
+  // Unresolved or invalid fighting-style-choice grants (single pass)
+  const allFightingStyleDecisions: FightingStyleId[] = []
+  const fightingStyleGrants = collectGrantsByType(bundles, 'fighting-style-choice')
+  // First collect all valid chosen styles for the alreadyChosen list
+  for (const { grant } of fightingStyleGrants) {
     const decision = choices[grant.key]
     if (decision?.type === 'fighting-style-choice') {
-      allFightingStyleDecisions.push(...decision.styles)
+      const validStyles = decision.styles.filter((s): s is FightingStyleId => grant.from.includes(s as FightingStyleId))
+      allFightingStyleDecisions.push(...validStyles)
     }
   }
-  for (const { grant, source } of collectGrantsByType(bundles, 'fighting-style-choice')) {
+  // Then emit pending choices for grants that are unresolved or have invalid/missing styles
+  for (const { grant, source } of fightingStyleGrants) {
     const decision = choices[grant.key]
-    if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) {
+    const validStyles = decision?.type === 'fighting-style-choice'
+      ? decision.styles.filter((s) => grant.from.includes(s as FightingStyleId))
+      : []
+    if (!decision || decision.type !== 'fighting-style-choice' || validStyles.length < grant.count) {
       pendingChoices.push({
         type: 'fighting-style-choice',
         choiceKey: grant.key,
         source,
         count: grant.count,
         from: grant.from,
-        alreadyChosen: allFightingStyleDecisions as import('@/lib/dnd-helpers').FightingStyleId[],
+        alreadyChosen: allFightingStyleDecisions,
       })
     }
   }
