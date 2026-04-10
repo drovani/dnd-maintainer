@@ -490,6 +490,22 @@
       "dungeoneers-pack": { "name": "Dungeoneer's Pack" }
     }
   },
+  "bundles": {
+    "fighter-chainmail": { "name": "Chain Mail" },
+    "fighter-archer-kit": { "name": "Leather Armor + Longbow + Arrows (20)" },
+    "longsword-and-shield": { "name": "Longsword + Shield" },
+    "two-longswords": { "name": "Two Longswords" },
+    "light-crossbow-kit": { "name": "Light Crossbow + Bolts (20)" },
+    "two-handaxes": { "name": "Two Handaxes" }
+  },
+  "bundleCategories": {
+    "loadout": "Loadout",
+    "armor": "Armor",
+    "melee-weapon": "Melee Weapon",
+    "ranged-weapon": "Ranged Weapon",
+    "pack": "Pack",
+    "gear": "Gear"
+  },
   "gender": {
     "male": "Male",
     "female": "Female",

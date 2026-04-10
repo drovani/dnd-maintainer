@@ -1,5 +1,6 @@
 import type { AbilityKey, ClassId, FightingStyleId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
 import type { ChoiceKey } from '@/types/choices'
+import type { BundleCategory } from '@/types/items'
 
 // Supporting types
 
@@ -163,6 +164,13 @@ export interface EquipmentChoiceGrant {
   readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[]
 }
 
+export interface BundleChoiceGrant {
+  readonly type: 'bundle-choice'
+  readonly key: ChoiceKey
+  readonly category: BundleCategory
+  readonly bundleIds: readonly string[]
+}
+
 export type Grant =
   | AbilityBonusGrant
   | AbilityChoiceGrant
@@ -184,3 +192,4 @@ export type Grant =
   | FightingStyleChoiceGrant
   | EquipmentGrant
   | EquipmentChoiceGrant
+  | BundleChoiceGrant

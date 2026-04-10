@@ -1,6 +1,22 @@
 import type { DamageTypeId } from '@/types/grants'
 import type { WeaponProficiencyId } from '@/lib/dnd-helpers'
 
+export const BUNDLE_CATEGORIES = [
+  'loadout',
+  'armor',
+  'melee-weapon',
+  'ranged-weapon',
+  'pack',
+  'gear',
+] as const
+export type BundleCategory = (typeof BUNDLE_CATEGORIES)[number]
+
+export interface BundleDef {
+  readonly id: string
+  readonly category: BundleCategory
+  readonly contents: readonly { readonly itemId: string; readonly quantity: number }[]
+}
+
 export const WEAPON_PROPERTIES = [
   'ammunition',
   'finesse',

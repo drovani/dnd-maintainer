@@ -225,7 +225,15 @@
       "choiceLabel": "Choose your equipment",
       "itemBundleSeparator": "+",
       "clearSelection": "Clear",
-      "summary": "Equipment Summary"
+      "summary": "Equipment Summary",
+      "sections": {
+        "loadout": "Loadout",
+        "armor": "Armor",
+        "melee-weapon": "Melee Weapon",
+        "ranged-weapon": "Ranged Weapon",
+        "pack": "Pack",
+        "gear": "Gear"
+      }
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",

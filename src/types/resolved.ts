@@ -2,7 +2,7 @@ import type { AbilityKey, FightingStyleId, SkillId, ArmorProficiencyId, WeaponPr
 import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants'
 import type { SourceTag } from '@/types/sources'
 import type { ChoiceKey } from '@/types/choices'
-import type { ItemDef, PhysicalDamageType, WeaponProperty, WeaponRange } from '@/types/items'
+import type { ItemDef, PhysicalDamageType, WeaponProperty, WeaponRange, BundleCategory } from '@/types/items'
 
 export interface Sourced<T> {
   readonly value: T
@@ -89,6 +89,7 @@ export type PendingChoice =
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }
   | { readonly type: 'fighting-style-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly FightingStyleId[]; readonly alreadyChosen: readonly FightingStyleId[] }
   | { readonly type: 'equipment-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[] }
+  | { readonly type: 'bundle-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: BundleCategory; readonly bundleIds: readonly string[] }
 
 export interface ResolvedCharacter {
   readonly abilities: Readonly<Record<AbilityKey, ResolvedAbility>>
