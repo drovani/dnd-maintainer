@@ -82,6 +82,39 @@ describe('resolveSavingThrows', () => {
     expect(result.str.sources).toHaveLength(1)
     expect(result.str.sources[0]).toEqual(source)
   })
+
+  it('non-proficient save breakdown has exactly one ability component', () => {
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, NO_BUNDLES, 2)
+    // DEX mod = 2, not proficient
+    expect(result.dex.breakdown).toHaveLength(1)
+    expect(result.dex.breakdown[0]).toEqual({ type: 'ability', value: 2, label: 'dex' })
+  })
+
+  it('proficient save breakdown has ability then proficiency component', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'proficiency', category: 'saving-throw', id: 'str' }],
+      },
+    ]
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2)
+    // STR mod = 3, proficiency = 2
+    expect(result.str.breakdown).toHaveLength(2)
+    expect(result.str.breakdown[0]).toEqual({ type: 'ability', value: 3, label: 'str' })
+    expect(result.str.breakdown[1]).toEqual({ type: 'proficiency', value: 2, label: 'proficiency' })
+  })
+
+  it('breakdown values sum to the bonus field', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'proficiency', category: 'saving-throw', id: 'str' }],
+      },
+    ]
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2)
+    const sum = result.str.breakdown.reduce((acc, c) => acc + c.value, 0)
+    expect(sum).toBe(result.str.bonus)
+  })
 })
 
 describe('resolveSkills', () => {

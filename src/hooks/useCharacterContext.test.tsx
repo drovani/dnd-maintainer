@@ -958,4 +958,61 @@ describe('CharacterProvider', () => {
       renderHook(() => useCharacterContext())
     }).toThrow('useCharacterContext must be used within a CharacterProvider')
   })
+
+  it('initialEquippedItems wiring: chain-mail + longsword produce AC 16 and a longsword attack', () => {
+    const character = buildSeedCharacter({
+      base_abilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+    } as Partial<Character>)
+
+    const creationRowWithAbilities: BuildLevelRow = {
+      sequence: 0,
+      base_abilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      ability_method: 'standard-array',
+      class_id: null,
+      class_level: null,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      // Resolved choices include equipment picks: chain-mail (option 0) and longsword (option 0)
+      choices: {
+        'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
+        'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
+        'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
+        'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
+        'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+        'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
+        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      deleted_at: null,
+    }
+
+    const fighterRow: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRowWithAbilities, fighterRow], ['chain-mail', 'longsword']),
+    })
+
+    const resolved = result.current.resolved
+    expect(resolved).not.toBeNull()
+    // chain-mail + armored fighter: AC 16 (no DEX bonus, heavy armor)
+    expect(resolved!.armorClass.effective).toBe(16)
+    // longsword should appear in attacks
+    expect(resolved!.attacks.length).toBeGreaterThan(0)
+    expect(resolved!.attacks.some((a) => a.weaponId === 'longsword')).toBe(true)
+  })
 })

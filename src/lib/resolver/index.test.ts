@@ -368,6 +368,88 @@ describe('Pending ASI and Subclass choices', () => {
   })
 })
 
+describe('Human Fighter L1 equipment integration', () => {
+  const humanFighterEquipBuild: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      // Equipment: option 0 = chain-mail
+      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
+      // Equipment: option 0 = longsword + shield
+      'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
+      'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
+    },
+    levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
+    feats: [],
+    activeItems: [],
+  }
+
+  const { bundles } = collectBundles(humanFighterEquipBuild)
+
+  it('chain-mail equipped gives AC 16 (heavy armor, no DEX)', () => {
+    const result = resolveCharacter({
+      baseAbilities: humanFighterEquipBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: humanFighterEquipBuild.choices,
+      levels: humanFighterEquipBuild.levels,
+      equippedItemIds: ['chain-mail'],
+    })
+    expect(result.armorClass.effective).toBe(16)
+  })
+
+  it('chain-mail + longsword equipped: AC 16 and longsword attack present', () => {
+    const result = resolveCharacter({
+      baseAbilities: humanFighterEquipBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: humanFighterEquipBuild.choices,
+      levels: humanFighterEquipBuild.levels,
+      equippedItemIds: ['chain-mail', 'longsword'],
+    })
+    expect(result.armorClass.effective).toBe(16)
+    expect(result.attacks.length).toBeGreaterThan(0)
+    expect(result.attacks.some((a) => a.weaponId === 'longsword')).toBe(true)
+  })
+
+  it('longsword attack bonus = STR mod (3) + proficiency (2) = 5', () => {
+    const result = resolveCharacter({
+      baseAbilities: humanFighterEquipBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: humanFighterEquipBuild.choices,
+      levels: humanFighterEquipBuild.levels,
+      equippedItemIds: ['chain-mail', 'longsword'],
+    })
+    const longswordAttack = result.attacks.find((a) => a.weaponId === 'longsword')
+    expect(longswordAttack).toBeDefined()
+    // STR 15+1(human) = 16 → mod 3, prof 2 = 5
+    expect(longswordAttack!.attackBonus).toBe(5)
+  })
+
+  it('shield alone adds +2 to AC even without body armor', () => {
+    const result = resolveCharacter({
+      baseAbilities: humanFighterEquipBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: humanFighterEquipBuild.choices,
+      levels: humanFighterEquipBuild.levels,
+      equippedItemIds: ['shield'],
+    })
+    // Unequipped armor → base 10 + DEX mod 2 = 12, plus shield +2 = 14
+    expect(result.armorClass.effective).toBe(14)
+    expect(result.armorClass.bonuses.some((b) => b.value === 2)).toBe(true)
+  })
+})
+
 describe('Human Fighter L5 integration', () => {
   const subclassKey = createChoiceKey('subclass', 'class', 'fighter', 0)
   const asiKey = createChoiceKey('asi', 'class', 'fighter', 0)
