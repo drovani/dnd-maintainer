@@ -91,79 +91,6 @@ describe('resolveEquipment', () => {
     expect(result.items[0].equipped).toBe(true)
   })
 
-  it('resolves equipment-choice when decision exists', () => {
-    const bundles: GrantBundle[] = [
-      {
-        source: { origin: 'class', id: 'fighter', level: 1 },
-        grants: [
-          {
-            type: 'equipment-choice',
-            key: 'equipment-choice:class:fighter:0',
-            options: [
-              [{ itemId: 'chain-mail', quantity: 1 }],
-              [{ itemId: 'leather', quantity: 1 }],
-            ],
-          },
-        ],
-      },
-    ]
-    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
-    }
-    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
-    expect(result.items).toHaveLength(1)
-    expect(result.items[0].itemId).toBe('chain-mail')
-    expect(result.pendingChoices).toHaveLength(0)
-  })
-
-  it('produces pending choice for unresolved equipment-choice', () => {
-    const bundles: GrantBundle[] = [
-      {
-        source: { origin: 'class', id: 'fighter', level: 1 },
-        grants: [
-          {
-            type: 'equipment-choice',
-            key: 'equipment-choice:class:fighter:0',
-            options: [
-              [{ itemId: 'chain-mail', quantity: 1 }],
-              [{ itemId: 'leather', quantity: 1 }],
-            ],
-          },
-        ],
-      },
-    ]
-    const result = resolveEquipment(bundles, NO_CHOICES, NO_EQUIPPED)
-    expect(result.items).toHaveLength(0)
-    expect(result.pendingChoices).toHaveLength(1)
-    expect(result.pendingChoices[0].type).toBe('equipment-choice')
-  })
-
-  it('re-prompts when stored optionIndex is out of range (stale persisted data)', () => {
-    const bundles: GrantBundle[] = [
-      {
-        source: { origin: 'class', id: 'fighter', level: 1 },
-        grants: [
-          {
-            type: 'equipment-choice',
-            key: 'equipment-choice:class:fighter:0',
-            options: [
-              [{ itemId: 'chain-mail', quantity: 1 }],
-              [{ itemId: 'leather', quantity: 1 }],
-            ],
-          },
-        ],
-      },
-    ]
-    // optionIndex 5 is out of range — should fall through to pending
-    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 5 },
-    }
-    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
-    expect(result.items).toHaveLength(0)
-    expect(result.pendingChoices).toHaveLength(1)
-    expect(result.pendingChoices[0].type).toBe('equipment-choice')
-    expect(result.pendingChoices[0].choiceKey).toBe('equipment-choice:class:fighter:0')
-  })
 })
 
 // ---------------------------------------------------------------------------
@@ -254,30 +181,6 @@ describe('resolveEquipment bundle-choice', () => {
     expect(result.pendingChoices[0].type).toBe('bundle-choice')
   })
 
-  it('equipment-choice branch still resolves correctly (backward compat)', () => {
-    const bundles: GrantBundle[] = [
-      {
-        source: FIGHTER_SOURCE,
-        grants: [
-          {
-            type: 'equipment-choice',
-            key: 'equipment-choice:class:fighter:0' as ChoiceKey,
-            options: [
-              [{ itemId: 'chain-mail', quantity: 1 }],
-              [{ itemId: 'leather', quantity: 1 }],
-            ],
-          },
-        ],
-      },
-    ]
-    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
-    }
-    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
-    expect(result.items).toHaveLength(1)
-    expect(result.items[0].itemId).toBe('chain-mail')
-    expect(result.pendingChoices).toHaveLength(0)
-  })
 })
 
 // ---------------------------------------------------------------------------

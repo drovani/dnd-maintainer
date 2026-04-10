@@ -88,7 +88,6 @@ export type PendingChoice =
   | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly points: number }
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }
   | { readonly type: 'fighting-style-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly FightingStyleId[]; readonly alreadyChosen: readonly FightingStyleId[] }
-  | { readonly type: 'equipment-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[] }
   | { readonly type: 'bundle-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: BundleCategory; readonly bundleIds: readonly string[] }
 
 export interface ResolvedCharacter {

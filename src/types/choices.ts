@@ -20,7 +20,6 @@ const CHOICE_CATEGORIES = [
   'asi',
   'subclass',
   'fighting-style-choice',
-  'equipment-choice',
   'bundle-choice',
 ] as const
 export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number]
@@ -75,7 +74,6 @@ export type ChoiceDecision =
   | { readonly type: 'asi'; readonly allocation: Partial<Record<AbilityKey, number>> }
   | { readonly type: 'subclass'; readonly subclassId: SubclassId }
   | { readonly type: 'fighting-style-choice'; readonly styles: readonly FightingStyleId[] }
-  | { readonly type: 'equipment-choice'; readonly optionIndex: number }
   | { readonly type: 'bundle-choice'; readonly bundleId: string }
 
 export interface BuildLevel {

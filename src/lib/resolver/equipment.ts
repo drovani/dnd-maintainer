@@ -34,43 +34,6 @@ export function resolveEquipment(
     })
   }
 
-  // Equipment choice grants (deprecated — use bundle-choice instead)
-  for (const { grant, source } of collectGrantsByType(bundles, 'equipment-choice')) {
-    if (import.meta.env?.DEV) {
-      console.warn('equipment-choice is deprecated, use bundle-choice instead')
-    }
-    const decision = choices[grant.key]
-    if (decision?.type === 'equipment-choice') {
-      const chosenOption = grant.options[decision.optionIndex]
-      // Re-prompt if the stored optionIndex is out of range (stale persisted data)
-      if (!chosenOption || decision.optionIndex >= grant.options.length) {
-        pendingChoices.push({
-          type: 'equipment-choice',
-          choiceKey: grant.key,
-          source,
-          options: grant.options,
-        })
-        continue
-      }
-      for (const { itemId, quantity } of chosenOption) {
-        items.push({
-          itemId,
-          itemDef: requireItemDef(itemId),
-          quantity,
-          source,
-          equipped: equippedItemIds.includes(itemId),
-        })
-      }
-    } else {
-      pendingChoices.push({
-        type: 'equipment-choice',
-        choiceKey: grant.key,
-        source,
-        options: grant.options,
-      })
-    }
-  }
-
   // Bundle-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'bundle-choice')) {
     const decision = choices[grant.key]
