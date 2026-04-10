@@ -8,6 +8,7 @@ import {
   type SkillId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
+import { getItemDef } from '@/lib/sources/items'
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
 import type { PendingChoice } from '@/types/resolved'
 import { useTranslation } from 'react-i18next'
@@ -188,6 +189,75 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                   className="flex-1 cursor-pointer"
                 >
                   {t(`tools.${toolId}`)}
+                </Label>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  if (choice.type === 'equipment-choice') {
+    const currentOptionIndex =
+      currentDecision?.type === 'equipment-choice' ? currentDecision.optionIndex : undefined
+
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">
+          {tc('characterBuilder.equipment.choiceLabel')}
+        </p>
+        <div className="space-y-2">
+          {choice.options.map((option, optionIndex) => {
+            const isSelected = currentOptionIndex === optionIndex
+            const optionLabel = option
+              .map(({ itemId, quantity }) => {
+                const itemDef = getItemDef(itemId)
+                const type = itemDef?.type ?? 'gear'
+                const name = t(`items.${type}s.${itemId}.name` as Parameters<typeof t>[0], {
+                  defaultValue: itemId,
+                })
+                const detail = (() => {
+                  if (itemDef?.type === 'weapon') {
+                    const props = itemDef.properties
+                      .map((p) => t(`weaponProperties.${p}`))
+                      .join(', ')
+                    const dmgType = t(`damageTypes.${itemDef.damageType}`)
+                    return ` (${itemDef.damageDice} ${dmgType}${props ? `, ${props}` : ''})`
+                  }
+                  if (itemDef?.type === 'armor') {
+                    return ` (AC ${itemDef.baseAc})`
+                  }
+                  return ''
+                })()
+                const quantityPrefix = quantity > 1 ? `${quantity}× ` : ''
+                return `${quantityPrefix}${name}${detail}`
+              })
+              .join(` ${tc('characterBuilder.equipment.optionSeparator')} `)
+
+            return (
+              <div
+                key={optionIndex}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <input
+                  type="radio"
+                  id={`choice-equip-${choice.choiceKey}-${optionIndex}`}
+                  name={`choice-equip-${choice.choiceKey}`}
+                  checked={isSelected}
+                  onChange={() =>
+                    onDecide(choice.choiceKey, {
+                      type: 'equipment-choice',
+                      optionIndex,
+                    })
+                  }
+                  className="size-4 text-primary"
+                />
+                <Label
+                  htmlFor={`choice-equip-${choice.choiceKey}-${optionIndex}`}
+                  className="flex-1 cursor-pointer"
+                >
+                  {optionLabel}
                 </Label>
               </div>
             )
