@@ -57,7 +57,11 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
   return result
 }
 
-export function resolveAc(bundles: readonly GrantBundle[], dexModifier: number): ResolvedArmorClass {
+export function resolveAc(
+  bundles: readonly GrantBundle[],
+  dexModifier: number,
+  equippedArmor?: { readonly baseAc: number; readonly shieldBonus: number } | null,
+): ResolvedArmorClass {
   const acGrants = collectGrantsByType(bundles, 'armor-class')
   const acBonusGrants = collectGrantsByType(bundles, 'ac-bonus')
 
@@ -66,9 +70,12 @@ export function resolveAc(bundles: readonly GrantBundle[], dexModifier: number):
   for (const { grant, source } of acGrants) {
     const calc = grant.calculation
     switch (calc.mode) {
-      case 'armored':
-        calculations.push({ mode: 'armored', baseValue: 10 + dexModifier, source })
+      case 'armored': {
+        // When equipped armor is provided, use its baseAc instead of 10 + DEX
+        const baseValue = equippedArmor != null ? equippedArmor.baseAc : 10 + dexModifier
+        calculations.push({ mode: 'armored', baseValue, source })
         break
+      }
       case 'natural':
         calculations.push({ mode: 'natural', baseValue: calc.baseAc, source })
         break
@@ -83,10 +90,18 @@ export function resolveAc(bundles: readonly GrantBundle[], dexModifier: number):
     }
   }
 
-  const bonuses = acBonusGrants.map(({ grant, source }) => ({
+  const bonuses: { readonly value: number; readonly source: SourceTag }[] = acBonusGrants.map(({ grant, source }) => ({
     value: grant.bonus,
     source,
   }))
+
+  // Add shield bonus when equipped armor has a shield
+  if (equippedArmor != null && equippedArmor.shieldBonus > 0) {
+    bonuses.push({
+      value: equippedArmor.shieldBonus,
+      source: { origin: 'item', id: 'shield' },
+    })
+  }
 
   // Effective AC: highest calculation base + all bonuses
   const baseAc = calculations.length > 0

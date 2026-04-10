@@ -189,6 +189,46 @@ describe('resolveAc', () => {
     expect(result.effective).toBe(13)
   })
 
+  it('equipped chain mail returns effective AC 16 (ignores DEX)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
+      },
+    ]
+    // DEX 16 → mod +3, but chain mail ignores DEX (maxDexBonus 0, baseAc 16)
+    const result = resolveAc(bundles, 3, { baseAc: 16, shieldBonus: 0 })
+    expect(result.effective).toBe(16)
+    expect(result.calculations[0].baseValue).toBe(16)
+  })
+
+  it('chain mail + Defense fighting style returns AC 17', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [
+          { type: 'armor-class', calculation: { mode: 'armored' } },
+          { type: 'ac-bonus', bonus: 1 },
+        ],
+      },
+    ]
+    const result = resolveAc(bundles, 3, { baseAc: 16, shieldBonus: 0 })
+    expect(result.effective).toBe(17)
+  })
+
+  it('chain mail + shield returns AC 18', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
+      },
+    ]
+    const result = resolveAc(bundles, 3, { baseAc: 16, shieldBonus: 2 })
+    expect(result.effective).toBe(18)
+    expect(result.bonuses).toHaveLength(1)
+    expect(result.bonuses[0].value).toBe(2)
+  })
+
   it('takes highest base AC when both armored and natural grants present', () => {
     // armored: 10 + 2 = 12, natural: 15 → highest wins (15)
     const bundles: GrantBundle[] = [
