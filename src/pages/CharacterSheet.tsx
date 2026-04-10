@@ -444,7 +444,9 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                                   ? t(`races.${resolvedFeature.source.id}`)
                                   : resolvedFeature.source.origin === 'background'
                                     ? t(`backgrounds.${resolvedFeature.source.id}`)
-                                    : resolvedFeature.source.id
+                                    : resolvedFeature.source.origin === 'loot'
+                                      ? resolvedFeature.source.description
+                                      : resolvedFeature.source.id
                           })}
                         </div>
                       )}

@@ -974,12 +974,12 @@ describe('CharacterProvider', () => {
       asi_allocation: null,
       feat_id: null,
       hp_roll: null,
-      // Resolved choices include equipment picks: chain-mail (option 0) and longsword (option 0)
+      // Resolved choices include bundle picks: chain-mail and longsword+shield
       choices: {
-        'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
-        'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
-        'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
-        'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
+        'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail' },
+        'bundle-choice:class:fighter:1': { type: 'bundle-choice', bundleId: 'longsword-and-shield' },
+        'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit' },
+        'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack' },
         'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
         'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
         'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },

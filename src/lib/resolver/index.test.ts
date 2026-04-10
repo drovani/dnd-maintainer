@@ -107,11 +107,11 @@ describe('Human Fighter L1 integration', () => {
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       // Soldier language choice
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
-      // Fighter equipment choices
-      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
+      // Fighter bundle choices
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail' },
+      'bundle-choice:class:fighter:1': { type: 'bundle-choice', bundleId: 'longsword-and-shield' },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit' },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack' },
     },
     levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     feats: [],
@@ -380,12 +380,11 @@ describe('Human Fighter L1 equipment integration', () => {
       'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
-      // Equipment: option 0 = chain-mail
-      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
-      // Equipment: option 0 = longsword + shield
-      'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
+      // Fighter bundle choices
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail' },
+      'bundle-choice:class:fighter:1': { type: 'bundle-choice', bundleId: 'longsword-and-shield' },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit' },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack' },
     },
     levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     feats: [],
@@ -474,11 +473,11 @@ describe('Human Fighter L5 integration', () => {
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
       [asiKey]: { type: 'asi' as const, allocation: { str: 2 } },
-      // Fighter equipment choices
-      'equipment-choice:class:fighter:0': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:1': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:2': { type: 'equipment-choice', optionIndex: 0 },
-      'equipment-choice:class:fighter:3': { type: 'equipment-choice', optionIndex: 0 },
+      // Fighter bundle choices
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail' },
+      'bundle-choice:class:fighter:1': { type: 'bundle-choice', bundleId: 'longsword-and-shield' },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit' },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack' },
     },
     feats: [],
     activeItems: [],

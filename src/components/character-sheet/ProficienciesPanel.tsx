@@ -13,7 +13,7 @@ interface ProficienciesPanelProps {
 }
 
 function sourceLabel(source: Sourced<string>['sources'][number]): string {
-  return source.id
+  return source.origin === 'loot' ? source.description : source.id
 }
 
 function ArmorBadge({ prof }: { prof: Sourced<ArmorProficiencyId> }) {
