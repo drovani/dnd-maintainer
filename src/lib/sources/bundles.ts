@@ -55,6 +55,14 @@ export function requireBundleDef(id: string): BundleDef {
 }
 
 /**
+ * Returns the i18n key for a bundle's display name.
+ * Mirrors getItemNameKey in src/lib/sources/items.ts.
+ */
+export function getBundleNameKey(bundleId: string): `bundles.${string}.name` {
+  return `bundles.${bundleId}.name`
+}
+
+/**
  * Resolves a bundle or pack id to its contents and kind.
  * Checks BUNDLE_CATALOG first, then falls back to pack-type items in ITEM_CATALOG.
  * Throws if the id is unknown or does not resolve to a bundle/pack.
