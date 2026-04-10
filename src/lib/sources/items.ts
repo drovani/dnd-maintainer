@@ -157,3 +157,28 @@ const ITEM_MAP: ReadonlyMap<string, ItemDef> = new Map(ITEM_CATALOG.map((item) =
 export function getItemDef(id: string): ItemDef | undefined {
   return ITEM_MAP.get(id)
 }
+
+// Maps ItemDef['type'] → the plural group key used in gamedata.json items.*
+const ITEM_TYPE_TO_GROUP = {
+  weapon: 'weapons',
+  armor: 'armor',
+  gear: 'gear',
+  pack: 'packs',
+} as const satisfies Record<ItemDef['type'], string>
+
+type ItemTypeGroup = (typeof ITEM_TYPE_TO_GROUP)[ItemDef['type']]
+
+export type ItemNameKey =
+  | `items.weapons.${string}.name`
+  | `items.armor.${string}.name`
+  | `items.gear.${string}.name`
+  | `items.packs.${string}.name`
+
+/**
+ * Returns a gamedata translation key for the item's name.
+ * Use with `t(getItemNameKey(def), { ns: 'gamedata', defaultValue: id })`.
+ */
+export function getItemNameKey(type: ItemDef['type'], id: string): ItemNameKey {
+  const group: ItemTypeGroup = ITEM_TYPE_TO_GROUP[type]
+  return `items.${group}.${id}.name`
+}

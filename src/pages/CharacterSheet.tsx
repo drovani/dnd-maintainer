@@ -24,7 +24,7 @@ import { LevelControls } from '@/components/character-sheet/LevelControls'
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel'
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel'
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel'
-import { getItemDef } from '@/lib/sources/items'
+import { getItemDef, getItemNameKey } from '@/lib/sources/items'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
@@ -465,7 +465,7 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                   {itemsData.map((item) => {
                     const itemDef = getItemDef(item.item_id)
                     const type = itemDef?.type ?? 'gear'
-                    const itemName = t(`items.${type}s.${item.item_id}.name` as Parameters<typeof t>[0], {
+                    const itemName = t(getItemNameKey(type, item.item_id), {
                       defaultValue: item.item_id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
                     })
                     const detail = (() => {

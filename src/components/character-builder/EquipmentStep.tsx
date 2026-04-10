@@ -1,5 +1,5 @@
 import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { getItemDef } from '@/lib/sources/items'
+import { getItemDef, getItemNameKey } from '@/lib/sources/items'
 import { useTranslation } from 'react-i18next'
 import { ChoicePicker } from './ChoicePicker'
 import type { ChoiceDecision } from '@/types/choices'
@@ -24,7 +24,7 @@ export function EquipmentStep() {
   function renderItemName(itemId: string): string {
     const itemDef = getItemDef(itemId)
     const type = itemDef?.type ?? 'gear'
-    return t(`items.${type}s.${itemId}.name` as Parameters<typeof t>[0], { defaultValue: itemId })
+    return t(getItemNameKey(type, itemId), { defaultValue: itemId })
   }
 
   return (

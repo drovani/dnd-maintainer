@@ -3,6 +3,7 @@ import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown'
 import type { ResolvedAttack } from '@/types/resolved'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
+import { getItemNameKey } from '@/lib/sources/items'
 import { useTranslation } from 'react-i18next'
 
 interface AttacksPanelProps {
@@ -49,7 +50,7 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
 
           {attacks.map((attack, index) => {
             const isExpanded = expandedRows.has(index)
-            const weaponName = t(`items.weapons.${attack.weaponId}.name` as Parameters<typeof t>[0], {
+            const weaponName = t(getItemNameKey('weapon', attack.weaponId), {
               defaultValue: attack.name,
             })
             const damageType = t(`damageTypes.${attack.damageType}`)

@@ -8,7 +8,7 @@ import {
   type SkillId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
-import { getItemDef } from '@/lib/sources/items'
+import { getItemDef, getItemNameKey } from '@/lib/sources/items'
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
 import type { PendingChoice } from '@/types/resolved'
 import { useTranslation } from 'react-i18next'
@@ -214,7 +214,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
               .map(({ itemId, quantity }) => {
                 const itemDef = getItemDef(itemId)
                 const type = itemDef?.type ?? 'gear'
-                const name = t(`items.${type}s.${itemId}.name` as Parameters<typeof t>[0], {
+                const name = t(getItemNameKey(type, itemId), {
                   defaultValue: itemId,
                 })
                 const detail = (() => {
