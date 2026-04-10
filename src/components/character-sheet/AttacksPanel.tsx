@@ -50,7 +50,7 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
 
           {attacks.map((attack, index) => {
             const isExpanded = expandedRows.has(index)
-            const weaponName = t(getItemNameKey('weapon', attack.weaponId), { defaultValue: attack.weaponId })
+            const weaponName = t(getItemNameKey('weapon', attack.weaponId), { defaultValue: '' })
             const damageType = t(`damageTypes.${attack.damageType}`)
             const damageStr = `${attack.damageDice}${attack.damageBonus !== 0 ? formatSigned(attack.damageBonus) : ''} ${damageType}`
 

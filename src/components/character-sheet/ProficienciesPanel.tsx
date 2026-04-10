@@ -18,7 +18,7 @@ function sourceLabel(source: Sourced<string>['sources'][number]): string {
 
 function ArmorBadge({ prof }: { prof: Sourced<ArmorProficiencyId> }) {
   const { t } = useTranslation('gamedata')
-  const label = t(`armor.${prof.value}`, { defaultValue: prof.value })
+  const label = t(`armor.${prof.value}`)
   const sources = prof.sources.map(sourceLabel).join(', ')
   return (
     <Badge variant="outline" title={sources} className="text-xs cursor-default">
@@ -29,7 +29,7 @@ function ArmorBadge({ prof }: { prof: Sourced<ArmorProficiencyId> }) {
 
 function WeaponBadge({ prof }: { prof: Sourced<WeaponProficiencyId> }) {
   const { t } = useTranslation('gamedata')
-  const label = t(`weapons.${prof.value}`, { defaultValue: prof.value })
+  const label = t(`weapons.${prof.value}`)
   const sources = prof.sources.map(sourceLabel).join(', ')
   return (
     <Badge variant="outline" title={sources} className="text-xs cursor-default">
@@ -40,7 +40,7 @@ function WeaponBadge({ prof }: { prof: Sourced<WeaponProficiencyId> }) {
 
 function ToolBadge({ prof }: { prof: Sourced<ToolProficiencyId> }) {
   const { t } = useTranslation('gamedata')
-  const label = t(`tools.${prof.value}`, { defaultValue: prof.value })
+  const label = t(`tools.${prof.value}`)
   const sources = prof.sources.map(sourceLabel).join(', ')
   return (
     <Badge variant="outline" title={sources} className="text-xs cursor-default">
@@ -51,7 +51,7 @@ function ToolBadge({ prof }: { prof: Sourced<ToolProficiencyId> }) {
 
 function LanguageBadge({ lang }: { lang: Sourced<LanguageId> }) {
   const { t } = useTranslation('gamedata')
-  const label = t(`languages.${lang.value}`, { defaultValue: lang.value })
+  const label = t(`languages.${lang.value}`)
   const sources = lang.sources.map(sourceLabel).join(', ')
   return (
     <Badge variant="outline" title={sources} className="text-xs cursor-default">

@@ -14,17 +14,17 @@ export function EquipmentStep() {
   const allEquipment = resolved?.equipment ?? []
 
   // Group resolved equipment by type for the summary
-  const weapons = allEquipment.filter((e) => e.itemDef?.type === 'weapon')
-  const armor = allEquipment.filter((e) => e.itemDef?.type === 'armor')
-  const gear = allEquipment.filter((e) => e.itemDef?.type === 'gear')
-  const packs = allEquipment.filter((e) => e.itemDef?.type === 'pack')
+  const weapons = allEquipment.filter((e) => e.itemDef.type === 'weapon')
+  const armor = allEquipment.filter((e) => e.itemDef.type === 'armor')
+  const gear = allEquipment.filter((e) => e.itemDef.type === 'gear')
+  const packs = allEquipment.filter((e) => e.itemDef.type === 'pack')
 
   const hasAnyEquipment = allEquipment.length > 0
 
   function renderItemName(itemId: string): string {
     const itemDef = getItemDef(itemId)
     const type = itemDef?.type ?? 'gear'
-    return t(getItemNameKey(type, itemId), { defaultValue: itemId })
+    return t(getItemNameKey(type, itemId), { defaultValue: '' })
   }
 
   return (
@@ -66,7 +66,7 @@ export function EquipmentStep() {
                     <li key={i} className="flex gap-2 text-foreground">
                       <span className="text-muted-foreground">{e.quantity}×</span>
                       <span>{renderItemName(e.itemId)}</span>
-                      {e.itemDef?.type === 'weapon' && (
+                      {e.itemDef.type === 'weapon' && (
                         <span className="text-muted-foreground">
                           ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
                         </span>
@@ -86,7 +86,7 @@ export function EquipmentStep() {
                     <li key={i} className="flex gap-2 text-foreground">
                       <span className="text-muted-foreground">{e.quantity}×</span>
                       <span>{renderItemName(e.itemId)}</span>
-                      {e.itemDef?.type === 'armor' && (
+                      {e.itemDef.type === 'armor' && (
                         <span className="text-muted-foreground">
                           {tc('characterSheet.attacks.acFormat', { ac: e.itemDef.baseAc })}
                         </span>

@@ -33,7 +33,7 @@ export interface WeaponDef {
   readonly longRange?: number
   readonly versatileDice?: string
   /** Explicit proficiency ID for use in proficiency checks — may differ from id when id uses hyphens */
-  readonly weaponProficiencyId: WeaponProficiencyId | WeaponCategory
+  readonly weaponProficiencyId: WeaponProficiencyId
 }
 
 export interface ArmorDef {
