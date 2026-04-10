@@ -18,9 +18,13 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { AttacksPanel } from '@/components/character-sheet/AttacksPanel'
+import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown'
 import { LevelControls } from '@/components/character-sheet/LevelControls'
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel'
+import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel'
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel'
+import { getItemDef } from '@/lib/sources/items'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
@@ -323,15 +327,16 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
             {savingThrows ? (
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.savingThrows')}</h2>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs">
                   {(Object.keys(savingThrows) as Array<keyof typeof savingThrows>).map((ability) => {
                     const save = savingThrows[ability]
                     return (
-                      <div key={ability} className="flex justify-between text-foreground">
+                      <div key={ability} className="flex justify-between items-center text-foreground">
                         <span className={save.proficient ? 'font-bold' : ''}>{t(`abilities.${ability}`)}</span>
-                        <span className="font-mono font-bold">
-                          {save.bonus >= 0 ? '+' : ''}{save.bonus}
-                        </span>
+                        <BonusBreakdown
+                          components={save.breakdown}
+                          total={save.bonus}
+                        />
                       </div>
                     )
                   })}
@@ -405,6 +410,16 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               </div>
             </div>
 
+            {/* Attacks */}
+            {resolved && (
+              <AttacksPanel attacks={resolved.attacks} />
+            )}
+
+            {/* Proficiencies */}
+            {resolved && (
+              <ProficienciesPanel resolved={resolved} />
+            )}
+
             {/* Features */}
             {resolved?.features && resolved.features.length > 0 && (
               <div className="bg-card border rounded-lg p-6">
@@ -447,23 +462,38 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
               <div className="bg-card border rounded-lg p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.equipment')}</h2>
                 <div className="space-y-2 text-xs">
-                  {itemsData.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-50 border border-green-200' : 'bg-muted/50'}`}
-                    >
-                      <div>
-                        <div className="font-semibold text-foreground">
-                          {/* TODO: add item translation keys to gamedata.json and use t(`items.${item.item_id}`) */}
-                          {item.item_id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                  {itemsData.map((item) => {
+                    const itemDef = getItemDef(item.item_id)
+                    const type = itemDef?.type ?? 'gear'
+                    const itemName = t(`items.${type}s.${item.item_id}.name` as Parameters<typeof t>[0], {
+                      defaultValue: item.item_id.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+                    })
+                    const detail = (() => {
+                      if (itemDef?.type === 'weapon') {
+                        return ` — ${itemDef.damageDice} ${t(`damageTypes.${itemDef.damageType}`)}`
+                      }
+                      if (itemDef?.type === 'armor') {
+                        return ` — AC ${itemDef.baseAc}`
+                      }
+                      return ''
+                    })()
+                    return (
+                      <div
+                        key={item.id}
+                        className={`flex justify-between items-center py-2 px-2 rounded ${item.equipped ? 'bg-green-50 border border-green-200 dark:bg-green-950/20 dark:border-green-900' : 'bg-muted/50'}`}
+                      >
+                        <div>
+                          <div className="font-semibold text-foreground">
+                            {itemName}{detail}
+                          </div>
+                          <div className="text-muted-foreground">
+                            {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: itemDef?.type !== 'pack' ? (itemDef?.weight ?? 0) : 0 })}
+                          </div>
                         </div>
-                        <div className="text-muted-foreground">
-                          {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: 0 })}
-                        </div>
+                        {item.equipped && <Check className="size-4 text-green-600" />}
                       </div>
-                      {item.equipped && <Check className="size-4 text-green-600" />}
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}

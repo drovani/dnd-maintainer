@@ -309,7 +309,9 @@
       "attackBonus": "ATK",
       "damage": "Damage",
       "noAttacks": "No weapons equipped",
-      "range": "Range"
+      "range": "Range",
+      "rangeFormat": "{{normal}}/{{long}} ft",
+      "acFormat": "AC {{ac}}"
     },
     "breakdown": {
       "base": "Base",
