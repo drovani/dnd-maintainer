@@ -2,6 +2,7 @@ import type { AbilityKey, FightingStyleId, SkillId, ArmorProficiencyId, WeaponPr
 import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants'
 import type { SourceTag } from '@/types/sources'
 import type { ChoiceKey } from '@/types/choices'
+import type { ItemDef, DamageType, WeaponProperty, WeaponRange } from '@/types/items'
 
 export interface Sourced<T> {
   readonly value: T
@@ -28,6 +29,47 @@ export interface ResolvedSkill {
   readonly bonus: number
   readonly breakdown: readonly SkillBonusComponent[]
   readonly sources: readonly SourceTag[]
+}
+
+export interface ResolvedEquipmentItem {
+  readonly itemId: string
+  readonly itemDef: ItemDef | undefined
+  readonly quantity: number
+  readonly source: SourceTag
+  readonly equipped: boolean
+}
+
+export interface AttackBonusComponent {
+  readonly type: 'ability' | 'proficiency' | 'fighting-style' | 'magic'
+  readonly value: number
+  readonly label: string
+}
+
+export interface DamageBonusComponent {
+  readonly type: 'ability' | 'fighting-style' | 'magic'
+  readonly value: number
+  readonly label: string
+}
+
+export interface ResolvedAttack {
+  readonly weaponId: string
+  readonly name: string
+  readonly attackBonus: number
+  readonly attackBreakdown: readonly AttackBonusComponent[]
+  readonly damageDice: string
+  readonly damageBonus: number
+  readonly damageBreakdown: readonly DamageBonusComponent[]
+  readonly damageType: DamageType
+  readonly properties: readonly WeaponProperty[]
+  readonly range: WeaponRange
+  readonly normalRange?: number
+  readonly longRange?: number
+}
+
+export interface SavingThrowBonusComponent {
+  readonly type: 'ability' | 'proficiency'
+  readonly value: number
+  readonly label: string
 }
 
 export interface ResolvedFeature {
@@ -70,7 +112,7 @@ export interface ResolvedCharacter {
   readonly initiative: number
   readonly proficiencyBonus: number
   readonly armorClass: ResolvedArmorClass
-  readonly savingThrows: Readonly<Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[] }>>
+  readonly savingThrows: Readonly<Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[]; readonly breakdown: readonly SavingThrowBonusComponent[] }>>
   readonly skills: Readonly<Record<SkillId, ResolvedSkill>>
   readonly armorProficiencies: readonly Sourced<ArmorProficiencyId>[]
   readonly weaponProficiencies: readonly Sourced<WeaponProficiencyId>[]
@@ -80,5 +122,7 @@ export interface ResolvedCharacter {
   readonly resistances: readonly Sourced<DamageTypeId>[]
   readonly immunities: readonly Sourced<DamageTypeId>[]
   readonly spellcasting: ResolvedSpellcasting | null
+  readonly equipment: readonly ResolvedEquipmentItem[]
+  readonly attacks: readonly ResolvedAttack[]
   readonly pendingChoices: readonly PendingChoice[]
 }
