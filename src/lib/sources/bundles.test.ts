@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { BUNDLE_CATALOG, getBundleDef, requireBundleDef, resolveBundleRef } from '@/lib/sources/bundles'
+import {
+  BUNDLE_CATALOG,
+  getBundleDef,
+  getItemsForSlot,
+  requireBundleDef,
+  resolveBundleRef,
+} from '@/lib/sources/bundles'
 import { getItemDef } from '@/lib/sources/items'
 
 describe('BUNDLE_CATALOG', () => {
@@ -9,9 +15,12 @@ describe('BUNDLE_CATALOG', () => {
     expect(uniqueIds.size).toBe(ids.length)
   })
 
-  it('every bundle has at least one content item', () => {
+  it('every bundle has at least one fixed item or slot', () => {
     for (const bundle of BUNDLE_CATALOG) {
-      expect(bundle.contents.length, `bundle "${bundle.id}" must have at least one item`).toBeGreaterThan(0)
+      expect(
+        bundle.contents.length + bundle.slots.length,
+        `bundle "${bundle.id}" must have at least one item or slot`,
+      ).toBeGreaterThan(0)
     }
   })
 
@@ -20,6 +29,18 @@ describe('BUNDLE_CATALOG', () => {
       for (const { itemId } of bundle.contents) {
         const def = getItemDef(itemId)
         expect(def, `bundle "${bundle.id}" references unknown itemId "${itemId}"`).toBeDefined()
+      }
+    }
+  })
+
+  it('every slot filter yields a non-empty candidate list', () => {
+    for (const bundle of BUNDLE_CATALOG) {
+      for (const slot of bundle.slots) {
+        const candidates = getItemsForSlot(slot.filter)
+        expect(
+          candidates.length,
+          `bundle "${bundle.id}" slot "${slot.slotKey}" has no candidate items`,
+        ).toBeGreaterThan(0)
       }
     }
   })
@@ -61,12 +82,21 @@ describe('requireBundleDef', () => {
 })
 
 describe('resolveBundleRef', () => {
-  it('resolves a bundle id to its contents with kind "bundle"', () => {
-    const result = resolveBundleRef('longsword-and-shield')
+  it('resolves a fixed bundle id to its contents with kind "bundle"', () => {
+    const result = resolveBundleRef('fighter-archer-kit')
     expect(result.kind).toBe('bundle')
-    expect(result.contents).toHaveLength(2)
-    expect(result.contents.map((c) => c.itemId)).toContain('longsword')
-    expect(result.contents.map((c) => c.itemId)).toContain('shield')
+    expect(result.contents).toHaveLength(3)
+    expect(result.contents.map((c) => c.itemId)).toContain('longbow')
+  })
+
+  it('resolves a slotted bundle id, returning only the fixed contents (ignores slots)', () => {
+    // martial-weapon-and-shield has zero fixed items and two slots (weapon + shield).
+    // resolveBundleRef returns only the fixed contents; slot resolution lives in the resolver.
+    const result = resolveBundleRef('martial-weapon-and-shield')
+    expect(result.kind).toBe('bundle')
+    expect(result.contents).toHaveLength(0)
+    const bundle = getBundleDef('martial-weapon-and-shield')
+    expect(bundle?.slots).toHaveLength(2)
   })
 
   it('resolves a pack item id to its contents with kind "pack"', () => {
@@ -101,10 +131,12 @@ describe('resolveBundleRef', () => {
     expect(ids).toContain('arrows-20')
   })
 
-  it('two-longswords contains longsword with quantity 2', () => {
-    const result = resolveBundleRef('two-longswords')
-    expect(result.contents[0].itemId).toBe('longsword')
-    expect(result.contents[0].quantity).toBe(2)
+  it('two-martial-weapons has no fixed contents (two slots instead)', () => {
+    const result = resolveBundleRef('two-martial-weapons')
+    expect(result.kind).toBe('bundle')
+    expect(result.contents).toHaveLength(0)
+    const bundle = getBundleDef('two-martial-weapons')
+    expect(bundle?.slots).toHaveLength(2)
   })
 
   it('light-crossbow-kit contains light-crossbow and bolts-20', () => {

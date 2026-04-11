@@ -1,4 +1,5 @@
 import { useCharacterContext } from '@/hooks/useCharacterContext'
+import { collectGrantsByType } from '@/lib/resolver/helpers'
 import { getItemDef, getItemNameKey } from '@/lib/sources/items'
 import { BUNDLE_CATEGORIES } from '@/types/items'
 import { useTranslation } from 'react-i18next'
@@ -10,34 +11,38 @@ export function EquipmentStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const context = useCharacterContext()
-  const { resolved } = context
+  const { bundles, resolved, build } = context
 
   const allEquipment = resolved?.equipment ?? []
-  const allPendingChoices = resolved?.pendingChoices ?? []
 
-  // Separate bundle-choice from other pending choices
-  const bundleChoices = allPendingChoices.filter(
-    (c): c is PendingChoice & { type: 'bundle-choice' } => c.type === 'bundle-choice',
-  )
-  const otherChoices = allPendingChoices.filter((c) => c.type !== 'bundle-choice')
+  // Drive the class loadout UI from the class's bundle-choice grants (not pendingChoices),
+  // so options remain visible after a decision is made and the user can change their pick.
+  const classBundleChoiceGrants = collectGrantsByType(bundles, 'bundle-choice')
+    .filter((tg) => tg.source.origin === 'class')
+    .sort((a, b) => {
+      const aIdx = BUNDLE_CATEGORIES.indexOf(a.grant.category)
+      const bIdx = BUNDLE_CATEGORIES.indexOf(b.grant.category)
+      return aIdx - bIdx
+    })
 
-  // Group bundle-choice pending choices by category, preserving fixed section order
-  const bundleChoicesByCategory = Object.fromEntries(
-    BUNDLE_CATEGORIES.map((cat) => [
-      cat,
-      bundleChoices.filter((c) => c.category === cat),
-    ]),
-  ) as Record<(typeof BUNDLE_CATEGORIES)[number], (PendingChoice & { type: 'bundle-choice' })[]>
+  // Synthesize the PendingChoice shape that ChoicePicker expects from each tagged grant.
+  const classBundleChoices: readonly (PendingChoice & { type: 'bundle-choice' })[] =
+    classBundleChoiceGrants.map(({ grant, source }) => ({
+      type: 'bundle-choice',
+      choiceKey: grant.key,
+      source,
+      category: grant.category,
+      bundleIds: grant.bundleIds,
+    }))
 
-  // Group resolved equipment by type for the summary
+  // Group resolved equipment by type for the running summary
   const weapons = allEquipment.filter((e) => e.itemDef.type === 'weapon')
   const armor = allEquipment.filter((e) => e.itemDef.type === 'armor')
   const gear = allEquipment.filter((e) => e.itemDef.type === 'gear')
   const packs = allEquipment.filter((e) => e.itemDef.type === 'pack')
 
   const hasAnyEquipment = allEquipment.length > 0
-  const hasBundleChoices = bundleChoices.length > 0
-  const hasOtherChoices = otherChoices.length > 0
+  const hasClassBundleChoices = classBundleChoices.length > 0
 
   function renderItemName(itemId: string): string {
     const itemDef = getItemDef(itemId)
@@ -46,137 +51,139 @@ export function EquipmentStep() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Bundle-choice sections grouped by category */}
-      {hasBundleChoices && (
-        <div className="space-y-6">
-          {BUNDLE_CATEGORIES.map((category) => {
-            const choices = bundleChoicesByCategory[category]
-            if (choices.length === 0) return null
-            return (
-              <div key={category} className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground">
-                  {tc(`characterBuilder.equipment.sections.${category}`)}
-                </h3>
-                {choices.map((choice) => {
-                  const decision = context.build?.choices[choice.choiceKey]
-                  return (
-                    <ChoicePicker
-                      key={choice.choiceKey}
-                      choice={choice}
-                      currentDecision={decision as ChoiceDecision | undefined}
-                      onDecide={(key, d) => context.makeChoice(key, d)}
-                      onClear={(key) => context.clearChoice(key)}
-                    />
-                  )
-                })}
-              </div>
-            )
-          })}
-        </div>
-      )}
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      {/* Left column — selections */}
+      <div className="space-y-8">
+        {/* Part 1: Class Equipment Loadout */}
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold text-foreground">
+              {tc('characterBuilder.equipment.classLoadoutTitle')}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {tc('characterBuilder.equipment.classLoadoutSubtitle')}
+            </p>
+          </div>
 
-      {/* Fallback flat list for non-bundle-choice pending choices (forward compat) */}
-      {hasOtherChoices && (
-        <div className="space-y-4">
-          {otherChoices.map((choice) => {
-            const decision = context.build?.choices[choice.choiceKey]
-            return (
-              <ChoicePicker
-                key={choice.choiceKey}
-                choice={choice}
-                currentDecision={decision as ChoiceDecision | undefined}
-                onDecide={(key, d) => context.makeChoice(key, d)}
-                onClear={(key) => context.clearChoice(key)}
-              />
-            )
-          })}
-        </div>
-      )}
+          {hasClassBundleChoices ? (
+            <div className="space-y-4">
+              {classBundleChoices.map((choice) => {
+                const decision = build?.choices[choice.choiceKey]
+                return (
+                  <ChoicePicker
+                    key={choice.choiceKey}
+                    choice={choice}
+                    currentDecision={decision as ChoiceDecision | undefined}
+                    onDecide={(key, d) => context.makeChoice(key, d)}
+                    onClear={(key) => context.clearChoice(key)}
+                  />
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">
+              {tc('characterBuilder.equipment.comingSoon')}
+            </p>
+          )}
+        </section>
 
-      {!hasBundleChoices && !hasOtherChoices && (
-        <p className="text-muted-foreground text-sm">
-          {tc('characterBuilder.equipment.comingSoon')}
-        </p>
-      )}
+        {/* Part 2: Purchase Equipment (placeholder) */}
+        <section className="space-y-2 border-t pt-6">
+          <h2 className="text-base font-semibold text-foreground">
+            {tc('characterBuilder.equipment.purchaseTitle')}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {tc('characterBuilder.equipment.purchaseComingSoon')}
+          </p>
+        </section>
+      </div>
 
-      {/* Equipment Summary */}
-      {hasAnyEquipment && (
-        <div className="border-t pt-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3">
+      {/* Right column — running equipment summary */}
+      <aside className="lg:sticky lg:top-4 lg:self-start">
+        <div className="rounded-lg border bg-card p-4 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">
             {tc('characterBuilder.equipment.summary')}
           </h3>
-          <div className="space-y-3 text-sm">
-            {weapons.length > 0 && (
-              <div>
-                <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                  {t('weaponCategories.simple')}/{t('weaponCategories.martial')}
+          {hasAnyEquipment ? (
+            <div className="space-y-3 text-sm">
+              {weapons.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                    {t('weaponCategories.simple')}/{t('weaponCategories.martial')}
+                  </div>
+                  <ul className="space-y-0.5">
+                    {weapons.map((e, i) => (
+                      <li key={i} className="flex gap-2 text-foreground">
+                        <span className="text-muted-foreground">{e.quantity}×</span>
+                        <span>{renderItemName(e.itemId)}</span>
+                        {e.itemDef.type === 'weapon' && (
+                          <span className="text-muted-foreground">
+                            ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-0.5">
-                  {weapons.map((e, i) => (
-                    <li key={i} className="flex gap-2 text-foreground">
-                      <span className="text-muted-foreground">{e.quantity}×</span>
-                      <span>{renderItemName(e.itemId)}</span>
-                      {e.itemDef.type === 'weapon' && (
-                        <span className="text-muted-foreground">
-                          ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {armor.length > 0 && (
-              <div>
-                <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                  {tc('characterSheet.proficiencies.armor')}
+              )}
+              {armor.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                    {tc('characterSheet.proficiencies.armor')}
+                  </div>
+                  <ul className="space-y-0.5">
+                    {armor.map((e, i) => (
+                      <li key={i} className="flex gap-2 text-foreground">
+                        <span className="text-muted-foreground">{e.quantity}×</span>
+                        <span>{renderItemName(e.itemId)}</span>
+                        {e.itemDef.type === 'armor' && (
+                          <span className="text-muted-foreground">
+                            {tc('characterSheet.attacks.acFormat', { ac: e.itemDef.baseAc })}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-0.5">
-                  {armor.map((e, i) => (
-                    <li key={i} className="flex gap-2 text-foreground">
-                      <span className="text-muted-foreground">{e.quantity}×</span>
-                      <span>{renderItemName(e.itemId)}</span>
-                      {e.itemDef.type === 'armor' && (
-                        <span className="text-muted-foreground">
-                          {tc('characterSheet.attacks.acFormat', { ac: e.itemDef.baseAc })}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {gear.length > 0 && (
-              <div>
-                <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                  {tc('characterSheet.sections.equipment')}
+              )}
+              {gear.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                    {tc('characterSheet.sections.equipment')}
+                  </div>
+                  <ul className="space-y-0.5">
+                    {gear.map((e, i) => (
+                      <li key={i} className="flex gap-2 text-foreground">
+                        <span className="text-muted-foreground">{e.quantity}×</span>
+                        <span>{renderItemName(e.itemId)}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-0.5">
-                  {gear.map((e, i) => (
-                    <li key={i} className="flex gap-2 text-foreground">
-                      <span className="text-muted-foreground">{e.quantity}×</span>
-                      <span>{renderItemName(e.itemId)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {packs.length > 0 && (
-              <div>
-                <ul className="space-y-0.5">
-                  {packs.map((e, i) => (
-                    <li key={i} className="flex gap-2 text-foreground">
-                      <span className="text-muted-foreground">{e.quantity}×</span>
-                      <span>{renderItemName(e.itemId)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+              )}
+              {packs.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                    {t('bundleCategories.pack')}
+                  </div>
+                  <ul className="space-y-0.5">
+                    {packs.map((e, i) => (
+                      <li key={i} className="flex gap-2 text-foreground">
+                        <span className="text-muted-foreground">{e.quantity}×</span>
+                        <span>{renderItemName(e.itemId)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">
+              {tc('characterBuilder.equipment.summaryEmpty')}
+            </p>
+          )}
         </div>
-      )}
+      </aside>
     </div>
   )
 }

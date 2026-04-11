@@ -115,7 +115,7 @@ describe('resolveEquipment bundle-choice', () => {
   it('expands bundle decision contents with source.origin "bundle"', () => {
     const bundles = [makeBundleChoiceBundle(['fighter-chainmail', 'fighter-archer-kit'])]
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail' },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
     }
     const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
     expect(result.items).toHaveLength(1)
@@ -127,7 +127,7 @@ describe('resolveEquipment bundle-choice', () => {
   it('multi-item bundle expands all contents', () => {
     const bundles = [makeBundleChoiceBundle(['fighter-chainmail', 'fighter-archer-kit'])]
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-archer-kit' },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-archer-kit', slotPicks: {} },
     }
     const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
     expect(result.items).toHaveLength(3)
@@ -143,7 +143,7 @@ describe('resolveEquipment bundle-choice', () => {
   it('pack-type id expands pack contents with source.origin "pack"', () => {
     const bundles = [makeBundleChoiceBundle(['dungeoneers-pack', 'explorers-pack'])]
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'dungeoneers-pack' },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
     }
     const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
     expect(result.items.length).toBeGreaterThan(0)
@@ -173,12 +173,111 @@ describe('resolveEquipment bundle-choice', () => {
   it('invalid bundleId (unknown) falls through to pending, not a crash', () => {
     const bundles = [makeBundleChoiceBundle(['fighter-chainmail', 'fighter-archer-kit'])]
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'nonexistent-bundle' },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'nonexistent-bundle', slotPicks: {} },
     }
     const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
     expect(result.items).toHaveLength(0)
     expect(result.pendingChoices).toHaveLength(1)
     expect(result.pendingChoices[0].type).toBe('bundle-choice')
+  })
+
+  // -------------------------------------------------------------------------
+  // Slotted bundle scenarios
+  // -------------------------------------------------------------------------
+
+  it('slotted bundle with all slots filled materializes every slot item', () => {
+    const bundles = [makeBundleChoiceBundle(['martial-weapon-and-shield', 'two-martial-weapons'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: { weapon: 'longsword', shield: 'shield' },
+      },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    const ids = result.items.map((i) => i.itemId).sort()
+    expect(ids).toEqual(['longsword', 'shield'])
+    for (const item of result.items) {
+      expect(item.source).toEqual({ origin: 'bundle', id: 'martial-weapon-and-shield' })
+    }
+    expect(result.pendingChoices).toHaveLength(0)
+  })
+
+  it('slotted bundle with partially filled slots (only weapon, missing shield) stays pending', () => {
+    const bundles = [makeBundleChoiceBundle(['martial-weapon-and-shield', 'two-martial-weapons'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: { weapon: 'longsword' },
+      },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(0)
+    expect(result.pendingChoices).toHaveLength(1)
+    expect(result.pendingChoices[0].type).toBe('bundle-choice')
+  })
+
+  it('slotted bundle with no slot picks stays pending', () => {
+    const bundles = [makeBundleChoiceBundle(['martial-weapon-and-shield', 'two-martial-weapons'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: {},
+      },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(0)
+    expect(result.pendingChoices).toHaveLength(1)
+  })
+
+  it('slotted bundle with invalid slot pick (wrong category) stays pending', () => {
+    const bundles = [makeBundleChoiceBundle(['martial-weapon-and-shield', 'two-martial-weapons'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        // 'club' is a simple weapon — fails the martial filter
+        slotPicks: { weapon: 'club', shield: 'shield' },
+      },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(0)
+    expect(result.pendingChoices).toHaveLength(1)
+  })
+
+  it('two-martial-weapons with duplicate slot picks materializes both copies', () => {
+    const bundles = [makeBundleChoiceBundle(['martial-weapon-and-shield', 'two-martial-weapons'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': {
+        type: 'bundle-choice',
+        bundleId: 'two-martial-weapons',
+        slotPicks: { 'weapon-1': 'longsword', 'weapon-2': 'longsword' },
+      },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(2)
+    expect(result.items.every((i) => i.itemId === 'longsword')).toBe(true)
+    for (const item of result.items) {
+      expect(item.source).toEqual({ origin: 'bundle', id: 'two-martial-weapons' })
+    }
+    expect(result.pendingChoices).toHaveLength(0)
+  })
+
+  it('two-martial-weapons with distinct slot picks materializes both weapons', () => {
+    const bundles = [makeBundleChoiceBundle(['martial-weapon-and-shield', 'two-martial-weapons'])]
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:fighter:0': {
+        type: 'bundle-choice',
+        bundleId: 'two-martial-weapons',
+        slotPicks: { 'weapon-1': 'longsword', 'weapon-2': 'rapier' },
+      },
+    }
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED)
+    expect(result.items).toHaveLength(2)
+    const ids = result.items.map((i) => i.itemId).sort()
+    expect(ids).toEqual(['longsword', 'rapier'])
   })
 
 })

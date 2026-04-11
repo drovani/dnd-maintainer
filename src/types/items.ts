@@ -11,10 +11,30 @@ export const BUNDLE_CATEGORIES = [
 ] as const
 export type BundleCategory = (typeof BUNDLE_CATEGORIES)[number]
 
+export type SlotFilter =
+  | {
+      readonly kind: 'weapon'
+      readonly category?: WeaponCategory
+      readonly range?: WeaponRange
+    }
+  | {
+      readonly kind: 'armor'
+      readonly category: ArmorCategory
+    }
+
+export interface BundleSlot {
+  /** Stable key within the bundle, e.g. 'weapon', 'weapon-1', 'weapon-2' */
+  readonly slotKey: string
+  readonly quantity: number
+  readonly filter: SlotFilter
+}
+
 export interface BundleDef {
   readonly id: string
   readonly category: BundleCategory
   readonly contents: readonly { readonly itemId: string; readonly quantity: number }[]
+  /** Required (empty array when bundle has no pickable slots). */
+  readonly slots: readonly BundleSlot[]
 }
 
 export const WEAPON_PROPERTIES = [

@@ -1,11 +1,12 @@
-import type { BundleDef } from '@/types/items'
-import { getItemDef } from '@/lib/sources/items'
+import type { BundleDef, ItemDef, SlotFilter } from '@/types/items'
+import { ARMOR_CATALOG, getItemDef, WEAPON_CATALOG } from '@/lib/sources/items'
 
 export const BUNDLE_CATALOG: readonly BundleDef[] = [
   {
     id: 'fighter-chainmail',
     category: 'loadout',
     contents: [{ itemId: 'chain-mail', quantity: 1 }],
+    slots: [],
   },
   {
     id: 'fighter-archer-kit',
@@ -15,19 +16,41 @@ export const BUNDLE_CATALOG: readonly BundleDef[] = [
       { itemId: 'longbow', quantity: 1 },
       { itemId: 'arrows-20', quantity: 1 },
     ],
+    slots: [],
   },
   {
-    id: 'longsword-and-shield',
+    id: 'martial-weapon-and-shield',
     category: 'melee-weapon',
-    contents: [
-      { itemId: 'longsword', quantity: 1 },
-      { itemId: 'shield', quantity: 1 },
+    contents: [],
+    slots: [
+      {
+        slotKey: 'weapon',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'martial' },
+      },
+      {
+        slotKey: 'shield',
+        quantity: 1,
+        filter: { kind: 'armor', category: 'shield' },
+      },
     ],
   },
   {
-    id: 'two-longswords',
+    id: 'two-martial-weapons',
     category: 'melee-weapon',
-    contents: [{ itemId: 'longsword', quantity: 2 }],
+    contents: [],
+    slots: [
+      {
+        slotKey: 'weapon-1',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'martial' },
+      },
+      {
+        slotKey: 'weapon-2',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'martial' },
+      },
+    ],
   },
   {
     id: 'light-crossbow-kit',
@@ -36,11 +59,13 @@ export const BUNDLE_CATALOG: readonly BundleDef[] = [
       { itemId: 'light-crossbow', quantity: 1 },
       { itemId: 'bolts-20', quantity: 1 },
     ],
+    slots: [],
   },
   {
     id: 'two-handaxes',
     category: 'ranged-weapon',
     contents: [{ itemId: 'handaxe', quantity: 2 }],
+    slots: [],
   },
 ]
 
@@ -63,7 +88,9 @@ export function getBundleNameKey(bundleId: string): `bundles.${string}.name` {
 }
 
 /**
- * Resolves a bundle or pack id to its contents and kind.
+ * Resolves a bundle or pack id to its fixed contents and kind.
+ * Note: this ignores any bundle slots — callers that need slot-materialized items must
+ * resolve them separately via `getItemsForSlot` and user slot picks.
  * Checks BUNDLE_CATALOG first, then falls back to pack-type items in ITEM_CATALOG.
  * Throws if the id is unknown or does not resolve to a bundle/pack.
  */
@@ -78,4 +105,21 @@ export function resolveBundleRef(id: string): {
   if (item?.type === 'pack') return { contents: item.contents, kind: 'pack' }
 
   throw new Error(`Unknown bundle or pack id: "${id}"`)
+}
+
+/**
+ * Returns every item from WEAPON_CATALOG / ARMOR_CATALOG that satisfies the given SlotFilter.
+ * Used by the ChoicePicker slot UI to populate the Select dropdown for slotted bundles,
+ * and by the resolver to validate persisted slot picks against the current catalog.
+ */
+export function getItemsForSlot(filter: SlotFilter): readonly ItemDef[] {
+  if (filter.kind === 'weapon') {
+    return WEAPON_CATALOG.filter((w) => {
+      if (filter.category !== undefined && w.category !== filter.category) return false
+      if (filter.range !== undefined && w.range !== filter.range) return false
+      return true
+    })
+  }
+  // armor
+  return ARMOR_CATALOG.filter((a) => a.category === filter.category)
 }

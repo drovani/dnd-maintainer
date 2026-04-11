@@ -25,7 +25,13 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('asi'), allocation: z.record(z.string(), z.number()) }),
   z.object({ type: z.literal('subclass'), subclassId: z.string().min(1) }),
   z.object({ type: z.literal('fighting-style-choice'), styles: z.array(z.string()).readonly() }),
-  z.object({ type: z.literal('bundle-choice'), bundleId: z.string().min(1) }),
+  z.object({
+    type: z.literal('bundle-choice'),
+    bundleId: z.string().min(1),
+    // Records persisted before the slot system default to {}; slotted bundles
+    // will re-prompt the user via pendingChoices when they load the character.
+    slotPicks: z.record(z.string(), z.string()).default({}),
+  }),
 ])
 
 export const CharacterBuildSchema = z.object({

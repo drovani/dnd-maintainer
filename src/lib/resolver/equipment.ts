@@ -12,8 +12,35 @@ import type {
 import type { ResolvedAbility } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 import { getItemDef, requireItemDef } from '@/lib/sources/items'
-import { resolveBundleRef } from '@/lib/sources/bundles'
+import { getBundleDef, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles'
 import type { WeaponProficiencyId } from '@/lib/dnd-helpers'
+import type { BundleSlot, SlotFilter } from '@/types/items'
+
+/**
+ * Confirms that a slot pick is an item in the catalog that satisfies the slot's filter.
+ * Guards against stale persisted decisions after catalog changes.
+ */
+function isValidSlotPick(filter: SlotFilter, itemId: string): boolean {
+  return getItemsForSlot(filter).some((item) => item.id === itemId)
+}
+
+/**
+ * Returns the itemIds materialized from a bundle's slots given the user's slot picks.
+ * Returns null if any slot is unfilled or has an invalid pick — in that case the
+ * bundle-choice should remain pending.
+ */
+function resolveSlotPicks(
+  slots: readonly BundleSlot[],
+  slotPicks: Readonly<Record<string, string>>,
+): readonly { readonly itemId: string; readonly quantity: number }[] | null {
+  const resolved: { readonly itemId: string; readonly quantity: number }[] = []
+  for (const slot of slots) {
+    const picked = slotPicks[slot.slotKey]
+    if (picked === undefined || !isValidSlotPick(slot.filter, picked)) return null
+    resolved.push({ itemId: picked, quantity: slot.quantity })
+  }
+  return resolved
+}
 
 export function resolveEquipment(
   bundles: readonly GrantBundle[],
@@ -37,25 +64,31 @@ export function resolveEquipment(
   // Bundle-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'bundle-choice')) {
     const decision = choices[grant.key]
-    if (decision?.type === 'bundle-choice') {
-      let ref: ReturnType<typeof resolveBundleRef> | undefined
-      try {
-        ref = resolveBundleRef(decision.bundleId)
-      } catch {
-        // Unknown bundleId (stale persisted data) — re-prompt
-        pendingChoices.push({
-          type: 'bundle-choice',
-          choiceKey: grant.key,
-          source,
-          category: grant.category,
-          bundleIds: grant.bundleIds,
-        })
-        continue
-      }
-      const itemSource: import('@/types/sources').SourceTag =
-        ref.kind === 'pack'
-          ? { origin: 'pack', id: decision.bundleId }
-          : { origin: 'bundle', id: decision.bundleId }
+    const pendingForGrant: PendingChoice = {
+      type: 'bundle-choice',
+      choiceKey: grant.key,
+      source,
+      category: grant.category,
+      bundleIds: grant.bundleIds,
+    }
+
+    if (decision?.type !== 'bundle-choice') {
+      pendingChoices.push(pendingForGrant)
+      continue
+    }
+
+    let ref: ReturnType<typeof resolveBundleRef> | undefined
+    try {
+      ref = resolveBundleRef(decision.bundleId)
+    } catch {
+      // Unknown bundleId (stale persisted data) — re-prompt
+      pendingChoices.push(pendingForGrant)
+      continue
+    }
+
+    // Packs never have slots — materialize contents directly.
+    if (ref.kind === 'pack') {
+      const itemSource: import('@/types/sources').SourceTag = { origin: 'pack', id: decision.bundleId }
       for (const { itemId, quantity } of ref.contents) {
         items.push({
           itemId,
@@ -65,13 +98,40 @@ export function resolveEquipment(
           equipped: equippedItemIds.includes(itemId),
         })
       }
-    } else {
-      pendingChoices.push({
-        type: 'bundle-choice',
-        choiceKey: grant.key,
-        source,
-        category: grant.category,
-        bundleIds: grant.bundleIds,
+      continue
+    }
+
+    // Bundle — may have slots. Resolve them against the user's slotPicks.
+    const bundle = getBundleDef(decision.bundleId)
+    if (bundle === undefined) {
+      pendingChoices.push(pendingForGrant)
+      continue
+    }
+
+    const slotItems = resolveSlotPicks(bundle.slots, decision.slotPicks)
+    if (slotItems === null) {
+      // Partial or invalid slot selection — keep the choice pending so the UI re-prompts.
+      pendingChoices.push(pendingForGrant)
+      continue
+    }
+
+    const itemSource: import('@/types/sources').SourceTag = { origin: 'bundle', id: decision.bundleId }
+    for (const { itemId, quantity } of bundle.contents) {
+      items.push({
+        itemId,
+        itemDef: requireItemDef(itemId),
+        quantity,
+        source: itemSource,
+        equipped: equippedItemIds.includes(itemId),
+      })
+    }
+    for (const { itemId, quantity } of slotItems) {
+      items.push({
+        itemId,
+        itemDef: requireItemDef(itemId),
+        quantity,
+        source: itemSource,
+        equipped: equippedItemIds.includes(itemId),
       })
     }
   }

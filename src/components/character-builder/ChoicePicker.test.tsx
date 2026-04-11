@@ -74,6 +74,7 @@ describe('ChoicePicker bundle-choice', () => {
     expect(onDecide).toHaveBeenCalledWith(BUNDLE_CHOICE.choiceKey, {
       type: 'bundle-choice',
       bundleId: 'fighter-chainmail',
+      slotPicks: {},
     })
   })
 
@@ -81,6 +82,7 @@ describe('ChoicePicker bundle-choice', () => {
     const currentDecision: ChoiceDecision = {
       type: 'bundle-choice',
       bundleId: 'fighter-archer-kit',
+      slotPicks: {},
     }
     render(
       <ChoicePicker
@@ -111,6 +113,7 @@ describe('ChoicePicker bundle-choice', () => {
     const currentDecision: ChoiceDecision = {
       type: 'bundle-choice',
       bundleId: 'fighter-chainmail',
+      slotPicks: {},
     }
     render(
       <ChoicePicker
@@ -128,6 +131,7 @@ describe('ChoicePicker bundle-choice', () => {
     const currentDecision: ChoiceDecision = {
       type: 'bundle-choice',
       bundleId: 'fighter-chainmail',
+      slotPicks: {},
     }
     render(
       <ChoicePicker
@@ -177,5 +181,157 @@ describe('ChoicePicker bundle-choice', () => {
     )
     const radios = screen.getAllByRole('radio')
     expect(radios).toHaveLength(2)
+  })
+
+  // -------------------------------------------------------------------------
+  // Card rendering for pack category
+  // -------------------------------------------------------------------------
+
+  it('pack category renders each option as a card with contents listed', () => {
+    const packChoice: PendingChoice & { type: 'bundle-choice' } = {
+      type: 'bundle-choice',
+      choiceKey: 'bundle-choice:class:fighter:3' as ChoiceKey,
+      source: FIGHTER_SOURCE,
+      category: 'pack' as BundleCategory,
+      bundleIds: ['dungeoneers-pack', 'explorers-pack'] as string[],
+    }
+    render(
+      <ChoicePicker
+        choice={packChoice}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    // Both packs render as cards via their test ids
+    expect(screen.getByTestId('bundle-pack-card-dungeoneers-pack')).toBeTruthy()
+    expect(screen.getByTestId('bundle-pack-card-explorers-pack')).toBeTruthy()
+
+    // Pack contents render as <ul>/<li> inside the card, including e.g. backpack
+    const dungeoneerCard = screen.getByTestId('bundle-pack-card-dungeoneers-pack')
+    expect(dungeoneerCard.querySelector('ul')).toBeTruthy()
+    // The mocked t() returns the last segment of the key, so 'items.gear.backpack.name' → 'name'.
+    // Easier assertion: there are list items inside
+    expect(dungeoneerCard.querySelectorAll('li').length).toBeGreaterThan(0)
+  })
+
+  it('clicking a pack card calls onDecide with that bundleId and empty slotPicks', () => {
+    const packChoice: PendingChoice & { type: 'bundle-choice' } = {
+      type: 'bundle-choice',
+      choiceKey: 'bundle-choice:class:fighter:3' as ChoiceKey,
+      source: FIGHTER_SOURCE,
+      category: 'pack' as BundleCategory,
+      bundleIds: ['dungeoneers-pack', 'explorers-pack'] as string[],
+    }
+    const onDecide = vi.fn()
+    render(
+      <ChoicePicker
+        choice={packChoice}
+        currentDecision={undefined}
+        onDecide={onDecide}
+        onClear={vi.fn()}
+      />,
+    )
+    fireEvent.click(screen.getByTestId('bundle-pack-card-explorers-pack'))
+    expect(onDecide).toHaveBeenCalledWith(packChoice.choiceKey, {
+      type: 'bundle-choice',
+      bundleId: 'explorers-pack',
+      slotPicks: {},
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Slotted bundle rendering
+  // -------------------------------------------------------------------------
+
+  const SLOTTED_CHOICE: PendingChoice & { type: 'bundle-choice' } = {
+    type: 'bundle-choice',
+    choiceKey: 'bundle-choice:class:fighter:1' as ChoiceKey,
+    source: FIGHTER_SOURCE,
+    category: 'melee-weapon' as BundleCategory,
+    bundleIds: ['martial-weapon-and-shield', 'two-martial-weapons'] as string[],
+  }
+
+  it('selecting a bundle calls onDecide with empty slotPicks', () => {
+    const onDecide = vi.fn()
+    render(
+      <ChoicePicker
+        choice={SLOTTED_CHOICE}
+        currentDecision={undefined}
+        onDecide={onDecide}
+        onClear={vi.fn()}
+      />,
+    )
+    const radios = screen.getAllByRole('radio')
+    fireEvent.click(radios[0])
+    expect(onDecide).toHaveBeenCalledWith(SLOTTED_CHOICE.choiceKey, {
+      type: 'bundle-choice',
+      bundleId: 'martial-weapon-and-shield',
+      slotPicks: {},
+    })
+  })
+
+  it('does not render the fixed-contents panel for slotted bundles with no fixed contents', () => {
+    // Both martial-weapon-and-shield and two-martial-weapons now have empty .contents,
+    // so the "Also includes" panel should never render for either.
+    const decision: ChoiceDecision = {
+      type: 'bundle-choice',
+      bundleId: 'martial-weapon-and-shield',
+      slotPicks: {},
+    }
+    render(
+      <ChoicePicker
+        choice={SLOTTED_CHOICE}
+        currentDecision={decision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    expect(screen.queryByTestId('bundle-fixed-contents-martial-weapon-and-shield')).toBeNull()
+  })
+
+  it('slot pickers only appear when the slotted bundle is selected', () => {
+    const { container, rerender } = render(
+      <ChoicePicker
+        choice={SLOTTED_CHOICE}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    // No bundle selected → no slot prompts visible
+    expect(container.querySelectorAll('[data-slot="select-trigger"]').length).toBe(0)
+
+    // Select "a martial weapon and a shield" — 2 slots (weapon + shield) should appear
+    const decision: ChoiceDecision = {
+      type: 'bundle-choice',
+      bundleId: 'martial-weapon-and-shield',
+      slotPicks: {},
+    }
+    rerender(
+      <ChoicePicker
+        choice={SLOTTED_CHOICE}
+        currentDecision={decision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    expect(container.querySelectorAll('[data-slot="select-trigger"]').length).toBe(2)
+
+    // Switch to the "two martial weapons" bundle — 2 slot pickers
+    const twoWeaponDecision: ChoiceDecision = {
+      type: 'bundle-choice',
+      bundleId: 'two-martial-weapons',
+      slotPicks: {},
+    }
+    rerender(
+      <ChoicePicker
+        choice={SLOTTED_CHOICE}
+        currentDecision={twoWeaponDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    expect(container.querySelectorAll('[data-slot="select-trigger"]').length).toBe(2)
   })
 })

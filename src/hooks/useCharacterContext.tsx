@@ -165,15 +165,35 @@ function applyDecisionToRows(
 
   const idx = rows.findIndex((r) => r.sequence === targetSeq)
   if (idx === -1) return `No row found for sequence ${targetSeq}`
+
+  // For bundle-choice decisions targeting the same bundle, merge slotPicks with any
+  // existing decision so that partial updates from multiple slot pickers compose
+  // correctly. This keeps us invariant to stale React closures at the call site.
+  let nextDecision: ChoiceDecision = decision
+  if (decision.type === 'bundle-choice') {
+    const existing = rows[idx].choices?.[choiceKey] as ChoiceDecision | undefined
+    if (
+      existing?.type === 'bundle-choice' &&
+      existing.bundleId === decision.bundleId
+    ) {
+      nextDecision = {
+        type: 'bundle-choice',
+        bundleId: decision.bundleId,
+        slotPicks: { ...existing.slotPicks, ...decision.slotPicks },
+      }
+    }
+  }
+
   rows[idx] = {
     ...rows[idx],
-    choices: { ...(rows[idx].choices ?? {}), [choiceKey]: decision },
+    choices: { ...(rows[idx].choices ?? {}), [choiceKey]: nextDecision },
   }
   return null
 }
 
 type BuildResult =
   | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null; readonly warnings: readonly string[] }
+  | { readonly status: 'incomplete'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: null; readonly warnings: readonly string[] }
   | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
   | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
 
@@ -186,6 +206,13 @@ function tryDeriveAndResolve(
 ): BuildResult {
   // Exclude soft-deleted rows before reconstruction
   const activeRows = rows.filter((r) => r.deleted_at == null)
+
+  // Race is the minimum identity field needed to build anything. When it's missing
+  // (new character mid-creation), return an "incomplete" state silently — this is
+  // the normal pre-population condition, not an error worth surfacing or logging.
+  if (!character.race) {
+    return { status: 'incomplete', build: null, bundles: [], resolved: null, error: null, warnings: [] }
+  }
 
   let build: CharacterBuild
   try {

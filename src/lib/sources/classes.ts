@@ -49,7 +49,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             type: 'bundle-choice',
             key: createChoiceKey('bundle-choice', 'class', 'fighter', 1),
             category: 'melee-weapon',
-            bundleIds: ['longsword-and-shield', 'two-longswords'],
+            bundleIds: ['martial-weapon-and-shield', 'two-martial-weapons'],
           },
           {
             type: 'bundle-choice',

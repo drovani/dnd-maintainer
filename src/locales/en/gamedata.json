@@ -493,8 +493,8 @@
   "bundles": {
     "fighter-chainmail": { "name": "Chain Mail" },
     "fighter-archer-kit": { "name": "Leather Armor + Longbow + Arrows (20)" },
-    "longsword-and-shield": { "name": "Longsword + Shield" },
-    "two-longswords": { "name": "Two Longswords" },
+    "martial-weapon-and-shield": { "name": "A martial weapon and a shield" },
+    "two-martial-weapons": { "name": "Two martial weapons" },
     "light-crossbow-kit": { "name": "Light Crossbow + Bolts (20)" },
     "two-handaxes": { "name": "Two Handaxes" }
   },
