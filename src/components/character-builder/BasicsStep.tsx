@@ -77,9 +77,8 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const pendingAdvanceRef = useRef<StepType | null>(null)
   const advanceCallbackRef = useRef(onRequestAdvance)
 
-  // Keep advanceCallbackRef current without making it an effect dependency.
-  // useLayoutEffect runs synchronously after DOM updates, before the browser paints,
-  // so the ref is always fresh by the time the step-advance effect fires.
+  // useLayoutEffect runs before useEffect in the same commit, so the ref is
+  // updated before the step-advance effect reads it.
   useLayoutEffect(() => {
     advanceCallbackRef.current = onRequestAdvance
   })
@@ -100,7 +99,6 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     }
     pendingAdvanceRef.current = null
     advanceCallbackRef.current?.(target)
-    // Effect deps are [character, rows] — NOT onRequestAdvance (use ref instead).
   }, [character, rows])
 
   const handleRaceChange = (value: RaceId) => {
@@ -141,7 +139,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       name: basics.name,
       class: classId,
       level: 1,
-      ...(basics.suggestedBackground ? { background: basics.suggestedBackground } : {}),
+      ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
     })
     // Mirror handleClassChange: use replaceLevel if a level-1 row already exists
     if (levelRows.length === 0) {
@@ -151,7 +149,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       // Re-click — atomically swap the class in the existing first-level row
       context.replaceLevel(levelRows[0].sequence, classId, null)
     }
-    if (basics.baseAbilities) {
+    if (basics.targetStep === 'skills') {
       context.updateCreation({ base_abilities: basics.baseAbilities })
     }
     // Note: saveDraft will fire once from goToStep (via advanceCallbackRef) and once

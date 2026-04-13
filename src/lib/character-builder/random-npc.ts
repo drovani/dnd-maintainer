@@ -15,19 +15,23 @@ import type { AbilityScores } from '@/types/database'
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
-export interface RandomNpcBasics {
+interface RandomNpcBasicsBase {
   readonly gender: DndGender
   readonly race: RaceId
   readonly alignment: AlignmentId
   readonly name: string
   readonly classId: ClassId
-  /** Present only when the class has quickBuild data. */
-  readonly baseAbilities?: AbilityScores
-  /** Present only when the class has quickBuild data. */
-  readonly suggestedBackground?: BackgroundId
-  /** Step the wizard should advance to after applying the basics. */
-  readonly targetStep: 'skills' | 'abilities'
 }
+
+export type RandomNpcBasics =
+  | (RandomNpcBasicsBase & {
+      readonly targetStep: 'skills'
+      readonly baseAbilities: AbilityScores
+      readonly suggestedBackground: BackgroundId
+    })
+  | (RandomNpcBasicsBase & {
+      readonly targetStep: 'abilities'
+    })
 
 type Rng = () => number
 
@@ -74,13 +78,19 @@ export function generateRandomNpcBasics(
   rng: Rng = Math.random,
 ): RandomNpcBasics | null {
   const classSource = CLASS_SOURCES.find((c) => c.id === classId)
-  if (!classSource) return null
+  if (!classSource) {
+    console.error('[random-npc] Unknown classId for Quick NPC', { classId })
+    return null
+  }
 
   const gender: DndGender = pick(['male', 'female'] as const, rng)
   const race = pick(RACE_SOURCES, rng).id
   const alignment = pick(DND_ALIGNMENTS, rng).id
   const name = generateCharacterName(race, gender)
-  if (!name) return null
+  if (!name) {
+    console.error('[random-npc] Name generation returned null', { classId, race, gender })
+    return null
+  }
 
   const qb = classSource.quickBuild
   if (!qb) {

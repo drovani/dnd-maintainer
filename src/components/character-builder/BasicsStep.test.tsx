@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BasicsStep } from '@/components/character-builder/BasicsStep'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
 import { RACE_SOURCES } from '@/lib/sources/races'
+import * as randomNpcModule from '@/lib/character-builder/random-npc'
 import type { Character, AbilityScores } from '@/types/database'
 import type { BuildLevelRow, CreationRow, LevelRow } from '@/lib/build-reconstruction'
 
@@ -186,21 +187,19 @@ describe('BasicsStep', () => {
   it('renders one Quick NPC button per CLASS_SOURCES entry', () => {
     render(<BasicsStep />)
 
-    const allButtons = screen.getAllByRole('button')
-    const npcButtons = allButtons.filter((b) => b.textContent?.includes('quickNpcButton'))
+    const npcButtons = CLASS_SOURCES.map((c) =>
+      screen.getByRole('button', { name: new RegExp(c.id, 'i') }),
+    )
     expect(npcButtons).toHaveLength(CLASS_SOURCES.length)
     // Fighter button must be present
-    expect(npcButtons.some((b) => b.textContent?.includes('fighter'))).toBe(true)
+    expect(screen.getByRole('button', { name: /fighter/i })).toBeTruthy()
   })
 
   it('clicking the Fighter button advances to Skills exactly once', async () => {
     const onRequestAdvance = vi.fn()
     const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
 
-    const npcButtons = screen.getAllByRole('button').filter((b) =>
-      b.textContent?.includes('quickNpcButton'),
-    )
-    fireEvent.click(npcButtons[0])
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
 
     // Simulate all state updates landing: character fields + base_abilities on creation row
     contextCharacter = {
@@ -228,10 +227,7 @@ describe('BasicsStep', () => {
   it('clicking the Fighter button populates NPC fields, background=soldier, and base abilities', () => {
     render(<BasicsStep />)
 
-    const npcButtons = screen.getAllByRole('button').filter((b) =>
-      b.textContent?.includes('quickNpcButton'),
-    )
-    fireEvent.click(npcButtons[0])
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
 
     // updateCharacter called with required NPC fields
     expect(mockUpdateCharacter).toHaveBeenCalledWith(
@@ -265,10 +261,7 @@ describe('BasicsStep', () => {
 
   it('omitting onRequestAdvance does not crash', () => {
     render(<BasicsStep />)
-    const npcButtons = screen.getAllByRole('button').filter((b) =>
-      b.textContent?.includes('quickNpcButton'),
-    )
-    expect(() => fireEvent.click(npcButtons[0])).not.toThrow()
+    expect(() => fireEvent.click(screen.getByRole('button', { name: /fighter/i }))).not.toThrow()
   })
 
   it('uses replaceLevel instead of levelUp when a level row already exists (re-click case)', () => {
@@ -277,12 +270,24 @@ describe('BasicsStep', () => {
 
     render(<BasicsStep />)
 
-    const npcButtons = screen.getAllByRole('button').filter((b) =>
-      b.textContent?.includes('quickNpcButton'),
-    )
-    fireEvent.click(npcButtons[0])
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
 
     expect(mockReplaceLevel).toHaveBeenCalledWith(1, 'fighter', null)
+    expect(mockLevelUp).not.toHaveBeenCalled()
+  })
+
+  it('shows toast error and does not advance when generateRandomNpcBasics returns null', () => {
+    const onRequestAdvance = vi.fn()
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasics').mockReturnValue(null)
+
+    render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    expect(mockToastError).toHaveBeenCalledWith('quickNpcFailed')
+    expect(onRequestAdvance).not.toHaveBeenCalled()
+    expect(mockUpdateCharacter).not.toHaveBeenCalled()
+    expect(mockUpdateCreation).not.toHaveBeenCalled()
     expect(mockLevelUp).not.toHaveBeenCalled()
   })
 })

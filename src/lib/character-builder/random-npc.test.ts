@@ -73,46 +73,48 @@ describe('generateRandomNpcBasics', () => {
   it('with rng=()=>0 returns fighter basics with targetStep=skills and str=15, con=14', () => {
     const result = generateRandomNpcBasics('fighter', () => 0)
     expect(result).not.toBeNull()
-    expect(result!.targetStep).toBe('skills')
+    if (!result || result.targetStep !== 'skills') return
     // highestAbility is ['str','dex']; rng=0 picks index 0 → str
-    expect(result!.baseAbilities!.str).toBe(15)
-    expect(result!.baseAbilities!.con).toBe(14)
-    expect(result!.suggestedBackground).toBe('soldier')
+    expect(result.baseAbilities.str).toBe(15)
+    expect(result.baseAbilities.con).toBe(14)
+    expect(result.suggestedBackground).toBe('soldier')
     // gender: pick(['male','female'], rng=0) → index 0 → 'male'
-    expect(result!.gender).toBe('male')
+    expect(result.gender).toBe('male')
     // race: pick(RACE_SOURCES, rng=0) → index 0
-    expect(result!.race).toBe(RACE_SOURCES[0].id)
+    expect(result.race).toBe(RACE_SOURCES[0].id)
     // alignment: pick(DND_ALIGNMENTS, rng=0) → index 0
-    expect(result!.alignment).toBe(DND_ALIGNMENTS[0].id)
+    expect(result.alignment).toBe(DND_ALIGNMENTS[0].id)
   })
 
   it('with rng=()=>0.999 picks dex=15 (last element of ["str","dex"])', () => {
     const result = generateRandomNpcBasics('fighter', () => 0.999)
     expect(result).not.toBeNull()
-    expect(result!.baseAbilities!.dex).toBe(15)
+    if (!result || result.targetStep !== 'skills') return
+    expect(result.baseAbilities.dex).toBe(15)
   })
 
   it('with default Math.random returns a valid result within expected pools', () => {
     const result = generateRandomNpcBasics('fighter')
     expect(result).not.toBeNull()
-    expect(['male', 'female']).toContain(result!.gender)
-    expect(RACE_SOURCES.map((r) => r.id)).toContain(result!.race)
-    expect(DND_ALIGNMENTS.map((a) => a.id)).toContain(result!.alignment)
-    expect(result!.name).toContain(' ')
+    if (!result) return
+    expect(['male', 'female']).toContain(result.gender)
+    expect(RACE_SOURCES.map((r) => r.id)).toContain(result.race)
+    expect(DND_ALIGNMENTS.map((a) => a.id)).toContain(result.alignment)
+    expect(result.name).toContain(' ')
     // baseAbilities values should be a permutation of STANDARD_ARRAY
-    const values = Object.values(result!.baseAbilities!).sort((a: number, b: number) => b - a)
+    if (result.targetStep !== 'skills') return
+    const values = Object.values(result.baseAbilities).sort((a, b) => b - a)
     expect(values).toEqual([...STANDARD_ARRAY])
   })
 
   // TODO: verify once a second class without quickBuild lands in CLASS_SOURCES.
   // For now, the no-quickBuild path is exercised by the unit tests for assignStandardArray
   // (which is only called when qb is present) and by the guard in random-npc.ts itself.
-  it('targetStep is abilities and no baseAbilities/suggestedBackground when class lacks quickBuild (structural guard)', () => {
-    // This test validates the branch logic exists: if we had a class without quickBuild,
-    // the function would return { targetStep: 'abilities' } without baseAbilities.
-    // Covered at the unit level; full integration test deferred until a second class lands.
+  it('targetStep is skills and baseAbilities/suggestedBackground are present for fighter', () => {
     const fighterResult = generateRandomNpcBasics('fighter', () => 0)
     expect(fighterResult?.targetStep).toBe('skills')
-    expect(fighterResult?.baseAbilities).toBeDefined()
+    if (!fighterResult || fighterResult.targetStep !== 'skills') return
+    expect(fighterResult.baseAbilities).toBeDefined()
+    expect(fighterResult.suggestedBackground).toBeDefined()
   })
 })
