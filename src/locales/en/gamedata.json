@@ -381,6 +381,131 @@
       "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
     }
   },
+  "weaponProperties": {
+    "ammunition": "Ammunition",
+    "finesse": "Finesse",
+    "heavy": "Heavy",
+    "light": "Light",
+    "loading": "Loading",
+    "reach": "Reach",
+    "special": "Special",
+    "thrown": "Thrown",
+    "two-handed": "Two-Handed",
+    "versatile": "Versatile"
+  },
+  "weaponCategories": {
+    "simple": "Simple",
+    "martial": "Martial"
+  },
+  "armorCategories": {
+    "light": "Light Armor",
+    "medium": "Medium Armor",
+    "heavy": "Heavy Armor",
+    "shield": "Shield"
+  },
+  "damageTypes": {
+    "bludgeoning": "Bludgeoning",
+    "piercing": "Piercing",
+    "slashing": "Slashing"
+  },
+  "items": {
+    "weapons": {
+      "club": { "name": "Club" },
+      "dagger": { "name": "Dagger" },
+      "greatclub": { "name": "Greatclub" },
+      "handaxe": { "name": "Handaxe" },
+      "javelin": { "name": "Javelin" },
+      "light-hammer": { "name": "Light Hammer" },
+      "mace": { "name": "Mace" },
+      "quarterstaff": { "name": "Quarterstaff" },
+      "sickle": { "name": "Sickle" },
+      "spear": { "name": "Spear" },
+      "light-crossbow": { "name": "Light Crossbow" },
+      "dart": { "name": "Dart" },
+      "shortbow": { "name": "Shortbow" },
+      "sling": { "name": "Sling" },
+      "battleaxe": { "name": "Battleaxe" },
+      "flail": { "name": "Flail" },
+      "glaive": { "name": "Glaive" },
+      "greataxe": { "name": "Greataxe" },
+      "greatsword": { "name": "Greatsword" },
+      "halberd": { "name": "Halberd" },
+      "lance": { "name": "Lance" },
+      "longsword": { "name": "Longsword" },
+      "maul": { "name": "Maul" },
+      "morningstar": { "name": "Morningstar" },
+      "pike": { "name": "Pike" },
+      "rapier": { "name": "Rapier" },
+      "scimitar": { "name": "Scimitar" },
+      "shortsword": { "name": "Shortsword" },
+      "trident": { "name": "Trident" },
+      "war-pick": { "name": "War Pick" },
+      "warhammer": { "name": "Warhammer" },
+      "whip": { "name": "Whip" },
+      "blowgun": { "name": "Blowgun" },
+      "hand-crossbow": { "name": "Hand Crossbow" },
+      "heavy-crossbow": { "name": "Heavy Crossbow" },
+      "longbow": { "name": "Longbow" },
+      "net": { "name": "Net" }
+    },
+    "armor": {
+      "padded": { "name": "Padded Armor" },
+      "leather": { "name": "Leather Armor" },
+      "studded-leather": { "name": "Studded Leather Armor" },
+      "hide": { "name": "Hide Armor" },
+      "chain-shirt": { "name": "Chain Shirt" },
+      "scale-mail": { "name": "Scale Mail" },
+      "breastplate": { "name": "Breastplate" },
+      "half-plate": { "name": "Half Plate" },
+      "ring-mail": { "name": "Ring Mail" },
+      "chain-mail": { "name": "Chain Mail" },
+      "splint": { "name": "Splint Armor" },
+      "plate": { "name": "Plate Armor" },
+      "shield": { "name": "Shield" }
+    },
+    "gear": {
+      "arrows-20": { "name": "Arrows (20)" },
+      "bolts-20": { "name": "Crossbow Bolts (20)" },
+      "sling-bullets-20": { "name": "Sling Bullets (20)" },
+      "blowgun-needles-50": { "name": "Blowgun Needles (50)" },
+      "insignia-of-rank": { "name": "Insignia of Rank" },
+      "common-clothes": { "name": "Common Clothes" },
+      "pouch": { "name": "Pouch" },
+      "backpack": { "name": "Backpack" },
+      "bedroll": { "name": "Bedroll" },
+      "mess-kit": { "name": "Mess Kit" },
+      "tinderbox": { "name": "Tinderbox" },
+      "torches-10": { "name": "Torches (10)" },
+      "rations-10": { "name": "Rations (10 days)" },
+      "waterskin": { "name": "Waterskin" },
+      "hemp-rope-50ft": { "name": "Hemp Rope (50 ft.)" },
+      "crowbar": { "name": "Crowbar" },
+      "hammer": { "name": "Hammer" },
+      "pitons-10": { "name": "Pitons (10)" },
+      "hooded-lantern": { "name": "Hooded Lantern" },
+      "oil-flasks-2": { "name": "Oil (2 flasks)" }
+    },
+    "packs": {
+      "explorers-pack": { "name": "Explorer's Pack" },
+      "dungeoneers-pack": { "name": "Dungeoneer's Pack" }
+    }
+  },
+  "bundles": {
+    "fighter-chainmail": { "name": "Chain Mail" },
+    "fighter-archer-kit": { "name": "Leather Armor + Longbow + Arrows (20)" },
+    "martial-weapon-and-shield": { "name": "A martial weapon and a shield" },
+    "two-martial-weapons": { "name": "Two martial weapons" },
+    "light-crossbow-kit": { "name": "Light Crossbow + Bolts (20)" },
+    "two-handaxes": { "name": "Two Handaxes" }
+  },
+  "bundleCategories": {
+    "loadout": "Loadout",
+    "armor": "Armor",
+    "melee-weapon": "Melee Weapon",
+    "ranged-weapon": "Ranged Weapon",
+    "pack": "Pack",
+    "gear": "Gear"
+  },
   "gender": {
     "male": "Male",
     "female": "Female",

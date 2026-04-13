@@ -2,6 +2,7 @@ import type { AbilityKey, FightingStyleId, SkillId, ArmorProficiencyId, WeaponPr
 import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants'
 import type { SourceTag } from '@/types/sources'
 import type { ChoiceKey } from '@/types/choices'
+import type { DamageDice, ItemDef, PhysicalDamageType, WeaponProperty, WeaponRange, BundleCategory } from '@/types/items'
 
 export interface Sourced<T> {
   readonly value: T
@@ -15,11 +16,16 @@ export interface ResolvedAbility {
   readonly modifier: number
 }
 
-export interface SkillBonusComponent {
-  readonly type: 'ability' | 'proficiency' | 'expertise' | 'ability-check-bonus'
+export interface BonusComponent<TKind extends string> {
+  readonly type: TKind
   readonly value: number
   readonly label: string
 }
+
+export type SkillBonusComponent = BonusComponent<'ability' | 'proficiency' | 'expertise' | 'ability-check-bonus'>
+export type AttackBonusComponent = BonusComponent<'ability' | 'proficiency' | 'fighting-style' | 'magic'>
+export type DamageBonusComponent = BonusComponent<'ability' | 'fighting-style' | 'magic'>
+export type SavingThrowBonusComponent = BonusComponent<'ability' | 'proficiency'>
 
 export interface ResolvedSkill {
   readonly ability: AbilityKey
@@ -28,6 +34,28 @@ export interface ResolvedSkill {
   readonly bonus: number
   readonly breakdown: readonly SkillBonusComponent[]
   readonly sources: readonly SourceTag[]
+}
+
+export interface ResolvedEquipmentItem {
+  readonly itemId: string
+  readonly itemDef: ItemDef
+  readonly quantity: number
+  readonly source: SourceTag
+  readonly equipped: boolean
+}
+
+export interface ResolvedAttack {
+  readonly weaponId: string
+  readonly attackBonus: number
+  readonly attackBreakdown: readonly AttackBonusComponent[]
+  readonly damageDice: DamageDice
+  readonly damageBonus: number
+  readonly damageBreakdown: readonly DamageBonusComponent[]
+  readonly damageType: PhysicalDamageType
+  readonly properties: readonly WeaponProperty[]
+  readonly range: WeaponRange
+  readonly normalRange?: number
+  readonly longRange?: number
 }
 
 export interface ResolvedFeature {
@@ -60,7 +88,7 @@ export type PendingChoice =
   | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly points: number }
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }
   | { readonly type: 'fighting-style-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly count: number; readonly from: readonly FightingStyleId[]; readonly alreadyChosen: readonly FightingStyleId[] }
-  | { readonly type: 'equipment-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[] }
+  | { readonly type: 'bundle-choice'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly category: BundleCategory; readonly bundleIds: readonly string[] }
 
 export interface ResolvedCharacter {
   readonly abilities: Readonly<Record<AbilityKey, ResolvedAbility>>
@@ -70,7 +98,7 @@ export interface ResolvedCharacter {
   readonly initiative: number
   readonly proficiencyBonus: number
   readonly armorClass: ResolvedArmorClass
-  readonly savingThrows: Readonly<Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[] }>>
+  readonly savingThrows: Readonly<Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[]; readonly breakdown: readonly SavingThrowBonusComponent[] }>>
   readonly skills: Readonly<Record<SkillId, ResolvedSkill>>
   readonly armorProficiencies: readonly Sourced<ArmorProficiencyId>[]
   readonly weaponProficiencies: readonly Sourced<WeaponProficiencyId>[]
@@ -80,5 +108,7 @@ export interface ResolvedCharacter {
   readonly resistances: readonly Sourced<DamageTypeId>[]
   readonly immunities: readonly Sourced<DamageTypeId>[]
   readonly spellcasting: ResolvedSpellcasting | null
+  readonly equipment: readonly ResolvedEquipmentItem[]
+  readonly attacks: readonly ResolvedAttack[]
   readonly pendingChoices: readonly PendingChoice[]
 }

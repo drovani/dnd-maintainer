@@ -3,6 +3,7 @@ import type { Character } from '@/types/database'
 import type { BuildLevelRow } from '@/lib/build-reconstruction'
 import type { ResolvedCharacter } from '@/types/resolved'
 import type { TablesInsert, TablesUpdate } from '@/types/supabase'
+import { buildMaterializedItemRows } from '@/lib/resolver/materialize'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -182,6 +183,27 @@ export function useBuilderAutosave(existingCharacterId?: string) {
     async (payload: AutosavePayload): Promise<string> => {
       const id = await saveDraft(payload)
       try {
+        // Materialize starting equipment on first finalize only (idempotency guard)
+        if (payload.resolved) {
+          const { data: existingItems, error: checkError } = await supabase
+            .from('character_items')
+            .select('id')
+            .eq('character_id', id)
+            .limit(1)
+
+          if (checkError) throw checkError
+
+          if (existingItems.length === 0) {
+            const rows = buildMaterializedItemRows(payload.resolved, id)
+            if (rows.length > 0) {
+              const { error: insertError } = await supabase
+                .from('character_items')
+                .insert(rows as TablesInsert<'character_items'>[])
+              if (insertError) throw insertError
+            }
+          }
+        }
+
         const { data, error } = await supabase
           .from('characters')
           .update({ status: 'ready' } as unknown as TablesUpdate<'characters'>)

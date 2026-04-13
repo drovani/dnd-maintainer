@@ -49,7 +49,8 @@
     "close": "Close",
     "confirm": "Confirm",
     "select": "Select",
-    "selected": "Selected"
+    "selected": "Selected",
+    "clearSelection": "Clear"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -127,8 +128,17 @@
       "skillChoice": "Choose {{count}} skill(s)",
       "languageChoice": "Choose {{count}} language(s)",
       "toolChoice": "Choose {{count}} tool(s)",
+      "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining"
+    },
+    "finalizeBlockers": {
+      "title": "Before you can finalize:",
+      "missingName": "Character name is required",
+      "missingRace": "Race is required",
+      "missingClass": "Class is required",
+      "missingBackground": "Background is required",
+      "pendingChoice": "Pending {{type}} ({{key}})"
     },
     "status": {
       "saving": "Saving...",
@@ -195,11 +205,13 @@
       "weaponProficiencies": "Weapon Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
       "languages": "Languages",
+      "fightingStyles": "Fighting Styles",
       "standardLanguages": "Standard Languages",
       "exoticLanguages": "Exotic Languages",
       "languageName": "Language",
       "typicalSpeakers": "Typical Speakers",
       "script": "Script",
+      "grantedByRace": "Granted",
       "chooseTools": "Choose {{count}} tool proficiency from the list below.",
       "chooseTools_plural": "Choose {{count}} tool proficiencies from the list below.",
       "randomizeLanguage": "Roll random language (d12)",
@@ -219,7 +231,41 @@
       "equipped": "Equipped",
       "quantity": "Qty",
       "weight": "Weight (lb)",
-      "comingSoon": "Equipment management coming soon"
+      "comingSoon": "Equipment management coming soon",
+      "title": "Equipment",
+      "choiceLabel": "Choose your equipment",
+      "itemBundleSeparator": "+",
+      "clearSelection": "Clear",
+      "summary": "Equipment Summary",
+      "summaryEmpty": "No equipment selected yet.",
+      "classLoadoutTitle": "Class Equipment Loadout",
+      "classLoadoutSubtitle": "Choose the starting gear granted by your class.",
+      "purchaseTitle": "Purchase Equipment",
+      "purchaseComingSoon": "Coming soon — spend your starting gold on additional gear.",
+      "slotChoosePrompt": "Choose {{label}}",
+      "slotPlaceholder": "Select…",
+      "alsoIncludes": "Also includes",
+      "slotLabels": {
+        "weaponMartial": "a martial weapon",
+        "weaponSimple": "a simple weapon",
+        "weaponMartialMelee": "a martial melee weapon",
+        "weaponMartialRanged": "a martial ranged weapon",
+        "weaponSimpleMelee": "a simple melee weapon",
+        "weaponSimpleRanged": "a simple ranged weapon",
+        "weaponAny": "a weapon",
+        "armorLight": "light armor",
+        "armorMedium": "medium armor",
+        "armorHeavy": "heavy armor",
+        "armorShield": "a shield"
+      },
+      "sections": {
+        "loadout": "Loadout",
+        "armor": "Armor",
+        "melee-weapon": "Melee Weapon",
+        "ranged-weapon": "Ranged Weapon",
+        "pack": "Pack",
+        "gear": "Gear"
+      }
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",
@@ -244,7 +290,9 @@
       "backstory": "Backstory",
       "appearance": "Appearance",
       "cantrips": "CANTRIPS",
-      "physicalTraits": "Physical Traits"
+      "physicalTraits": "Physical Traits",
+      "proficiencies": "Proficiencies",
+      "attacks": "Attacks"
     },
     "fields": {
       "class": "Class",
@@ -291,6 +339,42 @@
       "expertise": "Expertise",
       "expandAll": "Expand All",
       "collapseAll": "Collapse All"
+    },
+    "equipment": {
+      "sourceFrom": {
+        "race": "from race",
+        "class": "from class",
+        "subclass": "from subclass",
+        "background": "from background",
+        "feat": "from feat",
+        "item": "from item",
+        "bundle": "from {{id}}",
+        "pack": "from {{id}}",
+        "loot": "loot"
+      }
+    },
+    "proficiencies": {
+      "armor": "Armor",
+      "weapons": "Weapons",
+      "tools": "Tools",
+      "languages": "Languages"
+    },
+    "attacks": {
+      "name": "Name",
+      "attackBonus": "ATK",
+      "damage": "Damage",
+      "noAttacks": "No weapons equipped",
+      "range": "Range",
+      "rangeFormat": "{{normal}}/{{long}} ft",
+      "acFormat": "AC {{ac}}"
+    },
+    "breakdown": {
+      "base": "Base",
+      "armor": "Armor",
+      "shield": "Shield",
+      "ability": "Ability Modifier",
+      "proficiency": "Proficiency Bonus",
+      "fightingStyle": "Fighting Style"
     },
     "hints": {
       "skillsProficiency": "Click P for proficiency, E for expertise.",

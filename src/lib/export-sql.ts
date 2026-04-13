@@ -131,6 +131,7 @@ const TABLE_COLUMNS = {
     { name: 'quantity', type: 'integer' },
     { name: 'equipped', type: 'boolean' },
     { name: 'attuned', type: 'boolean' },
+    { name: 'source', type: 'jsonb' },
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],

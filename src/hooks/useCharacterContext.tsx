@@ -11,7 +11,7 @@ import type { GrantBundle, SubclassId } from '@/types/sources'
 import { reconstructBuild } from '@/lib/build-reconstruction'
 import { collectBundles, getRaceSource } from '@/lib/sources/index'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
-import { resolveCharacter } from '@/lib/resolver/index'
+import { resolveCharacter, type PersistedItem } from '@/lib/resolver/index'
 import { toast } from 'sonner'
 import i18next from 'i18next'
 
@@ -165,15 +165,35 @@ function applyDecisionToRows(
 
   const idx = rows.findIndex((r) => r.sequence === targetSeq)
   if (idx === -1) return `No row found for sequence ${targetSeq}`
+
+  // For bundle-choice decisions targeting the same bundle, merge slotPicks with any
+  // existing decision so that partial updates from multiple slot pickers compose
+  // correctly. This keeps us invariant to stale React closures at the call site.
+  let nextDecision: ChoiceDecision = decision
+  if (decision.type === 'bundle-choice') {
+    const existing = rows[idx].choices?.[choiceKey] as ChoiceDecision | undefined
+    if (
+      existing?.type === 'bundle-choice' &&
+      existing.bundleId === decision.bundleId
+    ) {
+      nextDecision = {
+        type: 'bundle-choice',
+        bundleId: decision.bundleId,
+        slotPicks: { ...existing.slotPicks, ...decision.slotPicks },
+      }
+    }
+  }
+
   rows[idx] = {
     ...rows[idx],
-    choices: { ...(rows[idx].choices ?? {}), [choiceKey]: decision },
+    choices: { ...(rows[idx].choices ?? {}), [choiceKey]: nextDecision },
   }
   return null
 }
 
 type BuildResult =
   | { readonly status: 'ok'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: ResolvedCharacter; readonly error: null; readonly warnings: readonly string[] }
+  | { readonly status: 'incomplete'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: null; readonly warnings: readonly string[] }
   | { readonly status: 'build-error'; readonly build: null; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
   | { readonly status: 'resolve-error'; readonly build: CharacterBuild; readonly bundles: readonly GrantBundle[]; readonly resolved: null; readonly error: string; readonly warnings: readonly string[] }
 
@@ -181,9 +201,18 @@ function tryDeriveAndResolve(
   character: Character,
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[],
+  persistedItems?: readonly PersistedItem[],
+  useDBInventory?: boolean,
 ): BuildResult {
   // Exclude soft-deleted rows before reconstruction
   const activeRows = rows.filter((r) => r.deleted_at == null)
+
+  // Race is the minimum identity field needed to build anything. When it's missing
+  // (new character mid-creation), return an "incomplete" state silently — this is
+  // the normal pre-population condition, not an error worth surfacing or logging.
+  if (!character.race) {
+    return { status: 'incomplete', build: null, bundles: [], resolved: null, error: null, warnings: [] }
+  }
 
   let build: CharacterBuild
   try {
@@ -212,6 +241,9 @@ function tryDeriveAndResolve(
       bundles,
       choices: build.choices,
       levels: build.levels,
+      equippedItemIds: equippedItems,
+      persistedItems,
+      useDBInventory,
     })
     return { status: 'ok', build, bundles, resolved, error: null, warnings }
   } catch (err) {
@@ -229,6 +261,8 @@ interface CharacterProviderProps {
   readonly initialCharacter: Character
   readonly initialRows: readonly BuildLevelRow[]
   readonly initialEquippedItems: readonly string[]
+  readonly initialPersistedItems?: readonly PersistedItem[]
+  readonly useDBInventory?: boolean
   readonly children: ReactNode
 }
 
@@ -236,6 +270,8 @@ export function CharacterProvider({
   initialCharacter,
   initialRows,
   initialEquippedItems,
+  initialPersistedItems,
+  useDBInventory,
   children,
 }: CharacterProviderProps): React.JSX.Element {
   const [character, setCharacter] = useState<Character>(initialCharacter)
@@ -257,11 +293,15 @@ export function CharacterProvider({
     }
     return [seedRow, ...initialRows]
   })
+  // TODO: add a toggleEquipped(itemId) setter so the character sheet can
+  // equip/unequip items at runtime. Currently read-only after mount.
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
   const { build, bundles, resolved, error: buildError, warnings: buildWarnings } = useMemo(
-    () => tryDeriveAndResolve(character, rows, equippedItems),
+    () => tryDeriveAndResolve(character, rows, equippedItems, initialPersistedItems, useDBInventory),
+    // initialPersistedItems and useDBInventory are stable (set at mount from DB query results)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [character, rows, equippedItems],
   )
 

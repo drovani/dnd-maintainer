@@ -1,14 +1,18 @@
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { BadgeCheckIcon } from 'lucide-react'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import type { ChoiceKey } from '@/types/choices'
 import {
   DND_LANGUAGE_DATA,
   DND_LANGUAGES,
   DND_TOOL_PROFICIENCIES,
+  type FightingStyleId,
   type LanguageId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
+import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -18,36 +22,58 @@ interface ChoiceInfo<T> {
   readonly from: readonly T[]
 }
 
+interface FightingStyleChoiceInfo {
+  readonly choiceKey: ChoiceKey
+  readonly count: number
+  readonly from: readonly FightingStyleId[]
+}
+
 export function ProficienciesStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const context = useCharacterContext()
   const { resolved, build, bundles } = context
 
-  // Scan grant bundles for all language-choice and tool-choice grants
-  const { languageChoices, toolChoices } = useMemo(() => {
-    if (bundles.length === 0) return { languageChoices: [] as ChoiceInfo<LanguageId>[], toolChoices: [] as ChoiceInfo<ToolProficiencyId>[] }
+  // Scan grant bundles for all language-choice/tool-choice/fighting-style-choice grants
+  // and direct language grants
+  const { languageChoices, toolChoices, grantedLanguages, fightingStyleChoices } = useMemo(() => {
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
+    const fsc: FightingStyleChoiceInfo[] = []
+    const granted = new Set<LanguageId>()
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {
-        if (grant.type !== 'proficiency-choice') continue
-        if (grant.category === 'language') {
-          lc.push({
+        if (grant.type === 'proficiency' && grant.category === 'language') {
+          granted.add(grant.id as LanguageId)
+        } else if (grant.type === 'proficiency-choice') {
+          if (grant.category === 'language') {
+            lc.push({
+              choiceKey: grant.key,
+              count: grant.count,
+              from: (grant.from ?? DND_LANGUAGES) as readonly LanguageId[],
+            })
+          } else if (grant.category === 'tool') {
+            tc.push({
+              choiceKey: grant.key,
+              count: grant.count,
+              from: (grant.from ?? DND_TOOL_PROFICIENCIES.map((t) => t)) as readonly ToolProficiencyId[],
+            })
+          }
+        } else if (grant.type === 'fighting-style-choice') {
+          fsc.push({
             choiceKey: grant.key,
             count: grant.count,
-            from: (grant.from ?? DND_LANGUAGES) as readonly LanguageId[],
-          })
-        } else if (grant.category === 'tool') {
-          tc.push({
-            choiceKey: grant.key,
-            count: grant.count,
-            from: (grant.from ?? DND_TOOL_PROFICIENCIES.map((t) => t)) as readonly ToolProficiencyId[],
+            from: grant.from,
           })
         }
       }
     }
-    return { languageChoices: lc, toolChoices: tc }
+    return {
+      languageChoices: lc,
+      toolChoices: tc,
+      grantedLanguages: granted,
+      fightingStyleChoices: fsc,
+    }
   }, [bundles])
 
   if (!resolved) {
@@ -64,11 +90,6 @@ export function ProficienciesStep() {
     for (const id of lc.from) choicePoolLanguages.add(id)
   }
 
-  // "Granted" = in resolved.languages AND not in any choice pool (truly fixed grants like Common)
-  const grantedLanguages = new Set<LanguageId>(
-    resolved.languages.filter((l) => !choicePoolLanguages.has(l.value as LanguageId)).map((l) => l.value as LanguageId)
-  )
-
   // Helper to get current selections for a choice
   function getSelectedLanguages(choiceKey: ChoiceKey): readonly LanguageId[] {
     const decision = build?.choices[choiceKey]
@@ -79,6 +100,12 @@ export function ProficienciesStep() {
   function getSelectedTools(choiceKey: ChoiceKey): readonly ToolProficiencyId[] {
     const decision = build?.choices[choiceKey]
     if (decision?.type === 'tool-choice') return decision.tools
+    return []
+  }
+
+  function getSelectedFightingStyles(choiceKey: ChoiceKey): readonly FightingStyleId[] {
+    const decision = build?.choices[choiceKey]
+    if (decision?.type === 'fighting-style-choice') return decision.styles
     return []
   }
 
@@ -94,31 +121,57 @@ export function ProficienciesStep() {
   function renderLanguageRow(lang: (typeof DND_LANGUAGE_DATA)[number]) {
     const langId = lang.id as LanguageId
     const isGranted = grantedLanguages.has(langId)
-    const choiceForLang = languageChoices.find((lc) => lc.from.includes(langId))
+    // All choices this language is eligible for (could be multiple: e.g. Human race + Soldier background)
+    const eligibleChoices = languageChoices.filter((lc) => lc.from.includes(langId))
+
+    // Which choice, if any, currently holds this language
+    const choiceHoldingLang = eligibleChoices.find((lc) =>
+      getSelectedLanguages(lc.choiceKey).includes(langId),
+    )
+    // First eligible choice that still has room — target for a new check
+    const choiceWithRoom = eligibleChoices.find(
+      (lc) => getSelectedLanguages(lc.choiceKey).length < lc.count,
+    )
 
     let checkbox: React.ReactNode = null
-    if (isGranted && !choiceForLang) {
-      checkbox = <Checkbox id={`lang-${langId}`} checked disabled />
-    } else if (choiceForLang) {
-      const selected = getSelectedLanguages(choiceForLang.choiceKey)
-      const isSelected = selected.includes(langId)
-      const atMax = selected.length >= choiceForLang.count
-      const isDisabled = (atMax && !isSelected) || isGranted
+    if (isGranted) {
+      checkbox = (
+        <BadgeCheckIcon
+          aria-label={tc('characterBuilder.proficiencies.grantedByRace')}
+          className="flex size-4 shrink-0 text-primary"
+        />
+      )
+    } else if (eligibleChoices.length > 0) {
+      const isSelected = choiceHoldingLang !== undefined
+      // Disable when nothing is checked AND no choice has room (every eligible choice is already at max)
+      const isDisabled = !isSelected && choiceWithRoom === undefined
 
       checkbox = (
         <Checkbox
           id={`lang-${langId}`}
-          checked={isSelected || isGranted}
+          checked={isSelected}
           disabled={isDisabled}
           onCheckedChange={(checked) => {
-            if (isGranted) return
-            const next = checked
-              ? [...selected, langId]
-              : selected.filter((id) => id !== langId)
-            if (next.length === 0) {
-              context.clearChoice(choiceForLang.choiceKey)
+            if (checked) {
+              // Route to the first eligible choice with room
+              const target = choiceWithRoom
+              if (!target) return
+              const current = getSelectedLanguages(target.choiceKey)
+              context.makeChoice(target.choiceKey, {
+                type: 'language-choice',
+                languages: [...current, langId],
+              })
             } else {
-              context.makeChoice(choiceForLang.choiceKey, { type: 'language-choice', languages: next })
+              // Remove from whichever choice currently holds it
+              const target = choiceHoldingLang
+              if (!target) return
+              const current = getSelectedLanguages(target.choiceKey)
+              const next = current.filter((id) => id !== langId)
+              if (next.length === 0) {
+                context.clearChoice(target.choiceKey)
+              } else {
+                context.makeChoice(target.choiceKey, { type: 'language-choice', languages: next })
+              }
             }
           }}
         />
@@ -130,13 +183,15 @@ export function ProficienciesStep() {
       : '—'
     const scriptText = lang.script ? t(`languageScripts.${lang.script}`) : '—'
 
+    const hasChoiceAffordance = eligibleChoices.length > 0 && !isGranted
+
     return (
       <tr key={langId} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
         <td className="py-1.5 text-center">{checkbox}</td>
         <td className="py-1.5">
           <label
-            htmlFor={choiceForLang && !isGranted ? `lang-${langId}` : undefined}
-            className={choiceForLang && !isGranted ? 'cursor-pointer' : isGranted ? 'text-muted-foreground' : ''}
+            htmlFor={hasChoiceAffordance ? `lang-${langId}` : undefined}
+            className={hasChoiceAffordance ? 'cursor-pointer' : isGranted ? 'text-muted-foreground' : ''}
           >
             {t(`languages.${langId}`)}
           </label>
@@ -307,6 +362,67 @@ export function ProficienciesStep() {
           <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.selectRaceFirst')}</p>
         )}
       </div>
+
+      {/* Fighting Styles */}
+      {fightingStyleChoices.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.proficiencies.fightingStyles')}</h3>
+          {fightingStyleChoices.map((fsc) => {
+            const selected = getSelectedFightingStyles(fsc.choiceKey)
+            const remaining = fsc.count - selected.length
+            return (
+              <div key={fsc.choiceKey} className="space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm text-muted-foreground">
+                    {tc('characterBuilder.pendingChoices.fightingStyleChoice', { count: fsc.count })}
+                  </p>
+                  <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
+                    {selected.length} / {fsc.count}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  {fsc.from.map((styleId) => {
+                    const styleSource = FIGHTING_STYLE_SOURCES.find((s) => s.id === styleId)
+                    if (!styleSource) return null
+                    const isSelected = selected.includes(styleId)
+                    const radioId = `fighting-style-${fsc.choiceKey}-${styleId}`
+                    return (
+                      <div
+                        key={styleId}
+                        className={`flex items-start gap-3 rounded-md border p-3 transition-colors hover:bg-muted/50 ${
+                          isSelected ? 'border-primary bg-primary/5' : 'border-border'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          id={radioId}
+                          name={`fighting-style-${fsc.choiceKey}`}
+                          checked={isSelected}
+                          onChange={() =>
+                            context.makeChoice(fsc.choiceKey, {
+                              type: 'fighting-style-choice',
+                              styles: [styleId],
+                            })
+                          }
+                          className="mt-0.5 size-4 text-primary"
+                        />
+                        <Label htmlFor={radioId} className="flex-1 cursor-pointer">
+                          <div className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
+                            {t(`fightingStyles.${styleId}.name`)}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {t(`fightingStyles.${styleId}.description`)}
+                          </p>
+                        </Label>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

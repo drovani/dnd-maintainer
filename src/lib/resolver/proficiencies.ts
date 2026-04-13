@@ -3,14 +3,14 @@ import type { AbilityKey, SkillId, ArmorProficiencyId, WeaponProficiencyId, Tool
 import type { GrantBundle, SourceTag } from '@/types/sources'
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 
-import type { ResolvedAbility, ResolvedSkill, SkillBonusComponent, Sourced, PendingChoice } from '@/types/resolved'
+import type { ResolvedAbility, ResolvedSkill, SkillBonusComponent, SavingThrowBonusComponent, Sourced, PendingChoice } from '@/types/resolved'
 import { collectGrantsByType } from '@/lib/resolver/helpers'
 
 export function resolveSavingThrows(
   abilities: Readonly<Record<AbilityKey, ResolvedAbility>>,
   bundles: readonly GrantBundle[],
   proficiencyBonus: number,
-): Readonly<Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[] }>> {
+): Readonly<Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[]; readonly breakdown: readonly SavingThrowBonusComponent[] }>> {
   const keys: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
   const proficientAbilities = new Map<AbilityKey, SourceTag[]>()
@@ -22,14 +22,22 @@ export function resolveSavingThrows(
     }
   }
 
-  const result = {} as Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[] }>
+  const result = {} as Record<AbilityKey, { readonly proficient: boolean; readonly bonus: number; readonly sources: readonly SourceTag[]; readonly breakdown: readonly SavingThrowBonusComponent[] }>
   for (const key of keys) {
     const sources = proficientAbilities.get(key) ?? []
     const proficient = sources.length > 0
+    const abilityMod = abilities[key].modifier
+
+    const breakdown: SavingThrowBonusComponent[] = [
+      { type: 'ability', value: abilityMod, label: key },
+      ...(proficient ? [{ type: 'proficiency' as const, value: proficiencyBonus, label: 'proficiency' }] : []),
+    ]
+
     result[key] = {
       proficient,
-      bonus: abilities[key].modifier + (proficient ? proficiencyBonus : 0),
+      bonus: abilityMod + (proficient ? proficiencyBonus : 0),
       sources,
+      breakdown,
     }
   }
   return result

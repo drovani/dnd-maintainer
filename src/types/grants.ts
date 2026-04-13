@@ -1,5 +1,6 @@
 import type { AbilityKey, ClassId, FightingStyleId, SkillId, ArmorProficiencyId, WeaponProficiencyId, ToolProficiencyId, LanguageId } from '@/lib/dnd-helpers'
 import type { ChoiceKey } from '@/types/choices'
+import type { BundleCategory } from '@/types/items'
 
 // Supporting types
 
@@ -18,9 +19,11 @@ export const DAMAGE_TYPES = [
   'force',
   'lightning',
   'necrotic',
+  'piercing',
   'poison',
   'psychic',
   'radiant',
+  'slashing',
   'thunder',
 ] as const
 
@@ -155,10 +158,11 @@ export interface FightingStyleChoiceGrant {
   readonly from: readonly FightingStyleId[]
 }
 
-export interface EquipmentChoiceGrant {
-  readonly type: 'equipment-choice'
+export interface BundleChoiceGrant {
+  readonly type: 'bundle-choice'
   readonly key: ChoiceKey
-  readonly options: readonly (readonly { readonly itemId: string; readonly quantity: number }[])[]
+  readonly category: BundleCategory
+  readonly bundleIds: readonly string[]
 }
 
 export type Grant =
@@ -181,4 +185,4 @@ export type Grant =
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant
   | EquipmentGrant
-  | EquipmentChoiceGrant
+  | BundleChoiceGrant

@@ -80,6 +80,10 @@ function CharacterBuilderInner() {
   const { campaignId } = useCampaignContext()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<StepType>('basics')
+  // Tracks the furthest step the user has reached. We use this to defer "Before you
+  // can finalize" hints until the user has seen every step at least once — otherwise
+  // a brand-new character on step 1 shows a wall of expected-missing warnings.
+  const [furthestStepIndex, setFurthestStepIndex] = useState(0)
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [finalizeError, setFinalizeError] = useState<string | null>(null)
   const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
@@ -127,6 +131,24 @@ function CharacterBuilderInner() {
     !!character.background &&
     (resolved?.pendingChoices.length ?? 0) === 0
 
+  // Surface exactly what's blocking finalize so the user can find and fix it.
+  const finalizeBlockers: readonly string[] = (() => {
+    const reasons: string[] = []
+    if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'))
+    if (!character.race) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'))
+    if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'))
+    if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'))
+    for (const pending of resolved?.pendingChoices ?? []) {
+      reasons.push(
+        t('characterBuilder.finalizeBlockers.pendingChoice', {
+          type: pending.type,
+          key: pending.choiceKey,
+        }),
+      )
+    }
+    return reasons
+  })()
+
   // Can only leave Basics step once required fields are filled
   const canLeaveBasics = hasRequiredFields
 
@@ -144,6 +166,7 @@ function CharacterBuilderInner() {
         })
     }
     setCurrentStep(targetStep)
+    setFurthestStepIndex((prev) => Math.max(prev, targetIndex))
   }
 
   const goNextStep = () => { if (currentStepIndex < STEPS.length - 1) goToStep(STEPS[currentStepIndex + 1].id) }
@@ -267,6 +290,18 @@ function CharacterBuilderInner() {
         )}
 
         {/* Navigation */}
+        {/* Only surface finalize blockers once the user has reached the final step.
+            Earlier in the flow they would just be a wall of expected-missing warnings. */}
+        {furthestStepIndex >= STEPS.length - 1 && !isReadyToFinalize && finalizeBlockers.length > 0 && (
+          <div className="mb-3 rounded-md border border-dashed border-amber-500/50 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+            <p className="font-semibold mb-1">{t('characterBuilder.finalizeBlockers.title')}</p>
+            <ul className="space-y-0.5">
+              {finalizeBlockers.map((reason, i) => (
+                <li key={i}>• {reason}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0}>
             <ChevronLeft size={16} />

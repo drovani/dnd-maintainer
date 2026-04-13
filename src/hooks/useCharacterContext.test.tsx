@@ -741,6 +741,71 @@ describe('CharacterProvider', () => {
     expect(creationRowResult?.choices).not.toHaveProperty('language-choice:race:human:0')
   })
 
+  it('makeChoice merges bundle-choice slotPicks when the bundleId matches the existing decision', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    // First pick: only weapon-1 is chosen
+    act(() => {
+      result.current.makeChoice('bundle-choice:class:fighter:1', {
+        type: 'bundle-choice',
+        bundleId: 'two-martial-weapons',
+        slotPicks: { 'weapon-1': 'flail' },
+      })
+    })
+
+    // Second pick: only weapon-2 is chosen — must NOT overwrite weapon-1
+    act(() => {
+      result.current.makeChoice('bundle-choice:class:fighter:1', {
+        type: 'bundle-choice',
+        bundleId: 'two-martial-weapons',
+        slotPicks: { 'weapon-2': 'battleaxe' },
+      })
+    })
+
+    const levelRow = result.current.rows.find((r) => r.sequence === 1)
+    const decision = levelRow?.choices?.['bundle-choice:class:fighter:1'] as
+      | { type: 'bundle-choice'; bundleId: string; slotPicks: Record<string, string> }
+      | undefined
+    expect(decision?.bundleId).toBe('two-martial-weapons')
+    expect(decision?.slotPicks).toEqual({ 'weapon-1': 'flail', 'weapon-2': 'battleaxe' })
+  })
+
+  it('makeChoice resets slotPicks when the bundleId changes', () => {
+    const character = buildSeedCharacter()
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    })
+
+    // Pick "two martial weapons" and fill both slots
+    act(() => {
+      result.current.makeChoice('bundle-choice:class:fighter:1', {
+        type: 'bundle-choice',
+        bundleId: 'two-martial-weapons',
+        slotPicks: { 'weapon-1': 'flail', 'weapon-2': 'battleaxe' },
+      })
+    })
+
+    // Switch to "a martial weapon and a shield" — ChoicePicker sends empty slotPicks
+    act(() => {
+      result.current.makeChoice('bundle-choice:class:fighter:1', {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: {},
+      })
+    })
+
+    const levelRow = result.current.rows.find((r) => r.sequence === 1)
+    const decision = levelRow?.choices?.['bundle-choice:class:fighter:1'] as
+      | { type: 'bundle-choice'; bundleId: string; slotPicks: Record<string, string> }
+      | undefined
+    expect(decision?.bundleId).toBe('martial-weapon-and-shield')
+    // Previous weapon-1/weapon-2 picks must be discarded since bundleId changed
+    expect(decision?.slotPicks).toEqual({})
+  })
+
   it('makeChoice with malformed key is a no-op', () => {
     const character = buildSeedCharacter()
     const { result } = renderHook(() => useCharacterContext(), {
@@ -786,14 +851,18 @@ describe('CharacterProvider', () => {
     expect(result.current.buildError).toBeNull()
   })
 
-  it('sets buildError when character has no race', () => {
+  it('returns a silent incomplete state (no buildError) when character has no race', () => {
+    // Missing race is the normal mid-creation condition — the hook should return
+    // { build: null, resolved: null, buildError: null } rather than surfacing an
+    // "error" that would render as a red banner in the builder UI.
     const character = buildSeedCharacter({ race: null })
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
     })
 
     expect(result.current.build).toBeNull()
-    expect(result.current.buildError).toBe('Character is missing required race')
+    expect(result.current.resolved).toBeNull()
+    expect(result.current.buildError).toBeNull()
   })
 
   describe('updateCreation', () => {
@@ -957,5 +1026,62 @@ describe('CharacterProvider', () => {
     expect(() => {
       renderHook(() => useCharacterContext())
     }).toThrow('useCharacterContext must be used within a CharacterProvider')
+  })
+
+  it('initialEquippedItems wiring: chain-mail + longsword produce AC 16 and a longsword attack', () => {
+    const character = buildSeedCharacter({
+      base_abilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+    } as Partial<Character>)
+
+    const creationRowWithAbilities: BuildLevelRow = {
+      sequence: 0,
+      base_abilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      ability_method: 'standard-array',
+      class_id: null,
+      class_level: null,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      // Resolved choices include bundle picks: chain-mail and longsword+shield
+      choices: {
+        'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
+        'bundle-choice:class:fighter:1': { type: 'bundle-choice', bundleId: 'martial-weapon-and-shield', slotPicks: { weapon: 'longsword', shield: 'shield' } },
+        'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
+        'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+        'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+        'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
+        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      deleted_at: null,
+    }
+
+    const fighterRow: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'fighter',
+      class_level: 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    }
+
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRowWithAbilities, fighterRow], ['chain-mail', 'longsword']),
+    })
+
+    const resolved = result.current.resolved
+    expect(resolved).not.toBeNull()
+    // chain-mail + armored fighter: AC 16 (no DEX bonus, heavy armor)
+    expect(resolved!.armorClass.effective).toBe(16)
+    // longsword should appear in attacks
+    expect(resolved!.attacks.length).toBeGreaterThan(0)
+    expect(resolved!.attacks.some((a) => a.weaponId === 'longsword')).toBe(true)
   })
 })

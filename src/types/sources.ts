@@ -21,6 +21,9 @@ export type SourceTag =
   | { readonly origin: 'background'; readonly id: BackgroundId }
   | { readonly origin: 'feat'; readonly id: string }
   | { readonly origin: 'item'; readonly id: string }
+  | { readonly origin: 'bundle'; readonly id: string }
+  | { readonly origin: 'pack'; readonly id: string }
+  | { readonly origin: 'loot'; readonly description: string }
 
 export interface GrantBundle {
   readonly source: SourceTag
