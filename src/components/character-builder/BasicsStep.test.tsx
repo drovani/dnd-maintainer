@@ -279,7 +279,7 @@ describe('BasicsStep', () => {
   it('shows toast error and does not advance when NPC generation returns null', () => {
     const onRequestAdvance = vi.fn()
     vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
-      basics: null,
+      ok: false,
       failure: 'name-generation',
     })
 
@@ -294,9 +294,24 @@ describe('BasicsStep', () => {
     expect(mockLevelUp).not.toHaveBeenCalled()
   })
 
+  it('rolls back cleanly if levelUp throws: no updateCharacter, no updateCreation, no advance', () => {
+    const onRequestAdvance = vi.fn()
+    mockLevelUp.mockImplementationOnce(() => {
+      throw new Error('simulated grants resolution failure')
+    })
+
+    render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    expect(mockToastError).toHaveBeenCalledWith('quickNpcCommitFailed')
+    expect(mockUpdateCharacter).not.toHaveBeenCalled()
+    expect(mockUpdateCreation).not.toHaveBeenCalled()
+    expect(onRequestAdvance).not.toHaveBeenCalled()
+  })
+
   it('surfaces a distinct toast for unknown-class failures', () => {
     vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
-      basics: null,
+      ok: false,
       failure: 'unknown-class',
     })
 
@@ -309,6 +324,7 @@ describe('BasicsStep', () => {
   it('advances to abilities (not skills) for a quick NPC whose class lacks quickBuild data', async () => {
     const onRequestAdvance = vi.fn()
     vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
+      ok: true,
       basics: {
         gender: 'male',
         race: RACE_SOURCES[0].id,
@@ -317,7 +333,6 @@ describe('BasicsStep', () => {
         classId: 'fighter',
         targetStep: 'abilities',
       },
-      failure: null,
     })
 
     const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
@@ -407,5 +422,15 @@ describe('BasicsStep', () => {
     await new Promise((r) => setTimeout(r, 0))
 
     expect(onRequestAdvance).not.toHaveBeenCalled()
+
+    // Verify ref-clearing didn't permanently disable the Quick NPC flow — a
+    // subsequent click must still arm a new advance.
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+    contextRows = [
+      buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }),
+      buildLevelRow('fighter'),
+    ]
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('skills'))
   })
 })

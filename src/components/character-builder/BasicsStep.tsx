@@ -142,39 +142,41 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   }
 
   const handleQuickNpc = (classId: ClassId) => {
-    const { basics, failure } = generateRandomNpcBasicsDetailed(classId)
-    if (!basics) {
-      toastForFailure(failure)
+    const result = generateRandomNpcBasicsDetailed(classId)
+    if (!result.ok) {
+      toastForFailure(result.failure)
       return
     }
-    // Arm the post-commit advance flag *before* mutations so the effect fires
-    // when state lands. If any mutation throws, we clear it in the catch.
-    pendingAdvanceRef.current = basics.targetStep
+    const basics = result.basics
+    // Run the riskiest mutation (class grants resolution) first. If it throws,
+    // no other state has been touched, so the form stays in its pre-click state.
     try {
-      context.updateCharacter({
-        character_type: 'npc',
-        player_name: '',
-        gender: basics.gender,
-        race: basics.race,
-        alignment: basics.alignment,
-        name: basics.name,
-        class: classId,
-        level: 1,
-        ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
-      })
-      // Mirror handleClassChange: use replaceLevel if a level-1 row already exists
       if (levelRows.length === 0) {
         context.levelUp(classId, null)
       } else {
         context.replaceLevel(levelRows[0].sequence, classId, null)
       }
-      if (basics.targetStep === 'skills') {
-        context.updateCreation({ base_abilities: basics.baseAbilities })
-      }
     } catch (err) {
-      pendingAdvanceRef.current = null
-      console.error('[BasicsStep] Quick NPC commit failed', err)
+      console.error('[BasicsStep] Quick NPC levelUp/replaceLevel failed', err)
       toast.error(tc('characterBuilder.hints.quickNpcCommitFailed'))
+      return
+    }
+    // Arm the advance flag only after the risky step succeeds. The post-commit
+    // effect reads it once all basics + abilities have landed.
+    pendingAdvanceRef.current = basics.targetStep
+    context.updateCharacter({
+      character_type: 'npc',
+      player_name: '',
+      gender: basics.gender,
+      race: basics.race,
+      alignment: basics.alignment,
+      name: basics.name,
+      class: classId,
+      level: 1,
+      ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
+    })
+    if (basics.targetStep === 'skills') {
+      context.updateCreation({ base_abilities: basics.baseAbilities })
     }
     // Note: saveDraft will fire once from goToStep (via advanceCallbackRef) and once
     // from the 500ms debounced autosave effect in CharacterBuilder. This is idempotent.

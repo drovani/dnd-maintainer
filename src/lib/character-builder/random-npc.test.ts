@@ -115,26 +115,17 @@ describe('generateRandomNpcBasics', () => {
   })
 
   it('returns targetStep=abilities for a class without quickBuild data', () => {
-    // Splice a minimal no-quickBuild ClassSource into the real array for this test only.
-    // We use barbarian (a valid ClassId that isn't yet in CLASS_SOURCES) so the ClassId
-    // type stays honest. A finally{} restore keeps the fixture isolated.
-    const mutable = CLASS_SOURCES as unknown as ClassSource[]
-    const stub: ClassSource = {
-      id: 'barbarian',
-      primaryAbility: 'str',
-      levels: [{ grants: [] }],
-    }
-    mutable.push(stub)
-    try {
-      const result = generateRandomNpcBasics('barbarian', () => 0)
-      expect(result).not.toBeNull()
-      expect(result?.targetStep).toBe('abilities')
-      if (!result || result.targetStep !== 'abilities') return
-      expect(result.classId).toBe('barbarian')
-      expect(result.name).toBeTruthy()
-    } finally {
-      mutable.pop()
-    }
+    // Inject a stub class-source array instead of mutating the real one —
+    // keeps production data pristine and makes the fixture obvious.
+    const stubSources: readonly ClassSource[] = [
+      { id: 'barbarian', primaryAbility: 'str', levels: [{ grants: [] }] },
+    ]
+    const result = generateRandomNpcBasics('barbarian', () => 0, stubSources)
+    expect(result).not.toBeNull()
+    expect(result?.targetStep).toBe('abilities')
+    if (!result || result.targetStep !== 'abilities') return
+    expect(result.classId).toBe('barbarian')
+    expect(result.name).toBeTruthy()
   })
 })
 
@@ -144,13 +135,15 @@ describe('generateRandomNpcBasicsDetailed', () => {
       'unknown' as Parameters<typeof generateRandomNpcBasicsDetailed>[0],
       () => 0,
     )
-    expect(result.basics).toBeNull()
+    expect(result.ok).toBe(false)
+    if (result.ok) return
     expect(result.failure).toBe('unknown-class')
   })
 
-  it('reports no failure on success', () => {
+  it('returns ok=true with targetStep=skills on fighter success', () => {
     const result = generateRandomNpcBasicsDetailed('fighter', () => 0)
-    expect(result.failure).toBeNull()
-    expect(result.basics).not.toBeNull()
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.basics.targetStep).toBe('skills')
   })
 })

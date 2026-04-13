@@ -50,6 +50,27 @@ export interface ClassQuickBuild {
   readonly suggestedBackground: BackgroundId
 }
 
+/**
+ * Construct a ClassQuickBuild with compile-time shape AND runtime disjointness checks.
+ * Throws if `secondaryAbility` overlaps `highestAbility`, or if `highestAbility` has
+ * duplicate entries — both of which would corrupt Standard Array assignment.
+ */
+export function makeQuickBuild(qb: ClassQuickBuild): ClassQuickBuild {
+  const highs = qb.highestAbility
+  const uniqueHighs = new Set(highs)
+  if (uniqueHighs.size !== highs.length) {
+    throw new Error(
+      `makeQuickBuild: highestAbility contains duplicates: [${highs.join(', ')}]`,
+    )
+  }
+  if (uniqueHighs.has(qb.secondaryAbility)) {
+    throw new Error(
+      `makeQuickBuild: secondaryAbility "${qb.secondaryAbility}" must not appear in highestAbility [${highs.join(', ')}]`,
+    )
+  }
+  return qb
+}
+
 export interface ClassSource {
   readonly id: ClassId
   readonly primaryAbility: AbilityKey

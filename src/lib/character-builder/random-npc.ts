@@ -11,6 +11,7 @@ import {
   type RaceId,
 } from '@/lib/dnd-helpers'
 import type { AbilityScores } from '@/types/database'
+import type { ClassSource } from '@/types/sources'
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -35,10 +36,9 @@ export type RandomNpcBasics =
       readonly targetStep: 'abilities'
     })
 
-export interface RandomNpcResult {
-  readonly basics: RandomNpcBasics | null
-  readonly failure: RandomNpcFailure | null
-}
+export type RandomNpcResult =
+  | { readonly ok: true; readonly basics: RandomNpcBasics }
+  | { readonly ok: false; readonly failure: RandomNpcFailure }
 
 type Rng = () => number
 
@@ -93,15 +93,13 @@ export function assignStandardArray(
 export function generateRandomNpcBasicsDetailed(
   classId: ClassId,
   rng: Rng = Math.random,
+  classSources: readonly ClassSource[] = CLASS_SOURCES,
 ): RandomNpcResult {
-  const classSource = CLASS_SOURCES.find((c) => c.id === classId)
+  const classSource = classSources.find((c) => c.id === classId)
   if (!classSource) {
     console.error('[random-npc] Unknown classId for Quick NPC', { classId })
-    return { basics: null, failure: 'unknown-class' }
+    return { ok: false, failure: 'unknown-class' }
   }
-
-  // RACE_SOURCES and DND_ALIGNMENTS are statically non-empty tuples (enforced at compile
-  // time by the tuple types). No runtime empty-guard needed.
 
   const gender: DndGender = pick(['male', 'female'] as const, rng)
   const race = pick(RACE_SOURCES, rng).id
@@ -109,14 +107,14 @@ export function generateRandomNpcBasicsDetailed(
   const name = generateCharacterName(race, gender, rng)
   if (!name) {
     console.error('[random-npc] Name generation returned null', { classId, race, gender })
-    return { basics: null, failure: 'name-generation' }
+    return { ok: false, failure: 'name-generation' }
   }
 
   const qb = classSource.quickBuild
   if (!qb) {
     return {
+      ok: true,
       basics: { gender, race, alignment, name, classId, targetStep: 'abilities' },
-      failure: null,
     }
   }
 
@@ -124,6 +122,7 @@ export function generateRandomNpcBasicsDetailed(
   const baseAbilities = assignStandardArray(highest, qb.secondaryAbility, rng)
 
   return {
+    ok: true,
     basics: {
       gender,
       race,
@@ -134,14 +133,15 @@ export function generateRandomNpcBasicsDetailed(
       suggestedBackground: qb.suggestedBackground,
       targetStep: 'skills',
     },
-    failure: null,
   }
 }
 
-/** Back-compat helper returning just the basics (null on any failure). */
+/** Convenience helper returning just the basics (null on any failure). */
 export function generateRandomNpcBasics(
   classId: ClassId,
   rng: Rng = Math.random,
+  classSources: readonly ClassSource[] = CLASS_SOURCES,
 ): RandomNpcBasics | null {
-  return generateRandomNpcBasicsDetailed(classId, rng).basics
+  const result = generateRandomNpcBasicsDetailed(classId, rng, classSources)
+  return result.ok ? result.basics : null
 }
