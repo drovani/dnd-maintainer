@@ -93,29 +93,29 @@ export function ProficienciesPanel({ resolved }: ProficienciesPanelProps) {
       <div className="space-y-3">
         {resolved.armorProficiencies.length > 0 && (
           <ProficiencySection label={tc('characterSheet.proficiencies.armor')}>
-            {resolved.armorProficiencies.map((prof, i) => (
-              <ArmorBadge key={i} prof={prof} />
+            {resolved.armorProficiencies.map((prof) => (
+              <ArmorBadge key={prof.value} prof={prof} />
             ))}
           </ProficiencySection>
         )}
         {resolved.weaponProficiencies.length > 0 && (
           <ProficiencySection label={tc('characterSheet.proficiencies.weapons')}>
-            {resolved.weaponProficiencies.map((prof, i) => (
-              <WeaponBadge key={i} prof={prof} />
+            {resolved.weaponProficiencies.map((prof) => (
+              <WeaponBadge key={prof.value} prof={prof} />
             ))}
           </ProficiencySection>
         )}
         {resolved.toolProficiencies.length > 0 && (
           <ProficiencySection label={tc('characterSheet.proficiencies.tools')}>
-            {resolved.toolProficiencies.map((prof, i) => (
-              <ToolBadge key={i} prof={prof} />
+            {resolved.toolProficiencies.map((prof) => (
+              <ToolBadge key={prof.value} prof={prof} />
             ))}
           </ProficiencySection>
         )}
         {resolved.languages.length > 0 && (
           <ProficiencySection label={tc('characterSheet.proficiencies.languages')}>
-            {resolved.languages.map((lang, i) => (
-              <LanguageBadge key={i} lang={lang} />
+            {resolved.languages.map((lang) => (
+              <LanguageBadge key={lang.value} lang={lang} />
             ))}
           </ProficiencySection>
         )}

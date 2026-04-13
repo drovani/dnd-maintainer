@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown'
+import { formatSigned } from '@/lib/format'
 import type { ResolvedAttack } from '@/types/resolved'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
@@ -8,10 +9,6 @@ import { useTranslation } from 'react-i18next'
 
 interface AttacksPanelProps {
   readonly attacks: readonly ResolvedAttack[]
-}
-
-function formatSigned(value: number): string {
-  return value >= 0 ? `+${value}` : `${value}`
 }
 
 export function AttacksPanel({ attacks }: AttacksPanelProps) {
@@ -41,7 +38,6 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
         <p className="text-sm text-muted-foreground">{tc('characterSheet.attacks.noAttacks')}</p>
       ) : (
         <div className="space-y-0.5 text-xs">
-          {/* Header row */}
           <div className="grid grid-cols-[1fr_auto_1fr] gap-2 px-1 py-1 text-[10px] font-bold text-muted-foreground uppercase">
             <span>{tc('characterSheet.attacks.name')}</span>
             <span className="text-center">{tc('characterSheet.attacks.attackBonus')}</span>
@@ -55,7 +51,7 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
             const damageStr = `${attack.damageDice}${attack.damageBonus !== 0 ? formatSigned(attack.damageBonus) : ''} ${damageType}`
 
             return (
-              <div key={index}>
+              <div key={attack.weaponId}>
                 <button
                   type="button"
                   onClick={() => toggleRow(index)}
@@ -75,7 +71,6 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
 
                 {isExpanded && (
                   <div className="ml-4 mb-2 space-y-2 px-1">
-                    {/* Weapon properties */}
                     {attack.properties.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {attack.properties.map((prop) => (
@@ -95,7 +90,6 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
                       </div>
                     )}
 
-                    {/* Attack breakdown */}
                     <div>
                       <div className="text-[10px] font-bold text-muted-foreground uppercase mb-0.5">
                         {tc('characterSheet.attacks.attackBonus')}
@@ -106,7 +100,6 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
                       />
                     </div>
 
-                    {/* Damage breakdown */}
                     <div>
                       <div className="text-[10px] font-bold text-muted-foreground uppercase mb-0.5">
                         {tc('characterSheet.attacks.damage')}

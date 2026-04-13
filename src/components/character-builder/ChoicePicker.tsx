@@ -258,8 +258,8 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
             let ref: ReturnType<typeof resolveBundleRef> | null = null
             try {
               ref = resolveBundleRef(bundleId)
-            } catch {
-              // Unknown bundle/pack — skip rendering this option
+            } catch (err) {
+              console.warn(`ChoicePicker: skipping unknown bundleId "${bundleId}"`, err)
               return null
             }
             const isSelected = currentBundleId === bundleId
@@ -572,5 +572,7 @@ function getSlotLabelKey(
   if (filter.category === 'shield') return 'characterBuilder.equipment.slotLabels.armorShield'
   if (filter.category === 'light') return 'characterBuilder.equipment.slotLabels.armorLight'
   if (filter.category === 'medium') return 'characterBuilder.equipment.slotLabels.armorMedium'
-  return 'characterBuilder.equipment.slotLabels.armorHeavy'
+  if (filter.category === 'heavy') return 'characterBuilder.equipment.slotLabels.armorHeavy'
+  const _exhaustive: never = filter.category
+  throw new Error(`Unhandled armor category: ${_exhaustive}`)
 }

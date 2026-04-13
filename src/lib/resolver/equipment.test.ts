@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment'
 import { requireItemDef } from '@/lib/sources/items'
 import type { GrantBundle } from '@/types/sources'
@@ -340,6 +340,27 @@ describe('resolveEquipment via useDBInventory', () => {
     expect(result.equipment).toHaveLength(1)
     expect(result.equipment[0].itemId).toBe('longsword')
   })
+
+  it('skips unknown persisted items gracefully (no throw) and logs a warning', async () => {
+    const { resolveCharacter } = await import('@/lib/resolver')
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const input = {
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      level: 0,
+      bundles: [] as GrantBundle[],
+      choices: {} as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+      useDBInventory: true,
+      persistedItems: [
+        { itemId: 'longsword', quantity: 1, equipped: true, source: { origin: 'bundle' as const, id: 'x' } },
+        { itemId: 'removed-item-xyz', quantity: 1, equipped: false, source: { origin: 'bundle' as const, id: 'x' } },
+      ],
+    }
+    const result = resolveCharacter(input)
+    expect(result.equipment).toHaveLength(1)
+    expect(result.equipment[0].itemId).toBe('longsword')
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('removed-item-xyz'))
+    warnSpy.mockRestore()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -454,6 +475,33 @@ describe('resolveAttacks', () => {
     }
   })
 
+  it('Dueling style: no +2 damage for two-handed melee weapon (greatsword)', () => {
+    const abilities = makeAbilities({ str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 })
+    const attacks = resolveAttacks(
+      [makeEquippedWeapon('greatsword')],
+      abilities,
+      2,
+      PROFICIENT_SIMPLE_MARTIAL,
+      ['dueling'],
+    )
+    expect(attacks).toHaveLength(1)
+    expect(attacks[0].damageBreakdown.some((c) => c.label === 'dueling')).toBe(false)
+  })
+
+  it('Dueling style: no +2 damage when melee + ranged weapon equipped (longsword + longbow)', () => {
+    const abilities = makeAbilities({ str: 16, dex: 14, con: 10, int: 10, wis: 10, cha: 10 })
+    const attacks = resolveAttacks(
+      [makeEquippedWeapon('longsword'), makeEquippedWeapon('longbow')],
+      abilities,
+      2,
+      PROFICIENT_SIMPLE_MARTIAL,
+      ['dueling'],
+    )
+    expect(attacks).toHaveLength(2)
+    const longswordAttack = attacks.find((a) => a.weaponId === 'longsword')!
+    expect(longswordAttack.damageBreakdown.some((c) => c.label === 'dueling')).toBe(false)
+  })
+
   it('Archery does not apply to melee weapons', () => {
     const abilities = makeAbilities({ str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 })
     const attacks = resolveAttacks(
@@ -494,6 +542,12 @@ describe('resolveEquippedArmorAc', () => {
     const result = resolveEquippedArmorAc([makeEquippedArmor('leather')], 3)
     expect(result).not.toBeNull()
     expect(result!.totalBase).toBe(14)
+  })
+
+  it('heavy armor with negative DEX modifier still floors at 0 (DEX 8, chain mail → 16)', () => {
+    const result = resolveEquippedArmorAc([makeEquippedArmor('chain-mail')], -1)
+    expect(result).not.toBeNull()
+    expect(result!.totalBase).toBe(16) // baseAc 16, DEX capped at 0 not -1
   })
 
   it('shield adds shieldBonus 2', () => {

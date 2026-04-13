@@ -17,6 +17,19 @@ const baseInput: ResolverInput = {
 }
 
 describe('resolveCharacter', () => {
+  it('collects resistance grants into resolved.resistances with source', () => {
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'race', id: 'tiefling' },
+        grants: [{ type: 'resistance', damageType: 'fire' }],
+      },
+    ]
+    const result = resolveCharacter({ ...baseInput, bundles })
+    expect(result.resistances).toHaveLength(1)
+    expect(result.resistances[0].value).toBe('fire')
+    expect(result.resistances[0].sources[0]).toEqual({ origin: 'race', id: 'tiefling' })
+  })
+
   it('returns a valid ResolvedCharacter for empty input', () => {
     const result = resolveCharacter(baseInput)
 

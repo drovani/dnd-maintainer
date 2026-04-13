@@ -2,7 +2,7 @@ import type { AbilityKey, FightingStyleId, SkillId, ArmorProficiencyId, WeaponPr
 import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants'
 import type { SourceTag } from '@/types/sources'
 import type { ChoiceKey } from '@/types/choices'
-import type { ItemDef, PhysicalDamageType, WeaponProperty, WeaponRange, BundleCategory } from '@/types/items'
+import type { DamageDice, ItemDef, PhysicalDamageType, WeaponProperty, WeaponRange, BundleCategory } from '@/types/items'
 
 export interface Sourced<T> {
   readonly value: T
@@ -48,7 +48,7 @@ export interface ResolvedAttack {
   readonly weaponId: string
   readonly attackBonus: number
   readonly attackBreakdown: readonly AttackBonusComponent[]
-  readonly damageDice: string
+  readonly damageDice: DamageDice
   readonly damageBonus: number
   readonly damageBreakdown: readonly DamageBonusComponent[]
   readonly damageType: PhysicalDamageType

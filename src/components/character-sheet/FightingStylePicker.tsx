@@ -9,21 +9,35 @@ import { useTranslation } from 'react-i18next'
 
 interface FightingStylePickerProps {
   readonly choice: Extract<PendingChoice, { type: 'fighting-style-choice' }>
+  readonly currentDecision?: ChoiceDecision | undefined
   readonly onDecide: (choiceKey: ChoiceKey, decision: ChoiceDecision) => void
+  readonly onClear?: (key: ChoiceKey) => void
 }
 
-export function FightingStylePicker({ choice, onDecide }: FightingStylePickerProps) {
+export function FightingStylePicker({ choice, currentDecision, onDecide, onClear }: FightingStylePickerProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
-  const [selected, setSelected] = useState<FightingStyleId | null>(null)
 
+  const existingStyleId = currentDecision?.type === 'fighting-style-choice'
+    ? currentDecision.styles[0] ?? null
+    : null
+  const [selected, setSelected] = useState<FightingStyleId | null>(existingStyleId)
+  const hasExistingDecision = existingStyleId !== null
+
+  // Show styles from the grant's pool, excluding styles chosen by OTHER grants
+  // (but keep the current grant's own selection visible so it stays selectable)
   const availableStyles = FIGHTING_STYLE_SOURCES.filter(
-    (s) => choice.from.includes(s.id) && !choice.alreadyChosen.includes(s.id),
+    (s) => choice.from.includes(s.id) && (s.id === existingStyleId || !choice.alreadyChosen.includes(s.id)),
   )
 
   const handleConfirm = () => {
     if (!selected) return
     onDecide(choice.choiceKey, { type: 'fighting-style-choice', styles: [selected] })
+  }
+
+  const handleClear = () => {
+    setSelected(null)
+    onClear?.(choice.choiceKey)
   }
 
   return (
@@ -57,13 +71,20 @@ export function FightingStylePicker({ choice, onDecide }: FightingStylePickerPro
           )
         })}
 
-        <Button
-          className="mt-4 w-full"
-          disabled={!selected}
-          onClick={handleConfirm}
-        >
-          {tc('buttons.confirm')}
-        </Button>
+        <div className="flex gap-2 mt-4">
+          {hasExistingDecision && (
+            <Button variant="ghost" size="sm" onClick={handleClear} className="flex-1">
+              {tc('buttons.clearSelection')}
+            </Button>
+          )}
+          <Button
+            className="flex-1"
+            disabled={!selected}
+            onClick={handleConfirm}
+          >
+            {tc('buttons.confirm')}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )

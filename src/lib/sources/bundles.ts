@@ -79,10 +79,7 @@ export function requireBundleDef(id: string): BundleDef {
   return bundle
 }
 
-/**
- * Returns the i18n key for a bundle's display name.
- * Mirrors getItemNameKey in src/lib/sources/items.ts.
- */
+/** Returns the i18n key for a bundle's display name. */
 export function getBundleNameKey(bundleId: string): `bundles.${string}.name` {
   return `bundles.${bundleId}.name`
 }

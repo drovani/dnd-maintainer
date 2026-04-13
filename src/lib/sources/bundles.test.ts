@@ -45,6 +45,17 @@ describe('BUNDLE_CATALOG', () => {
     }
   })
 
+  it('all bundles have unique slotKey values within their slots', () => {
+    for (const bundle of BUNDLE_CATALOG) {
+      const slotKeys = bundle.slots.map((s) => s.slotKey)
+      const uniqueKeys = new Set(slotKeys)
+      expect(
+        uniqueKeys.size,
+        `bundle "${bundle.id}" has duplicate slotKeys: ${slotKeys.join(', ')}`,
+      ).toBe(slotKeys.length)
+    }
+  })
+
   it('all bundles have a valid category', () => {
     const validCategories = ['loadout', 'armor', 'melee-weapon', 'ranged-weapon', 'pack', 'gear'] as const
     for (const bundle of BUNDLE_CATALOG) {

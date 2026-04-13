@@ -55,19 +55,20 @@ export type WeaponCategory = 'simple' | 'martial'
 export type WeaponRange = 'melee' | 'ranged'
 export type PhysicalDamageType = Extract<DamageTypeId, 'bludgeoning' | 'piercing' | 'slashing'>
 export type ArmorCategory = 'light' | 'medium' | 'heavy' | 'shield'
+export type DamageDice = `${number}d${number}`
 
 export interface WeaponDef {
   readonly id: string
   readonly category: WeaponCategory
   readonly range: WeaponRange
-  readonly damageDice: string
+  readonly damageDice: DamageDice
   readonly damageType: PhysicalDamageType
   readonly properties: readonly WeaponProperty[]
   readonly weight: number
   readonly costGp: number
   readonly normalRange?: number
   readonly longRange?: number
-  readonly versatileDice?: string
+  readonly versatileDice?: DamageDice
   /** Explicit proficiency ID for use in proficiency checks — may differ from id when id uses hyphens */
   readonly weaponProficiencyId: WeaponProficiencyId
 }

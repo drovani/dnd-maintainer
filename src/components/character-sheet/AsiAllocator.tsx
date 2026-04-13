@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { AbilityKey } from '@/lib/dnd-helpers'
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved'
-import type { ChoiceKey } from '@/types/choices'
+import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
 import { useTranslation } from 'react-i18next'
 
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -11,16 +11,21 @@ const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 
 interface AsiAllocatorProps {
   readonly choice: Extract<PendingChoice, { type: 'asi' }>
   readonly abilities: ResolvedCharacter['abilities']
+  readonly currentDecision?: ChoiceDecision | undefined
   readonly onDecide: (choiceKey: ChoiceKey, allocation: Partial<Record<AbilityKey, number>>) => void
+  readonly onClear?: (key: ChoiceKey) => void
   /** When true, calls onDecide on every +/- click and hides the confirm button. */
   readonly autoCommit?: boolean
 }
 
-export function AsiAllocator({ choice, abilities, onDecide, autoCommit }: AsiAllocatorProps) {
+export function AsiAllocator({ choice, abilities, currentDecision, onDecide, onClear, autoCommit }: AsiAllocatorProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
 
-  const [allocation, setAllocation] = useState<Partial<Record<AbilityKey, number>>>({})
+  const existingAllocation: Partial<Record<AbilityKey, number>> =
+    currentDecision?.type === 'asi' ? { ...currentDecision.allocation } : {}
+  const [allocation, setAllocation] = useState<Partial<Record<AbilityKey, number>>>(existingAllocation)
+  const hasExistingDecision = currentDecision?.type === 'asi'
 
   const pointsUsed = Object.values(allocation).reduce((sum, v) => sum + (v ?? 0), 0)
   const pointsRemaining = choice.points - pointsUsed
@@ -50,6 +55,11 @@ export function AsiAllocator({ choice, abilities, onDecide, autoCommit }: AsiAll
 
   const handleConfirm = () => {
     onDecide(choice.choiceKey, allocation)
+  }
+
+  const handleClear = () => {
+    setAllocation({})
+    onClear?.(choice.choiceKey)
   }
 
   return (
@@ -113,13 +123,20 @@ export function AsiAllocator({ choice, abilities, onDecide, autoCommit }: AsiAll
         })}
 
         {!autoCommit && (
-          <Button
-            className="mt-4 w-full"
-            disabled={pointsRemaining !== 0}
-            onClick={handleConfirm}
-          >
-            {tc('buttons.confirm')}
-          </Button>
+          <div className="flex gap-2 mt-4">
+            {hasExistingDecision && (
+              <Button variant="ghost" size="sm" onClick={handleClear} className="flex-1">
+                {tc('buttons.clearSelection')}
+              </Button>
+            )}
+            <Button
+              className="flex-1"
+              disabled={pointsRemaining !== 0}
+              onClick={handleConfirm}
+            >
+              {tc('buttons.confirm')}
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>

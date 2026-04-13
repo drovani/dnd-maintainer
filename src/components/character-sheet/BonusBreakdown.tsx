@@ -1,3 +1,4 @@
+import { formatSigned } from '@/lib/format'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,10 +13,6 @@ interface BonusBreakdownProps {
   readonly components: readonly BonusComponent[]
   readonly total: number
   readonly title?: string
-}
-
-function formatSigned(value: number): string {
-  return value >= 0 ? `+${value}` : `${value}`
 }
 
 function ComponentLabel({ type, label }: { type: string; label: string }) {

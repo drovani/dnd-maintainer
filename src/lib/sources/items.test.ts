@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { WEAPON_CATALOG, ARMOR_CATALOG, PACK_CATALOG, ITEM_CATALOG, getItemDef } from '@/lib/sources/items'
+import { WEAPON_CATALOG, ARMOR_CATALOG, PACK_CATALOG, ITEM_CATALOG, getItemDef, requireItemDef } from '@/lib/sources/items'
 
 describe('ITEM_CATALOG', () => {
   it('all item IDs are unique across the combined catalog', () => {
@@ -44,6 +44,27 @@ describe('ITEM_CATALOG', () => {
 
   it('getItemDef returns undefined for unknown item', () => {
     expect(getItemDef('unknown-item-xyz')).toBeUndefined()
+  })
+
+  it('requireItemDef throws for unknown item', () => {
+    expect(() => requireItemDef('unknown-item-xyz')).toThrow('Unknown item id')
+  })
+
+  it('all weapons with "thrown" have normalRange and longRange', () => {
+    for (const weapon of WEAPON_CATALOG) {
+      if (weapon.properties.includes('thrown')) {
+        expect(weapon.normalRange, `thrown weapon ${weapon.id} missing normalRange`).toBeDefined()
+        expect(weapon.longRange, `thrown weapon ${weapon.id} missing longRange`).toBeDefined()
+      }
+    }
+  })
+
+  it('all weapons with "versatile" have versatileDice', () => {
+    for (const weapon of WEAPON_CATALOG) {
+      if (weapon.properties.includes('versatile')) {
+        expect(weapon.versatileDice, `versatile weapon ${weapon.id} missing versatileDice`).toBeDefined()
+      }
+    }
   })
 
   it('chain mail has baseAc 16 and maxDexBonus 0 (heavy armor)', () => {

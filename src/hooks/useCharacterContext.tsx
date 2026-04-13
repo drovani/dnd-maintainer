@@ -293,9 +293,8 @@ export function CharacterProvider({
     }
     return [seedRow, ...initialRows]
   })
-  // TODO: add a toggleEquipped(itemId) setter here so the character sheet can
-  // equip/unequip items at runtime. Currently equippedItems is read-only after
-  // mount. This is a separate feature tracked in #67.
+  // TODO: add a toggleEquipped(itemId) setter so the character sheet can
+  // equip/unequip items at runtime. Currently read-only after mount.
   const [equippedItems] = useState<readonly string[]>(initialEquippedItems)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 

@@ -50,7 +50,6 @@ export function resolveEquipment(
   const items: ResolvedEquipmentItem[] = []
   const pendingChoices: PendingChoice[] = []
 
-  // Direct equipment grants — use requireItemDef for fail-fast on trusted source data
   for (const { grant, source } of collectGrantsByType(bundles, 'equipment')) {
     items.push({
       itemId: grant.itemId,
@@ -61,7 +60,6 @@ export function resolveEquipment(
     })
   }
 
-  // Bundle-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'bundle-choice')) {
     const decision = choices[grant.key]
     const pendingForGrant: PendingChoice = {
@@ -80,8 +78,11 @@ export function resolveEquipment(
     let ref: ReturnType<typeof resolveBundleRef> | undefined
     try {
       ref = resolveBundleRef(decision.bundleId)
-    } catch {
-      // Unknown bundleId (stale persisted data) — re-prompt
+    } catch (err) {
+      console.warn(
+        `resolveEquipment: unknown bundleId "${decision.bundleId}" for choice "${grant.key}" — re-prompting`,
+        err,
+      )
       pendingChoices.push(pendingForGrant)
       continue
     }
@@ -102,8 +103,13 @@ export function resolveEquipment(
     }
 
     // Bundle — may have slots. Resolve them against the user's slotPicks.
+    // resolveBundleRef above returned kind: 'bundle', so getBundleDef must succeed.
+    // If it doesn't, the bundle registry is inconsistent — log and re-prompt defensively.
     const bundle = getBundleDef(decision.bundleId)
     if (bundle === undefined) {
+      console.error(
+        `resolveEquipment: bundle registry inconsistent — resolveBundleRef("${decision.bundleId}") succeeded but getBundleDef returned undefined`,
+      )
       pendingChoices.push(pendingForGrant)
       continue
     }
@@ -153,11 +159,8 @@ export function resolveAttacks(
   const hasArchery = fightingStyleIds.includes('archery')
   const hasDueling = fightingStyleIds.includes('dueling')
 
-  // Count equipped one-handed melee weapons (no two-handed) for Dueling check
-  const oneHandedMeleeCount = equippedWeapons.filter((item) => {
-    if (item.itemDef.type !== 'weapon') return false
-    return item.itemDef.range === 'melee' && !item.itemDef.properties.includes('two-handed')
-  }).length
+  // Dueling requires exactly one weapon equipped total, and it must be one-handed melee
+  const totalEquippedWeapons = equippedWeapons.length
 
   const attacks: ResolvedAttack[] = []
 
@@ -177,12 +180,10 @@ export function resolveAttacks(
 
     const abilityMod = abilities[attackAbility].modifier
 
-    // Check proficiency using the explicit weaponProficiencyId field
     const proficient = weaponProficiencies.some(
       (p) => p.value === weapon.weaponProficiencyId || p.value === weapon.category,
     )
 
-    // Build attack breakdown
     const attackBreakdown: AttackBonusComponent[] = [
       { type: 'ability', value: abilityMod, label: attackAbility },
     ]
@@ -193,14 +194,12 @@ export function resolveAttacks(
       attackBreakdown.push({ type: 'fighting-style', value: 2, label: 'archery' })
     }
 
-    // Build damage breakdown
     const damageBreakdown: DamageBonusComponent[] = [
       { type: 'ability', value: abilityMod, label: attackAbility },
     ]
 
-    // Dueling: +2 damage on one-handed melee with no other weapon equipped
     const isOneHandedMelee = weapon.range === 'melee' && !weapon.properties.includes('two-handed')
-    if (hasDueling && isOneHandedMelee && oneHandedMeleeCount === 1) {
+    if (hasDueling && isOneHandedMelee && totalEquippedWeapons === 1) {
       damageBreakdown.push({ type: 'fighting-style', value: 2, label: 'dueling' })
     }
 
@@ -257,13 +256,10 @@ export function resolveEquippedArmorAc(
   const dexContribution =
     armor.maxDexBonus === null
       ? dexModifier
-      : Math.min(dexModifier, armor.maxDexBonus)
+      : Math.max(0, Math.min(dexModifier, armor.maxDexBonus))
 
   return { totalBase: armor.baseAc + dexContribution, shieldBonus }
 }
 
-/**
- * Looks up an item definition without throwing — safe for UI-side optional lookups.
- * Re-exported here so callers can import from a single location.
- */
+/** Re-exported from items.ts for convenience. */
 export { getItemDef }

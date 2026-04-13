@@ -12,7 +12,7 @@ import { resolveFeatures } from '@/lib/resolver/features'
 import { resolveHp, resolveSpeed, resolveAc } from '@/lib/resolver/combat'
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting'
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment'
-import { requireItemDef } from '@/lib/sources/items'
+import { getItemDef } from '@/lib/sources/items'
 
 export interface PersistedItem {
   readonly itemId: string
@@ -194,7 +194,10 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     toolProficiencies: proficiencies.tool,
     languages: proficiencies.language,
     features,
-    resistances: [],
+    resistances: collectGrantsByType(bundles, 'resistance').map(({ grant, source }) => ({
+      value: grant.damageType,
+      sources: [source],
+    })),
     immunities: [],
     spellcasting,
     equipment: equipmentResult.items,
@@ -212,12 +215,20 @@ function resolveEquipmentFromPersisted(persistedItems: readonly PersistedItem[])
   readonly items: readonly import('@/types/resolved').ResolvedEquipmentItem[]
   readonly pendingChoices: readonly import('@/types/resolved').PendingChoice[]
 } {
-  const items = persistedItems.map((row) => ({
-    itemId: row.itemId,
-    itemDef: requireItemDef(row.itemId),
-    quantity: row.quantity,
-    source: row.source,
-    equipped: row.equipped,
-  }))
+  const items: import('@/types/resolved').ResolvedEquipmentItem[] = []
+  for (const row of persistedItems) {
+    const itemDef = getItemDef(row.itemId)
+    if (!itemDef) {
+      console.warn(`Skipping unknown persisted item "${row.itemId}" — removed from catalog?`)
+      continue
+    }
+    items.push({
+      itemId: row.itemId,
+      itemDef,
+      quantity: row.quantity,
+      source: row.source,
+      equipped: row.equipped,
+    })
+  }
   return { items, pendingChoices: [] }
 }

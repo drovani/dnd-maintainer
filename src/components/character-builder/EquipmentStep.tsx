@@ -52,9 +52,7 @@ export function EquipmentStep() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-      {/* Left column — selections */}
       <div className="space-y-8">
-        {/* Part 1: Class Equipment Loadout */}
         <section className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-base font-semibold text-foreground">
@@ -87,7 +85,6 @@ export function EquipmentStep() {
           )}
         </section>
 
-        {/* Part 2: Purchase Equipment (placeholder) */}
         <section className="space-y-2 border-t pt-6">
           <h2 className="text-base font-semibold text-foreground">
             {tc('characterBuilder.equipment.purchaseTitle')}
@@ -98,7 +95,6 @@ export function EquipmentStep() {
         </section>
       </div>
 
-      {/* Right column — running equipment summary */}
       <aside className="lg:sticky lg:top-4 lg:self-start">
         <div className="rounded-lg border bg-card p-4 space-y-3">
           <h3 className="text-sm font-semibold text-foreground">
@@ -112,8 +108,8 @@ export function EquipmentStep() {
                     {t('weaponCategories.simple')}/{t('weaponCategories.martial')}
                   </div>
                   <ul className="space-y-0.5">
-                    {weapons.map((e, i) => (
-                      <li key={i} className="flex gap-2 text-foreground">
+                    {weapons.map((e) => (
+                      <li key={e.itemId} className="flex gap-2 text-foreground">
                         <span className="text-muted-foreground">{e.quantity}×</span>
                         <span>{renderItemName(e.itemId)}</span>
                         {e.itemDef.type === 'weapon' && (
@@ -132,8 +128,8 @@ export function EquipmentStep() {
                     {tc('characterSheet.proficiencies.armor')}
                   </div>
                   <ul className="space-y-0.5">
-                    {armor.map((e, i) => (
-                      <li key={i} className="flex gap-2 text-foreground">
+                    {armor.map((e) => (
+                      <li key={e.itemId} className="flex gap-2 text-foreground">
                         <span className="text-muted-foreground">{e.quantity}×</span>
                         <span>{renderItemName(e.itemId)}</span>
                         {e.itemDef.type === 'armor' && (
@@ -152,8 +148,8 @@ export function EquipmentStep() {
                     {tc('characterSheet.sections.equipment')}
                   </div>
                   <ul className="space-y-0.5">
-                    {gear.map((e, i) => (
-                      <li key={i} className="flex gap-2 text-foreground">
+                    {gear.map((e) => (
+                      <li key={e.itemId} className="flex gap-2 text-foreground">
                         <span className="text-muted-foreground">{e.quantity}×</span>
                         <span>{renderItemName(e.itemId)}</span>
                       </li>
@@ -167,8 +163,8 @@ export function EquipmentStep() {
                     {t('bundleCategories.pack')}
                   </div>
                   <ul className="space-y-0.5">
-                    {packs.map((e, i) => (
-                      <li key={i} className="flex gap-2 text-foreground">
+                    {packs.map((e) => (
+                      <li key={e.itemId} className="flex gap-2 text-foreground">
                         <span className="text-muted-foreground">{e.quantity}×</span>
                         <span>{renderItemName(e.itemId)}</span>
                       </li>

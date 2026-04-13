@@ -15,8 +15,7 @@ export function buildMaterializedItemRows(
   resolved: ResolvedCharacter,
   characterId: string,
 ): readonly TablesInsert<'character_items'>[] {
-  // Key: itemId + serialized source → accumulated quantity
-  const grouped = new Map<string, { quantity: number; source: object }>()
+  const grouped = new Map<string, { itemId: string; quantity: number; source: object }>()
 
   for (const item of resolved.equipment) {
     const key = `${item.itemId}::${JSON.stringify(item.source)}`
@@ -24,13 +23,12 @@ export function buildMaterializedItemRows(
     if (existing) {
       existing.quantity += item.quantity
     } else {
-      grouped.set(key, { quantity: item.quantity, source: item.source as object })
+      grouped.set(key, { itemId: item.itemId, quantity: item.quantity, source: item.source as object })
     }
   }
 
   const rows: TablesInsert<'character_items'>[] = []
-  for (const [key, { quantity, source }] of grouped) {
-    const itemId = key.split('::')[0]
+  for (const { itemId, quantity, source } of grouped.values()) {
     rows.push({
       character_id: characterId,
       item_id: itemId,
