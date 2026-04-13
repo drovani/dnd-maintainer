@@ -41,10 +41,20 @@ export interface LevelUp {
   readonly grants: readonly Grant[]
 }
 
+export interface ClassQuickBuild {
+  /** Ability receiving 15 from the Standard Array. Array form ("STR or DEX") picks one at random per roll. */
+  readonly highestAbility: AbilityKey | readonly AbilityKey[]
+  /** Ability receiving 14 from the Standard Array. */
+  readonly secondaryAbility: AbilityKey
+  /** Background id written to character.background on Quick NPC. */
+  readonly suggestedBackground: BackgroundId
+}
+
 export interface ClassSource {
   readonly id: ClassId
   readonly primaryAbility: AbilityKey
   readonly levels: readonly LevelUp[]
+  readonly quickBuild?: ClassQuickBuild
 }
 
 export interface SubclassFeature {

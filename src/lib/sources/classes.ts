@@ -8,6 +8,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
   {
     id: 'fighter',
     primaryAbility: 'str',
+    quickBuild: {
+      highestAbility: ['str', 'dex'], // PHB: "Strength or Dexterity"
+      secondaryAbility: 'con',
+      suggestedBackground: 'soldier',
+    },
     levels: [
       {
         grants: [
