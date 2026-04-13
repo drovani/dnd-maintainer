@@ -276,9 +276,12 @@ describe('BasicsStep', () => {
     expect(mockLevelUp).not.toHaveBeenCalled()
   })
 
-  it('shows toast error and does not advance when generateRandomNpcBasics returns null', () => {
+  it('shows toast error and does not advance when NPC generation returns null', () => {
     const onRequestAdvance = vi.fn()
-    vi.spyOn(randomNpcModule, 'generateRandomNpcBasics').mockReturnValue(null)
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
+      basics: null,
+      failure: 'name-generation',
+    })
 
     render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
 
@@ -289,5 +292,120 @@ describe('BasicsStep', () => {
     expect(mockUpdateCharacter).not.toHaveBeenCalled()
     expect(mockUpdateCreation).not.toHaveBeenCalled()
     expect(mockLevelUp).not.toHaveBeenCalled()
+  })
+
+  it('surfaces a distinct toast for unknown-class failures', () => {
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
+      basics: null,
+      failure: 'unknown-class',
+    })
+
+    render(<BasicsStep />)
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    expect(mockToastError).toHaveBeenCalledWith('quickNpcUnknownClass')
+  })
+
+  it('advances to abilities (not skills) for a quick NPC whose class lacks quickBuild data', async () => {
+    const onRequestAdvance = vi.fn()
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
+      basics: {
+        gender: 'male',
+        race: RACE_SOURCES[0].id,
+        alignment: 'n',
+        name: 'Test Name',
+        classId: 'fighter',
+        targetStep: 'abilities',
+      },
+      failure: null,
+    })
+
+    const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    // No background update and no updateCreation call on the abilities branch
+    const updateCall = mockUpdateCharacter.mock.calls[0][0] as Partial<Character>
+    expect(updateCall.background).toBeUndefined()
+    expect(mockUpdateCreation).not.toHaveBeenCalled()
+
+    // Simulate basics landing in state (abilities NOT required to advance on this branch)
+    contextCharacter = {
+      ...contextCharacter,
+      name: 'Test Name',
+      race: RACE_SOURCES[0].id,
+      alignment: 'n',
+      class: 'fighter',
+      level: 1,
+    }
+    contextRows = [buildCreationRow(), buildLevelRow('fighter')]
+
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('abilities'))
+    expect(onRequestAdvance).toHaveBeenCalledTimes(1)
+  })
+
+  it('does NOT advance to skills until base_abilities have committed', async () => {
+    const onRequestAdvance = vi.fn()
+    const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    // Commit basics without base_abilities — advance must NOT fire yet
+    contextCharacter = {
+      ...contextCharacter,
+      name: 'Test Name',
+      race: RACE_SOURCES[0].id,
+      alignment: 'lg',
+      class: 'fighter',
+      level: 1,
+      background: 'soldier',
+      gender: 'male',
+    }
+    contextRows = [buildCreationRow(/* no base_abilities */), buildLevelRow('fighter')]
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    await new Promise((r) => setTimeout(r, 0))
+    expect(onRequestAdvance).not.toHaveBeenCalled()
+
+    // Now commit base_abilities — advance fires exactly once
+    contextRows = [
+      buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }),
+      buildLevelRow('fighter'),
+    ]
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('skills'))
+    expect(onRequestAdvance).toHaveBeenCalledTimes(1)
+  })
+
+  it('manual field edit after Quick NPC cancels the pending step advance', async () => {
+    const onRequestAdvance = vi.fn()
+    const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    // User immediately edits the character name — this must clear the pending ref
+    const nameInput = screen.getByPlaceholderText('enterCharacterName') as HTMLInputElement
+    fireEvent.change(nameInput, { target: { value: 'Manual Edit' } })
+
+    // Now simulate all fields + abilities landing
+    contextCharacter = {
+      ...contextCharacter,
+      name: 'Manual Edit',
+      race: RACE_SOURCES[0].id,
+      alignment: 'lg',
+      class: 'fighter',
+      level: 1,
+      background: 'soldier',
+      gender: 'male',
+    }
+    contextRows = [
+      buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }),
+      buildLevelRow('fighter'),
+    ]
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    await new Promise((r) => setTimeout(r, 0))
+
+    expect(onRequestAdvance).not.toHaveBeenCalled()
   })
 })

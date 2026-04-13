@@ -21,8 +21,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers'
-
-export type StepType = 'basics' | 'abilities' | 'skills' | 'proficiencies' | 'equipment' | 'spells' | 'backstory'
+import type { StepType } from '@/types/character-builder'
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' }, { id: 'abilities' },

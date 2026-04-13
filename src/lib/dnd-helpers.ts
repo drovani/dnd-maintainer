@@ -897,14 +897,18 @@ export function toggleLanguageProficiencyChoice(
 
 export { EMPTY_PROFICIENCIES }
 
-export function generateCharacterName(raceId: string, gender: DndGender): string | null {
+export function generateCharacterName(
+  raceId: string,
+  gender: DndGender,
+  rng: () => number = Math.random,
+): string | null {
   const baseId = getBaseRaceId(raceId)
   const raceData = DND_RACE_NAMES[baseId]
   if (!raceData) return null
 
   const firstNames = raceData[gender]
-  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
-  const clanName = raceData.clan[Math.floor(Math.random() * raceData.clan.length)]
+  const firstName = firstNames[Math.floor(rng() * firstNames.length)]
+  const clanName = raceData.clan[Math.floor(rng() * raceData.clan.length)]
 
   return `${firstName} ${clanName}`
 }

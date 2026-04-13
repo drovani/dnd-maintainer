@@ -3,11 +3,13 @@ import {
   STANDARD_ARRAY,
   assignStandardArray,
   generateRandomNpcBasics,
+  generateRandomNpcBasicsDetailed,
   getQuickNpcClassIds,
 } from '@/lib/character-builder/random-npc'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
 import { RACE_SOURCES } from '@/lib/sources/races'
 import { DND_ALIGNMENTS } from '@/lib/dnd-helpers'
+import type { ClassSource } from '@/types/sources'
 
 describe('getQuickNpcClassIds', () => {
   it('returns the same ids as CLASS_SOURCES in order (catches drift)', () => {
@@ -31,21 +33,18 @@ describe('assignStandardArray', () => {
     expect(result.cha).toBe(13)
   })
 
-  it('produces a different ordering with rng=0.999 but still correct sum', () => {
-    const resultA = assignStandardArray('str', 'con', () => 0)
-    const resultB = assignStandardArray('str', 'con', () => 0.999)
-    // Both must have the same fixed slots
-    expect(resultB.str).toBe(15)
-    expect(resultB.con).toBe(14)
-    // The remainder must sum the same (13+12+10+8 = 43)
-    const sumA = resultA.dex + resultA.int + resultA.wis + resultA.cha
-    const sumB = resultB.dex + resultB.int + resultB.wis + resultB.cha
-    expect(sumA).toBe(43)
-    expect(sumB).toBe(43)
-    // With high rng the shuffle should produce a different order
-    const orderA = [resultA.dex, resultA.int, resultA.wis, resultA.cha]
-    const orderB = [resultB.dex, resultB.int, resultB.wis, resultB.cha]
-    expect(orderA).not.toEqual(orderB)
+  it('remaining four abilities are always a permutation of [13,12,10,8]', () => {
+    for (const rng of [() => 0, () => 0.25, () => 0.5, () => 0.999]) {
+      const result = assignStandardArray('str', 'con', rng)
+      const remainder = [result.dex, result.int, result.wis, result.cha].sort(
+        (a, b) => b - a,
+      )
+      expect(remainder).toEqual([13, 12, 10, 8])
+    }
+  })
+
+  it('throws when highest equals secondary (fail-fast invariant)', () => {
+    expect(() => assignStandardArray('str', 'str', () => 0)).toThrow(/must differ/)
   })
 
   it('always returns all six keys populated with values from STANDARD_ARRAY', () => {
@@ -107,14 +106,51 @@ describe('generateRandomNpcBasics', () => {
     expect(values).toEqual([...STANDARD_ARRAY])
   })
 
-  // TODO: verify once a second class without quickBuild lands in CLASS_SOURCES.
-  // For now, the no-quickBuild path is exercised by the unit tests for assignStandardArray
-  // (which is only called when qb is present) and by the guard in random-npc.ts itself.
   it('targetStep is skills and baseAbilities/suggestedBackground are present for fighter', () => {
     const fighterResult = generateRandomNpcBasics('fighter', () => 0)
     expect(fighterResult?.targetStep).toBe('skills')
     if (!fighterResult || fighterResult.targetStep !== 'skills') return
     expect(fighterResult.baseAbilities).toBeDefined()
     expect(fighterResult.suggestedBackground).toBeDefined()
+  })
+
+  it('returns targetStep=abilities for a class without quickBuild data', () => {
+    // Splice a minimal no-quickBuild ClassSource into the real array for this test only.
+    // We use barbarian (a valid ClassId that isn't yet in CLASS_SOURCES) so the ClassId
+    // type stays honest. A finally{} restore keeps the fixture isolated.
+    const mutable = CLASS_SOURCES as unknown as ClassSource[]
+    const stub: ClassSource = {
+      id: 'barbarian',
+      primaryAbility: 'str',
+      levels: [{ grants: [] }],
+    }
+    mutable.push(stub)
+    try {
+      const result = generateRandomNpcBasics('barbarian', () => 0)
+      expect(result).not.toBeNull()
+      expect(result?.targetStep).toBe('abilities')
+      if (!result || result.targetStep !== 'abilities') return
+      expect(result.classId).toBe('barbarian')
+      expect(result.name).toBeTruthy()
+    } finally {
+      mutable.pop()
+    }
+  })
+})
+
+describe('generateRandomNpcBasicsDetailed', () => {
+  it('reports failure="unknown-class" for an unknown classId', () => {
+    const result = generateRandomNpcBasicsDetailed(
+      'unknown' as Parameters<typeof generateRandomNpcBasicsDetailed>[0],
+      () => 0,
+    )
+    expect(result.basics).toBeNull()
+    expect(result.failure).toBe('unknown-class')
+  })
+
+  it('reports no failure on success', () => {
+    const result = generateRandomNpcBasicsDetailed('fighter', () => 0)
+    expect(result.failure).toBeNull()
+    expect(result.basics).not.toBeNull()
   })
 })

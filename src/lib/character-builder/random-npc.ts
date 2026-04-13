@@ -15,6 +15,8 @@ import type { AbilityScores } from '@/types/database'
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
+export type RandomNpcFailure = 'unknown-class' | 'name-generation'
+
 interface RandomNpcBasicsBase {
   readonly gender: DndGender
   readonly race: RaceId
@@ -32,6 +34,11 @@ export type RandomNpcBasics =
   | (RandomNpcBasicsBase & {
       readonly targetStep: 'abilities'
     })
+
+export interface RandomNpcResult {
+  readonly basics: RandomNpcBasics | null
+  readonly failure: RandomNpcFailure | null
+}
 
 type Rng = () => number
 
@@ -62,6 +69,11 @@ export function assignStandardArray(
   secondary: AbilityKey,
   rng: Rng = Math.random,
 ): AbilityScores {
+  if (highest === secondary) {
+    throw new Error(
+      `assignStandardArray: highest and secondary must differ (got "${highest}" for both)`,
+    )
+  }
   const remaining = ABILITY_KEYS.filter((k) => k !== highest && k !== secondary)
   const shuffledRemainder = shuffle([13, 12, 10, 8] as const, rng)
   const scores: AbilityScores = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
@@ -73,43 +85,63 @@ export function assignStandardArray(
   return scores
 }
 
-export function generateRandomNpcBasics(
+/**
+ * Generate randomized NPC basics for the given class. Returns `{ basics, failure }`
+ * so callers can surface a specific reason for null results. All randomness flows
+ * through the injected `rng` for deterministic testing.
+ */
+export function generateRandomNpcBasicsDetailed(
   classId: ClassId,
   rng: Rng = Math.random,
-): RandomNpcBasics | null {
+): RandomNpcResult {
   const classSource = CLASS_SOURCES.find((c) => c.id === classId)
   if (!classSource) {
     console.error('[random-npc] Unknown classId for Quick NPC', { classId })
-    return null
+    return { basics: null, failure: 'unknown-class' }
   }
+
+  // RACE_SOURCES and DND_ALIGNMENTS are statically non-empty tuples (enforced at compile
+  // time by the tuple types). No runtime empty-guard needed.
 
   const gender: DndGender = pick(['male', 'female'] as const, rng)
   const race = pick(RACE_SOURCES, rng).id
   const alignment = pick(DND_ALIGNMENTS, rng).id
-  const name = generateCharacterName(race, gender)
+  const name = generateCharacterName(race, gender, rng)
   if (!name) {
     console.error('[random-npc] Name generation returned null', { classId, race, gender })
-    return null
+    return { basics: null, failure: 'name-generation' }
   }
 
   const qb = classSource.quickBuild
   if (!qb) {
-    return { gender, race, alignment, name, classId, targetStep: 'abilities' }
+    return {
+      basics: { gender, race, alignment, name, classId, targetStep: 'abilities' },
+      failure: null,
+    }
   }
 
-  const highest: AbilityKey = Array.isArray(qb.highestAbility)
-    ? pick(qb.highestAbility as readonly AbilityKey[], rng)
-    : (qb.highestAbility as AbilityKey)
+  const highest = pick(qb.highestAbility, rng)
   const baseAbilities = assignStandardArray(highest, qb.secondaryAbility, rng)
 
   return {
-    gender,
-    race,
-    alignment,
-    name,
-    classId,
-    baseAbilities,
-    suggestedBackground: qb.suggestedBackground,
-    targetStep: 'skills',
+    basics: {
+      gender,
+      race,
+      alignment,
+      name,
+      classId,
+      baseAbilities,
+      suggestedBackground: qb.suggestedBackground,
+      targetStep: 'skills',
+    },
+    failure: null,
   }
+}
+
+/** Back-compat helper returning just the basics (null on any failure). */
+export function generateRandomNpcBasics(
+  classId: ClassId,
+  rng: Rng = Math.random,
+): RandomNpcBasics | null {
+  return generateRandomNpcBasicsDetailed(classId, rng).basics
 }

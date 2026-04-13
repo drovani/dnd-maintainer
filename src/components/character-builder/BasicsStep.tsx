@@ -28,10 +28,11 @@ import {
   type RaceId,
 } from '@/lib/dnd-helpers'
 import {
-  generateRandomNpcBasics,
+  generateRandomNpcBasicsDetailed,
   getQuickNpcClassIds,
+  type RandomNpcFailure,
 } from '@/lib/character-builder/random-npc'
-import type { StepType } from '@/pages/CharacterBuilder'
+import type { StepType } from '@/types/character-builder'
 import { Dices, Wand2 } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { toast } from 'sonner'
@@ -101,11 +102,19 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     advanceCallbackRef.current?.(target)
   }, [character, rows])
 
+  // Manual edits cancel any pending Quick-NPC advance so a later field change
+  // can't trigger an unexpected step navigation.
+  const cancelPendingAdvance = () => {
+    pendingAdvanceRef.current = null
+  }
+
   const handleRaceChange = (value: RaceId) => {
+    cancelPendingAdvance()
     context.updateCharacter({ race: value })
   }
 
   const handleClassChange = (value: ClassId) => {
+    cancelPendingAdvance()
     if (levelRows.length === 0) {
       // First time selecting a class — add level 1 row
       context.levelUp(value, null)
@@ -120,37 +129,52 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   }
 
   const handleBackgroundChange = (value: string) => {
+    cancelPendingAdvance()
     context.updateCharacter({ background: value })
   }
 
-  const handleQuickNpc = (classId: ClassId) => {
-    const basics = generateRandomNpcBasics(classId)
-    if (!basics) {
-      toast.error(tc('characterBuilder.hints.quickNpcFailed'))
+  const toastForFailure = (failure: RandomNpcFailure | null) => {
+    if (failure === 'unknown-class') {
+      toast.error(tc('characterBuilder.hints.quickNpcUnknownClass'))
       return
     }
-    pendingAdvanceRef.current = basics.targetStep
-    context.updateCharacter({
-      character_type: 'npc',
-      player_name: '',
-      gender: basics.gender,
-      race: basics.race,
-      alignment: basics.alignment,
-      name: basics.name,
-      class: classId,
-      level: 1,
-      ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
-    })
-    // Mirror handleClassChange: use replaceLevel if a level-1 row already exists
-    if (levelRows.length === 0) {
-      // First time — add level 1 row with class grants
-      context.levelUp(classId, null)
-    } else {
-      // Re-click — atomically swap the class in the existing first-level row
-      context.replaceLevel(levelRows[0].sequence, classId, null)
+    toast.error(tc('characterBuilder.hints.quickNpcFailed'))
+  }
+
+  const handleQuickNpc = (classId: ClassId) => {
+    const { basics, failure } = generateRandomNpcBasicsDetailed(classId)
+    if (!basics) {
+      toastForFailure(failure)
+      return
     }
-    if (basics.targetStep === 'skills') {
-      context.updateCreation({ base_abilities: basics.baseAbilities })
+    // Arm the post-commit advance flag *before* mutations so the effect fires
+    // when state lands. If any mutation throws, we clear it in the catch.
+    pendingAdvanceRef.current = basics.targetStep
+    try {
+      context.updateCharacter({
+        character_type: 'npc',
+        player_name: '',
+        gender: basics.gender,
+        race: basics.race,
+        alignment: basics.alignment,
+        name: basics.name,
+        class: classId,
+        level: 1,
+        ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
+      })
+      // Mirror handleClassChange: use replaceLevel if a level-1 row already exists
+      if (levelRows.length === 0) {
+        context.levelUp(classId, null)
+      } else {
+        context.replaceLevel(levelRows[0].sequence, classId, null)
+      }
+      if (basics.targetStep === 'skills') {
+        context.updateCreation({ base_abilities: basics.baseAbilities })
+      }
+    } catch (err) {
+      pendingAdvanceRef.current = null
+      console.error('[BasicsStep] Quick NPC commit failed', err)
+      toast.error(tc('characterBuilder.hints.quickNpcCommitFailed'))
     }
     // Note: saveDraft will fire once from goToStep (via advanceCallbackRef) and once
     // from the 500ms debounced autosave effect in CharacterBuilder. This is idempotent.
@@ -184,12 +208,13 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
           <span className={`text-sm font-semibold ${characterType === 'pc' ? 'text-foreground' : 'text-muted-foreground'}`}>{tc('characterType.pc')}</span>
           <Switch
             checked={characterType === 'npc'}
-            onCheckedChange={(checked: boolean) =>
+            onCheckedChange={(checked: boolean) => {
+              cancelPendingAdvance()
               context.updateCharacter({
                 character_type: checked ? 'npc' : 'pc',
                 player_name: checked ? '' : playerName,
               })
-            }
+            }}
           />
           <span className={`text-sm font-semibold ${characterType === 'npc' ? 'text-foreground' : 'text-muted-foreground'}`}>{tc('characterType.npc')}</span>
         </label>
@@ -205,7 +230,10 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         </Label>
         <GenderToggle
           value={gender as DndGender | ''}
-          onChange={(g) => context.updateCharacter({ gender: g })}
+          onChange={(g) => {
+            cancelPendingAdvance()
+            context.updateCharacter({ gender: g })
+          }}
         />
       </div>
 
@@ -220,7 +248,10 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
             <Input
               id="character-name"
               value={name}
-              onChange={(e) => context.updateCharacter({ name: e.target.value })}
+              onChange={(e) => {
+                cancelPendingAdvance()
+                context.updateCharacter({ name: e.target.value })
+              }}
               placeholder={tc('characterBuilder.placeholders.enterCharacterName')}
             />
             <Button
@@ -375,7 +406,10 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                     key={alignmentId}
                     type="button"
                     title={t(`alignments.${alignmentId}`)}
-                    onClick={() => context.updateCharacter({ alignment: alignmentId })}
+                    onClick={() => {
+                      cancelPendingAdvance()
+                      context.updateCharacter({ alignment: alignmentId })
+                    }}
                     className={`flex flex-col items-center justify-center border-r border-b border-border px-1 py-1 text-sm transition-colors cursor-pointer last-of-type:border-r-0 nth-[3n]:border-r-0 ${isSelected
                       ? 'bg-primary/10 font-medium'
                       : 'hover:bg-muted/50'

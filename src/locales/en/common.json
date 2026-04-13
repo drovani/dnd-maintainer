@@ -174,7 +174,9 @@
       "couldNotLoadPlayerNames": "Could not load player name suggestions",
       "quickNpcDescription": "Create a random NPC of this class and jump ahead in the wizard",
       "quickNpcButton": "Random {{class}} NPC",
-      "quickNpcFailed": "Could not generate NPC — name data missing for selected race"
+      "quickNpcFailed": "Could not generate NPC — name data missing for selected race",
+      "quickNpcUnknownClass": "Could not generate NPC — unknown class",
+      "quickNpcCommitFailed": "Could not apply NPC — please try again"
     },
     "abilities": {
       "standardArray": "Standard Array",

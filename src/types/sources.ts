@@ -42,8 +42,8 @@ export interface LevelUp {
 }
 
 export interface ClassQuickBuild {
-  /** Ability receiving 15 from the Standard Array. Array form ("STR or DEX") picks one at random per roll. */
-  readonly highestAbility: AbilityKey | readonly AbilityKey[]
+  /** Abilities eligible to receive 15 from the Standard Array. Non-empty; one is picked at random per roll. Must not include `secondaryAbility`. */
+  readonly highestAbility: readonly [AbilityKey, ...AbilityKey[]]
   /** Ability receiving 14 from the Standard Array. */
   readonly secondaryAbility: AbilityKey
   /** Background id written to character.background on Quick NPC. */
