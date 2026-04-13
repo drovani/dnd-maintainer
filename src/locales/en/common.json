@@ -121,7 +121,8 @@
       "weight": "Weight",
       "eyeColor": "Eye Color",
       "hairColor": "Hair Color",
-      "skinColor": "Skin Color"
+      "skinColor": "Skin Color",
+      "quickNpcLabel": "Quick Random NPC"
     },
     "pendingChoices": {
       "title": "Choices Required",
@@ -170,7 +171,10 @@
     "hints": {
       "selectRaceAndGender": "Select race and gender first",
       "generateRandomName": "Generate random name",
-      "couldNotLoadPlayerNames": "Could not load player name suggestions"
+      "couldNotLoadPlayerNames": "Could not load player name suggestions",
+      "quickNpcDescription": "Create a random NPC of this class and jump ahead in the wizard",
+      "quickNpcButton": "Random {{class}} NPC",
+      "quickNpcFailed": "Could not generate NPC — name data missing for selected race"
     },
     "abilities": {
       "standardArray": "Standard Array",

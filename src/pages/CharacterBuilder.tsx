@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers'
 
-type StepType = 'basics' | 'abilities' | 'skills' | 'proficiencies' | 'equipment' | 'spells' | 'backstory'
+export type StepType = 'basics' | 'abilities' | 'skills' | 'proficiencies' | 'equipment' | 'spells' | 'backstory'
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' }, { id: 'abilities' },
@@ -245,7 +245,7 @@ function CharacterBuilderInner() {
         <Card className="mb-8">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold mb-6">{t(`characterBuilder.steps.${STEPS[currentStepIndex].id}`)}</h2>
-            {currentStep === 'basics' && <BasicsStep />}
+            {currentStep === 'basics' && <BasicsStep onRequestAdvance={goToStep} />}
             {currentStep === 'abilities' && <AbilitiesStep />}
             {currentStep === 'skills' && <SkillsStep />}
             {currentStep === 'proficiencies' && <ProficienciesStep />}

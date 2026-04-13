@@ -27,7 +27,14 @@ import {
   type DndGender,
   type RaceId,
 } from '@/lib/dnd-helpers'
-import { Wand2 } from 'lucide-react'
+import {
+  generateRandomNpcBasics,
+  getQuickNpcClassIds,
+} from '@/lib/character-builder/random-npc'
+import type { StepType } from '@/pages/CharacterBuilder'
+import { Dices, Wand2 } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
 // Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
@@ -37,7 +44,11 @@ const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
   'Lawful Evil': 'le', 'Neutral Evil': 'ne', 'Chaotic Evil': 'ce',
 }
 
-export function BasicsStep() {
+interface BasicsStepProps {
+  readonly onRequestAdvance?: (targetStep: StepType) => void
+}
+
+export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const { data: playerNames = [], isError: playerNamesError } = usePlayerNames()
@@ -57,6 +68,40 @@ export function BasicsStep() {
   const levelRows = rows.filter((r) => r.sequence !== 0)
   const characterClass = (levelRows[0]?.class_id ?? '') as ClassId | ''
   const level = levelRows.length
+
+  // -------------------------------------------------------------------------
+  // Quick NPC: ref-flag + useEffect pattern for post-commit step advance.
+  // We use refs to avoid stale closures and to prevent onRequestAdvance from
+  // becoming an effect dependency (it is recreated on every parent render).
+  // -------------------------------------------------------------------------
+  const pendingAdvanceRef = useRef<StepType | null>(null)
+  const advanceCallbackRef = useRef(onRequestAdvance)
+
+  // Keep advanceCallbackRef current without making it an effect dependency.
+  // useLayoutEffect runs synchronously after DOM updates, before the browser paints,
+  // so the ref is always fresh by the time the step-advance effect fires.
+  useLayoutEffect(() => {
+    advanceCallbackRef.current = onRequestAdvance
+  })
+
+  useEffect(() => {
+    const target = pendingAdvanceRef.current
+    if (!target) return
+    const basicsReady =
+      !!character.name && !!character.race && !!character.class && !!character.alignment
+    if (!basicsReady) return
+    // If targeting 'skills', also wait until base_abilities have committed.
+    if (target === 'skills') {
+      const creation = rows.find((r) => r.sequence === 0)
+      const hasAbilities =
+        !!creation?.base_abilities &&
+        Object.values(creation.base_abilities).every((v) => typeof v === 'number' && v > 0)
+      if (!hasAbilities) return
+    }
+    pendingAdvanceRef.current = null
+    advanceCallbackRef.current?.(target)
+    // Effect deps are [character, rows] — NOT onRequestAdvance (use ref instead).
+  }, [character, rows])
 
   const handleRaceChange = (value: RaceId) => {
     context.updateCharacter({ race: value })
@@ -80,8 +125,61 @@ export function BasicsStep() {
     context.updateCharacter({ background: value })
   }
 
+  const handleQuickNpc = (classId: ClassId) => {
+    const basics = generateRandomNpcBasics(classId)
+    if (!basics) {
+      toast.error(tc('characterBuilder.hints.quickNpcFailed'))
+      return
+    }
+    pendingAdvanceRef.current = basics.targetStep
+    context.updateCharacter({
+      character_type: 'npc',
+      player_name: '',
+      gender: basics.gender,
+      race: basics.race,
+      alignment: basics.alignment,
+      name: basics.name,
+      class: classId,
+      level: 1,
+      ...(basics.suggestedBackground ? { background: basics.suggestedBackground } : {}),
+    })
+    // Mirror handleClassChange: use replaceLevel if a level-1 row already exists
+    if (levelRows.length === 0) {
+      // First time — add level 1 row with class grants
+      context.levelUp(classId, null)
+    } else {
+      // Re-click — atomically swap the class in the existing first-level row
+      context.replaceLevel(levelRows[0].sequence, classId, null)
+    }
+    if (basics.baseAbilities) {
+      context.updateCreation({ base_abilities: basics.baseAbilities })
+    }
+    // Note: saveDraft will fire once from goToStep (via advanceCallbackRef) and once
+    // from the 500ms debounced autosave effect in CharacterBuilder. This is idempotent.
+  }
+
   return (
     <div className="space-y-6">
+      {/* Quick Random NPC buttons */}
+      <div className="space-y-2">
+        <Label>{tc('characterBuilder.fields.quickNpcLabel')}</Label>
+        <p className="text-xs text-muted-foreground">{tc('characterBuilder.hints.quickNpcDescription')}</p>
+        <div className="flex flex-wrap gap-2">
+          {getQuickNpcClassIds().map((classId) => (
+            <Button
+              key={classId}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleQuickNpc(classId)}
+            >
+              <Dices className="size-4" />
+              {tc('characterBuilder.hints.quickNpcButton', { class: t(`classes.${classId}`) })}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {/* Character Type Switch + Level display */}
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2 cursor-pointer">
