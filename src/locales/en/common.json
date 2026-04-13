@@ -131,7 +131,8 @@
       "toolChoice": "Choose {{count}} tool(s)",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "unsupported": "Choice not yet supported: {{type}}",
-      "remaining": "remaining"
+      "remaining": "remaining",
+      "fromSource": "from {{source}}"
     },
     "finalizeBlockers": {
       "title": "Before you can finalize:",
