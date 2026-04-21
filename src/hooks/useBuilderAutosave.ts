@@ -227,5 +227,24 @@ export function useBuilderAutosave(existingCharacterId?: string) {
     setSaveStatus((prev) => (prev === 'saved' ? 'idle' : prev))
   }, [])
 
-  return { saveStatus, saveDraft, finalize, clearStatus }
+  const abandon = useCallback(
+    async (campaignId: string): Promise<void> => {
+      if (savingRef.current) {
+        try {
+          await savingRef.current
+        } catch (prevErr) {
+          console.warn('In-flight autosave failed before abandon:', prevErr)
+        }
+      }
+      const id = characterIdRef.current
+      if (!id) return
+      const { error } = await supabase.from('characters').delete().eq('id', id)
+      if (error) throw error
+      characterIdRef.current = null
+      queryClient.invalidateQueries({ queryKey: ['characters', campaignId] })
+    },
+    [queryClient],
+  )
+
+  return { saveStatus, saveDraft, finalize, clearStatus, abandon }
 }

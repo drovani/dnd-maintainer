@@ -48,9 +48,19 @@ export function AbilitiesStep() {
   // Local UI state for assignment selects and rolling
   // Derive initial assignments from saved base abilities so dropdowns persist across step navigation
   const [abilityAssignments, setAbilityAssignments] = useState<Record<keyof AbilityScores, number | null>>(() => {
+    // When baseAbilities is a full permutation of STANDARD_ARRAY (e.g. from Quick NPC
+    // autofill), every ability is assigned — including the 10, which is otherwise
+    // indistinguishable from the default and would be treated as unassigned below.
+    const baseSorted = Object.values(baseAbilities).slice().sort((a, b) => b - a)
+    const standardSorted = [...STANDARD_ARRAY].sort((a, b) => b - a)
+    const isCompletePermutation =
+      baseSorted.length === standardSorted.length &&
+      baseSorted.every((v, i) => v === standardSorted[i])
+    if (isCompletePermutation) return { ...baseAbilities }
+
     const hasAssignments = Object.values(baseAbilities).some((v) => v !== 10)
     if (!hasAssignments) return { ...DEFAULT_ASSIGNMENTS }
-    // Reconstruct assignments from base abilities
+    // Partial state: non-10 values are clearly assigned; 10 is ambiguous with the default.
     const assignments: Record<keyof AbilityScores, number | null> = { str: null, dex: null, con: null, int: null, wis: null, cha: null }
     for (const key of Object.keys(assignments) as Array<keyof AbilityScores>) {
       assignments[key] = baseAbilities[key] !== 10 ? baseAbilities[key] : null

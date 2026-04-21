@@ -24,6 +24,7 @@ import { LevelControls } from '@/components/character-sheet/LevelControls'
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel'
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel'
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel'
+import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons'
 import { getItemDef, getItemNameKey } from '@/lib/sources/items'
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters'
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
@@ -482,11 +483,15 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                       return ''
                     })()
                     const itemSource = item.source as SourceTag | null
-                    const sourceLabel = itemSource
-                      ? tc(`characterSheet.equipment.sourceFrom.${itemSource.origin}`, {
-                          id: 'id' in itemSource ? itemSource.id : undefined,
-                          description: 'description' in itemSource ? itemSource.description : undefined,
-                        })
+                    const sourceTooltip = itemSource
+                      ? itemSource.origin === 'loot'
+                        ? tc('characterSheet.equipment.sourceLoot')
+                        : tc('characterSheet.equipment.sourceFrom', {
+                            name: getSourceDisplayName(itemSource, t),
+                          })
+                      : null
+                    const SourceIcon = itemSource
+                      ? getGrantIcon(itemSource, itemDef?.type === 'pack' ? 'pack' : undefined)
                       : null
                     return (
                       <div
@@ -500,13 +505,18 @@ function CharacterSheetInner({ character, itemsData, characterId }: {
                           <div className="text-muted-foreground">
                             {tc('characterSheet.fields.qtyAndWeight', { qty: item.quantity, weight: itemDef?.type !== 'pack' ? (itemDef?.weight ?? 0) : 0 })}
                           </div>
-                          {sourceLabel && (
-                            <div className="text-xs text-muted-foreground/70 italic">
-                              {sourceLabel}
-                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {item.equipped && <Check className="size-4 text-green-600" />}
+                          {SourceIcon && (
+                            <span title={sourceTooltip ?? undefined} className="inline-flex">
+                              <SourceIcon
+                                aria-label={sourceTooltip ?? undefined}
+                                className="size-5 text-muted-foreground shrink-0"
+                              />
+                            </span>
                           )}
                         </div>
-                        {item.equipped && <Check className="size-4 text-green-600" />}
                       </div>
                     )
                   })}

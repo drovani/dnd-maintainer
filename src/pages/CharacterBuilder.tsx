@@ -1,6 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
   AbilitiesStep,
   BackstoryStep,
   BasicsStep,
@@ -16,10 +23,11 @@ import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacter
 import { useCharacter } from '@/hooks/useCharacters'
 import { useCampaignContext } from '@/hooks/useCampaignContext'
 import type { Character } from '@/types/database'
-import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers'
 import type { StepType } from '@/types/character-builder'
 
@@ -85,7 +93,9 @@ function CharacterBuilderInner() {
   const [furthestStepIndex, setFurthestStepIndex] = useState(0)
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [finalizeError, setFinalizeError] = useState<string | null>(null)
-  const { saveStatus, saveDraft, finalize, clearStatus } = useBuilderAutosave()
+  const [confirmAbandon, setConfirmAbandon] = useState(false)
+  const [isAbandoning, setIsAbandoning] = useState(false)
+  const { saveStatus, saveDraft, finalize, clearStatus, abandon } = useBuilderAutosave()
 
   const context = useCharacterContext()
   const { character, rows, resolved, buildError, isDirty, markSaved } = context
@@ -170,6 +180,21 @@ function CharacterBuilderInner() {
 
   const goNextStep = () => { if (currentStepIndex < STEPS.length - 1) goToStep(STEPS[currentStepIndex + 1].id) }
   const goPrevStep = () => { if (currentStepIndex > 0) goToStep(STEPS[currentStepIndex - 1].id) }
+
+  const handleAbandon = async () => {
+    if (!campaignId || !campaignSlug) return
+    setIsAbandoning(true)
+    try {
+      await abandon(campaignId)
+      toast.success(t('characterBuilder.abandon.success'))
+      navigate(`/campaign/${campaignSlug}/characters`)
+    } catch (err) {
+      console.error('Abandon draft failed:', err)
+      toast.error(t('characterBuilder.abandon.failed'))
+      setIsAbandoning(false)
+      setConfirmAbandon(false)
+    }
+  }
 
   const handleFinalize = async () => {
     if (!hasRequiredFields) return
@@ -302,10 +327,16 @@ function CharacterBuilderInner() {
           </div>
         )}
         <div className="flex items-center justify-between">
-          <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0}>
-            <ChevronLeft size={16} />
-            {t('buttons.previous')}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0}>
+              <ChevronLeft size={16} />
+              {t('buttons.previous')}
+            </Button>
+            <Button variant="destructive" onClick={() => setConfirmAbandon(true)}>
+              <Trash2 className="size-4" />
+              {t('buttons.abandonCharacter')}
+            </Button>
+          </div>
           <div className="flex items-center gap-3">
             {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
             {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
@@ -318,6 +349,26 @@ function CharacterBuilderInner() {
             </Button>
           </div>
         </div>
+
+        {confirmAbandon && (
+          <Dialog open onOpenChange={(open) => { if (!open && !isAbandoning) setConfirmAbandon(false) }}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t('characterBuilder.abandon.title')}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">{t('characterBuilder.abandon.confirm')}</p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setConfirmAbandon(false)} disabled={isAbandoning}>
+                  {t('buttons.cancel')}
+                </Button>
+                <Button variant="destructive" onClick={handleAbandon} pending={isAbandoning}>
+                  <Trash2 className="size-4" />
+                  {t('buttons.abandonCharacter')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   )

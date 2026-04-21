@@ -27,7 +27,9 @@ import {
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
 import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items'
 import type { PendingChoice } from '@/types/resolved'
+import { getGrantIcon } from '@/lib/class-icons'
 import type { TFunction } from 'i18next'
+import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 type GamedataT = TFunction<'gamedata'>
@@ -240,6 +242,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
     }
 
     const isPackCategory = choice.category === 'pack'
+    const grantIcon = getGrantIcon(choice.source, choice.category)
 
     return (
       <div className="space-y-2">
@@ -272,6 +275,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                   bundleId={bundleId}
                   contents={ref.contents}
                   isSelected={isSelected}
+                  icon={grantIcon}
                   onSelect={() => selectBundle(bundleId)}
                 />
               )
@@ -285,6 +289,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                 contents={ref.contents}
                 kind={ref.kind}
                 isSelected={isSelected}
+                icon={grantIcon}
                 slotPicks={isSelected ? currentSlotPicks : {}}
                 onSelect={() => selectBundle(bundleId)}
                 onSlotPick={(slotKey, itemId) => updateSlotPick(bundleId, slotKey, itemId)}
@@ -318,6 +323,7 @@ interface BundlePackCardProps {
   readonly bundleId: string
   readonly contents: readonly BundleContentItem[]
   readonly isSelected: boolean
+  readonly icon: LucideIcon | null
   readonly onSelect: () => void
 }
 
@@ -326,6 +332,7 @@ function BundlePackCard({
   bundleId,
   contents,
   isSelected,
+  icon: Icon,
   onSelect,
 }: BundlePackCardProps) {
   const { t } = useTranslation('gamedata')
@@ -356,6 +363,7 @@ function BundlePackCard({
               {packName}
             </Label>
           </CardTitle>
+          {Icon && <Icon aria-hidden className="size-5 text-muted-foreground shrink-0" />}
         </div>
         <ul className="ml-7 space-y-0.5 text-xs text-muted-foreground">
           {contents.map(({ itemId, quantity }) => {
@@ -381,6 +389,7 @@ interface BundleRadioOptionProps {
   readonly contents: readonly BundleContentItem[]
   readonly kind: 'bundle' | 'pack'
   readonly isSelected: boolean
+  readonly icon: LucideIcon | null
   readonly slotPicks: Readonly<Record<string, string>>
   readonly onSelect: () => void
   readonly onSlotPick: (slotKey: string, itemId: string) => void
@@ -392,6 +401,7 @@ function BundleRadioOption({
   contents,
   kind,
   isSelected,
+  icon: Icon,
   slotPicks,
   onSelect,
   onSlotPick,
@@ -432,6 +442,7 @@ function BundleRadioOption({
         <Label htmlFor={radioId} className="flex-1 cursor-pointer">
           {radioLabel}
         </Label>
+        {Icon && <Icon aria-hidden className="size-5 text-muted-foreground shrink-0" />}
       </div>
       {isSelected && hasSlots && (
         <div className="ml-7 space-y-2">

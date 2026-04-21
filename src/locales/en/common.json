@@ -15,6 +15,7 @@
     "retrySave": "Retry Save",
     "finalizeCharacter": "Finalize Character",
     "finalizing": "Finalizing...",
+    "abandonCharacter": "Abandon Character",
     "generateName": "Generate Name",
     "logNewSession": "Log New Session",
     "logFirstSession": "Log Your First Session",
@@ -145,6 +146,12 @@
     "status": {
       "saving": "Saving...",
       "draftSaved": "Draft saved"
+    },
+    "abandon": {
+      "title": "Abandon this character?",
+      "confirm": "This will permanently delete your draft. This action cannot be undone.",
+      "success": "Character draft abandoned",
+      "failed": "Failed to abandon draft"
     },
     "placeholders": {
       "enterCharacterName": "Enter character name",
@@ -348,17 +355,8 @@
       "collapseAll": "Collapse All"
     },
     "equipment": {
-      "sourceFrom": {
-        "race": "from race",
-        "class": "from class",
-        "subclass": "from subclass",
-        "background": "from background",
-        "feat": "from feat",
-        "item": "from item",
-        "bundle": "from {{id}}",
-        "pack": "from {{id}}",
-        "loot": "loot"
-      }
+      "sourceFrom": "From {{name}}",
+      "sourceLoot": "Loot"
     },
     "proficiencies": {
       "armor": "Armor",
