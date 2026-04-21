@@ -1,4 +1,7 @@
 import type { AbilityKey } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('resolver.equipment');
 import type { GrantBundle } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type {
@@ -79,7 +82,7 @@ export function resolveEquipment(
     try {
       ref = resolveBundleRef(decision.bundleId);
     } catch (err) {
-      console.warn(
+      logger.warn(
         `resolveEquipment: unknown bundleId "${decision.bundleId}" for choice "${grant.key}" — re-prompting`,
         err
       );
@@ -107,7 +110,7 @@ export function resolveEquipment(
     // If it doesn't, the bundle registry is inconsistent — log and re-prompt defensively.
     const bundle = getBundleDef(decision.bundleId);
     if (bundle === undefined) {
-      console.error(
+      logger.error(
         `resolveEquipment: bundle registry inconsistent — resolveBundleRef("${decision.bundleId}") succeeded but getBundleDef returned undefined`
       );
       pendingChoices.push(pendingForGrant);

@@ -1,4 +1,7 @@
 import { DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('build-reconstruction');
 import type { ClassId, RaceId } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
@@ -145,7 +148,7 @@ export function reconstructBuild(
       try {
         mergeChoiceEntry(validateChoiceKey(key), value);
       } catch (err) {
-        console.warn(`Skipping malformed choice key "${key}" in creation row:`, err);
+        logger.warn(`Skipping malformed choice key "${key}" in creation row:`, err);
       }
     }
   }
@@ -154,7 +157,7 @@ export function reconstructBuild(
   for (const row of levelRows) {
     if (row.subclass_id !== null) {
       if (!isSubclassId(row.subclass_id)) {
-        console.warn(`Skipping unknown subclass_id "${row.subclass_id}" in build level row sequence ${row.sequence}`);
+        logger.warn(`Skipping unknown subclass_id "${row.subclass_id}" in build level row sequence ${row.sequence}`);
       } else {
         const key = createChoiceKey('subclass', 'class', row.class_id, 0);
         choices[key] = { type: 'subclass', subclassId: row.subclass_id };
@@ -186,7 +189,7 @@ export function reconstructBuild(
         try {
           mergeChoiceEntry(validateChoiceKey(key), value);
         } catch (err) {
-          console.warn(`Skipping malformed choice key "${key}" in level row sequence ${row.sequence}:`, err);
+          logger.warn(`Skipping malformed choice key "${key}" in level row sequence ${row.sequence}:`, err);
         }
       }
     }

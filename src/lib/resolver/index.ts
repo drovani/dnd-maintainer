@@ -1,4 +1,7 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('resolver');
 import type { FightingStyleId } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { GrantBundle, SourceTag } from '@/types/sources';
@@ -224,7 +227,7 @@ function resolveEquipmentFromPersisted(persistedItems: readonly PersistedItem[])
   for (const row of persistedItems) {
     const itemDef = getItemDef(row.itemId);
     if (!itemDef) {
-      console.warn(`Skipping unknown persisted item "${row.itemId}" — removed from catalog?`);
+      logger.warn(`Skipping unknown persisted item "${row.itemId}" — removed from catalog?`);
       continue;
     }
     items.push({
