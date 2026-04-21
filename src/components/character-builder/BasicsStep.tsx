@@ -208,7 +208,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     } catch (err) {
       pendingAdvanceRef.current = null;
       clearWatchdog();
-      logger.warn('Quick NPC commit failed', err);
+      logger.error('Quick NPC commit failed', err);
       toast.error(tc('characterBuilder.hints.quickNpcCommitFailed'));
       return;
     }
@@ -221,7 +221,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       if (pendingAdvanceRef.current === null) return;
       pendingAdvanceRef.current = null;
       watchdogRef.current = null;
-      logger.warn('Quick NPC advance watchdog fired', { classId, basics });
+      logger.error('Quick NPC advance watchdog fired', { classId, basics });
       toast.error(tc('characterBuilder.hints.quickNpcAdvanceTimeout'));
     }, PENDING_ADVANCE_TIMEOUT_MS);
   };
