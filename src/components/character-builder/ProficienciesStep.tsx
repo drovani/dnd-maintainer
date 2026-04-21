@@ -1,7 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { BadgeCheckIcon } from 'lucide-react'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
 import { parseChoiceKey, type ChoiceKey } from '@/types/choices'
@@ -11,12 +10,10 @@ import {
   DND_TOOL_PROFICIENCIES,
   type BackgroundId,
   type ClassId,
-  type FightingStyleId,
   type LanguageId,
   type RaceId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
-import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -24,12 +21,6 @@ interface ChoiceInfo<T> {
   readonly choiceKey: ChoiceKey
   readonly count: number
   readonly from: readonly T[]
-}
-
-interface FightingStyleChoiceInfo {
-  readonly choiceKey: ChoiceKey
-  readonly count: number
-  readonly from: readonly FightingStyleId[]
 }
 
 export function ProficienciesStep() {
@@ -50,12 +41,10 @@ export function ProficienciesStep() {
     }
   }
 
-  // Scan grant bundles for all language-choice/tool-choice/fighting-style-choice grants
-  // and direct language grants
-  const { languageChoices, toolChoices, grantedLanguages, fightingStyleChoices } = useMemo(() => {
+  // Scan grant bundles for all language-choice/tool-choice grants and direct language grants
+  const { languageChoices, toolChoices, grantedLanguages } = useMemo(() => {
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
-    const fsc: FightingStyleChoiceInfo[] = []
     const granted = new Set<LanguageId>()
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {
@@ -75,12 +64,6 @@ export function ProficienciesStep() {
               from: (grant.from ?? DND_TOOL_PROFICIENCIES.map((t) => t)) as readonly ToolProficiencyId[],
             })
           }
-        } else if (grant.type === 'fighting-style-choice') {
-          fsc.push({
-            choiceKey: grant.key,
-            count: grant.count,
-            from: grant.from,
-          })
         }
       }
     }
@@ -88,7 +71,6 @@ export function ProficienciesStep() {
       languageChoices: lc,
       toolChoices: tc,
       grantedLanguages: granted,
-      fightingStyleChoices: fsc,
     }
   }, [bundles])
 
@@ -116,12 +98,6 @@ export function ProficienciesStep() {
   function getSelectedTools(choiceKey: ChoiceKey): readonly ToolProficiencyId[] {
     const decision = build?.choices[choiceKey]
     if (decision?.type === 'tool-choice') return decision.tools
-    return []
-  }
-
-  function getSelectedFightingStyles(choiceKey: ChoiceKey): readonly FightingStyleId[] {
-    const decision = build?.choices[choiceKey]
-    if (decision?.type === 'fighting-style-choice') return decision.styles
     return []
   }
 
@@ -401,69 +377,6 @@ export function ProficienciesStep() {
         )}
       </div>
 
-      {/* Fighting Styles */}
-      {fightingStyleChoices.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.proficiencies.fightingStyles')}</h3>
-          {fightingStyleChoices.map((fsc) => {
-            const selected = getSelectedFightingStyles(fsc.choiceKey)
-            const remaining = fsc.count - selected.length
-            return (
-              <div key={fsc.choiceKey} className="space-y-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-sm text-muted-foreground">
-                    {tc('characterBuilder.pendingChoices.fightingStyleChoice', { count: fsc.count })}{' '}
-                    <span className="text-xs">
-                      {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(fsc.choiceKey) })}
-                    </span>
-                  </p>
-                  <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
-                    {selected.length} / {fsc.count}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {fsc.from.map((styleId) => {
-                    const styleSource = FIGHTING_STYLE_SOURCES.find((s) => s.id === styleId)
-                    if (!styleSource) return null
-                    const isSelected = selected.includes(styleId)
-                    const radioId = `fighting-style-${fsc.choiceKey}-${styleId}`
-                    return (
-                      <div
-                        key={styleId}
-                        className={`flex items-start gap-3 rounded-md border p-3 transition-colors hover:bg-muted/50 ${
-                          isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          id={radioId}
-                          name={`fighting-style-${fsc.choiceKey}`}
-                          checked={isSelected}
-                          onChange={() =>
-                            context.makeChoice(fsc.choiceKey, {
-                              type: 'fighting-style-choice',
-                              styles: [styleId],
-                            })
-                          }
-                          className="mt-0.5 size-4 text-primary"
-                        />
-                        <Label htmlFor={radioId} className="flex-1 cursor-pointer">
-                          <div className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
-                            {t(`fightingStyles.${styleId}.name`)}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {t(`fightingStyles.${styleId}.description`)}
-                          </p>
-                        </Label>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
     </div>
   )
 }

@@ -11,10 +11,10 @@ import {
   AbilitiesStep,
   BackstoryStep,
   BasicsStep,
+  ClassFeaturesStep,
   EquipmentStep,
   ProficienciesStep,
   SkillsStep,
-  SpellsStep,
 } from '@/components/character-builder'
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
@@ -33,8 +33,8 @@ import type { StepType } from '@/types/character-builder'
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' }, { id: 'abilities' },
-  { id: 'skills' }, { id: 'proficiencies' },
-  { id: 'equipment' }, { id: 'spells' },
+  { id: 'skills' }, { id: 'classFeatures' },
+  { id: 'proficiencies' }, { id: 'equipment' },
   { id: 'backstory' },
 ]
 
@@ -272,9 +272,9 @@ function CharacterBuilderInner() {
             {currentStep === 'basics' && <BasicsStep onRequestAdvance={goToStep} />}
             {currentStep === 'abilities' && <AbilitiesStep />}
             {currentStep === 'skills' && <SkillsStep />}
+            {currentStep === 'classFeatures' && <ClassFeaturesStep />}
             {currentStep === 'proficiencies' && <ProficienciesStep />}
             {currentStep === 'equipment' && <EquipmentStep />}
-            {currentStep === 'spells' && <SpellsStep />}
             {currentStep === 'backstory' && <BackstoryStep />}
           </CardContent>
         </Card>

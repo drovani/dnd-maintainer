@@ -98,10 +98,9 @@
       "basics": "Basics",
       "abilities": "Abilities",
       "skills": "Skills",
-      "features": "Features",
+      "classFeatures": "Class Features",
       "proficiencies": "Proficiencies",
       "equipment": "Equipment",
-      "spells": "Spells",
       "backstory": "Backstory"
     },
     "fields": {
@@ -219,7 +218,6 @@
       "weaponProficiencies": "Weapon Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
       "languages": "Languages",
-      "fightingStyles": "Fighting Styles",
       "standardLanguages": "Standard Languages",
       "exoticLanguages": "Exotic Languages",
       "languageName": "Language",
@@ -236,10 +234,12 @@
       "fromClass": "From class",
       "fromRace": "From race"
     },
-    "spells": {
+    "classFeatures": {
+      "fightingStyles": "Fighting Styles",
+      "spellcasting": "Spellcasting",
       "basicVersion": "Spell management (basic version)",
-      "cantrips": "Cantrips (comma-separated)",
-      "noSpellcasting": "No spellcasting for this class"
+      "cantrips": "Cantrips",
+      "noClassChoices": "This class has no level-1 choices to make."
     },
     "equipment": {
       "equipped": "Equipped",
