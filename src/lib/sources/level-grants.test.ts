@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getGrantsForLevel } from '@/lib/sources/level-grants';
+import { getLogger } from '@/lib/logger';
+import type { ClassId } from '@/lib/dnd-helpers';
 
 describe('getGrantsForLevel', () => {
   it('returns subclass grant for fighter level 3', () => {
@@ -46,5 +48,17 @@ describe('getGrantsForLevel', () => {
     expect(preview.subclassGrants).toHaveLength(2);
     expect(preview.subclassGrants[0].type).toBe('feature');
     expect(preview.subclassGrants[1].type).toBe('ability-check-bonus');
+  });
+
+  it('returns empty grants and warns for unknown classId', () => {
+    const logger = getLogger('sources.level-grants');
+    const warnSpy = vi.spyOn(logger, 'warn');
+
+    const preview = getGrantsForLevel('unknown-class' as ClassId, 1, null);
+
+    expect(preview.classGrants).toHaveLength(0);
+    expect(preview.subclassGrants).toHaveLength(0);
+    expect(warnSpy).toHaveBeenCalledOnce();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('unknown-class'));
   });
 });

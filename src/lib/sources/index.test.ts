@@ -100,6 +100,27 @@ describe('collectBundles', () => {
     expect(() => collectBundles(unknownBuild)).not.toThrow();
   });
 
+  it('populates warnings array for unknown race ID', () => {
+    const unknownBuild: CharacterBuild = {
+      ...humanFighterL1Build,
+      raceId: 'gnome-forest' as RaceId,
+      levels: [],
+    };
+    const { warnings } = collectBundles(unknownBuild);
+    expect(warnings.length).toBeGreaterThan(0);
+    expect(warnings[0]).toContain('gnome-forest');
+  });
+
+  it('populates warnings array for unknown feat ID', () => {
+    const unknownFeatBuild: CharacterBuild = {
+      ...humanFighterL1Build,
+      feats: ['nonexistent-feat'],
+    };
+    const { warnings } = collectBundles(unknownFeatBuild);
+    expect(warnings.length).toBeGreaterThan(0);
+    expect(warnings[0]).toContain('nonexistent-feat');
+  });
+
   it('returns 5 bundles for Fighter L3 without subclass decision', () => {
     const l3Build: CharacterBuild = {
       ...humanFighterL1Build,
