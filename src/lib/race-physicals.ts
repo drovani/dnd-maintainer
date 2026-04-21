@@ -5,11 +5,13 @@ export interface DiceSpec {
   readonly sides: number;
 }
 
+export type WeightRule = { readonly kind: 'fixed' } | { readonly kind: 'variable'; readonly dice: DiceSpec };
+
 export interface RacePhysicals {
   readonly heightBase: number; // inches
   readonly heightDice: DiceSpec;
   readonly weightBase: number; // pounds
-  readonly weightDice: DiceSpec | null; // null = fixed weight multiplier of 1 (halflings, gnomes)
+  readonly weightRule: WeightRule;
 }
 
 // PHB Chapter 4 height/weight table. Exhaustive by design — adding a RaceId without an entry fails typecheck.
@@ -18,46 +20,76 @@ export const RACE_PHYSICALS: Readonly<Record<RaceId, RacePhysicals>> = {
     heightBase: 66,
     heightDice: { count: 2, sides: 8 },
     weightBase: 175,
-    weightDice: { count: 2, sides: 6 },
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 6 } },
   },
   'dwarf-hill': {
     heightBase: 44,
     heightDice: { count: 2, sides: 4 },
     weightBase: 115,
-    weightDice: { count: 2, sides: 6 },
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 6 } },
   },
   'dwarf-mountain': {
     heightBase: 48,
     heightDice: { count: 2, sides: 4 },
     weightBase: 130,
-    weightDice: { count: 2, sides: 6 },
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 6 } },
   },
   'elf-dark': {
     heightBase: 53,
     heightDice: { count: 2, sides: 6 },
     weightBase: 75,
-    weightDice: { count: 1, sides: 6 },
+    weightRule: { kind: 'variable', dice: { count: 1, sides: 6 } },
   },
   'elf-high': {
     heightBase: 54,
     heightDice: { count: 2, sides: 10 },
     weightBase: 90,
-    weightDice: { count: 1, sides: 4 },
+    weightRule: { kind: 'variable', dice: { count: 1, sides: 4 } },
   },
   'elf-wood': {
     heightBase: 54,
     heightDice: { count: 2, sides: 10 },
     weightBase: 100,
-    weightDice: { count: 1, sides: 4 },
+    weightRule: { kind: 'variable', dice: { count: 1, sides: 4 } },
   },
-  'gnome-forest': { heightBase: 35, heightDice: { count: 2, sides: 4 }, weightBase: 35, weightDice: null },
-  'gnome-rock': { heightBase: 35, heightDice: { count: 2, sides: 4 }, weightBase: 35, weightDice: null },
-  halfelf: { heightBase: 57, heightDice: { count: 2, sides: 8 }, weightBase: 110, weightDice: { count: 2, sides: 4 } },
-  halforc: { heightBase: 58, heightDice: { count: 2, sides: 10 }, weightBase: 140, weightDice: { count: 2, sides: 6 } },
-  'halfling-lightfoot': { heightBase: 31, heightDice: { count: 2, sides: 4 }, weightBase: 35, weightDice: null },
-  'halfling-stout': { heightBase: 31, heightDice: { count: 2, sides: 4 }, weightBase: 35, weightDice: null },
-  human: { heightBase: 56, heightDice: { count: 2, sides: 10 }, weightBase: 110, weightDice: { count: 2, sides: 4 } },
-  tiefling: { heightBase: 57, heightDice: { count: 2, sides: 8 }, weightBase: 110, weightDice: { count: 2, sides: 4 } },
+  'gnome-forest': { heightBase: 35, heightDice: { count: 2, sides: 4 }, weightBase: 35, weightRule: { kind: 'fixed' } },
+  'gnome-rock': { heightBase: 35, heightDice: { count: 2, sides: 4 }, weightBase: 35, weightRule: { kind: 'fixed' } },
+  halfelf: {
+    heightBase: 57,
+    heightDice: { count: 2, sides: 8 },
+    weightBase: 110,
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 4 } },
+  },
+  halforc: {
+    heightBase: 58,
+    heightDice: { count: 2, sides: 10 },
+    weightBase: 140,
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 6 } },
+  },
+  'halfling-lightfoot': {
+    heightBase: 31,
+    heightDice: { count: 2, sides: 4 },
+    weightBase: 35,
+    weightRule: { kind: 'fixed' },
+  },
+  'halfling-stout': {
+    heightBase: 31,
+    heightDice: { count: 2, sides: 4 },
+    weightBase: 35,
+    weightRule: { kind: 'fixed' },
+  },
+  human: {
+    heightBase: 56,
+    heightDice: { count: 2, sides: 10 },
+    weightBase: 110,
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 4 } },
+  },
+  tiefling: {
+    heightBase: 57,
+    heightDice: { count: 2, sides: 8 },
+    weightBase: 110,
+    weightRule: { kind: 'variable', dice: { count: 2, sides: 4 } },
+  },
 };
 
 export function diceRange(spec: DiceSpec): readonly [number, number] {

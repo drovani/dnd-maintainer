@@ -12,7 +12,7 @@ interface PhysicalCharacteristicsProps {
   readonly raceId: RaceId | null;
   readonly height: string | null;
   readonly weight: string | null;
-  readonly onChange: (updates: { height: string | null; weight: string | null }) => void;
+  readonly onChange: (updates: { readonly height: string | null; readonly weight: string | null }) => void;
 }
 
 type RollingField = 'height' | 'weight' | 'all' | null;
@@ -23,7 +23,8 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
   const physicals = raceId ? RACE_PHYSICALS[raceId] : null;
 
   const [hMin, hMax] = physicals ? diceRange(physicals.heightDice) : [0, 0];
-  const [wMin, wMax] = physicals?.weightDice ? diceRange(physicals.weightDice) : [1, 1];
+  const wDice = physicals?.weightRule.kind === 'variable' ? physicals.weightRule.dice : null;
+  const [wMin, wMax] = wDice ? diceRange(wDice) : [1, 1];
 
   // Derive initial modifier values from saved height/weight strings
   const deriveHeightMod = (): number | null => {
@@ -36,7 +37,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
   };
 
   const deriveWeightMod = (hMod: number | null): number | null => {
-    if (!physicals || !physicals.weightDice) return null;
+    if (!physicals || physicals.weightRule.kind !== 'variable') return null;
     if (hMod === null || hMod === 0) return null;
     const parsed = parseWeight(weight);
     if (parsed === null) return null;
@@ -53,23 +54,22 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
   const [weightMod, setWeightMod] = useState<number | null>(initialWMod);
   const [rollingField, setRollingField] = useState<RollingField>(null);
   const rollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFirstRender = useRef(true);
 
-  // Track previous raceId to reset modifiers when race changes.
-  // Using mid-render setState (React's recommended pattern for derived state resets)
-  // rather than useEffect to avoid cascading renders.
-  const [prevRaceId, setPrevRaceId] = useState<RaceId | null>(raceId);
-  if (prevRaceId !== raceId) {
-    setPrevRaceId(raceId);
-    setHeightMod(null);
-    setWeightMod(null);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (rollTimerRef.current) {
       clearTimeout(rollTimerRef.current);
       rollTimerRef.current = null;
     }
     setRollingField(null);
-    // Notify parent — deferred so we're not calling onChange during render
-    Promise.resolve().then(() => onChange({ height: null, weight: null }));
-  }
+    setHeightMod(null);
+    setWeightMod(null);
+    onChange({ height: null, weight: null });
+  }, [raceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -86,16 +86,16 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
     );
   }
 
-  const effectiveWeightMod =
-    weightMod ?? (physicals.weightDice ? averageDice(physicals.weightDice.count, physicals.weightDice.sides) : 1);
+  const effectiveWeightMod = weightMod ?? (wDice ? averageDice(wDice.count, wDice.sides) : 1);
   const finalHeightInches = physicals.heightBase + (heightMod ?? 0);
-  const finalWeightLbs = physicals.weightBase + (heightMod ?? 0) * (physicals.weightDice ? effectiveWeightMod : 1);
+  const finalWeightLbs = physicals.weightBase + (heightMod ?? 0) * (wDice ? effectiveWeightMod : 1);
 
   const commitValues = (hMod: number | null, wMod: number | null) => {
     const p = physicals;
+    const pWDice = p.weightRule.kind === 'variable' ? p.weightRule.dice : null;
     const hVal = hMod !== null ? formatHeight(p.heightBase + hMod) : null;
-    const effW = wMod ?? (p.weightDice ? averageDice(p.weightDice.count, p.weightDice.sides) : 1);
-    const wVal = hMod !== null ? formatWeight(p.weightBase + hMod * (p.weightDice ? effW : 1)) : null;
+    const effW = wMod ?? (pWDice ? averageDice(pWDice.count, pWDice.sides) : 1);
+    const wVal = hMod !== null ? formatWeight(p.weightBase + hMod * (pWDice ? effW : 1)) : null;
     onChange({ height: hVal, weight: wVal });
   };
 
@@ -107,10 +107,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
         field === 'height' || field === 'all'
           ? rollDice(physicals.heightDice.count, physicals.heightDice.sides)
           : heightMod;
-      const newWMod =
-        (field === 'weight' || field === 'all') && physicals.weightDice
-          ? rollDice(physicals.weightDice.count, physicals.weightDice.sides)
-          : weightMod;
+      const newWMod = (field === 'weight' || field === 'all') && wDice ? rollDice(wDice.count, wDice.sides) : weightMod;
       setHeightMod(newHMod);
       setWeightMod(newWMod);
       commitValues(newHMod, newWMod);
@@ -124,9 +121,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
         ? averageDice(physicals.heightDice.count, physicals.heightDice.sides)
         : heightMod;
     const newWMod =
-      (field === 'weight' || field === 'all') && physicals.weightDice
-        ? averageDice(physicals.weightDice.count, physicals.weightDice.sides)
-        : weightMod;
+      (field === 'weight' || field === 'all') && wDice ? averageDice(wDice.count, wDice.sides) : weightMod;
     setHeightMod(newHMod);
     setWeightMod(newWMod);
     commitValues(newHMod, newWMod);
@@ -237,7 +232,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
           <div className="flex items-center justify-between">
             <Label htmlFor="weight-mod">
               {t('characterBuilder.backstory.physicals.weightModifier')}{' '}
-              {physicals.weightDice ? (
+              {wDice ? (
                 <span className="text-muted-foreground text-xs">
                   {t('characterBuilder.backstory.physicals.modifierRange', { min: wMin, max: wMax })}
                 </span>
@@ -247,7 +242,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                 </span>
               )}
             </Label>
-            {physicals.weightDice && (
+            {wDice && (
               <div className="flex gap-1">
                 <Button
                   type="button"
@@ -283,16 +278,16 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                 max={wMax}
                 value={weightMod ?? ''}
                 onChange={(e) => handleWeightModChange(e.target.value)}
-                disabled={!physicals.weightDice || rollingField !== null}
+                disabled={!wDice || rollingField !== null}
                 className="w-full"
               />
             )}
           </div>
           <p className="text-muted-foreground text-xs">
-            {physicals.weightDice
+            {wDice
               ? t('characterBuilder.backstory.physicals.weightFormula', {
                   base: physicals.weightBase,
-                  dice: `${physicals.weightDice.count}d${physicals.weightDice.sides}`,
+                  dice: `${wDice.count}d${wDice.sides}`,
                 })
               : t('characterBuilder.backstory.physicals.weightFormula', {
                   base: physicals.weightBase,

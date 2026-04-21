@@ -51,8 +51,8 @@ describe('parseWeight', () => {
 describe('RACE_PHYSICALS', () => {
   it('has entry for all 14 races', () => {
     expect(RACE_PHYSICALS['human'].heightBase).toBe(56);
-    expect(RACE_PHYSICALS['gnome-forest'].weightDice).toBeNull();
-    expect(RACE_PHYSICALS['halfling-lightfoot'].weightDice).toBeNull();
-    expect(RACE_PHYSICALS['dragonborn'].weightDice).not.toBeNull();
+    expect(RACE_PHYSICALS['gnome-forest'].weightRule.kind).toBe('fixed');
+    expect(RACE_PHYSICALS['halfling-lightfoot'].weightRule.kind).toBe('fixed');
+    expect(RACE_PHYSICALS['dragonborn'].weightRule.kind).toBe('variable');
   });
 });
