@@ -62,6 +62,11 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
     setPrevRaceId(raceId);
     setHeightMod(null);
     setWeightMod(null);
+    if (rollTimerRef.current) {
+      clearTimeout(rollTimerRef.current);
+      rollTimerRef.current = null;
+    }
+    setRollingField(null);
     // Notify parent — deferred so we're not calling onChange during render
     Promise.resolve().then(() => onChange({ height: null, weight: null }));
   }
@@ -214,6 +219,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                 max={hMax}
                 value={heightMod ?? ''}
                 onChange={(e) => handleHeightModChange(e.target.value)}
+                disabled={rollingField !== null}
                 className="w-full"
               />
             )}
@@ -248,7 +254,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                   variant="ghost"
                   size="sm"
                   onClick={() => applyAverage('weight')}
-                  disabled={rollingField !== null}
+                  disabled={rollingField !== null || heightMod === null}
                 >
                   {t('characterBuilder.backstory.physicals.average')}
                 </Button>
@@ -257,7 +263,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                   variant="ghost"
                   size="sm"
                   onClick={() => startRoll('weight')}
-                  disabled={rollingField !== null}
+                  disabled={rollingField !== null || heightMod === null}
                 >
                   {t('characterBuilder.backstory.physicals.roll')}
                 </Button>
@@ -277,7 +283,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                 max={wMax}
                 value={weightMod ?? ''}
                 onChange={(e) => handleWeightModChange(e.target.value)}
-                disabled={!physicals.weightDice}
+                disabled={!physicals.weightDice || rollingField !== null}
                 className="w-full"
               />
             )}
