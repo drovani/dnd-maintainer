@@ -10,5 +10,18 @@
       "Bash(npx tsc *)",
       "Bash(npm view *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/claude-format-on-save.sh"
+          }
+        ]
+      }
+    ]
   }
 }

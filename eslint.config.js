@@ -3,6 +3,7 @@ import i18next from "eslint-plugin-i18next";
 import reactHooks from "eslint-plugin-react-hooks";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
+import prettierConfig from "eslint-config-prettier";
 
 export default defineConfig(
   {
@@ -32,10 +33,14 @@ export default defineConfig(
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/**/*.test.{ts,tsx}", "src/test/**"],
     rules: {
-      "no-restricted-syntax": ["error", {
-        selector: "TSAsExpression > TSNeverKeyword",
-        message: "Do not use 'as never'. Narrow the type instead — see CLAUDE.md i18n guidance.",
-      }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "TSAsExpression > TSNeverKeyword",
+          message: "Do not use 'as never'. Narrow the type instead — see CLAUDE.md i18n guidance.",
+        },
+      ],
     },
   },
+  prettierConfig,
 );
