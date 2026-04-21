@@ -5,6 +5,7 @@ import { RollingNumber } from '@/components/ui/rolling-number';
 import { averageDice, rollDice } from '@/lib/dnd-helpers';
 import type { RaceId } from '@/lib/dnd-helpers';
 import { diceRange, formatHeight, formatWeight, parseHeight, parseWeight, RACE_PHYSICALS } from '@/lib/race-physicals';
+import { Calculator, Dices } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -129,10 +130,10 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
   const isWeightRolling = rollingField === 'weight' || rollingField === 'all';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">{t('characterBuilder.backstory.physicals.sectionTitle')}</h3>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Button
             type="button"
             variant="outline"
@@ -140,6 +141,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
             onClick={() => applyAverage('all')}
             disabled={rollingField !== null}
           >
+            <Calculator className="size-3.5" />
             {t('characterBuilder.backstory.physicals.averageAll')}
           </Button>
           <Button
@@ -149,45 +151,46 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
             onClick={() => startRoll('all')}
             disabled={rollingField !== null}
           >
+            <Dices className="size-3.5" />
             {t('characterBuilder.backstory.physicals.rollAll')}
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:items-end">
         {/* Height modifier */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="height-mod">
-              {t('characterBuilder.backstory.physicals.heightModifier')}{' '}
-              <span className="text-muted-foreground text-xs">
-                {t('characterBuilder.backstory.physicals.modifierRange', { min: hMin, max: hMax })}
-              </span>
-            </Label>
-            <div className="flex gap-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => applyAverage('height')}
-                disabled={rollingField !== null}
-              >
-                {t('characterBuilder.backstory.physicals.average')}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => startRoll('height')}
-                disabled={rollingField !== null}
-              >
-                {t('characterBuilder.backstory.physicals.roll')}
-              </Button>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="space-y-1">
+          <Label htmlFor="height-mod" className="text-xs">
+            {t('characterBuilder.backstory.physicals.heightModifier')}{' '}
+            <span className="text-muted-foreground">
+              {t('characterBuilder.backstory.physicals.modifierRange', { min: hMin, max: hMax })}
+            </span>
+          </Label>
+          <div className="flex gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-9 shrink-0"
+              onClick={() => applyAverage('height')}
+              disabled={rollingField !== null}
+              title={t('characterBuilder.backstory.physicals.average')}
+            >
+              <Calculator className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-9 shrink-0"
+              onClick={() => startRoll('height')}
+              disabled={rollingField !== null}
+              title={t('characterBuilder.backstory.physicals.roll')}
+            >
+              <Dices className="size-3.5" />
+            </Button>
             {isHeightRolling ? (
-              <div className="border-input bg-background flex h-9 w-full items-center rounded-md border px-3 text-sm">
+              <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={heightMod} isRolling={true} range={[hMin, hMax]} />
               </div>
             ) : (
@@ -199,7 +202,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                 value={heightMod ?? ''}
                 onChange={(e) => handleHeightModChange(e.target.value)}
                 disabled={rollingField !== null}
-                className="w-full"
+                className="flex-1"
               />
             )}
           </div>
@@ -212,46 +215,46 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
         </div>
 
         {/* Weight modifier */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="weight-mod">
-              {t('characterBuilder.backstory.physicals.weightModifier')}{' '}
-              {wDice ? (
-                <span className="text-muted-foreground text-xs">
-                  {t('characterBuilder.backstory.physicals.modifierRange', { min: wMin, max: wMax })}
-                </span>
-              ) : (
-                <span className="text-muted-foreground text-xs">
-                  {t('characterBuilder.backstory.physicals.fixedWeightMod')}
-                </span>
-              )}
-            </Label>
+        <div className="space-y-1">
+          <Label htmlFor="weight-mod" className="text-xs">
+            {t('characterBuilder.backstory.physicals.weightModifier')}{' '}
+            {wDice ? (
+              <span className="text-muted-foreground">
+                {t('characterBuilder.backstory.physicals.modifierRange', { min: wMin, max: wMax })}
+              </span>
+            ) : (
+              <span className="text-muted-foreground">{t('characterBuilder.backstory.physicals.fixedWeightMod')}</span>
+            )}
+          </Label>
+          <div className="flex gap-1">
             {wDice && (
-              <div className="flex gap-1">
+              <>
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon"
+                  className="size-9 shrink-0"
                   onClick={() => applyAverage('weight')}
                   disabled={rollingField !== null || heightMod === null}
+                  title={t('characterBuilder.backstory.physicals.average')}
                 >
-                  {t('characterBuilder.backstory.physicals.average')}
+                  <Calculator className="size-3.5" />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon"
+                  className="size-9 shrink-0"
                   onClick={() => startRoll('weight')}
                   disabled={rollingField !== null || heightMod === null}
+                  title={t('characterBuilder.backstory.physicals.roll')}
                 >
-                  {t('characterBuilder.backstory.physicals.roll')}
+                  <Dices className="size-3.5" />
                 </Button>
-              </div>
+              </>
             )}
-          </div>
-          <div className="flex items-center gap-2">
             {isWeightRolling ? (
-              <div className="border-input bg-background flex h-9 w-full items-center rounded-md border px-3 text-sm">
+              <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={weightMod} isRolling={true} range={[wMin, wMax]} />
               </div>
             ) : (
@@ -263,32 +266,27 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
                 value={weightMod ?? ''}
                 onChange={(e) => handleWeightModChange(e.target.value)}
                 disabled={!wDice || rollingField !== null}
-                className="w-full"
+                className={wDice ? 'flex-1' : 'w-full'}
               />
             )}
           </div>
           <p className="text-muted-foreground text-xs">
-            {wDice
-              ? t('characterBuilder.backstory.physicals.weightFormula', {
-                  base: physicals.weightBase,
-                  dice: `${wDice.count}d${wDice.sides}`,
-                })
-              : t('characterBuilder.backstory.physicals.weightFormula', {
-                  base: physicals.weightBase,
-                  dice: '1',
-                })}
+            {t('characterBuilder.backstory.physicals.weightFormula', {
+              base: physicals.weightBase,
+              dice: wDice ? `${wDice.count}d${wDice.sides}` : '1',
+            })}
           </p>
         </div>
-      </div>
 
-      {/* Final computed values */}
-      <div className="grid grid-cols-2 gap-4 rounded-md border p-3">
+        {/* Final height */}
         <div className="space-y-1">
           <Label className="text-muted-foreground text-xs">
             {t('characterBuilder.backstory.physicals.finalHeight')}
           </Label>
           <p className="font-medium">{heightMod !== null ? formatHeight(finalHeightInches) : '—'}</p>
         </div>
+
+        {/* Final weight */}
         <div className="space-y-1">
           <Label className="text-muted-foreground text-xs">
             {t('characterBuilder.backstory.physicals.finalWeight')}
