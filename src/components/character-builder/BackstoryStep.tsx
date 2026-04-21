@@ -1,3 +1,4 @@
+import { PhysicalCharacteristics } from '@/components/character-builder/PhysicalCharacteristics';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
@@ -10,6 +11,13 @@ export function BackstoryStep() {
 
   return (
     <div className="space-y-4">
+      <PhysicalCharacteristics
+        raceId={character.race}
+        height={character.height ?? null}
+        weight={character.weight ?? null}
+        onChange={(updates) => context.updateCharacter(updates)}
+      />
+
       <div className="space-y-2">
         <Label htmlFor="personality">{t('characterSheet.fields.personalityTraits')}</Label>
         <Textarea

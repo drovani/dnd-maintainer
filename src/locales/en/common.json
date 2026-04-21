@@ -124,6 +124,26 @@
       "skinColor": "Skin Color",
       "quickNpcLabel": "Quick Random NPC"
     },
+    "backstory": {
+      "physicals": {
+        "sectionTitle": "Physical Characteristics",
+        "baseHeight": "Base Height",
+        "baseWeight": "Base Weight",
+        "heightModifier": "Height Modifier",
+        "weightModifier": "Weight Modifier",
+        "modifierRange": "({{min}}–{{max}})",
+        "fixedWeightMod": "Fixed: 1",
+        "rollAll": "Roll All",
+        "averageAll": "Average All",
+        "roll": "Roll",
+        "average": "Average",
+        "finalHeight": "Height",
+        "finalWeight": "Weight",
+        "formula": "{{base}} + {{dice}}",
+        "weightFormula": "{{base}} lbs + (height mod × {{dice}}) lbs",
+        "noRace": "Pick a race on the Basics step to set height and weight."
+      }
+    },
     "pendingChoices": {
       "title": "Choices Required",
       "skillChoice": "Choose {{count}} skill(s)",

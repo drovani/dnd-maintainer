@@ -10,6 +10,7 @@ import {
   DND_TOOL_PROFICIENCIES,
   DND_WEAPON_PROFICIENCIES,
   EMPTY_PROFICIENCIES,
+  averageDice,
   computeProficiencies,
   generateCharacterName,
   getAbilityModifier,
@@ -22,6 +23,7 @@ import {
   getSpellSlots,
   roll4d6DropLowest,
   rollAbilityScores,
+  rollDice,
   rollRandomLanguage,
   rollRandomLanguages,
   toggleLanguageProficiencyChoice,
@@ -668,5 +670,36 @@ describe('toggleLanguageProficiencyChoice', () => {
     const result = toggleLanguageProficiencyChoice(prev, 'halfelf', 'elvish');
     expect(result).toBe(prev);
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('elvish'));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// rollDice
+// ---------------------------------------------------------------------------
+describe('rollDice', () => {
+  it('returns sum within valid range for 2d10', () => {
+    const result = rollDice(2, 10);
+    expect(result).toBeGreaterThanOrEqual(2);
+    expect(result).toBeLessThanOrEqual(20);
+  });
+  it('returns minimum when rng returns 0', () => {
+    expect(rollDice(2, 10, () => 0)).toBe(2);
+  });
+  it('returns maximum when rng returns 0.9999', () => {
+    expect(rollDice(2, 10, () => 0.9999)).toBe(20);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// averageDice
+// ---------------------------------------------------------------------------
+describe('averageDice', () => {
+  it.each([
+    [2, 10, 12],
+    [2, 8, 10],
+    [2, 4, 6],
+    [1, 6, 4],
+  ])('averageDice(%i, %i) === %i', (count, sides, expected) => {
+    expect(averageDice(count, sides)).toBe(expected);
   });
 });

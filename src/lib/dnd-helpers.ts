@@ -829,6 +829,23 @@ export function rollRandomLanguages(count: number, exclude: readonly LanguageId[
   return rolled;
 }
 
+/** Rolls XdY and returns the sum. Uses injectable rng for testing. */
+export function rollDice(count: number, sides: number, rng: () => number = Math.random): number {
+  let total = 0;
+  for (let i = 0; i < count; i++) {
+    total += Math.floor(rng() * sides) + 1;
+  }
+  return total;
+}
+
+/**
+ * Returns the "D&D average" of XdY — each die's average rounded up.
+ * d10 → 6, d8 → 5, d6 → 4, d4 → 3. Produces 2d10=12, 2d8=10, 2d4=6.
+ */
+export function averageDice(count: number, sides: number): number {
+  return Math.ceil((sides + 1) / 2) * count;
+}
+
 export function roll4d6DropLowest(): number {
   const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
   rolls.sort((a, b) => a - b);
