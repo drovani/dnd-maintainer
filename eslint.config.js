@@ -42,5 +42,16 @@ export default defineConfig(
       ],
     },
   },
+  {
+    rules: {
+      'no-console': 'error',
+    },
+  },
+  {
+    files: ['src/lib/logger.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
   prettierConfig
 );
