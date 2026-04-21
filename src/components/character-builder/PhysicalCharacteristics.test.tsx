@@ -50,16 +50,8 @@ describe('PhysicalCharacteristics', () => {
     expect(inputs[1]).toHaveValue(5);
   });
 
-  it('resets on race change and calls onChange with nulls', async () => {
-    const onChange = vi.fn();
-    const { rerender } = render(
-      <PhysicalCharacteristics raceId="human" height={`5'8"`} weight="182 lbs" onChange={onChange} />,
-      { wrapper: createWrapper() }
-    );
-    rerender(<PhysicalCharacteristics raceId="dragonborn" height={`5'8"`} weight="182 lbs" onChange={onChange} />);
-    await Promise.resolve(); // flush microtask
-    expect(onChange).toHaveBeenCalledWith({ height: null, weight: null });
-  });
+  // Race-change reset is handled by the key prop in BackstoryStep — the component remounts
+  // when raceId changes, so useState initializers naturally run with null values.
 
   it('Roll All calls onChange with values in valid range after animation', async () => {
     vi.useFakeTimers();

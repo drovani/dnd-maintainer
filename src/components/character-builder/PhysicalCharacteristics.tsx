@@ -54,22 +54,6 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
   const [weightMod, setWeightMod] = useState<number | null>(initialWMod);
   const [rollingField, setRollingField] = useState<RollingField>(null);
   const rollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    if (rollTimerRef.current) {
-      clearTimeout(rollTimerRef.current);
-      rollTimerRef.current = null;
-    }
-    setRollingField(null);
-    setHeightMod(null);
-    setWeightMod(null);
-    onChange({ height: null, weight: null });
-  }, [raceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cleanup timer on unmount
   useEffect(() => {

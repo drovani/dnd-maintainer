@@ -127,8 +127,6 @@
     "backstory": {
       "physicals": {
         "sectionTitle": "Physical Characteristics",
-        "baseHeight": "Base Height",
-        "baseWeight": "Base Weight",
         "heightModifier": "Height Modifier",
         "weightModifier": "Weight Modifier",
         "modifierRange": "({{min}}–{{max}})",

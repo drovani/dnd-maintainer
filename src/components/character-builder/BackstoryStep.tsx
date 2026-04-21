@@ -12,6 +12,7 @@ export function BackstoryStep() {
   return (
     <div className="space-y-4">
       <PhysicalCharacteristics
+        key={context.character.race ?? 'none'}
         raceId={character.race}
         height={character.height ?? null}
         weight={character.weight ?? null}
