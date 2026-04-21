@@ -1,4 +1,7 @@
 import { isBackgroundId, type RaceId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('sources');
 import type {
   RaceSource,
   ClassSource,
@@ -85,7 +88,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   } else {
     const msg = `No source data found for race "${build.raceId}" — race grants will be empty`;
     warnings.push(msg);
-    console.warn(msg);
+    logger.warn(msg);
   }
 
   // Class levels — count levels per class in order
@@ -100,7 +103,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     if (!classSource) {
       const msg = `No source data found for class "${classId}" — class grants will be empty`;
       warnings.push(msg);
-      console.warn(msg);
+      logger.warn(msg);
       continue;
     }
     for (let i = 0; i < levelCount && i < classSource.levels.length; i++) {
@@ -144,7 +147,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
         } else {
           const msg = `No source data found for subclass "${subclassDecision.subclassId}" — subclass features will be empty`;
           warnings.push(msg);
-          console.warn(msg);
+          logger.warn(msg);
         }
       }
     }
@@ -170,7 +173,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
         } else {
           const msg = `No source data found for fighting style "${styleId}"`;
           warnings.push(msg);
-          console.warn(msg);
+          logger.warn(msg);
         }
       }
     }
@@ -194,7 +197,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     } else {
       const msg = `No source data found for feat "${featId}" — feat grants will be empty`;
       warnings.push(msg);
-      console.warn(msg);
+      logger.warn(msg);
     }
   }
 
@@ -207,7 +210,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     } else {
       const msg = `No source data found for item "${itemId}" — item grants will be empty`;
       warnings.push(msg);
-      console.warn(msg);
+      logger.warn(msg);
     }
   }
 

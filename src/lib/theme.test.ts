@@ -13,6 +13,7 @@ import {
   writeStoredColorMode,
   writeStoredTheme,
 } from '@/lib/theme';
+import { getLogger } from '@/lib/logger';
 
 const THEME_STORAGE_KEY = STORAGE_KEYS.theme;
 const COLOR_MODE_STORAGE_KEY = STORAGE_KEYS.colorMode;
@@ -216,33 +217,33 @@ describe('applyThemeToDOM', () => {
 // ---------------------------------------------------------------------------
 describe('localStorage exception handling', () => {
   it('readStoredTheme returns default when localStorage throws', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const themeLogger = getLogger('theme');
+    const warnSpy = vi.spyOn(themeLogger, 'warn').mockImplementation(() => {});
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('SecurityError');
     });
     expect(readStoredTheme()).toBe('default');
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
-    warnSpy.mockRestore();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to read theme'), expect.any(Error));
   });
 
   it('readStoredColorMode returns system when localStorage throws', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const themeLogger = getLogger('theme');
+    const warnSpy = vi.spyOn(themeLogger, 'warn').mockImplementation(() => {});
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('SecurityError');
     });
     expect(readStoredColorMode()).toBe('system');
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
-    warnSpy.mockRestore();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to read color mode'), expect.any(Error));
   });
 
   it('writeStoredTheme returns false and does not throw when localStorage throws', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const themeLogger = getLogger('theme');
+    const warnSpy = vi.spyOn(themeLogger, 'warn').mockImplementation(() => {});
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
     });
     expect(writeStoredTheme('arcane')).toBe(false);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
-    warnSpy.mockRestore();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to persist theme'), expect.any(Error));
   });
 
   it('writeStoredTheme returns true on success', () => {
@@ -250,13 +251,13 @@ describe('localStorage exception handling', () => {
   });
 
   it('writeStoredColorMode returns false and does not throw when localStorage throws', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const themeLogger = getLogger('theme');
+    const warnSpy = vi.spyOn(themeLogger, 'warn').mockImplementation(() => {});
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
     });
     expect(writeStoredColorMode('dark')).toBe(false);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[theme]'), expect.any(Error));
-    warnSpy.mockRestore();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to persist color mode'), expect.any(Error));
   });
 
   it('writeStoredColorMode returns true on success', () => {

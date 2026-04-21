@@ -1,3 +1,7 @@
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('theme');
+
 export const THEMES = [
   { id: 'default', labelKey: 'settings.themes.default', swatch: 'oklch(0.55 0.14 85)' },
   { id: 'sylvan', labelKey: 'settings.themes.sylvan', swatch: 'oklch(0.50 0.15 155)' },
@@ -30,7 +34,7 @@ export function readStoredTheme(): ThemeId {
     const v = localStorage.getItem(STORAGE_KEYS.theme);
     return isThemeId(v) ? v : 'default';
   } catch (err) {
-    console.warn('[theme] Failed to read theme from localStorage:', err);
+    logger.warn('Failed to read theme from localStorage:', err);
     return 'default';
   }
 }
@@ -40,7 +44,7 @@ export function writeStoredTheme(id: ThemeId): boolean {
     localStorage.setItem(STORAGE_KEYS.theme, id);
     return true;
   } catch (err) {
-    console.warn('[theme] Failed to persist theme to localStorage:', err);
+    logger.warn('Failed to persist theme to localStorage:', err);
     return false;
   }
 }
@@ -50,7 +54,7 @@ export function readStoredColorMode(): ColorMode {
     const v = localStorage.getItem(STORAGE_KEYS.colorMode);
     return isColorMode(v) ? v : 'system';
   } catch (err) {
-    console.warn('[theme] Failed to read color mode from localStorage:', err);
+    logger.warn('Failed to read color mode from localStorage:', err);
     return 'system';
   }
 }
@@ -60,7 +64,7 @@ export function writeStoredColorMode(mode: ColorMode): boolean {
     localStorage.setItem(STORAGE_KEYS.colorMode, mode);
     return true;
   } catch (err) {
-    console.warn('[theme] Failed to persist color mode to localStorage:', err);
+    logger.warn('Failed to persist color mode to localStorage:', err);
     return false;
   }
 }

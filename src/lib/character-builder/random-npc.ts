@@ -1,4 +1,7 @@
 import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('random-npc');
 import { RACE_SOURCES } from '@/lib/sources/races';
 import {
   DND_ALIGNMENTS,
@@ -91,7 +94,7 @@ export function generateRandomNpcBasicsDetailed(
 ): RandomNpcResult {
   const classSource = classSources.find((c) => c.id === classId);
   if (!classSource) {
-    console.error('[random-npc] Unknown classId for Quick NPC', { classId });
+    logger.error('Unknown classId for Quick NPC', { classId });
     return { ok: false, failure: 'unknown-class' };
   }
 
@@ -99,7 +102,7 @@ export function generateRandomNpcBasicsDetailed(
   const raceSource = pick(RACE_SOURCES, rng);
   const alignmentSource = pick(DND_ALIGNMENTS, rng);
   if (!gender || !raceSource || !alignmentSource) {
-    console.error('[random-npc] Empty data source for Quick NPC', {
+    logger.error('Empty data source for Quick NPC', {
       classId,
       raceSources: RACE_SOURCES.length,
       alignments: DND_ALIGNMENTS.length,
@@ -110,7 +113,7 @@ export function generateRandomNpcBasicsDetailed(
   const alignment = alignmentSource.id;
   const name = generateCharacterName(race, gender, rng);
   if (!name) {
-    console.error('[random-npc] Name generation returned null', { classId, race, gender });
+    logger.error('Name generation returned null', { classId, race, gender });
     return { ok: false, failure: 'name-generation' };
   }
 
@@ -124,7 +127,7 @@ export function generateRandomNpcBasicsDetailed(
 
   const highest = pick(qb.highestAbility, rng);
   if (!highest) {
-    console.error('[random-npc] quickBuild.highestAbility is empty', { classId });
+    logger.error('quickBuild.highestAbility is empty', { classId });
     return { ok: false, failure: 'empty-data-source' };
   }
   const baseAbilities = assignStandardArray(highest, qb.secondaryAbility, rng);

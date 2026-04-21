@@ -1,4 +1,7 @@
 import type { AbilityKey } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('resolver.abilities');
 import type { AbilityScores } from '@/types/database';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
@@ -44,7 +47,7 @@ export function resolveAbilities(
     if (decision?.type === 'asi') {
       const totalAllocated = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0);
       if (totalAllocated > grant.points) {
-        console.warn(
+        logger.warn(
           `ASI allocation for "${grant.key}" uses ${totalAllocated} points but grant allows ${grant.points} — skipping`
         );
         continue;

@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -24,6 +25,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers';
 import type { StepType } from '@/types/character-builder';
+
+const logger = getLogger('character-builder');
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' },
@@ -143,7 +146,7 @@ function CharacterBuilderInner() {
           // saveDraft sets saveStatus='error' internally on its own failure. This
           // .catch covers the markSaved() path too: if it fails, we still need
           // the banner so the user knows "saved" on screen is misleading.
-          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id });
+          logger.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id });
           markSaveError();
         });
     }, 500);
@@ -194,7 +197,7 @@ function CharacterBuilderInner() {
           // saveDraft sets saveStatus='error' internally on its own failure. This
           // .catch covers the markSaved() path too: if it fails, we still need
           // the banner so the user knows "saved" on screen is misleading.
-          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id });
+          logger.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id });
           markSaveError();
         });
     }
@@ -217,7 +220,7 @@ function CharacterBuilderInner() {
       toast.success(t('characterBuilder.abandon.success'));
       navigate(`/campaign/${campaignSlug}/characters`);
     } catch (err) {
-      console.error('Abandon draft failed:', err);
+      logger.error('Abandon draft failed:', err);
       toast.error(t('characterBuilder.abandon.failed'));
       setIsAbandoning(false);
       setConfirmAbandon(false);
@@ -233,7 +236,7 @@ function CharacterBuilderInner() {
       const slug = await finalize(payload);
       navigate(`/campaign/${campaignSlug}/character/${slug}`);
     } catch (err) {
-      console.error('Character finalization failed:', err);
+      logger.error('Character finalization failed:', err);
       setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'));
     } finally {
       setIsFinalizing(false);
@@ -329,7 +332,7 @@ function CharacterBuilderInner() {
                   saveDraft(payload)
                     .then(() => markSaved())
                     .catch((err: unknown) => {
-                      console.error('Autosave chain error:', err, {
+                      logger.error('Autosave chain error:', err, {
                         characterId: character.id,
                         campaignId: character.campaign_id,
                       });

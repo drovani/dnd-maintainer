@@ -1,5 +1,8 @@
 // D&D 5e Helper Functions and Data
 import type { AbilityKey } from '@/types/database';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('dnd-helpers');
 
 export type { AbilityKey };
 export type AbilityName = AbilityKey;
@@ -1329,11 +1332,11 @@ export function toggleToolProficiencyChoice(
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId);
   if (!cls?.toolChoices) return proficiencies;
   if (!cls.toolChoices.from.includes(toolId)) {
-    console.warn(`toggleToolProficiencyChoice: "${toolId}" is not in ${cls.id} toolChoices.from`);
+    logger.warn(`toggleToolProficiencyChoice: "${toolId}" is not in ${cls.id} toolChoices.from`);
     return proficiencies;
   }
   if (proficiencies.tools.includes(toolId)) {
-    console.warn(`toggleToolProficiencyChoice: "${toolId}" is already auto-granted`);
+    logger.warn(`toggleToolProficiencyChoice: "${toolId}" is already auto-granted`);
     return proficiencies;
   }
   const current = proficiencies.toolChoices;
@@ -1353,7 +1356,7 @@ export function toggleLanguageProficiencyChoice(
   const maxChoices = race?.languageChoices ?? 0;
   if (maxChoices === 0) return proficiencies;
   if (proficiencies.languages.includes(langId)) {
-    console.warn(`toggleLanguageProficiencyChoice: "${langId}" is already auto-granted`);
+    logger.warn(`toggleLanguageProficiencyChoice: "${langId}" is already auto-granted`);
     return proficiencies;
   }
   const current = proficiencies.languageChoices;

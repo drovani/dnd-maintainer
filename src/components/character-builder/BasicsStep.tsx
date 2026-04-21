@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
 import { Button } from '@/components/ui/button';
 import { GenderToggle } from '@/components/ui/gender-toggle';
@@ -38,6 +39,8 @@ import { Dices, Wand2 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+const logger = getLogger('basics-step');
 
 const PENDING_ADVANCE_TIMEOUT_MS = 3000;
 
@@ -205,7 +208,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     } catch (err) {
       pendingAdvanceRef.current = null;
       clearWatchdog();
-      console.error('[BasicsStep] Quick NPC commit failed', err);
+      logger.error('Quick NPC commit failed', err);
       toast.error(tc('characterBuilder.hints.quickNpcCommitFailed'));
       return;
     }
@@ -218,7 +221,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       if (pendingAdvanceRef.current === null) return;
       pendingAdvanceRef.current = null;
       watchdogRef.current = null;
-      console.error('[BasicsStep] Quick NPC advance watchdog fired', { classId, basics });
+      logger.error('Quick NPC advance watchdog fired', { classId, basics });
       toast.error(tc('characterBuilder.hints.quickNpcAdvanceTimeout'));
     }, PENDING_ADVANCE_TIMEOUT_MS);
   };
@@ -371,9 +374,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                     {group.options.map((option) => {
                       const raceItem = DND_RACES.find((r) => r.id === option.value);
                       if (!raceItem) {
-                        console.warn(
-                          `Race not found for "${option.value}" — check DND_RACES/DND_RACE_GROUPS data sync`
-                        );
+                        logger.warn(`Race not found for "${option.value}" — check DND_RACES/DND_RACE_GROUPS data sync`);
                         return null;
                       }
                       return (
@@ -465,7 +466,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                   `${ethic.charAt(0).toUpperCase() + ethic.slice(1)} ${moral.charAt(0).toUpperCase() + moral.slice(1)}` as keyof typeof ALIGNMENT_GRID;
                 const alignmentId = ALIGNMENT_GRID[gridKey];
                 if (!alignmentId) {
-                  console.warn(`Alignment not found for "${gridKey}" — check ALIGNMENT_GRID mapping`);
+                  logger.warn(`Alignment not found for "${gridKey}" — check ALIGNMENT_GRID mapping`);
                   return null;
                 }
                 const isSelected = alignment === alignmentId;

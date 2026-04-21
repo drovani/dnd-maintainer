@@ -1,4 +1,7 @@
 import type { Grant } from '@/types/grants';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('sources.level-grants');
 import type { ClassId } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/types/sources';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
@@ -20,7 +23,7 @@ export function getGrantsForLevel(
 ): LevelGrantPreview {
   const classSource = CLASS_SOURCES.find((cs) => cs.id === classId);
   if (!classSource) {
-    console.warn(`getGrantsForLevel: no class source for "${classId}"`);
+    logger.warn(`getGrantsForLevel: no class source for "${classId}"`);
   }
   const classGrants = classSource?.levels[targetClassLevel - 1]?.grants ?? [];
 

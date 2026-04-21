@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { reconstructBuild } from '@/lib/build-reconstruction';
 import type { BuildLevelRow, CharacterIdentity } from '@/lib/build-reconstruction';
+import { getLogger } from '@/lib/logger';
 import { collectBundles } from '@/lib/sources/index';
 import { resolveCharacter } from '@/lib/resolver/index';
 import { createChoiceKey } from '@/types/choices';
@@ -281,11 +282,11 @@ describe('reconstructBuild', () => {
       ...creationRow,
       choices: { bad: { type: 'unknown' } } as unknown as BuildLevelRow['choices'],
     };
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const buildReconstructionLogger = getLogger('build-reconstruction');
+    const warnSpy = vi.spyOn(buildReconstructionLogger, 'warn').mockImplementation(() => {});
     const result = reconstructBuild(identity, [creationWithBadChoices], []);
     expect(result.choices).toEqual({});
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('bad'), expect.any(Error));
-    warnSpy.mockRestore();
   });
 
   it('throws when level row is missing class_id', () => {

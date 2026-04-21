@@ -2,6 +2,9 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import commonEn from '@/locales/en/common.json';
 import gamedataEn from '@/locales/en/gamedata.json';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('i18n');
 
 i18n
   .use(initReactI18next)
@@ -17,14 +20,14 @@ i18n
     saveMissing: true,
     missingKeyHandler: (_lngs: readonly string[], ns: string, key: string) => {
       if (import.meta.env.DEV) {
-        console.warn(`[i18n] Missing translation key: ${ns}:${key}`);
+        logger.warn(`Missing translation key: ${ns}:${key}`);
       } else {
-        console.error(`[i18n] Missing translation key: ${ns}:${key}`);
+        logger.error(`Missing translation key: ${ns}:${key}`);
       }
     },
   })
   .catch((err: unknown) => {
-    console.error('i18n initialization failed:', err);
+    logger.error('i18n initialization failed:', err);
     throw err;
   });
 
