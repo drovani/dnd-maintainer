@@ -15,8 +15,13 @@ fi
 if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
   repo_root="$CLAUDE_PROJECT_DIR"
 else
-  repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [ -z "$repo_root" ]; then
+    echo "[format-hook] skipping: cannot determine repo root" >&2
+    exit 0
+  fi
 fi
+repo_root=$(realpath -m "$repo_root" 2>/dev/null || echo "$repo_root")
 
 # Resolve absolute path
 abs_file=$(realpath -m "$file" 2>/dev/null || echo "$file")
@@ -34,7 +39,12 @@ case "$abs_file" in
 esac
 
 # Extract lowercase extension
-ext="${abs_file##*.}"
+basename="${abs_file##*/}"
+if [[ "$basename" != *.* ]]; then
+  echo "skipping: no extension in $basename" >&2
+  exit 0
+fi
+ext="${basename##*.}"
 ext=$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')
 
 # Run Prettier for supported extensions
