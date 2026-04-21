@@ -28,6 +28,7 @@ import {
   toggleToolProficiencyChoice,
 } from '@/lib/dnd-helpers';
 import type { DndClass, DndRace, Proficiencies } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
 
 // ---------------------------------------------------------------------------
 // getAbilityModifier
@@ -614,14 +615,16 @@ describe('toggleToolProficiencyChoice', () => {
   });
 
   it('rejects a tool not in the class toolChoices.from list and warns', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const dndHelpersLogger = getLogger('dnd-helpers');
+    const warnSpy = vi.spyOn(dndHelpersLogger, 'warn').mockImplementation(() => {});
     const result = toggleToolProficiencyChoice(base, 'bard', 'thievestools');
     expect(result).toBe(base);
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('thievestools'));
   });
 
   it('rejects a tool already in auto-granted tools and warns', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const dndHelpersLogger = getLogger('dnd-helpers');
+    const warnSpy = vi.spyOn(dndHelpersLogger, 'warn').mockImplementation(() => {});
     const prev: Proficiencies = { ...base, tools: ['herbalismkit'] };
     const result = toggleToolProficiencyChoice(prev, 'bard', 'herbalismkit');
     expect(result).toBe(prev);
@@ -663,7 +666,8 @@ describe('toggleLanguageProficiencyChoice', () => {
   });
 
   it('rejects a language already in auto-granted languages and warns', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const dndHelpersLogger = getLogger('dnd-helpers');
+    const warnSpy = vi.spyOn(dndHelpersLogger, 'warn').mockImplementation(() => {});
     const prev: Proficiencies = { ...base, languages: ['common', 'elvish'] };
     const result = toggleLanguageProficiencyChoice(prev, 'halfelf', 'elvish');
     expect(result).toBe(prev);

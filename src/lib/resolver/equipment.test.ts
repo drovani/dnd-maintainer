@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment';
+import { getLogger } from '@/lib/logger';
 import { requireItemDef } from '@/lib/sources/items';
 import type { GrantBundle } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
@@ -356,7 +357,8 @@ describe('resolveEquipment via useDBInventory', () => {
 
   it('skips unknown persisted items gracefully (no throw) and logs a warning', async () => {
     const { resolveCharacter } = await import('@/lib/resolver');
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const resolverLogger = getLogger('resolver');
+    const warnSpy = vi.spyOn(resolverLogger, 'warn').mockImplementation(() => {});
     const input = {
       baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
       level: 0,
@@ -372,7 +374,6 @@ describe('resolveEquipment via useDBInventory', () => {
     expect(result.equipment).toHaveLength(1);
     expect(result.equipment[0].itemId).toBe('longsword');
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('removed-item-xyz'));
-    warnSpy.mockRestore();
   });
 });
 

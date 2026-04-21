@@ -4,10 +4,13 @@ import type { BuildLevelRow } from '@/lib/build-reconstruction';
 import type { ResolvedCharacter } from '@/types/resolved';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { buildMaterializedItemRows } from '@/lib/resolver/materialize';
+import { getLogger } from '@/lib/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import i18next from 'i18next';
+
+const logger = getLogger('builder-autosave');
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -43,7 +46,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
         try {
           await savingRef.current;
         } catch (prevErr) {
-          console.error('Previous autosave failed (retrying with fresh data):', prevErr);
+          logger.error('Previous autosave failed (retrying with fresh data):', prevErr);
           toast.warning(i18next.t('common:errors.saveFailed'));
         }
       }
@@ -155,7 +158,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             .not('sequence', 'in', `(${activeSequences.join(',')})`);
 
           if (cleanupError) {
-            console.error('Failed to clean up orphaned build rows:', cleanupError);
+            logger.error('Failed to clean up orphaned build rows:', cleanupError);
             toast.warning(i18next.t('common:errors.orphanedRowCleanupFailed'));
           }
 
@@ -163,7 +166,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
           return savedId;
         } catch (err) {
           setSaveStatus('error');
-          console.error('Draft save failed:', err);
+          logger.error('Draft save failed:', err);
           throw err;
         }
       })();
@@ -217,7 +220,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
         return (data as { slug: string }).slug;
       } catch (err) {
         setSaveStatus('error');
-        console.error('Failed to finalize character (draft was saved):', err);
+        logger.error('Failed to finalize character (draft was saved):', err);
         throw err;
       }
     },
@@ -238,7 +241,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
         try {
           await savingRef.current;
         } catch (prevErr) {
-          console.error('In-flight autosave failed before abandon:', prevErr, { campaignId });
+          logger.error('In-flight autosave failed before abandon:', prevErr, { campaignId });
         }
       }
       const id = characterIdRef.current;

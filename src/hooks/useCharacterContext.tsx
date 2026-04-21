@@ -1,5 +1,8 @@
+import { getLogger } from '@/lib/logger';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+
+const logger = getLogger('character-context');
 import type { Character } from '@/types/database';
 import type { AbilityScores } from '@/types/database';
 import type { BuildLevelRow } from '@/lib/build-reconstruction';
@@ -98,7 +101,7 @@ function findGrantRowIndex(
   const classSource = CLASS_SOURCES.find((cs) => cs.id === classId);
   if (!classSource) {
     const error = `No class source found for "${classId}"`;
-    console.error(`findGrantRowIndex: ${error}`);
+    logger.error(`findGrantRowIndex: ${error}`);
     return { ok: false, error };
   }
 
@@ -111,12 +114,12 @@ function findGrantRowIndex(
   }
   if (matchingClassLevels.length === 0) {
     const error = `No ${grantType} grant found in class "${classId}" source data`;
-    console.error(`findGrantRowIndex: ${error}`);
+    logger.error(`findGrantRowIndex: ${error}`);
     return { ok: false, error };
   }
   if (grantIndex >= matchingClassLevels.length) {
     const error = `Grant index ${grantIndex} exceeds available ${grantType} grants (${matchingClassLevels.length}) for class "${classId}"`;
-    console.error(`findGrantRowIndex: ${error}`);
+    logger.error(`findGrantRowIndex: ${error}`);
     return { ok: false, error };
   }
 
@@ -126,7 +129,7 @@ function findGrantRowIndex(
   );
   if (idx === -1) {
     const error = `No active row at class level ${grantClassLevel} for class "${classId}" — character may not be high enough level`;
-    console.error(`findGrantRowIndex: ${error}`);
+    logger.error(`findGrantRowIndex: ${error}`);
     return { ok: false, error };
   }
   return { ok: true, index: idx };
@@ -240,13 +243,13 @@ function tryDeriveAndResolve(
     build = reconstructBuild({ race: character.race, background: character.background }, activeRows, equippedItems);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error';
-    console.error('Failed to reconstruct character build:', { characterId: character.id, error: err });
+    logger.error('Failed to reconstruct character build:', { characterId: character.id, error: err });
     return { status: 'build-error', build: null, bundles: [], resolved: null, error: message, warnings: [] };
   }
 
   const { bundles, warnings } = collectBundles(build);
   if (warnings.length > 0) {
-    console.warn('collectBundles warnings:', warnings);
+    logger.warn('collectBundles warnings:', warnings);
   }
 
   try {
@@ -265,7 +268,7 @@ function tryDeriveAndResolve(
     return { status: 'ok', build, bundles, resolved, error: null, warnings };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown resolver error';
-    console.error('Failed to resolve character:', { characterId: character.id, error: err });
+    logger.error('Failed to resolve character:', { characterId: character.id, error: err });
     return { status: 'resolve-error', build, bundles, resolved: null, error: message, warnings };
   }
 }
@@ -402,7 +405,7 @@ export function CharacterProvider({
         setRows(next);
         setIsDirty(true);
       } catch (err) {
-        console.error('makeChoice failed:', { choiceKey, error: err });
+        logger.error('makeChoice failed:', { choiceKey, error: err });
         toast.error(i18next.t('common:errors.choiceSaveFailed'));
       }
     },
@@ -439,7 +442,7 @@ export function CharacterProvider({
         const targetSeq = resolveChoiceSequence(choiceKey, rows);
         const idx = rows.findIndex((r) => r.sequence === targetSeq);
         if (idx === -1) {
-          console.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`);
+          logger.warn(`clearChoice: no row found for key "${choiceKey}" — choice not cleared`);
           toast.error(i18next.t('common:errors.choiceClearFailed'));
           return;
         }
@@ -452,7 +455,7 @@ export function CharacterProvider({
         setRows(next);
         setIsDirty(true);
       } catch (err) {
-        console.error('clearChoice failed:', { choiceKey, error: err });
+        logger.error('clearChoice failed:', { choiceKey, error: err });
         toast.error(i18next.t('common:errors.choiceClearFailed'));
       }
     },
@@ -560,7 +563,7 @@ export function CharacterProvider({
     (oldSequence: number, newClassId: ClassId, newSubclassId: SubclassId | null) => {
       const idx = rows.findIndex((r) => r.sequence === oldSequence);
       if (idx === -1) {
-        console.warn(`replaceLevel: no row found for sequence ${oldSequence} — level not replaced`);
+        logger.warn(`replaceLevel: no row found for sequence ${oldSequence} — level not replaced`);
         toast.error(i18next.t('common:errors.levelReplaceFailed'));
         return;
       }

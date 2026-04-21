@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,8 @@ import { getGrantIcon } from '@/lib/class-icons';
 import type { TFunction } from 'i18next';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+const logger = getLogger('choice-picker');
 
 type GamedataT = TFunction<'gamedata'>;
 
@@ -226,7 +229,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
             try {
               ref = resolveBundleRef(bundleId);
             } catch (err) {
-              console.warn(`ChoicePicker: skipping unknown bundleId "${bundleId}"`, err);
+              logger.warn(`ChoicePicker: skipping unknown bundleId "${bundleId}"`, err);
               return null;
             }
             const isSelected = currentBundleId === bundleId;

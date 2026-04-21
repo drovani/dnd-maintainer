@@ -1,3 +1,4 @@
+import { getLogger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { GenderToggle } from '@/components/ui/gender-toggle';
@@ -28,6 +29,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave';
 import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
+
+const logger = getLogger('character-sheet');
 
 type EditSection = 'header' | 'personality' | 'backstory' | 'appearance' | null;
 
@@ -106,7 +109,7 @@ function CharacterSheetInner({
       await saveDraft(latestPayloadRef.current);
       markSaved();
     } catch (err: unknown) {
-      console.error('Autosave failed:', err);
+      logger.error('Autosave failed:', err);
       setSaveFailed(true);
       toast.error(tc('characterBuilder.errors.failedToSaveDraft'));
     }
