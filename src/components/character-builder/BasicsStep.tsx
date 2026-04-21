@@ -33,10 +33,19 @@ import {
   type RandomNpcFailure,
 } from '@/lib/character-builder/random-npc'
 import type { StepType } from '@/types/character-builder'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Dices, Wand2 } from 'lucide-react'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+
+const PENDING_ADVANCE_TIMEOUT_MS = 3000
 
 // Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
 const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
@@ -70,19 +79,26 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const characterClass = (levelRows[0]?.class_id ?? '') as ClassId | ''
   const level = levelRows.length
 
-  // -------------------------------------------------------------------------
-  // Quick NPC: ref-flag + useEffect pattern for post-commit step advance.
-  // We use refs to avoid stale closures and to prevent onRequestAdvance from
-  // becoming an effect dependency (it is recreated on every parent render).
-  // -------------------------------------------------------------------------
+  // Ref-flag + useEffect for post-commit step advance. Refs dodge stale closures
+  // and keep onRequestAdvance out of the effect deps (it is a new fn per render).
   const pendingAdvanceRef = useRef<StepType | null>(null)
   const advanceCallbackRef = useRef(onRequestAdvance)
+  const watchdogRef = useRef<number | null>(null)
 
   // useLayoutEffect runs before useEffect in the same commit, so the ref is
   // updated before the step-advance effect reads it.
   useLayoutEffect(() => {
     advanceCallbackRef.current = onRequestAdvance
   })
+
+  const clearWatchdog = () => {
+    if (watchdogRef.current !== null) {
+      window.clearTimeout(watchdogRef.current)
+      watchdogRef.current = null
+    }
+  }
+
+  useEffect(() => () => clearWatchdog(), [])
 
   useEffect(() => {
     const target = pendingAdvanceRef.current
@@ -99,13 +115,13 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       if (!hasAbilities) return
     }
     pendingAdvanceRef.current = null
+    clearWatchdog()
     advanceCallbackRef.current?.(target)
   }, [character, rows])
 
-  // Manual edits cancel any pending Quick-NPC advance so a later field change
-  // can't trigger an unexpected step navigation.
   const cancelPendingAdvance = () => {
     pendingAdvanceRef.current = null
+    clearWatchdog()
   }
 
   const handleRaceChange = (value: RaceId) => {
@@ -138,48 +154,88 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       toast.error(tc('characterBuilder.hints.quickNpcUnknownClass'))
       return
     }
+    if (failure === 'empty-data-source') {
+      toast.error(tc('characterBuilder.hints.quickNpcEmptyDataSource'))
+      return
+    }
     toast.error(tc('characterBuilder.hints.quickNpcFailed'))
   }
 
-  const handleQuickNpc = (classId: ClassId) => {
+  const [pendingOverwriteClassId, setPendingOverwriteClassId] = useState<ClassId | null>(null)
+
+  const hasUserEnteredData = (): boolean =>
+    !!character.name ||
+    !!character.race ||
+    !!character.alignment ||
+    !!character.background ||
+    !!character.gender ||
+    !!character.player_name ||
+    levelRows.length > 0
+
+  const commitQuickNpc = (classId: ClassId) => {
     const result = generateRandomNpcBasicsDetailed(classId)
     if (!result.ok) {
       toastForFailure(result.failure)
       return
     }
     const basics = result.basics
-    // Run the riskiest mutation (class grants resolution) first. If it throws,
-    // no other state has been touched, so the form stays in its pre-click state.
+    // Full commit is wrapped: if any step throws, we rollback ref state and
+    // surface the error. Callers of levelUp/replaceLevel already mutate before
+    // throwing, but a throw in updateCharacter/updateCreation would otherwise
+    // leave the form half-applied with no user feedback.
     try {
       if (levelRows.length === 0) {
         context.levelUp(classId, null)
       } else {
         context.replaceLevel(levelRows[0].sequence, classId, null)
       }
+      context.updateCharacter({
+        character_type: 'npc',
+        player_name: '',
+        gender: basics.gender,
+        race: basics.race,
+        alignment: basics.alignment,
+        name: basics.name,
+        class: classId,
+        level: 1,
+        ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
+      })
+      if (basics.targetStep === 'skills') {
+        context.updateCreation({ base_abilities: basics.baseAbilities })
+      }
     } catch (err) {
-      console.error('[BasicsStep] Quick NPC levelUp/replaceLevel failed', err)
+      pendingAdvanceRef.current = null
+      clearWatchdog()
+      console.error('[BasicsStep] Quick NPC commit failed', err)
       toast.error(tc('characterBuilder.hints.quickNpcCommitFailed'))
       return
     }
-    // Arm the advance flag only after the risky step succeeds. The post-commit
-    // effect reads it once all basics + abilities have landed.
+    // Arm the advance flag and a watchdog. If the basics-ready gate never
+    // settles (e.g. a reducer drops a field), the watchdog clears the ref and
+    // warns the user rather than leaving the flow silently stuck.
     pendingAdvanceRef.current = basics.targetStep
-    context.updateCharacter({
-      character_type: 'npc',
-      player_name: '',
-      gender: basics.gender,
-      race: basics.race,
-      alignment: basics.alignment,
-      name: basics.name,
-      class: classId,
-      level: 1,
-      ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
-    })
-    if (basics.targetStep === 'skills') {
-      context.updateCreation({ base_abilities: basics.baseAbilities })
+    clearWatchdog()
+    watchdogRef.current = window.setTimeout(() => {
+      if (pendingAdvanceRef.current === null) return
+      pendingAdvanceRef.current = null
+      watchdogRef.current = null
+      console.error('[BasicsStep] Quick NPC advance watchdog fired', { classId, basics })
+      toast.error(tc('characterBuilder.hints.quickNpcAdvanceTimeout'))
+    }, PENDING_ADVANCE_TIMEOUT_MS)
+  }
+
+  const handleQuickNpc = (classId: ClassId) => {
+    if (hasUserEnteredData()) {
+      setPendingOverwriteClassId(classId)
+      return
     }
-    // Note: saveDraft will fire once from goToStep (via advanceCallbackRef) and once
-    // from the 500ms debounced autosave effect in CharacterBuilder. This is idempotent.
+    commitQuickNpc(classId)
+  }
+
+  const handleOverwriteConfirm = () => {
+    const classId = pendingOverwriteClassId
+    setPendingOverwriteClassId(null)
+    if (classId) commitQuickNpc(classId)
   }
 
   return (
@@ -426,6 +482,28 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
           </div>
         </div>
       </div>
+
+      {pendingOverwriteClassId && (
+        <Dialog open onOpenChange={(open) => { if (!open) setPendingOverwriteClassId(null) }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{tc('characterBuilder.hints.quickNpcOverwriteTitle')}</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              {tc('characterBuilder.hints.quickNpcOverwriteConfirm')}
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPendingOverwriteClassId(null)}>
+                {tc('buttons.cancel')}
+              </Button>
+              <Button variant="destructive" onClick={handleOverwriteConfirm}>
+                <Dices className="size-4" />
+                {tc('characterBuilder.hints.quickNpcButton', { class: t(`classes.${pendingOverwriteClassId}`) })}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
     </div>
   )

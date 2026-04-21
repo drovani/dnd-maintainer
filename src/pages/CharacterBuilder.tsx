@@ -24,7 +24,7 @@ import { useCharacter } from '@/hooks/useCharacters'
 import { useCampaignContext } from '@/hooks/useCampaignContext'
 import type { Character } from '@/types/database'
 import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -37,6 +37,22 @@ const STEPS: { id: StepType }[] = [
   { id: 'proficiencies' }, { id: 'equipment' },
   { id: 'backstory' },
 ]
+
+function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactElement {
+  switch (step) {
+    case 'basics': return <BasicsStep onRequestAdvance={goToStep} />
+    case 'abilities': return <AbilitiesStep />
+    case 'skills': return <SkillsStep />
+    case 'classFeatures': return <ClassFeaturesStep />
+    case 'proficiencies': return <ProficienciesStep />
+    case 'equipment': return <EquipmentStep />
+    case 'backstory': return <BackstoryStep />
+    default: {
+      const _exhaustive: never = step
+      return _exhaustive
+    }
+  }
+}
 
 function buildSeedCharacter(campaignId: string): Character {
   return {
@@ -95,7 +111,7 @@ function CharacterBuilderInner() {
   const [finalizeError, setFinalizeError] = useState<string | null>(null)
   const [confirmAbandon, setConfirmAbandon] = useState(false)
   const [isAbandoning, setIsAbandoning] = useState(false)
-  const { saveStatus, saveDraft, finalize, clearStatus, abandon } = useBuilderAutosave()
+  const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } = useBuilderAutosave()
 
   const context = useCharacterContext()
   const { character, rows, resolved, buildError, isDirty, markSaved } = context
@@ -120,13 +136,15 @@ function CharacterBuilderInner() {
       saveDraft(latestPayloadRef.current)
         .then(() => markSaved())
         .catch((err: unknown) => {
-          // saveDraft sets saveStatus='error' internally;
-          // log here in case the .then() chain itself fails
-          console.warn('Autosave chain error:', err)
+          // saveDraft sets saveStatus='error' internally on its own failure. This
+          // .catch covers the markSaved() path too: if it fails, we still need
+          // the banner so the user knows "saved" on screen is misleading.
+          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id })
+          markSaveError()
         })
     }, 500)
     return () => clearTimeout(timer)
-  }, [isDirty, hasRequiredFields, saveDraft, markSaved])
+  }, [isDirty, hasRequiredFields, saveDraft, markSaved, markSaveError, character.id, character.campaign_id])
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
 
@@ -169,9 +187,11 @@ function CharacterBuilderInner() {
       saveDraft(payload)
         .then(() => markSaved())
         .catch((err: unknown) => {
-          // saveDraft sets saveStatus='error' internally;
-          // log here in case the .then() chain itself fails
-          console.warn('Autosave chain error:', err)
+          // saveDraft sets saveStatus='error' internally on its own failure. This
+          // .catch covers the markSaved() path too: if it fails, we still need
+          // the banner so the user knows "saved" on screen is misleading.
+          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id })
+          markSaveError()
         })
     }
     setCurrentStep(targetStep)
@@ -269,13 +289,7 @@ function CharacterBuilderInner() {
         <Card className="mb-8">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold mb-6">{t(`characterBuilder.steps.${STEPS[currentStepIndex].id}`)}</h2>
-            {currentStep === 'basics' && <BasicsStep onRequestAdvance={goToStep} />}
-            {currentStep === 'abilities' && <AbilitiesStep />}
-            {currentStep === 'skills' && <SkillsStep />}
-            {currentStep === 'classFeatures' && <ClassFeaturesStep />}
-            {currentStep === 'proficiencies' && <ProficienciesStep />}
-            {currentStep === 'equipment' && <EquipmentStep />}
-            {currentStep === 'backstory' && <BackstoryStep />}
+            {renderStep(currentStep, goToStep)}
           </CardContent>
         </Card>
 
@@ -301,9 +315,8 @@ function CharacterBuilderInner() {
                   saveDraft(payload)
                     .then(() => markSaved())
                     .catch((err: unknown) => {
-                      // saveDraft sets saveStatus='error' internally;
-                      // log here in case the .then() chain itself fails
-                      console.warn('Autosave chain error:', err)
+                      console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id })
+                      markSaveError()
                     })
                 }}
               >

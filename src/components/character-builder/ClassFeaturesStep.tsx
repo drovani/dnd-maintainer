@@ -1,13 +1,9 @@
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { parseChoiceKey, type ChoiceKey } from '@/types/choices'
-import {
-  type BackgroundId,
-  type ClassId,
-  type FightingStyleId,
-  type RaceId,
-} from '@/lib/dnd-helpers'
+import { type ChoiceKey } from '@/types/choices'
+import { type FightingStyleId } from '@/lib/dnd-helpers'
+import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name'
 import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -23,18 +19,6 @@ export function ClassFeaturesStep() {
   const { t: tc } = useTranslation('common')
   const context = useCharacterContext()
   const { resolved, build, bundles } = context
-
-  function getChoiceSourceName(choiceKey: ChoiceKey): string {
-    const { origin, id } = parseChoiceKey(choiceKey)
-    switch (origin) {
-      case 'race':
-        return t(`races.${id as RaceId}`)
-      case 'background':
-        return t(`backgrounds.${id as BackgroundId}`)
-      case 'class':
-        return t(`classes.${id as ClassId}`)
-    }
-  }
 
   const fightingStyleChoices = useMemo<readonly FightingStyleChoiceInfo[]>(() => {
     const fsc: FightingStyleChoiceInfo[] = []
@@ -80,7 +64,7 @@ export function ClassFeaturesStep() {
                     {tc('characterBuilder.pendingChoices.fightingStyleChoice', { count: fsc.count })}{' '}
                     <span className="text-xs">
                       {tc('characterBuilder.pendingChoices.fromSource', {
-                        source: getChoiceSourceName(fsc.choiceKey),
+                        source: getChoiceSourceName(fsc.choiceKey, t),
                       })}
                     </span>
                   </p>

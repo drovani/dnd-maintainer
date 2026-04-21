@@ -183,7 +183,11 @@
       "quickNpcButton": "Random {{class}} NPC",
       "quickNpcFailed": "Could not generate NPC — name data missing for selected race",
       "quickNpcUnknownClass": "Could not generate NPC — unknown class",
-      "quickNpcCommitFailed": "Could not apply NPC — please try again"
+      "quickNpcEmptyDataSource": "Could not generate NPC — required data is missing",
+      "quickNpcCommitFailed": "Could not apply NPC — please try again",
+      "quickNpcAdvanceTimeout": "NPC was created but the step did not advance — please navigate manually",
+      "quickNpcOverwriteTitle": "Replace your current work?",
+      "quickNpcOverwriteConfirm": "This will overwrite the data you have already entered. Continue?"
     },
     "abilities": {
       "standardArray": "Standard Array",

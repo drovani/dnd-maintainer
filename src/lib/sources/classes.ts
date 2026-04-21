@@ -9,7 +9,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
     id: 'fighter',
     primaryAbility: 'str',
     quickBuild: makeQuickBuild({
-      highestAbility: ['str', 'dex'], // PHB: "Strength or Dexterity"
+      highestAbility: ['str', 'dex'],
       secondaryAbility: 'con',
       suggestedBackground: 'soldier',
     }),

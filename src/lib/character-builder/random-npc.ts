@@ -16,7 +16,7 @@ import type { ClassSource } from '@/types/sources'
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
-export type RandomNpcFailure = 'unknown-class' | 'name-generation'
+export type RandomNpcFailure = 'unknown-class' | 'name-generation' | 'empty-data-source'
 
 interface RandomNpcBasicsBase {
   readonly gender: DndGender
@@ -42,11 +42,11 @@ export type RandomNpcResult =
 
 type Rng = () => number
 
-function pick<T>(arr: readonly T[], rng: Rng): T {
+function pick<T>(arr: readonly T[], rng: Rng): T | undefined {
+  if (arr.length === 0) return undefined
   return arr[Math.floor(rng() * arr.length)]
 }
 
-/** Fisher–Yates shuffle producing a new array. */
 function shuffle<T>(arr: readonly T[], rng: Rng): T[] {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
@@ -101,9 +101,19 @@ export function generateRandomNpcBasicsDetailed(
     return { ok: false, failure: 'unknown-class' }
   }
 
-  const gender: DndGender = pick(['male', 'female'] as const, rng)
-  const race = pick(RACE_SOURCES, rng).id
-  const alignment = pick(DND_ALIGNMENTS, rng).id
+  const gender = pick(['male', 'female'] as const, rng)
+  const raceSource = pick(RACE_SOURCES, rng)
+  const alignmentSource = pick(DND_ALIGNMENTS, rng)
+  if (!gender || !raceSource || !alignmentSource) {
+    console.error('[random-npc] Empty data source for Quick NPC', {
+      classId,
+      raceSources: RACE_SOURCES.length,
+      alignments: DND_ALIGNMENTS.length,
+    })
+    return { ok: false, failure: 'empty-data-source' }
+  }
+  const race = raceSource.id
+  const alignment = alignmentSource.id
   const name = generateCharacterName(race, gender, rng)
   if (!name) {
     console.error('[random-npc] Name generation returned null', { classId, race, gender })
@@ -119,6 +129,10 @@ export function generateRandomNpcBasicsDetailed(
   }
 
   const highest = pick(qb.highestAbility, rng)
+  if (!highest) {
+    console.error('[random-npc] quickBuild.highestAbility is empty', { classId })
+    return { ok: false, failure: 'empty-data-source' }
+  }
   const baseAbilities = assignStandardArray(highest, qb.secondaryAbility, rng)
 
   return {
@@ -136,7 +150,6 @@ export function generateRandomNpcBasicsDetailed(
   }
 }
 
-/** Convenience helper returning just the basics (null on any failure). */
 export function generateRandomNpcBasics(
   classId: ClassId,
   rng: Rng = Math.random,

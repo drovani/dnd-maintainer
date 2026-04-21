@@ -3,17 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BadgeCheckIcon } from 'lucide-react'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { parseChoiceKey, type ChoiceKey } from '@/types/choices'
+import { type ChoiceKey } from '@/types/choices'
 import {
   DND_LANGUAGE_DATA,
   DND_LANGUAGES,
   DND_TOOL_PROFICIENCIES,
-  type BackgroundId,
-  type ClassId,
   type LanguageId,
-  type RaceId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
+import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -29,19 +27,6 @@ export function ProficienciesStep() {
   const context = useCharacterContext()
   const { resolved, build, bundles } = context
 
-  function getChoiceSourceName(choiceKey: ChoiceKey): string {
-    const { origin, id } = parseChoiceKey(choiceKey)
-    switch (origin) {
-      case 'race':
-        return t(`races.${id as RaceId}`)
-      case 'background':
-        return t(`backgrounds.${id as BackgroundId}`)
-      case 'class':
-        return t(`classes.${id as ClassId}`)
-    }
-  }
-
-  // Scan grant bundles for all language-choice/tool-choice grants and direct language grants
   const { languageChoices, toolChoices, grantedLanguages } = useMemo(() => {
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
@@ -271,7 +256,7 @@ export function ProficienciesStep() {
                 <p className="text-sm text-muted-foreground">
                   {tc('characterBuilder.pendingChoices.toolChoice', { count: tc_choice.count })}{' '}
                   <span className="text-xs">
-                    {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(tc_choice.choiceKey) })}
+                    {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(tc_choice.choiceKey, t) })}
                   </span>
                 </p>
                 <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
@@ -325,7 +310,7 @@ export function ProficienciesStep() {
               <p className="text-sm text-muted-foreground">
                 {tc('characterBuilder.pendingChoices.languageChoice', { count: lc.count })}{' '}
                 <span className="text-xs">
-                  {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(lc.choiceKey) })}
+                  {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(lc.choiceKey, t) })}
                 </span>
               </p>
               <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">

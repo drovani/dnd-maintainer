@@ -907,6 +907,8 @@ export function generateCharacterName(
   if (!raceData) return null
 
   const firstNames = raceData[gender]
+  if (!firstNames?.length || !raceData.clan?.length) return null
+
   const firstName = firstNames[Math.floor(rng() * firstNames.length)]
   const clanName = raceData.clan[Math.floor(rng() * raceData.clan.length)]
 

@@ -43,7 +43,8 @@ export function useBuilderAutosave(existingCharacterId?: string) {
         try {
           await savingRef.current
         } catch (prevErr) {
-          console.warn('Previous autosave failed (retrying with fresh data):', prevErr)
+          console.error('Previous autosave failed (retrying with fresh data):', prevErr)
+          toast.warning(i18next.t('common:errors.saveFailed'))
         }
       }
 
@@ -227,13 +228,17 @@ export function useBuilderAutosave(existingCharacterId?: string) {
     setSaveStatus((prev) => (prev === 'saved' ? 'idle' : prev))
   }, [])
 
+  const markSaveError = useCallback(() => {
+    setSaveStatus('error')
+  }, [])
+
   const abandon = useCallback(
     async (campaignId: string): Promise<void> => {
       if (savingRef.current) {
         try {
           await savingRef.current
         } catch (prevErr) {
-          console.warn('In-flight autosave failed before abandon:', prevErr)
+          console.error('In-flight autosave failed before abandon:', prevErr, { campaignId })
         }
       }
       const id = characterIdRef.current
@@ -246,5 +251,5 @@ export function useBuilderAutosave(existingCharacterId?: string) {
     [queryClient],
   )
 
-  return { saveStatus, saveDraft, finalize, clearStatus, abandon }
+  return { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError }
 }

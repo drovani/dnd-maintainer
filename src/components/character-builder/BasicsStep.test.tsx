@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { BasicsStep } from '@/components/character-builder/BasicsStep'
 import { CLASS_SOURCES } from '@/lib/sources/classes'
 import { RACE_SOURCES } from '@/lib/sources/races'
@@ -264,13 +264,16 @@ describe('BasicsStep', () => {
     expect(() => fireEvent.click(screen.getByRole('button', { name: /fighter/i }))).not.toThrow()
   })
 
-  it('uses replaceLevel instead of levelUp when a level row already exists (re-click case)', () => {
+  it('uses replaceLevel instead of levelUp when a level row already exists (re-click case)', async () => {
     // Pre-populate a level-1 fighter row to simulate a re-click
     contextRows = [buildCreationRow(), buildLevelRow('fighter', 1)]
 
     render(<BasicsStep />)
 
     fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+    // Existing level row counts as user data → confirm overwrite in the dialog
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: /fighter/i }))
 
     expect(mockReplaceLevel).toHaveBeenCalledWith(1, 'fighter', null)
     expect(mockLevelUp).not.toHaveBeenCalled()
@@ -307,6 +310,68 @@ describe('BasicsStep', () => {
     expect(mockUpdateCharacter).not.toHaveBeenCalled()
     expect(mockUpdateCreation).not.toHaveBeenCalled()
     expect(onRequestAdvance).not.toHaveBeenCalled()
+  })
+
+  it('rolls back cleanly if replaceLevel throws on a re-click (pre-existing level row)', async () => {
+    const onRequestAdvance = vi.fn()
+    contextRows = [buildCreationRow(), buildLevelRow('fighter', 1)]
+    mockReplaceLevel.mockImplementationOnce(() => {
+      throw new Error('simulated replaceLevel failure')
+    })
+
+    render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+    // Existing row counts as user-entered data → confirmation dialog opens. Confirm to reach commit path.
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: /fighter/i }))
+
+    expect(mockToastError).toHaveBeenCalledWith('quickNpcCommitFailed')
+    expect(mockReplaceLevel).toHaveBeenCalled()
+    expect(mockUpdateCharacter).not.toHaveBeenCalled()
+    expect(mockUpdateCreation).not.toHaveBeenCalled()
+    expect(onRequestAdvance).not.toHaveBeenCalled()
+  })
+
+  it('cross-class re-click: second click does not race — only final targetStep fires', async () => {
+    const onRequestAdvance = vi.fn()
+    const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    // First click → Fighter (quickBuild → targetStep='skills')
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+
+    // Before any state lands, second click with a no-quickBuild class (targetStep='abilities')
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValueOnce({
+      ok: true,
+      basics: {
+        gender: 'female',
+        race: RACE_SOURCES[0].id,
+        alignment: 'n',
+        name: 'Second Name',
+        classId: 'fighter',
+        targetStep: 'abilities',
+      },
+    })
+    // Second click: existing level row (from first click's levelUp) triggers overwrite dialog.
+    contextRows = [buildCreationRow(), buildLevelRow('fighter', 1)]
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: /fighter/i }))
+
+    // Commit the second-click state: abilities NOT required since targetStep='abilities'
+    contextCharacter = {
+      ...contextCharacter,
+      name: 'Second Name',
+      race: RACE_SOURCES[0].id,
+      alignment: 'n',
+      class: 'fighter',
+      level: 1,
+    }
+    rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />)
+
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('abilities'))
+    expect(onRequestAdvance).toHaveBeenCalledTimes(1)
+    expect(onRequestAdvance).not.toHaveBeenCalledWith('skills')
   })
 
   it('surfaces a distinct toast for unknown-class failures', () => {
@@ -424,8 +489,11 @@ describe('BasicsStep', () => {
     expect(onRequestAdvance).not.toHaveBeenCalled()
 
     // Verify ref-clearing didn't permanently disable the Quick NPC flow — a
-    // subsequent click must still arm a new advance.
+    // subsequent click must still arm a new advance. Fields are now populated
+    // from the first click, so the overwrite dialog intercepts this second click.
     fireEvent.click(screen.getByRole('button', { name: /fighter/i }))
+    const dialog = await screen.findByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: /fighter/i }))
     contextRows = [
       buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }),
       buildLevelRow('fighter'),
