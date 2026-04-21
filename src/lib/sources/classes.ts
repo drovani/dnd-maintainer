@@ -1,4 +1,4 @@
-import type { ClassSource } from '@/types/sources'
+import { makeQuickBuild, type ClassSource } from '@/types/sources'
 import { createChoiceKey } from '@/types/choices'
 import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers'
 
@@ -8,6 +8,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
   {
     id: 'fighter',
     primaryAbility: 'str',
+    quickBuild: makeQuickBuild({
+      highestAbility: ['str', 'dex'],
+      secondaryAbility: 'con',
+      suggestedBackground: 'soldier',
+    }),
     levels: [
       {
         grants: [

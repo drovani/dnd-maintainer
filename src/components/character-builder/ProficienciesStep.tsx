@@ -1,18 +1,17 @@
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { BadgeCheckIcon } from 'lucide-react'
 import { useCharacterContext } from '@/hooks/useCharacterContext'
-import type { ChoiceKey } from '@/types/choices'
+import { type ChoiceKey } from '@/types/choices'
 import {
   DND_LANGUAGE_DATA,
   DND_LANGUAGES,
   DND_TOOL_PROFICIENCIES,
-  type FightingStyleId,
   type LanguageId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers'
-import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles'
+import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -22,24 +21,15 @@ interface ChoiceInfo<T> {
   readonly from: readonly T[]
 }
 
-interface FightingStyleChoiceInfo {
-  readonly choiceKey: ChoiceKey
-  readonly count: number
-  readonly from: readonly FightingStyleId[]
-}
-
 export function ProficienciesStep() {
   const { t } = useTranslation('gamedata')
   const { t: tc } = useTranslation('common')
   const context = useCharacterContext()
   const { resolved, build, bundles } = context
 
-  // Scan grant bundles for all language-choice/tool-choice/fighting-style-choice grants
-  // and direct language grants
-  const { languageChoices, toolChoices, grantedLanguages, fightingStyleChoices } = useMemo(() => {
+  const { languageChoices, toolChoices, grantedLanguages } = useMemo(() => {
     const lc: ChoiceInfo<LanguageId>[] = []
     const tc: ChoiceInfo<ToolProficiencyId>[] = []
-    const fsc: FightingStyleChoiceInfo[] = []
     const granted = new Set<LanguageId>()
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {
@@ -59,12 +49,6 @@ export function ProficienciesStep() {
               from: (grant.from ?? DND_TOOL_PROFICIENCIES.map((t) => t)) as readonly ToolProficiencyId[],
             })
           }
-        } else if (grant.type === 'fighting-style-choice') {
-          fsc.push({
-            choiceKey: grant.key,
-            count: grant.count,
-            from: grant.from,
-          })
         }
       }
     }
@@ -72,7 +56,6 @@ export function ProficienciesStep() {
       languageChoices: lc,
       toolChoices: tc,
       grantedLanguages: granted,
-      fightingStyleChoices: fsc,
     }
   }, [bundles])
 
@@ -100,12 +83,6 @@ export function ProficienciesStep() {
   function getSelectedTools(choiceKey: ChoiceKey): readonly ToolProficiencyId[] {
     const decision = build?.choices[choiceKey]
     if (decision?.type === 'tool-choice') return decision.tools
-    return []
-  }
-
-  function getSelectedFightingStyles(choiceKey: ChoiceKey): readonly FightingStyleId[] {
-    const decision = build?.choices[choiceKey]
-    if (decision?.type === 'fighting-style-choice') return decision.styles
     return []
   }
 
@@ -207,59 +184,80 @@ export function ProficienciesStep() {
 
   return (
     <div className="space-y-6">
-      {/* Armor Proficiencies */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.proficiencies.armorProficiencies')}</h3>
-        {resolved.armorProficiencies.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {resolved.armorProficiencies.map((sourced) => (
-              <Badge key={sourced.value} variant="secondary" title={sourced.sources[0]?.origin}>
-                {t(`armor.${sourced.value}`)}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.noProficiencies')}</p>
-        )}
+      {/* Armor / Weapon / Tool Proficiencies (granted) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{tc('characterBuilder.proficiencies.armorProficiencies')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {resolved.armorProficiencies.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {resolved.armorProficiencies.map((sourced) => (
+                  <Badge key={sourced.value} variant="secondary" title={sourced.sources[0]?.origin}>
+                    {t(`armor.${sourced.value}`)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.noProficiencies')}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{tc('characterBuilder.proficiencies.weaponProficiencies')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {resolved.weaponProficiencies.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {resolved.weaponProficiencies.map((sourced) => (
+                  <Badge key={sourced.value} variant="secondary" title={sourced.sources[0]?.origin}>
+                    {t(`weapons.${sourced.value}`)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.noProficiencies')}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{tc('characterBuilder.proficiencies.toolProficiencies')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {resolved.toolProficiencies.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {resolved.toolProficiencies.map((sourced) => (
+                  <Badge key={sourced.value} variant="secondary">
+                    {t(`tools.${sourced.value}`)}
+                  </Badge>
+                ))}
+              </div>
+            ) : toolChoices.length === 0 ? (
+              <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.noProficiencies')}</p>
+            ) : null}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Weapon Proficiencies */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.proficiencies.weaponProficiencies')}</h3>
-        {resolved.weaponProficiencies.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {resolved.weaponProficiencies.map((sourced) => (
-              <Badge key={sourced.value} variant="secondary" title={sourced.sources[0]?.origin}>
-                {t(`weapons.${sourced.value}`)}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.noProficiencies')}</p>
-        )}
-      </div>
-
-      {/* Tool Proficiencies */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.proficiencies.toolProficiencies')}</h3>
-        {resolved.toolProficiencies.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {resolved.toolProficiencies.map((sourced) => (
-              <Badge key={sourced.value} variant="secondary">
-                {t(`tools.${sourced.value}`)}
-              </Badge>
-            ))}
-          </div>
-        )}
-        {/* Tool choices */}
-        {toolChoices.map((tc_choice) => {
+      {/* Tool choices */}
+      {toolChoices.length > 0 && (
+        <div>
+          {toolChoices.map((tc_choice) => {
           const selected = getSelectedTools(tc_choice.choiceKey)
           const remaining = tc_choice.count - selected.length
           return (
             <div key={tc_choice.choiceKey} className="space-y-2 mt-2">
               <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">
-                  {tc('characterBuilder.pendingChoices.toolChoice', { count: tc_choice.count })}
+                  {tc('characterBuilder.pendingChoices.toolChoice', { count: tc_choice.count })}{' '}
+                  <span className="text-xs">
+                    {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(tc_choice.choiceKey, t) })}
+                  </span>
                 </p>
                 <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
                   {selected.length} / {tc_choice.count}
@@ -297,10 +295,8 @@ export function ProficienciesStep() {
             </div>
           )
         })}
-        {resolved.toolProficiencies.length === 0 && toolChoices.length === 0 && (
-          <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.noProficiencies')}</p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Languages */}
       <div>
@@ -312,7 +308,10 @@ export function ProficienciesStep() {
           return (
             <div key={lc.choiceKey} className="flex items-center gap-2 mb-2">
               <p className="text-sm text-muted-foreground">
-                {tc('characterBuilder.pendingChoices.languageChoice', { count: lc.count })}
+                {tc('characterBuilder.pendingChoices.languageChoice', { count: lc.count })}{' '}
+                <span className="text-xs">
+                  {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(lc.choiceKey, t) })}
+                </span>
               </p>
               <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
                 {selected.length} / {lc.count}
@@ -363,66 +362,6 @@ export function ProficienciesStep() {
         )}
       </div>
 
-      {/* Fighting Styles */}
-      {fightingStyleChoices.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.proficiencies.fightingStyles')}</h3>
-          {fightingStyleChoices.map((fsc) => {
-            const selected = getSelectedFightingStyles(fsc.choiceKey)
-            const remaining = fsc.count - selected.length
-            return (
-              <div key={fsc.choiceKey} className="space-y-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-sm text-muted-foreground">
-                    {tc('characterBuilder.pendingChoices.fightingStyleChoice', { count: fsc.count })}
-                  </p>
-                  <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
-                    {selected.length} / {fsc.count}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {fsc.from.map((styleId) => {
-                    const styleSource = FIGHTING_STYLE_SOURCES.find((s) => s.id === styleId)
-                    if (!styleSource) return null
-                    const isSelected = selected.includes(styleId)
-                    const radioId = `fighting-style-${fsc.choiceKey}-${styleId}`
-                    return (
-                      <div
-                        key={styleId}
-                        className={`flex items-start gap-3 rounded-md border p-3 transition-colors hover:bg-muted/50 ${
-                          isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          id={radioId}
-                          name={`fighting-style-${fsc.choiceKey}`}
-                          checked={isSelected}
-                          onChange={() =>
-                            context.makeChoice(fsc.choiceKey, {
-                              type: 'fighting-style-choice',
-                              styles: [styleId],
-                            })
-                          }
-                          className="mt-0.5 size-4 text-primary"
-                        />
-                        <Label htmlFor={radioId} className="flex-1 cursor-pointer">
-                          <div className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
-                            {t(`fightingStyles.${styleId}.name`)}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {t(`fightingStyles.${styleId}.description`)}
-                          </p>
-                        </Label>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
     </div>
   )
 }

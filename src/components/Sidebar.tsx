@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, useParams } from 'react-router-dom';
+import { Link, NavLink, useLocation, useParams } from 'react-router-dom';
 import { Button } from './ui/button';
 
 export interface SidebarProps {
@@ -25,11 +25,19 @@ export interface SidebarProps {
   onToggleCollapse: (collapsed: boolean) => void;
 }
 
-const NAV_ITEMS = [
-  { icon: Shield, labelKey: 'nav.dashboard' as const, path: '' },
-  { icon: Users, labelKey: 'nav.characters' as const, path: '/characters' },
-  { icon: BookOpen, labelKey: 'nav.sessions' as const, path: '/sessions' },
-  { icon: ScrollText, labelKey: 'nav.notes' as const, path: '/notes' },
+interface NavItem {
+  readonly icon: typeof Shield;
+  readonly labelKey: 'nav.dashboard' | 'nav.characters' | 'nav.sessions' | 'nav.notes';
+  readonly path: string;
+  readonly matchPaths?: readonly string[];
+  readonly end?: boolean;
+}
+
+const NAV_ITEMS: readonly NavItem[] = [
+  { icon: Shield, labelKey: 'nav.dashboard', path: '', end: true },
+  { icon: Users, labelKey: 'nav.characters', path: '/characters', matchPaths: ['/character'] },
+  { icon: BookOpen, labelKey: 'nav.sessions', path: '/sessions' },
+  { icon: ScrollText, labelKey: 'nav.notes', path: '/notes' },
 ];
 
 export function Sidebar({
@@ -41,6 +49,7 @@ export function Sidebar({
 }: SidebarProps) {
   const { t } = useTranslation('common');
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const location = useLocation();
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false);
 
   const effectiveSlug = selectedCampaignSlug || campaignSlug;
@@ -186,8 +195,17 @@ export function Sidebar({
               );
             }
 
+            const campaignPrefix = `/campaign/${currentCampaign.slug}`;
+            const pathMatches = (suffix: string): boolean => {
+              const full = `${campaignPrefix}${suffix}`;
+              if (item.end) return location.pathname === full;
+              return location.pathname === full || location.pathname.startsWith(`${full}/`);
+            };
+            const isActive =
+              pathMatches(item.path) || (item.matchPaths?.some(pathMatches) ?? false);
+
             return (
-              <NavLink
+              <Link
                 key={item.labelKey}
                 to={fullPath}
                 onClick={() => {
@@ -195,21 +213,19 @@ export function Sidebar({
                     onToggleCollapse(true);
                   }
                 }}
-                className={({ isActive }) =>
-                  `
+                className={`
                     flex items-center gap-3 px-3 py-3 rounded-lg
                     transition-colors duration-200 group
                     ${isActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium border border-sidebar-border'
                     : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
                   }
-                  `
-                }
+                  `}
                 title={t(item.labelKey)}
               >
                 <Icon className="size-5 shrink-0" />
                 {!isCollapsed && <span className="font-medium text-sm">{t(item.labelKey)}</span>}
-              </NavLink>
+              </Link>
             );
           })}
         </nav>

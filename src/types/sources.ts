@@ -41,10 +41,46 @@ export interface LevelUp {
   readonly grants: readonly Grant[]
 }
 
+export interface ClassQuickBuildSpec {
+  /** Abilities eligible to receive 15 from the Standard Array. Must not include `secondaryAbility`. */
+  readonly highestAbility: readonly [AbilityKey, ...AbilityKey[]]
+  readonly secondaryAbility: AbilityKey
+  readonly suggestedBackground: BackgroundId
+}
+
+declare const quickBuildBrand: unique symbol
+export type ClassQuickBuild = ClassQuickBuildSpec & { readonly [quickBuildBrand]: true }
+
+/**
+ * Only path that produces a `ClassQuickBuild`. Brand prevents raw object literals
+ * from satisfying `ClassSource.quickBuild`, so invalid specs cannot slip in at
+ * call sites. Throws if `secondaryAbility` overlaps `highestAbility`, if
+ * `highestAbility` has duplicates, or if `highestAbility` is empty.
+ */
+export function makeQuickBuild(qb: ClassQuickBuildSpec): ClassQuickBuild {
+  const highs = qb.highestAbility
+  if (highs.length === 0) {
+    throw new Error('makeQuickBuild: highestAbility must not be empty')
+  }
+  const uniqueHighs = new Set(highs)
+  if (uniqueHighs.size !== highs.length) {
+    throw new Error(
+      `makeQuickBuild: highestAbility contains duplicates: [${highs.join(', ')}]`,
+    )
+  }
+  if (uniqueHighs.has(qb.secondaryAbility)) {
+    throw new Error(
+      `makeQuickBuild: secondaryAbility "${qb.secondaryAbility}" must not appear in highestAbility [${highs.join(', ')}]`,
+    )
+  }
+  return qb as ClassQuickBuild
+}
+
 export interface ClassSource {
   readonly id: ClassId
   readonly primaryAbility: AbilityKey
   readonly levels: readonly LevelUp[]
+  readonly quickBuild?: ClassQuickBuild
 }
 
 export interface SubclassFeature {

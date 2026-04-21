@@ -15,6 +15,7 @@
     "retrySave": "Retry Save",
     "finalizeCharacter": "Finalize Character",
     "finalizing": "Finalizing...",
+    "abandonCharacter": "Abandon Character",
     "generateName": "Generate Name",
     "logNewSession": "Log New Session",
     "logFirstSession": "Log Your First Session",
@@ -97,10 +98,9 @@
       "basics": "Basics",
       "abilities": "Abilities",
       "skills": "Skills",
-      "features": "Features",
+      "classFeatures": "Class Features",
       "proficiencies": "Proficiencies",
       "equipment": "Equipment",
-      "spells": "Spells",
       "backstory": "Backstory"
     },
     "fields": {
@@ -121,7 +121,8 @@
       "weight": "Weight",
       "eyeColor": "Eye Color",
       "hairColor": "Hair Color",
-      "skinColor": "Skin Color"
+      "skinColor": "Skin Color",
+      "quickNpcLabel": "Quick Random NPC"
     },
     "pendingChoices": {
       "title": "Choices Required",
@@ -130,7 +131,8 @@
       "toolChoice": "Choose {{count}} tool(s)",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "unsupported": "Choice not yet supported: {{type}}",
-      "remaining": "remaining"
+      "remaining": "remaining",
+      "fromSource": "from {{source}}"
     },
     "finalizeBlockers": {
       "title": "Before you can finalize:",
@@ -143,6 +145,12 @@
     "status": {
       "saving": "Saving...",
       "draftSaved": "Draft saved"
+    },
+    "abandon": {
+      "title": "Abandon this character?",
+      "confirm": "This will permanently delete your draft. This action cannot be undone.",
+      "success": "Character draft abandoned",
+      "failed": "Failed to abandon draft"
     },
     "placeholders": {
       "enterCharacterName": "Enter character name",
@@ -170,7 +178,16 @@
     "hints": {
       "selectRaceAndGender": "Select race and gender first",
       "generateRandomName": "Generate random name",
-      "couldNotLoadPlayerNames": "Could not load player name suggestions"
+      "couldNotLoadPlayerNames": "Could not load player name suggestions",
+      "quickNpcDescription": "Create a random NPC of this class and jump ahead in the wizard",
+      "quickNpcButton": "Random {{class}} NPC",
+      "quickNpcFailed": "Could not generate NPC — name data missing for selected race",
+      "quickNpcUnknownClass": "Could not generate NPC — unknown class",
+      "quickNpcEmptyDataSource": "Could not generate NPC — required data is missing",
+      "quickNpcCommitFailed": "Could not apply NPC — please try again",
+      "quickNpcAdvanceTimeout": "NPC was created but the step did not advance — please navigate manually",
+      "quickNpcOverwriteTitle": "Replace your current work?",
+      "quickNpcOverwriteConfirm": "This will overwrite the data you have already entered. Continue?"
     },
     "abilities": {
       "standardArray": "Standard Array",
@@ -205,7 +222,6 @@
       "weaponProficiencies": "Weapon Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
       "languages": "Languages",
-      "fightingStyles": "Fighting Styles",
       "standardLanguages": "Standard Languages",
       "exoticLanguages": "Exotic Languages",
       "languageName": "Language",
@@ -222,10 +238,12 @@
       "fromClass": "From class",
       "fromRace": "From race"
     },
-    "spells": {
+    "classFeatures": {
+      "fightingStyles": "Fighting Styles",
+      "spellcasting": "Spellcasting",
       "basicVersion": "Spell management (basic version)",
-      "cantrips": "Cantrips (comma-separated)",
-      "noSpellcasting": "No spellcasting for this class"
+      "cantrips": "Cantrips",
+      "noClassChoices": "This class has no level-1 choices to make."
     },
     "equipment": {
       "equipped": "Equipped",
@@ -341,17 +359,8 @@
       "collapseAll": "Collapse All"
     },
     "equipment": {
-      "sourceFrom": {
-        "race": "from race",
-        "class": "from class",
-        "subclass": "from subclass",
-        "background": "from background",
-        "feat": "from feat",
-        "item": "from item",
-        "bundle": "from {{id}}",
-        "pack": "from {{id}}",
-        "loot": "loot"
-      }
+      "sourceFrom": "From {{name}}",
+      "sourceLoot": "Loot"
     },
     "proficiencies": {
       "armor": "Armor",
