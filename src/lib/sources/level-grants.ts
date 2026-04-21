@@ -1,12 +1,12 @@
-import type { Grant } from '@/types/grants'
-import type { ClassId } from '@/lib/dnd-helpers'
-import type { SubclassId } from '@/types/sources'
-import { CLASS_SOURCES } from '@/lib/sources/classes'
-import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses'
+import type { Grant } from '@/types/grants';
+import type { ClassId } from '@/lib/dnd-helpers';
+import type { SubclassId } from '@/types/sources';
+import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
 
 export interface LevelGrantPreview {
-  readonly classGrants: readonly Grant[]
-  readonly subclassGrants: readonly Grant[]
+  readonly classGrants: readonly Grant[];
+  readonly subclassGrants: readonly Grant[];
 }
 
 /**
@@ -16,20 +16,20 @@ export interface LevelGrantPreview {
 export function getGrantsForLevel(
   classId: ClassId,
   targetClassLevel: number,
-  subclassId: SubclassId | null,
+  subclassId: SubclassId | null
 ): LevelGrantPreview {
-  const classSource = CLASS_SOURCES.find((cs) => cs.id === classId)
+  const classSource = CLASS_SOURCES.find((cs) => cs.id === classId);
   if (!classSource) {
-    console.warn(`getGrantsForLevel: no class source for "${classId}"`)
+    console.warn(`getGrantsForLevel: no class source for "${classId}"`);
   }
-  const classGrants = classSource?.levels[targetClassLevel - 1]?.grants ?? []
+  const classGrants = classSource?.levels[targetClassLevel - 1]?.grants ?? [];
 
-  let subclassGrants: readonly Grant[] = []
+  let subclassGrants: readonly Grant[] = [];
   if (subclassId) {
-    const subclassSource = SUBCLASS_SOURCES.find((sc) => sc.id === subclassId && sc.classId === classId)
-    const feature = subclassSource?.features.find((f) => f.classLevel === targetClassLevel)
-    subclassGrants = feature?.grants ?? []
+    const subclassSource = SUBCLASS_SOURCES.find((sc) => sc.id === subclassId && sc.classId === classId);
+    const feature = subclassSource?.features.find((f) => f.classLevel === targetClassLevel);
+    subclassGrants = feature?.grants ?? [];
   }
 
-  return { classGrants, subclassGrants }
+  return { classGrants, subclassGrants };
 }

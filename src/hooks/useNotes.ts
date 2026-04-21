@@ -4,7 +4,6 @@ import type { Note, NoteSummary } from '@/types/database';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { NOTE_SUMMARY_COLS, NOTE_DETAIL_COLS } from '@/lib/query-columns';
 
-
 export function useNotes(campaignId: string) {
   return useQuery({
     queryKey: ['notes', campaignId],
@@ -26,11 +25,7 @@ export function useNote(id: string) {
   return useQuery({
     queryKey: ['note', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('notes')
-        .select(NOTE_DETAIL_COLS)
-        .eq('id', id)
-        .single();
+      const { data, error } = await supabase.from('notes').select(NOTE_DETAIL_COLS).eq('id', id).single();
       if (error) throw error;
       return data as unknown as Note;
     },

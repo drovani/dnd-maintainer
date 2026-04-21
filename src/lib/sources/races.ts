@@ -1,5 +1,5 @@
-import type { RaceSource } from '@/types/sources'
-import { createChoiceKey } from '@/types/choices'
+import type { RaceSource } from '@/types/sources';
+import { createChoiceKey } from '@/types/choices';
 
 export const RACE_SOURCES: readonly RaceSource[] = [
   {
@@ -54,12 +54,35 @@ export const RACE_SOURCES: readonly RaceSource[] = [
         from: ['smithstools', 'brewersupplies', 'masonstools'],
       },
       // Darkvision (60 ft)
-      { type: 'feature', feature: { id: 'dwarf-darkvision', name: 'Darkvision', description: 'You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light.' } },
+      {
+        type: 'feature',
+        feature: {
+          id: 'dwarf-darkvision',
+          name: 'Darkvision',
+          description:
+            'You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light.',
+        },
+      },
       // Dwarven Resilience: advantage on saves vs. poison, resistance to poison damage
       { type: 'resistance', damageType: 'poison' },
-      { type: 'feature', feature: { id: 'dwarf-dwarven-resilience', name: 'Dwarven Resilience', description: 'You have advantage on saving throws against poison.' } },
+      {
+        type: 'feature',
+        feature: {
+          id: 'dwarf-dwarven-resilience',
+          name: 'Dwarven Resilience',
+          description: 'You have advantage on saving throws against poison.',
+        },
+      },
       // Stonecunning
-      { type: 'feature', feature: { id: 'dwarf-stonecunning', name: 'Stonecunning', description: 'Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus.' } },
+      {
+        type: 'feature',
+        feature: {
+          id: 'dwarf-stonecunning',
+          name: 'Stonecunning',
+          description:
+            'Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus.',
+        },
+      },
     ],
   },
-]
+];

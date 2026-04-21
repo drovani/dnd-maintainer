@@ -1,6 +1,6 @@
-import type { SubclassSource } from '@/types/sources'
-import { createChoiceKey } from '@/types/choices'
-import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers'
+import type { SubclassSource } from '@/types/sources';
+import { createChoiceKey } from '@/types/choices';
+import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers';
 
 export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
   {
@@ -8,11 +8,30 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
     classId: 'fighter',
     features: [
       { classLevel: 3, grants: [{ type: 'feature', feature: { id: 'champion-improved-critical' } }] },
-      { classLevel: 7, grants: [
-        { type: 'feature', feature: { id: 'champion-remarkable-athlete' } },
-        { type: 'ability-check-bonus', abilities: ['str', 'dex', 'con'], value: 'half-proficiency', onlyWhenNotProficient: true, featureId: 'champion-remarkable-athlete' },
-      ] },
-      { classLevel: 10, grants: [{ type: 'fighting-style-choice', key: createChoiceKey('fighting-style-choice', 'class', 'fighter', 1), count: 1, from: FIGHTING_STYLE_IDS }] },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'feature', feature: { id: 'champion-remarkable-athlete' } },
+          {
+            type: 'ability-check-bonus',
+            abilities: ['str', 'dex', 'con'],
+            value: 'half-proficiency',
+            onlyWhenNotProficient: true,
+            featureId: 'champion-remarkable-athlete',
+          },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          {
+            type: 'fighting-style-choice',
+            key: createChoiceKey('fighting-style-choice', 'class', 'fighter', 1),
+            count: 1,
+            from: FIGHTING_STYLE_IDS,
+          },
+        ],
+      },
       { classLevel: 15, grants: [{ type: 'feature', feature: { id: 'champion-superior-critical' } }] },
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'champion-survivor' } }] },
     ],
@@ -39,4 +58,4 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'eldritchknight-improved-war-magic' } }] },
     ],
   },
-]
+];

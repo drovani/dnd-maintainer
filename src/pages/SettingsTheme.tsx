@@ -23,10 +23,7 @@ function CampaignThemeRow({ campaign }: { campaign: CampaignSummary }): React.JS
 
   const updateTheme = useMutation({
     mutationFn: async (newTheme: ThemeId | null) => {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ theme: newTheme })
-        .eq('id', campaign.id);
+      const { error } = await supabase.from('campaigns').update({ theme: newTheme }).eq('id', campaign.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -46,9 +43,7 @@ function CampaignThemeRow({ campaign }: { campaign: CampaignSummary }): React.JS
           disabled={updateTheme.isPending}
         />
       </div>
-      {updateTheme.isError && (
-        <p className="text-sm text-destructive">{t('errors.saveFailed')}</p>
-      )}
+      {updateTheme.isError && <p className="text-sm text-destructive">{t('errors.saveFailed')}</p>}
     </div>
   );
 }

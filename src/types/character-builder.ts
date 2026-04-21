@@ -5,4 +5,4 @@ export type StepType =
   | 'classFeatures'
   | 'proficiencies'
   | 'equipment'
-  | 'backstory'
+  | 'backstory';

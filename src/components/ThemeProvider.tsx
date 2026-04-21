@@ -55,15 +55,21 @@ export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.
     toast.warning(i18next.t('errors.themeNotPersisted', { ns: 'common' }));
   }, []);
 
-  const setTheme = useCallback((id: ThemeId) => {
-    setThemeState(id);
-    if (!writeStoredTheme(id)) warnPersistenceFailed();
-  }, [warnPersistenceFailed]);
+  const setTheme = useCallback(
+    (id: ThemeId) => {
+      setThemeState(id);
+      if (!writeStoredTheme(id)) warnPersistenceFailed();
+    },
+    [warnPersistenceFailed]
+  );
 
-  const setColorMode = useCallback((mode: ColorMode) => {
-    setColorModeState(mode);
-    if (!writeStoredColorMode(mode)) warnPersistenceFailed();
-  }, [warnPersistenceFailed]);
+  const setColorMode = useCallback(
+    (mode: ColorMode) => {
+      setColorModeState(mode);
+      if (!writeStoredColorMode(mode)) warnPersistenceFailed();
+    },
+    [warnPersistenceFailed]
+  );
 
   const effectiveTheme = campaignThemeOverride ?? theme;
 
@@ -82,7 +88,16 @@ export function ThemeProvider({ children }: { children: ReactNode }): React.JSX.
       setCampaignThemeOverride,
       effectiveTheme,
     }),
-    [theme, setTheme, colorMode, setColorMode, resolvedMode, campaignThemeOverride, setCampaignThemeOverride, effectiveTheme],
+    [
+      theme,
+      setTheme,
+      colorMode,
+      setColorMode,
+      resolvedMode,
+      campaignThemeOverride,
+      setCampaignThemeOverride,
+      effectiveTheme,
+    ]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

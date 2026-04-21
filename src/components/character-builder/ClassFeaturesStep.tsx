@@ -1,27 +1,27 @@
-import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
-import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { type ChoiceKey } from '@/types/choices'
-import { type FightingStyleId } from '@/lib/dnd-helpers'
-import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name'
-import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles'
-import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { type ChoiceKey } from '@/types/choices';
+import { type FightingStyleId } from '@/lib/dnd-helpers';
+import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
+import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface FightingStyleChoiceInfo {
-  readonly choiceKey: ChoiceKey
-  readonly count: number
-  readonly from: readonly FightingStyleId[]
+  readonly choiceKey: ChoiceKey;
+  readonly count: number;
+  readonly from: readonly FightingStyleId[];
 }
 
 export function ClassFeaturesStep() {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
-  const context = useCharacterContext()
-  const { resolved, build, bundles } = context
+  const { t } = useTranslation('gamedata');
+  const { t: tc } = useTranslation('common');
+  const context = useCharacterContext();
+  const { resolved, build, bundles } = context;
 
   const fightingStyleChoices = useMemo<readonly FightingStyleChoiceInfo[]>(() => {
-    const fsc: FightingStyleChoiceInfo[] = []
+    const fsc: FightingStyleChoiceInfo[] = [];
     for (const bundle of bundles) {
       for (const grant of bundle.grants) {
         if (grant.type === 'fighting-style-choice') {
@@ -29,34 +29,32 @@ export function ClassFeaturesStep() {
             choiceKey: grant.key,
             count: grant.count,
             from: grant.from,
-          })
+          });
         }
       }
     }
-    return fsc
-  }, [bundles])
+    return fsc;
+  }, [bundles]);
 
   function getSelectedFightingStyles(choiceKey: ChoiceKey): readonly FightingStyleId[] {
-    const decision = build?.choices[choiceKey]
-    if (decision?.type === 'fighting-style-choice') return decision.styles
-    return []
+    const decision = build?.choices[choiceKey];
+    if (decision?.type === 'fighting-style-choice') return decision.styles;
+    return [];
   }
 
-  const spellcasting = resolved?.spellcasting
-  const hasFightingStyles = fightingStyleChoices.length > 0
-  const hasSpellcasting = !!spellcasting
-  const hasAnyContent = hasFightingStyles || hasSpellcasting
+  const spellcasting = resolved?.spellcasting;
+  const hasFightingStyles = fightingStyleChoices.length > 0;
+  const hasSpellcasting = !!spellcasting;
+  const hasAnyContent = hasFightingStyles || hasSpellcasting;
 
   return (
     <div className="space-y-6">
       {hasFightingStyles && (
         <div>
-          <h3 className="text-sm font-semibold mb-2">
-            {tc('characterBuilder.classFeatures.fightingStyles')}
-          </h3>
+          <h3 className="text-sm font-semibold mb-2">{tc('characterBuilder.classFeatures.fightingStyles')}</h3>
           {fightingStyleChoices.map((fsc) => {
-            const selected = getSelectedFightingStyles(fsc.choiceKey)
-            const remaining = fsc.count - selected.length
+            const selected = getSelectedFightingStyles(fsc.choiceKey);
+            const remaining = fsc.count - selected.length;
             return (
               <div key={fsc.choiceKey} className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
@@ -74,10 +72,10 @@ export function ClassFeaturesStep() {
                 </div>
                 <div className="space-y-2">
                   {fsc.from.map((styleId) => {
-                    const styleSource = FIGHTING_STYLE_SOURCES.find((s) => s.id === styleId)
-                    if (!styleSource) return null
-                    const isSelected = selected.includes(styleId)
-                    const radioId = `fighting-style-${fsc.choiceKey}-${styleId}`
+                    const styleSource = FIGHTING_STYLE_SOURCES.find((s) => s.id === styleId);
+                    if (!styleSource) return null;
+                    const isSelected = selected.includes(styleId);
+                    const radioId = `fighting-style-${fsc.choiceKey}-${styleId}`;
                     return (
                       <div
                         key={styleId}
@@ -107,28 +105,22 @@ export function ClassFeaturesStep() {
                           </p>
                         </Label>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       )}
 
       {hasSpellcasting && (
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold">
-            {tc('characterBuilder.classFeatures.spellcasting')}
-          </h3>
-          <p className="text-muted-foreground text-sm">
-            {tc('characterBuilder.classFeatures.basicVersion')}
-          </p>
+          <h3 className="text-sm font-semibold">{tc('characterBuilder.classFeatures.spellcasting')}</h3>
+          <p className="text-muted-foreground text-sm">{tc('characterBuilder.classFeatures.basicVersion')}</p>
           {spellcasting.cantrips.length > 0 && (
             <div>
-              <span className="text-sm font-semibold">
-                {tc('characterBuilder.classFeatures.cantrips')}:{' '}
-              </span>
+              <span className="text-sm font-semibold">{tc('characterBuilder.classFeatures.cantrips')}: </span>
               <span className="text-sm">{spellcasting.cantrips.join(', ')}</span>
             </div>
           )}
@@ -136,10 +128,8 @@ export function ClassFeaturesStep() {
       )}
 
       {!hasAnyContent && (
-        <p className="text-muted-foreground text-sm">
-          {tc('characterBuilder.classFeatures.noClassChoices')}
-        </p>
+        <p className="text-muted-foreground text-sm">{tc('characterBuilder.classFeatures.noClassChoices')}</p>
       )}
     </div>
-  )
+  );
 }

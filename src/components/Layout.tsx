@@ -21,16 +21,13 @@ export function Layout() {
 
   // Find the current campaign by current or previous slug
   const currentCampaign = campaigns?.find(
-    c => c.slug === campaignSlug || c.previous_slugs?.includes(campaignSlug ?? '')
+    (c) => c.slug === campaignSlug || c.previous_slugs?.includes(campaignSlug ?? '')
   );
 
   // Redirect from previous slug to canonical slug, preserving the path suffix
   useEffect(() => {
     if (currentCampaign && campaignSlug && currentCampaign.slug !== campaignSlug) {
-      const canonicalPath = location.pathname.replace(
-        `/campaign/${campaignSlug}`,
-        `/campaign/${currentCampaign.slug}`
-      );
+      const canonicalPath = location.pathname.replace(`/campaign/${campaignSlug}`, `/campaign/${currentCampaign.slug}`);
       navigate(canonicalPath, { replace: true });
     }
   }, [currentCampaign, campaignSlug, navigate, location.pathname]);
@@ -88,9 +85,7 @@ export function Layout() {
               <div className="max-w-md mx-auto p-6 rounded-lg border bg-card text-center space-y-4">
                 <AlertTriangle className="size-12 text-destructive mx-auto" />
                 <h2 className="text-xl font-bold text-foreground">{t('errors.loadingCampaigns')}</h2>
-                <p className="text-muted-foreground text-sm">
-                  {t('errors.loadingCampaignsDescription')}
-                </p>
+                <p className="text-muted-foreground text-sm">{t('errors.loadingCampaignsDescription')}</p>
                 <ul className="text-left text-foreground text-sm space-y-2 list-disc list-inside">
                   <li>{t('errors.supabaseRunning')}</li>
                   <li>{t('errors.envVars')}</li>
@@ -114,13 +109,18 @@ export function Layout() {
                 <AlertTriangle className="size-12 text-destructive mx-auto" />
                 <h2 className="text-xl font-bold text-foreground">{t('campaign.notFound')}</h2>
                 <p className="text-muted-foreground text-sm">{t('campaign.notFoundDescription')}</p>
-                <Button onClick={() => navigate('/')}>
-                  {t('campaign.backToCampaigns')}
-                </Button>
+                <Button onClick={() => navigate('/')}>{t('campaign.backToCampaigns')}</Button>
               </div>
             </div>
           ) : (
-            <Outlet context={{ campaignSlug, campaignId: currentCampaign?.id } as import('@/hooks/useCampaignContext').CampaignContext} />
+            <Outlet
+              context={
+                {
+                  campaignSlug,
+                  campaignId: currentCampaign?.id,
+                } as import('@/hooks/useCampaignContext').CampaignContext
+              }
+            />
           )}
         </div>
       </main>

@@ -1,38 +1,36 @@
-import { Badge } from '@/components/ui/badge'
-import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown'
-import { formatSigned } from '@/lib/format'
-import type { ResolvedAttack } from '@/types/resolved'
-import { ChevronDown, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
-import { getItemNameKey } from '@/lib/sources/items'
-import { useTranslation } from 'react-i18next'
+import { Badge } from '@/components/ui/badge';
+import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown';
+import { formatSigned } from '@/lib/format';
+import type { ResolvedAttack } from '@/types/resolved';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { getItemNameKey } from '@/lib/sources/items';
+import { useTranslation } from 'react-i18next';
 
 interface AttacksPanelProps {
-  readonly attacks: readonly ResolvedAttack[]
+  readonly attacks: readonly ResolvedAttack[];
 }
 
 export function AttacksPanel({ attacks }: AttacksPanelProps) {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+  const { t } = useTranslation('gamedata');
+  const { t: tc } = useTranslation('common');
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   const toggleRow = (index: number) => {
     setExpandedRows((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(index)) {
-        next.delete(index)
+        next.delete(index);
       } else {
-        next.add(index)
+        next.add(index);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   return (
     <div className="bg-card border rounded-lg p-6">
-      <h2 className="text-lg font-bold text-foreground mb-4">
-        {tc('characterSheet.sections.attacks')}
-      </h2>
+      <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.attacks')}</h2>
 
       {attacks.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tc('characterSheet.attacks.noAttacks')}</p>
@@ -45,10 +43,10 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
           </div>
 
           {attacks.map((attack, index) => {
-            const isExpanded = expandedRows.has(index)
-            const weaponName = t(getItemNameKey('weapon', attack.weaponId), { defaultValue: '' })
-            const damageType = t(`damageTypes.${attack.damageType}`)
-            const damageStr = `${attack.damageDice}${attack.damageBonus !== 0 ? formatSigned(attack.damageBonus) : ''} ${damageType}`
+            const isExpanded = expandedRows.has(index);
+            const weaponName = t(getItemNameKey('weapon', attack.weaponId), { defaultValue: '' });
+            const damageType = t(`damageTypes.${attack.damageType}`);
+            const damageStr = `${attack.damageDice}${attack.damageBonus !== 0 ? formatSigned(attack.damageBonus) : ''} ${damageType}`;
 
             return (
               <div key={attack.weaponId}>
@@ -58,9 +56,11 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
                   className="grid grid-cols-[1fr_auto_1fr] gap-2 w-full px-1 py-1.5 rounded hover:bg-muted/50 transition-colors text-left"
                 >
                   <span className="flex items-center gap-1 text-foreground font-medium">
-                    {isExpanded
-                      ? <ChevronDown className="size-3 text-muted-foreground shrink-0" />
-                      : <ChevronRight className="size-3 text-muted-foreground shrink-0" />}
+                    {isExpanded ? (
+                      <ChevronDown className="size-3 text-muted-foreground shrink-0" />
+                    ) : (
+                      <ChevronRight className="size-3 text-muted-foreground shrink-0" />
+                    )}
                     {weaponName}
                   </span>
                   <span className="font-mono font-bold text-foreground text-center">
@@ -94,10 +94,7 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
                       <div className="text-[10px] font-bold text-muted-foreground uppercase mb-0.5">
                         {tc('characterSheet.attacks.attackBonus')}
                       </div>
-                      <BonusBreakdown
-                        components={attack.attackBreakdown}
-                        total={attack.attackBonus}
-                      />
+                      <BonusBreakdown components={attack.attackBreakdown} total={attack.attackBonus} />
                     </div>
 
                     <div>
@@ -107,20 +104,17 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
                       <div className="text-muted-foreground text-[11px]">
                         {attack.damageDice}
                         {attack.damageBreakdown.length > 0 && (
-                          <BonusBreakdown
-                            components={attack.damageBreakdown}
-                            total={attack.damageBonus}
-                          />
+                          <BonusBreakdown components={attack.damageBreakdown} total={attack.damageBonus} />
                         )}
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }

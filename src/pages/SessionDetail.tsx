@@ -1,26 +1,16 @@
-import { parseIntOrDefault } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
-import { Session } from '@/types/database'
-import type { Json, TablesUpdate } from '@/types/supabase'
-import { useSession } from '@/hooks/useSessions'
-import { useSessionEncounters } from '@/hooks/useEncounters'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
-import {
-  AlertCircle,
-  ArrowLeft,
-  BookOpen,
-  Calendar,
-  Link as LinkIcon,
-  Lock,
-  Plus,
-  Trash2,
-  Zap,
-} from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { parseIntOrDefault } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { Session } from '@/types/database';
+import type { Json, TablesUpdate } from '@/types/supabase';
+import { useSession } from '@/hooks/useSessions';
+import { useSessionEncounters } from '@/hooks/useEncounters';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { AlertCircle, ArrowLeft, BookOpen, Calendar, Link as LinkIcon, Lock, Plus, Trash2, Zap } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -28,169 +18,169 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { ValidationError } from '@/components/ui/validation-error'
+} from '@/components/ui/dialog';
+import { ValidationError } from '@/components/ui/validation-error';
 
 interface LootEntry {
-  id: string
-  item_name: string
-  quantity: number
-  gold_value: number
-  awarded_to: string
+  id: string;
+  item_name: string;
+  quantity: number;
+  gold_value: number;
+  awarded_to: string;
 }
 
 export default function SessionDetail() {
-  const { t } = useTranslation('common')
+  const { t } = useTranslation('common');
   const { campaignSlug, sessionSlug } = useParams<{
-    campaignSlug: string
-    sessionSlug: string
-  }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const sessionSaveTimer = useRef<NodeJS.Timeout>(null)
-  const dmNotesSaveTimer = useRef<NodeJS.Timeout>(null)
+    campaignSlug: string;
+    sessionSlug: string;
+  }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const sessionSaveTimer = useRef<NodeJS.Timeout>(null);
+  const dmNotesSaveTimer = useRef<NodeJS.Timeout>(null);
   useEffect(() => {
-    const sessionTimer = sessionSaveTimer.current
-    const dmNotesTimer = dmNotesSaveTimer.current
+    const sessionTimer = sessionSaveTimer.current;
+    const dmNotesTimer = dmNotesSaveTimer.current;
     return () => {
-      if (sessionTimer) clearTimeout(sessionTimer)
-      if (dmNotesTimer) clearTimeout(dmNotesTimer)
-    }
-  }, [])
+      if (sessionTimer) clearTimeout(sessionTimer);
+      if (dmNotesTimer) clearTimeout(dmNotesTimer);
+    };
+  }, []);
 
-  const [formInitialized, setFormInitialized] = useState(false)
+  const [formInitialized, setFormInitialized] = useState(false);
   const [formData, setFormData] = useState<Partial<Session>>({
     name: '',
     session_number: 1,
     date: new Date().toISOString().split('T')[0],
     summary: '',
     experience_awarded: 0,
-  })
+  });
 
-  const [dmNotes, setDmNotes] = useState('')
-  const [loot, setLoot] = useState<LootEntry[]>([])
-  const [showNewLootForm, setShowNewLootForm] = useState(false)
-  const [deletingLootId, setDeletingLootId] = useState<string | null>(null)
-  const [lootNameError, setLootNameError] = useState<string>('')
+  const [dmNotes, setDmNotes] = useState('');
+  const [loot, setLoot] = useState<LootEntry[]>([]);
+  const [showNewLootForm, setShowNewLootForm] = useState(false);
+  const [deletingLootId, setDeletingLootId] = useState<string | null>(null);
+  const [lootNameError, setLootNameError] = useState<string>('');
   const [newLoot, setNewLoot] = useState<LootEntry>({
     id: crypto.randomUUID(),
     item_name: '',
     quantity: 1,
     gold_value: 0,
     awarded_to: '',
-  })
+  });
 
   // Fetch session
-  const { data: session, isLoading, error } = useSession(sessionSlug)
+  const { data: session, isLoading, error } = useSession(sessionSlug);
 
   // DM notes and loot are stored on the session itself
-  const sessionNotes = (session as unknown as Record<string, unknown>)?.notes as string ?? ''
-  const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? []
+  const sessionNotes = ((session as unknown as Record<string, unknown>)?.notes as string) ?? '';
+  const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? [];
 
-  const { data: encounters = [] } = useSessionEncounters(session?.id)
+  const { data: encounters = [] } = useSessionEncounters(session?.id);
 
   // Update session mutation
   const updateSessionMutation = useMutation({
     mutationFn: async (updates: Partial<Session>) => {
-      if (!session?.id) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required');
 
       const { error } = await supabase
         .from('sessions')
         .update(updates as unknown as TablesUpdate<'sessions'>)
-        .eq('id', session.id)
+        .eq('id', session.id);
 
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
-      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] });
+      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 });
     },
-  })
+  });
 
   // Update DM notes mutation (stored on sessions.notes column)
   const updateDmNotesMutation = useMutation({
     mutationFn: async (content: string) => {
-      if (!session?.id) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required');
 
       const { error } = await supabase
         .from('sessions')
         .update({ notes: content.trim() || null })
-        .eq('id', session.id)
+        .eq('id', session.id);
 
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
-      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 })
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] });
+      toast.success(t('status.saved'), { id: 'session-save', duration: 2000 });
     },
-  })
+  });
 
   // Upsert loot mutation (stored on sessions.loot JSONB column)
   const upsertLootMutation = useMutation({
     mutationFn: async (lootEntry: LootEntry) => {
-      if (!session?.id) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required');
 
-      const updatedLoot = [...loot.filter((l) => l.id !== lootEntry.id), lootEntry]
+      const updatedLoot = [...loot.filter((l) => l.id !== lootEntry.id), lootEntry];
       const { error } = await supabase
         .from('sessions')
         .update({ loot: updatedLoot as unknown as Json })
-        .eq('id', session.id)
+        .eq('id', session.id);
 
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: (_data, lootEntry) => {
-      setLoot(prev => [...prev.filter(l => l.id !== lootEntry.id), lootEntry])
-      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
+      setLoot((prev) => [...prev.filter((l) => l.id !== lootEntry.id), lootEntry]);
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] });
     },
-  })
+  });
 
   // Delete loot mutation
   const deleteLootMutation = useMutation({
     mutationFn: async (lootId: string) => {
-      if (!session?.id) throw new Error('Session ID is required')
+      if (!session?.id) throw new Error('Session ID is required');
 
-      const updatedLoot = loot.filter((l) => l.id !== lootId)
+      const updatedLoot = loot.filter((l) => l.id !== lootId);
       const { error } = await supabase
         .from('sessions')
         .update({ loot: updatedLoot as unknown as Json })
-        .eq('id', session.id)
+        .eq('id', session.id);
 
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: (_data, lootId) => {
-      setLoot(prev => prev.filter(l => l.id !== lootId))
-      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] })
+      setLoot((prev) => prev.filter((l) => l.id !== lootId));
+      queryClient.invalidateQueries({ queryKey: ['session', sessionSlug] });
     },
-  })
+  });
 
   // Sync form state from query data on first load
   if (session && !formInitialized) {
-    setFormInitialized(true)
-    setFormData(session)
-    setDmNotes(sessionNotes)
-    setLoot(lootItems)
+    setFormInitialized(true);
+    setFormData(session);
+    setDmNotes(sessionNotes);
+    setLoot(lootItems);
   }
 
   function scheduleSave(timer: React.RefObject<NodeJS.Timeout | null>, mutateFn: () => void): void {
-    if (timer.current) clearTimeout(timer.current)
-    timer.current = setTimeout(mutateFn, 3000)
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(mutateFn, 3000);
   }
 
   // Auto-save handler
   const handleFieldChange = useCallback(
     (field: string, value: unknown) => {
-      const updated = { ...formData, [field]: value }
-      setFormData(updated)
-      scheduleSave(sessionSaveTimer, () => updateSessionMutation.mutate(updated))
+      const updated = { ...formData, [field]: value };
+      setFormData(updated);
+      scheduleSave(sessionSaveTimer, () => updateSessionMutation.mutate(updated));
     },
     [formData, updateSessionMutation]
-  )
+  );
 
   const handleAddLoot = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!newLoot.item_name.trim()) {
-      setLootNameError(t('validation.itemNameRequired'))
-      return
+      setLootNameError(t('validation.itemNameRequired'));
+      return;
     }
     upsertLootMutation.mutate(newLoot, {
       onSuccess: () => {
@@ -200,54 +190,54 @@ export default function SessionDetail() {
           quantity: 1,
           gold_value: 0,
           awarded_to: '',
-        })
-        setLootNameError('')
-        setShowNewLootForm(false)
+        });
+        setLootNameError('');
+        setShowNewLootForm(false);
       },
-    })
-  }
+    });
+  };
 
   const handleDeleteLoot = (lootId: string) => {
-    setDeletingLootId(lootId)
-  }
+    setDeletingLootId(lootId);
+  };
 
   const handleConfirmDeleteLoot = () => {
-    if (!deletingLootId) return
+    if (!deletingLootId) return;
     deleteLootMutation.mutate(deletingLootId, {
       onSettled: () => setDeletingLootId(null),
-    })
-  }
+    });
+  };
 
   function encounterStatusClass(status: string): string {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-600'
+        return 'bg-green-100 text-green-600';
       case 'active':
-        return 'bg-red-100 text-destructive'
+        return 'bg-red-100 text-destructive';
       default:
-        return 'bg-muted text-muted-foreground'
+        return 'bg-muted text-muted-foreground';
     }
   }
 
   function encounterStatusLabel(status: string): string {
     switch (status) {
       case 'completed':
-        return t('sessionDetail.encounterCompleted')
+        return t('sessionDetail.encounterCompleted');
       case 'active':
-        return t('sessionDetail.encounterActive')
+        return t('sessionDetail.encounterActive');
       default:
-        return t('sessionDetail.encounterPlanning')
+        return t('sessionDetail.encounterPlanning');
     }
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString + 'T00:00:00')
+    const date = new Date(dateString + 'T00:00:00');
     return date.toLocaleDateString(undefined, {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
-    })
-  }
+    });
+  };
 
   if (error) {
     return (
@@ -269,7 +259,7 @@ export default function SessionDetail() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (isLoading) {
@@ -282,10 +272,10 @@ export default function SessionDetail() {
           <p className="text-muted-foreground mt-4">{t('sessionDetail.loadingSession')}</p>
         </div>
       </div>
-    )
+    );
   }
 
-  const totalLootValue = loot.reduce((sum, item) => sum + item.gold_value, 0)
+  const totalLootValue = loot.reduce((sum, item) => sum + item.gold_value, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -336,12 +326,7 @@ export default function SessionDetail() {
               <input
                 type="number"
                 value={formData.session_number || 1}
-                onChange={(e) =>
-                  handleFieldChange(
-                    'session_number',
-                    parseIntOrDefault(e.target.value, 1)
-                  )
-                }
+                onChange={(e) => handleFieldChange('session_number', parseIntOrDefault(e.target.value, 1))}
                 className="w-full bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 min="1"
               />
@@ -380,9 +365,7 @@ export default function SessionDetail() {
             <input
               type="number"
               value={formData.experience_awarded || 0}
-              onChange={(e) =>
-                handleFieldChange('experience_awarded', parseIntOrDefault(e.target.value, 0))
-              }
+              onChange={(e) => handleFieldChange('experience_awarded', parseIntOrDefault(e.target.value, 0))}
               className="w-full md:w-48 bg-muted border border-border rounded-lg px-4 py-2 text-foreground outline-none focus:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               min="0"
             />
@@ -399,9 +382,9 @@ export default function SessionDetail() {
           <textarea
             value={dmNotes}
             onChange={(e) => {
-              const newValue = e.target.value
-              setDmNotes(newValue)
-              scheduleSave(dmNotesSaveTimer, () => updateDmNotesMutation.mutate(newValue))
+              const newValue = e.target.value;
+              setDmNotes(newValue);
+              scheduleSave(dmNotesSaveTimer, () => updateDmNotesMutation.mutate(newValue));
             }}
             placeholder={t('sessionDetail.placeholderDmNotes')}
             rows={6}
@@ -418,8 +401,8 @@ export default function SessionDetail() {
             </h2>
             <button
               onClick={() => {
-                setLootNameError('')
-                setShowNewLootForm(true)
+                setLootNameError('');
+                setShowNewLootForm(true);
               }}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
@@ -436,8 +419,8 @@ export default function SessionDetail() {
                     type="text"
                     value={newLoot.item_name}
                     onChange={(e) => {
-                      setLootNameError('')
-                      setNewLoot({ ...newLoot, item_name: e.target.value })
+                      setLootNameError('');
+                      setNewLoot({ ...newLoot, item_name: e.target.value });
                     }}
                     placeholder={t('sessionDetail.placeholderItemName')}
                     className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
@@ -474,9 +457,7 @@ export default function SessionDetail() {
                 <input
                   type="text"
                   value={newLoot.awarded_to}
-                  onChange={(e) =>
-                    setNewLoot({ ...newLoot, awarded_to: e.target.value })
-                  }
+                  onChange={(e) => setNewLoot({ ...newLoot, awarded_to: e.target.value })}
                   placeholder={t('sessionDetail.placeholderAwardedTo')}
                   className="bg-muted border border-input rounded px-3 py-2 text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                 />
@@ -485,7 +466,10 @@ export default function SessionDetail() {
               <div className="flex gap-2 justify-end">
                 <button
                   type="button"
-                  onClick={() => { setShowNewLootForm(false); setLootNameError('') }}
+                  onClick={() => {
+                    setShowNewLootForm(false);
+                    setLootNameError('');
+                  }}
                   className="px-4 py-2 bg-muted hover:bg-accent text-foreground rounded transition-colors text-sm"
                 >
                   {t('buttons.cancel')}
@@ -502,28 +486,17 @@ export default function SessionDetail() {
           )}
 
           {loot.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4 text-center">
-              {t('sessionDetail.noItemsYet')}
-            </p>
+            <p className="text-muted-foreground text-sm py-4 text-center">{t('sessionDetail.noItemsYet')}</p>
           ) : (
             <div className="space-y-3">
               {loot.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-muted rounded-lg p-4 flex items-start justify-between"
-                >
+                <div key={item.id} className="bg-muted rounded-lg p-4 flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-foreground font-semibold">
-                      {item.item_name}
-                    </p>
+                    <p className="text-foreground font-semibold">{item.item_name}</p>
                     <p className="text-muted-foreground text-sm mt-1">
                       {t('sessionDetail.lootQtyValue', { qty: item.quantity, value: item.gold_value })}
                     </p>
-                    {item.awarded_to && (
-                      <p className="text-muted-foreground text-sm mt-2">
-                        → {item.awarded_to}
-                      </p>
-                    )}
+                    {item.awarded_to && <p className="text-muted-foreground text-sm mt-2">→ {item.awarded_to}</p>}
                   </div>
                   <button
                     onClick={() => handleDeleteLoot(item.id)}
@@ -554,9 +527,7 @@ export default function SessionDetail() {
               {t('sessionDetail.linkedEncounters')}
             </h2>
             <button
-              onClick={() =>
-                navigate(`/campaign/${campaignSlug}/encounter/new?session=${session?.id}`)
-              }
+              onClick={() => navigate(`/campaign/${campaignSlug}/encounter/new?session=${session?.id}`)}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded-lg transition-colors text-sm"
             >
               <Plus className="size-4" />
@@ -565,28 +536,20 @@ export default function SessionDetail() {
           </div>
 
           {encounters.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-4 text-center">
-              {t('sessionDetail.noEncounters')}
-            </p>
+            <p className="text-muted-foreground text-sm py-4 text-center">{t('sessionDetail.noEncounters')}</p>
           ) : (
             <div className="space-y-3">
               {encounters.map((encounter) => (
                 <div
                   key={encounter.id}
-                  onClick={() =>
-                    navigate(`/campaign/${campaignSlug}/encounter/${encounter.id}`)
-                  }
+                  onClick={() => navigate(`/campaign/${campaignSlug}/encounter/${encounter.id}`)}
                   className="bg-muted hover:bg-muted/50 rounded-lg p-4 cursor-pointer transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <p className="text-foreground font-semibold">
-                        {encounter.name}
-                      </p>
+                      <p className="text-foreground font-semibold">{encounter.name}</p>
                       {encounter.description && (
-                        <p className="text-muted-foreground text-sm mt-1">
-                          {encounter.description}
-                        </p>
+                        <p className="text-muted-foreground text-sm mt-1">{encounter.description}</p>
                       )}
                     </div>
                     <span
@@ -603,29 +566,27 @@ export default function SessionDetail() {
       </div>
 
       {/* Remove Loot Confirmation Dialog */}
-      <Dialog open={deletingLootId !== null} onOpenChange={(open) => { if (!open) setDeletingLootId(null) }}>
+      <Dialog
+        open={deletingLootId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingLootId(null);
+        }}
+      >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>{t('sessionDetail.confirmRemoveLootTitle')}</DialogTitle>
             <DialogDescription>{t('sessionDetail.confirmRemoveLoot')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeletingLootId(null)}
-            >
+            <Button variant="outline" onClick={() => setDeletingLootId(null)}>
               {t('buttons.cancel')}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDeleteLoot}
-              pending={deleteLootMutation.isPending}
-            >
+            <Button variant="destructive" onClick={handleConfirmDeleteLoot} pending={deleteLootMutation.isPending}>
               {t('buttons.remove')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

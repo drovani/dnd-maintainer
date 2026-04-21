@@ -1,52 +1,52 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses'
-import type { PendingChoice } from '@/types/resolved'
-import type { ChoiceKey, ChoiceDecision } from '@/types/choices'
-import type { SubclassId } from '@/types/sources'
-import { isSubclassId } from '@/types/sources'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
+import type { PendingChoice } from '@/types/resolved';
+import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
+import type { SubclassId } from '@/types/sources';
+import { isSubclassId } from '@/types/sources';
+import { useTranslation } from 'react-i18next';
 
 interface SubclassPickerProps {
-  readonly choice: Extract<PendingChoice, { type: 'subclass' }>
-  readonly currentDecision?: ChoiceDecision | undefined
-  readonly onDecide: (choiceKey: ChoiceKey, subclassId: SubclassId) => void
-  readonly onClear?: (key: ChoiceKey) => void
+  readonly choice: Extract<PendingChoice, { type: 'subclass' }>;
+  readonly currentDecision?: ChoiceDecision | undefined;
+  readonly onDecide: (choiceKey: ChoiceKey, subclassId: SubclassId) => void;
+  readonly onClear?: (key: ChoiceKey) => void;
   /** When true, calls onDecide immediately on selection and hides the confirm button. */
-  readonly autoCommit?: boolean
+  readonly autoCommit?: boolean;
 }
 
 export function SubclassPicker({ choice, currentDecision, onDecide, onClear, autoCommit }: SubclassPickerProps) {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
+  const { t } = useTranslation('gamedata');
+  const { t: tc } = useTranslation('common');
 
   const existingSubclassId: SubclassId | null =
     currentDecision?.type === 'subclass' && isSubclassId(currentDecision.subclassId)
       ? currentDecision.subclassId
-      : null
-  const [selected, setSelected] = useState<SubclassId | null>(existingSubclassId)
-  const hasExistingDecision = existingSubclassId !== null
+      : null;
+  const [selected, setSelected] = useState<SubclassId | null>(existingSubclassId);
+  const hasExistingDecision = existingSubclassId !== null;
 
-  const subclasses = SUBCLASS_SOURCES.filter((sc) => sc.classId === choice.classId)
-  const className = t(`classes.${choice.classId}`, { defaultValue: choice.classId })
+  const subclasses = SUBCLASS_SOURCES.filter((sc) => sc.classId === choice.classId);
+  const className = t(`classes.${choice.classId}`, { defaultValue: choice.classId });
 
   const handleSelect = (id: SubclassId) => {
-    setSelected(id)
+    setSelected(id);
     if (autoCommit) {
-      onDecide(choice.choiceKey, id)
+      onDecide(choice.choiceKey, id);
     }
-  }
+  };
 
   const handleConfirm = () => {
-    if (!selected) return
-    onDecide(choice.choiceKey, selected)
-  }
+    if (!selected) return;
+    onDecide(choice.choiceKey, selected);
+  };
 
   const handleClear = () => {
-    setSelected(null)
-    onClear?.(choice.choiceKey)
-  }
+    setSelected(null);
+    onClear?.(choice.choiceKey);
+  };
 
   return (
     <Card>
@@ -58,12 +58,10 @@ export function SubclassPicker({ choice, currentDecision, onDecide, onClear, aut
       </CardHeader>
       <CardContent className="space-y-3">
         {subclasses.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            {tc('characterSheet.subclassPicker.noSubclassesAvailable')}
-          </p>
+          <p className="text-sm text-muted-foreground">{tc('characterSheet.subclassPicker.noSubclassesAvailable')}</p>
         )}
         {subclasses.map((sc) => {
-          const isSelected = selected === sc.id
+          const isSelected = selected === sc.id;
 
           return (
             <button
@@ -77,9 +75,7 @@ export function SubclassPicker({ choice, currentDecision, onDecide, onClear, aut
               <div className={`text-sm text-foreground ${isSelected ? 'font-semibold' : ''}`}>
                 {t(`subclasses.${sc.id}.name`)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t(`subclasses.${sc.id}.description`)}
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">{t(`subclasses.${sc.id}.description`)}</p>
               {isSelected && (
                 <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
                   {sc.features.flatMap((f) =>
@@ -91,15 +87,14 @@ export function SubclassPicker({ choice, currentDecision, onDecide, onClear, aut
                             {t(`features.${g.feature.id}.name`, { defaultValue: g.feature.id })}
                           </span>
                           {` ${tc('characterSheet.classLevelLabel', { level: f.classLevel })} `}
-                          &mdash;{' '}
-                          {t(`features.${g.feature.id}.description`, { defaultValue: '' })}
+                          &mdash; {t(`features.${g.feature.id}.description`, { defaultValue: '' })}
                         </li>
                       ))
                   )}
                 </ul>
               )}
             </button>
-          )
+          );
         })}
 
         {!autoCommit && (
@@ -109,16 +104,12 @@ export function SubclassPicker({ choice, currentDecision, onDecide, onClear, aut
                 {tc('buttons.clearSelection')}
               </Button>
             )}
-            <Button
-              className="flex-1"
-              disabled={!selected}
-              onClick={handleConfirm}
-            >
+            <Button className="flex-1" disabled={!selected} onClick={handleConfirm}>
               {tc('buttons.confirm')}
             </Button>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

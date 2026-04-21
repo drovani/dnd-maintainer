@@ -27,9 +27,7 @@ export function ThemePicker(props: ThemePickerProps): React.JSX.Element {
             className={cn(
               'flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              value === null
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border hover:bg-accent'
+              value === null ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'
             )}
           >
             {value === null && <Check className="size-4" />}
@@ -45,15 +43,10 @@ export function ThemePicker(props: ThemePickerProps): React.JSX.Element {
             className={cn(
               'flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              value === theme.id
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border hover:bg-accent'
+              value === theme.id ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'
             )}
           >
-            <span
-              className="size-4 rounded-full border border-border"
-              style={{ backgroundColor: theme.swatch }}
-            />
+            <span className="size-4 rounded-full border border-border" style={{ backgroundColor: theme.swatch }} />
             {value === theme.id && <Check className="size-4" />}
             {t(theme.labelKey)}
           </button>

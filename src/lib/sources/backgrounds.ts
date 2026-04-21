@@ -1,5 +1,5 @@
-import type { BackgroundSource } from '@/types/sources'
-import { createChoiceKey } from '@/types/choices'
+import type { BackgroundSource } from '@/types/sources';
+import { createChoiceKey } from '@/types/choices';
 
 export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
   {
@@ -13,12 +13,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         category: 'tool',
         key: createChoiceKey('tool-choice', 'background', 'soldier', 0),
         count: 1,
-        from: [
-          'gaming-set-dice',
-          'gaming-set-cards',
-          'gaming-set-dragonchess',
-          'gaming-set-three-dragon-ante',
-        ],
+        from: ['gaming-set-dice', 'gaming-set-cards', 'gaming-set-dragonchess', 'gaming-set-three-dragon-ante'],
       },
       {
         type: 'proficiency-choice',
@@ -32,4 +27,4 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
       { type: 'equipment', itemId: 'pouch', quantity: 1 },
     ],
   },
-]
+];
