@@ -1,73 +1,65 @@
-import { useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { LevelUpDialog } from '@/components/character-sheet/LevelUpDialog'
-import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { DND_CLASSES } from '@/lib/dnd-helpers'
-import type { ClassId, FightingStyleId } from '@/lib/dnd-helpers'
-import type { ChoiceKey } from '@/types/choices'
-import type { ChoiceDecision } from '@/types/choices'
-import type { SubclassId } from '@/types/sources'
-import { useTranslation } from 'react-i18next'
+import { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { LevelUpDialog } from '@/components/character-sheet/LevelUpDialog';
+import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { DND_CLASSES } from '@/lib/dnd-helpers';
+import type { ClassId, FightingStyleId } from '@/lib/dnd-helpers';
+import type { ChoiceKey } from '@/types/choices';
+import type { ChoiceDecision } from '@/types/choices';
+import type { SubclassId } from '@/types/sources';
+import { useTranslation } from 'react-i18next';
 
 interface LevelControlsProps {
   /** The class to level up into. Determines hit die and class-level progression. */
-  readonly classId: ClassId
+  readonly classId: ClassId;
 }
 
 export function LevelControls({ classId }: LevelControlsProps) {
-  const { t } = useTranslation('common')
-  const { t: tg } = useTranslation('gamedata')
-  const {
-    level,
-    rows,
-    resolved,
-    hasDeletedRows,
-    nextRestoreLevel,
-    levelUp,
-    levelDown,
-    undoLevelDown,
-  } = useCharacterContext()
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const { t } = useTranslation('common');
+  const { t: tg } = useTranslation('gamedata');
+  const { level, rows, resolved, hasDeletedRows, nextRestoreLevel, levelUp, levelDown, undoLevelDown } =
+    useCharacterContext();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const canLevelUp = level < 20
-  const canLevelDown = level > 1
+  const canLevelUp = level < 20;
+  const canLevelDown = level > 1;
 
-  const classData = DND_CLASSES.find((c) => c.id === classId)
+  const classData = DND_CLASSES.find((c) => c.id === classId);
   if (!classData) {
-    throw new Error(`LevelControls: classId "${classId}" not found in DND_CLASSES — this is a data integrity error`)
+    throw new Error(`LevelControls: classId "${classId}" not found in DND_CLASSES — this is a data integrity error`);
   }
-  const hitDie = classData.hitDie
-  const className = tg(`classes.${classId}`)
-  const targetLevel = level + 1
+  const hitDie = classData.hitDie;
+  const className = tg(`classes.${classId}`);
+  const targetLevel = level + 1;
 
   // Find the current subclass for this class (if any)
-  const currentSubclassId = (rows.find(
-    (r) => r.class_id === classId && r.subclass_id != null && r.deleted_at == null,
-  )?.subclass_id ?? null) as SubclassId | null
+  const currentSubclassId = (rows.find((r) => r.class_id === classId && r.subclass_id != null && r.deleted_at == null)
+    ?.subclass_id ?? null) as SubclassId | null;
 
   // Collect already-chosen fighting styles from existing build choices
   const alreadyChosenStyles = useMemo((): readonly FightingStyleId[] => {
-    const styles: FightingStyleId[] = []
+    const styles: FightingStyleId[] = [];
     for (const row of rows) {
       if (row.choices) {
         for (const decision of Object.values(row.choices)) {
           if (decision.type === 'fighting-style-choice') {
-            styles.push(...(decision.styles as FightingStyleId[]))
+            styles.push(...(decision.styles as FightingStyleId[]));
           }
         }
       }
     }
-    return styles
-  }, [rows])
+    return styles;
+  }, [rows]);
 
   const handleConfirmLevelUp = (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
-    levelUp(classId, hpRoll, decisions)
-  }
+    levelUp(classId, hpRoll, decisions);
+  };
 
   // Button label changes based on whether we're replacing a soft-deleted level
-  const levelUpLabel = hasDeletedRows && nextRestoreLevel != null
-    ? t('characterSheet.levelManagement.replaceLevelUp', { className, level: targetLevel })
-    : t('characterSheet.levelManagement.levelUpTo', { className, level: targetLevel })
+  const levelUpLabel =
+    hasDeletedRows && nextRestoreLevel != null
+      ? t('characterSheet.levelManagement.replaceLevelUp', { className, level: targetLevel })
+      : t('characterSheet.levelManagement.levelUpTo', { className, level: targetLevel });
 
   return (
     <>
@@ -102,5 +94,5 @@ export function LevelControls({ classId }: LevelControlsProps) {
         alreadyChosenStyles={alreadyChosenStyles}
       />
     </>
-  )
+  );
 }

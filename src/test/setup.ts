@@ -1,8 +1,8 @@
 /// <reference types="vitest/globals" />
-import '@testing-library/jest-dom/vitest'
+import '@testing-library/jest-dom/vitest';
 
-global.URL.createObjectURL = vi.fn(() => 'blob:mock')
-global.URL.revokeObjectURL = vi.fn()
+global.URL.createObjectURL = vi.fn(() => 'blob:mock');
+global.URL.revokeObjectURL = vi.fn();
 
 // jsdom doesn't implement matchMedia — provide a stub for ThemeProvider
 Object.defineProperty(window, 'matchMedia', {
@@ -17,4 +17,4 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-})
+});

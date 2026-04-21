@@ -5,119 +5,108 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
-import { supabase } from '@/lib/supabase'
-import { CampaignSummary } from '@/types/database'
-import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns'
-import { useQuery } from '@tanstack/react-query'
-import {
-  Archive,
-  BookOpen,
-  Plus,
-  Search,
-  Swords,
-  Users,
-  Zap,
-} from 'lucide-react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
-import { Trans, useTranslation } from 'react-i18next'
-import { ValidationError } from '@/components/ui/validation-error'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/lib/supabase';
+import { CampaignSummary } from '@/types/database';
+import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns';
+import { useQuery } from '@tanstack/react-query';
+import { Archive, BookOpen, Plus, Search, Swords, Users, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Trans, useTranslation } from 'react-i18next';
+import { ValidationError } from '@/components/ui/validation-error';
 
 export default function CampaignList() {
-  const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showNewCampaignForm, setShowNewCampaignForm] = useState(false)
-  const [campaignToArchive, setCampaignToArchive] = useState<CampaignSummary | null>(null)
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showNewCampaignForm, setShowNewCampaignForm] = useState(false);
+  const [campaignToArchive, setCampaignToArchive] = useState<CampaignSummary | null>(null);
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     setting: '',
     description: '',
-  })
-  const [nameError, setNameError] = useState<string>('')
+  });
+  const [nameError, setNameError] = useState<string>('');
 
-  const { t } = useTranslation('common')
+  const { t } = useTranslation('common');
 
-  const { data: campaigns = [], isLoading } = useCampaigns()
-  const { create: createCampaignMutation, archive: archiveCampaignMutation } = useCampaignMutations()
+  const { data: campaigns = [], isLoading } = useCampaigns();
+  const { create: createCampaignMutation, archive: archiveCampaignMutation } = useCampaignMutations();
 
   const { data: characterCounts = {} } = useQuery({
     queryKey: ['campaign-character-counts'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('campaign_id, character_type')
-      if (error) throw error
+      const { data, error } = await supabase.from('characters').select('campaign_id, character_type');
+      if (error) throw error;
 
-      const counts: Record<string, { pc: number; npc: number }> = {}
+      const counts: Record<string, { pc: number; npc: number }> = {};
       data.forEach((char) => {
         if (!counts[char.campaign_id]) {
-          counts[char.campaign_id] = { pc: 0, npc: 0 }
+          counts[char.campaign_id] = { pc: 0, npc: 0 };
         }
         if (char.character_type === 'npc') {
-          counts[char.campaign_id].npc++
+          counts[char.campaign_id].npc++;
         } else {
-          counts[char.campaign_id].pc++
+          counts[char.campaign_id].pc++;
         }
-      })
-      return counts
+      });
+      return counts;
     },
-  })
+  });
 
   const { data: sessionCounts = {} } = useQuery({
     queryKey: ['campaign-session-counts'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('campaign_id')
-      if (error) throw error
+      const { data, error } = await supabase.from('sessions').select('campaign_id');
+      if (error) throw error;
 
-      const counts: Record<string, number> = {}
+      const counts: Record<string, number> = {};
       data.forEach((session) => {
-        counts[session.campaign_id] = (counts[session.campaign_id] || 0) + 1
-      })
-      return counts
+        counts[session.campaign_id] = (counts[session.campaign_id] || 0) + 1;
+      });
+      return counts;
     },
-  })
+  });
 
   const handleCreateCampaign = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!newCampaign.name.trim()) {
-      setNameError(t('validation.nameRequired'))
-      return
+      setNameError(t('validation.nameRequired'));
+      return;
     }
     createCampaignMutation.mutate(newCampaign, {
       onSuccess: (data) => {
-        setShowNewCampaignForm(false)
-        setNewCampaign({ name: '', setting: '', description: '' })
-        setNameError('')
+        setShowNewCampaignForm(false);
+        setNewCampaign({ name: '', setting: '', description: '' });
+        setNameError('');
         if (data?.slug) {
-          navigate(`/campaign/${data.slug}`)
+          navigate(`/campaign/${data.slug}`);
         } else {
-          toast.error(t('errors.missingSlug'))
+          toast.error(t('errors.missingSlug'));
         }
       },
-    })
-  }
+    });
+  };
 
   const handleArchiveCampaign = () => {
     if (campaignToArchive) {
       archiveCampaignMutation.mutate(campaignToArchive.id, {
         onSuccess: () => setCampaignToArchive(null),
-      })
+      });
     }
-  }
+  };
 
-  const filteredCampaigns = campaigns.filter((campaign) =>
-    campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    campaign.setting?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredCampaigns = campaigns.filter(
+    (campaign) =>
+      campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.setting?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -134,7 +123,7 @@ export default function CampaignList() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -148,11 +137,14 @@ export default function CampaignList() {
                 <Swords className="size-10 text-muted-foreground" />
                 {t('campaign.campaigns')}
               </h1>
-              <p className="text-muted-foreground mt-2">
-                {t('campaign.campaignCount', { count: campaigns.length })}
-              </p>
+              <p className="text-muted-foreground mt-2">{t('campaign.campaignCount', { count: campaigns.length })}</p>
             </div>
-            <Button onClick={() => { setShowNewCampaignForm(true); setNameError('') }}>
+            <Button
+              onClick={() => {
+                setShowNewCampaignForm(true);
+                setNameError('');
+              }}
+            >
               <Plus className="size-5" />
               {t('buttons.newCampaign')}
             </Button>
@@ -173,13 +165,17 @@ export default function CampaignList() {
       </div>
 
       {/* New Campaign Dialog */}
-      <Dialog open={showNewCampaignForm} onOpenChange={(open) => { setShowNewCampaignForm(open); if (!open) setNameError('') }}>
+      <Dialog
+        open={showNewCampaignForm}
+        onOpenChange={(open) => {
+          setShowNewCampaignForm(open);
+          if (!open) setNameError('');
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t('campaign.createNew')}</DialogTitle>
-            <DialogDescription>
-              {t('campaign.createNewDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('campaign.createNewDescription')}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleCreateCampaign} className="space-y-4">
@@ -190,8 +186,8 @@ export default function CampaignList() {
                   id="campaign-name"
                   value={newCampaign.name}
                   onChange={(e) => {
-                    setNameError('')
-                    setNewCampaign({ ...newCampaign, name: e.target.value })
+                    setNameError('');
+                    setNewCampaign({ ...newCampaign, name: e.target.value });
                   }}
                   placeholder={t('campaign.placeholderName')}
                 />
@@ -204,9 +200,7 @@ export default function CampaignList() {
               <Input
                 id="campaign-setting"
                 value={newCampaign.setting}
-                onChange={(e) =>
-                  setNewCampaign({ ...newCampaign, setting: e.target.value })
-                }
+                onChange={(e) => setNewCampaign({ ...newCampaign, setting: e.target.value })}
                 placeholder={t('campaign.placeholderSetting')}
               />
             </div>
@@ -231,14 +225,14 @@ export default function CampaignList() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => { setShowNewCampaignForm(false); setNameError('') }}
+                onClick={() => {
+                  setShowNewCampaignForm(false);
+                  setNameError('');
+                }}
               >
                 {t('buttons.cancel')}
               </Button>
-              <Button
-                type="submit"
-                pending={createCampaignMutation.isPending}
-              >
+              <Button type="submit" pending={createCampaignMutation.isPending}>
                 {createCampaignMutation.isPending ? t('buttons.creating') : t('buttons.create')}
               </Button>
             </DialogFooter>
@@ -252,9 +246,7 @@ export default function CampaignList() {
           <div className="text-center py-24 rounded-lg border bg-card p-12">
             <Swords className="size-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">
-              {campaigns.length === 0
-                ? t('campaign.noCampaignsYet')
-                : t('campaign.noCampaignsMatch')}
+              {campaigns.length === 0 ? t('campaign.noCampaignsYet') : t('campaign.noCampaignsMatch')}
             </h3>
             <p className="text-muted-foreground mb-6">
               {campaigns.length === 0
@@ -262,7 +254,12 @@ export default function CampaignList() {
                 : t('campaign.noCampaignsMatchDescription')}
             </p>
             {campaigns.length === 0 && (
-              <Button onClick={() => { setShowNewCampaignForm(true); setNameError('') }}>
+              <Button
+                onClick={() => {
+                  setShowNewCampaignForm(true);
+                  setNameError('');
+                }}
+              >
                 <Plus className="size-5" />
                 {t('buttons.createYourFirstCampaign')}
               </Button>
@@ -274,8 +271,8 @@ export default function CampaignList() {
               const charCount = characterCounts[campaign.id] || {
                 pc: 0,
                 npc: 0,
-              }
-              const sessionCount = sessionCounts[campaign.id] || 0
+              };
+              const sessionCount = sessionCounts[campaign.id] || 0;
 
               return (
                 <div
@@ -289,16 +286,12 @@ export default function CampaignList() {
                       <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                         {campaign.name}
                       </h3>
-                      {campaign.setting && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {campaign.setting}
-                        </p>
-                      )}
+                      {campaign.setting && <p className="text-sm text-muted-foreground mt-1">{campaign.setting}</p>}
                     </div>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
-                        setCampaignToArchive(campaign)
+                        e.stopPropagation();
+                        setCampaignToArchive(campaign);
                       }}
                       className="text-muted-foreground hover:text-foreground transition-colors"
                       title={t('campaign.archiveTitle')}
@@ -309,9 +302,7 @@ export default function CampaignList() {
 
                   {/* Description */}
                   {campaign.description && (
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                      {campaign.description}
-                    </p>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{campaign.description}</p>
                   )}
 
                   {/* Stats */}
@@ -320,18 +311,14 @@ export default function CampaignList() {
                       <Users className="size-4 text-muted-foreground" />
                       <div>
                         <p className="text-muted-foreground text-xs">{t('campaign.stats.characters')}</p>
-                        <p className="text-foreground font-bold">
-                          {charCount.pc + charCount.npc}
-                        </p>
+                        <p className="text-foreground font-bold">{charCount.pc + charCount.npc}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <BookOpen className="size-4 text-muted-foreground" />
                       <div>
                         <p className="text-muted-foreground text-xs">{t('campaign.stats.sessions')}</p>
-                        <p className="text-foreground font-bold">
-                          {sessionCount}
-                        </p>
+                        <p className="text-foreground font-bold">{sessionCount}</p>
                       </div>
                     </div>
                   </div>
@@ -360,14 +347,19 @@ export default function CampaignList() {
                     </span>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
       </div>
 
       {/* Archive Confirmation Dialog */}
-      <Dialog open={!!campaignToArchive} onOpenChange={(open) => { if (!open) setCampaignToArchive(null) }}>
+      <Dialog
+        open={!!campaignToArchive}
+        onOpenChange={(open) => {
+          if (!open) setCampaignToArchive(null);
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>{t('campaign.archiveCampaign')}</DialogTitle>
@@ -380,22 +372,15 @@ export default function CampaignList() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setCampaignToArchive(null)}
-            >
+            <Button variant="outline" onClick={() => setCampaignToArchive(null)}>
               {t('buttons.cancel')}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleArchiveCampaign}
-              pending={archiveCampaignMutation.isPending}
-            >
+            <Button variant="destructive" onClick={handleArchiveCampaign} pending={archiveCampaignMutation.isPending}>
               {archiveCampaignMutation.isPending ? t('buttons.archiving') : t('buttons.archive')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

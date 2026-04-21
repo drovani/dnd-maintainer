@@ -1,5 +1,5 @@
-import type { BundleDef, ItemDef, SlotFilter } from '@/types/items'
-import { ARMOR_CATALOG, getItemDef, WEAPON_CATALOG } from '@/lib/sources/items'
+import type { BundleDef, ItemDef, SlotFilter } from '@/types/items';
+import { ARMOR_CATALOG, getItemDef, WEAPON_CATALOG } from '@/lib/sources/items';
 
 export const BUNDLE_CATALOG: readonly BundleDef[] = [
   {
@@ -67,21 +67,21 @@ export const BUNDLE_CATALOG: readonly BundleDef[] = [
     contents: [{ itemId: 'handaxe', quantity: 2 }],
     slots: [],
   },
-]
+];
 
 export function getBundleDef(id: string): BundleDef | undefined {
-  return BUNDLE_CATALOG.find((b) => b.id === id)
+  return BUNDLE_CATALOG.find((b) => b.id === id);
 }
 
 export function requireBundleDef(id: string): BundleDef {
-  const bundle = getBundleDef(id)
-  if (!bundle) throw new Error(`Unknown bundle id: "${id}"`)
-  return bundle
+  const bundle = getBundleDef(id);
+  if (!bundle) throw new Error(`Unknown bundle id: "${id}"`);
+  return bundle;
 }
 
 /** Returns the i18n key for a bundle's display name. */
 export function getBundleNameKey(bundleId: string): `bundles.${string}.name` {
-  return `bundles.${bundleId}.name`
+  return `bundles.${bundleId}.name`;
 }
 
 /**
@@ -92,16 +92,16 @@ export function getBundleNameKey(bundleId: string): `bundles.${string}.name` {
  * Throws if the id is unknown or does not resolve to a bundle/pack.
  */
 export function resolveBundleRef(id: string): {
-  readonly contents: readonly { readonly itemId: string; readonly quantity: number }[]
-  readonly kind: 'bundle' | 'pack'
+  readonly contents: readonly { readonly itemId: string; readonly quantity: number }[];
+  readonly kind: 'bundle' | 'pack';
 } {
-  const bundle = getBundleDef(id)
-  if (bundle) return { contents: bundle.contents, kind: 'bundle' }
+  const bundle = getBundleDef(id);
+  if (bundle) return { contents: bundle.contents, kind: 'bundle' };
 
-  const item = getItemDef(id)
-  if (item?.type === 'pack') return { contents: item.contents, kind: 'pack' }
+  const item = getItemDef(id);
+  if (item?.type === 'pack') return { contents: item.contents, kind: 'pack' };
 
-  throw new Error(`Unknown bundle or pack id: "${id}"`)
+  throw new Error(`Unknown bundle or pack id: "${id}"`);
 }
 
 /**
@@ -112,11 +112,11 @@ export function resolveBundleRef(id: string): {
 export function getItemsForSlot(filter: SlotFilter): readonly ItemDef[] {
   if (filter.kind === 'weapon') {
     return WEAPON_CATALOG.filter((w) => {
-      if (filter.category !== undefined && w.category !== filter.category) return false
-      if (filter.range !== undefined && w.range !== filter.range) return false
-      return true
-    })
+      if (filter.category !== undefined && w.category !== filter.category) return false;
+      if (filter.range !== undefined && w.range !== filter.range) return false;
+      return true;
+    });
   }
   // armor
-  return ARMOR_CATALOG.filter((a) => a.category === filter.category)
+  return ARMOR_CATALOG.filter((a) => a.category === filter.category);
 }

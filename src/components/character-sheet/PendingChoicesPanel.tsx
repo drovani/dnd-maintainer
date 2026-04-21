@@ -1,15 +1,15 @@
-import { useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
-import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker'
-import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
-import { ChoicePicker } from '@/components/character-builder/ChoicePicker'
-import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { collectGrantsByType } from '@/lib/resolver/helpers'
-import type { PendingChoice } from '@/types/resolved'
-import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
-import type { FightingStyleId } from '@/lib/dnd-helpers'
-import { useTranslation } from 'react-i18next'
+import { useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
+import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
+import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
+import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
+import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { collectGrantsByType } from '@/lib/resolver/helpers';
+import type { PendingChoice } from '@/types/resolved';
+import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
+import type { FightingStyleId } from '@/lib/dnd-helpers';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Synthesize PendingChoice shapes from all choice-producing grants,
@@ -17,12 +17,12 @@ import { useTranslation } from 'react-i18next'
  * overall panel is rendered because other grants remain unresolved).
  */
 function useAllChoiceGrants() {
-  const { bundles, build } = useCharacterContext()
-  const buildChoices = build?.choices
+  const { bundles, build } = useCharacterContext();
+  const buildChoices = build?.choices;
 
   return useMemo(() => {
-    const choices = buildChoices ?? {}
-    const allGrants: PendingChoice[] = []
+    const choices = buildChoices ?? {};
+    const allGrants: PendingChoice[] = [];
 
     // bundle-choice grants
     for (const { grant, source } of collectGrantsByType(bundles, 'bundle-choice')) {
@@ -32,19 +32,19 @@ function useAllChoiceGrants() {
         source,
         category: grant.category,
         bundleIds: grant.bundleIds,
-      })
+      });
     }
 
     // fighting-style-choice grants — compute alreadyChosen from all valid decisions
-    const fightingStyleGrants = collectGrantsByType(bundles, 'fighting-style-choice')
-    const allChosenStyles: FightingStyleId[] = []
+    const fightingStyleGrants = collectGrantsByType(bundles, 'fighting-style-choice');
+    const allChosenStyles: FightingStyleId[] = [];
     for (const { grant } of fightingStyleGrants) {
-      const decision = choices[grant.key]
+      const decision = choices[grant.key];
       if (decision?.type === 'fighting-style-choice') {
-        const validStyles = decision.styles.filter(
-          (s): s is FightingStyleId => grant.from.includes(s as FightingStyleId),
-        )
-        allChosenStyles.push(...validStyles)
+        const validStyles = decision.styles.filter((s): s is FightingStyleId =>
+          grant.from.includes(s as FightingStyleId)
+        );
+        allChosenStyles.push(...validStyles);
       }
     }
     for (const { grant, source } of fightingStyleGrants) {
@@ -55,7 +55,7 @@ function useAllChoiceGrants() {
         count: grant.count,
         from: grant.from,
         alreadyChosen: allChosenStyles,
-      })
+      });
     }
 
     // subclass grants
@@ -65,7 +65,7 @@ function useAllChoiceGrants() {
         choiceKey: grant.key,
         source,
         classId: grant.classId,
-      })
+      });
     }
 
     // ASI grants
@@ -75,7 +75,7 @@ function useAllChoiceGrants() {
         choiceKey: grant.key,
         source,
         points: grant.points,
-      })
+      });
     }
 
     // ability-choice grants
@@ -87,7 +87,7 @@ function useAllChoiceGrants() {
         count: grant.count,
         bonus: grant.bonus,
         from: grant.from,
-      })
+      });
     }
 
     // proficiency-choice grants → skill-choice, tool-choice, language-choice
@@ -100,7 +100,7 @@ function useAllChoiceGrants() {
           category: 'skill',
           count: grant.count,
           from: grant.from,
-        })
+        });
       } else if (grant.category === 'tool') {
         allGrants.push({
           type: 'tool-choice',
@@ -109,7 +109,7 @@ function useAllChoiceGrants() {
           category: 'tool',
           count: grant.count,
           from: grant.from,
-        })
+        });
       } else if (grant.category === 'language') {
         allGrants.push({
           type: 'language-choice',
@@ -117,12 +117,12 @@ function useAllChoiceGrants() {
           source,
           count: grant.count,
           from: grant.from,
-        })
+        });
       }
     }
 
-    return allGrants
-  }, [bundles, buildChoices])
+    return allGrants;
+  }, [bundles, buildChoices]);
 }
 
 function PendingChoiceRow({
@@ -131,36 +131,29 @@ function PendingChoiceRow({
   onDecide,
   onClear,
 }: {
-  choice: PendingChoice
-  currentDecision: ChoiceDecision | undefined
-  onDecide: (key: ChoiceKey, decision: ChoiceDecision) => void
-  onClear: (key: ChoiceKey) => void
+  choice: PendingChoice;
+  currentDecision: ChoiceDecision | undefined;
+  onDecide: (key: ChoiceKey, decision: ChoiceDecision) => void;
+  onClear: (key: ChoiceKey) => void;
 }) {
-  const { resolved } = useCharacterContext()
-  const { t: tc } = useTranslation('common')
+  const { resolved } = useCharacterContext();
+  const { t: tc } = useTranslation('common');
 
   if (choice.type === 'subclass') {
     return (
       <SubclassPicker
         choice={choice}
         currentDecision={currentDecision}
-        onDecide={(choiceKey, subclassId) =>
-          onDecide(choiceKey, { type: 'subclass', subclassId })
-        }
+        onDecide={(choiceKey, subclassId) => onDecide(choiceKey, { type: 'subclass', subclassId })}
         onClear={onClear}
       />
-    )
+    );
   }
 
   if (choice.type === 'fighting-style-choice') {
     return (
-      <FightingStylePicker
-        choice={choice}
-        currentDecision={currentDecision}
-        onDecide={onDecide}
-        onClear={onClear}
-      />
-    )
+      <FightingStylePicker choice={choice} currentDecision={currentDecision} onDecide={onDecide} onClear={onClear} />
+    );
   }
 
   if (choice.type === 'asi') {
@@ -172,51 +165,42 @@ function PendingChoiceRow({
             <p className="text-xs text-destructive">{tc('characterSheet.levelUp.abilitiesUnavailable')}</p>
           </CardContent>
         </Card>
-      )
+      );
     }
     return (
       <AsiAllocator
         choice={choice}
         abilities={resolved.abilities}
         currentDecision={currentDecision}
-        onDecide={(choiceKey, allocation) =>
-          onDecide(choiceKey, { type: 'asi', allocation })
-        }
+        onDecide={(choiceKey, allocation) => onDecide(choiceKey, { type: 'asi', allocation })}
         onClear={onClear}
       />
-    )
+    );
   }
 
-  return (
-    <ChoicePicker
-      choice={choice}
-      currentDecision={currentDecision}
-      onDecide={onDecide}
-      onClear={onClear}
-    />
-  )
+  return <ChoicePicker choice={choice} currentDecision={currentDecision} onDecide={onDecide} onClear={onClear} />;
 }
 
 export function PendingChoicesPanel() {
-  const { t } = useTranslation('common')
-  const { resolved, build, makeChoice, clearChoice } = useCharacterContext()
+  const { t } = useTranslation('common');
+  const { resolved, build, makeChoice, clearChoice } = useCharacterContext();
 
   // Drive the picker list from grants so resolved pickers stay mounted
-  const allChoiceGrants = useAllChoiceGrants()
+  const allChoiceGrants = useAllChoiceGrants();
 
-  const pendingChoices = resolved?.pendingChoices ?? []
-  const choices = build?.choices ?? {}
+  const pendingChoices = resolved?.pendingChoices ?? [];
+  const choices = build?.choices ?? {};
 
   // Panel is only visible when there are unresolved choices
-  if (pendingChoices.length === 0) return null
+  if (pendingChoices.length === 0) return null;
 
   const handleDecide = (key: ChoiceKey, decision: ChoiceDecision) => {
-    makeChoice(key, decision)
-  }
+    makeChoice(key, decision);
+  };
 
   const handleClear = (key: ChoiceKey) => {
-    clearChoice(key)
-  }
+    clearChoice(key);
+  };
 
   return (
     <Card className="border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10">
@@ -230,11 +214,11 @@ export function PendingChoicesPanel() {
       </CardHeader>
       <CardContent className="space-y-4">
         {allChoiceGrants.map((choice) => {
-          const currentDecision = choices[choice.choiceKey]
+          const currentDecision = choices[choice.choiceKey];
           // Include a hash of the decision in the key so pickers with local state
           // (AsiAllocator, FightingStylePicker, SubclassPicker) remount when the
           // decision is cleared or changed externally.
-          const decisionHash = currentDecision ? JSON.stringify(currentDecision) : 'none'
+          const decisionHash = currentDecision ? JSON.stringify(currentDecision) : 'none';
           return (
             <PendingChoiceRow
               key={`${choice.choiceKey}::${decisionHash}`}
@@ -243,9 +227,9 @@ export function PendingChoicesPanel() {
               onDecide={handleDecide}
               onClear={handleClear}
             />
-          )
+          );
         })}
       </CardContent>
     </Card>
-  )
+  );
 }

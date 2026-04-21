@@ -1,57 +1,55 @@
-import { DND_SKILLS } from '@/lib/dnd-helpers'
-import type { SkillId } from '@/lib/dnd-helpers'
-import type { ResolvedSkill } from '@/types/resolved'
-import { ChevronDown, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { DND_SKILLS } from '@/lib/dnd-helpers';
+import type { SkillId } from '@/lib/dnd-helpers';
+import type { ResolvedSkill } from '@/types/resolved';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SkillsPanelProps {
-  readonly skills: Readonly<Record<SkillId, ResolvedSkill>>
+  readonly skills: Readonly<Record<SkillId, ResolvedSkill>>;
 }
 
 function formatBonus(value: number): string {
-  return value >= 0 ? `+${value}` : `${value}`
+  return value >= 0 ? `+${value}` : `${value}`;
 }
 
 function BreakdownLabel({ type, label }: { type: string; label: string }) {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
+  const { t } = useTranslation('gamedata');
+  const { t: tc } = useTranslation('common');
 
-  if (type === 'ability') return <>{t(`abilities.${label as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'}`)}</>
-  if (type === 'proficiency') return <>{tc('characterSheet.skillBreakdown.proficiency')}</>
-  if (type === 'expertise') return <>{tc('characterSheet.skillBreakdown.expertise')}</>
-  return <>{t(`features.${label}.name`, { defaultValue: label })}</>
+  if (type === 'ability') return <>{t(`abilities.${label as 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'}`)}</>;
+  if (type === 'proficiency') return <>{tc('characterSheet.skillBreakdown.proficiency')}</>;
+  if (type === 'expertise') return <>{tc('characterSheet.skillBreakdown.expertise')}</>;
+  return <>{t(`features.${label}.name`, { defaultValue: label })}</>;
 }
 
 export function SkillsPanel({ skills }: SkillsPanelProps) {
-  const { t } = useTranslation('gamedata')
-  const { t: tc } = useTranslation('common')
-  const [expanded, setExpanded] = useState<Set<SkillId>>(new Set())
+  const { t } = useTranslation('gamedata');
+  const { t: tc } = useTranslation('common');
+  const [expanded, setExpanded] = useState<Set<SkillId>>(new Set());
 
-  const sortedSkills = [...DND_SKILLS].sort((a, b) =>
-    t(`skills.${a.id}`).localeCompare(t(`skills.${b.id}`)),
-  )
+  const sortedSkills = [...DND_SKILLS].sort((a, b) => t(`skills.${a.id}`).localeCompare(t(`skills.${b.id}`)));
 
-  const allExpanded = expanded.size === sortedSkills.length
+  const allExpanded = expanded.size === sortedSkills.length;
   const toggleAll = () => {
     if (allExpanded) {
-      setExpanded(new Set())
+      setExpanded(new Set());
     } else {
-      setExpanded(new Set(sortedSkills.map((s) => s.id)))
+      setExpanded(new Set(sortedSkills.map((s) => s.id)));
     }
-  }
+  };
 
   const toggleSkill = (id: SkillId) => {
     setExpanded((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(id)) {
-        next.delete(id)
+        next.delete(id);
       } else {
-        next.add(id)
+        next.add(id);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   return (
     <div className="bg-card border rounded-lg p-6">
@@ -69,10 +67,10 @@ export function SkillsPanel({ skills }: SkillsPanelProps) {
       </div>
       <div className="space-y-0.5 text-xs">
         {sortedSkills.map((skill) => {
-          const resolved = skills[skill.id as keyof typeof skills]
-          if (!resolved) return null
-          const isExpanded = expanded.has(skill.id)
-          const abbrev = t(`abilityAbbreviations.${skill.ability}`)
+          const resolved = skills[skill.id as keyof typeof skills];
+          if (!resolved) return null;
+          const isExpanded = expanded.has(skill.id);
+          const abbrev = t(`abilityAbbreviations.${skill.ability}`);
 
           return (
             <div key={skill.id}>
@@ -82,9 +80,11 @@ export function SkillsPanel({ skills }: SkillsPanelProps) {
                 className="flex items-center justify-between w-full text-foreground py-1 hover:bg-muted/50 rounded px-1 -mx-1 transition-colors"
               >
                 <span className="flex items-center gap-1">
-                  {isExpanded
-                    ? <ChevronDown className="size-3 text-muted-foreground" />
-                    : <ChevronRight className="size-3 text-muted-foreground" />}
+                  {isExpanded ? (
+                    <ChevronDown className="size-3 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="size-3 text-muted-foreground" />
+                  )}
                   <span className={resolved.proficient ? 'font-bold' : ''}>
                     {t(`skills.${skill.id}`)}
                     <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
@@ -99,24 +99,19 @@ export function SkillsPanel({ skills }: SkillsPanelProps) {
               {isExpanded && (
                 <div className="ml-5 mb-1 space-y-0.5">
                   {resolved.breakdown.map((component, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between text-muted-foreground py-0.5"
-                    >
+                    <div key={i} className="flex items-center justify-between text-muted-foreground py-0.5">
                       <span className="text-[11px]">
                         <BreakdownLabel type={component.type} label={component.label} />
                       </span>
-                      <span className="font-mono text-[11px]">
-                        {formatBonus(component.value)}
-                      </span>
+                      <span className="font-mono text-[11px]">{formatBonus(component.value)}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

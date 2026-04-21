@@ -7,12 +7,12 @@ import {
   createWrapper,
   supabase,
   mockQueryResult,
-} from '@/test/hook-test-helpers'
+} from '@/test/hook-test-helpers';
 
-vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'))
+vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'));
 
-import { useCharacters, useCharacter, usePlayerNames, useCharacterMutations } from '@/hooks/useCharacters'
-import type { Character } from '@/types/database'
+import { useCharacters, useCharacter, usePlayerNames, useCharacterMutations } from '@/hooks/useCharacters';
+import type { Character } from '@/types/database';
 
 const baseCharacter: Character = {
   id: 'char-1',
@@ -52,45 +52,43 @@ const baseCharacter: Character = {
   portrait_url: null,
   is_active: true,
   status: 'ready',
-}
+};
 
-setupMockReset()
+setupMockReset();
 
 describeListQuery(
   'useCharacters',
   () => renderHook(() => useCharacters('camp-1'), { wrapper: createWrapper() }),
   baseCharacter,
   () => renderHook(() => useCharacters(''), { wrapper: createWrapper() }),
-  'campaign_id',
-)
+  'campaign_id'
+);
 
 describeSingleQuery(
   'useCharacter',
   (id) => renderHook(() => useCharacter(id as string | undefined), { wrapper: createWrapper() }),
   baseCharacter,
   'char-1',
-  undefined,
-)
+  undefined
+);
 
 describe('useCharacter slug query pattern', () => {
   it('queries by slug using .or() with both slug and previous_slugs', async () => {
-    mockQueryResult.data = baseCharacter
+    mockQueryResult.data = baseCharacter;
 
-    const { result } = renderHook(() => useCharacter('aria-silverw-char'), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useCharacter('aria-silverw-char'), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(supabase.or).toHaveBeenCalledWith(
-      'slug.eq.aria-silverw-char,previous_slugs.cs.{"aria-silverw-char"}'
-    )
-  })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(supabase.or).toHaveBeenCalledWith('slug.eq.aria-silverw-char,previous_slugs.cs.{"aria-silverw-char"}');
+  });
 
   it('throws when slug contains invalid characters', async () => {
-    const { result } = renderHook(() => useCharacter('bad,slug'), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useCharacter('bad,slug'), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(result.current.error).toBeInstanceOf(Error)
-  })
-})
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeInstanceOf(Error);
+  });
+});
 
 describe('usePlayerNames', () => {
   it('returns sorted unique player names', async () => {
@@ -99,70 +97,73 @@ describe('usePlayerNames', () => {
       { player_name: 'Alice' },
       { player_name: 'Alice' },
       { player_name: 'Bob' },
-    ]
+    ];
 
-    const { result } = renderHook(() => usePlayerNames(), { wrapper: createWrapper() })
+    const { result } = renderHook(() => usePlayerNames(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(['Alice', 'Bob', 'Charlie'])
-  })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(['Alice', 'Bob', 'Charlie']);
+  });
 
   it('deduplicates player names', async () => {
-    mockQueryResult.data = [
-      { player_name: 'Alice' },
-      { player_name: 'Alice' },
-    ]
+    mockQueryResult.data = [{ player_name: 'Alice' }, { player_name: 'Alice' }];
 
-    const { result } = renderHook(() => usePlayerNames(), { wrapper: createWrapper() })
+    const { result } = renderHook(() => usePlayerNames(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toHaveLength(1)
-    expect(result.current.data).toEqual(['Alice'])
-  })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toHaveLength(1);
+    expect(result.current.data).toEqual(['Alice']);
+  });
 
   it('returns empty array when no player names exist', async () => {
-    mockQueryResult.data = []
+    mockQueryResult.data = [];
 
-    const { result } = renderHook(() => usePlayerNames(), { wrapper: createWrapper() })
+    const { result } = renderHook(() => usePlayerNames(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual([])
-  })
-})
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([]);
+  });
+});
 
 describe('useCharacterMutations', () => {
   it('create inserts character and returns it', async () => {
-    mockQueryResult.data = baseCharacter
+    mockQueryResult.data = baseCharacter;
 
-    const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
 
-    const { id: _id, created_at: _created_at, updated_at: _updated_at, is_active: _is_active, ...createPayload } = baseCharacter
-    result.current.create.mutate(createPayload)
+    const {
+      id: _id,
+      created_at: _created_at,
+      updated_at: _updated_at,
+      is_active: _is_active,
+      ...createPayload
+    } = baseCharacter;
+    result.current.create.mutate(createPayload);
 
-    await waitFor(() => expect(result.current.create.isSuccess).toBe(true))
-    expect(result.current.create.data).toEqual(baseCharacter)
-  })
+    await waitFor(() => expect(result.current.create.isSuccess).toBe(true));
+    expect(result.current.create.data).toEqual(baseCharacter);
+  });
 
   it('update patches character by id', async () => {
-    const updated = { ...baseCharacter, name: 'New Name' }
-    mockQueryResult.data = updated
+    const updated = { ...baseCharacter, name: 'New Name' };
+    mockQueryResult.data = updated;
 
-    const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
 
-    result.current.update.mutate({ id: 'char-1', name: 'New Name' })
+    result.current.update.mutate({ id: 'char-1', name: 'New Name' });
 
-    await waitFor(() => expect(result.current.update.isSuccess).toBe(true))
-    expect(supabase.eq).toHaveBeenCalledWith('id', 'char-1')
-  })
+    await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
+    expect(supabase.eq).toHaveBeenCalledWith('id', 'char-1');
+  });
 
   it('remove deletes character by id', async () => {
-    mockQueryResult.data = null
+    mockQueryResult.data = null;
 
-    const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() })
+    const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
 
-    result.current.remove.mutate({ id: 'char-1', campaignId: 'camp-1' })
+    result.current.remove.mutate({ id: 'char-1', campaignId: 'camp-1' });
 
-    await waitFor(() => expect(result.current.remove.isSuccess).toBe(true))
-    expect(supabase.eq).toHaveBeenCalledWith('id', 'char-1')
-  })
-})
+    await waitFor(() => expect(result.current.remove.isSuccess).toBe(true));
+    expect(supabase.eq).toHaveBeenCalledWith('id', 'char-1');
+  });
+});

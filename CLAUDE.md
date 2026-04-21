@@ -21,6 +21,10 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 - `npm run test:watch` — run tests in watch mode
 - `npm run test:coverage` — run tests with v8 coverage report
 
+### Formatting
+
+Prettier + `eslint --fix` run automatically on every file Claude writes or edits (see `.claude/settings.json` and `scripts/claude-format-on-save.sh`). Don't hand-format — let the hook normalize style. Manual formatting: `npm run format`. CI check: `npm run format:check`.
+
 ## Tech Stack
 
 - **React 19** with TypeScript (strict mode), Vite 7, React Router v7
@@ -59,7 +63,7 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 - **Translation files**: `src/locales/en/common.json` and `src/locales/en/gamedata.json`.
 - **Type safety**: `src/@types/i18next.d.ts` maps `resources` to the JSON files, giving compile-time key checking. Invalid `t('nonexistent.key')` calls fail typecheck.
 - **Usage pattern**: `const { t } = useTranslation('common')` for UI strings, `const { t } = useTranslation('gamedata')` for game data. When both are needed in one component, alias one: `const { t: tc } = useTranslation('common')`.
-- **Dynamic keys**: Domain ID types (`RaceId`, `ClassId`, `AlignmentId`) are narrow enough that template literals like `` t(`races.${raceId}`) `` typecheck without casts. If a variable is wider than the key union (e.g., `string` from `Object.entries()`), narrow it first rather than using `as never`.
+- **Dynamic keys**: Domain ID types (`RaceId`, `ClassId`, `AlignmentId`) are narrow enough that template literals like ``t(`races.${raceId}`)`` typecheck without casts. If a variable is wider than the key union (e.g., `string` from `Object.entries()`), narrow it first rather than using `as never`.
 - **ID-based data model**: Race, class, background, alignment, and skill values are stored as lowercase IDs in the database (e.g., `dwarf-hill`, `wizard`, `folkhero`). Always translate IDs to display names via `t()` from the `gamedata` namespace — never display raw IDs to users.
 
 ### D&D Game Data

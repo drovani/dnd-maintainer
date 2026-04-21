@@ -1,0 +1,7 @@
+dist/
+node_modules/
+coverage/
+supabase/.branches/
+supabase/.temp/
+package-lock.json
+src/types/supabase.ts

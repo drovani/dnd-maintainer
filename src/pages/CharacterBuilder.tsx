@@ -1,12 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AbilitiesStep,
   BackstoryStep,
@@ -15,41 +9,51 @@ import {
   EquipmentStep,
   ProficienciesStep,
   SkillsStep,
-} from '@/components/character-builder'
-import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext'
-import { useBuilderAutosave } from '@/hooks/useBuilderAutosave'
-import type { AutosavePayload } from '@/hooks/useBuilderAutosave'
-import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild'
-import { useCharacter } from '@/hooks/useCharacters'
-import { useCampaignContext } from '@/hooks/useCampaignContext'
-import type { Character } from '@/types/database'
-import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactElement } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
-import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers'
-import type { StepType } from '@/types/character-builder'
+} from '@/components/character-builder';
+import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext';
+import { useBuilderAutosave } from '@/hooks/useBuilderAutosave';
+import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
+import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
+import { useCharacter } from '@/hooks/useCharacters';
+import { useCampaignContext } from '@/hooks/useCampaignContext';
+import type { Character } from '@/types/database';
+import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers';
+import type { StepType } from '@/types/character-builder';
 
 const STEPS: { id: StepType }[] = [
-  { id: 'basics' }, { id: 'abilities' },
-  { id: 'skills' }, { id: 'classFeatures' },
-  { id: 'proficiencies' }, { id: 'equipment' },
+  { id: 'basics' },
+  { id: 'abilities' },
+  { id: 'skills' },
+  { id: 'classFeatures' },
+  { id: 'proficiencies' },
+  { id: 'equipment' },
   { id: 'backstory' },
-]
+];
 
 function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactElement {
   switch (step) {
-    case 'basics': return <BasicsStep onRequestAdvance={goToStep} />
-    case 'abilities': return <AbilitiesStep />
-    case 'skills': return <SkillsStep />
-    case 'classFeatures': return <ClassFeaturesStep />
-    case 'proficiencies': return <ProficienciesStep />
-    case 'equipment': return <EquipmentStep />
-    case 'backstory': return <BackstoryStep />
+    case 'basics':
+      return <BasicsStep onRequestAdvance={goToStep} />;
+    case 'abilities':
+      return <AbilitiesStep />;
+    case 'skills':
+      return <SkillsStep />;
+    case 'classFeatures':
+      return <ClassFeaturesStep />;
+    case 'proficiencies':
+      return <ProficienciesStep />;
+    case 'equipment':
+      return <EquipmentStep />;
+    case 'backstory':
+      return <BackstoryStep />;
     default: {
-      const _exhaustive: never = step
-      return _exhaustive
+      const _exhaustive: never = step;
+      return _exhaustive;
     }
   }
 }
@@ -93,45 +97,45 @@ function buildSeedCharacter(campaignId: string): Character {
     status: 'draft',
     created_at: '',
     updated_at: '',
-  }
+  };
 }
 
 function CharacterBuilderInner() {
-  const { t } = useTranslation('common')
-  const { t: tg } = useTranslation('gamedata')
-  const { campaignSlug } = useParams<{ campaignSlug: string }>()
-  const { campaignId } = useCampaignContext()
-  const navigate = useNavigate()
-  const [currentStep, setCurrentStep] = useState<StepType>('basics')
+  const { t } = useTranslation('common');
+  const { t: tg } = useTranslation('gamedata');
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const { campaignId } = useCampaignContext();
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState<StepType>('basics');
   // Tracks the furthest step the user has reached. We use this to defer "Before you
   // can finalize" hints until the user has seen every step at least once — otherwise
   // a brand-new character on step 1 shows a wall of expected-missing warnings.
-  const [furthestStepIndex, setFurthestStepIndex] = useState(0)
-  const [isFinalizing, setIsFinalizing] = useState(false)
-  const [finalizeError, setFinalizeError] = useState<string | null>(null)
-  const [confirmAbandon, setConfirmAbandon] = useState(false)
-  const [isAbandoning, setIsAbandoning] = useState(false)
-  const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } = useBuilderAutosave()
+  const [furthestStepIndex, setFurthestStepIndex] = useState(0);
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
+  const [confirmAbandon, setConfirmAbandon] = useState(false);
+  const [isAbandoning, setIsAbandoning] = useState(false);
+  const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } = useBuilderAutosave();
 
-  const context = useCharacterContext()
-  const { character, rows, resolved, buildError, isDirty, markSaved } = context
+  const context = useCharacterContext();
+  const { character, rows, resolved, buildError, isDirty, markSaved } = context;
 
   useEffect(() => {
-    if (saveStatus !== 'saved') return
-    const timer = setTimeout(() => clearStatus(), 2000)
-    return () => clearTimeout(timer)
-  }, [saveStatus, clearStatus])
+    if (saveStatus !== 'saved') return;
+    const timer = setTimeout(() => clearStatus(), 2000);
+    return () => clearTimeout(timer);
+  }, [saveStatus, clearStatus]);
 
   // Keep a ref to the latest payload so the debounced save always uses fresh data
-  const latestPayloadRef = useRef<AutosavePayload>({ character, rows, resolved })
-  latestPayloadRef.current = { character, rows, resolved }
+  const latestPayloadRef = useRef<AutosavePayload>({ character, rows, resolved });
+  latestPayloadRef.current = { character, rows, resolved };
 
   // Required fields before any draft can be saved
-  const hasRequiredFields = !!character.name && !!character.race && !!character.class && !!character.alignment
+  const hasRequiredFields = !!character.name && !!character.race && !!character.class && !!character.alignment;
 
   // Autosave when isDirty changes to true — debounced 500ms, only if required fields present
   useEffect(() => {
-    if (!isDirty || !hasRequiredFields) return
+    if (!isDirty || !hasRequiredFields) return;
     const timer = setTimeout(() => {
       saveDraft(latestPayloadRef.current)
         .then(() => markSaved())
@@ -139,101 +143,109 @@ function CharacterBuilderInner() {
           // saveDraft sets saveStatus='error' internally on its own failure. This
           // .catch covers the markSaved() path too: if it fails, we still need
           // the banner so the user knows "saved" on screen is misleading.
-          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id })
-          markSaveError()
-        })
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [isDirty, hasRequiredFields, saveDraft, markSaved, markSaveError, character.id, character.campaign_id])
+          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id });
+          markSaveError();
+        });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [isDirty, hasRequiredFields, saveDraft, markSaved, markSaveError, character.id, character.campaign_id]);
 
-  const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep)
+  const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep);
 
-  const selectedRace = character.race ? DND_RACES.find((r) => r.id === character.race) : null
-  const selectedClass = character.class ? DND_CLASSES.find((c) => c.id === character.class) : null
+  const selectedRace = character.race ? DND_RACES.find((r) => r.id === character.race) : null;
+  const selectedClass = character.class ? DND_CLASSES.find((c) => c.id === character.class) : null;
 
   const isReadyToFinalize =
     !!character.name &&
     !!character.race &&
     !!character.class &&
     !!character.background &&
-    (resolved?.pendingChoices.length ?? 0) === 0
+    (resolved?.pendingChoices.length ?? 0) === 0;
 
   // Surface exactly what's blocking finalize so the user can find and fix it.
   const finalizeBlockers: readonly string[] = (() => {
-    const reasons: string[] = []
-    if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'))
-    if (!character.race) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'))
-    if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'))
-    if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'))
+    const reasons: string[] = [];
+    if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'));
+    if (!character.race) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'));
+    if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'));
+    if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'));
     for (const pending of resolved?.pendingChoices ?? []) {
       reasons.push(
         t('characterBuilder.finalizeBlockers.pendingChoice', {
           type: pending.type,
           key: pending.choiceKey,
-        }),
-      )
+        })
+      );
     }
-    return reasons
-  })()
+    return reasons;
+  })();
 
   // Can only leave Basics step once required fields are filled
-  const canLeaveBasics = hasRequiredFields
+  const canLeaveBasics = hasRequiredFields;
 
   const goToStep = (targetStep: StepType) => {
-    const targetIndex = STEPS.findIndex((s) => s.id === targetStep)
-    if (targetIndex > 0 && !canLeaveBasics) return
+    const targetIndex = STEPS.findIndex((s) => s.id === targetStep);
+    if (targetIndex > 0 && !canLeaveBasics) return;
     if (hasRequiredFields) {
-      const payload: AutosavePayload = { character, rows, resolved }
+      const payload: AutosavePayload = { character, rows, resolved };
       saveDraft(payload)
         .then(() => markSaved())
         .catch((err: unknown) => {
           // saveDraft sets saveStatus='error' internally on its own failure. This
           // .catch covers the markSaved() path too: if it fails, we still need
           // the banner so the user knows "saved" on screen is misleading.
-          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id })
-          markSaveError()
-        })
+          console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id });
+          markSaveError();
+        });
     }
-    setCurrentStep(targetStep)
-    setFurthestStepIndex((prev) => Math.max(prev, targetIndex))
-  }
+    setCurrentStep(targetStep);
+    setFurthestStepIndex((prev) => Math.max(prev, targetIndex));
+  };
 
-  const goNextStep = () => { if (currentStepIndex < STEPS.length - 1) goToStep(STEPS[currentStepIndex + 1].id) }
-  const goPrevStep = () => { if (currentStepIndex > 0) goToStep(STEPS[currentStepIndex - 1].id) }
+  const goNextStep = () => {
+    if (currentStepIndex < STEPS.length - 1) goToStep(STEPS[currentStepIndex + 1].id);
+  };
+  const goPrevStep = () => {
+    if (currentStepIndex > 0) goToStep(STEPS[currentStepIndex - 1].id);
+  };
 
   const handleAbandon = async () => {
-    if (!campaignId || !campaignSlug) return
-    setIsAbandoning(true)
+    if (!campaignId || !campaignSlug) return;
+    setIsAbandoning(true);
     try {
-      await abandon(campaignId)
-      toast.success(t('characterBuilder.abandon.success'))
-      navigate(`/campaign/${campaignSlug}/characters`)
+      await abandon(campaignId);
+      toast.success(t('characterBuilder.abandon.success'));
+      navigate(`/campaign/${campaignSlug}/characters`);
     } catch (err) {
-      console.error('Abandon draft failed:', err)
-      toast.error(t('characterBuilder.abandon.failed'))
-      setIsAbandoning(false)
-      setConfirmAbandon(false)
+      console.error('Abandon draft failed:', err);
+      toast.error(t('characterBuilder.abandon.failed'));
+      setIsAbandoning(false);
+      setConfirmAbandon(false);
     }
-  }
+  };
 
   const handleFinalize = async () => {
-    if (!hasRequiredFields) return
-    setIsFinalizing(true)
-    setFinalizeError(null)
+    if (!hasRequiredFields) return;
+    setIsFinalizing(true);
+    setFinalizeError(null);
     try {
-      const payload: AutosavePayload = { character, rows, resolved }
-      const slug = await finalize(payload)
-      navigate(`/campaign/${campaignSlug}/character/${slug}`)
+      const payload: AutosavePayload = { character, rows, resolved };
+      const slug = await finalize(payload);
+      navigate(`/campaign/${campaignSlug}/character/${slug}`);
     } catch (err) {
-      console.error('Character finalization failed:', err)
-      setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'))
+      console.error('Character finalization failed:', err);
+      setFinalizeError(err instanceof Error ? err.message : t('errors.unexpectedError'));
     } finally {
-      setIsFinalizing(false)
+      setIsFinalizing(false);
     }
-  }
+  };
 
   if (!campaignId || !campaignSlug) {
-    return <div className="page-container"><p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p></div>
+    return (
+      <div className="page-container">
+        <p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p>
+      </div>
+    );
   }
 
   return (
@@ -265,7 +277,9 @@ function CharacterBuilderInner() {
                   <span className="text-xs text-muted-foreground mt-2">{t(`characterBuilder.steps.${step.id}`)}</span>
                 </div>
                 {index < STEPS.length - 1 && (
-                  <div className={`flex-1 h-1 mx-2 self-start mt-5 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'}`} />
+                  <div
+                    className={`flex-1 h-1 mx-2 self-start mt-5 ${index < currentStepIndex ? 'bg-green-600' : 'bg-muted'}`}
+                  />
                 )}
               </div>
             ))}
@@ -311,13 +325,16 @@ function CharacterBuilderInner() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const payload: AutosavePayload = { character, rows, resolved }
+                  const payload: AutosavePayload = { character, rows, resolved };
                   saveDraft(payload)
                     .then(() => markSaved())
                     .catch((err: unknown) => {
-                      console.error('Autosave chain error:', err, { characterId: character.id, campaignId: character.campaign_id })
-                      markSaveError()
-                    })
+                      console.error('Autosave chain error:', err, {
+                        characterId: character.id,
+                        campaignId: character.campaign_id,
+                      });
+                      markSaveError();
+                    });
                 }}
               >
                 {t('buttons.retrySave')}
@@ -351,10 +368,16 @@ function CharacterBuilderInner() {
             </Button>
           </div>
           <div className="flex items-center gap-3">
-            {saveStatus === 'saving' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>}
-            {saveStatus === 'saved' && <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>}
+            {saveStatus === 'saving' && (
+              <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>
+            )}
             {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeaveBasics}>{t('buttons.next')} <ChevronRight size={16} /></Button>
+              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeaveBasics}>
+                {t('buttons.next')} <ChevronRight size={16} />
+              </Button>
             )}
             <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing}>
               <Save className="size-4" />
@@ -364,7 +387,12 @@ function CharacterBuilderInner() {
         </div>
 
         {confirmAbandon && (
-          <Dialog open onOpenChange={(open) => { if (!open && !isAbandoning) setConfirmAbandon(false) }}>
+          <Dialog
+            open
+            onOpenChange={(open) => {
+              if (!open && !isAbandoning) setConfirmAbandon(false);
+            }}
+          >
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>{t('characterBuilder.abandon.title')}</DialogTitle>
@@ -384,34 +412,36 @@ function CharacterBuilderInner() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export default function CharacterBuilder() {
-  const { campaignSlug, characterSlug } = useParams<{ campaignSlug: string; characterSlug: string }>()
-  const { campaignId } = useCampaignContext()
-  const { t } = useTranslation('common')
+  const { campaignSlug, characterSlug } = useParams<{ campaignSlug: string; characterSlug: string }>();
+  const { campaignId } = useCampaignContext();
+  const { t } = useTranslation('common');
 
-  const isNew = !characterSlug
-  const { data: existingCharacter, isLoading: characterLoading, error: characterError } = useCharacter(
-    isNew ? undefined : characterSlug
-  )
+  const isNew = !characterSlug;
+  const {
+    data: existingCharacter,
+    isLoading: characterLoading,
+    error: characterError,
+  } = useCharacter(isNew ? undefined : characterSlug);
   const { data: buildRows = [], isLoading: rowsLoading } = useCharacterBuildLevels(
     isNew ? undefined : existingCharacter?.id
-  )
+  );
   const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(
     isNew ? undefined : existingCharacter?.id
-  )
+  );
 
   if (!campaignId || !campaignSlug) {
     return (
       <div className="page-container">
         <p className="text-destructive">{t('characterBuilder.errors.noCampaignId')}</p>
       </div>
-    )
+    );
   }
 
-  const isLoading = !isNew && (characterLoading || rowsLoading || itemsLoading)
+  const isLoading = !isNew && (characterLoading || rowsLoading || itemsLoading);
 
   if (isLoading) {
     return (
@@ -424,7 +454,7 @@ export default function CharacterBuilder() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!isNew && (characterError || !existingCharacter || !existingCharacter.id)) {
@@ -434,14 +464,16 @@ export default function CharacterBuilder() {
           {t('characterSheet.errors.loadingCharacter', { error: String(characterError) })}
         </p>
       </div>
-    )
+    );
   }
 
-  const initialCharacter = isNew ? buildSeedCharacter(campaignId) : existingCharacter!
-  const initialRows = isNew ? [] : buildRows
+  const initialCharacter = isNew ? buildSeedCharacter(campaignId) : existingCharacter!;
+  const initialRows = isNew ? [] : buildRows;
   const initialEquippedItems: string[] = isNew
     ? []
-    : itemsData.filter((item: { equipped?: boolean; item_id?: string }) => item.equipped).map((item: { item_id?: string }) => item.item_id ?? '')
+    : itemsData
+        .filter((item: { equipped?: boolean; item_id?: string }) => item.equipped)
+        .map((item: { item_id?: string }) => item.item_id ?? '');
 
   return (
     <CharacterProvider
@@ -452,5 +484,5 @@ export default function CharacterBuilder() {
     >
       <CharacterBuilderInner />
     </CharacterProvider>
-  )
+  );
 }

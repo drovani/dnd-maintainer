@@ -1,6 +1,6 @@
-import { QueryClient } from '@tanstack/react-query'
-import i18next from 'i18next'
-import { toast } from 'sonner'
+import { QueryClient } from '@tanstack/react-query';
+import i18next from 'i18next';
+import { toast } from 'sonner';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,9 +13,9 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: 1,
       onError: (error) => {
-        toast.error(i18next.t('errors.saveFailed', { ns: 'common' }))
-        console.error('Mutation failed:', error)
+        toast.error(i18next.t('errors.saveFailed', { ns: 'common' }));
+        console.error('Mutation failed:', error);
       },
     },
   },
-})
+});

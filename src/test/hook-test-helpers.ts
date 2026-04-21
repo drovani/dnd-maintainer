@@ -1,28 +1,28 @@
-import { renderHook, waitFor } from '@testing-library/react'
-import { createWrapper } from '@/test/wrapper'
-import { supabase, mockQueryResult } from '@/test/mocks/supabase'
+import { renderHook, waitFor } from '@testing-library/react';
+import { createWrapper } from '@/test/wrapper';
+import { supabase, mockQueryResult } from '@/test/mocks/supabase';
 
 // Minimal shape of result.current that all hook results share.
 interface QueryResult {
-  isSuccess: boolean
-  isError: boolean
-  isLoading: boolean
-  fetchStatus: string
-  data: unknown
-  error: unknown
+  isSuccess: boolean;
+  isError: boolean;
+  isLoading: boolean;
+  fetchStatus: string;
+  data: unknown;
+  error: unknown;
 }
 
 interface MutationResult {
-  isSuccess: boolean
-  isError: boolean
-  data: unknown
-  error: unknown
+  isSuccess: boolean;
+  isError: boolean;
+  data: unknown;
+  error: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mutate: (payload: any) => void
+  mutate: (payload: any) => void;
 }
 
-type InvokeFn = () => { result: { current: QueryResult } }
-type MutationInvokeFn = () => { result: { current: MutationResult } }
+type InvokeFn = () => { result: { current: QueryResult } };
+type MutationInvokeFn = () => { result: { current: MutationResult } };
 
 /**
  * Call inside each test file's top-level scope to register the standard
@@ -30,15 +30,15 @@ type MutationInvokeFn = () => { result: { current: MutationResult } }
  */
 export function setupMockReset(): void {
   beforeEach(() => {
-    mockQueryResult.data = null
-    mockQueryResult.error = null
+    mockQueryResult.data = null;
+    mockQueryResult.error = null;
     for (const key of Object.keys(supabase)) {
-      const fn = supabase[key as keyof typeof supabase]
+      const fn = supabase[key as keyof typeof supabase];
       if (typeof fn === 'function' && 'mockClear' in fn) {
-        vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear()
+        vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear();
       }
     }
-  })
+  });
 }
 
 /**
@@ -56,48 +56,48 @@ export function describeListQuery<T>(
   invoke: InvokeFn,
   mockItem: T,
   invokeDisabled: InvokeFn | null,
-  eqField?: string,
+  eqField?: string
 ): void {
   describe(label, () => {
     it(`returns a list of ${label.replace(/^use/, '').toLowerCase()}`, async () => {
-      mockQueryResult.data = [mockItem]
+      mockQueryResult.data = [mockItem];
 
-      const { result } = invoke()
+      const { result } = invoke();
 
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-      expect(result.current.data).toEqual([mockItem])
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual([mockItem]);
       if (eqField) {
-        expect(supabase.eq).toHaveBeenCalledWith(eqField, expect.any(String))
+        expect(supabase.eq).toHaveBeenCalledWith(eqField, expect.any(String));
       }
-    })
+    });
 
     it('returns empty array when none exist', async () => {
-      mockQueryResult.data = []
+      mockQueryResult.data = [];
 
-      const { result } = invoke()
+      const { result } = invoke();
 
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-      expect(result.current.data).toEqual([])
-    })
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual([]);
+    });
 
     it('sets error state when query fails', async () => {
-      mockQueryResult.error = { message: 'DB error' }
+      mockQueryResult.error = { message: 'DB error' };
 
-      const { result } = invoke()
+      const { result } = invoke();
 
-      await waitFor(() => expect(result.current.isError).toBe(true))
-      expect(result.current.error).toEqual({ message: 'DB error' })
-    })
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.error).toEqual({ message: 'DB error' });
+    });
 
     if (invokeDisabled !== null) {
       it('does not fetch when id is disabled', () => {
-        const { result } = invokeDisabled()
+        const { result } = invokeDisabled();
 
-        expect(result.current.fetchStatus).toBe('idle')
-        expect(supabase.from).not.toHaveBeenCalled()
-      })
+        expect(result.current.fetchStatus).toBe('idle');
+        expect(supabase.from).not.toHaveBeenCalled();
+      });
     }
-  })
+  });
 }
 
 /**
@@ -114,25 +114,25 @@ export function describeSingleQuery<T>(
   invokeWith: (id: string | undefined) => { result: { current: QueryResult } },
   mockItem: T,
   validId: string,
-  disabledId: string | undefined,
+  disabledId: string | undefined
 ): void {
   describe(label, () => {
     it(`returns a single ${label.replace(/^use/, '').toLowerCase()} by id`, async () => {
-      mockQueryResult.data = mockItem
+      mockQueryResult.data = mockItem;
 
-      const { result } = invokeWith(validId)
+      const { result } = invokeWith(validId);
 
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-      expect(result.current.data).toEqual(mockItem)
-    })
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual(mockItem);
+    });
 
     it(`does not fetch when id is ${disabledId === '' ? 'empty string' : 'undefined'}`, () => {
-      const { result } = invokeWith(disabledId)
+      const { result } = invokeWith(disabledId);
 
-      expect(result.current.fetchStatus).toBe('idle')
-      expect(supabase.from).not.toHaveBeenCalled()
-    })
-  })
+      expect(result.current.fetchStatus).toBe('idle');
+      expect(supabase.from).not.toHaveBeenCalled();
+    });
+  });
 }
 
 /**
@@ -148,30 +148,30 @@ export function describeCreateMutation<TPayload, TResult>(
   label: string,
   hookFn: MutationInvokeFn,
   payload: TPayload,
-  mockItem: TResult,
+  mockItem: TResult
 ): void {
   describe(label, () => {
     it('inserts and returns the created item', async () => {
-      mockQueryResult.data = mockItem
+      mockQueryResult.data = mockItem;
 
-      const { result } = hookFn()
-      result.current.mutate(payload)
+      const { result } = hookFn();
+      result.current.mutate(payload);
 
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-      expect(result.current.data).toEqual(mockItem)
-      expect(supabase.insert).toHaveBeenCalled()
-    })
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual(mockItem);
+      expect(supabase.insert).toHaveBeenCalled();
+    });
 
     it('sets error when insert fails', async () => {
-      mockQueryResult.error = { message: 'Insert failed' }
+      mockQueryResult.error = { message: 'Insert failed' };
 
-      const { result } = hookFn()
-      result.current.mutate(payload)
+      const { result } = hookFn();
+      result.current.mutate(payload);
 
-      await waitFor(() => expect(result.current.isError).toBe(true))
-      expect(result.current.error).toEqual({ message: 'Insert failed' })
-    })
-  })
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.error).toEqual({ message: 'Insert failed' });
+    });
+  });
 }
 
 /**
@@ -185,30 +185,30 @@ export function describeCreateMutation<TPayload, TResult>(
 export function describeUpdateMutation<TPayload extends { id: string }>(
   label: string,
   hookFn: MutationInvokeFn,
-  payload: TPayload,
+  payload: TPayload
 ): void {
   describe(label, () => {
     it('updates by id and succeeds', async () => {
-      mockQueryResult.data = { id: payload.id }
+      mockQueryResult.data = { id: payload.id };
 
-      const { result } = hookFn()
-      result.current.mutate(payload)
+      const { result } = hookFn();
+      result.current.mutate(payload);
 
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-      expect(supabase.update).toHaveBeenCalled()
-      expect(supabase.eq).toHaveBeenCalledWith('id', payload.id)
-    })
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(supabase.update).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith('id', payload.id);
+    });
 
     it('sets error when update fails', async () => {
-      mockQueryResult.error = { message: 'Update failed' }
+      mockQueryResult.error = { message: 'Update failed' };
 
-      const { result } = hookFn()
-      result.current.mutate(payload)
+      const { result } = hookFn();
+      result.current.mutate(payload);
 
-      await waitFor(() => expect(result.current.isError).toBe(true))
-      expect(result.current.error).toEqual({ message: 'Update failed' })
-    })
-  })
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.error).toEqual({ message: 'Update failed' });
+    });
+  });
 }
 
 /**
@@ -222,35 +222,37 @@ export function describeUpdateMutation<TPayload extends { id: string }>(
 export function describeDeleteMutation<TPayload extends { id: string }>(
   label: string,
   hookFn: MutationInvokeFn,
-  payload: TPayload,
+  payload: TPayload
 ): void {
   describe(label, () => {
     it('deletes by id and succeeds', async () => {
-      mockQueryResult.data = null
+      mockQueryResult.data = null;
 
-      const { result } = hookFn()
-      result.current.mutate(payload)
+      const { result } = hookFn();
+      result.current.mutate(payload);
 
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
-      expect(supabase.delete).toHaveBeenCalled()
-      expect(supabase.eq).toHaveBeenCalledWith('id', payload.id)
-    })
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(supabase.delete).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith('id', payload.id);
+    });
 
     it('sets error when delete fails', async () => {
-      mockQueryResult.error = { message: 'Delete failed' }
+      mockQueryResult.error = { message: 'Delete failed' };
 
-      const { result } = hookFn()
-      result.current.mutate(payload)
+      const { result } = hookFn();
+      result.current.mutate(payload);
 
-      await waitFor(() => expect(result.current.isError).toBe(true))
-      expect(result.current.error).toEqual({ message: 'Delete failed' })
-    })
-  })
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.error).toEqual({ message: 'Delete failed' });
+    });
+  });
 }
 
 // The hook internally uses promise.finally() which creates an uncaught derived rejection
 // when the underlying promise rejects. This listener silences those expected rejections.
-const suppressUnhandledRejection = () => { /* intentional no-op */ }
+const suppressUnhandledRejection = () => {
+  /* intentional no-op */
+};
 
 /**
  * Wraps an async test function to suppress unhandled promise rejections that arise
@@ -258,9 +260,13 @@ const suppressUnhandledRejection = () => { /* intentional no-op */ }
  * by the test — this just prevents Node from treating it as unhandled.
  */
 export async function withSuppressedRejections(fn: () => Promise<void>): Promise<void> {
-  process.on('unhandledRejection', suppressUnhandledRejection)
-  try { await fn() } finally { process.off('unhandledRejection', suppressUnhandledRejection) }
+  process.on('unhandledRejection', suppressUnhandledRejection);
+  try {
+    await fn();
+  } finally {
+    process.off('unhandledRejection', suppressUnhandledRejection);
+  }
 }
 
 // Re-export commonly needed test utilities so files only need one import line.
-export { renderHook, waitFor, createWrapper, supabase, mockQueryResult }
+export { renderHook, waitFor, createWrapper, supabase, mockQueryResult };

@@ -6,7 +6,7 @@ export const THEMES = [
 
 export type ThemeMeta = (typeof THEMES)[number];
 export type ThemeId = ThemeMeta['id'];
-export const THEME_IDS: readonly ThemeId[] = THEMES.map(t => t.id);
+export const THEME_IDS: readonly ThemeId[] = THEMES.map((t) => t.id);
 
 export const COLOR_MODES = ['light', 'dark', 'system'] as const;
 export type ColorMode = (typeof COLOR_MODES)[number];

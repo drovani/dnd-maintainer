@@ -4,7 +4,6 @@ import type { Encounter, EncounterSummary } from '@/types/database';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { ENCOUNTER_SUMMARY_COLS, ENCOUNTER_DETAIL_COLS } from '@/lib/query-columns';
 
-
 export function useEncounters(campaignId: string) {
   return useQuery({
     queryKey: ['encounters', campaignId],
@@ -41,11 +40,7 @@ export function useEncounter(id: string) {
   return useQuery({
     queryKey: ['encounter', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('encounters')
-        .select(ENCOUNTER_DETAIL_COLS)
-        .eq('id', id)
-        .single();
+      const { data, error } = await supabase.from('encounters').select(ENCOUNTER_DETAIL_COLS).eq('id', id).single();
       if (error) throw error;
       return data as unknown as Encounter;
     },
@@ -103,13 +98,7 @@ export function useDeleteEncounter() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-    }: {
-      id: string;
-      campaignId: string;
-      sessionId?: string;
-    }) => {
+    mutationFn: async ({ id }: { id: string; campaignId: string; sessionId?: string }) => {
       const { error } = await supabase.from('encounters').delete().eq('id', id);
       if (error) throw error;
     },

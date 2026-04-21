@@ -8,7 +8,12 @@ import { useTranslation } from 'react-i18next';
 
 export default function ExportData() {
   const { t } = useTranslation('common');
-  const { data: campaigns = [], isLoading: isCampaignsLoading, isError: isCampaignsError, error: campaignsError } = useCampaigns();
+  const {
+    data: campaigns = [],
+    isLoading: isCampaignsLoading,
+    isError: isCampaignsError,
+    error: campaignsError,
+  } = useCampaigns();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -70,7 +75,9 @@ export default function ExportData() {
       }
 
       if (!campaignsRes.data || campaignsRes.data.length === 0) {
-        throw new Error('No campaign data returned. This may be a permissions issue — check that RLS policies allow read access.');
+        throw new Error(
+          'No campaign data returned. This may be a permissions issue — check that RLS policies allow read access.'
+        );
       }
 
       // Fetch character-scoped tables using the character IDs we just retrieved
@@ -80,7 +87,13 @@ export default function ExportData() {
 
       if (characterIds.length > 0) {
         const [buildLevelsRes, itemsRes] = await Promise.all([
-          supabase.from('character_build_levels').select('*').in('character_id', characterIds).is('deleted_at', null).order('character_id').order('sequence'),
+          supabase
+            .from('character_build_levels')
+            .select('*')
+            .in('character_id', characterIds)
+            .is('deleted_at', null)
+            .order('character_id')
+            .order('sequence'),
           supabase.from('character_items').select('*').in('character_id', characterIds),
         ]);
 
@@ -156,9 +169,7 @@ export default function ExportData() {
             <Download className="size-10 text-primary" />
             {t('export.title')}
           </h1>
-          <p className="text-muted-foreground mt-2">
-            {t('export.description')}
-          </p>
+          <p className="text-muted-foreground mt-2">{t('export.description')}</p>
         </div>
       </div>
 
@@ -215,9 +226,10 @@ export default function ExportData() {
                     className={`
                       w-full flex items-center gap-3 px-4 py-3 rounded-lg
                       text-left transition-all
-                      ${isSelected
-                        ? 'bg-amber-900/20 border border-border text-primary'
-                        : 'bg-card border border-border text-foreground hover:border-border'
+                      ${
+                        isSelected
+                          ? 'bg-amber-900/20 border border-border text-primary'
+                          : 'bg-card border border-border text-foreground hover:border-border'
                       }
                     `}
                   >
@@ -228,9 +240,7 @@ export default function ExportData() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{campaign.name}</p>
-                      {campaign.setting && (
-                        <p className="text-xs text-muted-foreground mt-0.5">{campaign.setting}</p>
-                      )}
+                      {campaign.setting && <p className="text-xs text-muted-foreground mt-0.5">{campaign.setting}</p>}
                     </div>
                   </button>
                 );

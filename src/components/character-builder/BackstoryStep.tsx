@@ -1,12 +1,12 @@
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { useCharacterContext } from '@/hooks/useCharacterContext'
-import { useTranslation } from 'react-i18next'
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { useTranslation } from 'react-i18next';
 
 export function BackstoryStep() {
-  const { t } = useTranslation('common')
-  const context = useCharacterContext()
-  const { character } = context
+  const { t } = useTranslation('common');
+  const context = useCharacterContext();
+  const { character } = context;
 
   return (
     <div className="space-y-4">
@@ -70,5 +70,5 @@ export function BackstoryStep() {
         />
       </div>
     </div>
-  )
+  );
 }

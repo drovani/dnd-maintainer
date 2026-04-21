@@ -5,7 +5,6 @@ import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { SESSION_SUMMARY_COLS, SESSION_DETAIL_COLS } from '@/lib/query-columns';
 import { validateSlug } from '@/lib/slug-utils';
 
-
 export function useSessions(campaignId: string) {
   return useQuery({
     queryKey: ['sessions', campaignId],

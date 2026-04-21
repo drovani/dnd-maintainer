@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import { CharacterProvider, useCharacterContext, resolveChoiceSequence } from '@/hooks/useCharacterContext'
-import type { BuildLevelRow } from '@/lib/build-reconstruction'
-import type { Character } from '@/types/database'
-import type { ChoiceKey } from '@/types/choices'
-import type { ReactNode } from 'react'
+import { describe, it, expect } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { CharacterProvider, useCharacterContext, resolveChoiceSequence } from '@/hooks/useCharacterContext';
+import type { BuildLevelRow } from '@/lib/build-reconstruction';
+import type { Character } from '@/types/database';
+import type { ChoiceKey } from '@/types/choices';
+import type { ReactNode } from 'react';
 
 // ---------------------------------------------------------------------------
 // resolveChoiceSequence — pure function tests
@@ -22,7 +22,7 @@ const creationRow: BuildLevelRow = {
   hp_roll: null,
   choices: null,
   deleted_at: null,
-}
+};
 
 const fighterLevel1: BuildLevelRow = {
   sequence: 1,
@@ -36,7 +36,7 @@ const fighterLevel1: BuildLevelRow = {
   hp_roll: null,
   choices: null,
   deleted_at: null,
-}
+};
 
 const wizardLevel2: BuildLevelRow = {
   sequence: 2,
@@ -50,35 +50,35 @@ const wizardLevel2: BuildLevelRow = {
   hp_roll: null,
   choices: null,
   deleted_at: null,
-}
+};
 
-const rows = [creationRow, fighterLevel1, wizardLevel2] as const
+const rows = [creationRow, fighterLevel1, wizardLevel2] as const;
 
 describe('resolveChoiceSequence', () => {
   it('routes race choices to sequence 0', () => {
-    expect(resolveChoiceSequence('language-choice:race:human:0', rows)).toBe(0)
-  })
+    expect(resolveChoiceSequence('language-choice:race:human:0', rows)).toBe(0);
+  });
 
   it('routes background choices to sequence 0', () => {
-    expect(resolveChoiceSequence('skill-choice:background:soldier:0', rows)).toBe(0)
-  })
+    expect(resolveChoiceSequence('skill-choice:background:soldier:0', rows)).toBe(0);
+  });
 
   it('routes class choices to the matching level row', () => {
-    expect(resolveChoiceSequence('skill-choice:class:fighter:0', rows)).toBe(1)
-  })
+    expect(resolveChoiceSequence('skill-choice:class:fighter:0', rows)).toBe(1);
+  });
 
   it('routes class choices to correct row in multiclass', () => {
-    expect(resolveChoiceSequence('skill-choice:class:wizard:0', rows)).toBe(2)
-  })
+    expect(resolveChoiceSequence('skill-choice:class:wizard:0', rows)).toBe(2);
+  });
 
   it('throws when class has no matching active level row', () => {
-    expect(() => resolveChoiceSequence('skill-choice:class:rogue:0', rows)).toThrow('No active level row found')
-  })
+    expect(() => resolveChoiceSequence('skill-choice:class:rogue:0', rows)).toThrow('No active level row found');
+  });
 
   it('throws for unknown origins', () => {
-    expect(() => resolveChoiceSequence('skill-choice:unknown:foo:0', rows)).toThrow('Invalid choice key origin')
-  })
-})
+    expect(() => resolveChoiceSequence('skill-choice:unknown:foo:0', rows)).toThrow('Invalid choice key origin');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // CharacterProvider — integration tests
@@ -124,14 +124,10 @@ function buildSeedCharacter(overrides: Partial<Character> = {}): Character {
     created_at: '',
     updated_at: '',
     ...overrides,
-  }
+  };
 }
 
-function createWrapper(
-  character: Character,
-  initialRows: BuildLevelRow[] = [],
-  initialEquippedItems: string[] = [],
-) {
+function createWrapper(character: Character, initialRows: BuildLevelRow[] = [], initialEquippedItems: string[] = []) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <CharacterProvider
@@ -141,119 +137,119 @@ function createWrapper(
       >
         {children}
       </CharacterProvider>
-    )
-  }
+    );
+  };
 }
 
 describe('CharacterProvider', () => {
   it('seeds a creation row if none exists', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, []),
-    })
+    });
 
-    expect(result.current.rows).toHaveLength(1)
-    expect(result.current.rows[0].sequence).toBe(0)
-  })
+    expect(result.current.rows).toHaveLength(1);
+    expect(result.current.rows[0].sequence).toBe(0);
+  });
 
   it('preserves existing creation row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const existingCreation: BuildLevelRow = {
       ...creationRow,
       base_abilities: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [existingCreation]),
-    })
+    });
 
-    expect(result.current.rows).toHaveLength(1)
-    expect(result.current.rows[0].base_abilities?.str).toBe(15)
-  })
+    expect(result.current.rows).toHaveLength(1);
+    expect(result.current.rows[0].base_abilities?.str).toBe(15);
+  });
 
   it('updateCharacter sets race and auto-updates size', () => {
-    const character = buildSeedCharacter({ race: null, size: null })
+    const character = buildSeedCharacter({ race: null, size: null });
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, []),
-    })
+    });
 
     act(() => {
-      result.current.updateCharacter({ race: 'human' })
-    })
+      result.current.updateCharacter({ race: 'human' });
+    });
 
-    expect(result.current.character.race).toBe('human')
-    expect(result.current.character.size).toBe('medium')
-    expect(result.current.isDirty).toBe(true)
-  })
+    expect(result.current.character.race).toBe('human');
+    expect(result.current.character.size).toBe('medium');
+    expect(result.current.isDirty).toBe(true);
+  });
 
   it('levelUp adds a new level row with correct sequence', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow]),
-    })
+    });
 
     act(() => {
-      result.current.levelUp('fighter', null)
-    })
+      result.current.levelUp('fighter', null);
+    });
 
-    const levelRows = result.current.rows.filter((r) => r.sequence !== 0)
-    expect(levelRows).toHaveLength(1)
-    expect(levelRows[0].class_id).toBe('fighter')
-    expect(levelRows[0].class_level).toBe(1)
-    expect(levelRows[0].sequence).toBe(1)
-  })
+    const levelRows = result.current.rows.filter((r) => r.sequence !== 0);
+    expect(levelRows).toHaveLength(1);
+    expect(levelRows[0].class_id).toBe('fighter');
+    expect(levelRows[0].class_level).toBe(1);
+    expect(levelRows[0].sequence).toBe(1);
+  });
 
   it('levelDown soft-deletes the highest-sequence active level row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
-    expect(result.current.rows).toHaveLength(2)
+    expect(result.current.rows).toHaveLength(2);
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
     // Row count unchanged — row is soft-deleted, not removed
-    expect(result.current.rows).toHaveLength(2)
-    const levelRow = result.current.rows.find((r) => r.sequence === 1)
-    expect(levelRow?.deleted_at).toBeTruthy()
-    expect(result.current.isDirty).toBe(true)
-  })
+    expect(result.current.rows).toHaveLength(2);
+    const levelRow = result.current.rows.find((r) => r.sequence === 1);
+    expect(levelRow?.deleted_at).toBeTruthy();
+    expect(result.current.isDirty).toBe(true);
+  });
 
   it('levelDown does not affect creation row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow]),
-    })
+    });
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
     // No level rows to soft-delete — creation row untouched
-    expect(result.current.rows).toHaveLength(1)
-    expect(result.current.rows[0].sequence).toBe(0)
-    expect(result.current.rows[0].deleted_at).toBeNull()
-  })
+    expect(result.current.rows).toHaveLength(1);
+    expect(result.current.rows[0].sequence).toBe(0);
+    expect(result.current.rows[0].deleted_at).toBeNull();
+  });
 
   it('hasDeletedRows is true after levelDown and false when no soft-deleted rows exist', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
-    expect(result.current.hasDeletedRows).toBe(false)
+    expect(result.current.hasDeletedRows).toBe(false);
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
-    expect(result.current.hasDeletedRows).toBe(true)
-  })
+    expect(result.current.hasDeletedRows).toBe(true);
+  });
 
   it('undoLevelDown clears deleted_at on the most recently soft-deleted row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const fighterLevel2: BuildLevelRow = {
       sequence: 2,
       base_abilities: null,
@@ -266,83 +262,83 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2]),
-    })
+    });
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
     // sequence 2 should be soft-deleted
-    expect(result.current.rows.find((r) => r.sequence === 2)?.deleted_at).toBeTruthy()
-    expect(result.current.hasDeletedRows).toBe(true)
+    expect(result.current.rows.find((r) => r.sequence === 2)?.deleted_at).toBeTruthy();
+    expect(result.current.hasDeletedRows).toBe(true);
 
     act(() => {
-      result.current.undoLevelDown()
-    })
+      result.current.undoLevelDown();
+    });
 
     // sequence 2 should be restored
-    expect(result.current.rows.find((r) => r.sequence === 2)?.deleted_at).toBeFalsy()
-    expect(result.current.hasDeletedRows).toBe(false)
-  })
+    expect(result.current.rows.find((r) => r.sequence === 2)?.deleted_at).toBeFalsy();
+    expect(result.current.hasDeletedRows).toBe(false);
+  });
 
   it('undoLevelDown is a no-op when no soft-deleted rows exist', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
-    const rowsBefore = result.current.rows
+    const rowsBefore = result.current.rows;
 
     act(() => {
-      result.current.undoLevelDown()
-    })
+      result.current.undoLevelDown();
+    });
 
-    expect(result.current.rows).toEqual(rowsBefore)
-  })
+    expect(result.current.rows).toEqual(rowsBefore);
+  });
 
   it('nextRestoreLevel returns level+1 after levelDown and null after undoLevelDown', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     // Before soft-delete: no deleted rows, so nextRestoreLevel is null
-    expect(result.current.nextRestoreLevel).toBeNull()
+    expect(result.current.nextRestoreLevel).toBeNull();
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
     // After levelDown: level is 0, nextRestoreLevel should be 1 (level + 1)
-    expect(result.current.level).toBe(0)
-    expect(result.current.nextRestoreLevel).toBe(1)
+    expect(result.current.level).toBe(0);
+    expect(result.current.nextRestoreLevel).toBe(1);
 
     act(() => {
-      result.current.undoLevelDown()
-    })
+      result.current.undoLevelDown();
+    });
 
     // After undoLevelDown: restored, so nextRestoreLevel is null again
-    expect(result.current.level).toBe(1)
-    expect(result.current.nextRestoreLevel).toBeNull()
-  })
+    expect(result.current.level).toBe(1);
+    expect(result.current.nextRestoreLevel).toBeNull();
+  });
 
   it('makeChoice targeting a soft-deleted level row fails gracefully', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     // Soft-delete the fighter row
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
-    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy();
 
-    const rowsBefore = result.current.rows
+    const rowsBefore = result.current.rows;
 
     // Attempt a class-scoped choice targeting the now-deleted fighter row.
     // resolveChoiceSequence filters for deleted_at == null, so it will throw
@@ -351,36 +347,36 @@ describe('CharacterProvider', () => {
       result.current.makeChoice('skill-choice:class:fighter:0', {
         type: 'skill-choice',
         skills: ['athletics'],
-      })
-    })
+      });
+    });
 
     // Rows should be unchanged — the choice must not have been applied
-    expect(result.current.rows).toEqual(rowsBefore)
-  })
+    expect(result.current.rows).toEqual(rowsBefore);
+  });
 
   it('levelUp restores a soft-deleted row instead of appending a new one', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
-    expect(result.current.rows).toHaveLength(2)
-    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+    expect(result.current.rows).toHaveLength(2);
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy();
 
     act(() => {
-      result.current.levelUp('fighter', 8)
-    })
+      result.current.levelUp('fighter', 8);
+    });
 
     // Should still be 2 rows (restored, not appended)
-    expect(result.current.rows).toHaveLength(2)
-    const restoredRow = result.current.rows.find((r) => r.sequence === 1)
-    expect(restoredRow?.deleted_at).toBeFalsy()
-    expect(restoredRow?.hp_roll).toBe(8)
-  })
+    expect(result.current.rows).toHaveLength(2);
+    const restoredRow = result.current.rows.find((r) => r.sequence === 1);
+    expect(restoredRow?.deleted_at).toBeFalsy();
+    expect(restoredRow?.hp_roll).toBe(8);
+  });
 
   it('levelUp clears choices on restored soft-deleted row so user gets fresh prompts', () => {
     const fighterLevel3WithSubclass: BuildLevelRow = {
@@ -395,50 +391,50 @@ describe('CharacterProvider', () => {
       hp_roll: 6,
       choices: null,
       deleted_at: null,
-    }
-    const character = buildSeedCharacter()
+    };
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel3WithSubclass]),
-    })
+    });
 
     // Soft-delete level 3
     act(() => {
-      result.current.levelDown()
-    })
-    expect(result.current.rows.find((r) => r.sequence === 3)?.deleted_at).toBeTruthy()
+      result.current.levelDown();
+    });
+    expect(result.current.rows.find((r) => r.sequence === 3)?.deleted_at).toBeTruthy();
 
     // Restore it
     act(() => {
-      result.current.levelUp('fighter', 5)
-    })
+      result.current.levelUp('fighter', 5);
+    });
 
-    const restored = result.current.rows.find((r) => r.sequence === 3)
-    expect(restored?.deleted_at).toBeNull()
-    expect(restored?.hp_roll).toBe(5)
-    expect(restored?.subclass_id).toBeNull()
-    expect(restored?.asi_allocation).toBeNull()
-    expect(restored?.choices).toBeNull()
-  })
+    const restored = result.current.rows.find((r) => r.sequence === 3);
+    expect(restored?.deleted_at).toBeNull();
+    expect(restored?.hp_roll).toBe(5);
+    expect(restored?.subclass_id).toBeNull();
+    expect(restored?.asi_allocation).toBeNull();
+    expect(restored?.choices).toBeNull();
+  });
 
   it('build reconstruction excludes soft-deleted rows', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     // Before levelDown: build should reflect 1 level
-    expect(result.current.build?.levels).toHaveLength(1)
+    expect(result.current.build?.levels).toHaveLength(1);
 
     act(() => {
-      result.current.levelDown()
-    })
+      result.current.levelDown();
+    });
 
     // After soft-delete: build should reflect 0 levels (deleted row excluded)
-    expect(result.current.build?.levels).toHaveLength(0)
-  })
+    expect(result.current.build?.levels).toHaveLength(0);
+  });
 
   it('makeChoice with subclass decision sets subclass_id on the Fighter L3 row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const fighterLevel2: BuildLevelRow = {
       sequence: 2,
       base_abilities: null,
@@ -451,7 +447,7 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const fighterLevel3: BuildLevelRow = {
       sequence: 3,
       base_abilities: null,
@@ -464,25 +460,25 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3]),
-    })
+    });
 
     act(() => {
       result.current.makeChoice('subclass:class:fighter:0', {
         type: 'subclass',
         subclassId: 'champion',
-      })
-    })
+      });
+    });
 
     // subclass_id should be set on the Fighter L3 row (sequence 3)
-    const l3Row = result.current.rows.find((r) => r.sequence === 3)
-    expect(l3Row?.subclass_id).toBe('champion')
-  })
+    const l3Row = result.current.rows.find((r) => r.sequence === 3);
+    expect(l3Row?.subclass_id).toBe('champion');
+  });
 
   it('makeChoice with asi decision sets asi_allocation on the Fighter L4 row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const fighterLevel2: BuildLevelRow = {
       sequence: 2,
       base_abilities: null,
@@ -495,7 +491,7 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const fighterLevel3: BuildLevelRow = {
       sequence: 3,
       base_abilities: null,
@@ -508,7 +504,7 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const fighterLevel4: BuildLevelRow = {
       sequence: 4,
       base_abilities: null,
@@ -521,25 +517,25 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3, fighterLevel4]),
-    })
+    });
 
     act(() => {
       result.current.makeChoice('asi:class:fighter:0', {
         type: 'asi',
         allocation: { str: 2 },
-      })
-    })
+      });
+    });
 
     // asi_allocation should be set on the Fighter L4 row (sequence 4)
-    const l4Row = result.current.rows.find((r) => r.sequence === 4)
-    expect(l4Row?.asi_allocation).toEqual({ str: 2 })
-  })
+    const l4Row = result.current.rows.find((r) => r.sequence === 4);
+    expect(l4Row?.asi_allocation).toEqual({ str: 2 });
+  });
 
   it('clearChoice for subclass nulls the dedicated column on the correct row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const fighterLevel2: BuildLevelRow = {
       sequence: 2,
       base_abilities: null,
@@ -552,7 +548,7 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const fighterLevel3: BuildLevelRow = {
       sequence: 3,
       base_abilities: null,
@@ -565,21 +561,21 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3]),
-    })
+    });
 
     act(() => {
-      result.current.clearChoice('subclass:class:fighter:0')
-    })
+      result.current.clearChoice('subclass:class:fighter:0');
+    });
 
-    const l3Row = result.current.rows.find((r) => r.sequence === 3)
-    expect(l3Row?.subclass_id).toBeNull()
-  })
+    const l3Row = result.current.rows.find((r) => r.sequence === 3);
+    expect(l3Row?.subclass_id).toBeNull();
+  });
 
   it('clearChoice for ASI nulls the dedicated column on the correct row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const fighterLevel2: BuildLevelRow = {
       sequence: 2,
       base_abilities: null,
@@ -592,7 +588,7 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const fighterLevel3: BuildLevelRow = {
       sequence: 3,
       base_abilities: null,
@@ -605,7 +601,7 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const fighterLevel4: BuildLevelRow = {
       sequence: 4,
       base_abilities: null,
@@ -618,47 +614,47 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1, fighterLevel2, fighterLevel3, fighterLevel4]),
-    })
+    });
 
     act(() => {
-      result.current.clearChoice('asi:class:fighter:0')
-    })
+      result.current.clearChoice('asi:class:fighter:0');
+    });
 
-    const l4Row = result.current.rows.find((r) => r.sequence === 4)
-    expect(l4Row?.asi_allocation).toBeNull()
-  })
+    const l4Row = result.current.rows.find((r) => r.sequence === 4);
+    expect(l4Row?.asi_allocation).toBeNull();
+  });
 
   it('levelUp with class mismatch on soft-deleted row appends a new row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     // Soft-delete the fighter row
     act(() => {
-      result.current.levelDown()
-    })
-    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
+      result.current.levelDown();
+    });
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy();
 
     // Level up as wizard — should NOT restore the fighter row
     act(() => {
-      result.current.levelUp('wizard', 6)
-    })
+      result.current.levelUp('wizard', 6);
+    });
 
     // Fighter row remains soft-deleted, new wizard row appended
-    expect(result.current.rows).toHaveLength(3)
-    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy()
-    const wizardRow = result.current.rows.find((r) => r.sequence === 2)
-    expect(wizardRow?.class_id).toBe('wizard')
-    expect(wizardRow?.deleted_at).toBeNull()
-    expect(wizardRow?.class_level).toBe(1)
-  })
+    expect(result.current.rows).toHaveLength(3);
+    expect(result.current.rows.find((r) => r.sequence === 1)?.deleted_at).toBeTruthy();
+    const wizardRow = result.current.rows.find((r) => r.sequence === 2);
+    expect(wizardRow?.class_id).toBe('wizard');
+    expect(wizardRow?.deleted_at).toBeNull();
+    expect(wizardRow?.class_level).toBe(1);
+  });
 
   it('does not level past 20 (max level guard)', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const levelRows: BuildLevelRow[] = Array.from({ length: 20 }, (_, i) => ({
       sequence: i + 1,
       base_abilities: null,
@@ -671,81 +667,81 @@ describe('CharacterProvider', () => {
       hp_roll: i === 0 ? null : 6,
       choices: null,
       deleted_at: null,
-    }))
+    }));
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, ...levelRows]),
-    })
+    });
 
-    expect(result.current.level).toBe(20)
+    expect(result.current.level).toBe(20);
 
     act(() => {
-      result.current.levelUp('fighter', 6)
-    })
+      result.current.levelUp('fighter', 6);
+    });
 
     // Still 20 — no new row added
-    expect(result.current.level).toBe(20)
-  })
+    expect(result.current.level).toBe(20);
+  });
 
   it('makeChoice stores decision on the correct row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     act(() => {
       result.current.makeChoice('skill-choice:class:fighter:0', {
         type: 'skill-choice',
         skills: ['athletics', 'perception'],
-      })
-    })
+      });
+    });
 
     // Should be stored on the fighter level row (sequence 1)
-    const levelRow = result.current.rows.find((r) => r.sequence === 1)
-    expect(levelRow?.choices).toHaveProperty('skill-choice:class:fighter:0')
-  })
+    const levelRow = result.current.rows.find((r) => r.sequence === 1);
+    expect(levelRow?.choices).toHaveProperty('skill-choice:class:fighter:0');
+  });
 
   it('makeChoice stores race choices on creation row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     act(() => {
       result.current.makeChoice('language-choice:race:human:0', {
         type: 'language-choice',
         languages: ['elvish'],
-      })
-    })
+      });
+    });
 
-    const creationRowResult = result.current.rows.find((r) => r.sequence === 0)
-    expect(creationRowResult?.choices).toHaveProperty('language-choice:race:human:0')
-  })
+    const creationRowResult = result.current.rows.find((r) => r.sequence === 0);
+    expect(creationRowResult?.choices).toHaveProperty('language-choice:race:human:0');
+  });
 
   it('clearChoice removes decision from the correct row', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const creationWithChoice: BuildLevelRow = {
       ...creationRow,
       choices: {
         'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
       },
-    }
+    };
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationWithChoice, fighterLevel1]),
-    })
+    });
 
     act(() => {
-      result.current.clearChoice('language-choice:race:human:0')
-    })
+      result.current.clearChoice('language-choice:race:human:0');
+    });
 
-    const creationRowResult = result.current.rows.find((r) => r.sequence === 0)
-    expect(creationRowResult?.choices).not.toHaveProperty('language-choice:race:human:0')
-  })
+    const creationRowResult = result.current.rows.find((r) => r.sequence === 0);
+    expect(creationRowResult?.choices).not.toHaveProperty('language-choice:race:human:0');
+  });
 
   it('makeChoice merges bundle-choice slotPicks when the bundleId matches the existing decision', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     // First pick: only weapon-1 is chosen
     act(() => {
@@ -753,8 +749,8 @@ describe('CharacterProvider', () => {
         type: 'bundle-choice',
         bundleId: 'two-martial-weapons',
         slotPicks: { 'weapon-1': 'flail' },
-      })
-    })
+      });
+    });
 
     // Second pick: only weapon-2 is chosen — must NOT overwrite weapon-1
     act(() => {
@@ -762,22 +758,22 @@ describe('CharacterProvider', () => {
         type: 'bundle-choice',
         bundleId: 'two-martial-weapons',
         slotPicks: { 'weapon-2': 'battleaxe' },
-      })
-    })
+      });
+    });
 
-    const levelRow = result.current.rows.find((r) => r.sequence === 1)
+    const levelRow = result.current.rows.find((r) => r.sequence === 1);
     const decision = levelRow?.choices?.['bundle-choice:class:fighter:1'] as
       | { type: 'bundle-choice'; bundleId: string; slotPicks: Record<string, string> }
-      | undefined
-    expect(decision?.bundleId).toBe('two-martial-weapons')
-    expect(decision?.slotPicks).toEqual({ 'weapon-1': 'flail', 'weapon-2': 'battleaxe' })
-  })
+      | undefined;
+    expect(decision?.bundleId).toBe('two-martial-weapons');
+    expect(decision?.slotPicks).toEqual({ 'weapon-1': 'flail', 'weapon-2': 'battleaxe' });
+  });
 
   it('makeChoice resets slotPicks when the bundleId changes', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
     // Pick "two martial weapons" and fill both slots
     act(() => {
@@ -785,8 +781,8 @@ describe('CharacterProvider', () => {
         type: 'bundle-choice',
         bundleId: 'two-martial-weapons',
         slotPicks: { 'weapon-1': 'flail', 'weapon-2': 'battleaxe' },
-      })
-    })
+      });
+    });
 
     // Switch to "a martial weapon and a shield" — ChoicePicker sends empty slotPicks
     act(() => {
@@ -794,123 +790,123 @@ describe('CharacterProvider', () => {
         type: 'bundle-choice',
         bundleId: 'martial-weapon-and-shield',
         slotPicks: {},
-      })
-    })
+      });
+    });
 
-    const levelRow = result.current.rows.find((r) => r.sequence === 1)
+    const levelRow = result.current.rows.find((r) => r.sequence === 1);
     const decision = levelRow?.choices?.['bundle-choice:class:fighter:1'] as
       | { type: 'bundle-choice'; bundleId: string; slotPicks: Record<string, string> }
-      | undefined
-    expect(decision?.bundleId).toBe('martial-weapon-and-shield')
+      | undefined;
+    expect(decision?.bundleId).toBe('martial-weapon-and-shield');
     // Previous weapon-1/weapon-2 picks must be discarded since bundleId changed
-    expect(decision?.slotPicks).toEqual({})
-  })
+    expect(decision?.slotPicks).toEqual({});
+  });
 
   it('makeChoice with malformed key is a no-op', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
-    const rowsBefore = result.current.rows
+    const rowsBefore = result.current.rows;
 
     act(() => {
-      result.current.makeChoice('bad-key' as ChoiceKey, { type: 'skill-choice', skills: ['athletics'] })
-    })
+      result.current.makeChoice('bad-key' as ChoiceKey, { type: 'skill-choice', skills: ['athletics'] });
+    });
 
     // Rows unchanged — choice was not saved
-    expect(result.current.rows).toBe(rowsBefore)
-    expect(result.current.isDirty).toBe(false)
-  })
+    expect(result.current.rows).toBe(rowsBefore);
+    expect(result.current.isDirty).toBe(false);
+  });
 
   it('markSaved clears isDirty', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow]),
-    })
+    });
 
     act(() => {
-      result.current.updateCharacter({ name: 'New Name' })
-    })
-    expect(result.current.isDirty).toBe(true)
+      result.current.updateCharacter({ name: 'New Name' });
+    });
+    expect(result.current.isDirty).toBe(true);
 
     act(() => {
-      result.current.markSaved()
-    })
-    expect(result.current.isDirty).toBe(false)
-  })
+      result.current.markSaved();
+    });
+    expect(result.current.isDirty).toBe(false);
+  });
 
   it('derives build and resolved from valid character data', () => {
-    const character = buildSeedCharacter()
+    const character = buildSeedCharacter();
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
-    expect(result.current.build).not.toBeNull()
-    expect(result.current.resolved).not.toBeNull()
-    expect(result.current.buildError).toBeNull()
-  })
+    expect(result.current.build).not.toBeNull();
+    expect(result.current.resolved).not.toBeNull();
+    expect(result.current.buildError).toBeNull();
+  });
 
   it('returns a silent incomplete state (no buildError) when character has no race', () => {
     // Missing race is the normal mid-creation condition — the hook should return
     // { build: null, resolved: null, buildError: null } rather than surfacing an
     // "error" that would render as a red banner in the builder UI.
-    const character = buildSeedCharacter({ race: null })
+    const character = buildSeedCharacter({ race: null });
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-    })
+    });
 
-    expect(result.current.build).toBeNull()
-    expect(result.current.resolved).toBeNull()
-    expect(result.current.buildError).toBeNull()
-  })
+    expect(result.current.build).toBeNull();
+    expect(result.current.resolved).toBeNull();
+    expect(result.current.buildError).toBeNull();
+  });
 
   describe('updateCreation', () => {
     it('sets base_abilities on the creation row', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [creationRow]),
-      })
+      });
 
       act(() => {
         result.current.updateCreation({
           base_abilities: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
-        })
-      })
+        });
+      });
 
-      const creation = result.current.rows.find((r) => r.sequence === 0)
-      expect(creation?.base_abilities).toEqual({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 })
-    })
+      const creation = result.current.rows.find((r) => r.sequence === 0);
+      expect(creation?.base_abilities).toEqual({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
+    });
 
     it('merges choices with existing choices rather than replacing', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       const creationWithChoice: BuildLevelRow = {
         ...creationRow,
         choices: {
           'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
         },
-      }
+      };
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [creationWithChoice]),
-      })
+      });
 
       act(() => {
         result.current.updateCreation({
           choices: {
             'skill-choice:background:soldier:0': { type: 'skill-choice', skills: ['athletics'] },
           },
-        })
-      })
+        });
+      });
 
-      const creation = result.current.rows.find((r) => r.sequence === 0)
+      const creation = result.current.rows.find((r) => r.sequence === 0);
       // Original choice should still be present
-      expect(creation?.choices).toHaveProperty('language-choice:race:human:0')
+      expect(creation?.choices).toHaveProperty('language-choice:race:human:0');
       // New choice should also be present
-      expect(creation?.choices).toHaveProperty('skill-choice:background:soldier:0')
-    })
+      expect(creation?.choices).toHaveProperty('skill-choice:background:soldier:0');
+    });
 
     it('updates auto-seeded creation row with new abilities', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       // Pass only a level row — no creation row at sequence 0.
       // Note: CharacterProvider seeds a creation row normally, so we need to
       // simulate the -1 branch by providing rows that already include sequence 0
@@ -936,102 +932,102 @@ describe('CharacterProvider', () => {
       // updateCreation with abilities works correctly regardless.
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [fighterLevel1]),
-      })
+      });
 
       // The provider auto-seeded a creation row, so we have 2 rows
-      expect(result.current.rows).toHaveLength(2)
+      expect(result.current.rows).toHaveLength(2);
 
       act(() => {
         result.current.updateCreation({
           base_abilities: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
-        })
-      })
+        });
+      });
 
-      const creation = result.current.rows.find((r) => r.sequence === 0)
-      expect(creation?.base_abilities).toEqual({ str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 })
-    })
-  })
+      const creation = result.current.rows.find((r) => r.sequence === 0);
+      expect(creation?.base_abilities).toEqual({ str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 });
+    });
+  });
 
   describe('replaceLevel', () => {
     it('swaps the class on a level row in a single update', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-      })
+      });
 
       act(() => {
-        result.current.replaceLevel(1, 'wizard', null)
-      })
+        result.current.replaceLevel(1, 'wizard', null);
+      });
 
-      const levelRow = result.current.rows.find((r) => r.sequence === 1)
-      expect(levelRow?.class_id).toBe('wizard')
-      expect(levelRow?.class_level).toBe(1)
-      expect(result.current.isDirty).toBe(true)
-    })
+      const levelRow = result.current.rows.find((r) => r.sequence === 1);
+      expect(levelRow?.class_id).toBe('wizard');
+      expect(levelRow?.class_level).toBe(1);
+      expect(result.current.isDirty).toBe(true);
+    });
 
     it('resets choices on the replaced level row', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       const fighterWithChoices: BuildLevelRow = {
         ...fighterLevel1,
         choices: {
           'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics'] },
         },
-      }
+      };
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [creationRow, fighterWithChoices]),
-      })
+      });
 
       act(() => {
-        result.current.replaceLevel(1, 'wizard', null)
-      })
+        result.current.replaceLevel(1, 'wizard', null);
+      });
 
-      const levelRow = result.current.rows.find((r) => r.sequence === 1)
-      expect(levelRow?.choices).toBeNull()
-    })
+      const levelRow = result.current.rows.find((r) => r.sequence === 1);
+      expect(levelRow?.choices).toBeNull();
+    });
 
     it('sets subclass_id when provided', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-      })
+      });
 
       act(() => {
-        result.current.replaceLevel(1, 'wizard', 'champion')
-      })
+        result.current.replaceLevel(1, 'wizard', 'champion');
+      });
 
-      const levelRow = result.current.rows.find((r) => r.sequence === 1)
-      expect(levelRow?.class_id).toBe('wizard')
-      expect(levelRow?.subclass_id).toBe('champion')
-    })
+      const levelRow = result.current.rows.find((r) => r.sequence === 1);
+      expect(levelRow?.class_id).toBe('wizard');
+      expect(levelRow?.subclass_id).toBe('champion');
+    });
 
     it('does nothing when sequence does not exist', () => {
-      const character = buildSeedCharacter()
+      const character = buildSeedCharacter();
       const { result } = renderHook(() => useCharacterContext(), {
         wrapper: createWrapper(character, [creationRow, fighterLevel1]),
-      })
+      });
 
-      const rowsBefore = result.current.rows
+      const rowsBefore = result.current.rows;
 
       act(() => {
-        result.current.replaceLevel(99, 'wizard', null)
-      })
+        result.current.replaceLevel(99, 'wizard', null);
+      });
 
       // Rows should be unchanged (same references for the row objects)
-      expect(result.current.rows).toHaveLength(rowsBefore.length)
-      expect(result.current.rows.find((r) => r.sequence === 1)?.class_id).toBe('fighter')
-    })
-  })
+      expect(result.current.rows).toHaveLength(rowsBefore.length);
+      expect(result.current.rows.find((r) => r.sequence === 1)?.class_id).toBe('fighter');
+    });
+  });
 
   it('throws when useCharacterContext is used outside provider', () => {
     expect(() => {
-      renderHook(() => useCharacterContext())
-    }).toThrow('useCharacterContext must be used within a CharacterProvider')
-  })
+      renderHook(() => useCharacterContext());
+    }).toThrow('useCharacterContext must be used within a CharacterProvider');
+  });
 
   it('initialEquippedItems wiring: chain-mail + longsword produce AC 16 and a longsword attack', () => {
     const character = buildSeedCharacter({
       base_abilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
-    } as Partial<Character>)
+    } as Partial<Character>);
 
     const creationRowWithAbilities: BuildLevelRow = {
       sequence: 0,
@@ -1046,7 +1042,11 @@ describe('CharacterProvider', () => {
       // Resolved choices include bundle picks: chain-mail and longsword+shield
       choices: {
         'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
-        'bundle-choice:class:fighter:1': { type: 'bundle-choice', bundleId: 'martial-weapon-and-shield', slotPicks: { weapon: 'longsword', shield: 'shield' } },
+        'bundle-choice:class:fighter:1': {
+          type: 'bundle-choice',
+          bundleId: 'martial-weapon-and-shield',
+          slotPicks: { weapon: 'longsword', shield: 'shield' },
+        },
         'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
         'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
         'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
@@ -1056,7 +1056,7 @@ describe('CharacterProvider', () => {
         'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       deleted_at: null,
-    }
+    };
 
     const fighterRow: BuildLevelRow = {
       sequence: 1,
@@ -1070,18 +1070,18 @@ describe('CharacterProvider', () => {
       hp_roll: null,
       choices: null,
       deleted_at: null,
-    }
+    };
 
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRowWithAbilities, fighterRow], ['chain-mail', 'longsword']),
-    })
+    });
 
-    const resolved = result.current.resolved
-    expect(resolved).not.toBeNull()
+    const resolved = result.current.resolved;
+    expect(resolved).not.toBeNull();
     // chain-mail + armored fighter: AC 16 (no DEX bonus, heavy armor)
-    expect(resolved!.armorClass.effective).toBe(16)
+    expect(resolved!.armorClass.effective).toBe(16);
     // longsword should appear in attacks
-    expect(resolved!.attacks.length).toBeGreaterThan(0)
-    expect(resolved!.attacks.some((a) => a.weaponId === 'longsword')).toBe(true)
-  })
-})
+    expect(resolved!.attacks.length).toBeGreaterThan(0);
+    expect(resolved!.attacks.some((a) => a.weaponId === 'longsword')).toBe(true);
+  });
+});

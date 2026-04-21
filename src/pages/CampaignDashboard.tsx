@@ -1,12 +1,12 @@
-import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { ValidationError } from '@/components/ui/validation-error'
-import { ThemePicker } from '@/components/ThemePicker'
-import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns'
-import { useCampaignContext } from '@/hooks/useCampaignContext'
-import { useCharacters } from '@/hooks/useCharacters'
-import { useSessions } from '@/hooks/useSessions'
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ValidationError } from '@/components/ui/validation-error';
+import { ThemePicker } from '@/components/ThemePicker';
+import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns';
+import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { useCharacters } from '@/hooks/useCharacters';
+import { useSessions } from '@/hooks/useSessions';
 import {
   ArrowLeft,
   BookOpen,
@@ -20,36 +20,36 @@ import {
   Users,
   X,
   Zap,
-} from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 export default function CampaignDashboard() {
-  const { campaignSlug } = useParams<{ campaignSlug: string }>()
-  const { campaignId } = useCampaignContext()
-  const navigate = useNavigate()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const { campaignId } = useCampaignContext();
+  const navigate = useNavigate();
 
-  const [isEditingName, setIsEditingName] = useState(false)
-  const [isEditingDescription, setIsEditingDescription] = useState(false)
-  const [isEditingSetting, setIsEditingSetting] = useState(false)
-  const [editedName, setEditedName] = useState('')
-  const [editedDescription, setEditedDescription] = useState('')
-  const [editedSetting, setEditedSetting] = useState('')
-  const [nameError, setNameError] = useState<string>('')
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingSetting, setIsEditingSetting] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedDescription, setEditedDescription] = useState('');
+  const [editedSetting, setEditedSetting] = useState('');
+  const [nameError, setNameError] = useState<string>('');
 
-  const { t } = useTranslation('common')
-  const { t: tg } = useTranslation('gamedata')
+  const { t } = useTranslation('common');
+  const { t: tg } = useTranslation('gamedata');
 
-  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignSlug)
-  const { update: updateMutation } = useCampaignMutations()
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignSlug);
+  const { update: updateMutation } = useCampaignMutations();
 
-  const { data: charactersRaw = [], error: charactersError } = useCharacters(campaignId!)
+  const { data: charactersRaw = [], error: charactersError } = useCharacters(campaignId!);
   const characters = useMemo(
     () => [...charactersRaw].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
     [charactersRaw]
-  )
+  );
 
-  const { data: sessions = [], error: sessionsError } = useSessions(campaignId!)
+  const { data: sessions = [], error: sessionsError } = useSessions(campaignId!);
 
   if (!campaignSlug || !campaignId) {
     return (
@@ -58,39 +58,42 @@ export default function CampaignDashboard() {
           <p className="text-destructive">{t('campaign.notFound')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   const handleUpdate = (updates: Record<string, string>) => {
-    updateMutation.mutate({ id: campaign!.id, ...updates }, {
-      onSuccess: () => {
-        setIsEditingName(false)
-        setIsEditingDescription(false)
-        setIsEditingSetting(false)
-      },
-    })
-  }
+    updateMutation.mutate(
+      { id: campaign!.id, ...updates },
+      {
+        onSuccess: () => {
+          setIsEditingName(false);
+          setIsEditingDescription(false);
+          setIsEditingSetting(false);
+        },
+      }
+    );
+  };
 
   const handleUpdateName = () => {
     if (!editedName.trim()) {
-      setNameError(t('validation.nameRequired'))
-      return
+      setNameError(t('validation.nameRequired'));
+      return;
     }
-    handleUpdate({ name: editedName })
-  }
+    handleUpdate({ name: editedName });
+  };
 
   const handleUpdateDescription = () => {
-    handleUpdate({ description: editedDescription })
-  }
+    handleUpdate({ description: editedDescription });
+  };
 
   const handleUpdateSetting = () => {
-    handleUpdate({ setting: editedSetting })
-  }
+    handleUpdate({ setting: editedSetting });
+  };
 
-  const pcCount = characters.filter((c) => c.character_type === 'pc').length
-  const npcCount = characters.filter((c) => c.character_type === 'npc').length
-  const lastSession = sessions[0]
-  const recentCharacters = characters.slice(0, 5)
+  const pcCount = characters.filter((c) => c.character_type === 'pc').length;
+  const npcCount = characters.filter((c) => c.character_type === 'npc').length;
+  const lastSession = sessions[0];
+  const recentCharacters = characters.slice(0, 5);
 
   if (campaignLoading) {
     return (
@@ -102,7 +105,7 @@ export default function CampaignDashboard() {
           <p className="text-foreground mt-4">{t('campaign.loading')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!campaign) {
@@ -112,7 +115,7 @@ export default function CampaignDashboard() {
           <p className="text-destructive">{t('campaign.notFound')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -138,26 +141,27 @@ export default function CampaignDashboard() {
                       type="text"
                       value={editedName}
                       onChange={(e) => {
-                        setEditedName(e.target.value)
-                        setNameError('')
+                        setEditedName(e.target.value);
+                        setNameError('');
                       }}
                       className="text-3xl font-bold bg-muted border border-ring rounded px-3 py-1 text-foreground outline-none"
                       autoFocus
                       onKeyDown={(e) => {
-                        if (e.key === 'Escape') { setIsEditingName(false); setNameError('') }
-                        if (e.key === 'Enter') handleUpdateName()
+                        if (e.key === 'Escape') {
+                          setIsEditingName(false);
+                          setNameError('');
+                        }
+                        if (e.key === 'Enter') handleUpdateName();
                       }}
                     />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleUpdateName}
-                      pending={updateMutation.isPending}
-                    >
+                    <Button variant="ghost" size="icon" onClick={handleUpdateName} pending={updateMutation.isPending}>
                       <Save className="size-6" />
                     </Button>
                     <button
-                      onClick={() => { setIsEditingName(false); setNameError('') }}
+                      onClick={() => {
+                        setIsEditingName(false);
+                        setNameError('');
+                      }}
                       className="text-muted-foreground hover:text-foreground p-2"
                     >
                       <X className="size-6" />
@@ -167,14 +171,12 @@ export default function CampaignDashboard() {
                 </div>
               ) : (
                 <div className="flex items-center gap-4 group">
-                  <h1 className="text-3xl font-bold text-foreground">
-                    {campaign.name}
-                  </h1>
+                  <h1 className="text-3xl font-bold text-foreground">{campaign.name}</h1>
                   <button
                     onClick={() => {
-                      setEditedName(campaign.name)
-                      setNameError('')
-                      setIsEditingName(true)
+                      setEditedName(campaign.name);
+                      setNameError('');
+                      setIsEditingName(true);
                     }}
                     className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
                   >
@@ -191,8 +193,8 @@ export default function CampaignDashboard() {
                     className="text-sm bg-muted border border-ring rounded px-3 py-1 text-muted-foreground outline-none flex-1"
                     autoFocus
                     onKeyDown={(e) => {
-                      if (e.key === 'Escape') setIsEditingSetting(false)
-                      if (e.key === 'Enter') handleUpdateSetting()
+                      if (e.key === 'Escape') setIsEditingSetting(false);
+                      if (e.key === 'Enter') handleUpdateSetting();
                     }}
                   />
                   <Button
@@ -214,15 +216,13 @@ export default function CampaignDashboard() {
                 <div className="flex items-center gap-2 group/setting mt-2">
                   <p className="text-muted-foreground">
                     {campaign.setting || (
-                      <span className="italic text-muted-foreground">
-                        {t('campaign.noSetting')}
-                      </span>
+                      <span className="italic text-muted-foreground">{t('campaign.noSetting')}</span>
                     )}
                   </p>
                   <button
                     onClick={() => {
-                      setEditedSetting(campaign.setting || '')
-                      setIsEditingSetting(true)
+                      setEditedSetting(campaign.setting || '');
+                      setIsEditingSetting(true);
                     }}
                     className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover/setting:opacity-100"
                   >
@@ -255,14 +255,11 @@ export default function CampaignDashboard() {
               className="bg-card border border-ring rounded-lg p-4 text-foreground outline-none min-h-24 resize-none"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Escape') setIsEditingDescription(false)
+                if (e.key === 'Escape') setIsEditingDescription(false);
               }}
             />
             <div className="flex gap-2">
-              <Button
-                onClick={handleUpdateDescription}
-                pending={updateMutation.isPending}
-              >
+              <Button onClick={handleUpdateDescription} pending={updateMutation.isPending}>
                 <Save className="size-4" />
                 {t('buttons.save')}
               </Button>
@@ -281,8 +278,8 @@ export default function CampaignDashboard() {
               <h3 className="text-foreground font-semibold">{t('campaign.description')}</h3>
               <button
                 onClick={() => {
-                  setEditedDescription(campaign.description || '')
-                  setIsEditingDescription(true)
+                  setEditedDescription(campaign.description || '');
+                  setIsEditingDescription(true);
                 }}
                 className="text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
               >
@@ -291,9 +288,7 @@ export default function CampaignDashboard() {
             </div>
             <p className="text-muted-foreground">
               {campaign.description || (
-                <span className="italic text-muted-foreground">
-                  {t('campaign.noDescription')}
-                </span>
+                <span className="italic text-muted-foreground">{t('campaign.noDescription')}</span>
               )}
             </p>
           </div>
@@ -313,27 +308,20 @@ export default function CampaignDashboard() {
                     <Users className="size-5 text-primary" />
                     {t('campaign.stats.characters')}
                   </h3>
-                  <Link
-                    to={`/campaign/${campaignSlug}/characters`}
-                    className="text-primary hover:text-foreground"
-                  >
+                  <Link to={`/campaign/${campaignSlug}/characters`} className="text-primary hover:text-foreground">
                     <ChevronRight className="size-5" />
                   </Link>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('campaign.stats.total')}</span>
-                    <span className="text-foreground font-bold text-lg">
-                      {pcCount + npcCount}
-                    </span>
+                    <span className="text-foreground font-bold text-lg">{pcCount + npcCount}</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
                       className="bg-primary h-2 rounded-full"
                       style={{
-                        width: `${((pcCount + npcCount) / Math.max(pcCount + npcCount, 1)) *
-                          100
-                          }%`,
+                        width: `${((pcCount + npcCount) / Math.max(pcCount + npcCount, 1)) * 100}%`,
                       }}
                     />
                   </div>
@@ -351,17 +339,18 @@ export default function CampaignDashboard() {
                     <BookOpen className="size-5 text-primary" />
                     {t('campaign.stats.sessions')}
                   </h3>
-                  <Link
-                    to={`/campaign/${campaignSlug}/sessions`}
-                    className="text-primary hover:text-foreground"
-                  >
+                  <Link to={`/campaign/${campaignSlug}/sessions`} className="text-primary hover:text-foreground">
                     <ChevronRight className="size-5" />
                   </Link>
                 </div>
                 <p className="text-foreground font-bold text-lg">{sessions.length}</p>
                 {lastSession && (
                   <p className="text-muted-foreground text-sm mt-2">
-                    {t('campaign.stats.lastSession', { date: lastSession.date ? new Date(lastSession.date).toLocaleDateString() : t('campaign.stats.noDate') })}
+                    {t('campaign.stats.lastSession', {
+                      date: lastSession.date
+                        ? new Date(lastSession.date).toLocaleDateString()
+                        : t('campaign.stats.noDate'),
+                    })}
                   </p>
                 )}
               </div>
@@ -373,10 +362,7 @@ export default function CampaignDashboard() {
                     <Scroll className="size-5 text-primary" />
                     {t('campaign.stats.notes')}
                   </h3>
-                  <Link
-                    to={`/campaign/${campaignSlug}/notes`}
-                    className="text-primary hover:text-foreground"
-                  >
+                  <Link to={`/campaign/${campaignSlug}/notes`} className="text-primary hover:text-foreground">
                     <ChevronRight className="size-5" />
                   </Link>
                 </div>
@@ -400,24 +386,25 @@ export default function CampaignDashboard() {
               ) : lastSession ? (
                 <div className="space-y-4">
                   <div className="bg-muted/50 rounded-lg p-4 border border-border">
-                    <p className="text-foreground font-semibold">
-                      {t('campaign.activity.lastSessionPlayed')}
-                    </p>
+                    <p className="text-foreground font-semibold">{t('campaign.activity.lastSessionPlayed')}</p>
                     <p className="text-primary font-bold text-lg mt-1">
-                      {t('sessionDetail.sessionHeading', { number: lastSession.session_number, title: lastSession.name })}
+                      {t('sessionDetail.sessionHeading', {
+                        number: lastSession.session_number,
+                        title: lastSession.name,
+                      })}
                     </p>
                     <p className="text-muted-foreground text-sm mt-2">
-                      {lastSession.date ? new Date(lastSession.date).toLocaleDateString(undefined, {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      }) : t('campaign.stats.noDate')}
+                      {lastSession.date
+                        ? new Date(lastSession.date).toLocaleDateString(undefined, {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })
+                        : t('campaign.stats.noDate')}
                     </p>
                     {lastSession.summary && (
-                      <p className="text-muted-foreground text-sm mt-3 line-clamp-2">
-                        {lastSession.summary}
-                      </p>
+                      <p className="text-muted-foreground text-sm mt-3 line-clamp-2">{lastSession.summary}</p>
                     )}
                   </div>
 
@@ -467,7 +454,11 @@ export default function CampaignDashboard() {
                             {char.name}
                           </p>
                           <p className="text-muted-foreground text-sm">
-                            {t('campaign.party.charSummary', { race: char.race ? tg(`races.${char.race}`, { defaultValue: char.race }) : '', class: char.class ? tg(`classes.${char.class}`, { defaultValue: char.class }) : '', level: char.level })}
+                            {t('campaign.party.charSummary', {
+                              race: char.race ? tg(`races.${char.race}`, { defaultValue: char.race }) : '',
+                              class: char.class ? tg(`classes.${char.class}`, { defaultValue: char.class }) : '',
+                              level: char.level,
+                            })}
                           </p>
                           {char.player_name && (
                             <p className="text-muted-foreground text-xs mt-1">
@@ -507,9 +498,7 @@ export default function CampaignDashboard() {
 
         {/* Quick Links */}
         <div className="mt-12 bg-card border border-border rounded-lg p-8">
-          <h3 className="text-xl font-bold text-foreground mb-6">
-            {t('campaign.toolkit.title')}
-          </h3>
+          <h3 className="text-xl font-bold text-foreground mb-6">{t('campaign.toolkit.title')}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
               to={`/campaign/${campaignSlug}/characters`}
@@ -548,7 +537,6 @@ export default function CampaignDashboard() {
                 </p>
               </div>
             </Link>
-
           </div>
 
           <div className="mt-4">
@@ -574,5 +562,5 @@ export default function CampaignDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

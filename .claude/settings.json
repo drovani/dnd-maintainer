@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck *)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run test *)",
+      "Bash(npm run test)",
+      "Bash(npm run lint *)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc *)",
+      "Bash(npm view *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/claude-format-on-save.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

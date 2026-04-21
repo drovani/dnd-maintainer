@@ -67,18 +67,18 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Scripts
 
-| Command                 | Description                                          |
-| ----------------------- | ---------------------------------------------------- |
-| `npm run start`         | Start Supabase, regenerate types, and launch Vite    |
-| `npm run stop`          | Stop the local Supabase instance                     |
-| `npm run dev`           | Start Vite dev server                                |
-| `npm run build`         | Typecheck and build for production                   |
-| `npm run preview`       | Preview the production build                         |
-| `npm run typecheck`     | Run TypeScript type checking                         |
-| `npm run lint`          | Lint with ESLint (`--max-warnings 0`)                |
-| `npm run test`          | Run unit tests                                       |
-| `npm run test:watch`    | Run tests in watch mode                              |
-| `npm run test:coverage` | Run tests with coverage report                       |
+| Command                 | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `npm run start`         | Start Supabase, regenerate types, and launch Vite |
+| `npm run stop`          | Stop the local Supabase instance                  |
+| `npm run dev`           | Start Vite dev server                             |
+| `npm run build`         | Typecheck and build for production                |
+| `npm run preview`       | Preview the production build                      |
+| `npm run typecheck`     | Run TypeScript type checking                      |
+| `npm run lint`          | Lint with ESLint (`--max-warnings 0`)             |
+| `npm run test`          | Run unit tests                                    |
+| `npm run test:watch`    | Run tests in watch mode                           |
+| `npm run test:coverage` | Run tests with coverage report                    |
 
 ## Tech Stack
 

@@ -1,16 +1,16 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Toaster } from '@/components/ui/sonner'
-import { Layout } from '@/components/Layout'
-import CampaignList from '@/pages/CampaignList'
-import CampaignDashboard from '@/pages/CampaignDashboard'
-import CharacterList from '@/pages/CharacterList'
-import CharacterBuilder from '@/pages/CharacterBuilder'
-import CharacterSheet from '@/pages/CharacterSheet'
-import SessionList from '@/pages/SessionList'
-import SessionDetail from '@/pages/SessionDetail'
-import NotesPage from '@/pages/NotesPage'
-import ExportData from '@/pages/ExportData'
-import SettingsTheme from '@/pages/SettingsTheme'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
+import { Layout } from '@/components/Layout';
+import CampaignList from '@/pages/CampaignList';
+import CampaignDashboard from '@/pages/CampaignDashboard';
+import CharacterList from '@/pages/CharacterList';
+import CharacterBuilder from '@/pages/CharacterBuilder';
+import CharacterSheet from '@/pages/CharacterSheet';
+import SessionList from '@/pages/SessionList';
+import SessionDetail from '@/pages/SessionDetail';
+import NotesPage from '@/pages/NotesPage';
+import ExportData from '@/pages/ExportData';
+import SettingsTheme from '@/pages/SettingsTheme';
 
 export default function App() {
   return (
@@ -32,5 +32,5 @@ export default function App() {
       </Routes>
       <Toaster position="bottom-center" />
     </>
-  )
+  );
 }

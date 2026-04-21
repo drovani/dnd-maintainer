@@ -1,69 +1,69 @@
-import { useCharacters } from '@/hooks/useCharacters'
-import { useCampaignContext } from '@/hooks/useCampaignContext'
-import { Plus, Search, User, Users } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useCharacters } from '@/hooks/useCharacters';
+import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { Plus, Search, User, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 
-type FilterType = 'all' | 'pc' | 'npc'
-type SortType = 'name' | 'level' | 'class' | 'updated'
+type FilterType = 'all' | 'pc' | 'npc';
+type SortType = 'name' | 'level' | 'class' | 'updated';
 
 export default function CharacterList() {
-  const { t } = useTranslation('common')
-  const { t: tg } = useTranslation('gamedata')
-  const { campaignSlug } = useParams<{ campaignSlug: string }>()
-  const { campaignId } = useCampaignContext()
-  const navigate = useNavigate()
-  const [filterType, setFilterType] = useState<FilterType>('all')
-  const [sortBy, setSortBy] = useState<SortType>('name')
-  const [searchQuery, setSearchQuery] = useState('')
+  const { t } = useTranslation('common');
+  const { t: tg } = useTranslation('gamedata');
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const { campaignId } = useCampaignContext();
+  const navigate = useNavigate();
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [sortBy, setSortBy] = useState<SortType>('name');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: characters = [], isLoading, error } = useCharacters(campaignId!)
+  const { data: characters = [], isLoading, error } = useCharacters(campaignId!);
 
   const filteredAndSortedCharacters = useMemo(() => {
-    let result = characters
+    let result = characters;
 
     // Filter by type
     if (filterType === 'pc') {
-      result = result.filter((c) => c.character_type === 'pc')
+      result = result.filter((c) => c.character_type === 'pc');
     } else if (filterType === 'npc') {
-      result = result.filter((c) => c.character_type === 'npc')
+      result = result.filter((c) => c.character_type === 'npc');
     }
 
     // Filter by search query
     if (searchQuery) {
-      const query = searchQuery.toLowerCase()
+      const query = searchQuery.toLowerCase();
       result = result.filter(
         (c) =>
           c.name.toLowerCase().includes(query) ||
           c.player_name?.toLowerCase().includes(query) ||
           c.race?.toLowerCase().includes(query) ||
           c.class?.toLowerCase().includes(query)
-      )
+      );
     }
 
     // Sort
-    const sorted = [...result]
+    const sorted = [...result];
     switch (sortBy) {
       case 'name':
-        sorted.sort((a, b) => a.name.localeCompare(b.name))
-        break
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
       case 'level':
-        sorted.sort((a, b) => b.level - a.level)
-        break
+        sorted.sort((a, b) => b.level - a.level);
+        break;
       case 'class':
-        sorted.sort((a, b) => (a.class ?? '').localeCompare(b.class ?? ''))
-        break
+        sorted.sort((a, b) => (a.class ?? '').localeCompare(b.class ?? ''));
+        break;
       case 'updated':
-        sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-        break
+        sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+        break;
     }
 
-    return sorted
-  }, [characters, filterType, searchQuery, sortBy])
+    return sorted;
+  }, [characters, filterType, searchQuery, sortBy]);
 
-  const pcCount = characters.filter((c) => c.character_type === 'pc').length
-  const npcCount = characters.filter((c) => c.character_type === 'npc').length
+  const pcCount = characters.filter((c) => c.character_type === 'pc').length;
+  const npcCount = characters.filter((c) => c.character_type === 'npc').length;
 
   if (error) {
     return (
@@ -72,7 +72,7 @@ export default function CharacterList() {
           {t('characterList.errorLoading', { error: String(error) })}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -99,10 +99,7 @@ export default function CharacterList() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <Search
-              size={20}
-              className="absolute left-3 top-3 text-muted-foreground"
-            />
+            <Search size={20} className="absolute left-3 top-3 text-muted-foreground" />
             <input
               type="text"
               placeholder={t('characterList.searchPlaceholder')}
@@ -118,29 +115,28 @@ export default function CharacterList() {
           <div className="flex gap-2">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-lg transition-colors ${filterType === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-foreground hover:bg-muted'
-                }`}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                filterType === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground hover:bg-muted'
+              }`}
             >
               {t('characterList.allCharacters')}
             </button>
             <button
               onClick={() => setFilterType('pc')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${filterType === 'pc'
-                ? 'bg-blue-600 text-primary-foreground'
-                : 'bg-muted text-foreground hover:bg-muted'
-                }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                filterType === 'pc' ? 'bg-blue-600 text-primary-foreground' : 'bg-muted text-foreground hover:bg-muted'
+              }`}
             >
               <User size={16} />
               {t('characterList.playerCharacters')}
             </button>
             <button
               onClick={() => setFilterType('npc')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${filterType === 'npc'
-                ? 'bg-purple-600 text-primary-foreground'
-                : 'bg-muted text-foreground hover:bg-muted'
-                }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                filterType === 'npc'
+                  ? 'bg-purple-600 text-primary-foreground'
+                  : 'bg-muted text-foreground hover:bg-muted'
+              }`}
             >
               <Users size={16} />
               <span>{t('characterList.npcs')}</span>
@@ -181,21 +177,16 @@ export default function CharacterList() {
             {filteredAndSortedCharacters.map((character) => (
               <div
                 key={character.id}
-                onClick={() =>
-                  navigate(
-                    `/campaign/${campaignSlug}/character/${character.slug}`
-                  )
-                }
-                className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${character.character_type === 'pc'
-                  ? 'bg-muted border-blue-500/50 hover:border-blue-400'
-                  : 'bg-muted/50 border-purple-500/30 hover:border-purple-400'
-                  }`}
+                onClick={() => navigate(`/campaign/${campaignSlug}/character/${character.slug}`)}
+                className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${
+                  character.character_type === 'pc'
+                    ? 'bg-muted border-blue-500/50 hover:border-blue-400'
+                    : 'bg-muted/50 border-purple-500/30 hover:border-purple-400'
+                }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-foreground mb-1">
-                      {character.name}
-                    </h3>
+                    <h3 className="text-xl font-bold text-foreground mb-1">{character.name}</h3>
                     {character.player_name && (
                       <p className="text-sm text-muted-foreground">
                         {t('characterList.player', { name: character.player_name })}
@@ -203,10 +194,9 @@ export default function CharacterList() {
                     )}
                   </div>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${character.character_type === 'pc'
-                      ? 'bg-blue-900 text-blue-200'
-                      : 'bg-purple-900 text-purple-200'
-                      }`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                      character.character_type === 'pc' ? 'bg-blue-900 text-blue-200' : 'bg-purple-900 text-purple-200'
+                    }`}
                   >
                     {t(`characterType.${character.character_type}`)}
                   </span>
@@ -215,32 +205,30 @@ export default function CharacterList() {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.race')}</span>
-                    <span className="text-foreground">{character.race ? tg(`races.${character.race}`, { defaultValue: character.race }) : ''}</span>
+                    <span className="text-foreground">
+                      {character.race ? tg(`races.${character.race}`, { defaultValue: character.race }) : ''}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.class')}</span>
-                    <span className="text-foreground">{character.class ? tg(`classes.${character.class}`, { defaultValue: character.class }) : ''}</span>
+                    <span className="text-foreground">
+                      {character.class ? tg(`classes.${character.class}`, { defaultValue: character.class }) : ''}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.level')}</span>
-                    <span className="text-foreground font-semibold">
-                      {character.level}
-                    </span>
+                    <span className="text-foreground font-semibold">{character.level}</span>
                   </div>
                 </div>
 
                 <div className="border-t border-border pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.hp')}</span>
-                    <span className="text-destructive font-semibold">
-                      {character.hit_points_max}
-                    </span>
+                    <span className="text-destructive font-semibold">{character.hit_points_max}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.ac')}</span>
-                    <span className="text-cyan-400 font-semibold">
-                      {character.armor_class}
-                    </span>
+                    <span className="text-cyan-400 font-semibold">{character.armor_class}</span>
                   </div>
                 </div>
               </div>
@@ -249,5 +237,5 @@ export default function CharacterList() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -273,15 +273,21 @@ describe('index.html theme constants sync', () => {
   it('validThemes in index.html matches THEME_IDS (excluding default)', () => {
     const match = indexHtml.match(/var validThemes = \[([^\]]+)\]/);
     expect(match).not.toBeNull();
-    const inlineThemes = match![1].replace(/'/g, '').split(',').map(s => s.trim());
-    const expectedThemes = THEME_IDS.filter(id => id !== 'default');
+    const inlineThemes = match![1]
+      .replace(/'/g, '')
+      .split(',')
+      .map((s) => s.trim());
+    const expectedThemes = THEME_IDS.filter((id) => id !== 'default');
     expect(inlineThemes).toEqual(expectedThemes);
   });
 
   it('validModes in index.html matches COLOR_MODES', () => {
     const match = indexHtml.match(/var validModes = \[([^\]]+)\]/);
     expect(match).not.toBeNull();
-    const inlineModes = match![1].replace(/'/g, '').split(',').map(s => s.trim());
+    const inlineModes = match![1]
+      .replace(/'/g, '')
+      .split(',')
+      .map((s) => s.trim());
     expect(inlineModes).toEqual([...COLOR_MODES]);
   });
 
@@ -297,13 +303,16 @@ describe('index.html theme constants sync', () => {
 describe('DB migration theme CHECK constraint sync', () => {
   const migrationSql = fs.readFileSync(
     path.resolve(__dirname, '../../supabase/migrations/00007_add_campaign_theme.sql'),
-    'utf-8',
+    'utf-8'
   );
 
   it('CHECK constraint values match THEME_IDS', () => {
     const match = migrationSql.match(/CHECK\s*\(theme\s+IN\s*\(([^)]+)\)\)/i);
     expect(match).not.toBeNull();
-    const dbValues = match![1].replace(/'/g, '').split(',').map(s => s.trim());
+    const dbValues = match![1]
+      .replace(/'/g, '')
+      .split(',')
+      .map((s) => s.trim());
     expect(dbValues).toEqual([...THEME_IDS]);
   });
 });

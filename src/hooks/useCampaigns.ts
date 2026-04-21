@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { Campaign, CampaignSummary } from '@/types/database'
-import { CAMPAIGN_SUMMARY_COLS, CAMPAIGN_DETAIL_COLS } from '@/lib/query-columns'
-import { validateSlug } from '@/lib/slug-utils'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { Campaign, CampaignSummary } from '@/types/database';
+import { CAMPAIGN_SUMMARY_COLS, CAMPAIGN_DETAIL_COLS } from '@/lib/query-columns';
+import { validateSlug } from '@/lib/slug-utils';
 
 // --- Queries ---
 
@@ -14,37 +14,36 @@ export function useCampaigns() {
         .from('campaigns')
         .select(CAMPAIGN_SUMMARY_COLS)
         .is('archived_at', null)
-        .order('updated_at', { ascending: false })
-      if (error) throw error
-      return (data || []) as unknown as CampaignSummary[]
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as unknown as CampaignSummary[];
     },
-  })
+  });
 }
 
 export function useCampaign(slug: string | undefined) {
   return useQuery({
     queryKey: ['campaign', slug],
     queryFn: async () => {
-      const safe = validateSlug(slug!)
+      const safe = validateSlug(slug!);
       const { data, error } = await supabase
         .from('campaigns')
         .select(CAMPAIGN_DETAIL_COLS)
         .or(`slug.eq.${safe},previous_slugs.cs.{"${safe}"}`)
-        .single()
-      if (error) throw error
-      return data as unknown as Campaign
+        .single();
+      if (error) throw error;
+      return data as unknown as Campaign;
     },
     enabled: !!slug,
-  })
+  });
 }
 
 // --- Mutations ---
 
 export function useCampaignMutations() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['campaigns'] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['campaigns'] });
 
   const create = useMutation({
     mutationFn: async (campaign: { name: string; setting?: string; description?: string }) => {
@@ -52,41 +51,33 @@ export function useCampaignMutations() {
         .from('campaigns')
         .insert({ ...campaign, status: 'planning' })
         .select()
-        .single()
-      if (error) throw error
-      return data as Campaign
+        .single();
+      if (error) throw error;
+      return data as Campaign;
     },
     onSuccess: invalidate,
-  })
+  });
 
   const update = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Campaign> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single()
-      if (error) throw error
-      return data as Campaign
+      const { data, error } = await supabase.from('campaigns').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data as Campaign;
     },
     onSuccess: (data) => {
-      invalidate()
-      queryClient.invalidateQueries({ queryKey: ['campaign'] })
-      queryClient.setQueryData(['campaign', data.slug], data)
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: ['campaign'] });
+      queryClient.setQueryData(['campaign', data.slug], data);
     },
-  })
+  });
 
   const archive = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ archived_at: new Date().toISOString() })
-        .eq('id', id)
-      if (error) throw error
+      const { error } = await supabase.from('campaigns').update({ archived_at: new Date().toISOString() }).eq('id', id);
+      if (error) throw error;
     },
     onSuccess: invalidate,
-  })
+  });
 
-  return { create, update, archive }
+  return { create, update, archive };
 }

@@ -1,44 +1,38 @@
-import { AsiAllocator } from '@/components/character-sheet/AsiAllocator'
-import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker'
-import { SubclassPicker } from '@/components/character-sheet/SubclassPicker'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { RollingNumber } from '@/components/ui/rolling-number'
-import type { ClassId } from '@/lib/dnd-helpers'
-import { getGrantsForLevel } from '@/lib/sources/level-grants'
-import type { ChoiceDecision, ChoiceKey } from '@/types/choices'
-import type { AsiGrant, FeatureGrant, FightingStyleChoiceGrant, SubclassGrant } from '@/types/grants'
-import type { PendingChoice, ResolvedCharacter } from '@/types/resolved'
-import type { SubclassId } from '@/types/sources'
-import type { FightingStyleId } from '@/lib/dnd-helpers'
-import { Dices } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
+import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
+import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { RollingNumber } from '@/components/ui/rolling-number';
+import type { ClassId } from '@/lib/dnd-helpers';
+import { getGrantsForLevel } from '@/lib/sources/level-grants';
+import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
+import type { AsiGrant, FeatureGrant, FightingStyleChoiceGrant, SubclassGrant } from '@/types/grants';
+import type { PendingChoice, ResolvedCharacter } from '@/types/resolved';
+import type { SubclassId } from '@/types/sources';
+import type { FightingStyleId } from '@/lib/dnd-helpers';
+import { Dices } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LevelUpDialogProps {
-  readonly open: boolean
-  readonly onOpenChange: (open: boolean) => void
-  readonly onConfirm: (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => void
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly onConfirm: (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => void;
   /** The hit die sides (e.g. 10 for d10). Used to roll and compute average. */
-  readonly hitDie: number
+  readonly hitDie: number;
   /** The translated class name (e.g. "Fighter"). */
-  readonly className: string
+  readonly className: string;
   /** The character level the character will advance to. Currently assumes single-class; multiclass will need per-class level calculation. */
-  readonly targetLevel: number
+  readonly targetLevel: number;
   /** The class being leveled up. */
-  readonly classId: ClassId
+  readonly classId: ClassId;
   /** The already-chosen subclass (for subclass feature grants at higher levels). */
-  readonly currentSubclassId: SubclassId | null
+  readonly currentSubclassId: SubclassId | null;
   /** Current resolved abilities (needed for ASI allocator). */
-  readonly currentAbilities: ResolvedCharacter['abilities'] | null
+  readonly currentAbilities: ResolvedCharacter['abilities'] | null;
   /** Fighting styles already chosen by the character (to exclude from picker). */
-  readonly alreadyChosenStyles: readonly FightingStyleId[]
+  readonly alreadyChosenStyles: readonly FightingStyleId[];
 }
 
 export function LevelUpDialog({
@@ -53,134 +47,136 @@ export function LevelUpDialog({
   currentAbilities,
   alreadyChosenStyles,
 }: LevelUpDialogProps) {
-  const { t } = useTranslation('common')
-  const { t: tg } = useTranslation('gamedata')
-  const hpAverageGrant = Math.floor(hitDie / 2) + 1
+  const { t } = useTranslation('common');
+  const { t: tg } = useTranslation('gamedata');
+  const hpAverageGrant = Math.floor(hitDie / 2) + 1;
 
-  const [rolledValue, setRolledValue] = useState<number | null>(null)
-  const [isRolling, setIsRolling] = useState<boolean>(false)
-  const [hpSelection, setHpSelection] = useState<number | null>(hpAverageGrant)
-  const [decisions, setDecisions] = useState<Map<ChoiceKey, ChoiceDecision>>(new Map())
-  const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [rolledValue, setRolledValue] = useState<number | null>(null);
+  const [isRolling, setIsRolling] = useState<boolean>(false);
+  const [hpSelection, setHpSelection] = useState<number | null>(hpAverageGrant);
+  const [decisions, setDecisions] = useState<Map<ChoiceKey, ChoiceDecision>>(new Map());
+  const rollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     return () => {
-      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
-    }
-  }, [])
+      if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
+    };
+  }, []);
 
-  const hpRange = useMemo(() => [1, hitDie] as const, [hitDie])
+  const hpRange = useMemo(() => [1, hitDie] as const, [hitDie]);
 
   const preview = useMemo(
     () => getGrantsForLevel(classId, targetLevel, currentSubclassId),
-    [classId, targetLevel, currentSubclassId],
-  )
+    [classId, targetLevel, currentSubclassId]
+  );
 
   // Categorize grants
   const featureGrants = useMemo(() => {
-    const allGrants = [...preview.classGrants, ...preview.subclassGrants]
-    return allGrants.filter((g): g is FeatureGrant => g.type === 'feature')
-  }, [preview])
+    const allGrants = [...preview.classGrants, ...preview.subclassGrants];
+    return allGrants.filter((g): g is FeatureGrant => g.type === 'feature');
+  }, [preview]);
 
   const asiGrants = useMemo(() => {
-    return preview.classGrants.filter((g): g is AsiGrant => g.type === 'asi')
-  }, [preview])
+    return preview.classGrants.filter((g): g is AsiGrant => g.type === 'asi');
+  }, [preview]);
 
   const subclassGrants = useMemo(() => {
-    return preview.classGrants.filter((g): g is SubclassGrant => g.type === 'subclass')
-  }, [preview])
+    return preview.classGrants.filter((g): g is SubclassGrant => g.type === 'subclass');
+  }, [preview]);
 
   const fightingStyleGrants = useMemo(() => {
-    const allGrants = [...preview.classGrants, ...preview.subclassGrants]
-    return allGrants.filter((g): g is FightingStyleChoiceGrant => g.type === 'fighting-style-choice')
-  }, [preview])
+    const allGrants = [...preview.classGrants, ...preview.subclassGrants];
+    return allGrants.filter((g): g is FightingStyleChoiceGrant => g.type === 'fighting-style-choice');
+  }, [preview]);
 
   // Check if all required choices are made
   const allChoicesMade = useMemo(() => {
     for (const grant of asiGrants) {
-      const decision = decisions.get(grant.key)
-      if (!decision || decision.type !== 'asi') return false
-      const total = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0)
-      if (total !== grant.points) return false
+      const decision = decisions.get(grant.key);
+      if (!decision || decision.type !== 'asi') return false;
+      const total = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0);
+      if (total !== grant.points) return false;
     }
     for (const grant of subclassGrants) {
-      const decision = decisions.get(grant.key)
-      if (!decision || decision.type !== 'subclass') return false
+      const decision = decisions.get(grant.key);
+      if (!decision || decision.type !== 'subclass') return false;
     }
     for (const grant of fightingStyleGrants) {
-      const decision = decisions.get(grant.key)
-      if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) return false
+      const decision = decisions.get(grant.key);
+      if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) return false;
     }
-    return true
-  }, [asiGrants, subclassGrants, fightingStyleGrants, decisions])
+    return true;
+  }, [asiGrants, subclassGrants, fightingStyleGrants, decisions]);
 
-  const canConfirm = hpSelection !== null && allChoicesMade
+  const canConfirm = hpSelection !== null && allChoicesMade;
 
   const handleRoll = useCallback(() => {
-    if (isRolling) return
-    setIsRolling(true)
-    setHpSelection(null)
+    if (isRolling) return;
+    setIsRolling(true);
+    setHpSelection(null);
 
-    const finalValue = Math.floor(Math.random() * hitDie) + 1
-    let ticks = 0
-    const totalTicks = 12
+    const finalValue = Math.floor(Math.random() * hitDie) + 1;
+    let ticks = 0;
+    const totalTicks = 12;
 
-    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
+    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
     rollIntervalRef.current = setInterval(() => {
-      ticks++
+      ticks++;
       if (ticks >= totalTicks) {
-        if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
-        setRolledValue(finalValue)
-        setIsRolling(false)
+        if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
+        setRolledValue(finalValue);
+        setIsRolling(false);
       }
-    }, 60)
-  }, [isRolling, hitDie])
+    }, 60);
+  }, [isRolling, hitDie]);
 
   const handleSelectHp = (value: number) => {
-    setHpSelection(value)
-  }
+    setHpSelection(value);
+  };
 
   const handleConfirm = () => {
-    if (hpSelection === null) return
-    onConfirm(hpSelection, decisions)
-    resetState()
-    onOpenChange(false)
-  }
+    if (hpSelection === null) return;
+    onConfirm(hpSelection, decisions);
+    resetState();
+    onOpenChange(false);
+  };
 
   const resetState = () => {
-    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current)
-    setRolledValue(null)
-    setIsRolling(false)
-    setHpSelection(null)
-    setDecisions(new Map())
-  }
+    if (rollIntervalRef.current) clearInterval(rollIntervalRef.current);
+    setRolledValue(null);
+    setIsRolling(false);
+    setHpSelection(null);
+    setDecisions(new Map());
+  };
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) resetState()
-    onOpenChange(nextOpen)
-  }
+    if (!nextOpen) resetState();
+    onOpenChange(nextOpen);
+  };
 
   const handleAsiDecide = (choiceKey: ChoiceKey, allocation: Partial<Record<string, number>>) => {
     setDecisions((prev) => {
-      const next = new Map(prev)
-      next.set(choiceKey, { type: 'asi', allocation: allocation as Record<string, number> })
-      return next
-    })
-  }
+      const next = new Map(prev);
+      next.set(choiceKey, { type: 'asi', allocation: allocation as Record<string, number> });
+      return next;
+    });
+  };
 
   const handleSubclassDecide = (choiceKey: ChoiceKey, subclassId: SubclassId) => {
     setDecisions((prev) => {
-      const next = new Map(prev)
-      next.set(choiceKey, { type: 'subclass', subclassId })
-      return next
-    })
-  }
+      const next = new Map(prev);
+      next.set(choiceKey, { type: 'subclass', subclassId });
+      return next;
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t('characterSheet.levelManagement.levelUpTitle', { className, level: targetLevel })}</DialogTitle>
+          <DialogTitle>
+            {t('characterSheet.levelManagement.levelUpTitle', { className, level: targetLevel })}
+          </DialogTitle>
         </DialogHeader>
 
         {/* Features gained */}
@@ -201,17 +197,16 @@ export function LevelUpDialog({
 
         {/* HP selection */}
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            {t('characterSheet.levelManagement.hpRollPrompt')}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('characterSheet.levelManagement.hpRollPrompt')}</p>
 
           <div className="grid grid-cols-2 gap-2">
             {/* Take average option */}
-            <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection === hpAverageGrant ? 'border-primary bg-primary/5' : 'bg-muted/30'
-              }`}>
-              <p className="text-sm font-medium text-foreground">
-                {t('characterSheet.levelManagement.takeAverage')}
-              </p>
+            <div
+              className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${
+                hpSelection === hpAverageGrant ? 'border-primary bg-primary/5' : 'bg-muted/30'
+              }`}
+            >
+              <p className="text-sm font-medium text-foreground">{t('characterSheet.levelManagement.takeAverage')}</p>
               <p className="text-xs text-muted-foreground">
                 {t('characterSheet.levelManagement.takeAverageHint', { value: hpAverageGrant })}
               </p>
@@ -225,11 +220,12 @@ export function LevelUpDialog({
               </Button>
             </div>
             {/* Roll HP option */}
-            <div className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${hpSelection !== null && hpSelection === rolledValue ? 'border-primary bg-primary/5' : 'bg-muted/30'
-              }`}>
-              <p className="text-sm font-medium text-foreground">
-                {t('characterSheet.levelManagement.rollHp')}
-              </p>
+            <div
+              className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center ${
+                hpSelection !== null && hpSelection === rolledValue ? 'border-primary bg-primary/5' : 'bg-muted/30'
+              }`}
+            >
+              <p className="text-sm font-medium text-foreground">{t('characterSheet.levelManagement.rollHp')}</p>
               <p className="text-xs text-muted-foreground">
                 {t('characterSheet.levelManagement.rollHpHint', { die: hitDie })}
               </p>
@@ -259,7 +255,6 @@ export function LevelUpDialog({
                 )}
               </div>
             </div>
-
           </div>
         </div>
 
@@ -267,12 +262,14 @@ export function LevelUpDialog({
         {subclassGrants.map((grant) => (
           <SubclassPicker
             key={grant.key}
-            choice={{
-              type: 'subclass',
-              choiceKey: grant.key,
-              source: { origin: 'class', id: classId, level: targetLevel },
-              classId: grant.classId,
-            } satisfies Extract<PendingChoice, { type: 'subclass' }>}
+            choice={
+              {
+                type: 'subclass',
+                choiceKey: grant.key,
+                source: { origin: 'class', id: classId, level: targetLevel },
+                classId: grant.classId,
+              } satisfies Extract<PendingChoice, { type: 'subclass' }>
+            }
             onDecide={handleSubclassDecide}
             autoCommit
           />
@@ -282,20 +279,22 @@ export function LevelUpDialog({
         {fightingStyleGrants.map((grant) => (
           <FightingStylePicker
             key={grant.key}
-            choice={{
-              type: 'fighting-style-choice',
-              choiceKey: grant.key,
-              source: { origin: 'class', id: classId, level: targetLevel },
-              count: grant.count,
-              from: grant.from,
-              alreadyChosen: alreadyChosenStyles,
-            } satisfies Extract<PendingChoice, { type: 'fighting-style-choice' }>}
+            choice={
+              {
+                type: 'fighting-style-choice',
+                choiceKey: grant.key,
+                source: { origin: 'class', id: classId, level: targetLevel },
+                count: grant.count,
+                from: grant.from,
+                alreadyChosen: alreadyChosenStyles,
+              } satisfies Extract<PendingChoice, { type: 'fighting-style-choice' }>
+            }
             onDecide={(choiceKey, decision) => {
               setDecisions((prev) => {
-                const next = new Map(prev)
-                next.set(choiceKey, decision)
-                return next
-              })
+                const next = new Map(prev);
+                next.set(choiceKey, decision);
+                return next;
+              });
             }}
           />
         ))}
@@ -305,12 +304,14 @@ export function LevelUpDialog({
           currentAbilities ? (
             <AsiAllocator
               key={grant.key}
-              choice={{
-                type: 'asi',
-                choiceKey: grant.key,
-                source: { origin: 'class', id: classId, level: targetLevel },
-                points: grant.points,
-              } satisfies Extract<PendingChoice, { type: 'asi' }>}
+              choice={
+                {
+                  type: 'asi',
+                  choiceKey: grant.key,
+                  source: { origin: 'class', id: classId, level: targetLevel },
+                  points: grant.points,
+                } satisfies Extract<PendingChoice, { type: 'asi' }>
+              }
               abilities={currentAbilities}
               onDecide={handleAsiDecide}
               autoCommit
@@ -319,7 +320,7 @@ export function LevelUpDialog({
             <p key={grant.key} className="text-sm text-destructive">
               {t('characterSheet.levelUp.abilitiesUnavailable')}
             </p>
-          ),
+          )
         )}
 
         <DialogFooter className="gap-2 sm:gap-0">
@@ -332,5 +333,5 @@ export function LevelUpDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

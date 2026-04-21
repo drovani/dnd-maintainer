@@ -140,7 +140,15 @@ const TABLE_COLUMNS = {
 type TableName = keyof typeof TABLE_COLUMNS;
 
 // Order matters: parent tables before children for foreign key constraints
-const TABLE_ORDER: readonly TableName[] = ['campaigns', 'characters', 'sessions', 'encounters', 'notes', 'character_build_levels', 'character_items'] as const satisfies readonly TableName[];
+const TABLE_ORDER: readonly TableName[] = [
+  'campaigns',
+  'characters',
+  'sessions',
+  'encounters',
+  'notes',
+  'character_build_levels',
+  'character_items',
+] as const satisfies readonly TableName[];
 
 // Tables with non-standard unique constraints for ON CONFLICT
 const CONFLICT_TARGETS: Partial<Record<TableName, string>> = {
@@ -180,7 +188,7 @@ export function escapeSqlValue(value: unknown, type: ColumnType): string {
     case 'text[]': {
       const arr = Array.isArray(value) ? value : [];
       if (arr.length === 0) {
-        return "ARRAY[]::text[]";
+        return 'ARRAY[]::text[]';
       }
       const elements = arr.map((el: unknown) => `'${escapeSqlString(String(el))}'`);
       return `ARRAY[${elements.join(', ')}]::text[]`;
@@ -197,7 +205,7 @@ export function buildInsertStatement(
   table: string,
   row: Record<string, unknown>,
   columns: readonly ColumnDef[],
-  conflictTarget: string = '(id)',
+  conflictTarget: string = '(id)'
 ): string {
   const colNames = columns.map((c) => c.name).join(', ');
   const values = columns.map((c) => escapeSqlValue(row[c.name], c.type)).join(', ');

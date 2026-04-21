@@ -1,9 +1,9 @@
-import type { CSSProperties } from 'react'
-import { Toaster as Sonner, type ToasterProps } from 'sonner'
-import { useTheme } from '@/components/ThemeProvider'
+import type { CSSProperties } from 'react';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
+import { useTheme } from '@/components/ThemeProvider';
 
 function Toaster(props: ToasterProps) {
-  const { resolvedMode } = useTheme()
+  const { resolvedMode } = useTheme();
   return (
     <Sonner
       theme={resolvedMode}
@@ -23,7 +23,7 @@ function Toaster(props: ToasterProps) {
       }
       {...props}
     />
-  )
+  );
 }
 
-export { Toaster }
+export { Toaster };
