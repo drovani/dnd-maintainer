@@ -2,8 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RollingNumber } from '@/components/ui/rolling-number';
-import { averageDice, rollDice } from '@/lib/dnd-helpers';
 import type { RaceId } from '@/lib/dnd-helpers';
+import { averageDice, rollDice } from '@/lib/dnd-helpers';
 import { diceRange, formatHeight, formatWeight, parseHeight, parseWeight, RACE_PHYSICALS } from '@/lib/race-physicals';
 import { Calculator, Dices, Info } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -14,11 +14,12 @@ interface PhysicalCharacteristicsProps {
   readonly height: string | null;
   readonly weight: string | null;
   readonly onChange: (updates: { readonly height: string | null; readonly weight: string | null }) => void;
+  readonly className?: string;
 }
 
 type RollingField = 'height' | 'weight' | 'all' | null;
 
-export function PhysicalCharacteristics({ raceId, height, weight, onChange }: PhysicalCharacteristicsProps) {
+export function PhysicalCharacteristics({ raceId, height, weight, onChange, className }: PhysicalCharacteristicsProps) {
   const { t } = useTranslation('common');
 
   const physicals = raceId ? RACE_PHYSICALS[raceId] : null;
@@ -65,7 +66,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
 
   if (!physicals) {
     return (
-      <div className="rounded-md border p-4 text-sm text-muted-foreground">
+      <div className={`rounded-md border p-4 text-sm text-muted-foreground${className ? ` ${className}` : ''}`}>
         {t('characterBuilder.backstory.physicals.noRace')}
       </div>
     );
@@ -130,8 +131,8 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
   const isWeightRolling = rollingField === 'weight' || rollingField === 'all';
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
+    <div className={`space-y-2${className ? ` ${className}` : ''}`}>
+      <div className="flex items-center justify-between flex-col md:flex-row">
         <h3 className="text-sm font-semibold">{t('characterBuilder.backstory.physicals.sectionTitle')}</h3>
         <div className="flex gap-1">
           <Button
