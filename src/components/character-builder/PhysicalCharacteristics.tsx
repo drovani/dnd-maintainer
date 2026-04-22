@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { DiceIcon, type DiceSides } from '@/components/ui/dice-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RollingNumber } from '@/components/ui/rolling-number';
@@ -18,6 +19,14 @@ interface PhysicalCharacteristicsProps {
 }
 
 type RollingField = 'height' | 'weight' | 'all' | null;
+
+// Alternating vertical offset for stacked dice icons.
+// 2 dice: up, down. 3+ dice: down, up, down, …
+function diceOffset(index: number, count: number): string {
+  if (count <= 1) return '';
+  if (count === 2) return index === 0 ? '-translate-y-0.5' : 'translate-y-0.5';
+  return index % 2 === 0 ? 'translate-y-0.5' : '-translate-y-0.5';
+}
 
 export function PhysicalCharacteristics({ raceId, height, weight, onChange, className }: PhysicalCharacteristicsProps) {
   const { t } = useTranslation('common');
@@ -172,7 +181,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
               <Info className="text-muted-foreground size-3" />
             </span>
           </Label>
-          <div className="flex gap-1">
+          <div className="relative flex gap-1">
             {isHeightRolling ? (
               <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={heightMod} isRolling={true} range={[hMin, hMax]} />
@@ -186,8 +195,19 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
                 value={heightMod ?? ''}
                 onChange={(e) => handleHeightModChange(e.target.value)}
                 disabled={rollingField !== null}
-                className="flex-1"
+                className="flex-1 pr-14"
               />
+            )}
+            {!isHeightRolling && (
+              <div className="text-muted-foreground pointer-events-none absolute inset-y-0 right-2 flex items-center -space-x-1.5">
+                {Array.from({ length: physicals.heightDice.count }, (_, i) => (
+                  <DiceIcon
+                    key={i}
+                    sides={physicals.heightDice.sides as DiceSides}
+                    className={`size-5 ${diceOffset(i, physicals.heightDice.count)}`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -205,7 +225,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
               <Info className="text-muted-foreground size-3" />
             </span>
           </Label>
-          <div className="flex gap-1">
+          <div className="relative flex gap-1">
             {isWeightRolling ? (
               <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={weightMod} isRolling={true} range={[wMin, wMax]} />
@@ -219,8 +239,19 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
                 value={weightMod ?? ''}
                 onChange={(e) => handleWeightModChange(e.target.value)}
                 disabled={!wDice || rollingField !== null}
-                className={wDice ? 'flex-1' : 'w-full'}
+                className={wDice ? 'flex-1 pr-14' : 'w-full'}
               />
+            )}
+            {!isWeightRolling && wDice && (
+              <div className="text-muted-foreground pointer-events-none absolute inset-y-0 right-2 flex items-center -space-x-1.5">
+                {Array.from({ length: wDice.count }, (_, i) => (
+                  <DiceIcon
+                    key={i}
+                    sides={wDice.sides as DiceSides}
+                    className={`size-5 ${diceOffset(i, wDice.count)}`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
