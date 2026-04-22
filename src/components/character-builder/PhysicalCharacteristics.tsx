@@ -5,7 +5,7 @@ import { RollingNumber } from '@/components/ui/rolling-number';
 import { averageDice, rollDice } from '@/lib/dnd-helpers';
 import type { RaceId } from '@/lib/dnd-helpers';
 import { diceRange, formatHeight, formatWeight, parseHeight, parseWeight, RACE_PHYSICALS } from '@/lib/race-physicals';
-import { Calculator, Dices } from 'lucide-react';
+import { Calculator, Dices, Info } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -142,7 +142,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
             disabled={rollingField !== null}
           >
             <Calculator className="size-3.5" />
-            {t('characterBuilder.backstory.physicals.averageAll')}
+            {t('characterBuilder.backstory.physicals.average')}
           </Button>
           <Button
             type="button"
@@ -152,7 +152,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
             disabled={rollingField !== null}
           >
             <Dices className="size-3.5" />
-            {t('characterBuilder.backstory.physicals.rollAll')}
+            {t('characterBuilder.backstory.physicals.roll')}
           </Button>
         </div>
       </div>
@@ -160,35 +160,18 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:items-end">
         {/* Height modifier */}
         <div className="space-y-1">
-          <Label htmlFor="height-mod" className="text-xs">
-            {t('characterBuilder.backstory.physicals.heightModifier')}{' '}
-            <span className="text-muted-foreground">
-              {t('characterBuilder.backstory.physicals.modifierRange', { min: hMin, max: hMax })}
+          <Label htmlFor="height-mod" className="flex items-center gap-1 text-xs">
+            {t('characterBuilder.backstory.physicals.heightModifier')}
+            <span
+              title={t('characterBuilder.backstory.physicals.formula', {
+                base: `${physicals.heightBase}"`,
+                dice: `${physicals.heightDice.count}d${physicals.heightDice.sides}`,
+              })}
+            >
+              <Info className="text-muted-foreground size-3" />
             </span>
           </Label>
           <div className="flex gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-9 shrink-0"
-              onClick={() => applyAverage('height')}
-              disabled={rollingField !== null}
-              title={t('characterBuilder.backstory.physicals.average')}
-            >
-              <Calculator className="size-3.5" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-9 shrink-0"
-              onClick={() => startRoll('height')}
-              disabled={rollingField !== null}
-              title={t('characterBuilder.backstory.physicals.roll')}
-            >
-              <Dices className="size-3.5" />
-            </Button>
             {isHeightRolling ? (
               <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={heightMod} isRolling={true} range={[hMin, hMax]} />
@@ -206,53 +189,22 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
               />
             )}
           </div>
-          <p className="text-muted-foreground text-xs">
-            {t('characterBuilder.backstory.physicals.formula', {
-              base: `${physicals.heightBase}"`,
-              dice: `${physicals.heightDice.count}d${physicals.heightDice.sides}`,
-            })}
-          </p>
         </div>
 
         {/* Weight modifier */}
         <div className="space-y-1">
-          <Label htmlFor="weight-mod" className="text-xs">
-            {t('characterBuilder.backstory.physicals.weightModifier')}{' '}
-            {wDice ? (
-              <span className="text-muted-foreground">
-                {t('characterBuilder.backstory.physicals.modifierRange', { min: wMin, max: wMax })}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">{t('characterBuilder.backstory.physicals.fixedWeightMod')}</span>
-            )}
+          <Label htmlFor="weight-mod" className="flex items-center gap-1 text-xs">
+            {t('characterBuilder.backstory.physicals.weightModifier')}
+            <span
+              title={t('characterBuilder.backstory.physicals.weightFormula', {
+                base: physicals.weightBase,
+                dice: wDice ? `${wDice.count}d${wDice.sides}` : '1',
+              })}
+            >
+              <Info className="text-muted-foreground size-3" />
+            </span>
           </Label>
           <div className="flex gap-1">
-            {wDice && (
-              <>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-9 shrink-0"
-                  onClick={() => applyAverage('weight')}
-                  disabled={rollingField !== null || heightMod === null}
-                  title={t('characterBuilder.backstory.physicals.average')}
-                >
-                  <Calculator className="size-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-9 shrink-0"
-                  onClick={() => startRoll('weight')}
-                  disabled={rollingField !== null || heightMod === null}
-                  title={t('characterBuilder.backstory.physicals.roll')}
-                >
-                  <Dices className="size-3.5" />
-                </Button>
-              </>
-            )}
             {isWeightRolling ? (
               <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={weightMod} isRolling={true} range={[wMin, wMax]} />
@@ -270,12 +222,6 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange }: Ph
               />
             )}
           </div>
-          <p className="text-muted-foreground text-xs">
-            {t('characterBuilder.backstory.physicals.weightFormula', {
-              base: physicals.weightBase,
-              dice: wDice ? `${wDice.count}d${wDice.sides}` : '1',
-            })}
-          </p>
         </div>
 
         {/* Final height */}
