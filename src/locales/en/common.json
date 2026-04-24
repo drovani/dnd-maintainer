@@ -389,7 +389,8 @@
       "armor": "Armor",
       "weapons": "Weapons",
       "tools": "Tools",
-      "languages": "Languages"
+      "languages": "Languages",
+      "expertise": "Expertise"
     },
     "attacks": {
       "name": "Name",
