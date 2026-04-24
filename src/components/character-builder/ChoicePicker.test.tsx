@@ -245,7 +245,6 @@ const TOTEM_CHOICE: PendingChoice & { type: 'totem-animal-choice' } = {
   type: 'totem-animal-choice',
   choiceKey: 'totem-animal-choice:class:barbarian:0' as ChoiceKey,
   source: TOTEM_SOURCE,
-  featureIdPrefix: 'totemwarrior-totem-spirit',
 };
 
 describe('ChoicePicker totem-animal-choice', () => {

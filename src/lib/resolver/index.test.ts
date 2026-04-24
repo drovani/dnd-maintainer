@@ -776,15 +776,12 @@ describe('Human Barbarian L6 + Totem Warrior (no totem decisions) integration', 
     expect(keys).toContain(totemL6Key);
   });
 
-  it('the two totem-animal-choice pending entries have distinct featureIdPrefixes', () => {
+  it('the two totem-animal-choice pending entries have distinct choiceKeys (one per grant)', () => {
     const result = resolveCharacter(input);
-    const totemPending = result.pendingChoices.filter(
-      (c): c is Extract<(typeof result.pendingChoices)[number], { type: 'totem-animal-choice' }> =>
-        c.type === 'totem-animal-choice'
-    );
-    const prefixes = totemPending.map((c) => c.featureIdPrefix);
-    expect(prefixes).toContain('totemwarrior-totem-spirit');
-    expect(prefixes).toContain('totemwarrior-aspect-of-the-beast');
+    const totemPending = result.pendingChoices.filter((c) => c.type === 'totem-animal-choice');
+    // Each grant emits its own pending entry identified by its unique choiceKey
+    expect(totemPending.map((c) => c.choiceKey)).toContain(totemL3Key);
+    expect(totemPending.map((c) => c.choiceKey)).toContain(totemL6Key);
   });
 });
 

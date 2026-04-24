@@ -127,7 +127,6 @@ function useAllChoiceGrants() {
         type: 'totem-animal-choice',
         choiceKey: grant.key,
         source,
-        featureIdPrefix: grant.featureIdPrefix,
       });
     }
 

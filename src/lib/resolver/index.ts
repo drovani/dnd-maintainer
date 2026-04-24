@@ -203,7 +203,6 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         type: 'totem-animal-choice',
         choiceKey: grant.key,
         source,
-        featureIdPrefix: grant.featureIdPrefix,
       });
     }
   }
