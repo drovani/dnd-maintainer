@@ -1,6 +1,7 @@
 import type { SpellDef, SpellLevel } from '@/types/spells';
 import type { ClassId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
+import type gamedata from '@/locales/en/gamedata.json';
 
 const logger = getLogger('spells');
 
@@ -1374,6 +1375,35 @@ export function requireSpellDef(id: string): SpellDef {
  * Returns all spells in the catalog for a given class and optional level filter.
  * When level is omitted, returns all spells for the class across all levels.
  */
+/**
+ * All spell IDs present in gamedata.json — derived from the JSON type so
+ * that i18next key-checking can resolve `spells.<id>.name` exactly.
+ */
+export type SpellId = keyof typeof gamedata.spells;
+
+/** A typed gamedata key for a spell name: `spells.<id>.name` */
+export type SpellNameKey = `spells.${SpellId}.name`;
+/** A typed gamedata key for a spell description: `spells.<id>.description` */
+export type SpellDescriptionKey = `spells.${SpellId}.description`;
+
+/**
+ * Returns the typed gamedata key for a spell's name.
+ * `spellId` must be a known SpellId from the catalog. Cast from `string` only
+ * when the id is guaranteed to come from the catalog (e.g., SPELL_CATALOG entries
+ * or LAND_TERRAIN_SPELL_GRANTS).
+ */
+export function getSpellNameKey(spellId: SpellId): SpellNameKey {
+  return `spells.${spellId}.name`;
+}
+
+/**
+ * Returns the typed gamedata key for a spell's description.
+ * Same narrowing requirement as getSpellNameKey.
+ */
+export function getSpellDescriptionKey(spellId: SpellId): SpellDescriptionKey {
+  return `spells.${spellId}.description`;
+}
+
 export function getSpellsForList(classId: ClassId, level?: SpellLevel): readonly SpellDef[] {
   return SPELL_CATALOG.filter((s) => {
     if (!s.classes.includes(classId)) return false;

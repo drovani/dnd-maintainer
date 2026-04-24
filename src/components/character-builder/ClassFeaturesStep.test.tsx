@@ -17,9 +17,17 @@ vi.mock('react-i18next', () => ({
       if (segments[0] === 'fightingStyles' && segments.length === 3) {
         return `${segments[1]}:${segments[2]}`;
       }
+      // spells.<id>.name / .description -> "spell:<id>"
+      if (segments[0] === 'spells' && segments.length === 3 && segments[2] === 'name') {
+        return `spell:${segments[1]}`;
+      }
+      if (segments[0] === 'spells' && segments.length === 3 && segments[2] === 'description') {
+        return `spell-desc:${segments[1]}`;
+      }
       const last = segments[segments.length - 1];
       if (opts && 'count' in opts) return `${last}:${String(opts.count)}`;
       if (opts && 'source' in opts) return `${last}:${String(opts.source)}`;
+      if (opts && 'selected' in opts) return `${last}:${String(opts.selected)}/${String(opts.count)}`;
       return last;
     },
     i18n: { language: 'en' },
@@ -70,7 +78,7 @@ function wizardSpellcasting(): ResolvedSpellcasting {
     ability: 'int',
     spellSaveDC: 13,
     spellAttackBonus: 5,
-    cantrips: ['Fire Bolt', 'Mage Hand', 'Prestidigitation'],
+    cantrips: ['druidcraft', 'guidance', 'shillelagh'],
     knownSpells: [],
     alwaysPreparedSpells: [],
     slots: [2],
@@ -127,7 +135,7 @@ describe('ClassFeaturesStep', () => {
     render(<ClassFeaturesStep />);
 
     expect(screen.getByText('spellcasting')).toBeTruthy();
-    expect(screen.getByText(/Fire Bolt, Mage Hand, Prestidigitation/)).toBeTruthy();
+    expect(screen.getByText(/spell:druidcraft, spell:guidance, spell:shillelagh/)).toBeTruthy();
   });
 
   it('renders fallback when class has no fighting styles and no spellcasting', () => {

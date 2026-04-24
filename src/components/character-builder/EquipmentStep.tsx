@@ -1,7 +1,7 @@
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
-import { BUNDLE_CATEGORIES } from '@/types/items';
+import { BUNDLE_CATEGORIES, type ArmorDef } from '@/types/items';
 import { useTranslation } from 'react-i18next';
 import { ChoicePicker } from './ChoicePicker';
 import type { ChoiceDecision } from '@/types/choices';
@@ -14,6 +14,11 @@ export function EquipmentStep() {
   const { bundles, resolved, build } = context;
 
   const allEquipment = resolved?.equipment ?? [];
+
+  // Warn when a druid has metal armor in their resolved equipment.
+  const isDruid = build?.levels?.some((l) => l.classId === 'druid') ?? false;
+  const hasMetalArmor =
+    isDruid && allEquipment.some((e) => e.itemDef.type === 'armor' && (e.itemDef as ArmorDef).metal);
 
   // Drive the class loadout UI from the class's bundle-choice grants (not pendingChoices),
   // so options remain visible after a decision is made and the user can change their pick.
@@ -54,6 +59,11 @@ export function EquipmentStep() {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div className="space-y-8">
+        {hasMetalArmor && (
+          <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-400">
+            {tc('characterBuilder.druidMetalArmorWarning')}
+          </div>
+        )}
         <section className="space-y-4">
           <div className="space-y-1">
             <h2 className="text-base font-semibold text-foreground">
