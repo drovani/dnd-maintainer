@@ -13,7 +13,7 @@ import type {
   GrantBundle,
   SourceTag,
 } from '@/types/sources';
-import type { SubclassGrant, FightingStyleChoiceGrant } from '@/types/grants';
+import type { SubclassGrant, FightingStyleChoiceGrant, LandTerrainChoiceGrant } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { RACE_SOURCES } from '@/lib/sources/races';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
@@ -22,6 +22,7 @@ import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { FEAT_SOURCES } from '@/lib/sources/feats';
 import { ITEM_SOURCES } from '@/lib/sources/items';
 import { FIGHTING_STYLE_SOURCES, getFightingStyleSource } from '@/lib/sources/fighting-styles';
+import { getLandTerrainSpellGrant } from '@/lib/sources/land-terrains';
 import type { FightingStyleId } from '@/lib/dnd-helpers';
 
 export type {
@@ -175,6 +176,40 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           warnings.push(msg);
           logger.warn(msg);
         }
+      }
+    }
+  }
+
+  // Land terrain synthesis — Circle of the Land: emit always-prepared spell grants for chosen terrain
+  // gated by the druid's class level. Must run after subclass bundles are emitted so the
+  // land-terrain-choice grant exists to discover.
+  const druidClassLevel = classCounts.get('druid' as ClassId) ?? 0;
+  if (druidClassLevel > 0) {
+    const allLandTerrainGrants: { grant: LandTerrainChoiceGrant; source: SourceTag }[] = [];
+    for (const bundle of bundles) {
+      for (const grant of bundle.grants) {
+        if (grant.type === 'land-terrain-choice') {
+          allLandTerrainGrants.push({ grant: grant as LandTerrainChoiceGrant, source: bundle.source });
+        }
+      }
+    }
+    for (const { grant } of allLandTerrainGrants) {
+      const decision = build.choices[grant.key];
+      if (decision?.type !== 'land-terrain-choice') continue;
+      const terrainGrant = getLandTerrainSpellGrant(decision.terrainId);
+      if (!terrainGrant) continue;
+      for (const tier of terrainGrant.tiers) {
+        if (druidClassLevel < tier.level) continue;
+        const tag: SourceTag = {
+          origin: 'subclass',
+          id: 'landcircle',
+          classId: 'druid' as ClassId,
+          level: tier.level,
+        };
+        bundles.push({
+          source: tag,
+          grants: tier.spellIds.map((spellId) => ({ type: 'spell' as const, spellId, alwaysPrepared: true })),
+        });
       }
     }
   }

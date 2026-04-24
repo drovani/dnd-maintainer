@@ -183,3 +183,136 @@ describe('collectBundles', () => {
     expect(subclassBundles).toHaveLength(1); // only L3 feature, not L7, L10, L15, L18
   });
 });
+
+describe('Land terrain synthesis in collectBundles', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'druid', 0);
+  const terrainKey = createChoiceKey('land-terrain-choice', 'subclass', 'landcircle', 0);
+
+  const baseDruidBuild: CharacterBuild = {
+    raceId: 'human' as RaceId,
+    backgroundId: null,
+    baseAbilities: { str: 8, dex: 12, con: 14, int: 10, wis: 16, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  function buildLandDruid(druidLevel: number, terrainId: 'forest'): CharacterBuild {
+    const levels = Array.from({ length: druidLevel }, (_, i) => ({
+      classId: 'druid' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 5,
+    }));
+    return {
+      ...baseDruidBuild,
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'landcircle' as SubclassId },
+        [terrainKey]: { type: 'land-terrain-choice' as const, terrainId },
+      },
+    };
+  }
+
+  it('Forest at druid L3: emits barkskin + spider-climb (tier 3 only)', () => {
+    const { bundles } = collectBundles(buildLandDruid(3, 'forest'));
+    const spellGrants = bundles
+      .flatMap((b) => b.grants)
+      .filter((g) => g.type === 'spell' && g.alwaysPrepared)
+      .map((g) => (g.type === 'spell' ? g.spellId : null));
+    expect(spellGrants).toContain('barkskin');
+    expect(spellGrants).toContain('spider-climb');
+    expect(spellGrants).not.toContain('call-lightning');
+    expect(spellGrants).not.toContain('plant-growth');
+    expect(spellGrants).toHaveLength(2);
+  });
+
+  it('Forest at druid L5: emits tiers 3+5 (barkskin, spider-climb, call-lightning, plant-growth)', () => {
+    const { bundles } = collectBundles(buildLandDruid(5, 'forest'));
+    const spellGrants = bundles
+      .flatMap((b) => b.grants)
+      .filter((g) => g.type === 'spell' && g.alwaysPrepared)
+      .map((g) => (g.type === 'spell' ? g.spellId : null));
+    expect(spellGrants).toContain('barkskin');
+    expect(spellGrants).toContain('spider-climb');
+    expect(spellGrants).toContain('call-lightning');
+    expect(spellGrants).toContain('plant-growth');
+    expect(spellGrants).toHaveLength(4);
+  });
+
+  it('Forest at druid L7: emits tiers 3+5+7 (6 spells)', () => {
+    const { bundles } = collectBundles(buildLandDruid(7, 'forest'));
+    const spellGrants = bundles
+      .flatMap((b) => b.grants)
+      .filter((g) => g.type === 'spell' && g.alwaysPrepared)
+      .map((g) => (g.type === 'spell' ? g.spellId : null));
+    expect(spellGrants).toHaveLength(6);
+    expect(spellGrants).toContain('divination');
+    expect(spellGrants).toContain('freedom-of-movement');
+  });
+
+  it('Forest at druid L9: emits all 4 tiers (8 spells)', () => {
+    const { bundles } = collectBundles(buildLandDruid(9, 'forest'));
+    const spellGrants = bundles
+      .flatMap((b) => b.grants)
+      .filter((g) => g.type === 'spell' && g.alwaysPrepared)
+      .map((g) => (g.type === 'spell' ? g.spellId : null));
+    expect(spellGrants).toHaveLength(8);
+    expect(spellGrants).toContain('commune-with-nature');
+    expect(spellGrants).toContain('tree-stride');
+  });
+
+  it('emits no spell grants when no land-terrain-choice decision is present', () => {
+    const noTerrainBuild: CharacterBuild = {
+      ...baseDruidBuild,
+      levels: [
+        { classId: 'druid' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'druid' as ClassId, classLevel: 2, hpRoll: 5 },
+        { classId: 'druid' as ClassId, classLevel: 3, hpRoll: 4 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'landcircle' as SubclassId },
+        // No terrain decision — land-terrain-choice grant becomes pending
+      },
+    };
+    const { bundles } = collectBundles(noTerrainBuild);
+    const alwaysPreparedSpells = bundles.flatMap((b) => b.grants).filter((g) => g.type === 'spell' && g.alwaysPrepared);
+    expect(alwaysPreparedSpells).toHaveLength(0);
+  });
+
+  it('emits no spell grants for non-Land druid (mooncircle)', () => {
+    const moonSubclassKey = createChoiceKey('subclass', 'class', 'druid', 0);
+    const moonBuild: CharacterBuild = {
+      ...baseDruidBuild,
+      levels: [
+        { classId: 'druid' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'druid' as ClassId, classLevel: 2, hpRoll: 5 },
+        { classId: 'druid' as ClassId, classLevel: 5, hpRoll: 4 },
+      ],
+      choices: {
+        [moonSubclassKey]: { type: 'subclass' as const, subclassId: 'mooncircle' as SubclassId },
+      },
+    };
+    const { bundles } = collectBundles(moonBuild);
+    const alwaysPreparedSpells = bundles.flatMap((b) => b.grants).filter((g) => g.type === 'spell' && g.alwaysPrepared);
+    expect(alwaysPreparedSpells).toHaveLength(0);
+  });
+
+  it('synthesized spell bundles have subclass source tagged as landcircle', () => {
+    const { bundles } = collectBundles(buildLandDruid(3, 'forest'));
+    const spellBundles = bundles.filter(
+      (b) =>
+        b.source.origin === 'subclass' &&
+        b.source.id === 'landcircle' &&
+        b.grants.some((g) => g.type === 'spell' && g.alwaysPrepared)
+    );
+    expect(spellBundles.length).toBeGreaterThan(0);
+    const source = spellBundles[0].source;
+    expect(source.origin).toBe('subclass');
+    if (source.origin === 'subclass') {
+      expect(source.id).toBe('landcircle');
+      expect(source.classId).toBe('druid');
+    }
+  });
+});

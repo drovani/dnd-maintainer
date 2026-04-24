@@ -52,7 +52,11 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const features = resolveFeatures(bundles);
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level);
   const speed = resolveSpeed(bundles);
-  const spellcasting = resolveSpellcasting(bundles);
+
+  // Derive classId from the first class-origin bundle (null for classless builds)
+  const classBundle = bundles.find((b) => b.source.origin === 'class');
+  const classId = classBundle?.source.origin === 'class' ? classBundle.source.id : null;
+  const spellcasting = resolveSpellcasting(bundles, { classId, level, abilities, proficiencyBonus, choices });
 
   // Equipment resolution — finalized characters read from DB inventory directly
   const equipmentResult =
@@ -183,6 +187,38 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         choiceKey: grant.key,
         source,
         classId: grant.classId,
+      });
+    }
+  }
+
+  // Unresolved spell-choice grants
+  const resolvedSpellChoiceKeys = new Set<string>();
+  for (const { grant, source } of collectGrantsByType(bundles, 'spell-choice')) {
+    const decision = choices[grant.key];
+    if (!decision || decision.type !== 'spell-choice') {
+      if (!resolvedSpellChoiceKeys.has(grant.key)) {
+        resolvedSpellChoiceKeys.add(grant.key);
+        pendingChoices.push({
+          type: 'spell-choice',
+          choiceKey: grant.key,
+          source,
+          count: grant.count,
+          fromList: grant.fromList,
+          maxLevel: grant.maxLevel,
+          alreadyChosen: [],
+        });
+      }
+    }
+  }
+
+  // Unresolved land-terrain-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'land-terrain-choice')) {
+    const decision = choices[grant.key];
+    if (!decision || decision.type !== 'land-terrain-choice') {
+      pendingChoices.push({
+        type: 'land-terrain-choice',
+        choiceKey: grant.key,
+        source,
       });
     }
   }
