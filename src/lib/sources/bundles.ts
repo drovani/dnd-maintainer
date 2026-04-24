@@ -67,6 +67,36 @@ export const BUNDLE_CATALOG: readonly BundleDef[] = [
     contents: [{ itemId: 'handaxe', quantity: 2 }],
     slots: [],
   },
+  {
+    id: 'barbarian-greataxe',
+    category: 'melee-weapon',
+    contents: [{ itemId: 'greataxe', quantity: 1 }],
+    slots: [],
+  },
+  {
+    id: 'any-martial-melee',
+    category: 'melee-weapon',
+    contents: [],
+    slots: [
+      {
+        slotKey: 'weapon',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'martial', range: 'melee' },
+      },
+    ],
+  },
+  {
+    id: 'any-simple-weapon',
+    category: 'ranged-weapon',
+    contents: [],
+    slots: [
+      {
+        slotKey: 'weapon',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'simple' },
+      },
+    ],
+  },
 ];
 
 export function getBundleDef(id: string): BundleDef | undefined {
