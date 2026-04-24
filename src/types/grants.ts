@@ -112,6 +112,14 @@ export interface SkillExpertiseGrant {
   readonly skill: SkillId;
 }
 
+export interface ExpertiseChoiceGrant {
+  readonly type: 'expertise-choice';
+  readonly key: ChoiceKey;
+  readonly count: number;
+  readonly from: readonly SkillId[] | null;
+  readonly fromTools?: readonly ToolProficiencyId[];
+}
+
 export interface FeatureGrant {
   readonly type: 'feature';
   readonly feature: FeatureDef;
@@ -210,6 +218,7 @@ export type Grant =
   | ProficiencyGrant
   | ProficiencyChoiceGrant
   | SkillExpertiseGrant
+  | ExpertiseChoiceGrant
   | FeatureGrant
   | SpeedGrant
   | HitDieGrant

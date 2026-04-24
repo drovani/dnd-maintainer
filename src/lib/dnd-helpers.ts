@@ -361,6 +361,8 @@ export const DND_TOOL_PROFICIENCIES = [
   'gaming-set-cards',
   'gaming-set-dragonchess',
   'gaming-set-three-dragon-ante',
+  'disguisekit',
+  'poisonerskit',
 ] as const;
 
 export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number];

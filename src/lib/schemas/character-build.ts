@@ -20,7 +20,11 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('skill-choice'), skills: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('tool-choice'), tools: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('language-choice'), languages: z.array(z.string()).readonly() }),
-  z.object({ type: z.literal('expertise-choice'), skills: z.array(z.string()).readonly() }),
+  z.object({
+    type: z.literal('expertise-choice'),
+    skills: z.array(z.string()).readonly(),
+    tools: z.array(z.string()).readonly().optional(),
+  }),
   z.object({ type: z.literal('asi'), allocation: z.record(z.string(), z.number()) }),
   z.object({ type: z.literal('subclass'), subclassId: z.string().min(1) }),
   z.object({ type: z.literal('fighting-style-choice'), styles: z.array(z.string()).readonly() }),

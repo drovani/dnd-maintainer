@@ -79,7 +79,11 @@ export type ChoiceDecision =
   | { readonly type: 'skill-choice'; readonly skills: readonly SkillId[] }
   | { readonly type: 'tool-choice'; readonly tools: readonly ToolProficiencyId[] }
   | { readonly type: 'language-choice'; readonly languages: readonly LanguageId[] }
-  | { readonly type: 'expertise-choice'; readonly skills: readonly SkillId[] }
+  | {
+      readonly type: 'expertise-choice';
+      readonly skills: readonly SkillId[];
+      readonly tools?: readonly ToolProficiencyId[];
+    }
   | { readonly type: 'asi'; readonly allocation: Partial<Record<AbilityKey, number>> }
   | { readonly type: 'subclass'; readonly subclassId: SubclassId }
   | { readonly type: 'fighting-style-choice'; readonly styles: readonly FightingStyleId[] }

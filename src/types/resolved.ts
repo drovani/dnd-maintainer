@@ -186,5 +186,6 @@ export interface ResolvedCharacter {
   readonly spellcasting: ResolvedSpellcasting | null;
   readonly equipment: readonly ResolvedEquipmentItem[];
   readonly attacks: readonly ResolvedAttack[];
+  readonly toolExpertise: readonly ToolProficiencyId[];
   readonly pendingChoices: readonly PendingChoice[];
 }
