@@ -1,4 +1,5 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers';
+import type { ToolProficiencyId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
@@ -187,6 +188,29 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved expertise-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'expertise-choice')) {
+    const decision = choices[grant.key];
+    if (!decision || decision.type !== 'expertise-choice') {
+      pendingChoices.push({
+        type: 'expertise-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: grant.from,
+      });
+    }
+  }
+
+  // Collect tool expertise from resolved expertise-choice decisions
+  const toolExpertise: ToolProficiencyId[] = [];
+  for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
+    const decision = choices[grant.key];
+    if (decision?.type === 'expertise-choice' && decision.tools) {
+      toolExpertise.push(...(decision.tools as ToolProficiencyId[]));
+    }
+  }
+
   return {
     abilities,
     hitDie,
@@ -210,6 +234,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     spellcasting,
     equipment: equipmentResult.items,
     attacks,
+    toolExpertise,
     pendingChoices,
   };
 }
