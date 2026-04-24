@@ -127,8 +127,9 @@
     "backstory": {
       "physicals": {
         "sectionTitle": "Physical Characteristics",
-        "heightModifier": "Height Modifier",
+        "heightModifier": "Height Modifier ({{dice}})",
         "weightModifier": "Weight Modifier",
+        "weightModifierWithDice": "Weight Modifier ({{dice}})",
         "modifierRange": "({{min}}–{{max}})",
         "fixedWeightMod": "Fixed: 1",
         "rollAll": "Roll All",

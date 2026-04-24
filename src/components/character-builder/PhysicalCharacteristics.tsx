@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { DiceIcon, type DiceSides } from '@/components/ui/dice-icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RollingNumber } from '@/components/ui/rolling-number';
@@ -19,14 +18,6 @@ interface PhysicalCharacteristicsProps {
 }
 
 type RollingField = 'height' | 'weight' | 'all' | null;
-
-// Alternating vertical offset for stacked dice icons.
-// 2 dice: up, down. 3+ dice: down, up, down, …
-function diceOffset(index: number, count: number): string {
-  if (count <= 1) return '';
-  if (count === 2) return index === 0 ? '-translate-y-0.5' : 'translate-y-0.5';
-  return index % 2 === 0 ? 'translate-y-0.5' : '-translate-y-0.5';
-}
 
 export function PhysicalCharacteristics({ raceId, height, weight, onChange, className }: PhysicalCharacteristicsProps) {
   const { t } = useTranslation('common');
@@ -167,23 +158,18 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:items-end">
-        {/* Height modifier */}
-        <div className="space-y-1">
-          <Label htmlFor="height-mod" className="flex items-center gap-1 text-xs">
-            {t('characterBuilder.backstory.physicals.heightModifier')}
-            <span
-              title={t('characterBuilder.backstory.physicals.formula', {
-                base: `${physicals.heightBase}"`,
+      <div className="space-y-2 lg:flex lg:flex-wrap lg:items-center lg:gap-x-6 lg:gap-y-2 lg:space-y-0">
+        {/* Modifier row: Height Mod + Weight Mod inline */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* Height modifier */}
+          <div className="flex items-center gap-2">
+            <Label htmlFor="height-mod" className="whitespace-nowrap text-xs">
+              {t('characterBuilder.backstory.physicals.heightModifier', {
                 dice: `${physicals.heightDice.count}d${physicals.heightDice.sides}`,
               })}
-            >
-              <Info className="text-muted-foreground size-3" />
-            </span>
-          </Label>
-          <div className="relative flex gap-1">
+            </Label>
             {isHeightRolling ? (
-              <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
+              <div className="border-input bg-background flex h-9 w-16 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={heightMod} isRolling={true} range={[hMin, hMax]} />
               </div>
             ) : (
@@ -195,39 +181,22 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
                 value={heightMod ?? ''}
                 onChange={(e) => handleHeightModChange(e.target.value)}
                 disabled={rollingField !== null}
-                className="flex-1 pr-14"
+                className="w-16"
               />
             )}
-            {!isHeightRolling && (
-              <div className="text-muted-foreground pointer-events-none absolute inset-y-0 right-2 flex items-center -space-x-1.5">
-                {Array.from({ length: physicals.heightDice.count }, (_, i) => (
-                  <DiceIcon
-                    key={i}
-                    sides={physicals.heightDice.sides as DiceSides}
-                    className={`size-5 ${diceOffset(i, physicals.heightDice.count)}`}
-                  />
-                ))}
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Weight modifier */}
-        <div className="space-y-1">
-          <Label htmlFor="weight-mod" className="flex items-center gap-1 text-xs">
-            {t('characterBuilder.backstory.physicals.weightModifier')}
-            <span
-              title={t('characterBuilder.backstory.physicals.weightFormula', {
-                base: physicals.weightBase,
-                dice: wDice ? `${wDice.count}d${wDice.sides}` : '1',
-              })}
-            >
-              <Info className="text-muted-foreground size-3" />
-            </span>
-          </Label>
-          <div className="relative flex gap-1">
+          {/* Weight modifier */}
+          <div className="flex items-center gap-2">
+            <Label htmlFor="weight-mod" className="whitespace-nowrap text-xs">
+              {wDice
+                ? t('characterBuilder.backstory.physicals.weightModifierWithDice', {
+                    dice: `${wDice.count}d${wDice.sides}`,
+                  })
+                : t('characterBuilder.backstory.physicals.weightModifier')}
+            </Label>
             {isWeightRolling ? (
-              <div className="border-input bg-background flex h-9 flex-1 items-center rounded-md border px-3 text-sm">
+              <div className="border-input bg-background flex h-9 w-16 items-center rounded-md border px-3 text-sm">
                 <RollingNumber value={weightMod} isRolling={true} range={[wMin, wMax]} />
               </div>
             ) : (
@@ -239,37 +208,45 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
                 value={weightMod ?? ''}
                 onChange={(e) => handleWeightModChange(e.target.value)}
                 disabled={!wDice || rollingField !== null}
-                className={wDice ? 'flex-1 pr-14' : 'w-full'}
+                className="w-16"
               />
-            )}
-            {!isWeightRolling && wDice && (
-              <div className="text-muted-foreground pointer-events-none absolute inset-y-0 right-2 flex items-center -space-x-1.5">
-                {Array.from({ length: wDice.count }, (_, i) => (
-                  <DiceIcon
-                    key={i}
-                    sides={wDice.sides as DiceSides}
-                    className={`size-5 ${diceOffset(i, wDice.count)}`}
-                  />
-                ))}
-              </div>
             )}
           </div>
         </div>
 
-        {/* Final height */}
-        <div className="space-y-1">
-          <Label className="text-muted-foreground text-xs">
-            {t('characterBuilder.backstory.physicals.finalHeight')}
-          </Label>
-          <p className="font-medium">{heightMod !== null ? formatHeight(finalHeightInches) : '—'}</p>
-        </div>
+        {/* Calculated row: Final Height + Final Weight inline */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* Final height */}
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs">
+              {t('characterBuilder.backstory.physicals.finalHeight')}
+              <span
+                title={t('characterBuilder.backstory.physicals.formula', {
+                  base: `${physicals.heightBase}"`,
+                  dice: `${physicals.heightDice.count}d${physicals.heightDice.sides}`,
+                })}
+              >
+                <Info className="text-muted-foreground size-3" />
+              </span>
+            </span>
+            <p className="font-medium">{heightMod !== null ? formatHeight(finalHeightInches) : '—'}</p>
+          </div>
 
-        {/* Final weight */}
-        <div className="space-y-1">
-          <Label className="text-muted-foreground text-xs">
-            {t('characterBuilder.backstory.physicals.finalWeight')}
-          </Label>
-          <p className="font-medium">{heightMod !== null ? formatWeight(finalWeightLbs) : '—'}</p>
+          {/* Final weight */}
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground flex items-center gap-1 whitespace-nowrap text-xs">
+              {t('characterBuilder.backstory.physicals.finalWeight')}
+              <span
+                title={t('characterBuilder.backstory.physicals.weightFormula', {
+                  base: physicals.weightBase,
+                  dice: wDice ? `${wDice.count}d${wDice.sides}` : '1',
+                })}
+              >
+                <Info className="text-muted-foreground size-3" />
+              </span>
+            </span>
+            <p className="font-medium">{heightMod !== null ? formatWeight(finalWeightLbs) : '—'}</p>
+          </div>
         </div>
       </div>
     </div>
