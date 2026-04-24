@@ -1,8 +1,10 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import type { ChoiceKey } from '@/types/choices';
-import { ABILITY_ABBREVIATIONS, DND_SKILLS, type SkillId } from '@/lib/dnd-helpers';
+import type { SourceTag } from '@/types/sources';
+import { ABILITY_ABBREVIATIONS, DND_SKILLS, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +12,14 @@ interface SkillChoiceInfo {
   readonly choiceKey: ChoiceKey;
   readonly count: number;
   readonly from: readonly SkillId[];
+}
+
+interface ExpertiseChoiceInfo {
+  readonly choiceKey: ChoiceKey;
+  readonly source: SourceTag;
+  readonly count: number;
+  readonly from: readonly SkillId[] | null;
+  readonly fromTools: readonly ToolProficiencyId[];
 }
 
 export function SkillsStep() {
@@ -36,22 +46,38 @@ export function SkillsStep() {
     return choices;
   }, [bundles]);
 
+  // Scan grant bundles for all expertise-choice grants (regardless of pending status)
+  const expertiseChoices = useMemo((): readonly ExpertiseChoiceInfo[] => {
+    if (bundles.length === 0) return [];
+    const choices: ExpertiseChoiceInfo[] = [];
+    for (const bundle of bundles) {
+      for (const grant of bundle.grants) {
+        if (grant.type === 'expertise-choice') {
+          choices.push({
+            choiceKey: grant.key,
+            source: bundle.source,
+            count: grant.count,
+            from: grant.from,
+            fromTools: grant.fromTools,
+          });
+        }
+      }
+    }
+    return choices;
+  }, [bundles]);
+
   if (!resolved) {
     return <p className="text-muted-foreground text-sm">{tc('characterBuilder.skills.selectClassFirst')}</p>;
   }
 
-  // Build set of skills eligible for any choice
-  const eligibleSkillIds = new Set<SkillId>();
-  for (const sc of skillChoices) {
-    for (const s of sc.from) eligibleSkillIds.add(s);
-  }
-
-  // Get current selections for a choice
+  // Get current selections for a skill-choice
   const getSelectedSkills = (choiceKey: ChoiceKey): readonly SkillId[] => {
     const decision = build?.choices[choiceKey];
     if (decision?.type === 'skill-choice') return decision.skills;
     return [];
   };
+
+  const allExpertiseChoiceKeys = expertiseChoices.map((ec) => ec.choiceKey);
 
   return (
     <div className="space-y-4">
@@ -142,6 +168,27 @@ export function SkillsStep() {
           );
         })}
       </div>
+
+      {/* Expertise choices — one section per grant, rendered via shared picker */}
+      {expertiseChoices.map((ec) => (
+        <ExpertiseChoicePicker
+          key={ec.choiceKey}
+          choice={{
+            type: 'expertise-choice',
+            choiceKey: ec.choiceKey,
+            source: ec.source,
+            count: ec.count,
+            from: ec.from,
+            fromTools: ec.fromTools,
+          }}
+          currentDecision={build?.choices[ec.choiceKey]}
+          allDecisions={build?.choices ?? {}}
+          allExpertiseChoiceKeys={allExpertiseChoiceKeys}
+          resolvedSkills={resolved.skills}
+          onDecide={context.makeChoice}
+          onClear={context.clearChoice}
+        />
+      ))}
     </div>
   );
 }

@@ -106,6 +106,26 @@ export function resolveSkills(
     }
   }
 
+  // Collect expertise grants
+  const expertiseSkills = new Set<SkillId>();
+
+  // Fixed skill-expertise grants
+  for (const { grant } of collectGrantsByType(bundles, 'skill-expertise')) {
+    expertiseSkills.add(grant.skill);
+  }
+
+  // Expertise choice grants — filter by grant's from pool and cap at grant.count
+  // so a malformed overfilled decision cannot double the PB on extra skills.
+  for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
+    const decision = choices[grant.key];
+    if (decision?.type === 'expertise-choice') {
+      const pool = decision.skills.filter((s) => grant.from === null || grant.from.includes(s));
+      for (const skillId of pool.slice(0, grant.count)) {
+        expertiseSkills.add(skillId);
+      }
+    }
+  }
+
   // Collect ability-check-bonus grants
   const abilityCheckBonuses = collectGrantsByType(bundles, 'ability-check-bonus');
 
@@ -114,6 +134,7 @@ export function resolveSkills(
     const ability = skill.ability as AbilityKey;
     const sources = proficientSkills.get(skill.id) ?? [];
     const proficient = sources.length > 0;
+    const hasExpertise = proficient && expertiseSkills.has(skill.id);
 
     const breakdown: SkillBonusComponent[] = [];
     let bonus = 0;
@@ -126,6 +147,12 @@ export function resolveSkills(
     // Proficiency bonus
     if (proficient) {
       breakdown.push({ type: 'proficiency', value: proficiencyBonus, label: 'proficiency' });
+      bonus += proficiencyBonus;
+    }
+
+    // Expertise doubles the proficiency bonus
+    if (hasExpertise) {
+      breakdown.push({ type: 'expertise', value: proficiencyBonus, label: 'expertise' });
       bonus += proficiencyBonus;
     }
 
@@ -144,7 +171,7 @@ export function resolveSkills(
     result[skill.id] = {
       ability,
       proficient,
-      expertise: false,
+      expertise: hasExpertise,
       bonus,
       breakdown,
       sources,

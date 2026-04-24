@@ -115,11 +115,27 @@ function CharacterSheetInner({
     }
   }, [saveDraft, markSaved, tc]);
 
+  const isDirtyRef = useRef(isDirty);
+  const doSaveRef = useRef(doSave);
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+    doSaveRef.current = doSave;
+  });
+
   useEffect(() => {
     if (!isDirty) return;
     const timer = setTimeout(doSave, 500);
     return () => clearTimeout(timer);
   }, [isDirty, doSave]);
+
+  // Flush a pending autosave on unmount so the last level-up isn't lost when the user navigates away within the debounce window.
+  useEffect(() => {
+    return () => {
+      if (isDirtyRef.current) {
+        void doSaveRef.current();
+      }
+    };
+  }, []);
 
   const handleUpdate = (updates: Partial<Character>) => {
     updateMutation.mutate(

@@ -85,4 +85,97 @@ export const RACE_SOURCES: readonly RaceSource[] = [
       },
     ],
   },
+  {
+    id: 'halfling-lightfoot',
+    defaultSize: 'small',
+    defaultSpeed: 25,
+    grants: [
+      { type: 'ability-bonus', ability: 'dex', bonus: 2 },
+      { type: 'ability-bonus', ability: 'cha', bonus: 1 },
+      { type: 'speed', mode: 'walk', value: 25 },
+      { type: 'proficiency', category: 'language', id: 'common' },
+      { type: 'proficiency', category: 'language', id: 'halfling' },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-lucky',
+          name: 'Lucky',
+          description:
+            'When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.',
+        },
+      },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-brave',
+          name: 'Brave',
+          description: 'You have advantage on saving throws against being frightened.',
+        },
+      },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-nimbleness',
+          name: 'Halfling Nimbleness',
+          description: 'You can move through the space of any creature that is of a size larger than yours.',
+        },
+      },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-naturally-stealthy',
+          name: 'Naturally Stealthy',
+          description:
+            'You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'halfling-stout',
+    defaultSize: 'small',
+    defaultSpeed: 25,
+    grants: [
+      { type: 'ability-bonus', ability: 'dex', bonus: 2 },
+      { type: 'ability-bonus', ability: 'con', bonus: 1 },
+      { type: 'speed', mode: 'walk', value: 25 },
+      { type: 'proficiency', category: 'language', id: 'common' },
+      { type: 'proficiency', category: 'language', id: 'halfling' },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-lucky',
+          name: 'Lucky',
+          description:
+            'When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.',
+        },
+      },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-brave',
+          name: 'Brave',
+          description: 'You have advantage on saving throws against being frightened.',
+        },
+      },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-nimbleness',
+          name: 'Halfling Nimbleness',
+          description: 'You can move through the space of any creature that is of a size larger than yours.',
+        },
+      },
+      { type: 'resistance', damageType: 'poison' },
+      {
+        type: 'feature',
+        feature: {
+          id: 'halfling-stout-resilience',
+          name: 'Stout Resilience',
+          description:
+            'You have advantage on saving throws against poison, and you have resistance against poison damage.',
+        },
+      },
+    ],
+  },
 ];

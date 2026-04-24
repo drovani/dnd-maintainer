@@ -67,6 +67,44 @@ export const BUNDLE_CATALOG: readonly BundleDef[] = [
     contents: [{ itemId: 'handaxe', quantity: 2 }],
     slots: [],
   },
+  // Rogue starting equipment
+  {
+    id: 'rogue-loadout',
+    category: 'loadout',
+    contents: [
+      { itemId: 'leather', quantity: 1 },
+      { itemId: 'dagger', quantity: 2 },
+      { itemId: 'thieves-tools', quantity: 1 },
+    ],
+    slots: [],
+  },
+  {
+    id: 'rogue-rapier',
+    category: 'melee-weapon',
+    contents: [{ itemId: 'rapier', quantity: 1 }],
+    slots: [],
+  },
+  {
+    id: 'rogue-shortsword-melee',
+    category: 'melee-weapon',
+    contents: [{ itemId: 'shortsword', quantity: 1 }],
+    slots: [],
+  },
+  {
+    id: 'rogue-shortbow-kit',
+    category: 'ranged-weapon',
+    contents: [
+      { itemId: 'shortbow', quantity: 1 },
+      { itemId: 'arrows-20', quantity: 1 },
+    ],
+    slots: [],
+  },
+  {
+    id: 'rogue-shortsword-ranged',
+    category: 'ranged-weapon',
+    contents: [{ itemId: 'shortsword', quantity: 1 }],
+    slots: [],
+  },
 ];
 
 export function getBundleDef(id: string): BundleDef | undefined {

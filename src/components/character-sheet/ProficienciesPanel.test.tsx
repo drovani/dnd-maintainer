@@ -33,6 +33,7 @@ function buildMinimalResolved(overrides: Partial<ResolvedCharacter> = {}): Resol
     spellcasting: null,
     equipment: [],
     attacks: [],
+    toolExpertise: [],
     pendingChoices: [],
     ...overrides,
   };
@@ -105,5 +106,26 @@ describe('ProficienciesPanel', () => {
     render(<ProficienciesPanel resolved={resolved} />);
     // 'armor' section label should not be present (mock returns last segment)
     expect(screen.queryByText('armor')).not.toBeInTheDocument();
+  });
+
+  it('renders tool proficiency without expertise marker when toolExpertise is empty', () => {
+    const resolved = buildMinimalResolved({
+      toolProficiencies: [{ value: 'thievestools', sources: [{ origin: 'background', id: 'criminal' }] }],
+      toolExpertise: [],
+    });
+    render(<ProficienciesPanel resolved={resolved} />);
+    expect(screen.getByText('thievestools')).toBeInTheDocument();
+    // 'expertise' is the last segment of characterSheet.proficiencies.expertise
+    expect(screen.queryByText('expertise')).not.toBeInTheDocument();
+  });
+
+  it('renders expertise marker on tool badge when tool ID appears in toolExpertise', () => {
+    const resolved = buildMinimalResolved({
+      toolProficiencies: [{ value: 'thievestools', sources: [{ origin: 'class', id: 'rogue', level: 1 }] }],
+      toolExpertise: ['thievestools'],
+    });
+    render(<ProficienciesPanel resolved={resolved} />);
+    expect(screen.getByText('thievestools')).toBeInTheDocument();
+    expect(screen.getByText('expertise')).toBeInTheDocument();
   });
 });

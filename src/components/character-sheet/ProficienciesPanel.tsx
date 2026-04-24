@@ -33,13 +33,26 @@ function WeaponBadge({ prof }: { prof: Sourced<WeaponProficiencyId> }) {
   );
 }
 
-function ToolBadge({ prof }: { prof: Sourced<ToolProficiencyId> }) {
+function ToolBadge({ prof, hasExpertise }: { prof: Sourced<ToolProficiencyId>; hasExpertise: boolean }) {
   const { t } = useTranslation('gamedata');
+  const { t: tc } = useTranslation('common');
   const label = t(`tools.${prof.value}`);
   const sources = prof.sources.map(sourceLabel).join(', ');
   return (
-    <Badge variant="outline" title={sources} className="text-xs cursor-default">
+    <Badge
+      variant={hasExpertise ? 'default' : 'outline'}
+      title={hasExpertise ? `${sources} — ${tc('characterSheet.proficiencies.expertise')}` : sources}
+      className="text-xs cursor-default"
+    >
       {label}
+      {hasExpertise && (
+        <span
+          className="ml-1 text-[10px] font-bold uppercase tracking-wide opacity-80"
+          aria-label={tc('characterSheet.proficiencies.expertise')}
+        >
+          {tc('characterSheet.proficiencies.expertise')}
+        </span>
+      )}
     </Badge>
   );
 }
@@ -101,7 +114,7 @@ export function ProficienciesPanel({ resolved }: ProficienciesPanelProps) {
         {resolved.toolProficiencies.length > 0 && (
           <ProficiencySection label={tc('characterSheet.proficiencies.tools')}>
             {resolved.toolProficiencies.map((prof) => (
-              <ToolBadge key={prof.value} prof={prof} />
+              <ToolBadge key={prof.value} prof={prof} hasExpertise={resolved.toolExpertise.includes(prof.value)} />
             ))}
           </ProficiencySection>
         )}

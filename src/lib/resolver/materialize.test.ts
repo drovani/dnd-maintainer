@@ -40,6 +40,7 @@ function makeResolved(equipment: readonly ResolvedEquipmentItem[]): ResolvedChar
     immunities: [],
     spellcasting: null,
     attacks: [],
+    toolExpertise: [],
     pendingChoices: [],
   };
 }

@@ -1,4 +1,5 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers';
+import type { ToolProficiencyId, SkillId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
@@ -6,8 +7,8 @@ import type { FightingStyleId } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
-import type { ResolvedCharacter, PendingChoice } from '@/types/resolved';
-import type { HitDie } from '@/types/grants';
+import type { ResolvedCharacter, PendingChoice, ResolvedSkill } from '@/types/resolved';
+import type { HitDie, ExpertiseChoiceGrant } from '@/types/grants';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies';
@@ -34,6 +35,16 @@ export interface ResolverInput {
   readonly equippedItemIds?: readonly string[];
   readonly persistedItems?: readonly PersistedItem[];
   readonly useDBInventory?: boolean;
+}
+
+function isValidExpertiseSkillPick(
+  skillId: SkillId,
+  grant: ExpertiseChoiceGrant,
+  resolvedSkills: Readonly<Record<SkillId, ResolvedSkill>>
+): boolean {
+  if (!resolvedSkills[skillId]?.proficient) return false;
+  if (grant.from === null) return true;
+  return grant.from.includes(skillId);
 }
 
 export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
@@ -187,6 +198,40 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved or underfilled expertise-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'expertise-choice')) {
+    const decision = choices[grant.key];
+    const validSkills =
+      decision?.type === 'expertise-choice'
+        ? decision.skills.filter((s) => isValidExpertiseSkillPick(s, grant, skills))
+        : [];
+    const validTools =
+      decision?.type === 'expertise-choice' ? decision.tools.filter((t) => grant.fromTools.includes(t)) : [];
+    if (!decision || decision.type !== 'expertise-choice' || validSkills.length + validTools.length !== grant.count) {
+      pendingChoices.push({
+        type: 'expertise-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: grant.from,
+        fromTools: grant.fromTools,
+      });
+    }
+  }
+
+  // Collect tool expertise, filtered by fromTools and capped at grant.count so a
+  // malformed overfilled decision cannot double the PB on more tools than granted.
+  const toolExpertise: ToolProficiencyId[] = [];
+  for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
+    const decision = choices[grant.key];
+    if (decision?.type === 'expertise-choice') {
+      const pool = decision.tools.filter((t) => grant.fromTools.includes(t));
+      for (const toolId of pool.slice(0, grant.count)) {
+        toolExpertise.push(toolId);
+      }
+    }
+  }
+
   return {
     abilities,
     hitDie,
@@ -210,6 +255,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     spellcasting,
     equipment: equipmentResult.items,
     attacks,
+    toolExpertise,
     pendingChoices,
   };
 }

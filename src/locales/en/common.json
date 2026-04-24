@@ -148,6 +148,7 @@
       "skillChoice": "Choose {{count}} skill(s)",
       "languageChoice": "Choose {{count}} language(s)",
       "toolChoice": "Choose {{count}} tool(s)",
+      "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining",
@@ -232,7 +233,9 @@
       "selectClassFirst": "Please select a class in the Basics step before choosing skills.",
       "chooseSkills": "Choose {{count}} skill from your class list.",
       "chooseSkills_plural": "Choose {{count}} skills from your class list.",
-      "selected": "{{count}} / {{max}} selected"
+      "selected": "{{count}} / {{max}} selected",
+      "expertiseEmptyPool": "Pick your skill proficiencies first — expertise requires an already-proficient skill.",
+      "expertiseAlreadyChosen": "already has expertise"
     },
     "proficiencies": {
       "selectClassFirst": "Please select a class in the Basics step before viewing proficiencies.",
@@ -262,6 +265,7 @@
       "spellcasting": "Spellcasting",
       "basicVersion": "Spell management (basic version)",
       "cantrips": "Cantrips",
+      "features": "Class Features",
       "noClassChoices": "This class has no level-1 choices to make."
     },
     "equipment": {
@@ -385,7 +389,8 @@
       "armor": "Armor",
       "weapons": "Weapons",
       "tools": "Tools",
-      "languages": "Languages"
+      "languages": "Languages",
+      "expertise": "Expertise"
     },
     "attacks": {
       "name": "Name",
