@@ -528,4 +528,34 @@ describe('resolveSkills — expertise', () => {
       { type: 'expertise', value: 2, label: 'expertise' },
     ]);
   });
+
+  it('expertise decision skill outside grant.from pool is ignored even when proficient', () => {
+    // arcana is proficient so the downstream proficient && has guard would normally allow it
+    // but the grant restricts to from: ['stealth'] only → arcana must not gain expertise
+    const bundles: GrantBundle[] = [
+      proficientBundle('stealth'),
+      proficientBundle('arcana'),
+      {
+        source: { origin: 'class', id: 'rogue', level: 1 },
+        grants: [
+          {
+            type: 'expertise-choice',
+            key: 'expertise-choice:class:rogue:0',
+            count: 1,
+            from: ['stealth'] as const,
+            fromTools: [],
+          },
+        ],
+      },
+    ];
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['arcana'], tools: [] },
+    };
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
+    // arcana is proficient but outside grant.from → must not get expertise
+    expect(result.arcana.proficient).toBe(true);
+    expect(result.arcana.expertise).toBe(false);
+    // stealth is in grant.from but not in decision → no expertise
+    expect(result.stealth.expertise).toBe(false);
+  });
 });

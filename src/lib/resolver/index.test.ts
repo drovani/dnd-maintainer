@@ -992,3 +992,136 @@ describe('Rogue L3 + Arcane Trickster subclass integration', () => {
     }
   });
 });
+
+describe('expertise-choice count and validity validation', () => {
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const baseRogueL1Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  it('count-underfilled decision emits pending expertise-choice', () => {
+    // Only 1 skill selected for a count-2 grant → should still be pending
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(expertiseKey0);
+  });
+
+  it('non-proficient skill in decision emits pending and does not apply expertise', () => {
+    // Rogue has no arcana proficiency → arcana pick is invalid
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['arcana', 'stealth'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    // arcana is not proficient so the decision has only 1 valid pick (stealth) for count 2 → pending
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    // arcana must not gain expertise even though it appears in the decision
+    expect(result.skills.arcana.expertise).toBe(false);
+  });
+
+  it('tool outside fromTools pool is filtered and emits pending', () => {
+    // herbalism-kit is not in rogue's fromTools (thievestools only)
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: [] as const,
+          tools: ['herbalism-kit'] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    // herbalism-kit is not in fromTools → filtered out → valid count is 0 < 2 → pending
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    expect(result.toolExpertise).not.toContain('herbalism-kit');
+  });
+
+  it('valid full decision (2 proficient skills) resolves cleanly with no pending choice', () => {
+    // stealth and sleightofhand are both rogue proficiencies → count 2 satisfied
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth', 'sleightofhand'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeUndefined();
+    expect(result.skills.stealth.expertise).toBe(true);
+    expect(result.skills.sleightofhand.expertise).toBe(true);
+  });
+});

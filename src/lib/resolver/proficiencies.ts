@@ -114,11 +114,12 @@ export function resolveSkills(
     expertiseSkills.add(grant.skill);
   }
 
-  // Expertise choice grants — look up decisions
+  // Expertise choice grants — look up decisions, filter by grant's from pool
   for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
     const decision = choices[grant.key];
     if (decision?.type === 'expertise-choice') {
       for (const skillId of decision.skills) {
+        if (grant.from !== null && !grant.from.includes(skillId)) continue;
         expertiseSkills.add(skillId);
       }
     }
