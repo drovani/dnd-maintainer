@@ -1,10 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { type ChoiceKey } from '@/types/choices';
 import { type FightingStyleId } from '@/lib/dnd-helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
 import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles';
+import type { PendingChoice } from '@/types/resolved';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -46,13 +48,20 @@ export function ClassFeaturesStep() {
   const hasFightingStyles = fightingStyleChoices.length > 0;
   const hasSpellcasting = !!spellcasting;
 
+  const subclassChoices = useMemo<readonly Extract<PendingChoice, { type: 'subclass' }>[]>(() => {
+    return (resolved?.pendingChoices ?? []).filter(
+      (c): c is Extract<PendingChoice, { type: 'subclass' }> => c.type === 'subclass'
+    );
+  }, [resolved]);
+  const hasSubclassChoices = subclassChoices.length > 0;
+
   const levelOneClassFeatures = useMemo(() => {
     if (!resolved?.features) return [];
     return resolved.features.filter((f) => f.source.origin === 'class' && f.source.level === 1);
   }, [resolved]);
   const hasLevelOneFeatures = levelOneClassFeatures.length > 0;
 
-  const hasAnyContent = hasFightingStyles || hasSpellcasting || hasLevelOneFeatures;
+  const hasAnyContent = hasFightingStyles || hasSpellcasting || hasLevelOneFeatures || hasSubclassChoices;
 
   return (
     <div className="space-y-6">
@@ -149,6 +158,21 @@ export function ClassFeaturesStep() {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {hasSubclassChoices && (
+        <div className="space-y-3">
+          {subclassChoices.map((choice) => (
+            <SubclassPicker
+              key={choice.choiceKey}
+              choice={choice}
+              currentDecision={build?.choices[choice.choiceKey]}
+              onDecide={(choiceKey, subclassId) => context.makeChoice(choiceKey, { type: 'subclass', subclassId })}
+              onClear={(choiceKey) => context.clearChoice(choiceKey)}
+              autoCommit
+            />
+          ))}
         </div>
       )}
 
