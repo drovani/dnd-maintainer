@@ -121,6 +121,16 @@ function useAllChoiceGrants() {
       }
     }
 
+    // totem-animal-choice grants
+    for (const { grant, source } of collectGrantsByType(bundles, 'totem-animal-choice')) {
+      allGrants.push({
+        type: 'totem-animal-choice',
+        choiceKey: grant.key,
+        source,
+        featureIdPrefix: grant.featureIdPrefix,
+      });
+    }
+
     return allGrants;
   }, [bundles, buildChoices]);
 }
