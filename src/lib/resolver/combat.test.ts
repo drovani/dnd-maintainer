@@ -124,7 +124,7 @@ describe('resolveSpeed', () => {
 
 describe('resolveAc', () => {
   it('returns default AC 10 + DEX modifier when no grants', () => {
-    const result = resolveAc(NO_BUNDLES, 2);
+    const result = resolveAc(NO_BUNDLES, 2, 0, 0);
     expect(result.effective).toBe(12);
     expect(result.calculations).toHaveLength(0);
     expect(result.bonuses).toHaveLength(0);
@@ -138,7 +138,7 @@ describe('resolveAc', () => {
       },
     ];
     // DEX 14 → mod +2, armored AC = 10 + 2 = 12
-    const result = resolveAc(bundles, 2);
+    const result = resolveAc(bundles, 2, 0, 0);
     expect(result.calculations).toHaveLength(1);
     expect(result.calculations[0].mode).toBe('armored');
     expect(result.calculations[0].baseValue).toBe(12);
@@ -152,7 +152,7 @@ describe('resolveAc', () => {
         grants: [{ type: 'armor-class', calculation: { mode: 'natural', baseAc: 14 } }],
       },
     ];
-    const result = resolveAc(bundles, 0);
+    const result = resolveAc(bundles, 0, 0, 0);
     expect(result.calculations[0].mode).toBe('natural');
     expect(result.calculations[0].baseValue).toBe(14);
     expect(result.effective).toBe(14);
@@ -169,24 +169,52 @@ describe('resolveAc', () => {
       },
     ];
     // armored: 10 + 0 = 10, bonus +2 = 12
-    const result = resolveAc(bundles, 0);
+    const result = resolveAc(bundles, 0, 0, 0);
     expect(result.effective).toBe(12);
     expect(result.bonuses).toHaveLength(1);
   });
 
-  it('unarmored mode: 10 + DEX modifier', () => {
+  it('unarmored barbarian formula: 10 + DEX + CON modifier', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'class', id: 'fighter', level: 1 },
+        source: { origin: 'class', id: 'barbarian', level: 1 },
         grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } }],
       },
     ];
-    // DEX 16 → mod +3, unarmored AC = 10 + 3 = 13
-    const result = resolveAc(bundles, 3);
+    // DEX 16 → mod +3, CON 14 → mod +2, unarmored AC = 10 + 3 + 2 = 15
+    const result = resolveAc(bundles, 3, 2, 0);
     expect(result.calculations).toHaveLength(1);
     expect(result.calculations[0].mode).toBe('unarmored');
+    expect(result.calculations[0].baseValue).toBe(15);
+    expect(result.effective).toBe(15);
+  });
+
+  it('unarmored barbarian formula with zero CON: 10 + DEX only', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'barbarian', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } }],
+      },
+    ];
+    // DEX 16 → mod +3, CON 10 → mod 0, AC = 13
+    const result = resolveAc(bundles, 3, 0, 0);
     expect(result.calculations[0].baseValue).toBe(13);
     expect(result.effective).toBe(13);
+  });
+
+  it('unarmored monk formula: 10 + DEX + WIS modifier', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'monk', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'monk' } }],
+      },
+    ];
+    // DEX 14 → mod +2, WIS 16 → mod +3, unarmored AC = 10 + 2 + 3 = 15
+    const result = resolveAc(bundles, 2, 0, 3);
+    expect(result.calculations).toHaveLength(1);
+    expect(result.calculations[0].mode).toBe('unarmored');
+    expect(result.calculations[0].baseValue).toBe(15);
+    expect(result.effective).toBe(15);
   });
 
   it('equipped chain mail returns effective AC 16 (ignores DEX)', () => {
@@ -197,7 +225,7 @@ describe('resolveAc', () => {
       },
     ];
     // DEX 16 → mod +3, but chain mail ignores DEX (maxDexBonus 0, baseAc 16)
-    const result = resolveAc(bundles, 3, { totalBase: 16, shieldBonus: 0 });
+    const result = resolveAc(bundles, 3, 0, 0, { totalBase: 16, shieldBonus: 0 });
     expect(result.effective).toBe(16);
     expect(result.calculations[0].baseValue).toBe(16);
   });
@@ -212,7 +240,7 @@ describe('resolveAc', () => {
         ],
       },
     ];
-    const result = resolveAc(bundles, 3, { totalBase: 16, shieldBonus: 0 });
+    const result = resolveAc(bundles, 3, 0, 0, { totalBase: 16, shieldBonus: 0 });
     expect(result.effective).toBe(17);
   });
 
@@ -223,7 +251,7 @@ describe('resolveAc', () => {
         grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
       },
     ];
-    const result = resolveAc(bundles, 3, { totalBase: 16, shieldBonus: 2 });
+    const result = resolveAc(bundles, 3, 0, 0, { totalBase: 16, shieldBonus: 2 });
     expect(result.effective).toBe(18);
     expect(result.bonuses).toHaveLength(1);
     expect(result.bonuses[0].value).toBe(2);
@@ -241,7 +269,7 @@ describe('resolveAc', () => {
         grants: [{ type: 'armor-class', calculation: { mode: 'natural', baseAc: 15 } }],
       },
     ];
-    const result = resolveAc(bundles, 2);
+    const result = resolveAc(bundles, 2, 0, 0);
     expect(result.calculations).toHaveLength(2);
     expect(result.effective).toBe(15);
   });
