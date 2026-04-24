@@ -226,4 +226,53 @@ describe('Rogue class grant structures', () => {
       expect(source?.levels[i].grants).toHaveLength(0);
     }
   });
+
+  it('level 1 has 4 bundle-choice grants', () => {
+    const bundleChoices = source?.levels[0].grants.filter((g) => g.type === 'bundle-choice');
+    expect(bundleChoices).toHaveLength(4);
+  });
+
+  it('level 1 bundle-choice 0 is loadout with rogue-loadout', () => {
+    const grant = source?.levels[0].grants.find(
+      (g) => g.type === 'bundle-choice' && g.key === createChoiceKey('bundle-choice', 'class', 'rogue', 0)
+    );
+    expect(grant?.type).toBe('bundle-choice');
+    if (grant?.type === 'bundle-choice') {
+      expect(grant.category).toBe('loadout');
+      expect(grant.bundleIds).toEqual(['rogue-loadout']);
+    }
+  });
+
+  it('level 1 bundle-choice 1 is melee-weapon with rapier and shortsword options', () => {
+    const grant = source?.levels[0].grants.find(
+      (g) => g.type === 'bundle-choice' && g.key === createChoiceKey('bundle-choice', 'class', 'rogue', 1)
+    );
+    expect(grant?.type).toBe('bundle-choice');
+    if (grant?.type === 'bundle-choice') {
+      expect(grant.category).toBe('melee-weapon');
+      expect(grant.bundleIds).toEqual(['rogue-rapier', 'rogue-shortsword-melee']);
+    }
+  });
+
+  it('level 1 bundle-choice 2 is ranged-weapon with shortbow-kit and shortsword options', () => {
+    const grant = source?.levels[0].grants.find(
+      (g) => g.type === 'bundle-choice' && g.key === createChoiceKey('bundle-choice', 'class', 'rogue', 2)
+    );
+    expect(grant?.type).toBe('bundle-choice');
+    if (grant?.type === 'bundle-choice') {
+      expect(grant.category).toBe('ranged-weapon');
+      expect(grant.bundleIds).toEqual(['rogue-shortbow-kit', 'rogue-shortsword-ranged']);
+    }
+  });
+
+  it('level 1 bundle-choice 3 is pack with burglar, dungeoneer, and explorer options', () => {
+    const grant = source?.levels[0].grants.find(
+      (g) => g.type === 'bundle-choice' && g.key === createChoiceKey('bundle-choice', 'class', 'rogue', 3)
+    );
+    expect(grant?.type).toBe('bundle-choice');
+    if (grant?.type === 'bundle-choice') {
+      expect(grant.category).toBe('pack');
+      expect(grant.bundleIds).toEqual(['burglars-pack', 'dungeoneers-pack', 'explorers-pack']);
+    }
+  });
 });

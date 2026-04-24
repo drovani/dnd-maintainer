@@ -545,14 +545,25 @@
       "hammer": { "name": "Hammer" },
       "pitons-10": { "name": "Pitons (10)" },
       "hooded-lantern": { "name": "Hooded Lantern" },
-      "oil-flasks-2": { "name": "Oil (2 flasks)" }
+      "oil-flasks-2": { "name": "Oil (2 flasks)" },
+      "thieves-tools": { "name": "Thieves' Tools" },
+      "ball-bearings-1000": { "name": "Ball Bearings (bag of 1,000)" },
+      "string-10ft": { "name": "String (10 ft.)" },
+      "bell": { "name": "Bell" },
+      "candles-5": { "name": "Candles (5)" }
     },
     "packs": {
+      "burglars-pack": { "name": "Burglar's Pack" },
       "explorers-pack": { "name": "Explorer's Pack" },
       "dungeoneers-pack": { "name": "Dungeoneer's Pack" }
     }
   },
   "bundles": {
+    "rogue-loadout": { "name": "Leather Armor + 2 Daggers + Thieves' Tools" },
+    "rogue-rapier": { "name": "Rapier" },
+    "rogue-shortsword-melee": { "name": "Shortsword" },
+    "rogue-shortbow-kit": { "name": "Shortbow + Arrows (20)" },
+    "rogue-shortsword-ranged": { "name": "Shortsword" },
     "fighter-chainmail": { "name": "Chain Mail" },
     "fighter-archer-kit": { "name": "Leather Armor + Longbow + Arrows (20)" },
     "martial-weapon-and-shield": { "name": "A martial weapon and a shield" },
