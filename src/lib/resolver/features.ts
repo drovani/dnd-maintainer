@@ -7,7 +7,7 @@ export function resolveFeatures(bundles: readonly GrantBundle[]): readonly Resol
   for (const { grant, source } of collectGrantsByType(bundles, 'feature')) {
     const rank = source.origin === 'class' || source.origin === 'subclass' ? source.level : 0;
     const existing = byId.get(grant.feature.id);
-    if (!existing || rank >= existing.rank) {
+    if (!existing || rank > existing.rank) {
       byId.set(grant.feature.id, { entry: { feature: grant.feature, source }, rank });
     }
   }

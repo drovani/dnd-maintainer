@@ -73,7 +73,7 @@ describe('resolveFeatures', () => {
     expect(result[0].source.origin).toBe('class');
   });
 
-  it('non-class source wins if it appears after a class entry with the same id when ranks are equal (rank 0 vs 0)', () => {
+  it('first entry wins when ranks are equal (first-writer-wins tiebreaker)', () => {
     const bundles: readonly GrantBundle[] = [
       {
         source: { origin: 'background', id: 'soldier' },
@@ -85,9 +85,27 @@ describe('resolveFeatures', () => {
       },
     ];
     const result = resolveFeatures(bundles);
-    // Both rank 0, second one wins via `rank >= existing.rank`
+    // Both rank 0 — first entry wins (strict > comparison, not >=)
     expect(result).toHaveLength(1);
-    expect(result[0].feature.usesCount).toBe(2);
+    expect(result[0].feature.usesCount).toBe(1);
+    expect(result[0].source).toMatchObject({ origin: 'background', id: 'soldier' });
+  });
+
+  it('first-writer-wins on ties: same rank from two class sources keeps the first emission', () => {
+    // Same class level (rank 3) from two distinct class entries — first one wins
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'barbarian', level: 3 },
+        grants: [{ type: 'feature', feature: { id: 'contested-feature', usesCount: 10 } }],
+      },
+      {
+        source: { origin: 'class', id: 'barbarian', level: 3 },
+        grants: [{ type: 'feature', feature: { id: 'contested-feature', usesCount: 99 } }],
+      },
+    ];
+    const result = resolveFeatures(bundles);
+    expect(result).toHaveLength(1);
+    expect(result[0].feature.usesCount).toBe(10);
   });
 
   it('higher subclass level beats lower class level for same feature id', () => {
