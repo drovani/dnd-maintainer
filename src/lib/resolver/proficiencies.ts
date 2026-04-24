@@ -119,7 +119,7 @@ export function resolveSkills(
     const decision = choices[grant.key];
     if (decision?.type === 'expertise-choice') {
       for (const skillId of decision.skills) {
-        expertiseSkills.add(skillId as SkillId);
+        expertiseSkills.add(skillId);
       }
     }
   }
