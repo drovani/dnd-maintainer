@@ -212,6 +212,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                   type="radio"
                   id={radioId}
                   name={`choice-totem-${choice.choiceKey}`}
+                  value={animal}
                   checked={isSelected}
                   onChange={() => onDecide(choice.choiceKey, { type: 'totem-animal-choice', animal })}
                   className="mt-0.5 size-4 text-primary"

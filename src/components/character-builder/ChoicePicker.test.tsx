@@ -264,9 +264,9 @@ describe('ChoicePicker totem-animal-choice', () => {
   it('selecting bear calls onDecide with totem-animal-choice decision', () => {
     const onDecide = vi.fn();
     render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
-    const radios = screen.getAllByRole('radio');
-    // bear is the first animal in TOTEM_ANIMALS
-    fireEvent.click(radios[0]);
+    const bearRadio = screen.getAllByRole('radio').find((r) => (r as HTMLInputElement).value === 'bear');
+    expect(bearRadio).toBeDefined();
+    fireEvent.click(bearRadio!);
     expect(onDecide).toHaveBeenCalledWith(TOTEM_CHOICE.choiceKey, {
       type: 'totem-animal-choice',
       animal: 'bear',
@@ -276,8 +276,9 @@ describe('ChoicePicker totem-animal-choice', () => {
   it('selecting eagle calls onDecide with eagle animal', () => {
     const onDecide = vi.fn();
     render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
-    const radios = screen.getAllByRole('radio');
-    fireEvent.click(radios[1]);
+    const eagleRadio = screen.getAllByRole('radio').find((r) => (r as HTMLInputElement).value === 'eagle');
+    expect(eagleRadio).toBeDefined();
+    fireEvent.click(eagleRadio!);
     expect(onDecide).toHaveBeenCalledWith(TOTEM_CHOICE.choiceKey, {
       type: 'totem-animal-choice',
       animal: 'eagle',
@@ -290,9 +291,12 @@ describe('ChoicePicker totem-animal-choice', () => {
       <ChoicePicker choice={TOTEM_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
     );
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
-    expect(radios[0].checked).toBe(true); // bear
-    expect(radios[1].checked).toBe(false); // eagle
-    expect(radios[2].checked).toBe(false); // wolf
+    const bearRadio = radios.find((r) => r.value === 'bear');
+    const eagleRadio = radios.find((r) => r.value === 'eagle');
+    const wolfRadio = radios.find((r) => r.value === 'wolf');
+    expect(bearRadio?.checked).toBe(true);
+    expect(eagleRadio?.checked).toBe(false);
+    expect(wolfRadio?.checked).toBe(false);
   });
 
   it('persisted wolf decision renders wolf radio as checked', () => {
@@ -301,13 +305,14 @@ describe('ChoicePicker totem-animal-choice', () => {
       <ChoicePicker choice={TOTEM_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
     );
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
-    expect(radios[2].checked).toBe(true); // wolf
+    const wolfRadio = radios.find((r) => r.value === 'wolf');
+    expect(wolfRadio?.checked).toBe(true);
   });
 
   it('renders animal name labels from translation keys', () => {
     render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
-    // mock t() returns last segment: 'totemAnimals.bear.name' → 'name'
-    // All three labels will have 'name' text since mock returns last segment
+    // The mock t() returns the last key segment; all three animal name keys share the same
+    // last segment ('name'), so three elements with that text appear.
     const labels = screen.getAllByText('name');
     expect(labels).toHaveLength(3);
   });
