@@ -415,6 +415,10 @@
     "dwarf-stonecunning": {
       "name": "Stonecunning",
       "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus."
+    },
+    "dwarf-dwarven-toughness": {
+      "name": "Dwarven Toughness",
+      "description": "Your hit point maximum increases by 1, and it increases by 1 whenever you gain a level."
     }
   },
   "subclasses": {

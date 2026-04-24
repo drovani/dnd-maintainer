@@ -71,6 +71,52 @@ describe('resolveHp', () => {
     // Level 2: 7 + (roll 4 + (-1)) = 7 + 3 = 10
     expect(resolveHp(bundles, [null, 4], -1, 2).max).toBe(10);
   });
+
+  it('hp-bonus grant adds perLevel * level on top of base HP', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'barbarian', level: 1 },
+        grants: [{ type: 'hit-die', die: 12 }],
+      },
+      {
+        source: { origin: 'race', id: 'dwarf-hill' },
+        grants: [{ type: 'hp-bonus', perLevel: 1 }],
+      },
+    ];
+    // Level 1: die 12 + CON 0 = 12, plus 1×1 = 13
+    expect(resolveHp(bundles, [], 0, 1).max).toBe(13);
+    // Level 5 with null rolls: 12 + 4×(avg 7 + 0) = 12 + 28 = 40, plus 1×5 = 45
+    expect(resolveHp(bundles, [null, null, null, null, null], 0, 5).max).toBe(45);
+  });
+
+  it('hp-bonus stacks when multiple grants present', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'hit-die', die: 10 }],
+      },
+      {
+        source: { origin: 'race', id: 'dwarf-hill' },
+        grants: [{ type: 'hp-bonus', perLevel: 1 }],
+      },
+      {
+        source: { origin: 'feat', id: 'tough' },
+        grants: [{ type: 'hp-bonus', perLevel: 2 }],
+      },
+    ];
+    // Level 3 with rolled 6, 6: 10 + 6 + 6 = 22, plus (1+2)×3 = 9 → 31
+    expect(resolveHp(bundles, [null, 6, 6], 0, 3).max).toBe(31);
+  });
+
+  it('hp-bonus does not apply when level is 0', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'race', id: 'dwarf-hill' },
+        grants: [{ type: 'hp-bonus', perLevel: 1 }],
+      },
+    ];
+    expect(resolveHp(bundles, [], 0, 0).max).toBe(0);
+  });
 });
 
 describe('resolveSpeed', () => {

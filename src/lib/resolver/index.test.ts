@@ -847,3 +847,107 @@ describe('Totem Warrior — invalid totem decision falls through to pending', ()
     expect(totemPending).toHaveLength(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Hill Dwarf integration tests
+// ---------------------------------------------------------------------------
+
+describe('Hill Dwarf Barbarian L3 integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+  const dwarfToolKey = createChoiceKey('tool-choice', 'race', 'dwarf-hill', 0);
+
+  // Base abilities chosen so Hill Dwarf's +2 CON and +1 WIS are observable over defaults
+  const hillDwarfL3Build: CharacterBuild = {
+    raceId: 'dwarf-hill',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 14, con: 16, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['elvish'] },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'berserker' as SubclassId },
+      'bundle-choice:class:barbarian:0': {
+        type: 'bundle-choice' as const,
+        bundleId: 'barbarian-greataxe',
+        slotPicks: {},
+      },
+      'bundle-choice:class:barbarian:1': {
+        type: 'bundle-choice' as const,
+        bundleId: 'two-handaxes',
+        slotPicks: {},
+      },
+      // Intentionally leave dwarf tool-choice unresolved to verify it surfaces as pending
+    },
+    levels: [
+      { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 8 },
+      { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+    ],
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(hillDwarfL3Build);
+
+  const input: ResolverInput = {
+    baseAbilities: hillDwarfL3Build.baseAbilities,
+    level: 3,
+    bundles,
+    choices: hillDwarfL3Build.choices,
+    levels: hillDwarfL3Build.levels,
+  };
+
+  it('CON total = 18 (base 16 + dwarf +2)', () => {
+    const result = resolveCharacter(input);
+    expect(result.abilities.con.total).toBe(18);
+    expect(result.abilities.con.modifier).toBe(4);
+  });
+
+  it('WIS total = 11 (base 10 + hill subrace +1)', () => {
+    const result = resolveCharacter(input);
+    expect(result.abilities.wis.total).toBe(11);
+  });
+
+  // HP = L1 max die (12) + CON mod (4) = 16
+  //    + L2 roll 8 + CON mod 4 = 12 → 28
+  //    + L3 roll 7 + CON mod 4 = 11 → 39
+  //    + Dwarven Toughness 1 × 3 levels = 3 → 42
+  it('HP max = 42 (hit die + CON mods + Dwarven Toughness)', () => {
+    const result = resolveCharacter(input);
+    expect(result.hitPoints.max).toBe(42);
+  });
+
+  it('features include darkvision, dwarven resilience, stonecunning, and dwarven toughness', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toEqual(
+      expect.arrayContaining([
+        'dwarf-darkvision',
+        'dwarf-dwarven-resilience',
+        'dwarf-stonecunning',
+        'dwarf-dwarven-toughness',
+      ])
+    );
+  });
+
+  it('resistances include poison with race source', () => {
+    const result = resolveCharacter(input);
+    const poisonResistance = result.resistances.find((r) => r.value === 'poison');
+    expect(poisonResistance).toBeDefined();
+    expect(poisonResistance!.sources).toContainEqual({ origin: 'race', id: 'dwarf-hill' });
+  });
+
+  it('walk speed is 25 (dwarf)', () => {
+    const result = resolveCharacter(input);
+    expect(result.speed.walk?.value).toBe(25);
+  });
+
+  it('pendingChoices contains the unresolved dwarf tool-choice', () => {
+    const result = resolveCharacter(input);
+    const dwarfToolPending = result.pendingChoices.filter(
+      (c) => c.type === 'tool-choice' && c.choiceKey === dwarfToolKey
+    );
+    expect(dwarfToolPending).toHaveLength(1);
+  });
+});

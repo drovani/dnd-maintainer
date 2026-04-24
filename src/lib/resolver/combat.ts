@@ -30,6 +30,11 @@ export function resolveHp(
     max += value + conModifier;
   }
 
+  const hpBonusGrants = collectGrantsByType(bundles, 'hp-bonus');
+  for (const { grant } of hpBonusGrants) {
+    max += grant.perLevel * level;
+  }
+
   return { max };
 }
 

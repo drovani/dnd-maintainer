@@ -91,3 +91,96 @@ describe('Mountain Dwarf race source', () => {
     expect(resistance).toEqual({ type: 'resistance', damageType: 'poison' });
   });
 });
+
+describe('Hill Dwarf race source', () => {
+  const source = getRaceSource('dwarf-hill' as RaceId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(25);
+  });
+
+  it('grants +2 CON and +1 WIS', () => {
+    const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
+    expect(abilityBonuses).toEqual(
+      expect.arrayContaining([
+        { type: 'ability-bonus', ability: 'con', bonus: 2 },
+        { type: 'ability-bonus', ability: 'wis', bonus: 1 },
+      ])
+    );
+    expect(abilityBonuses).toHaveLength(2);
+  });
+
+  it('grants 25 ft walk speed', () => {
+    const speed = source?.grants.find((g) => g.type === 'speed');
+    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 25 });
+  });
+
+  it('grants Common and Dwarvish languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'dwarvish' },
+      ])
+    );
+  });
+
+  it('does not grant armor proficiency (Mountain-only)', () => {
+    const armor = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'armor');
+    expect(armor).toHaveLength(0);
+  });
+
+  it('grants dwarven weapon proficiencies', () => {
+    const weapons = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'weapon');
+    expect(weapons).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'weapon', id: 'battleaxe' },
+        { type: 'proficiency', category: 'weapon', id: 'handaxe' },
+        { type: 'proficiency', category: 'weapon', id: 'lighthammer' },
+        { type: 'proficiency', category: 'weapon', id: 'warhammer' },
+      ])
+    );
+    expect(weapons).toHaveLength(4);
+  });
+
+  it('grants tool proficiency choice from artisan tools', () => {
+    const toolChoice = source?.grants.find((g) => g.type === 'proficiency-choice');
+    expect(toolChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'tool',
+      key: createChoiceKey('tool-choice', 'race', 'dwarf-hill', 0),
+      count: 1,
+      from: ['smithstools', 'brewersupplies', 'masonstools'],
+    });
+  });
+
+  it('grants darkvision, dwarven resilience, stonecunning, and dwarven toughness features', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(4);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(
+      expect.arrayContaining([
+        'dwarf-darkvision',
+        'dwarf-dwarven-resilience',
+        'dwarf-stonecunning',
+        'dwarf-dwarven-toughness',
+      ])
+    );
+  });
+
+  it('grants poison resistance', () => {
+    const resistance = source?.grants.find((g) => g.type === 'resistance');
+    expect(resistance).toEqual({ type: 'resistance', damageType: 'poison' });
+  });
+
+  it('grants Dwarven Toughness hp-bonus of 1 per level', () => {
+    const hpBonus = source?.grants.find((g) => g.type === 'hp-bonus');
+    expect(hpBonus).toEqual({ type: 'hp-bonus', perLevel: 1 });
+  });
+});
