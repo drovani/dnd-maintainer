@@ -858,6 +858,18 @@ describe('Rogue L6 second expertise-choice', () => {
     expect(result.skills.perception.expertise).toBe(true);
   });
 
+  it('includes cumulative rogue class features through level 6', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    // L1 features
+    expect(featureIds).toContain('rogue-sneak-attack');
+    expect(featureIds).toContain('rogue-thieves-cant');
+    // L2 feature
+    expect(featureIds).toContain('rogue-cunning-action');
+    // L5 feature
+    expect(featureIds).toContain('rogue-uncanny-dodge');
+  });
+
   it('generates pending choice for L6 expertise when only L1 is resolved', () => {
     const inputPartial: ResolverInput = {
       ...input,

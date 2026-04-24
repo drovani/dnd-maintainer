@@ -208,6 +208,62 @@ describe('ExpertiseChoicePicker', () => {
     expect(perceptionCheckbox?.disabled).toBe(false);
   });
 
+  it('atMax cap: unselected eligible skill is disabled when count is already reached', () => {
+    const resolvedSkills = skillsWithProficient(['stealth', 'sleightofhand', 'perception']);
+    // count:2 and both stealth+sleightofhand are already selected — at max
+    const currentDecision: ChoiceDecision = {
+      type: 'expertise-choice',
+      skills: ['stealth', 'sleightofhand'],
+      tools: [],
+    };
+    const { container } = render(
+      <ExpertiseChoicePicker
+        choice={makeChoice(L1_KEY, { count: 2, fromTools: [] })}
+        currentDecision={currentDecision}
+        allDecisions={{ [L1_KEY]: currentDecision } as Record<ChoiceKey, ChoiceDecision>}
+        allExpertiseChoiceKeys={[L1_KEY]}
+        resolvedSkills={resolvedSkills}
+        onDecide={mockOnDecide}
+        onClear={mockOnClear}
+      />
+    );
+
+    // perception is eligible but not selected — must be disabled at max
+    const perceptionCheckbox = container.querySelector(
+      `[id="expertise-${L1_KEY}-skill-perception"]`
+    ) as HTMLInputElement | null;
+    expect(perceptionCheckbox).toBeInTheDocument();
+    expect(perceptionCheckbox?.disabled).toBe(true);
+
+    // selected skills must remain enabled so the user can deselect them
+    const stealthCheckbox = container.querySelector(
+      `[id="expertise-${L1_KEY}-skill-stealth"]`
+    ) as HTMLInputElement | null;
+    expect(stealthCheckbox?.disabled).toBe(false);
+  });
+
+  it('from:null filter: only proficient skills appear; non-proficient skills are absent', () => {
+    // Character is proficient in stealth and sleightofhand only
+    const resolvedSkills = skillsWithProficient(['stealth', 'sleightofhand']);
+    const { container } = render(
+      <ExpertiseChoicePicker
+        choice={makeChoice(L1_KEY, { from: null, fromTools: [] })}
+        currentDecision={undefined}
+        allDecisions={{}}
+        allExpertiseChoiceKeys={[L1_KEY]}
+        resolvedSkills={resolvedSkills}
+        onDecide={mockOnDecide}
+        onClear={mockOnClear}
+      />
+    );
+
+    // proficient skills are rendered
+    expect(container.querySelector(`[id="expertise-${L1_KEY}-skill-stealth"]`)).toBeInTheDocument();
+    expect(container.querySelector(`[id="expertise-${L1_KEY}-skill-sleightofhand"]`)).toBeInTheDocument();
+    // arcana is NOT proficient — must not appear in the expertise pool
+    expect(container.querySelector(`[id="expertise-${L1_KEY}-skill-arcana"]`)).not.toBeInTheDocument();
+  });
+
   it('cross-choice dedupe: L1 picker is unaffected by L6 decisions', () => {
     const resolvedSkills = skillsWithProficient(['stealth', 'sleightofhand', 'perception']);
     const l6Decision: ChoiceDecision = { type: 'expertise-choice', skills: ['perception'], tools: [] };

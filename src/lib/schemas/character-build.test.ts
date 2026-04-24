@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CharacterBuildSchema, CharacterBuildSchemaStrict } from '@/lib/schemas/character-build';
+import { CharacterBuildSchema, CharacterBuildSchemaStrict, ChoiceDecisionSchema } from '@/lib/schemas/character-build';
 
 const validBuild = {
   raceId: 'human',
@@ -61,6 +61,129 @@ describe('CharacterBuildSchema', () => {
     };
     const result = CharacterBuildSchema.safeParse(emptyBuild);
     expect(result.success).toBe(true);
+  });
+});
+
+describe('ChoiceDecisionSchema', () => {
+  describe('expertise-choice', () => {
+    it('accepts valid expertise-choice with skill and empty tools', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'expertise-choice',
+        skills: ['stealth'],
+        tools: [],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects invalid skill ID', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'expertise-choice',
+        skills: ['not-a-skill'],
+        tools: [],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects invalid tool ID', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'expertise-choice',
+        skills: [],
+        tools: ['not-a-tool'],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects missing tools field', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'expertise-choice',
+        skills: [],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts valid tool ID', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'expertise-choice',
+        skills: [],
+        tools: ['thievestools'],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('skill-choice', () => {
+    it('accepts valid skill-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'skill-choice',
+        skills: ['perception', 'stealth'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing skills field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'skill-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('tool-choice', () => {
+    it('accepts valid tool-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'tool-choice',
+        tools: ['thievestools'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing tools field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'tool-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('language-choice', () => {
+    it('accepts valid language-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'language-choice',
+        languages: ['elvish', 'dwarvish'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing languages field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'language-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('ability-choice', () => {
+    it('accepts valid ability-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'ability-choice',
+        abilities: ['str', 'dex'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing abilities field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'ability-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('fighting-style-choice', () => {
+    it('accepts valid fighting-style-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'fighting-style-choice',
+        styles: ['defense'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing styles field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'fighting-style-choice' });
+      expect(result.success).toBe(false);
+    });
   });
 });
 
