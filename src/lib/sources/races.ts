@@ -178,4 +178,48 @@ export const RACE_SOURCES: readonly RaceSource[] = [
       },
     ],
   },
+  {
+    id: 'halfelf',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [
+      // Ability Score Increase: +2 CHA (fixed)
+      { type: 'ability-bonus', ability: 'cha', bonus: 2 },
+      // Ability Score Increase: +1 to two other abilities of player's choice (not CHA)
+      {
+        type: 'ability-choice',
+        key: createChoiceKey('ability-choice', 'race', 'halfelf', 0),
+        count: 2,
+        bonus: 1,
+        from: ['str', 'dex', 'con', 'int', 'wis'],
+      },
+      // Speed: 30 ft
+      { type: 'speed', mode: 'walk', value: 30 },
+      // Languages: Common, Elvish (fixed)
+      { type: 'proficiency', category: 'language', id: 'common' },
+      { type: 'proficiency', category: 'language', id: 'elvish' },
+      // One additional language of choice
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'race', 'halfelf', 0),
+        count: 1,
+        from: null,
+      },
+      // Skill Versatility: proficiency in 2 skills of player's choice
+      {
+        type: 'proficiency-choice',
+        category: 'skill',
+        key: createChoiceKey('skill-choice', 'race', 'halfelf', 0),
+        count: 2,
+        from: null,
+      },
+      // Darkvision (60 ft)
+      { type: 'feature', feature: { id: 'halfelf-darkvision' } },
+      // Fey Ancestry: advantage vs charm, immune to magical sleep
+      { type: 'feature', feature: { id: 'halfelf-fey-ancestry' } },
+      // Skill Versatility
+      { type: 'feature', feature: { id: 'halfelf-skill-versatility' } },
+    ],
+  },
 ];

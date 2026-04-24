@@ -150,6 +150,7 @@
       "toolChoice": "Choose {{count}} tool(s)",
       "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
+      "abilityChoice": "Choose {{count}} abilities to gain +{{bonus}}",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining",
       "fromSource": "from {{source}}"
@@ -227,7 +228,8 @@
       "increaseScore_plural": "Increase score, spend {{count}} points",
       "maximumScore": "Maximum score",
       "notEnoughPoints": "Not enough points",
-      "racialBonus": "{{race}} Racial Bonus: {{bonuses}}"
+      "racialBonus": "{{race}} Racial Bonus: {{bonuses}}",
+      "racialAbilityChoice": "Racial Ability Bonuses"
     },
     "skills": {
       "selectClassFirst": "Please select a class in the Basics step before choosing skills.",
