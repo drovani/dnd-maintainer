@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Character, CharacterSummary } from '@/types/database';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
@@ -106,4 +107,30 @@ export function useCharacterMutations() {
   });
 
   return { create, update, remove };
+}
+
+export function useUpdatePreparedSpells(): UseMutationResult<
+  Character,
+  Error,
+  { characterId: string; spellIds: string[] }
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ characterId, spellIds }) => {
+      const { data, error } = await supabase
+        .from('characters')
+        .update({ prepared_spells: spellIds } as unknown as TablesUpdate<'characters'>)
+        .eq('id', characterId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as unknown as Character;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['characters', data.campaign_id] });
+      queryClient.invalidateQueries({ queryKey: ['character'] });
+      queryClient.setQueryData(['character', data.slug], data);
+    },
+  });
 }

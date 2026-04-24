@@ -419,6 +419,22 @@
       "rangeFormat": "{{normal}}/{{long}} ft",
       "acFormat": "AC {{ac}}"
     },
+    "spellcasting": {
+      "panelTitle": "Spellcasting",
+      "saveDC": "Spell Save DC: {{dc}}",
+      "attackBonus": "Spell Attack: +{{bonus}}",
+      "slotsHeader": "Spell Slots",
+      "cantripsHeader": "Cantrips",
+      "alwaysPreparedHeader": "Always Prepared",
+      "preparedHeader": "Prepared Spells",
+      "ritualBadge": "R",
+      "addSpell": "Add spell",
+      "preparedCap": "{{count}} / {{max}}",
+      "schoolLabel": "School: {{school}}",
+      "slotLabel": "L{{level}}: {{count}}",
+      "abilityLabel": "{{ability}} spellcasting",
+      "attackBonusValue": "+{{bonus}}"
+    },
     "breakdown": {
       "base": "Base",
       "armor": "Armor",

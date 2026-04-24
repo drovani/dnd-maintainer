@@ -13,6 +13,7 @@ import { LevelControls } from '@/components/character-sheet/LevelControls';
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel';
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
+import { SpellcastingPanel } from '@/components/character-sheet/SpellcastingPanel';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
@@ -558,25 +559,9 @@ function CharacterSheetInner({
               </div>
             )}
 
-            {/* Spells */}
-            {resolved?.spellcasting && resolved.spellcasting.cantrips.length > 0 && (
-              <div className="bg-card border border-purple-200 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.spells')}</h2>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-xs font-bold text-muted-foreground mb-2">
-                      {tc('characterSheet.sections.cantrips')}
-                    </div>
-                    <div className="space-y-1">
-                      {resolved.spellcasting.cantrips.map((cantrip, i) => (
-                        <div key={i} className="text-sm text-foreground">
-                          &bull; {cantrip}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Spellcasting */}
+            {resolved?.spellcasting && (
+              <SpellcastingPanel character={character} resolved={resolved} spellcasting={resolved.spellcasting} />
             )}
 
             {/* Personality */}
