@@ -1,9 +1,9 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
+import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import type { ChoiceKey } from '@/types/choices';
-import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
+import type { SourceTag } from '@/types/sources';
 import { ABILITY_ABBREVIATIONS, DND_SKILLS, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,17 +16,11 @@ interface SkillChoiceInfo {
 
 interface ExpertiseChoiceInfo {
   readonly choiceKey: ChoiceKey;
+  readonly source: SourceTag;
   readonly count: number;
   readonly from: readonly SkillId[] | null;
   readonly fromTools: readonly ToolProficiencyId[];
 }
-
-interface ExpertiseSelection {
-  readonly skills: readonly SkillId[];
-  readonly tools: readonly ToolProficiencyId[];
-}
-
-const EMPTY_EXPERTISE: ExpertiseSelection = { skills: [], tools: [] };
 
 export function SkillsStep() {
   const { t } = useTranslation('gamedata');
@@ -61,6 +55,7 @@ export function SkillsStep() {
         if (grant.type === 'expertise-choice') {
           choices.push({
             choiceKey: grant.key,
+            source: bundle.source,
             count: grant.count,
             from: grant.from,
             fromTools: grant.fromTools,
@@ -75,45 +70,14 @@ export function SkillsStep() {
     return <p className="text-muted-foreground text-sm">{tc('characterBuilder.skills.selectClassFirst')}</p>;
   }
 
-  // Build set of skills eligible for any choice
-  const eligibleSkillIds = new Set<SkillId>();
-  for (const sc of skillChoices) {
-    for (const s of sc.from) eligibleSkillIds.add(s);
-  }
-
-  // Get current selections for a choice
+  // Get current selections for a skill-choice
   const getSelectedSkills = (choiceKey: ChoiceKey): readonly SkillId[] => {
     const decision = build?.choices[choiceKey];
     if (decision?.type === 'skill-choice') return decision.skills;
     return [];
   };
 
-  const getSelectedExpertise = (choiceKey: ChoiceKey): ExpertiseSelection => {
-    const decision = build?.choices[choiceKey];
-    if (decision?.type === 'expertise-choice') {
-      return { skills: decision.skills, tools: decision.tools };
-    }
-    return EMPTY_EXPERTISE;
-  };
-
-  // Skills already expert'd by another expertise-choice (for cross-choice dedupe)
-  const skillsExpertInOtherChoice = (excludeKey: ChoiceKey): ReadonlySet<SkillId> => {
-    const taken = new Set<SkillId>();
-    for (const ec of expertiseChoices) {
-      if (ec.choiceKey === excludeKey) continue;
-      for (const s of getSelectedExpertise(ec.choiceKey).skills) taken.add(s);
-    }
-    return taken;
-  };
-
-  const toolsExpertInOtherChoice = (excludeKey: ChoiceKey): ReadonlySet<ToolProficiencyId> => {
-    const taken = new Set<ToolProficiencyId>();
-    for (const ec of expertiseChoices) {
-      if (ec.choiceKey === excludeKey) continue;
-      for (const t of getSelectedExpertise(ec.choiceKey).tools) taken.add(t);
-    }
-    return taken;
-  };
+  const allExpertiseChoiceKeys = expertiseChoices.map((ec) => ec.choiceKey);
 
   return (
     <div className="space-y-4">
@@ -205,120 +169,26 @@ export function SkillsStep() {
         })}
       </div>
 
-      {/* Expertise choices — one section per grant */}
-      {expertiseChoices.map((ec) => {
-        const selected = getSelectedExpertise(ec.choiceKey);
-        const totalSelected = selected.skills.length + selected.tools.length;
-        const atMax = totalSelected >= ec.count;
-        const skillsTakenElsewhere = skillsExpertInOtherChoice(ec.choiceKey);
-        const toolsTakenElsewhere = toolsExpertInOtherChoice(ec.choiceKey);
-
-        // Eligible skills: grant.from (if non-null) else any currently-proficient skill
-        const eligibleSkills: readonly SkillId[] = ec.from
-          ? ec.from
-          : DND_SKILLS.filter((s) => resolved.skills[s.id]?.proficient).map((s) => s.id);
-
-        const commit = (nextSkills: readonly SkillId[], nextTools: readonly ToolProficiencyId[]) => {
-          if (nextSkills.length === 0 && nextTools.length === 0) {
-            context.clearChoice(ec.choiceKey);
-            return;
-          }
-          context.makeChoice(ec.choiceKey, {
+      {/* Expertise choices — one section per grant, rendered via shared picker */}
+      {expertiseChoices.map((ec) => (
+        <ExpertiseChoicePicker
+          key={ec.choiceKey}
+          choice={{
             type: 'expertise-choice',
-            skills: nextSkills,
-            tools: nextTools,
-          });
-        };
-
-        const toggleSkill = (skillId: SkillId, checked: boolean) => {
-          const next = checked ? [...selected.skills, skillId] : selected.skills.filter((s) => s !== skillId);
-          commit(next, selected.tools);
-        };
-
-        const toggleTool = (toolId: ToolProficiencyId, checked: boolean) => {
-          const next = checked ? [...selected.tools, toolId] : selected.tools.filter((tt) => tt !== toolId);
-          commit(selected.skills, next);
-        };
-
-        return (
-          <div key={ec.choiceKey} className="space-y-2 border-t border-border pt-4">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold">
-                {tc('characterBuilder.pendingChoices.expertiseChoice', { count: ec.count })}{' '}
-                <span className="text-xs font-normal text-muted-foreground">
-                  {tc('characterBuilder.pendingChoices.fromSource', {
-                    source: getChoiceSourceName(ec.choiceKey, t),
-                  })}
-                </span>
-              </p>
-              <Badge variant={totalSelected === ec.count ? 'default' : 'outline'} className="text-xs">
-                {totalSelected} / {ec.count}
-              </Badge>
-            </div>
-
-            {eligibleSkills.length === 0 && ec.fromTools.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic">{tc('characterBuilder.skills.expertiseEmptyPool')}</p>
-            ) : (
-              <div className="space-y-1">
-                {eligibleSkills.map((skillId) => {
-                  const isSelected = selected.skills.includes(skillId);
-                  const takenElsewhere = skillsTakenElsewhere.has(skillId);
-                  const isDisabled = (atMax && !isSelected) || takenElsewhere;
-                  const id = `expertise-${ec.choiceKey}-skill-${skillId}`;
-                  return (
-                    <div
-                      key={skillId}
-                      className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
-                    >
-                      <Checkbox
-                        id={id}
-                        checked={isSelected}
-                        disabled={isDisabled}
-                        onCheckedChange={(checked) => toggleSkill(skillId, checked)}
-                      />
-                      <Label htmlFor={id} className="flex-1 cursor-pointer text-sm">
-                        {t(`skills.${skillId}`)}
-                        {takenElsewhere && (
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ({tc('characterBuilder.skills.expertiseAlreadyChosen')})
-                          </span>
-                        )}
-                      </Label>
-                    </div>
-                  );
-                })}
-                {ec.fromTools.map((toolId) => {
-                  const isSelected = selected.tools.includes(toolId);
-                  const takenElsewhere = toolsTakenElsewhere.has(toolId);
-                  const isDisabled = (atMax && !isSelected) || takenElsewhere;
-                  const id = `expertise-${ec.choiceKey}-tool-${toolId}`;
-                  return (
-                    <div
-                      key={toolId}
-                      className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
-                    >
-                      <Checkbox
-                        id={id}
-                        checked={isSelected}
-                        disabled={isDisabled}
-                        onCheckedChange={(checked) => toggleTool(toolId, checked)}
-                      />
-                      <Label htmlFor={id} className="flex-1 cursor-pointer text-sm">
-                        {t(`tools.${toolId}`)}
-                        {takenElsewhere && (
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ({tc('characterBuilder.skills.expertiseAlreadyChosen')})
-                          </span>
-                        )}
-                      </Label>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
+            choiceKey: ec.choiceKey,
+            source: ec.source,
+            count: ec.count,
+            from: ec.from,
+            fromTools: ec.fromTools,
+          }}
+          currentDecision={build?.choices[ec.choiceKey]}
+          allDecisions={build?.choices ?? {}}
+          allExpertiseChoiceKeys={allExpertiseChoiceKeys}
+          resolvedSkills={resolved.skills}
+          onDecide={context.makeChoice}
+          onClear={context.clearChoice}
+        />
+      ))}
     </div>
   );
 }

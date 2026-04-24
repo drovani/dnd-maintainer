@@ -39,6 +39,7 @@ vi.mock('@/hooks/useCharacterContext', () => ({
 }));
 
 const EXPERTISE_KEY = 'expertise-choice:class:rogue:0' as ChoiceKey;
+const EXPERTISE_KEY_L6 = 'expertise-choice:class:rogue:1' as ChoiceKey;
 
 function skillsWithProficient(proficientIds: readonly SkillId[]): Record<SkillId, ResolvedSkill> {
   const result = {} as Record<SkillId, ResolvedSkill>;
@@ -148,5 +149,52 @@ describe('SkillsStep expertise-choice', () => {
     expect(checkbox).not.toBeNull();
     fireEvent.click(checkbox!);
     expect(mockClearChoice).toHaveBeenCalledWith(EXPERTISE_KEY);
+  });
+
+  it('cross-choice dedupe: skills chosen in L1 grant are disabled in L6 grant picker', () => {
+    // Add a second expertise-choice bundle (simulating rogue L6)
+    const l6Bundle: GrantBundle = {
+      source: { origin: 'class', id: 'rogue', level: 6 },
+      grants: [
+        {
+          type: 'expertise-choice',
+          key: EXPERTISE_KEY_L6,
+          count: 2,
+          from: null,
+          fromTools: [],
+        },
+      ],
+    };
+    mockContextValue.bundles = [rogueExpertiseBundle(), l6Bundle];
+    mockContextValue.resolved = {
+      skills: skillsWithProficient(['stealth', 'sleightofhand', 'perception']),
+    } as Partial<ResolvedCharacter>;
+    // L1 already resolved with stealth + sleightofhand
+    const l1Decision: ChoiceDecision = { type: 'expertise-choice', skills: ['stealth', 'sleightofhand'], tools: [] };
+    mockContextValue.build = {
+      choices: { [EXPERTISE_KEY]: l1Decision } as Record<ChoiceKey, ChoiceDecision>,
+    };
+
+    const { container } = render(<SkillsStep />);
+
+    // stealth and sleightofhand should be disabled in L6 picker
+    const stealthL6 = container.querySelector(
+      `[id="expertise-${EXPERTISE_KEY_L6}-skill-stealth"]`
+    ) as HTMLInputElement | null;
+    expect(stealthL6).toBeInTheDocument();
+    expect(stealthL6?.disabled).toBe(true);
+
+    const sleightL6 = container.querySelector(
+      `[id="expertise-${EXPERTISE_KEY_L6}-skill-sleightofhand"]`
+    ) as HTMLInputElement | null;
+    expect(sleightL6).toBeInTheDocument();
+    expect(sleightL6?.disabled).toBe(true);
+
+    // perception is free in L6 picker
+    const perceptionL6 = container.querySelector(
+      `[id="expertise-${EXPERTISE_KEY_L6}-skill-perception"]`
+    ) as HTMLInputElement | null;
+    expect(perceptionL6).toBeInTheDocument();
+    expect(perceptionL6?.disabled).toBe(false);
   });
 });

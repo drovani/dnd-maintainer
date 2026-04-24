@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
+import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
-import type { PendingChoice } from '@/types/resolved';
+import type { PendingChoice, ResolvedCharacter } from '@/types/resolved';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { FightingStyleId } from '@/lib/dnd-helpers';
 import { useTranslation } from 'react-i18next';
@@ -121,6 +122,18 @@ function useAllChoiceGrants() {
       }
     }
 
+    // expertise-choice grants
+    for (const { grant, source } of collectGrantsByType(bundles, 'expertise-choice')) {
+      allGrants.push({
+        type: 'expertise-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: grant.from,
+        fromTools: grant.fromTools,
+      });
+    }
+
     return allGrants;
   }, [bundles, buildChoices]);
 }
@@ -136,7 +149,7 @@ function PendingChoiceRow({
   onDecide: (key: ChoiceKey, decision: ChoiceDecision) => void;
   onClear: (key: ChoiceKey) => void;
 }) {
-  const { resolved } = useCharacterContext();
+  const { resolved, build, bundles } = useCharacterContext();
   const { t: tc } = useTranslation('common');
 
   if (choice.type === 'subclass') {
@@ -173,6 +186,23 @@ function PendingChoiceRow({
         abilities={resolved.abilities}
         currentDecision={currentDecision}
         onDecide={(choiceKey, allocation) => onDecide(choiceKey, { type: 'asi', allocation })}
+        onClear={onClear}
+      />
+    );
+  }
+
+  if (choice.type === 'expertise-choice') {
+    // Collect all expertise-choice keys so the picker can dedupe across grants
+    // (e.g. rogue L1 + L6 both active simultaneously after a schema migration)
+    const allExpertiseChoiceKeys = collectGrantsByType(bundles, 'expertise-choice').map(({ grant }) => grant.key);
+    return (
+      <ExpertiseChoicePicker
+        choice={choice}
+        currentDecision={currentDecision}
+        allDecisions={build?.choices ?? {}}
+        allExpertiseChoiceKeys={allExpertiseChoiceKeys}
+        resolvedSkills={resolved?.skills ?? ({} as ResolvedCharacter['skills'])}
+        onDecide={onDecide}
         onClear={onClear}
       />
     );
