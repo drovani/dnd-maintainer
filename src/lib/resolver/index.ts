@@ -198,6 +198,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         source,
         count: grant.count,
         from: grant.from,
+        ...(grant.fromTools ? { fromTools: grant.fromTools } : {}),
       });
     }
   }
@@ -207,7 +208,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
     const decision = choices[grant.key];
     if (decision?.type === 'expertise-choice' && decision.tools) {
-      toolExpertise.push(...(decision.tools as ToolProficiencyId[]));
+      toolExpertise.push(...decision.tools);
     }
   }
 
