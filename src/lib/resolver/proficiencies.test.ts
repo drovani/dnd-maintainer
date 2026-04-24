@@ -442,3 +442,88 @@ describe('resolveProficiencies', () => {
     expect(result.language.filter((l) => l.value === 'common')).toHaveLength(1);
   });
 });
+
+describe('resolveSkills — expertise', () => {
+  const proficientBundle = (skillId: string): GrantBundle => ({
+    source: { origin: 'class', id: 'rogue', level: 1 },
+    grants: [{ type: 'proficiency', category: 'skill', id: skillId as 'stealth' }],
+  });
+
+  it('expertise-choice with decision doubles proficiency bonus', () => {
+    const bundles: GrantBundle[] = [
+      proficientBundle('stealth'),
+      {
+        source: { origin: 'class', id: 'rogue', level: 1 },
+        grants: [
+          {
+            type: 'expertise-choice',
+            key: 'expertise-choice:class:rogue:0',
+            count: 2,
+            from: null,
+          },
+        ],
+      },
+    ];
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['stealth'] },
+    };
+    // proficiencyBonus=2, dex mod=0 → stealth = 0 + 2 (prof) + 2 (expertise) = 4
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
+    expect(result.stealth.expertise).toBe(true);
+    expect(result.stealth.bonus).toBe(4);
+  });
+
+  it('expertise on non-proficient skill has no effect', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'rogue', level: 1 },
+        grants: [
+          {
+            type: 'expertise-choice',
+            key: 'expertise-choice:class:rogue:0',
+            count: 2,
+            from: null,
+          },
+        ],
+      },
+    ];
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['stealth'] },
+    };
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
+    expect(result.stealth.expertise).toBe(false);
+    expect(result.stealth.bonus).toBe(0);
+  });
+
+  it('skill-expertise grant sets expertise correctly', () => {
+    const bundles: GrantBundle[] = [
+      proficientBundle('perception'),
+      {
+        source: { origin: 'class', id: 'rogue', level: 1 },
+        grants: [{ type: 'skill-expertise', skill: 'perception' }],
+      },
+    ];
+    // wis mod=0, prof=2, expertise=2 → 4
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 2, NO_CHOICES);
+    expect(result.perception.expertise).toBe(true);
+    expect(result.perception.bonus).toBe(4);
+  });
+
+  it('expertise breakdown includes both proficiency and expertise components', () => {
+    const bundles: GrantBundle[] = [
+      proficientBundle('stealth'),
+      {
+        source: { origin: 'class', id: 'rogue', level: 1 },
+        grants: [{ type: 'skill-expertise', skill: 'stealth' }],
+      },
+    ];
+    const result = resolveSkills(POSITIVE_ABILITIES, bundles, 2, NO_CHOICES);
+    // DEX 14 → mod 2, prof 2, expertise 2 → bonus 6
+    expect(result.stealth.bonus).toBe(6);
+    expect(result.stealth.breakdown).toEqual([
+      { type: 'ability', value: 2, label: 'dex' },
+      { type: 'proficiency', value: 2, label: 'proficiency' },
+      { type: 'expertise', value: 2, label: 'expertise' },
+    ]);
+  });
+});

@@ -33,6 +33,7 @@ function buildMinimalResolved(overrides: Partial<ResolvedCharacter> = {}): Resol
     spellcasting: null,
     equipment: [],
     attacks: [],
+    toolExpertise: [],
     pendingChoices: [],
     ...overrides,
   };
