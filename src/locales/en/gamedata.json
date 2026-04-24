@@ -362,6 +362,18 @@
       "name": "Stout Resilience",
       "description": "You have advantage on saving throws against poison, and you have resistance against poison damage."
     },
+    "halfelf-darkvision": {
+      "name": "Darkvision",
+      "description": "You can see in dim light within 60 feet as if it were bright light, and in darkness as if it were dim light."
+    },
+    "halfelf-fey-ancestry": {
+      "name": "Fey Ancestry",
+      "description": "You have advantage on saving throws against being charmed, and magic can't put you to sleep."
+    },
+    "halfelf-skill-versatility": {
+      "name": "Skill Versatility",
+      "description": "You gain proficiency in two skills of your choice."
+    },
     "rogue-sneak-attack": {
       "name": "Sneak Attack",
       "description": "Once per turn, deal extra 1d6 damage to one creature you hit with a finesse or ranged weapon attack if you have advantage or an ally is within 5 feet of the target. Scales to ceil(level/2)d6."

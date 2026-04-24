@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RollingNumber } from '@/components/ui/rolling-number';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { useCharacterContext, type CreationUpdates } from '@/hooks/useCharacterContext';
 import {
   getAbilityModifier,
@@ -18,8 +19,9 @@ import {
   DND_RACES,
 } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
+import type { PendingChoice } from '@/types/resolved';
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const DEFAULT_ABILITIES: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
@@ -262,6 +264,27 @@ export function AbilitiesStep() {
     );
   };
 
+  // Scan grant bundles for ability-choice grants (e.g. Half-Elf +1/+1)
+  const abilityChoicePending = useMemo((): readonly PendingChoice[] => {
+    if (context.bundles.length === 0) return [];
+    const result: PendingChoice[] = [];
+    for (const bundle of context.bundles) {
+      for (const grant of bundle.grants) {
+        if (grant.type === 'ability-choice') {
+          result.push({
+            type: 'ability-choice',
+            choiceKey: grant.key,
+            source: bundle.source,
+            count: grant.count,
+            bonus: grant.bonus,
+            from: grant.from,
+          });
+        }
+      }
+    }
+    return result;
+  }, [context.bundles]);
+
   const abilityKeys = Object.keys(baseAbilities) as Array<keyof AbilityScores>;
   const pointsSpent = Object.values(baseAbilities).reduce((sum, s) => sum + getPointBuyCost(s), 0);
   const pointsRemaining = POINT_BUY_TOTAL - pointsSpent;
@@ -277,6 +300,8 @@ export function AbilitiesStep() {
     setIsRolling(false);
     context.updateCreation({ ability_method: val as CreationUpdates['ability_method'] });
   };
+
+  const { build } = context;
 
   return (
     <div className="space-y-4">
@@ -454,6 +479,27 @@ export function AbilitiesStep() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {abilityChoicePending.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold">
+              {tc('characterBuilder.abilities.racialAbilityChoice')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {abilityChoicePending.map((choice) => (
+              <ChoicePicker
+                key={choice.choiceKey}
+                choice={choice}
+                currentDecision={build?.choices[choice.choiceKey]}
+                onDecide={context.makeChoice}
+                onClear={context.clearChoice}
+              />
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

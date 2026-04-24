@@ -227,3 +227,80 @@ describe('Stout Halfling race source', () => {
     expect(resistance).toEqual({ type: 'resistance', damageType: 'poison' });
   });
 });
+
+describe('Half-Elf race source', () => {
+  const source = getRaceSource('halfelf' as RaceId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants exactly one fixed ability bonus: +2 CHA', () => {
+    const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
+    expect(abilityBonuses).toHaveLength(1);
+    expect(abilityBonuses).toEqual([{ type: 'ability-bonus', ability: 'cha', bonus: 2 }]);
+  });
+
+  it('grants one ability-choice with count 2, bonus 1, from all abilities except CHA', () => {
+    const abilityChoice = source?.grants.find((g) => g.type === 'ability-choice');
+    expect(abilityChoice).toEqual({
+      type: 'ability-choice',
+      key: createChoiceKey('ability-choice', 'race', 'halfelf', 0),
+      count: 2,
+      bonus: 1,
+      from: ['str', 'dex', 'con', 'int', 'wis'],
+    });
+  });
+
+  it('grants 30 ft walk speed', () => {
+    const speed = source?.grants.find((g) => g.type === 'speed');
+    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 30 });
+  });
+
+  it('grants Common and Elvish languages as fixed proficiencies', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'elvish' },
+      ])
+    );
+  });
+
+  it('grants one language-choice with count 1 and from: null (any language)', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'race', 'halfelf', 0),
+      count: 1,
+      from: null,
+    });
+  });
+
+  it('grants one skill-choice with count 2 and from: null (any skill)', () => {
+    const skillChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'skill');
+    expect(skillChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'skill',
+      key: createChoiceKey('skill-choice', 'race', 'halfelf', 0),
+      count: 2,
+      from: null,
+    });
+  });
+
+  it('grants three features: darkvision, fey ancestry, skill versatility', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(3);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(
+      expect.arrayContaining(['halfelf-darkvision', 'halfelf-fey-ancestry', 'halfelf-skill-versatility'])
+    );
+  });
+});

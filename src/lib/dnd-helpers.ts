@@ -434,7 +434,7 @@ export const DND_RACES = [
     id: 'halfelf',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { cha: 2, int: 1, wis: 1 },
+    abilityBonuses: { cha: 2 },
     languages: ['common', 'elvish'],
     languageChoices: 1,
   },
