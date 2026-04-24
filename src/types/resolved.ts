@@ -137,6 +137,7 @@ export type PendingChoice =
       readonly source: SourceTag;
       readonly count: number;
       readonly from: readonly SkillId[] | null;
+      readonly fromTools: readonly ToolProficiencyId[];
     }
   | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly points: number }
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }
@@ -191,5 +192,6 @@ export interface ResolvedCharacter {
   readonly spellcasting: ResolvedSpellcasting | null;
   readonly equipment: readonly ResolvedEquipmentItem[];
   readonly attacks: readonly ResolvedAttack[];
+  readonly toolExpertise: readonly ToolProficiencyId[];
   readonly pendingChoices: readonly PendingChoice[];
 }

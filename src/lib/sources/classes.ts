@@ -4,6 +4,20 @@ import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers';
 
 const EMPTY_LEVEL = { grants: [] } as const;
 
+const ROGUE_SKILL_POOL = [
+  'acrobatics',
+  'athletics',
+  'deception',
+  'insight',
+  'intimidation',
+  'investigation',
+  'perception',
+  'performance',
+  'persuasion',
+  'sleightofhand',
+  'stealth',
+] as const;
+
 export const CLASS_SOURCES: readonly ClassSource[] = [
   /**
    * Rage is re-emitted at L1/L3/L6/L9 with scaling usesCount; resolveFeatures
@@ -179,6 +193,101 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 2), points: 2 }] },
       { grants: [{ type: 'feature', feature: { id: 'fighter-indomitable' } }] },
       EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+    ],
+  },
+  {
+    id: 'rogue',
+    primaryAbility: 'dex',
+    quickBuild: makeQuickBuild({
+      highestAbility: ['dex'],
+      secondaryAbility: 'int',
+      suggestedBackground: 'criminal',
+    }),
+    levels: [
+      {
+        grants: [
+          { type: 'hit-die', die: 8 },
+          { type: 'proficiency', category: 'armor', id: 'light' },
+          { type: 'proficiency', category: 'weapon', id: 'simple' },
+          { type: 'proficiency', category: 'weapon', id: 'handcrossbow' },
+          { type: 'proficiency', category: 'weapon', id: 'longsword' },
+          { type: 'proficiency', category: 'weapon', id: 'rapier' },
+          { type: 'proficiency', category: 'weapon', id: 'shortsword' },
+          { type: 'proficiency', category: 'tool', id: 'thievestools' },
+          { type: 'proficiency', category: 'saving-throw', id: 'dex' },
+          { type: 'proficiency', category: 'saving-throw', id: 'int' },
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: createChoiceKey('skill-choice', 'class', 'rogue', 0),
+            count: 4,
+            from: ROGUE_SKILL_POOL,
+          },
+          { type: 'armor-class', calculation: { mode: 'armored' } },
+          {
+            type: 'expertise-choice',
+            key: createChoiceKey('expertise-choice', 'class', 'rogue', 0),
+            count: 2,
+            from: null,
+            fromTools: ['thievestools'],
+          },
+          { type: 'feature', feature: { id: 'rogue-sneak-attack' } },
+          { type: 'feature', feature: { id: 'rogue-thieves-cant' } },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'rogue', 0),
+            category: 'loadout',
+            bundleIds: ['rogue-loadout'],
+          },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'rogue', 1),
+            category: 'melee-weapon',
+            bundleIds: ['rogue-rapier', 'rogue-shortsword-melee'],
+          },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'rogue', 2),
+            category: 'ranged-weapon',
+            bundleIds: ['rogue-shortbow-kit', 'rogue-shortsword-ranged'],
+          },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'rogue', 3),
+            category: 'pack',
+            bundleIds: ['burglars-pack', 'dungeoneers-pack', 'explorers-pack'],
+          },
+        ],
+      },
+      { grants: [{ type: 'feature', feature: { id: 'rogue-cunning-action' } }] },
+      { grants: [{ type: 'subclass', classId: 'rogue', key: createChoiceKey('subclass', 'class', 'rogue', 0) }] },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'rogue', 0), points: 2 }] },
+      { grants: [{ type: 'feature', feature: { id: 'rogue-uncanny-dodge' } }] },
+      {
+        grants: [
+          {
+            type: 'expertise-choice',
+            key: createChoiceKey('expertise-choice', 'class', 'rogue', 1),
+            count: 2,
+            from: null,
+            fromTools: ['thievestools'],
+          },
+        ],
+      },
+      { grants: [{ type: 'feature', feature: { id: 'rogue-evasion' } }] },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'rogue', 1), points: 2 }] },
+      EMPTY_LEVEL,
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'rogue', 2), points: 2 }] },
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,

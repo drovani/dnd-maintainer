@@ -129,4 +129,13 @@ describe('ITEM_CATALOG', () => {
     expect(def).toBeDefined();
     expect(def!.type).toBe('gear');
   });
+
+  it('burglars-pack contents all resolve via getItemDef', () => {
+    const def = getItemDef('burglars-pack');
+    expect(def).toBeDefined();
+    if (!def || def.type !== 'pack') throw new Error('burglars-pack should be a pack');
+    for (const { itemId } of def.contents) {
+      expect(getItemDef(itemId), `burglars-pack references unknown itemId "${itemId}"`).toBeDefined();
+    }
+  });
 });

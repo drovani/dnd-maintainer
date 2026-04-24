@@ -1,7 +1,16 @@
 import type { RaceId, ClassId, BackgroundId, SizeId, AbilityKey } from '@/lib/dnd-helpers';
 import type { Grant } from '@/types/grants';
 
-export const SUBCLASS_IDS = ['champion', 'battlemaster', 'eldritchknight', 'berserker', 'totemwarrior'] as const;
+export const SUBCLASS_IDS = [
+  'champion',
+  'battlemaster',
+  'eldritchknight',
+  'berserker',
+  'totemwarrior',
+  'thief',
+  'assassin',
+  'arcanetrickster',
+] as const;
 export type SubclassId = (typeof SUBCLASS_IDS)[number];
 
 export function isSubclassId(s: string): s is SubclassId {

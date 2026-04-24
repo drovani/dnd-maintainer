@@ -162,6 +162,11 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             toast.warning(i18next.t('common:errors.orphanedRowCleanupFailed'));
           }
 
+          queryClient.invalidateQueries({ queryKey: ['character'] });
+          queryClient.invalidateQueries({ queryKey: ['characters', character.campaign_id] });
+          queryClient.invalidateQueries({ queryKey: ['character-build-levels', savedId] });
+          queryClient.invalidateQueries({ queryKey: ['character-items', savedId] });
+
           setSaveStatus('saved');
           return savedId;
         } catch (err) {
@@ -216,7 +221,10 @@ export function useBuilderAutosave(existingCharacterId?: string) {
           .single();
         if (error) throw error;
         if (!data?.slug) throw new Error('Finalize succeeded but no character slug was returned');
+        queryClient.invalidateQueries({ queryKey: ['character'] });
         queryClient.invalidateQueries({ queryKey: ['characters', payload.character.campaign_id] });
+        queryClient.invalidateQueries({ queryKey: ['character-build-levels', id] });
+        queryClient.invalidateQueries({ queryKey: ['character-items', id] });
         return (data as { slug: string }).slug;
       } catch (err) {
         setSaveStatus('error');

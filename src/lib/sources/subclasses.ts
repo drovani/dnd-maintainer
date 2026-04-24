@@ -95,4 +95,47 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       { classLevel: 10, grants: [{ type: 'feature', feature: { id: 'totemwarrior-spirit-walker' } }] },
     ],
   },
+  {
+    id: 'thief',
+    classId: 'rogue',
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'feature', feature: { id: 'thief-fast-hands' } },
+          { type: 'feature', feature: { id: 'thief-second-story-work' } },
+        ],
+      },
+      { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'thief-supreme-sneak' } }] },
+    ],
+  },
+  {
+    id: 'assassin',
+    classId: 'rogue',
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'proficiency', category: 'tool', id: 'disguisekit' },
+          { type: 'proficiency', category: 'tool', id: 'poisonerskit' },
+          { type: 'feature', feature: { id: 'assassin-assassinate' } },
+        ],
+      },
+      { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'assassin-infiltration-expertise' } }] },
+    ],
+  },
+  {
+    id: 'arcanetrickster',
+    classId: 'rogue',
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'spellcasting', ability: 'int', source: 'class' },
+          { type: 'feature', feature: { id: 'arcanetrickster-mage-hand-legerdemain' } },
+        ],
+      },
+      { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'arcanetrickster-magical-ambush' } }] },
+    ],
+  },
 ];

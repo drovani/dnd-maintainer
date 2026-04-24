@@ -221,7 +221,9 @@
     "gaming-set-three-dragon-ante": "Three-Dragon Ante Set",
     "smithstools": "Smith's Tools",
     "brewersupplies": "Brewer's Supplies",
-    "masonstools": "Mason's Tools"
+    "masonstools": "Mason's Tools",
+    "disguisekit": "Disguise Kit",
+    "poisonerskit": "Poisoner's Kit"
   },
   "features": {
     "barbarian-brutal-critical-1": {
@@ -419,6 +421,74 @@
     "dwarf-dwarven-toughness": {
       "name": "Dwarven Toughness",
       "description": "Your hit point maximum increases by 1, and it increases by 1 whenever you gain a level."
+    },
+    "halfling-lucky": {
+      "name": "Lucky",
+      "description": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."
+    },
+    "halfling-brave": {
+      "name": "Brave",
+      "description": "You have advantage on saving throws against being frightened."
+    },
+    "halfling-nimbleness": {
+      "name": "Halfling Nimbleness",
+      "description": "You can move through the space of any creature that is of a size larger than yours."
+    },
+    "halfling-naturally-stealthy": {
+      "name": "Naturally Stealthy",
+      "description": "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."
+    },
+    "halfling-stout-resilience": {
+      "name": "Stout Resilience",
+      "description": "You have advantage on saving throws against poison, and you have resistance against poison damage."
+    },
+    "rogue-sneak-attack": {
+      "name": "Sneak Attack",
+      "description": "Once per turn, deal extra 1d6 damage to one creature you hit with a finesse or ranged weapon attack if you have advantage or an ally is within 5 feet of the target. Scales to ceil(level/2)d6."
+    },
+    "rogue-thieves-cant": {
+      "name": "Thieves' Cant",
+      "description": "You have learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation."
+    },
+    "rogue-cunning-action": {
+      "name": "Cunning Action",
+      "description": "You can take a bonus action on each of your turns in combat to take the Dash, Disengage, or Hide action."
+    },
+    "rogue-uncanny-dodge": {
+      "name": "Uncanny Dodge",
+      "description": "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."
+    },
+    "rogue-evasion": {
+      "name": "Evasion",
+      "description": "When you are subjected to an effect that allows you to make a DEX save to take half damage, you take no damage on a success and half on a failure."
+    },
+    "thief-fast-hands": {
+      "name": "Fast Hands",
+      "description": "Use Cunning Action to make a Sleight of Hand check, use thieves' tools to disarm a trap or open a lock, or take the Use an Object action."
+    },
+    "thief-second-story-work": {
+      "name": "Second-Story Work",
+      "description": "Climbing no longer costs extra movement. When you make a running jump, the distance increases by a number of feet equal to your DEX modifier."
+    },
+    "thief-supreme-sneak": {
+      "name": "Supreme Sneak",
+      "description": "You have advantage on DEX (Stealth) checks if you move no more than half your speed on the same turn."
+    },
+    "assassin-assassinate": {
+      "name": "Assassinate",
+      "description": "You have advantage on attack rolls against creatures that haven't taken a turn yet. Any hit against a surprised creature is a critical hit."
+    },
+    "assassin-infiltration-expertise": {
+      "name": "Infiltration Expertise",
+      "description": "You can create false identities. Spend 7 days and 25 gp to establish history, profession, and affiliations for an identity."
+    },
+    "arcanetrickster-mage-hand-legerdemain": {
+      "name": "Mage Hand Legerdemain",
+      "description": "When you cast mage hand, you can make it invisible and use it to stow/retrieve objects or use thieves' tools at range."
+    },
+    "arcanetrickster-magical-ambush": {
+      "name": "Magical Ambush",
+      "description": "If hidden when you cast a spell, the target has disadvantage on saving throws against it this turn."
     }
   },
   "subclasses": {
@@ -441,6 +511,18 @@
     "totemwarrior": {
       "name": "Path of the Totem Warrior",
       "description": "The Path of the Totem Warrior is a spiritual journey, as the barbarian accepts a spirit animal as guide, protector, and inspiration. In battle, your totem spirit fills you with supernatural might, adding magical fuel to your barbarian rage."
+    },
+    "thief": {
+      "name": "Thief",
+      "description": "You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype."
+    },
+    "assassin": {
+      "name": "Assassin",
+      "description": "You focus your training on the grim art of death. Hired killers, spies, bounty hunters, and specially anointed priests follow this archetype."
+    },
+    "arcanetrickster": {
+      "name": "Arcane Trickster",
+      "description": "Some rogues enhance their fine-honed skills of stealth and agility with magic, learning tricks of enchantment and illusion."
     }
   },
   "fightingStyles": {
@@ -571,9 +653,15 @@
       "hammer": { "name": "Hammer" },
       "pitons-10": { "name": "Pitons (10)" },
       "hooded-lantern": { "name": "Hooded Lantern" },
-      "oil-flasks-2": { "name": "Oil (2 flasks)" }
+      "oil-flasks-2": { "name": "Oil (2 flasks)" },
+      "thieves-tools": { "name": "Thieves' Tools" },
+      "ball-bearings-1000": { "name": "Ball Bearings (bag of 1,000)" },
+      "string-10ft": { "name": "String (10 ft.)" },
+      "bell": { "name": "Bell" },
+      "candles-5": { "name": "Candles (5)" }
     },
     "packs": {
+      "burglars-pack": { "name": "Burglar's Pack" },
       "explorers-pack": { "name": "Explorer's Pack" },
       "dungeoneers-pack": { "name": "Dungeoneer's Pack" }
     }
@@ -582,6 +670,11 @@
     "any-martial-melee": { "name": "Any martial melee weapon" },
     "any-simple-weapon": { "name": "Any simple weapon" },
     "barbarian-greataxe": { "name": "Greataxe" },
+    "rogue-loadout": { "name": "Leather Armor + 2 Daggers + Thieves' Tools" },
+    "rogue-rapier": { "name": "Rapier" },
+    "rogue-shortsword-melee": { "name": "Shortsword" },
+    "rogue-shortbow-kit": { "name": "Shortbow + Arrows (20)" },
+    "rogue-shortsword-ranged": { "name": "Shortsword" },
     "fighter-chainmail": { "name": "Chain Mail" },
     "fighter-archer-kit": { "name": "Leather Armor + Longbow + Arrows (20)" },
     "light-crossbow-kit": { "name": "Light Crossbow + Bolts (20)" },

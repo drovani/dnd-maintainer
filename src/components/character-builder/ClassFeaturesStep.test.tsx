@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClassFeaturesStep } from '@/components/character-builder/ClassFeaturesStep';
-import type { ResolvedCharacter, ResolvedSpellcasting } from '@/types/resolved';
+import type { ResolvedCharacter, ResolvedSpellcasting, ResolvedFeature, PendingChoice } from '@/types/resolved';
 import type { CharacterBuild, ChoiceKey } from '@/types/choices';
 import type { GrantBundle } from '@/types/sources';
 
@@ -78,6 +78,34 @@ function wizardSpellcasting(): ResolvedSpellcasting {
 }
 
 // ---------------------------------------------------------------------------
+// Additional fixtures
+// ---------------------------------------------------------------------------
+
+const ROGUE_SUBCLASS_CHOICE_KEY = 'subclass:class:rogue:0' as ChoiceKey;
+
+function rogueL1Features(): readonly ResolvedFeature[] {
+  return [
+    {
+      feature: { id: 'rogue-sneak-attack' },
+      source: { origin: 'class', id: 'rogue', level: 1 },
+    },
+    {
+      feature: { id: 'rogue-thieves-cant' },
+      source: { origin: 'class', id: 'rogue', level: 1 },
+    },
+  ];
+}
+
+function rogueSubclassChoice(): Extract<PendingChoice, { type: 'subclass' }> {
+  return {
+    type: 'subclass',
+    choiceKey: ROGUE_SUBCLASS_CHOICE_KEY,
+    classId: 'rogue',
+    source: { origin: 'class', id: 'rogue', level: 3 },
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -149,6 +177,98 @@ describe('ClassFeaturesStep', () => {
 
     expect(screen.getByText('fightingStyles')).toBeTruthy();
     expect(screen.getByText('spellcasting')).toBeTruthy();
+    expect(screen.queryByText('noClassChoices')).toBeNull();
+  });
+
+  it('renders level-1 class features with name and description', () => {
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: rogueL1Features(),
+      pendingChoices: [],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassFeaturesStep />);
+
+    // The i18n mock returns the last segment: features.<id>.name -> "name"
+    // Both features share the same last segment, so we use getAllByText
+    expect(screen.getAllByText('name')).toHaveLength(2);
+    // Section heading: last segment of characterBuilder.classFeatures.features -> "features"
+    expect(screen.getByText('features')).toBeTruthy();
+  });
+
+  it('filters out features not from class L1', () => {
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [
+        // L1 class feature — should render
+        {
+          feature: { id: 'rogue-sneak-attack' },
+          source: { origin: 'class', id: 'rogue', level: 1 },
+        },
+        // race feature — should NOT render
+        {
+          feature: { id: 'darkvision' },
+          source: { origin: 'race', id: 'elf-high', level: 0 },
+        },
+        // class L3 feature — should NOT render
+        {
+          feature: { id: 'rogue-uncanny-dodge' },
+          source: { origin: 'class', id: 'rogue', level: 3 },
+        },
+      ] as ResolvedFeature[],
+      pendingChoices: [],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassFeaturesStep />);
+
+    // Only one feature list item should appear
+    const listItems = document.querySelectorAll('li');
+    expect(listItems).toHaveLength(1);
+  });
+
+  it('renders SubclassPicker for each pending subclass choice', () => {
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [rogueSubclassChoice()],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassFeaturesStep />);
+
+    // The SubclassPicker heading: last segment of characterSheet.subclassPicker.chooseSubclass -> "chooseSubclass"
+    expect(screen.getByText('chooseSubclass')).toBeTruthy();
+  });
+
+  it('invokes makeChoice with correct payload when a subclass is auto-committed', () => {
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [rogueSubclassChoice()],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassFeaturesStep />);
+
+    // SUBCLASS_SOURCES contains thief, assassin, arcanetrickster for rogue.
+    // The SubclassPicker renders them as <button> elements. Click the first one.
+    const subclassButtons = screen.getAllByRole('button');
+    expect(subclassButtons.length).toBeGreaterThan(0);
+    fireEvent.click(subclassButtons[0]);
+
+    expect(mockMakeChoice).toHaveBeenCalledWith(
+      ROGUE_SUBCLASS_CHOICE_KEY,
+      expect.objectContaining({ type: 'subclass', subclassId: expect.any(String) })
+    );
+  });
+
+  it('hides empty-state when only L1 class features are present', () => {
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: rogueL1Features(),
+      pendingChoices: [],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassFeaturesStep />);
+
     expect(screen.queryByText('noClassChoices')).toBeNull();
   });
 });

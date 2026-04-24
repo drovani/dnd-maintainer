@@ -673,6 +673,11 @@ export const GEAR_CATALOG: readonly ({ readonly type: 'gear' } & GearDef)[] = [
   { type: 'gear', id: 'pitons-10', weight: 2.5, costGp: 0.5 },
   { type: 'gear', id: 'hooded-lantern', weight: 2, costGp: 5 },
   { type: 'gear', id: 'oil-flasks-2', weight: 2, costGp: 0.2 },
+  { type: 'gear', id: 'thieves-tools', weight: 1, costGp: 25 },
+  { type: 'gear', id: 'ball-bearings-1000', weight: 2, costGp: 1 },
+  { type: 'gear', id: 'string-10ft', weight: 0, costGp: 0.01 },
+  { type: 'gear', id: 'bell', weight: 0, costGp: 0.1 },
+  { type: 'gear', id: 'candles-5', weight: 0, costGp: 0.05 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -691,6 +696,26 @@ export const PACK_CATALOG: readonly ({ readonly type: 'pack' } & PackDef)[] = [
       { itemId: 'tinderbox', quantity: 1 },
       { itemId: 'torches-10', quantity: 1 },
       { itemId: 'rations-10', quantity: 1 },
+      { itemId: 'waterskin', quantity: 1 },
+      { itemId: 'hemp-rope-50ft', quantity: 1 },
+    ],
+  },
+  {
+    type: 'pack',
+    id: 'burglars-pack',
+    costGp: 16,
+    contents: [
+      { itemId: 'backpack', quantity: 1 },
+      { itemId: 'ball-bearings-1000', quantity: 1 },
+      { itemId: 'string-10ft', quantity: 1 },
+      { itemId: 'bell', quantity: 1 },
+      { itemId: 'candles-5', quantity: 1 },
+      { itemId: 'crowbar', quantity: 1 },
+      { itemId: 'hammer', quantity: 1 },
+      { itemId: 'pitons-10', quantity: 1 },
+      { itemId: 'hooded-lantern', quantity: 1 },
+      { itemId: 'oil-flasks-2', quantity: 1 },
+      { itemId: 'tinderbox', quantity: 1 },
       { itemId: 'waterskin', quantity: 1 },
       { itemId: 'hemp-rope-50ft', quantity: 1 },
     ],

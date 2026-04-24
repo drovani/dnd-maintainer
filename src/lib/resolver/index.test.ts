@@ -4,9 +4,8 @@ import type { ResolverInput } from '@/lib/resolver';
 import type { AbilityKey, ClassId } from '@/lib/dnd-helpers';
 import { DND_SKILLS } from '@/lib/dnd-helpers';
 import { collectBundles } from '@/lib/sources';
-import type { CharacterBuild } from '@/types/choices';
+import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
-import type { ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SubclassId } from '@/types/sources';
 
 const baseInput: ResolverInput = {
@@ -949,5 +948,602 @@ describe('Hill Dwarf Barbarian L3 integration', () => {
       (c) => c.type === 'tool-choice' && c.choiceKey === dwarfToolKey
     );
     expect(dwarfToolPending).toHaveLength(1);
+  });
+});
+
+describe('Rogue L1 integration', () => {
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const rogueL1Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      [expertiseKey0]: {
+        type: 'expertise-choice' as const,
+        skills: ['stealth', 'sleightofhand'] as const,
+        tools: [] as const,
+      },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(rogueL1Build);
+  const input: ResolverInput = {
+    baseAbilities: rogueL1Build.baseAbilities,
+    level: 1,
+    bundles,
+    choices: rogueL1Build.choices,
+    levels: rogueL1Build.levels,
+  };
+
+  it('chosen skills with expertise have doubled proficiency bonus', () => {
+    const result = resolveCharacter(input);
+    // DEX 16+1(human)=17 → mod 3, prof 2, expertise 2 → stealth = 3+2+2 = 7
+    expect(result.skills.stealth.proficient).toBe(true);
+    expect(result.skills.stealth.expertise).toBe(true);
+    expect(result.skills.stealth.bonus).toBe(7);
+  });
+
+  it('proficient skill without expertise has single proficiency bonus', () => {
+    const result = resolveCharacter(input);
+    // Perception is WIS-based: WIS 10+1(human)=11 → mod 0, prof 2 → bonus = 2
+    expect(result.skills.perception.proficient).toBe(true);
+    expect(result.skills.perception.expertise).toBe(false);
+    expect(result.skills.perception.bonus).toBe(2);
+  });
+
+  it('has sneak attack and thieves cant features', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('rogue-sneak-attack');
+    expect(featureIds).toContain('rogue-thieves-cant');
+  });
+
+  it('toolExpertise is empty when no tool expertise chosen', () => {
+    const result = resolveCharacter(input);
+    expect(result.toolExpertise).toHaveLength(0);
+  });
+
+  it('toolExpertise contains tool when tool expertise chosen', () => {
+    const inputWithToolExpertise: ResolverInput = {
+      ...input,
+      choices: {
+        ...rogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth'] as const,
+          tools: ['thievestools'] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const result = resolveCharacter(inputWithToolExpertise);
+    expect(result.toolExpertise).toContain('thievestools');
+  });
+
+  it('expertise choice without decision generates pending choice', () => {
+    const inputNoExpertiseDecision: ResolverInput = {
+      ...input,
+      choices: {
+        'skill-choice:class:rogue:0': {
+          type: 'skill-choice',
+          skills: ['stealth', 'deception', 'perception', 'sleightofhand'],
+        },
+        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      },
+    };
+    const result = resolveCharacter(inputNoExpertiseDecision);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(expertiseKey0);
+  });
+});
+
+describe('Rogue L3 + Thief subclass integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'rogue', 0);
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const rogueL3Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'rogue' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 3, hpRoll: 5 },
+    ],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      [expertiseKey0]: {
+        type: 'expertise-choice' as const,
+        skills: ['stealth', 'sleightofhand'] as const,
+        tools: [] as const,
+      },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'thief' as SubclassId },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(rogueL3Build);
+  const input: ResolverInput = {
+    baseAbilities: rogueL3Build.baseAbilities,
+    level: 3,
+    bundles,
+    choices: rogueL3Build.choices,
+    levels: rogueL3Build.levels,
+  };
+
+  it('has thief subclass features at L3', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('thief-fast-hands');
+    expect(featureIds).toContain('thief-second-story-work');
+  });
+
+  it('has pending subclass choice when subclass not decided', () => {
+    const inputNoSubclass: ResolverInput = {
+      ...input,
+      choices: {
+        'skill-choice:class:rogue:0': {
+          type: 'skill-choice' as const,
+          skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+        },
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth', 'sleightofhand'] as const,
+          tools: [] as const,
+        },
+        'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const result = resolveCharacter(inputNoSubclass);
+    const pending = result.pendingChoices.find((c) => c.type === 'subclass');
+    expect(pending).toBeDefined();
+    if (pending?.type === 'subclass') {
+      expect(pending.classId).toBe('rogue');
+    }
+  });
+});
+
+describe('Rogue L1 expertise-choice combined decision', () => {
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const rogueL1Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      [expertiseKey0]: {
+        type: 'expertise-choice' as const,
+        skills: ['stealth'] as const,
+        tools: ['thievestools'] as const,
+      },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(rogueL1Build);
+  const input: ResolverInput = {
+    baseAbilities: rogueL1Build.baseAbilities,
+    level: 1,
+    bundles,
+    choices: rogueL1Build.choices,
+    levels: rogueL1Build.levels,
+  };
+
+  it('combined decision grants skill expertise and tool expertise in the same build', () => {
+    const result = resolveCharacter(input);
+    expect(result.skills.stealth.expertise).toBe(true);
+    expect(result.toolExpertise).toContain('thievestools');
+  });
+
+  it('pending expertise-choice carries fromTools when no decision provided', () => {
+    const inputNoDecision: ResolverInput = {
+      ...input,
+      choices: {
+        'skill-choice:class:rogue:0': {
+          type: 'skill-choice' as const,
+          skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+        },
+        'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const result = resolveCharacter(inputNoDecision);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    if (pending?.type === 'expertise-choice') {
+      expect(pending.fromTools).toContain('thievestools');
+    }
+  });
+});
+
+describe('Rogue L6 second expertise-choice', () => {
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+  const expertiseKey1 = createChoiceKey('expertise-choice', 'class', 'rogue', 1);
+  const subclassKey = createChoiceKey('subclass', 'class', 'rogue', 0);
+
+  const rogueL6Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'rogue' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 3, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 4, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 5, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 6, hpRoll: 5 },
+    ],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      [expertiseKey0]: {
+        type: 'expertise-choice' as const,
+        skills: ['stealth', 'sleightofhand'] as const,
+        tools: [] as const,
+      },
+      [expertiseKey1]: {
+        type: 'expertise-choice' as const,
+        skills: ['deception', 'perception'] as const,
+        tools: [] as const,
+      },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'thief' as SubclassId },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(rogueL6Build);
+  const input: ResolverInput = {
+    baseAbilities: rogueL6Build.baseAbilities,
+    level: 6,
+    bundles,
+    choices: rogueL6Build.choices,
+    levels: rogueL6Build.levels,
+  };
+
+  it('L6 second expertise-choice resolves independently from L1', () => {
+    const result = resolveCharacter(input);
+    // L1 expertise
+    expect(result.skills.stealth.expertise).toBe(true);
+    expect(result.skills.sleightofhand.expertise).toBe(true);
+    // L6 expertise
+    expect(result.skills.deception.expertise).toBe(true);
+    expect(result.skills.perception.expertise).toBe(true);
+  });
+
+  it('includes cumulative rogue class features through level 6', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    // L1 features
+    expect(featureIds).toContain('rogue-sneak-attack');
+    expect(featureIds).toContain('rogue-thieves-cant');
+    // L2 feature
+    expect(featureIds).toContain('rogue-cunning-action');
+    // L5 feature
+    expect(featureIds).toContain('rogue-uncanny-dodge');
+  });
+
+  it('generates pending choice for L6 expertise when only L1 is resolved', () => {
+    const inputPartial: ResolverInput = {
+      ...input,
+      choices: {
+        'skill-choice:class:rogue:0': {
+          type: 'skill-choice' as const,
+          skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+        },
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth', 'sleightofhand'] as const,
+          tools: [] as const,
+        },
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'thief' as SubclassId },
+        'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const result = resolveCharacter(inputPartial);
+    const pendingExpertise = result.pendingChoices.filter((c) => c.type === 'expertise-choice');
+    expect(pendingExpertise).toHaveLength(1);
+    expect(pendingExpertise[0].choiceKey).toBe(expertiseKey1);
+  });
+});
+
+describe('Rogue L3 + Assassin subclass integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'rogue', 0);
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const rogueL3AssassinBuild: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'rogue' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 3, hpRoll: 5 },
+    ],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      [expertiseKey0]: {
+        type: 'expertise-choice' as const,
+        skills: ['stealth', 'sleightofhand'] as const,
+        tools: [] as const,
+      },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'assassin' as SubclassId },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(rogueL3AssassinBuild);
+  const input: ResolverInput = {
+    baseAbilities: rogueL3AssassinBuild.baseAbilities,
+    level: 3,
+    bundles,
+    choices: rogueL3AssassinBuild.choices,
+    levels: rogueL3AssassinBuild.levels,
+  };
+
+  it('has assassin subclass features at L3', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('assassin-assassinate');
+  });
+
+  it('grants disguisekit and poisonerskit tool proficiencies', () => {
+    const result = resolveCharacter(input);
+    const toolIds = result.toolProficiencies.map((t) => t.value);
+    expect(toolIds).toContain('disguisekit');
+    expect(toolIds).toContain('poisonerskit');
+  });
+});
+
+describe('Rogue L3 + Arcane Trickster subclass integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'rogue', 0);
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const rogueL3ArcaneBuild: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'rogue' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'rogue' as ClassId, classLevel: 3, hpRoll: 5 },
+    ],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      [expertiseKey0]: {
+        type: 'expertise-choice' as const,
+        skills: ['stealth', 'sleightofhand'] as const,
+        tools: [] as const,
+      },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'arcanetrickster' as SubclassId },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(rogueL3ArcaneBuild);
+  const input: ResolverInput = {
+    baseAbilities: rogueL3ArcaneBuild.baseAbilities,
+    level: 3,
+    bundles,
+    choices: rogueL3ArcaneBuild.choices,
+    levels: rogueL3ArcaneBuild.levels,
+  };
+
+  it('has Mage Hand Legerdemain feature at L3', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('arcanetrickster-mage-hand-legerdemain');
+  });
+
+  it('spellcasting grant is present in resolved bundles', () => {
+    const { bundles } = collectBundles(rogueL3ArcaneBuild);
+    const spellcastingGrants = bundles.flatMap((b) => b.grants.filter((g) => g.type === 'spellcasting'));
+    expect(spellcastingGrants).toHaveLength(1);
+    const grant = spellcastingGrants[0];
+    if (grant.type === 'spellcasting') {
+      expect(grant.ability).toBe('int');
+    }
+  });
+});
+
+describe('expertise-choice count and validity validation', () => {
+  const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
+
+  const baseRogueL1Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:rogue:0': {
+        type: 'skill-choice' as const,
+        skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
+      },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  it('count-underfilled decision emits pending expertise-choice', () => {
+    // Only 1 skill selected for a count-2 grant → should still be pending
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(expertiseKey0);
+  });
+
+  it('non-proficient skill in decision emits pending and does not apply expertise', () => {
+    // Rogue has no arcana proficiency → arcana pick is invalid
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['arcana', 'stealth'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    // arcana is not proficient so the decision has only 1 valid pick (stealth) for count 2 → pending
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    // arcana must not gain expertise even though it appears in the decision
+    expect(result.skills.arcana.expertise).toBe(false);
+  });
+
+  it('tool outside fromTools pool is filtered and emits pending', () => {
+    // herbalism-kit is not in rogue's fromTools (thievestools only)
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: [] as const,
+          tools: ['herbalism-kit'] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    // herbalism-kit is not in fromTools → filtered out → valid count is 0 < 2 → pending
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    expect(result.toolExpertise).not.toContain('herbalism-kit');
+  });
+
+  it('overfilled decision emits pending and caps applied expertise at grant.count', () => {
+    // 3 proficient skills for a count-2 grant → should still be pending, and only 2 get expertise
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth', 'sleightofhand', 'perception'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    const expertSkills = (['stealth', 'sleightofhand', 'perception'] as const).filter(
+      (s) => result.skills[s].expertise
+    );
+    expect(expertSkills.length).toBe(2);
+  });
+
+  it('valid full decision (2 proficient skills) resolves cleanly with no pending choice', () => {
+    // stealth and sleightofhand are both rogue proficiencies → count 2 satisfied
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth', 'sleightofhand'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeUndefined();
+    expect(result.skills.stealth.expertise).toBe(true);
+    expect(result.skills.sleightofhand.expertise).toBe(true);
   });
 });

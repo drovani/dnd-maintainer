@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import { DND_SKILLS, DND_TOOL_PROFICIENCIES, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+
+const SKILL_IDS = DND_SKILLS.map((s) => s.id) as [SkillId, ...SkillId[]];
+const TOOL_IDS = DND_TOOL_PROFICIENCIES as unknown as [ToolProficiencyId, ...ToolProficiencyId[]];
 
 export const AbilityScoresSchema = z.object({
   str: z.number().int().min(1).max(30),
@@ -20,7 +24,11 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('skill-choice'), skills: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('tool-choice'), tools: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('language-choice'), languages: z.array(z.string()).readonly() }),
-  z.object({ type: z.literal('expertise-choice'), skills: z.array(z.string()).readonly() }),
+  z.object({
+    type: z.literal('expertise-choice'),
+    skills: z.array(z.enum(SKILL_IDS)).readonly(),
+    tools: z.array(z.enum(TOOL_IDS)).readonly(),
+  }),
   z.object({ type: z.literal('asi'), allocation: z.record(z.string(), z.number()) }),
   z.object({ type: z.literal('subclass'), subclassId: z.string().min(1) }),
   z.object({ type: z.literal('fighting-style-choice'), styles: z.array(z.string()).readonly() }),

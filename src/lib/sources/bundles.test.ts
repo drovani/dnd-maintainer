@@ -93,6 +93,51 @@ describe('requireBundleDef', () => {
   });
 });
 
+describe('rogue bundles', () => {
+  it('rogue-loadout contains leather, dagger x2, thieves-tools', () => {
+    const result = resolveBundleRef('rogue-loadout');
+    expect(result.kind).toBe('bundle');
+    const contents = result.contents;
+    expect(contents.find((c) => c.itemId === 'leather')?.quantity).toBe(1);
+    expect(contents.find((c) => c.itemId === 'dagger')?.quantity).toBe(2);
+    expect(contents.find((c) => c.itemId === 'thieves-tools')?.quantity).toBe(1);
+  });
+
+  it('rogue-rapier contains rapier x1', () => {
+    const result = resolveBundleRef('rogue-rapier');
+    expect(result.kind).toBe('bundle');
+    expect(result.contents).toHaveLength(1);
+    expect(result.contents[0].itemId).toBe('rapier');
+    expect(result.contents[0].quantity).toBe(1);
+  });
+
+  it('rogue-shortsword-melee contains shortsword x1', () => {
+    const result = resolveBundleRef('rogue-shortsword-melee');
+    expect(result.kind).toBe('bundle');
+    expect(result.contents).toHaveLength(1);
+    expect(result.contents[0].itemId).toBe('shortsword');
+    expect(result.contents[0].quantity).toBe(1);
+  });
+
+  it('rogue-shortbow-kit contains shortbow x1 and arrows-20 x1', () => {
+    const result = resolveBundleRef('rogue-shortbow-kit');
+    expect(result.kind).toBe('bundle');
+    const ids = result.contents.map((c) => c.itemId);
+    expect(ids).toContain('shortbow');
+    expect(ids).toContain('arrows-20');
+    expect(result.contents.find((c) => c.itemId === 'shortbow')?.quantity).toBe(1);
+    expect(result.contents.find((c) => c.itemId === 'arrows-20')?.quantity).toBe(1);
+  });
+
+  it('rogue-shortsword-ranged contains shortsword x1', () => {
+    const result = resolveBundleRef('rogue-shortsword-ranged');
+    expect(result.kind).toBe('bundle');
+    expect(result.contents).toHaveLength(1);
+    expect(result.contents[0].itemId).toBe('shortsword');
+    expect(result.contents[0].quantity).toBe(1);
+  });
+});
+
 describe('resolveBundleRef', () => {
   it('resolves a fixed bundle id to its contents with kind "bundle"', () => {
     const result = resolveBundleRef('fighter-archer-kit');
