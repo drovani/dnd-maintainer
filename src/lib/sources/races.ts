@@ -90,15 +90,11 @@ export const RACE_SOURCES: readonly RaceSource[] = [
     defaultSize: 'small',
     defaultSpeed: 25,
     grants: [
-      // Ability Score Increase: +2 DEX, +1 CHA
       { type: 'ability-bonus', ability: 'dex', bonus: 2 },
       { type: 'ability-bonus', ability: 'cha', bonus: 1 },
-      // Speed: 25 ft
       { type: 'speed', mode: 'walk', value: 25 },
-      // Languages: Common, Halfling
       { type: 'proficiency', category: 'language', id: 'common' },
       { type: 'proficiency', category: 'language', id: 'halfling' },
-      // Lucky: reroll natural 1s on attacks, ability checks, and saves
       {
         type: 'feature',
         feature: {
@@ -108,7 +104,6 @@ export const RACE_SOURCES: readonly RaceSource[] = [
             'When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.',
         },
       },
-      // Brave: advantage on saves vs. frightened
       {
         type: 'feature',
         feature: {
@@ -117,7 +112,6 @@ export const RACE_SOURCES: readonly RaceSource[] = [
           description: 'You have advantage on saving throws against being frightened.',
         },
       },
-      // Halfling Nimbleness: move through the space of any larger creature
       {
         type: 'feature',
         feature: {
@@ -126,7 +120,6 @@ export const RACE_SOURCES: readonly RaceSource[] = [
           description: 'You can move through the space of any creature that is of a size larger than yours.',
         },
       },
-      // Naturally Stealthy: can hide when obscured by a larger creature
       {
         type: 'feature',
         feature: {
@@ -143,15 +136,11 @@ export const RACE_SOURCES: readonly RaceSource[] = [
     defaultSize: 'small',
     defaultSpeed: 25,
     grants: [
-      // Ability Score Increase: +2 DEX, +1 CON
       { type: 'ability-bonus', ability: 'dex', bonus: 2 },
       { type: 'ability-bonus', ability: 'con', bonus: 1 },
-      // Speed: 25 ft
       { type: 'speed', mode: 'walk', value: 25 },
-      // Languages: Common, Halfling
       { type: 'proficiency', category: 'language', id: 'common' },
       { type: 'proficiency', category: 'language', id: 'halfling' },
-      // Lucky: reroll natural 1s on attacks, ability checks, and saves
       {
         type: 'feature',
         feature: {
@@ -161,7 +150,6 @@ export const RACE_SOURCES: readonly RaceSource[] = [
             'When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.',
         },
       },
-      // Brave: advantage on saves vs. frightened
       {
         type: 'feature',
         feature: {
@@ -170,7 +158,6 @@ export const RACE_SOURCES: readonly RaceSource[] = [
           description: 'You have advantage on saving throws against being frightened.',
         },
       },
-      // Halfling Nimbleness: move through the space of any larger creature
       {
         type: 'feature',
         feature: {
@@ -179,7 +166,6 @@ export const RACE_SOURCES: readonly RaceSource[] = [
           description: 'You can move through the space of any creature that is of a size larger than yours.',
         },
       },
-      // Stout Resilience: advantage on saves vs. poison, resistance to poison damage
       { type: 'resistance', damageType: 'poison' },
       {
         type: 'feature',

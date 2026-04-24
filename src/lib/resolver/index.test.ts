@@ -982,9 +982,7 @@ describe('Rogue L3 + Arcane Trickster subclass integration', () => {
     expect(featureIds).toContain('arcanetrickster-mage-hand-legerdemain');
   });
 
-  it('spellcasting grant is present in resolved bundles (stub returns null until Phase 2)', () => {
-    // resolveSpellcasting is a Phase 1 stub; verify the grant is wired in bundles
-    // and the spellcasting ability is 'int' when the resolver is eventually implemented.
+  it('spellcasting grant is present in resolved bundles', () => {
     const { bundles } = collectBundles(rogueL3ArcaneBuild);
     const spellcastingGrants = bundles.flatMap((b) => b.grants.filter((g) => g.type === 'spellcasting'));
     expect(spellcastingGrants).toHaveLength(1);
