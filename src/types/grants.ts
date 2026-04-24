@@ -117,7 +117,7 @@ export interface ExpertiseChoiceGrant {
   readonly key: ChoiceKey;
   readonly count: number;
   readonly from: readonly SkillId[] | null;
-  readonly fromTools?: readonly ToolProficiencyId[];
+  readonly fromTools: readonly ToolProficiencyId[];
 }
 
 export interface FeatureGrant {

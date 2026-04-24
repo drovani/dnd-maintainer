@@ -460,12 +460,13 @@ describe('resolveSkills — expertise', () => {
             key: 'expertise-choice:class:rogue:0',
             count: 2,
             from: null,
+            fromTools: [],
           },
         ],
       },
     ];
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['stealth'] },
+      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['stealth'], tools: [] },
     };
     // proficiencyBonus=2, dex mod=0 → stealth = 0 + 2 (prof) + 2 (expertise) = 4
     const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
@@ -483,12 +484,13 @@ describe('resolveSkills — expertise', () => {
             key: 'expertise-choice:class:rogue:0',
             count: 2,
             from: null,
+            fromTools: [],
           },
         ],
       },
     ];
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['stealth'] },
+      'expertise-choice:class:rogue:0': { type: 'expertise-choice', skills: ['stealth'], tools: [] },
     };
     const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
     expect(result.stealth.expertise).toBe(false);

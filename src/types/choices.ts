@@ -82,7 +82,7 @@ export type ChoiceDecision =
   | {
       readonly type: 'expertise-choice';
       readonly skills: readonly SkillId[];
-      readonly tools?: readonly ToolProficiencyId[];
+      readonly tools: readonly ToolProficiencyId[];
     }
   | { readonly type: 'asi'; readonly allocation: Partial<Record<AbilityKey, number>> }
   | { readonly type: 'subclass'; readonly subclassId: SubclassId }

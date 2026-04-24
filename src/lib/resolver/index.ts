@@ -198,7 +198,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         source,
         count: grant.count,
         from: grant.from,
-        ...(grant.fromTools ? { fromTools: grant.fromTools } : {}),
+        fromTools: grant.fromTools,
       });
     }
   }
@@ -207,7 +207,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const toolExpertise: ToolProficiencyId[] = [];
   for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
     const decision = choices[grant.key];
-    if (decision?.type === 'expertise-choice' && decision.tools) {
+    if (decision?.type === 'expertise-choice') {
       toolExpertise.push(...decision.tools);
     }
   }
