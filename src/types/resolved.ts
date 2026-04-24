@@ -8,7 +8,7 @@ import type {
   LanguageId,
   ClassId,
 } from '@/lib/dnd-helpers';
-import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants';
+import type { FeatureDef, DamageTypeId, HitDie, SpeedMode, TotemFeatureIdPrefix } from '@/types/grants';
 import type { SourceTag } from '@/types/sources';
 import type { ChoiceKey } from '@/types/choices';
 import type {
@@ -159,7 +159,7 @@ export type PendingChoice =
       readonly type: 'totem-animal-choice';
       readonly choiceKey: ChoiceKey;
       readonly source: SourceTag;
-      readonly featureIdPrefix: string;
+      readonly featureIdPrefix: TotemFeatureIdPrefix;
     };
 
 export interface ResolvedCharacter {
