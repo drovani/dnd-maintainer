@@ -59,6 +59,43 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
     ],
   },
   {
+    id: 'berserker',
+    classId: 'barbarian',
+    features: [
+      { classLevel: 3, grants: [{ type: 'feature', feature: { id: 'berserker-frenzy' } }] },
+      { classLevel: 6, grants: [{ type: 'feature', feature: { id: 'berserker-mindless-rage' } }] },
+      { classLevel: 10, grants: [{ type: 'feature', feature: { id: 'berserker-intimidating-presence' } }] },
+    ],
+  },
+  {
+    id: 'totemwarrior',
+    classId: 'barbarian',
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'feature', feature: { id: 'totemwarrior-spirit-seeker' } },
+          {
+            type: 'totem-animal-choice',
+            key: createChoiceKey('totem-animal-choice', 'class', 'barbarian', 0),
+            featureIdPrefix: 'totemwarrior-totem-spirit',
+          },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          {
+            type: 'totem-animal-choice',
+            key: createChoiceKey('totem-animal-choice', 'class', 'barbarian', 1),
+            featureIdPrefix: 'totemwarrior-aspect-of-the-beast',
+          },
+        ],
+      },
+      { classLevel: 10, grants: [{ type: 'feature', feature: { id: 'totemwarrior-spirit-walker' } }] },
+    ],
+  },
+  {
     id: 'thief',
     classId: 'rogue',
     features: [

@@ -5,6 +5,8 @@ export const SUBCLASS_IDS = [
   'champion',
   'battlemaster',
   'eldritchknight',
+  'berserker',
+  'totemwarrior',
   'thief',
   'assassin',
   'arcanetrickster',

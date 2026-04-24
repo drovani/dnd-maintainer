@@ -125,6 +125,19 @@ export interface FeatureGrant {
   readonly feature: FeatureDef;
 }
 
+export const TOTEM_ANIMALS = ['bear', 'eagle', 'wolf'] as const;
+export type TotemAnimalId = (typeof TOTEM_ANIMALS)[number];
+
+/** Literal union of all feature-id prefixes that a totem-animal-choice grant can produce. */
+export type TotemFeatureIdPrefix = 'totemwarrior-totem-spirit' | 'totemwarrior-aspect-of-the-beast';
+
+export interface TotemAnimalChoiceGrant {
+  readonly type: 'totem-animal-choice';
+  readonly key: ChoiceKey;
+  /** Resolver appends `-bear` / `-eagle` / `-wolf` to form the resolved feature id. */
+  readonly featureIdPrefix: TotemFeatureIdPrefix;
+}
+
 export type SpeedMode = 'walk' | 'fly' | 'swim' | 'climb' | 'burrow';
 
 export interface SpeedGrant {
@@ -233,4 +246,5 @@ export type Grant =
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant
   | EquipmentGrant
-  | BundleChoiceGrant;
+  | BundleChoiceGrant
+  | TotemAnimalChoiceGrant;

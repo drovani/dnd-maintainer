@@ -4,6 +4,7 @@ import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import type { PendingChoice } from '@/types/resolved';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { BundleCategory } from '@/types/items';
+import type { SourceTag } from '@/types/sources';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -231,5 +232,87 @@ describe('ChoicePicker bundle-choice', () => {
       <ChoicePicker choice={SLOTTED_CHOICE} currentDecision={twoWeaponDecision} onDecide={vi.fn()} onClear={vi.fn()} />
     );
     expect(container.querySelectorAll('[data-slot="select-trigger"]').length).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ChoicePicker — totem-animal-choice branch
+// ---------------------------------------------------------------------------
+
+const TOTEM_SOURCE: SourceTag = { origin: 'subclass', id: 'totemwarrior', classId: 'barbarian', level: 3 };
+
+const TOTEM_CHOICE: PendingChoice & { type: 'totem-animal-choice' } = {
+  type: 'totem-animal-choice',
+  choiceKey: 'totem-animal-choice:class:barbarian:0' as ChoiceKey,
+  source: TOTEM_SOURCE,
+};
+
+describe('ChoicePicker totem-animal-choice', () => {
+  it('renders three radio options (bear, eagle, wolf)', () => {
+    render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(3);
+  });
+
+  it('no radio is checked when currentDecision is undefined', () => {
+    render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios.every((r) => !r.checked)).toBe(true);
+  });
+
+  it('selecting bear calls onDecide with totem-animal-choice decision', () => {
+    const onDecide = vi.fn();
+    render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
+    const bearRadio = screen.getAllByRole('radio').find((r) => (r as HTMLInputElement).value === 'bear');
+    expect(bearRadio).toBeDefined();
+    fireEvent.click(bearRadio!);
+    expect(onDecide).toHaveBeenCalledWith(TOTEM_CHOICE.choiceKey, {
+      type: 'totem-animal-choice',
+      animal: 'bear',
+    });
+  });
+
+  it('selecting eagle calls onDecide with eagle animal', () => {
+    const onDecide = vi.fn();
+    render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
+    const eagleRadio = screen.getAllByRole('radio').find((r) => (r as HTMLInputElement).value === 'eagle');
+    expect(eagleRadio).toBeDefined();
+    fireEvent.click(eagleRadio!);
+    expect(onDecide).toHaveBeenCalledWith(TOTEM_CHOICE.choiceKey, {
+      type: 'totem-animal-choice',
+      animal: 'eagle',
+    });
+  });
+
+  it('persisted bear decision renders the bear radio as checked', () => {
+    const currentDecision: ChoiceDecision = { type: 'totem-animal-choice', animal: 'bear' };
+    render(
+      <ChoicePicker choice={TOTEM_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const bearRadio = radios.find((r) => r.value === 'bear');
+    const eagleRadio = radios.find((r) => r.value === 'eagle');
+    const wolfRadio = radios.find((r) => r.value === 'wolf');
+    expect(bearRadio?.checked).toBe(true);
+    expect(eagleRadio?.checked).toBe(false);
+    expect(wolfRadio?.checked).toBe(false);
+  });
+
+  it('persisted wolf decision renders wolf radio as checked', () => {
+    const currentDecision: ChoiceDecision = { type: 'totem-animal-choice', animal: 'wolf' };
+    render(
+      <ChoicePicker choice={TOTEM_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const wolfRadio = radios.find((r) => r.value === 'wolf');
+    expect(wolfRadio?.checked).toBe(true);
+  });
+
+  it('renders animal name labels from translation keys', () => {
+    render(<ChoicePicker choice={TOTEM_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    // The mock t() returns the last key segment; all three animal name keys share the same
+    // last segment ('name'), so three elements with that text appear.
+    const labels = screen.getAllByText('name');
+    expect(labels).toHaveLength(3);
   });
 });

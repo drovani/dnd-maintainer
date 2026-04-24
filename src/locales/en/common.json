@@ -150,6 +150,7 @@
       "toolChoice": "Choose {{count}} tool(s)",
       "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
+      "totemAnimalChoice": "Choose your totem animal",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining",
       "fromSource": "from {{source}}"

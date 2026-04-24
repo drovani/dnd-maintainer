@@ -9,6 +9,7 @@ import type { GrantBundle, SourceTag } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { ResolvedCharacter, PendingChoice, ResolvedSkill } from '@/types/resolved';
 import type { HitDie, ExpertiseChoiceGrant } from '@/types/grants';
+import { TOTEM_ANIMALS } from '@/types/grants';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies';
@@ -56,11 +57,12 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const abilities = resolveAbilities(baseAbilities, bundles, choices);
   const conModifier = abilities.con.modifier;
   const dexModifier = abilities.dex.modifier;
+  const wisModifier = abilities.wis.modifier;
 
   const savingThrows = resolveSavingThrows(abilities, bundles, proficiencyBonus);
   const skills = resolveSkills(abilities, bundles, proficiencyBonus, choices);
   const proficiencies = resolveProficiencies(bundles, choices);
-  const features = resolveFeatures(bundles);
+  const resolvedFeatures = resolveFeatures(bundles);
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level);
   const speed = resolveSpeed(bundles);
   const spellcasting = resolveSpellcasting(bundles);
@@ -71,7 +73,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       ? resolveEquipmentFromPersisted(input.persistedItems)
       : resolveEquipment(bundles, choices, equippedItemIds);
   const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier);
-  const armorClass = resolveAc(bundles, dexModifier, equippedArmorAc);
+  const armorClass = resolveAc(bundles, dexModifier, conModifier, wisModifier, equippedArmorAc);
 
   // Extract chosen fighting style IDs for attack resolver, validating against each grant's from list.
   // Stale persisted decisions containing removed style IDs are filtered out and re-prompted.
@@ -198,6 +200,24 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Totem animal choices — either synthesize a resolved feature or emit a pending choice
+  const totemFeatures: import('@/types/resolved').ResolvedFeature[] = [];
+  for (const { grant, source } of collectGrantsByType(bundles, 'totem-animal-choice')) {
+    const decision = choices[grant.key];
+    if (decision?.type === 'totem-animal-choice' && TOTEM_ANIMALS.includes(decision.animal)) {
+      totemFeatures.push({
+        feature: { id: `${grant.featureIdPrefix}-${decision.animal}` },
+        source,
+      });
+    } else {
+      pendingChoices.push({
+        type: 'totem-animal-choice',
+        choiceKey: grant.key,
+        source,
+      });
+    }
+  }
+
   // Unresolved or underfilled expertise-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'expertise-choice')) {
     const decision = choices[grant.key];
@@ -218,6 +238,8 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       });
     }
   }
+
+  const features = [...resolvedFeatures, ...totemFeatures];
 
   // Collect tool expertise, filtered by fromTools and capped at grant.count so a
   // malformed overfilled decision cannot double the PB on more tools than granted.

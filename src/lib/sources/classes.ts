@@ -19,6 +19,101 @@ const ROGUE_SKILL_POOL = [
 ] as const;
 
 export const CLASS_SOURCES: readonly ClassSource[] = [
+  /**
+   * Rage is re-emitted at L1/L3/L6/L9 with scaling usesCount; resolveFeatures
+   * in src/lib/resolver/features.ts dedupes by feature id, keeping the
+   * highest-rank (latest level) source.
+   */
+  {
+    id: 'barbarian',
+    primaryAbility: 'str',
+    quickBuild: makeQuickBuild({
+      highestAbility: ['str'],
+      secondaryAbility: 'con',
+      suggestedBackground: 'outlander',
+    }),
+    levels: [
+      {
+        grants: [
+          { type: 'hit-die', die: 12 },
+          { type: 'proficiency', category: 'armor', id: 'light' },
+          { type: 'proficiency', category: 'armor', id: 'medium' },
+          { type: 'proficiency', category: 'armor', id: 'shields' },
+          { type: 'proficiency', category: 'weapon', id: 'simple' },
+          { type: 'proficiency', category: 'weapon', id: 'martial' },
+          { type: 'proficiency', category: 'saving-throw', id: 'str' },
+          { type: 'proficiency', category: 'saving-throw', id: 'con' },
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: createChoiceKey('skill-choice', 'class', 'barbarian', 0),
+            count: 2,
+            from: ['animalhandling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
+          },
+          { type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } },
+          { type: 'feature', feature: { id: 'barbarian-rage', usesPerRest: 'long', usesCount: 2 } },
+          { type: 'feature', feature: { id: 'barbarian-unarmored-defense' } },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'barbarian', 0),
+            category: 'melee-weapon',
+            bundleIds: ['barbarian-greataxe', 'any-martial-melee'],
+          },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'barbarian', 1),
+            category: 'ranged-weapon',
+            bundleIds: ['two-handaxes', 'any-simple-weapon'],
+          },
+          { type: 'equipment', itemId: 'javelin', quantity: 4 },
+          { type: 'equipment', itemId: 'explorers-pack', quantity: 1 },
+        ],
+      },
+      {
+        grants: [
+          { type: 'feature', feature: { id: 'barbarian-reckless-attack' } },
+          { type: 'feature', feature: { id: 'barbarian-danger-sense' } },
+        ],
+      },
+      {
+        grants: [
+          { type: 'subclass', classId: 'barbarian', key: createChoiceKey('subclass', 'class', 'barbarian', 0) },
+          { type: 'feature', feature: { id: 'barbarian-rage', usesPerRest: 'long', usesCount: 3 } },
+        ],
+      },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 0), points: 2 }] },
+      {
+        grants: [
+          { type: 'feature', feature: { id: 'barbarian-extra-attack' } },
+          { type: 'feature', feature: { id: 'barbarian-fast-movement' } },
+          { type: 'speed', mode: 'walk', value: 40 },
+        ],
+      },
+      {
+        grants: [{ type: 'feature', feature: { id: 'barbarian-rage', usesPerRest: 'long', usesCount: 4 } }],
+      },
+      { grants: [{ type: 'feature', feature: { id: 'barbarian-feral-instinct' } }] },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 1), points: 2 }] },
+      {
+        grants: [
+          { type: 'feature', feature: { id: 'barbarian-brutal-critical-1' } },
+          { type: 'feature', feature: { id: 'barbarian-rage', usesPerRest: 'long', usesCount: 4 } },
+        ],
+      },
+      // Level 10 — path feature handled by subclass entries
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+    ],
+  },
   {
     id: 'fighter',
     primaryAbility: 'str',

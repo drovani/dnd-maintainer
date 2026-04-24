@@ -30,6 +30,11 @@ export function resolveHp(
     max += value + conModifier;
   }
 
+  const hpBonusGrants = collectGrantsByType(bundles, 'hp-bonus');
+  for (const { grant } of hpBonusGrants) {
+    max += grant.perLevel * level;
+  }
+
   return { max };
 }
 
@@ -60,6 +65,8 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
 export function resolveAc(
   bundles: readonly GrantBundle[],
   dexModifier: number,
+  conModifier: number,
+  wisModifier: number,
   equippedArmor?: { readonly totalBase: number | null; readonly shieldBonus: number } | null
 ): ResolvedArmorClass {
   const acGrants = collectGrantsByType(bundles, 'armor-class');
@@ -83,10 +90,23 @@ export function resolveAc(
       case 'natural':
         calculations.push({ mode: 'natural', baseValue: calc.baseAc, source });
         break;
-      case 'unarmored':
-        // Unarmored: 10 + DEX modifier. TODO: barbarian formula should add CON modifier, monk should add WIS modifier.
-        calculations.push({ mode: 'unarmored', baseValue: 10 + dexModifier, source });
+      case 'unarmored': {
+        let baseValue: number;
+        switch (calc.formula) {
+          case 'barbarian':
+            baseValue = 10 + dexModifier + conModifier;
+            break;
+          case 'monk':
+            baseValue = 10 + dexModifier + wisModifier;
+            break;
+          default: {
+            const _exhaustiveFormula: never = calc.formula;
+            throw new Error(`Unhandled unarmored formula: ${JSON.stringify(_exhaustiveFormula)}`);
+          }
+        }
+        calculations.push({ mode: 'unarmored', baseValue, source });
         break;
+      }
       default: {
         const _exhaustive: never = calc;
         throw new Error(`Unhandled AC calculation mode: ${JSON.stringify(_exhaustive)}`);

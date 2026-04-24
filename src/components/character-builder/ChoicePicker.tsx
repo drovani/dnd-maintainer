@@ -11,6 +11,7 @@ import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } fro
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items';
 import type { PendingChoice } from '@/types/resolved';
+import { TOTEM_ANIMALS, type TotemAnimalId } from '@/types/grants';
 import { getGrantIcon } from '@/lib/class-icons';
 import type { TFunction } from 'i18next';
 import type { LucideIcon } from 'lucide-react';
@@ -181,6 +182,46 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                 />
                 <Label htmlFor={`choice-tool-${choice.choiceKey}-${toolId}`} className="flex-1 cursor-pointer">
                   {t(`tools.${toolId}`)}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (choice.type === 'totem-animal-choice') {
+    const currentAnimal = currentDecision?.type === 'totem-animal-choice' ? currentDecision.animal : undefined;
+
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{tc('characterBuilder.pendingChoices.totemAnimalChoice')}</p>
+        <div className="space-y-2">
+          {TOTEM_ANIMALS.map((animal: TotemAnimalId) => {
+            const isSelected = currentAnimal === animal;
+            const radioId = `choice-totem-${choice.choiceKey}-${animal}`;
+            return (
+              <div
+                key={animal}
+                className={`flex items-start gap-3 rounded-md border p-3 transition-colors hover:bg-muted/50 ${
+                  isSelected ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+              >
+                <input
+                  type="radio"
+                  id={radioId}
+                  name={`choice-totem-${choice.choiceKey}`}
+                  value={animal}
+                  checked={isSelected}
+                  onChange={() => onDecide(choice.choiceKey, { type: 'totem-animal-choice', animal })}
+                  className="mt-0.5 size-4 text-primary"
+                />
+                <Label htmlFor={radioId} className="flex-1 cursor-pointer">
+                  <div className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
+                    {t(`totemAnimals.${animal}.name`)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{t(`totemAnimals.${animal}.description`)}</p>
                 </Label>
               </div>
             );

@@ -155,6 +155,11 @@ export type PendingChoice =
       readonly source: SourceTag;
       readonly category: BundleCategory;
       readonly bundleIds: readonly string[];
+    }
+  | {
+      readonly type: 'totem-animal-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
     };
 
 export interface ResolvedCharacter {
