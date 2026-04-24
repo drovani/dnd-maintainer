@@ -132,7 +132,7 @@ describe('Rogue class grant structures', () => {
     }
   });
 
-  it('level 1 has two expertise-choice grants', () => {
+  it('level 1 has one expertise-choice grant with count 2', () => {
     const expertiseGrants = source?.levels[0].grants.filter((g) => g.type === 'expertise-choice');
     expect(expertiseGrants).toHaveLength(1);
     if (expertiseGrants?.[0]?.type === 'expertise-choice') {
