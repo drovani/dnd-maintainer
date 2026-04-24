@@ -18,7 +18,7 @@ import type { AbilityScores } from '@/types/database';
  * - Determines which build row (sequence) stores the decision
  * - e.g. "skill-choice:class:fighter:0", "language-choice:race:human:0"
  */
-const CHOICE_ORIGINS = ['race', 'background', 'class'] as const;
+const CHOICE_ORIGINS = ['race', 'background', 'class', 'subclass'] as const;
 export type ChoiceOrigin = (typeof CHOICE_ORIGINS)[number];
 
 const CHOICE_CATEGORIES = [

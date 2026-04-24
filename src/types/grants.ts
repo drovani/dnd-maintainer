@@ -2,6 +2,7 @@ import type {
   AbilityKey,
   ClassId,
   FightingStyleId,
+  LandTerrainId,
   SkillId,
   ArmorProficiencyId,
   WeaponProficiencyId,
@@ -216,6 +217,7 @@ export interface SpellChoiceGrant {
 export interface LandTerrainChoiceGrant {
   readonly type: 'land-terrain-choice';
   readonly key: ChoiceKey;
+  readonly from?: readonly LandTerrainId[];
 }
 
 export type Grant =

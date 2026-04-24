@@ -340,6 +340,62 @@
     "dwarf-stonecunning": {
       "name": "Stonecunning",
       "description": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus."
+    },
+    "druid-druidic": {
+      "name": "Druidic",
+      "description": "You know Druidic, the secret language of druids. You can speak it and use it to leave hidden messages. Others notice the markings but cannot decipher them without knowing the language."
+    },
+    "druid-spellcasting": {
+      "name": "Spellcasting",
+      "description": "Drawing on the divine essence of nature, you can cast druid spells. Wisdom is your spellcasting ability. You prepare a number of spells equal to your Wisdom modifier plus your druid level (minimum 1)."
+    },
+    "druid-wild-shape": {
+      "name": "Wild Shape",
+      "description": "You can use your action to magically assume the shape of a beast you have seen before. You can use this feature twice, regaining uses on a short or long rest."
+    },
+    "druid-wild-shape-improvement-swim": {
+      "name": "Wild Shape Improvement",
+      "description": "You can now transform into beasts with a swim speed, and you can remain in beast form for up to 4 hours."
+    },
+    "druid-wild-shape-improvement-fly": {
+      "name": "Wild Shape Improvement",
+      "description": "You can now transform into beasts with a fly speed, and you can remain in beast form for up to 8 hours."
+    },
+    "landcircle-bonus-cantrip": {
+      "name": "Bonus Cantrip",
+      "description": "You learn one additional druid cantrip of your choice."
+    },
+    "landcircle-natural-recovery": {
+      "name": "Natural Recovery",
+      "description": "Once per day after a short rest, you can recover expended spell slots totaling a combined level up to half your druid level (rounded up, maximum 5th level)."
+    },
+    "landcircle-circle-spells": {
+      "name": "Circle Spells",
+      "description": "Your mystical connection to the land infuses you with certain spells. At class levels 3, 5, 7, and 9, you gain access to two bonus spells determined by your chosen terrain. These spells are always prepared and do not count against your prepared spell total."
+    },
+    "landcircle-lands-stride": {
+      "name": "Land's Stride",
+      "description": "Moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed or taking damage. You have advantage on saving throws against plants that are magically created or manipulated."
+    },
+    "landcircle-natures-ward": {
+      "name": "Nature's Ward",
+      "description": "You cannot be charmed or frightened by elementals or fey, and you are immune to poison and disease."
+    },
+    "mooncircle-combat-wild-shape": {
+      "name": "Combat Wild Shape",
+      "description": "You can use Wild Shape as a bonus action. While transformed, you can use a bonus action to expend one spell slot to regain 1d8 hit points per slot level."
+    },
+    "mooncircle-circle-forms": {
+      "name": "Circle Forms",
+      "description": "Your Wild Shape improves. Your maximum CR for beast forms equals your druid level divided by 3 (rounded down, minimum 1). You can also transform into beasts with a swim speed starting at level 2."
+    },
+    "mooncircle-primal-strike": {
+      "name": "Primal Strike",
+      "description": "Your attacks in beast form count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage."
+    },
+    "mooncircle-elemental-wild-shape": {
+      "name": "Elemental Wild Shape",
+      "description": "You can expend two uses of Wild Shape to transform into an air elemental, earth elemental, fire elemental, or water elemental."
     }
   },
   "subclasses": {
