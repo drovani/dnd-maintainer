@@ -6,6 +6,7 @@ import { DND_SKILLS } from '@/lib/dnd-helpers';
 import { collectBundles } from '@/lib/sources';
 import type { CharacterBuild } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
+import type { ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SubclassId } from '@/types/sources';
 
 const baseInput: ResolverInput = {
@@ -568,5 +569,284 @@ describe('Human Fighter L5 integration', () => {
     const pendingTypes = result.pendingChoices.map((c) => c.type);
     expect(pendingTypes).toContain('asi');
     expect(pendingTypes).toContain('subclass');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Barbarian integration tests
+// ---------------------------------------------------------------------------
+
+describe('Human Barbarian L1 integration', () => {
+  // STR 15, DEX 14, CON 16 → after human +1 each: STR 16, DEX 15, CON 17
+  // DEX modifier = 2, CON modifier = 3
+  // Unarmored AC = 10 + 2 + 3 = 15
+  // HP max = 12 (hit die) + 3 (CON mod) = 15
+  const barbarianL1Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 14, con: 16, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      // Leave both bundle-choice grants unresolved to test pending choices
+    },
+    levels: [{ classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null }],
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(barbarianL1Build);
+
+  const input: ResolverInput = {
+    baseAbilities: barbarianL1Build.baseAbilities,
+    level: 1,
+    bundles,
+    choices: barbarianL1Build.choices,
+    levels: barbarianL1Build.levels,
+  };
+
+  it('unarmored AC = 10 + DEX modifier (2) + CON modifier (3) = 15', () => {
+    const result = resolveCharacter(input);
+    expect(result.armorClass.effective).toBe(15);
+  });
+
+  it('features contain barbarian-rage with usesCount: 2', () => {
+    const result = resolveCharacter(input);
+    const rageFeature = result.features.find((f) => f.feature.id === 'barbarian-rage');
+    expect(rageFeature).toBeDefined();
+    expect(rageFeature!.feature.usesCount).toBe(2);
+  });
+
+  it('features contain barbarian-unarmored-defense', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('barbarian-unarmored-defense');
+  });
+
+  it('HP max = 12 (barbarian hit die) + 3 (CON mod) = 15', () => {
+    const result = resolveCharacter(input);
+    expect(result.hitDie[0].die).toBe(12);
+    expect(result.hitPoints.max).toBe(15);
+  });
+
+  it('two bundle-choice grants appear in pendingChoices when not resolved', () => {
+    const result = resolveCharacter(input);
+    const bundlePending = result.pendingChoices.filter((c) => c.type === 'bundle-choice');
+    expect(bundlePending).toHaveLength(2);
+  });
+});
+
+describe('Human Barbarian L3 + Totem Warrior + Bear integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+  const totemL3Key = createChoiceKey('totem-animal-choice', 'class', 'barbarian', 0);
+
+  const barbarianL3Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 14, con: 16, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'totemwarrior' as SubclassId },
+      [totemL3Key]: { type: 'totem-animal-choice' as const, animal: 'bear' as const },
+      'bundle-choice:class:barbarian:0': {
+        type: 'bundle-choice' as const,
+        bundleId: 'barbarian-greataxe',
+        slotPicks: {},
+      },
+      'bundle-choice:class:barbarian:1': {
+        type: 'bundle-choice' as const,
+        bundleId: 'two-handaxes',
+        slotPicks: {},
+      },
+    },
+    levels: [
+      { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 8 },
+      { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+    ],
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(barbarianL3Build);
+
+  const input: ResolverInput = {
+    baseAbilities: barbarianL3Build.baseAbilities,
+    level: 3,
+    bundles,
+    choices: barbarianL3Build.choices,
+    levels: barbarianL3Build.levels,
+  };
+
+  it('features contain totemwarrior-totem-spirit-bear', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('totemwarrior-totem-spirit-bear');
+  });
+
+  it('pendingChoices does NOT contain an entry for the L3 totem choiceKey', () => {
+    const result = resolveCharacter(input);
+    const totemPending = result.pendingChoices.filter(
+      (c) => c.type === 'totem-animal-choice' && c.choiceKey === totemL3Key
+    );
+    expect(totemPending).toHaveLength(0);
+  });
+
+  it('barbarian-rage has usesCount: 3 (dedupe keeps L3 re-emission over L1)', () => {
+    const result = resolveCharacter(input);
+    const rageFeature = result.features.find((f) => f.feature.id === 'barbarian-rage');
+    expect(rageFeature).toBeDefined();
+    expect(rageFeature!.feature.usesCount).toBe(3);
+  });
+
+  it('no pending choices remain when all choices resolved', () => {
+    const result = resolveCharacter(input);
+    expect(result.pendingChoices).toHaveLength(0);
+  });
+});
+
+describe('Human Barbarian L6 + Totem Warrior (no totem decisions) integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+  const totemL3Key = createChoiceKey('totem-animal-choice', 'class', 'barbarian', 0);
+  const totemL6Key = createChoiceKey('totem-animal-choice', 'class', 'barbarian', 1);
+
+  const barbarianL6Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 14, con: 16, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'totemwarrior' as SubclassId },
+      'bundle-choice:class:barbarian:0': {
+        type: 'bundle-choice' as const,
+        bundleId: 'barbarian-greataxe',
+        slotPicks: {},
+      },
+      'bundle-choice:class:barbarian:1': {
+        type: 'bundle-choice' as const,
+        bundleId: 'two-handaxes',
+        slotPicks: {},
+      },
+      // Intentionally omit both totem-animal-choice decisions
+    },
+    levels: [
+      { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 8 },
+      { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+      { classId: 'barbarian' as ClassId, classLevel: 4, hpRoll: 6 },
+      { classId: 'barbarian' as ClassId, classLevel: 5, hpRoll: 9 },
+      { classId: 'barbarian' as ClassId, classLevel: 6, hpRoll: 8 },
+    ],
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(barbarianL6Build);
+
+  const input: ResolverInput = {
+    baseAbilities: barbarianL6Build.baseAbilities,
+    level: 6,
+    bundles,
+    choices: barbarianL6Build.choices,
+    levels: barbarianL6Build.levels,
+  };
+
+  it('pendingChoices contains TWO totem-animal-choice entries', () => {
+    const result = resolveCharacter(input);
+    const totemPending = result.pendingChoices.filter((c) => c.type === 'totem-animal-choice');
+    expect(totemPending).toHaveLength(2);
+  });
+
+  it('the two totem-animal-choice pending entries have distinct choiceKeys', () => {
+    const result = resolveCharacter(input);
+    const totemPending = result.pendingChoices.filter((c) => c.type === 'totem-animal-choice');
+    const keys = totemPending.map((c) => c.choiceKey);
+    expect(keys).toContain(totemL3Key);
+    expect(keys).toContain(totemL6Key);
+  });
+
+  it('the two totem-animal-choice pending entries have distinct featureIdPrefixes', () => {
+    const result = resolveCharacter(input);
+    const totemPending = result.pendingChoices.filter(
+      (c): c is Extract<(typeof result.pendingChoices)[number], { type: 'totem-animal-choice' }> =>
+        c.type === 'totem-animal-choice'
+    );
+    const prefixes = totemPending.map((c) => c.featureIdPrefix);
+    expect(prefixes).toContain('totemwarrior-totem-spirit');
+    expect(prefixes).toContain('totemwarrior-aspect-of-the-beast');
+  });
+});
+
+describe('Totem Warrior — invalid totem decision falls through to pending', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+  const totemL3Key = createChoiceKey('totem-animal-choice', 'class', 'barbarian', 0);
+
+  const invalidDecision = { type: 'totem-animal-choice', animal: 'cat' } as unknown as ChoiceDecision;
+
+  const barbarianL3Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 14, con: 16, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'totemwarrior' as SubclassId },
+      [totemL3Key]: invalidDecision,
+      'bundle-choice:class:barbarian:0': {
+        type: 'bundle-choice' as const,
+        bundleId: 'barbarian-greataxe',
+        slotPicks: {},
+      },
+      'bundle-choice:class:barbarian:1': {
+        type: 'bundle-choice' as const,
+        bundleId: 'two-handaxes',
+        slotPicks: {},
+      },
+    },
+    levels: [
+      { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 8 },
+      { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+    ],
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(barbarianL3Build);
+
+  const input: ResolverInput = {
+    baseAbilities: barbarianL3Build.baseAbilities,
+    level: 3,
+    bundles,
+    choices: barbarianL3Build.choices,
+    levels: barbarianL3Build.levels,
+  };
+
+  it('does NOT synthesize totemwarrior-totem-spirit-cat feature', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).not.toContain('totemwarrior-totem-spirit-cat');
+  });
+
+  it('emits a pending totem-animal-choice entry for the invalid decision key', () => {
+    const result = resolveCharacter(input);
+    const totemPending = result.pendingChoices.filter(
+      (c) => c.type === 'totem-animal-choice' && c.choiceKey === totemL3Key
+    );
+    expect(totemPending).toHaveLength(1);
   });
 });
