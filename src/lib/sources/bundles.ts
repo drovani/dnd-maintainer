@@ -67,6 +67,53 @@ export const BUNDLE_CATALOG: readonly BundleDef[] = [
     contents: [{ itemId: 'handaxe', quantity: 2 }],
     slots: [],
   },
+  // Druid bundles
+  {
+    id: 'druid-shield',
+    category: 'armor',
+    contents: [{ itemId: 'wooden-shield', quantity: 1 }],
+    slots: [],
+  },
+  {
+    id: 'druid-simple-weapon',
+    category: 'melee-weapon',
+    contents: [],
+    slots: [
+      {
+        slotKey: 'weapon',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'simple' },
+      },
+    ],
+  },
+  {
+    id: 'druid-scimitar',
+    category: 'melee-weapon',
+    contents: [{ itemId: 'scimitar', quantity: 1 }],
+    slots: [],
+  },
+  {
+    id: 'druid-simple-melee',
+    category: 'melee-weapon',
+    contents: [],
+    slots: [
+      {
+        slotKey: 'weapon',
+        quantity: 1,
+        filter: { kind: 'weapon', category: 'simple', range: 'melee' },
+      },
+    ],
+  },
+  {
+    id: 'druid-starter-kit',
+    category: 'loadout',
+    contents: [
+      { itemId: 'leather', quantity: 1 },
+      { itemId: 'druidic-focus-sprig', quantity: 1 },
+      { itemId: 'explorers-pack', quantity: 1 },
+    ],
+    slots: [],
+  },
 ];
 
 export function getBundleDef(id: string): BundleDef | undefined {

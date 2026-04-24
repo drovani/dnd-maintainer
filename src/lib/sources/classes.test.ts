@@ -103,3 +103,137 @@ describe('Fighter class levels 2–10 grant structures', () => {
     expect(source?.levels).toHaveLength(20);
   });
 });
+
+describe('Druid class grant structures', () => {
+  const source = getClassSource('druid' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('levels array has exactly 20 entries', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 8', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie).toBeDefined();
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(8);
+    }
+  });
+
+  it('level 1 has 3 armor proficiencies: light, medium-nonmetal, shields-nonmetal', () => {
+    const armorProfs = source?.levels[0].grants.filter((g) => g.type === 'proficiency' && g.category === 'armor');
+    expect(armorProfs).toHaveLength(3);
+    const ids = armorProfs?.map((g) => (g.type === 'proficiency' ? g.id : null));
+    expect(ids).toContain('light');
+    expect(ids).toContain('medium-nonmetal');
+    expect(ids).toContain('shields-nonmetal');
+  });
+
+  it('level 1 has 10 weapon proficiencies', () => {
+    const weaponProfs = source?.levels[0].grants.filter((g) => g.type === 'proficiency' && g.category === 'weapon');
+    expect(weaponProfs).toHaveLength(10);
+  });
+
+  it('level 1 has druid-druidic feature', () => {
+    const druidic = source?.levels[0].grants.find((g) => g.type === 'feature' && g.feature.id === 'druid-druidic');
+    expect(druidic).toBeDefined();
+  });
+
+  it('level 1 has druid-spellcasting feature', () => {
+    const spellcasting = source?.levels[0].grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'druid-spellcasting'
+    );
+    expect(spellcasting).toBeDefined();
+  });
+
+  it('level 1 has spellcasting grant with ability wis', () => {
+    const grant = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'spellcasting') {
+      expect(grant.ability).toBe('wis');
+    }
+  });
+
+  it('level 1 has spell-choice grant with count 2 at spell level 0', () => {
+    const grant = source?.levels[0].grants.find((g) => g.type === 'spell-choice');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'spell-choice') {
+      expect(grant.count).toBe(2);
+      expect(grant.maxLevel).toBe(0);
+      expect(grant.key).toBe(createChoiceKey('spell-choice', 'class', 'druid', 0));
+    }
+  });
+
+  it('level 2 has subclass grant for druid', () => {
+    const grant = source?.levels[1].grants.find((g) => g.type === 'subclass');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('druid');
+      expect(grant.key).toBe(createChoiceKey('subclass', 'class', 'druid', 0));
+    }
+  });
+
+  it('level 2 has druid-wild-shape feature with usesPerRest short and usesCount 2', () => {
+    const grant = source?.levels[1].grants.find((g) => g.type === 'feature' && g.feature.id === 'druid-wild-shape');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'feature') {
+      expect(grant.feature.usesPerRest).toBe('short');
+      expect(grant.feature.usesCount).toBe(2);
+    }
+  });
+
+  it('level 4 has asi grant with 2 points', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'asi') {
+      expect(grant.points).toBe(2);
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'druid', 0));
+    }
+  });
+
+  it('level 4 has spell-choice grant with count 1 at spell level 0', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'spell-choice');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'spell-choice') {
+      expect(grant.count).toBe(1);
+      expect(grant.maxLevel).toBe(0);
+      expect(grant.key).toBe(createChoiceKey('spell-choice', 'class', 'druid', 1));
+    }
+  });
+
+  it('level 4 has druid-wild-shape-improvement-swim feature', () => {
+    const grant = source?.levels[3].grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'druid-wild-shape-improvement-swim'
+    );
+    expect(grant).toBeDefined();
+  });
+
+  it('level 8 has asi grant with 2 points (index 1)', () => {
+    const grant = source?.levels[7].grants.find((g) => g.type === 'asi');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'asi') {
+      expect(grant.points).toBe(2);
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'druid', 1));
+    }
+  });
+
+  it('level 8 has druid-wild-shape-improvement-fly feature', () => {
+    const grant = source?.levels[7].grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'druid-wild-shape-improvement-fly'
+    );
+    expect(grant).toBeDefined();
+  });
+
+  it('level 10 has spell-choice grant with count 1 at spell level 0', () => {
+    const grant = source?.levels[9].grants.find((g) => g.type === 'spell-choice');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'spell-choice') {
+      expect(grant.count).toBe(1);
+      expect(grant.maxLevel).toBe(0);
+      expect(grant.key).toBe(createChoiceKey('spell-choice', 'class', 'druid', 2));
+    }
+  });
+});

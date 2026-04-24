@@ -213,6 +213,7 @@ export type Database = {
           personality_traits: string | null
           player_name: string | null
           portrait_url: string | null
+          prepared_spells: Json
           previous_slugs: string[]
           proficiency_bonus: number | null
           race: string | null
@@ -252,6 +253,7 @@ export type Database = {
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
+          prepared_spells?: Json
           previous_slugs?: string[]
           proficiency_bonus?: number | null
           race?: string | null
@@ -291,6 +293,7 @@ export type Database = {
           personality_traits?: string | null
           player_name?: string | null
           portrait_url?: string | null
+          prepared_spells?: Json
           previous_slugs?: string[]
           proficiency_bonus?: number | null
           race?: string | null

@@ -510,6 +510,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 8,
     costGp: 5,
+    metal: false,
   },
   {
     type: 'armor',
@@ -521,6 +522,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 10,
     costGp: 10,
+    metal: false,
   },
   {
     type: 'armor',
@@ -532,6 +534,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 13,
     costGp: 45,
+    metal: false,
   },
   // Medium armor
   {
@@ -544,6 +547,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 12,
     costGp: 10,
+    metal: false,
   },
   {
     type: 'armor',
@@ -555,6 +559,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 20,
     costGp: 50,
+    metal: true,
   },
   {
     type: 'armor',
@@ -566,6 +571,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 45,
     costGp: 50,
+    metal: true,
   },
   {
     type: 'armor',
@@ -577,6 +583,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 20,
     costGp: 400,
+    metal: true,
   },
   {
     type: 'armor',
@@ -588,6 +595,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 40,
     costGp: 750,
+    metal: true,
   },
   // Heavy armor
   {
@@ -600,6 +608,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 40,
     costGp: 30,
+    metal: true,
   },
   {
     type: 'armor',
@@ -611,6 +620,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 13,
     weight: 55,
     costGp: 75,
+    metal: true,
   },
   {
     type: 'armor',
@@ -622,6 +632,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 15,
     weight: 60,
     costGp: 200,
+    metal: true,
   },
   {
     type: 'armor',
@@ -633,6 +644,7 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 15,
     weight: 65,
     costGp: 1500,
+    metal: true,
   },
   // Shield
   {
@@ -645,6 +657,19 @@ export const ARMOR_CATALOG: readonly ({ readonly type: 'armor' } & ArmorDef)[] =
     strengthRequirement: 0,
     weight: 6,
     costGp: 10,
+    metal: true,
+  },
+  {
+    type: 'armor',
+    id: 'wooden-shield',
+    category: 'shield',
+    baseAc: 2,
+    maxDexBonus: null,
+    stealthDisadvantage: false,
+    strengthRequirement: 0,
+    weight: 6,
+    costGp: 7,
+    metal: false,
   },
 ];
 
@@ -673,6 +698,7 @@ export const GEAR_CATALOG: readonly ({ readonly type: 'gear' } & GearDef)[] = [
   { type: 'gear', id: 'pitons-10', weight: 2.5, costGp: 0.5 },
   { type: 'gear', id: 'hooded-lantern', weight: 2, costGp: 5 },
   { type: 'gear', id: 'oil-flasks-2', weight: 2, costGp: 0.2 },
+  { type: 'gear', id: 'druidic-focus-sprig', weight: 0, costGp: 1 },
 ];
 
 // ---------------------------------------------------------------------------

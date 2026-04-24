@@ -98,6 +98,7 @@ function buildSeedCharacter(campaignId: string): Character {
     portrait_url: null,
     is_active: true,
     status: 'draft',
+    prepared_spells: [],
     created_at: '',
     updated_at: '',
   };

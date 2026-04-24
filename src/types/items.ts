@@ -75,6 +75,7 @@ export interface ArmorDef {
   readonly strengthRequirement: number;
   readonly weight: number;
   readonly costGp: number;
+  readonly metal: boolean;
 }
 
 export interface GearDef {

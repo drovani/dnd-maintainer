@@ -4,6 +4,9 @@ import type { Character, CharacterSummary } from '@/types/database';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { CHARACTER_SUMMARY_COLS, CHARACTER_DETAIL_COLS } from '@/lib/query-columns';
 import { validateSlug } from '@/lib/slug-utils';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('characters');
 
 // --- Queries ---
 
@@ -93,6 +96,30 @@ export function useCharacterMutations() {
       queryClient.invalidateQueries({ queryKey: ['character'] });
       queryClient.setQueryData(['character', data.slug], data);
     },
+    onError: (error, variables) => {
+      logger.error('Character update failed', { error, variables });
+    },
+  });
+
+  const updatePreparedSpells = useMutation({
+    mutationFn: async ({ characterId, spellIds }: { characterId: string; spellIds: string[] }) => {
+      const { data, error } = await supabase
+        .from('characters')
+        .update({ prepared_spells: spellIds } as unknown as TablesUpdate<'characters'>)
+        .eq('id', characterId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as unknown as Character;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['characters', data.campaign_id] });
+      queryClient.invalidateQueries({ queryKey: ['character'] });
+      queryClient.setQueryData(['character', data.slug], data);
+    },
+    onError: (error, variables) => {
+      logger.error('Prepared spells update failed', { error, characterId: variables.characterId });
+    },
   });
 
   const remove = useMutation({
@@ -105,5 +132,5 @@ export function useCharacterMutations() {
     },
   });
 
-  return { create, update, remove };
+  return { create, update, remove, updatePreparedSpells };
 }

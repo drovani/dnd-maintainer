@@ -264,6 +264,29 @@
       "cantrips": "Cantrips",
       "noClassChoices": "This class has no level-1 choices to make."
     },
+    "spellChoice": {
+      "header": "Choose Cantrips",
+      "headerSpells": "Choose Spells",
+      "progress": "{{selected}} / {{count}} selected",
+      "school": "{{school}} spells",
+      "groupHeader": "{{school}}"
+    },
+    "landTerrain": {
+      "header": "Choose Your Land",
+      "description": "Select the terrain that bonds you to the land. You gain bonus prepared spells as you advance.",
+      "tierLabel": "Level {{level}}",
+      "circleSpellsTitle": "Circle Spells"
+    },
+    "spellcasting": {
+      "saveDC": "Spell Save DC",
+      "attackBonus": "Spell Attack",
+      "slots": "Spell Slots",
+      "cantrips": "Cantrips",
+      "alwaysPrepared": "Always Prepared",
+      "slotLevel": "{{level}}",
+      "alwaysPreparedCount": "{{count}} spell(s)"
+    },
+    "druidMetalArmorWarning": "Druids are traditionally forbidden from wearing metal armor. Your character may ignore this restriction, but doing so goes against druidic custom.",
     "equipment": {
       "equipped": "Equipped",
       "quantity": "Qty",
@@ -395,6 +418,26 @@
       "range": "Range",
       "rangeFormat": "{{normal}}/{{long}} ft",
       "acFormat": "AC {{ac}}"
+    },
+    "spellcasting": {
+      "panelTitle": "Spellcasting",
+      "saveDC": "Spell Save DC: {{dc}}",
+      "attackBonus": "Spell Attack: +{{bonus}}",
+      "slotsHeader": "Spell Slots",
+      "cantripsHeader": "Cantrips",
+      "alwaysPreparedHeader": "Always Prepared",
+      "preparedHeader": "Prepared Spells",
+      "ritualBadge": "R",
+      "addSpell": "Add spell",
+      "preparedCap": "{{count}} / {{max}}",
+      "schoolLabel": "School: {{school}}",
+      "slotLabel": "L{{level}}: {{count}}",
+      "abilityLabel": "{{ability}} spellcasting",
+      "attackBonusValue": "+{{bonus}}",
+      "noSearchMatch": "No spells match your search.",
+      "noSpellsAvailable": "No spells available to add.",
+      "removeSpellAria": "Remove {{spellName}}",
+      "updateFailed": "Failed to update prepared spells. Please try again."
     },
     "breakdown": {
       "base": "Base",

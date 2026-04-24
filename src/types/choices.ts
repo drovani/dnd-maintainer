@@ -1,6 +1,7 @@
 import type {
   AbilityKey,
   FightingStyleId,
+  LandTerrainId,
   SkillId,
   ToolProficiencyId,
   LanguageId,
@@ -17,7 +18,7 @@ import type { AbilityScores } from '@/types/database';
  * - Determines which build row (sequence) stores the decision
  * - e.g. "skill-choice:class:fighter:0", "language-choice:race:human:0"
  */
-const CHOICE_ORIGINS = ['race', 'background', 'class'] as const;
+const CHOICE_ORIGINS = ['race', 'background', 'class', 'subclass'] as const;
 export type ChoiceOrigin = (typeof CHOICE_ORIGINS)[number];
 
 const CHOICE_CATEGORIES = [
@@ -30,6 +31,8 @@ const CHOICE_CATEGORIES = [
   'subclass',
   'fighting-style-choice',
   'bundle-choice',
+  'spell-choice',
+  'land-terrain-choice',
 ] as const;
 export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number];
 
@@ -88,7 +91,9 @@ export type ChoiceDecision =
       readonly bundleId: string;
       /** Map of slotKey → chosen itemId. Empty object when the bundle has no slots. */
       readonly slotPicks: Readonly<Record<string, string>>;
-    };
+    }
+  | { readonly type: 'spell-choice'; readonly spellIds: readonly string[] }
+  | { readonly type: 'land-terrain-choice'; readonly terrainId: LandTerrainId };
 
 export interface BuildLevel {
   readonly classId: ClassId;

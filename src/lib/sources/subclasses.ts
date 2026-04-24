@@ -1,6 +1,7 @@
 import type { SubclassSource } from '@/types/sources';
 import { createChoiceKey } from '@/types/choices';
-import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers';
+import { FIGHTING_STYLE_IDS, DND_LAND_TERRAINS } from '@/lib/dnd-helpers';
+import type { SpellLevel } from '@/types/spells';
 
 export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
   {
@@ -56,6 +57,66 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       { classLevel: 10, grants: [{ type: 'feature', feature: { id: 'eldritchknight-eldritch-strike' } }] },
       { classLevel: 15, grants: [{ type: 'feature', feature: { id: 'eldritchknight-arcane-charge' } }] },
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'eldritchknight-improved-war-magic' } }] },
+    ],
+  },
+  {
+    id: 'landcircle',
+    classId: 'druid',
+    features: [
+      {
+        classLevel: 2,
+        grants: [
+          { type: 'feature', feature: { id: 'landcircle-bonus-cantrip' } },
+          { type: 'feature', feature: { id: 'landcircle-natural-recovery' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'subclass', 'landcircle', 0),
+            count: 1,
+            fromList: 'druid',
+            maxLevel: 0 as SpellLevel,
+          },
+        ],
+      },
+      {
+        classLevel: 3,
+        grants: [
+          {
+            type: 'land-terrain-choice',
+            key: createChoiceKey('land-terrain-choice', 'subclass', 'landcircle', 0),
+            from: DND_LAND_TERRAINS.map((t) => t.id),
+          },
+          { type: 'feature', feature: { id: 'landcircle-circle-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'landcircle-lands-stride' } }],
+      },
+      {
+        classLevel: 10,
+        grants: [{ type: 'feature', feature: { id: 'landcircle-natures-ward' } }],
+      },
+    ],
+  },
+  {
+    id: 'mooncircle',
+    classId: 'druid',
+    features: [
+      {
+        classLevel: 2,
+        grants: [
+          { type: 'feature', feature: { id: 'mooncircle-combat-wild-shape' } },
+          { type: 'feature', feature: { id: 'mooncircle-circle-forms' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'mooncircle-primal-strike' } }],
+      },
+      {
+        classLevel: 10,
+        grants: [{ type: 'feature', feature: { id: 'mooncircle-elemental-wild-shape' } }],
+      },
     ],
   },
 ];

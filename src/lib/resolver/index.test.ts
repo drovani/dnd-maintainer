@@ -570,3 +570,290 @@ describe('Human Fighter L5 integration', () => {
     expect(pendingTypes).toContain('subclass');
   });
 });
+
+describe('Druid L1 integration', () => {
+  const druidL1Build: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'hermit',
+    baseAbilities: { str: 8, dex: 12, con: 14, int: 10, wis: 16, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:druid:0': { type: 'skill-choice', skills: ['nature', 'perception'] },
+      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'language-choice:background:hermit:0': { type: 'language-choice', languages: ['sylvan'] },
+      'spell-choice:class:druid:0': { type: 'spell-choice', spellIds: ['druidcraft', 'shillelagh'] },
+      'bundle-choice:class:druid:0': { type: 'bundle-choice', bundleId: 'druid-shield', slotPicks: {} },
+      'bundle-choice:class:druid:1': { type: 'bundle-choice', bundleId: 'druid-scimitar', slotPicks: {} },
+      'bundle-choice:class:druid:2': { type: 'bundle-choice', bundleId: 'druid-starter-kit', slotPicks: {} },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(druidL1Build);
+  const input: ResolverInput = {
+    baseAbilities: druidL1Build.baseAbilities,
+    level: 1,
+    bundles,
+    choices: druidL1Build.choices,
+    levels: druidL1Build.levels,
+  };
+
+  it('has spellcasting with WIS ability', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting).not.toBeNull();
+    expect(result.spellcasting!.ability).toBe('wis');
+  });
+
+  it('spell save DC = 8 + prof(2) + WIS mod(3) = 13 (WIS 16 + 1 human = 17 → mod +3)', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.spellSaveDC).toBe(13); // 8 + 2 + 3
+  });
+
+  it('spell attack bonus = prof(2) + WIS mod(3) = 5', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.spellAttackBonus).toBe(5);
+  });
+
+  it('slots at L1 = [2]', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.slots).toEqual([2]);
+  });
+
+  it('has 2 cantrips from chosen spell-choice decision', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.cantrips).toHaveLength(2);
+    expect(result.spellcasting!.cantrips).toContain('druidcraft');
+    expect(result.spellcasting!.cantrips).toContain('shillelagh');
+  });
+
+  it('has no alwaysPreparedSpells at L1', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.alwaysPreparedSpells).toHaveLength(0);
+  });
+
+  it('has pending spell-choice when choices are missing (no subclass at L1)', () => {
+    const result = resolveCharacter({ ...input, choices: {} });
+    const pendingTypes = result.pendingChoices.map((c) => c.type);
+    // Druid gets subclass grant at L2, not L1 — no subclass pending here
+    expect(pendingTypes).toContain('spell-choice');
+    expect(pendingTypes).not.toContain('subclass');
+  });
+});
+
+describe('Druid L10 Circle of the Land (Forest) integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'druid', 0);
+  const terrainKey = createChoiceKey('land-terrain-choice', 'subclass', 'landcircle', 0);
+  const landcircleCantrip = createChoiceKey('spell-choice', 'subclass', 'landcircle', 0);
+
+  const druidL10LandBuild: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'hermit',
+    baseAbilities: { str: 8, dex: 12, con: 14, int: 10, wis: 18, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'druid' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'druid' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'druid' as ClassId, classLevel: 3, hpRoll: 4 },
+      { classId: 'druid' as ClassId, classLevel: 4, hpRoll: 6 },
+      { classId: 'druid' as ClassId, classLevel: 5, hpRoll: 5 },
+      { classId: 'druid' as ClassId, classLevel: 6, hpRoll: 4 },
+      { classId: 'druid' as ClassId, classLevel: 7, hpRoll: 7 },
+      { classId: 'druid' as ClassId, classLevel: 8, hpRoll: 5 },
+      { classId: 'druid' as ClassId, classLevel: 9, hpRoll: 6 },
+      { classId: 'druid' as ClassId, classLevel: 10, hpRoll: 4 },
+    ],
+    choices: {
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'landcircle' as SubclassId },
+      [terrainKey]: { type: 'land-terrain-choice' as const, terrainId: 'forest' as const },
+      [landcircleCantrip]: { type: 'spell-choice' as const, spellIds: ['mending'] as const },
+      'spell-choice:class:druid:0': { type: 'spell-choice' as const, spellIds: ['druidcraft', 'shillelagh'] as const },
+      'spell-choice:class:druid:1': { type: 'spell-choice' as const, spellIds: ['guidance'] as const },
+      'spell-choice:class:druid:2': { type: 'spell-choice' as const, spellIds: ['thorn-whip'] as const },
+      'asi:class:druid:0': { type: 'asi' as const, allocation: { wis: 2 } },
+      'asi:class:druid:1': { type: 'asi' as const, allocation: { con: 2 } },
+      'skill-choice:class:druid:0': {
+        type: 'skill-choice' as const,
+        skills: ['nature', 'perception'] as const,
+      },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:background:hermit:0': { type: 'language-choice' as const, languages: ['sylvan'] as const },
+      'bundle-choice:class:druid:0': {
+        type: 'bundle-choice' as const,
+        bundleId: 'druid-shield',
+        slotPicks: {},
+      },
+      'bundle-choice:class:druid:1': {
+        type: 'bundle-choice' as const,
+        bundleId: 'druid-scimitar',
+        slotPicks: {},
+      },
+      'bundle-choice:class:druid:2': {
+        type: 'bundle-choice' as const,
+        bundleId: 'druid-starter-kit',
+        slotPicks: {},
+      },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(druidL10LandBuild);
+  const input: ResolverInput = {
+    baseAbilities: druidL10LandBuild.baseAbilities,
+    level: 10,
+    bundles,
+    choices: druidL10LandBuild.choices,
+    levels: druidL10LandBuild.levels,
+  };
+
+  it('has spellcasting with WIS ability', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting).not.toBeNull();
+    expect(result.spellcasting!.ability).toBe('wis');
+  });
+
+  it('slots at L10 = [4,3,3,3,2]', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.slots).toEqual([4, 3, 3, 3, 2]);
+  });
+
+  it('has 4 cantrips (class L1:2 + class L4:1 + class L10:1)', () => {
+    const result = resolveCharacter(input);
+    // Note: landcircle grants one extra cantrip via spell-choice:subclass:landcircle:0
+    // but its maxLevel is 0 so it counts too, giving 5 total
+    expect(result.spellcasting!.cantrips).toHaveLength(5);
+    expect(result.spellcasting!.cantrips).toContain('druidcraft');
+    expect(result.spellcasting!.cantrips).toContain('shillelagh');
+    expect(result.spellcasting!.cantrips).toContain('guidance');
+    expect(result.spellcasting!.cantrips).toContain('thorn-whip');
+    expect(result.spellcasting!.cantrips).toContain('mending');
+  });
+
+  it('alwaysPreparedSpells includes Forest terrain spells (all 4 tiers through L10)', () => {
+    const result = resolveCharacter(input);
+    // Forest tiers: L3 (barkskin, spider-climb), L5 (call-lightning, plant-growth),
+    //               L7 (divination, freedom-of-movement), L9 (commune-with-nature, tree-stride)
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('barkskin');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('spider-climb');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('call-lightning');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('plant-growth');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('divination');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('freedom-of-movement');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('commune-with-nature');
+    expect(result.spellcasting!.alwaysPreparedSpells).toContain('tree-stride');
+    expect(result.spellcasting!.alwaysPreparedSpells).toHaveLength(8);
+  });
+
+  it('no pending choices when all are resolved', () => {
+    const result = resolveCharacter(input);
+    expect(result.pendingChoices).toHaveLength(0);
+  });
+
+  it('has land-terrain-choice as pending when not resolved', () => {
+    const choicesWithoutTerrain = { ...druidL10LandBuild.choices };
+    // Remove the terrain decision so it becomes pending
+    const { [terrainKey]: _removed, ...rest } = choicesWithoutTerrain;
+    const result = resolveCharacter({ ...input, choices: rest });
+    const pendingTypes = result.pendingChoices.map((c) => c.type);
+    expect(pendingTypes).toContain('land-terrain-choice');
+  });
+});
+
+describe('Druid L10 Circle of the Moon integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'druid', 0);
+
+  const druidL10MoonBuild: CharacterBuild = {
+    raceId: 'human',
+    backgroundId: 'hermit',
+    baseAbilities: { str: 8, dex: 12, con: 14, int: 10, wis: 18, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'druid' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'druid' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'druid' as ClassId, classLevel: 3, hpRoll: 4 },
+      { classId: 'druid' as ClassId, classLevel: 4, hpRoll: 6 },
+      { classId: 'druid' as ClassId, classLevel: 5, hpRoll: 5 },
+      { classId: 'druid' as ClassId, classLevel: 6, hpRoll: 4 },
+      { classId: 'druid' as ClassId, classLevel: 7, hpRoll: 7 },
+      { classId: 'druid' as ClassId, classLevel: 8, hpRoll: 5 },
+      { classId: 'druid' as ClassId, classLevel: 9, hpRoll: 6 },
+      { classId: 'druid' as ClassId, classLevel: 10, hpRoll: 4 },
+    ],
+    choices: {
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'mooncircle' as SubclassId },
+      'spell-choice:class:druid:0': { type: 'spell-choice' as const, spellIds: ['druidcraft', 'shillelagh'] as const },
+      'spell-choice:class:druid:1': { type: 'spell-choice' as const, spellIds: ['guidance'] as const },
+      'spell-choice:class:druid:2': { type: 'spell-choice' as const, spellIds: ['thorn-whip'] as const },
+      'asi:class:druid:0': { type: 'asi' as const, allocation: { wis: 2 } },
+      'asi:class:druid:1': { type: 'asi' as const, allocation: { con: 2 } },
+      'skill-choice:class:druid:0': {
+        type: 'skill-choice' as const,
+        skills: ['nature', 'perception'] as const,
+      },
+      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:background:hermit:0': { type: 'language-choice' as const, languages: ['sylvan'] as const },
+      'bundle-choice:class:druid:0': {
+        type: 'bundle-choice' as const,
+        bundleId: 'druid-shield',
+        slotPicks: {},
+      },
+      'bundle-choice:class:druid:1': {
+        type: 'bundle-choice' as const,
+        bundleId: 'druid-scimitar',
+        slotPicks: {},
+      },
+      'bundle-choice:class:druid:2': {
+        type: 'bundle-choice' as const,
+        bundleId: 'druid-starter-kit',
+        slotPicks: {},
+      },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(druidL10MoonBuild);
+  const input: ResolverInput = {
+    baseAbilities: druidL10MoonBuild.baseAbilities,
+    level: 10,
+    bundles,
+    choices: druidL10MoonBuild.choices,
+    levels: druidL10MoonBuild.levels,
+  };
+
+  it('has spellcasting with WIS ability', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting).not.toBeNull();
+    expect(result.spellcasting!.ability).toBe('wis');
+  });
+
+  it('slots at L10 = [4,3,3,3,2]', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.slots).toEqual([4, 3, 3, 3, 2]);
+  });
+
+  it('has 4 cantrips from class grants (no bonus cantrip from mooncircle)', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.cantrips).toHaveLength(4);
+    expect(result.spellcasting!.cantrips).toContain('druidcraft');
+    expect(result.spellcasting!.cantrips).toContain('shillelagh');
+    expect(result.spellcasting!.cantrips).toContain('guidance');
+    expect(result.spellcasting!.cantrips).toContain('thorn-whip');
+  });
+
+  it('alwaysPreparedSpells is empty (mooncircle has no spell grants)', () => {
+    const result = resolveCharacter(input);
+    expect(result.spellcasting!.alwaysPreparedSpells).toHaveLength(0);
+  });
+
+  it('has mooncircle features', () => {
+    const result = resolveCharacter(input);
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('mooncircle-combat-wild-shape');
+    expect(featureIds).toContain('mooncircle-circle-forms');
+    expect(featureIds).toContain('mooncircle-primal-strike');
+    expect(featureIds).toContain('mooncircle-elemental-wild-shape');
+  });
+});

@@ -52,6 +52,7 @@ const baseCharacter: Character = {
   portrait_url: null,
   is_active: true,
   status: 'ready',
+  prepared_spells: [],
 };
 
 setupMockReset();
