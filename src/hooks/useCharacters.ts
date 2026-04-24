@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { UseMutationResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Character, CharacterSummary } from '@/types/database';
 import type { TablesInsert, TablesUpdate } from '@/types/supabase';
 import { CHARACTER_SUMMARY_COLS, CHARACTER_DETAIL_COLS } from '@/lib/query-columns';
 import { validateSlug } from '@/lib/slug-utils';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('characters');
 
 // --- Queries ---
 
@@ -94,30 +96,13 @@ export function useCharacterMutations() {
       queryClient.invalidateQueries({ queryKey: ['character'] });
       queryClient.setQueryData(['character', data.slug], data);
     },
-  });
-
-  const remove = useMutation({
-    mutationFn: async ({ id }: { id: string; campaignId: string }) => {
-      const { error } = await supabase.from('characters').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: (_, { campaignId }) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', campaignId] });
+    onError: (error, variables) => {
+      logger.error('Character update failed', { error, variables });
     },
   });
 
-  return { create, update, remove };
-}
-
-export function useUpdatePreparedSpells(): UseMutationResult<
-  Character,
-  Error,
-  { characterId: string; spellIds: string[] }
-> {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ characterId, spellIds }) => {
+  const updatePreparedSpells = useMutation({
+    mutationFn: async ({ characterId, spellIds }: { characterId: string; spellIds: string[] }) => {
       const { data, error } = await supabase
         .from('characters')
         .update({ prepared_spells: spellIds } as unknown as TablesUpdate<'characters'>)
@@ -132,5 +117,20 @@ export function useUpdatePreparedSpells(): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: ['character'] });
       queryClient.setQueryData(['character', data.slug], data);
     },
+    onError: (error, variables) => {
+      logger.error('Prepared spells update failed', { error, characterId: variables.characterId });
+    },
   });
+
+  const remove = useMutation({
+    mutationFn: async ({ id }: { id: string; campaignId: string }) => {
+      const { error } = await supabase.from('characters').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { campaignId }) => {
+      queryClient.invalidateQueries({ queryKey: ['characters', campaignId] });
+    },
+  });
+
+  return { create, update, remove, updatePreparedSpells };
 }

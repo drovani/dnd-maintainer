@@ -12,9 +12,6 @@ const logger = getLogger('spells');
 // ---------------------------------------------------------------------------
 
 export const SPELL_CATALOG: readonly SpellDef[] = [
-  // ---------------------------
-  // Cantrips (level 0) — Druid
-  // ---------------------------
   {
     id: 'druidcraft',
     level: 0,
@@ -111,9 +108,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Instantaneous',
     classes: ['druid'],
   },
-  // ---------------------------
-  // Level 1 — Druid
-  // ---------------------------
   {
     id: 'animal-friendship',
     level: 1,
@@ -318,9 +312,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Instantaneous',
     classes: ['bard', 'cleric', 'druid', 'sorcerer', 'wizard'],
   },
-  // ---------------------------
-  // Level 2 — Druid
-  // ---------------------------
   {
     id: 'animal-messenger',
     level: 2,
@@ -537,9 +528,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 10 minutes',
     classes: ['druid', 'ranger'],
   },
-  // ---------------------------
-  // Level 3 — Druid
-  // ---------------------------
   {
     id: 'call-lightning',
     level: 3,
@@ -708,9 +696,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 1 minute',
     classes: ['druid', 'ranger'],
   },
-  // ---------------------------
-  // Level 4 — Druid
-  // ---------------------------
   {
     id: 'blight',
     level: 4,
@@ -903,9 +888,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 1 minute',
     classes: ['druid', 'sorcerer', 'wizard'],
   },
-  // ---------------------------
-  // Level 5 — Druid
-  // ---------------------------
   {
     id: 'antilife-shell',
     level: 5,
@@ -1074,10 +1056,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 10 minutes',
     classes: ['druid', 'sorcerer', 'wizard'],
   },
-  // ---------------------------
-  // Cross-class spells used in Land terrain lists (classes does NOT include 'druid')
-  // ---------------------------
-  // Coast terrain spells
   {
     id: 'mirror-image',
     level: 2,
@@ -1102,10 +1080,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Instantaneous',
     classes: ['sorcerer', 'warlock', 'wizard'],
   },
-  // water-breathing already included (druid list)
-  // water-walk already included (druid list)
-  // freedom-of-movement already included (druid list)
-  // Desert terrain spells
   {
     id: 'blur',
     level: 2,
@@ -1142,10 +1116,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Instantaneous',
     classes: ['cleric', 'paladin'],
   },
-  // protection-from-energy already in druid list
-  // hallucinatory-terrain already in druid list
-  // blight already in druid list
-  // Forest terrain spells
   {
     id: 'spider-climb',
     level: 2,
@@ -1170,7 +1140,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Instantaneous',
     classes: ['cleric', 'druid'],
   },
-  // Grassland terrain spells
   {
     id: 'invisibility',
     level: 2,
@@ -1183,7 +1152,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 1 hour',
     classes: ['bard', 'sorcerer', 'warlock', 'wizard'],
   },
-  // daylight already in druid list
   {
     id: 'haste',
     level: 3,
@@ -1196,7 +1164,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 1 minute',
     classes: ['sorcerer', 'wizard'],
   },
-  // Mountain terrain spells
   {
     id: 'lightning-bolt',
     level: 3,
@@ -1209,10 +1176,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Instantaneous',
     classes: ['sorcerer', 'wizard'],
   },
-  // meld-into-stone already in druid list
-  // stone-shape already in druid list
-  // stoneskin already in druid list
-  // Swamp terrain spells
   {
     id: 'acid-arrow',
     level: 2,
@@ -1249,8 +1212,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 1 minute',
     classes: ['bard', 'sorcerer', 'wizard'],
   },
-  // insect-plague already in druid list
-  // Underdark terrain spells
   {
     id: 'web',
     level: 2,
@@ -1299,7 +1260,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: 'Up to 10 minutes',
     classes: ['sorcerer', 'wizard'],
   },
-  // Mountain level 9 terrain spell
   {
     id: 'passwall',
     level: 5,
@@ -1312,7 +1272,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: '1 hour',
     classes: ['wizard'],
   },
-  // Grassland level 9 terrain spell
   {
     id: 'dream',
     level: 5,
@@ -1325,7 +1284,6 @@ export const SPELL_CATALOG: readonly SpellDef[] = [
     duration: '8 hours',
     classes: ['bard', 'warlock', 'wizard'],
   },
-  // Arctic terrain spells
   {
     id: 'slow',
     level: 3,

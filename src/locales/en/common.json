@@ -433,7 +433,11 @@
       "schoolLabel": "School: {{school}}",
       "slotLabel": "L{{level}}: {{count}}",
       "abilityLabel": "{{ability}} spellcasting",
-      "attackBonusValue": "+{{bonus}}"
+      "attackBonusValue": "+{{bonus}}",
+      "noSearchMatch": "No spells match your search.",
+      "noSpellsAvailable": "No spells available to add.",
+      "removeSpellAria": "Remove {{spellName}}",
+      "updateFailed": "Failed to update prepared spells. Please try again."
     },
     "breakdown": {
       "base": "Base",

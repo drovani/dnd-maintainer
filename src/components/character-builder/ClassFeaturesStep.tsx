@@ -254,10 +254,6 @@ export function ClassFeaturesStep() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// SpellChoicePicker — multi-select capped at count, grouped by school
-// ---------------------------------------------------------------------------
-
 interface SpellChoicePickerProps {
   readonly choiceKey: ChoiceKey;
   readonly count: number;
@@ -337,10 +333,6 @@ function SpellChoicePicker({ choiceKey, count, fromList, maxLevel, selected, onT
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// LandTerrainChoicePicker — radio cards with per-tier spell previews
-// ---------------------------------------------------------------------------
 
 interface LandTerrainChoicePickerProps {
   readonly choiceKey: ChoiceKey;

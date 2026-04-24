@@ -4,6 +4,10 @@ import type { GrantBundle } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { ResolvedAbility, ResolvedSpellcasting } from '@/types/resolved';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
+import { getSpellDef } from '@/lib/sources/spells';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('resolver.spellcasting');
 
 export function resolveSpellcasting(
   bundles: readonly GrantBundle[],
@@ -24,7 +28,6 @@ export function resolveSpellcasting(
   const spellSaveDC = 8 + deps.proficiencyBonus + abilityMod;
   const spellAttackBonus = deps.proficiencyBonus + abilityMod;
 
-  // Cantrips: collect spell-choice decisions for grants with maxLevel === 0
   const spellChoiceGrants = collectGrantsByType(bundles, 'spell-choice');
   const cantripSet = new Set<string>();
   for (const { grant: scGrant } of spellChoiceGrants) {
@@ -32,25 +35,30 @@ export function resolveSpellcasting(
     const decision = deps.choices[scGrant.key];
     if (decision?.type === 'spell-choice') {
       for (const spellId of decision.spellIds) {
+        if (!getSpellDef(spellId)) {
+          logger.warn('Unknown spell id in cantrip choice, skipping', { key: scGrant.key, spellId });
+          continue;
+        }
         cantripSet.add(spellId);
       }
     }
   }
   const cantrips = Array.from(cantripSet);
 
-  // knownSpells: empty for prepared casters (Druid); placeholder for Wizard/Bard later
   const knownSpells: string[] = [];
 
-  // alwaysPreparedSpells: spell grants with alwaysPrepared === true (deduplicated)
   const alwaysPreparedSet = new Set<string>();
   for (const { grant: spellGrant } of collectGrantsByType(bundles, 'spell')) {
     if (spellGrant.alwaysPrepared) {
+      if (!getSpellDef(spellGrant.spellId)) {
+        logger.warn('Unknown spell id in always-prepared grant, skipping', { spellId: spellGrant.spellId });
+        continue;
+      }
       alwaysPreparedSet.add(spellGrant.spellId);
     }
   }
   const alwaysPreparedSpells = Array.from(alwaysPreparedSet);
 
-  // Spell slots from class table
   const slots = deps.classId !== null ? getSpellSlots(deps.classId, deps.level) : [];
 
   return {

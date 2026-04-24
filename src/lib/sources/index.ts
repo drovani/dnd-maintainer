@@ -1,5 +1,6 @@
 import { isBackgroundId, type RaceId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
+import { getSpellDef } from '@/lib/sources/spells';
 
 const logger = getLogger('sources');
 import type {
@@ -197,7 +198,12 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
       const decision = build.choices[grant.key];
       if (decision?.type !== 'land-terrain-choice') continue;
       const terrainGrant = getLandTerrainSpellGrant(decision.terrainId);
-      if (!terrainGrant) continue;
+      if (!terrainGrant) {
+        const msg = `No terrain spell data found for terrain "${decision.terrainId}" — circle spells will be empty`;
+        warnings.push(msg);
+        logger.warn(msg);
+        continue;
+      }
       for (const tier of terrainGrant.tiers) {
         if (druidClassLevel < tier.level) continue;
         const tag: SourceTag = {
@@ -206,9 +212,16 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           classId: 'druid' as ClassId,
           level: tier.level,
         };
+        const validSpellIds = tier.spellIds.filter((spellId) => {
+          if (getSpellDef(spellId)) return true;
+          const msg = `Unknown spell id "${spellId}" in terrain "${decision.terrainId}" level ${tier.level} — skipping`;
+          warnings.push(msg);
+          logger.warn(msg);
+          return false;
+        });
         bundles.push({
           source: tag,
-          grants: tier.spellIds.map((spellId) => ({ type: 'spell' as const, spellId, alwaysPrepared: true })),
+          grants: validSpellIds.map((spellId) => ({ type: 'spell' as const, spellId, alwaysPrepared: true })),
         });
       }
     }

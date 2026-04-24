@@ -15,7 +15,6 @@ export function EquipmentStep() {
 
   const allEquipment = resolved?.equipment ?? [];
 
-  // Warn when a druid has metal armor in their resolved equipment.
   const isDruid = build?.levels?.some((l) => l.classId === 'druid') ?? false;
   const hasMetalArmor =
     isDruid && allEquipment.some((e) => e.itemDef.type === 'armor' && (e.itemDef as ArmorDef).metal);

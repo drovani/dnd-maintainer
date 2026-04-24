@@ -106,7 +106,6 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       suggestedBackground: 'hermit',
     }),
     levels: [
-      // Level 1
       {
         grants: [
           { type: 'hit-die', die: 8 },
@@ -165,7 +164,6 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
         ],
       },
-      // Level 2
       {
         grants: [
           {
@@ -179,9 +177,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
         ],
       },
-      // Level 3
       EMPTY_LEVEL,
-      // Level 4
       {
         grants: [
           { type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 0), points: 2 },
@@ -195,22 +191,16 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'feature', feature: { id: 'druid-wild-shape-improvement-swim' } },
         ],
       },
-      // Level 5
       EMPTY_LEVEL,
-      // Level 6
       EMPTY_LEVEL,
-      // Level 7
       EMPTY_LEVEL,
-      // Level 8
       {
         grants: [
           { type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 1), points: 2 },
           { type: 'feature', feature: { id: 'druid-wild-shape-improvement-fly' } },
         ],
       },
-      // Level 9
       EMPTY_LEVEL,
-      // Level 10
       {
         grants: [
           {
@@ -222,7 +212,6 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
         ],
       },
-      // Levels 11-20
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,

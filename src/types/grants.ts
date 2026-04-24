@@ -217,7 +217,7 @@ export interface SpellChoiceGrant {
 export interface LandTerrainChoiceGrant {
   readonly type: 'land-terrain-choice';
   readonly key: ChoiceKey;
-  readonly from?: readonly LandTerrainId[];
+  readonly from: readonly LandTerrainId[] | null;
 }
 
 export type Grant =

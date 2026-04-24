@@ -88,3 +88,31 @@ describe('SPELL_CATALOG', () => {
     }
   });
 });
+
+describe('cross-class spells do not list druid', () => {
+  const crossClassIds = [
+    'mirror-image',
+    'misty-step',
+    'blur',
+    'silence',
+    'create-food-and-water',
+    'spider-climb',
+    'invisibility',
+    'haste',
+    'lightning-bolt',
+    'acid-arrow',
+    'darkness',
+    'stinking-cloud',
+    'web',
+    'gaseous-form',
+    'greater-invisibility',
+    'cloudkill',
+    'slow',
+    'cone-of-cold',
+  ];
+  it.each(crossClassIds)('%s has classes without "druid"', (id) => {
+    const spell = getSpellDef(id);
+    expect(spell).toBeDefined();
+    expect(spell!.classes).not.toContain('druid');
+  });
+});

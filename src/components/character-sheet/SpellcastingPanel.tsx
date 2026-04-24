@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -8,8 +9,11 @@ import type { ResolvedCharacter } from '@/types/resolved';
 import type { ResolvedSpellcasting } from '@/types/resolved';
 import { SPELL_CATALOG, getSpellDef } from '@/lib/sources/spells';
 import type { SpellId } from '@/lib/sources/spells';
-import { useUpdatePreparedSpells } from '@/hooks/useCharacters';
+import { useCharacterMutations } from '@/hooks/useCharacters';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('SpellcastingPanel');
 
 interface SpellcastingPanelProps {
   readonly character: Character;
@@ -30,13 +34,12 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
   const { rows } = useCharacterContext();
-  const updatePreparedSpells = useUpdatePreparedSpells();
+  const { updatePreparedSpells } = useCharacterMutations();
 
   const [showPicker, setShowPicker] = useState(false);
   const [search, setSearch] = useState('');
 
-  // Druid level: count active (non-deleted) rows with class_id === character.class
-  const classId = character.class ?? 'druid';
+  const classId = character.class!;
   const classLevel = useMemo(
     () =>
       rows.filter(
@@ -49,19 +52,15 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
     [rows, classId]
   );
 
-  // Wisdom modifier
   const wisMod = resolved.abilities.wis.modifier;
 
-  // Prepared spell cap: max(1, wisMod + classLevel)
   const preparedCap = Math.max(1, wisMod + classLevel);
 
-  // Current prepared spells (from DB field)
   const preparedSpells: readonly string[] = useMemo(() => character.prepared_spells ?? [], [character.prepared_spells]);
 
-  // Highest slot level
-  const highestSlotLevel = spellcasting.slots.length; // 1-indexed (slots[0] = level-1 slots)
+  // slots[i] holds slots for spell level i+1, so length equals the highest castable spell level
+  const highestSlotLevel = spellcasting.slots.length;
 
-  // Sets for exclusion in picker
   const alwaysPreparedSet = useMemo(
     () => new Set(spellcasting.alwaysPreparedSpells),
     [spellcasting.alwaysPreparedSpells]
@@ -91,21 +90,36 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
   const handleAddSpell = (spellId: string) => {
     if (preparedSpells.length >= preparedCap) return;
     const next = [...preparedSpells, spellId];
-    updatePreparedSpells.mutate({ characterId: character.id, spellIds: next });
+    updatePreparedSpells.mutate(
+      { characterId: character.id, spellIds: next },
+      {
+        onError: (error) => {
+          logger.error('Failed to add prepared spell', { characterId: character.id, spellId, error });
+          toast.error(tc('characterSheet.spellcasting.updateFailed'));
+        },
+      }
+    );
     setSearch('');
     setShowPicker(false);
   };
 
   const handleRemoveSpell = (spellId: string) => {
     const next = preparedSpells.filter((id) => id !== spellId);
-    updatePreparedSpells.mutate({ characterId: character.id, spellIds: next });
+    updatePreparedSpells.mutate(
+      { characterId: character.id, spellIds: next },
+      {
+        onError: (error) => {
+          logger.error('Failed to remove prepared spell', { characterId: character.id, spellId, error });
+          toast.error(tc('characterSheet.spellcasting.updateFailed'));
+        },
+      }
+    );
   };
 
   const abilityName = t(`abilities.${spellcasting.ability}`);
 
   return (
     <div className="bg-card border border-purple-200 dark:border-purple-900 rounded-lg p-6">
-      {/* Header */}
       <h2 className="text-lg font-bold text-foreground mb-1">{tc('characterSheet.spellcasting.panelTitle')}</h2>
       <div className="text-xs text-muted-foreground mb-3">
         {tc('characterSheet.spellcasting.abilityLabel', { ability: abilityName })}
@@ -135,7 +149,6 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
         </div>
       )}
 
-      {/* Cantrips */}
       {spellcasting.cantrips.length > 0 && (
         <div className="mb-4">
           <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
@@ -212,7 +225,7 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
                   size="icon-sm"
                   onClick={() => handleRemoveSpell(spellId)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label={`Remove ${spellName}`}
+                  aria-label={tc('characterSheet.spellcasting.removeSpellAria', { spellName })}
                 >
                   <X className="size-3" />
                 </Button>
@@ -221,7 +234,6 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
           })}
         </div>
 
-        {/* Add Spell Picker */}
         {preparedSpells.length < preparedCap && (
           <div>
             {!showPicker ? (
@@ -266,7 +278,9 @@ export function SpellcastingPanel({ character, resolved, spellcasting }: Spellca
                   })}
                   {availableSpells.length === 0 && (
                     <div className="text-xs text-muted-foreground px-2 py-1">
-                      {search ? 'No spells match your search.' : 'No spells available to add.'}
+                      {search
+                        ? tc('characterSheet.spellcasting.noSearchMatch')
+                        : tc('characterSheet.spellcasting.noSpellsAvailable')}
                     </div>
                   )}
                 </div>
