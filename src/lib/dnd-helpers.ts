@@ -287,6 +287,7 @@ export const DND_LANGUAGE_DATA = [
   { id: 'primordial', category: 'exotic', typicalSpeakers: ['elementals'], script: 'dwarvish' },
   { id: 'sylvan', category: 'exotic', typicalSpeakers: ['fey'], script: 'elvish' },
   { id: 'undercommon', category: 'exotic', typicalSpeakers: ['underworld-traders'], script: 'elvish' },
+  { id: 'druidic', category: 'exotic', typicalSpeakers: [] as readonly CreatureTypeId[], script: null },
 ] as const;
 
 export type LanguageId = (typeof DND_LANGUAGE_DATA)[number]['id'];
@@ -750,6 +751,19 @@ export const DND_ALIGNMENTS = [
 ] as const;
 
 export type AlignmentId = (typeof DND_ALIGNMENTS)[number]['id'];
+
+export const DND_LAND_TERRAINS = [
+  { id: 'arctic' },
+  { id: 'coast' },
+  { id: 'desert' },
+  { id: 'forest' },
+  { id: 'grassland' },
+  { id: 'mountain' },
+  { id: 'swamp' },
+  { id: 'underdark' },
+] as const;
+
+export type LandTerrainId = (typeof DND_LAND_TERRAINS)[number]['id'];
 
 export const ABILITY_ABBREVIATIONS: Readonly<Record<AbilityName, string>> = {
   str: 'STR',

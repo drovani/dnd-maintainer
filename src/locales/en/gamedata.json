@@ -153,7 +153,8 @@
     "infernal": "Infernal",
     "primordial": "Primordial",
     "sylvan": "Sylvan",
-    "undercommon": "Undercommon"
+    "undercommon": "Undercommon",
+    "druidic": "Druidic"
   },
   "languageCategories": {
     "standard": "Standard Languages",
@@ -353,6 +354,14 @@
     "eldritchknight": {
       "name": "Eldritch Knight",
       "description": "The Eldritch Knight combines martial prowess with careful study of magic. These fighters learn to cast spells from the wizard spell list, weaving magic into their weapon strikes and defenses."
+    },
+    "landcircle": {
+      "name": "Circle of the Land",
+      "description": "The Circle of the Land connects druids to the mystical power of a specific terrain, granting spells that reflect that land's nature and deepening their connection to the natural world."
+    },
+    "mooncircle": {
+      "name": "Circle of the Moon",
+      "description": "The Circle of the Moon channels the ferocity of the moon and the power of Wild Shape, allowing druids to transform into increasingly powerful beasts in combat."
     }
   },
   "fightingStyles": {
@@ -461,7 +470,8 @@
       "chain-mail": { "name": "Chain Mail" },
       "splint": { "name": "Splint Armor" },
       "plate": { "name": "Plate Armor" },
-      "shield": { "name": "Shield" }
+      "shield": { "name": "Shield" },
+      "wooden-shield": { "name": "Wooden Shield" }
     },
     "gear": {
       "arrows-20": { "name": "Arrows (20)" },
@@ -483,7 +493,8 @@
       "hammer": { "name": "Hammer" },
       "pitons-10": { "name": "Pitons (10)" },
       "hooded-lantern": { "name": "Hooded Lantern" },
-      "oil-flasks-2": { "name": "Oil (2 flasks)" }
+      "oil-flasks-2": { "name": "Oil (2 flasks)" },
+      "druidic-focus-sprig": { "name": "Sprig of Mistletoe" }
     },
     "packs": {
       "explorers-pack": { "name": "Explorer's Pack" },
@@ -496,7 +507,12 @@
     "martial-weapon-and-shield": { "name": "A martial weapon and a shield" },
     "two-martial-weapons": { "name": "Two martial weapons" },
     "light-crossbow-kit": { "name": "Light Crossbow + Bolts (20)" },
-    "two-handaxes": { "name": "Two Handaxes" }
+    "two-handaxes": { "name": "Two Handaxes" },
+    "druid-shield": { "name": "Wooden Shield" },
+    "druid-simple-weapon": { "name": "Any simple weapon" },
+    "druid-scimitar": { "name": "Scimitar" },
+    "druid-simple-melee": { "name": "Any simple melee weapon" },
+    "druid-starter-kit": { "name": "Leather armor, a druidic focus, and an explorer's pack" }
   },
   "bundleCategories": {
     "loadout": "Loadout",
@@ -518,5 +534,483 @@
     "large": "Large",
     "huge": "Huge",
     "gargantuan": "Gargantuan"
+  },
+  "schools": {
+    "abjuration": "Abjuration",
+    "conjuration": "Conjuration",
+    "divination": "Divination",
+    "enchantment": "Enchantment",
+    "evocation": "Evocation",
+    "illusion": "Illusion",
+    "necromancy": "Necromancy",
+    "transmutation": "Transmutation"
+  },
+  "terrains": {
+    "arctic": {
+      "name": "Arctic",
+      "description": "Frozen tundra and glacial terrain where survival demands mastery of cold and ice."
+    },
+    "coast": {
+      "name": "Coast",
+      "description": "Shoreline and littoral environments where land meets sea."
+    },
+    "desert": {
+      "name": "Desert",
+      "description": "Arid wastes of sand and rock where heat and thirst are constant threats."
+    },
+    "forest": {
+      "name": "Forest",
+      "description": "Dense woodland where light filters through canopy and ancient trees hold secrets."
+    },
+    "grassland": {
+      "name": "Grassland",
+      "description": "Open plains of tall grasses swept by wind, home to vast herds."
+    },
+    "mountain": {
+      "name": "Mountain",
+      "description": "High peaks of bare stone and thin air, demanding both strength and sure footing."
+    },
+    "swamp": {
+      "name": "Swamp",
+      "description": "Murky wetlands of twisted trees and stagnant water teeming with hidden life."
+    },
+    "underdark": {
+      "name": "Underdark",
+      "description": "The vast lightless caves and tunnels beneath the earth, home to strange and dangerous beings."
+    }
+  },
+  "spells": {
+    "druidcraft": {
+      "name": "Druidcraft",
+      "description": "A minor effect tied to nature's forces: predict weather, make a flower bloom, light or snuff a candle, or create a harmless sensory effect."
+    },
+    "guidance": {
+      "name": "Guidance",
+      "description": "Touch a willing creature to grant it a d4 bonus on one ability check of its choice before the spell ends."
+    },
+    "mending": {
+      "name": "Mending",
+      "description": "Repair a single break or tear in an object — a broken chain link, cracked goblet, or torn page — provided the break is no larger than 1 foot in any dimension."
+    },
+    "poison-spray": {
+      "name": "Poison Spray",
+      "description": "Extend your hand to project a puff of noxious gas; the target must succeed on a Constitution saving throw or take 1d12 poison damage."
+    },
+    "produce-flame": {
+      "name": "Produce Flame",
+      "description": "A flickering flame appears in your palm, shedding bright light in a 10-foot radius; you can hurl it as a ranged spell attack for fire damage."
+    },
+    "resistance": {
+      "name": "Resistance",
+      "description": "Touch a willing creature; before the spell ends, it may roll a d4 and add the result to one saving throw of its choice."
+    },
+    "shillelagh": {
+      "name": "Shillelagh",
+      "description": "Wood of a club or quarterstaff becomes imbued with nature's power — it uses your spellcasting ability for attack and damage rolls and its damage die becomes a d8."
+    },
+    "thorn-whip": {
+      "name": "Thorn Whip",
+      "description": "Create a long vine-like whip covered in thorns; on a hit it deals 1d6 piercing damage and pulls a Large or smaller creature up to 10 feet toward you."
+    },
+    "animal-friendship": {
+      "name": "Animal Friendship",
+      "description": "Convince a beast of your benign intent; if it fails a Wisdom save, it is charmed by you for 24 hours."
+    },
+    "charm-person": {
+      "name": "Charm Person",
+      "description": "Attempt to charm a humanoid; on a failed Wisdom save it regards you as a friendly acquaintance for up to 1 hour or until you harm it."
+    },
+    "create-or-destroy-water": {
+      "name": "Create or Destroy Water",
+      "description": "Either conjure up to 10 gallons of clean water in open containers nearby, or destroy the same volume of water in open containers or fog."
+    },
+    "cure-wounds": {
+      "name": "Cure Wounds",
+      "description": "A touched creature regains hit points equal to 1d8 plus your spellcasting ability modifier; no effect on undead or constructs."
+    },
+    "detect-magic": {
+      "name": "Detect Magic",
+      "description": "For up to 10 minutes you sense the presence and school of any magic within 30 feet of you."
+    },
+    "detect-poison-and-disease": {
+      "name": "Detect Poison and Disease",
+      "description": "Sense the presence and location of poisons, poisonous creatures, and diseases within 30 feet for up to 10 minutes."
+    },
+    "entangle": {
+      "name": "Entangle",
+      "description": "Grasping weeds and vines sprout from the ground in a 20-foot square, restraining creatures that fail a Strength save for up to 1 minute."
+    },
+    "faerie-fire": {
+      "name": "Faerie Fire",
+      "description": "Outline objects and creatures in a 20-foot cube with blue, green, or violet light; affected creatures can't benefit from invisibility and attacks against them have advantage."
+    },
+    "fog-cloud": {
+      "name": "Fog Cloud",
+      "description": "Create a 20-foot radius sphere of thick fog centered on a point you choose; the area is heavily obscured for up to 1 hour."
+    },
+    "goodberry": {
+      "name": "Goodberry",
+      "description": "Up to ten berries appear in your hand, each of which heals 1 hit point when consumed and provides enough nourishment for one day."
+    },
+    "healing-word": {
+      "name": "Healing Word",
+      "description": "A creature you can see within range regains hit points equal to 1d4 plus your spellcasting modifier; cast as a bonus action."
+    },
+    "ice-knife": {
+      "name": "Ice Knife",
+      "description": "Hurl a shard of ice at one creature; on a hit deal 1d10 piercing damage, then the ice explodes dealing 2d6 cold damage to creatures within 5 feet on a failed Dexterity save."
+    },
+    "jump": {
+      "name": "Jump",
+      "description": "Touch a creature; its jump distance is tripled until the spell ends."
+    },
+    "longstrider": {
+      "name": "Longstrider",
+      "description": "Touch a creature; its speed increases by 10 feet for 1 hour."
+    },
+    "purify-food-and-drink": {
+      "name": "Purify Food and Drink",
+      "description": "All non-magical food and drink within a 5-foot radius sphere is purified, removing poison and disease."
+    },
+    "speak-with-animals": {
+      "name": "Speak with Animals",
+      "description": "Gain the ability to verbally communicate with beasts for 10 minutes; they may not be intelligent enough to convey complex information."
+    },
+    "thunderwave": {
+      "name": "Thunderwave",
+      "description": "A wave of thunderous force sweeps a 15-foot cube; creatures that fail a Constitution save take 2d8 thunder damage and are pushed 10 feet, or half damage on a success."
+    },
+    "animal-messenger": {
+      "name": "Animal Messenger",
+      "description": "Compel a Tiny beast to carry a message to a destination; it travels for up to 24 hours to reach the target you describe."
+    },
+    "barkskin": {
+      "name": "Barkskin",
+      "description": "The target's skin becomes tough and bark-like; its AC can't be less than 16 while the spell is active."
+    },
+    "beast-sense": {
+      "name": "Beast Sense",
+      "description": "Touch a willing beast; you can use your action to see through its eyes and hear through its ears for up to 1 hour."
+    },
+    "darkvision": {
+      "name": "Darkvision",
+      "description": "A touched creature gains the ability to see in darkness — dim light within 60 feet becomes bright, and darkness becomes dim — for 8 hours."
+    },
+    "enhance-ability": {
+      "name": "Enhance Ability",
+      "description": "Bestow a magical enhancement on a creature: advantage on ability checks and in some cases additional benefits depending on the chosen ability."
+    },
+    "find-traps": {
+      "name": "Find Traps",
+      "description": "Sense the presence of any trap within range — mechanical or magical — though the spell doesn't reveal the trap's exact location."
+    },
+    "flame-blade": {
+      "name": "Flame Blade",
+      "description": "Evoke a fiery blade in your free hand that deals 3d6 fire damage on a hit, sheds bright light in a 10-foot radius, and is not a metal weapon."
+    },
+    "flaming-sphere": {
+      "name": "Flaming Sphere",
+      "description": "Conjure a 5-foot diameter sphere of fire that you can move up to 30 feet each turn; creatures adjacent to it take 2d6 fire damage on a failed Dexterity save."
+    },
+    "gust-of-wind": {
+      "name": "Gust of Wind",
+      "description": "A strong wind blasts from you in a 60-foot line, pushing creatures that fail a Strength save 15 feet away and impeding movement into the wind."
+    },
+    "heat-metal": {
+      "name": "Heat Metal",
+      "description": "Make a metal object glow red-hot; a creature in contact with it takes 2d8 fire damage and must drop it on a failed Constitution save."
+    },
+    "hold-person": {
+      "name": "Hold Person",
+      "description": "Target a humanoid you can see; on a failed Wisdom save it is paralyzed for up to 1 minute, with repeat saves each turn."
+    },
+    "lesser-restoration": {
+      "name": "Lesser Restoration",
+      "description": "Touch a creature to end either one disease or one of the following conditions: blinded, deafened, paralyzed, or poisoned."
+    },
+    "locate-animals-or-plants": {
+      "name": "Locate Animals or Plants",
+      "description": "Name a specific kind of beast or plant; you sense the direction of the nearest example of that kind within 5 miles, if any."
+    },
+    "locate-object": {
+      "name": "Locate Object",
+      "description": "Describe or name an object you are familiar with; you sense its direction as long as it is within 1000 feet and not blocked by running water."
+    },
+    "moonbeam": {
+      "name": "Moonbeam",
+      "description": "A silvery beam of pale light shines down in a 5-foot radius cylinder; creatures that enter or start their turn there take 2d10 radiant damage on a failed Constitution save."
+    },
+    "pass-without-trace": {
+      "name": "Pass Without Trace",
+      "description": "A veil of shadows and silence allows you and up to 10 willing companions to add +10 to Stealth checks and leave no tracks for up to 1 hour."
+    },
+    "protection-from-poison": {
+      "name": "Protection from Poison",
+      "description": "Touch a creature; neutralize any poison affecting it, and grant it advantage on saves against poison and resistance to poison damage for 1 hour."
+    },
+    "spike-growth": {
+      "name": "Spike Growth",
+      "description": "The ground in a 20-foot radius becomes covered with sharp spikes; creatures moving through take 2d4 piercing damage per 5 feet and the area becomes difficult terrain."
+    },
+    "call-lightning": {
+      "name": "Call Lightning",
+      "description": "Summon a storm cloud; on each of your turns you can call a bolt of lightning that deals 3d10 lightning damage in a 5-foot cylinder on a failed Dexterity save."
+    },
+    "conjure-animals": {
+      "name": "Conjure Animals",
+      "description": "Summon fey spirits that take the form of beasts — choose any combination of CR totaling 2 — which obey your verbal commands for up to 1 hour."
+    },
+    "daylight": {
+      "name": "Daylight",
+      "description": "A 60-foot radius sphere of bright daylight emanates from a touched point or object for 1 hour, overriding magical darkness of 3rd level or lower."
+    },
+    "dispel-magic": {
+      "name": "Dispel Magic",
+      "description": "Choose a creature, object, or magical effect within range; any spell of 3rd level or lower on the target ends automatically, and higher-level spells end on a successful spellcasting check."
+    },
+    "erupting-earth": {
+      "name": "Erupting Earth",
+      "description": "Choose a point on the ground; a 20-foot cube erupts with rock and dirt dealing 3d12 bludgeoning damage on a failed Dexterity save and becoming difficult terrain."
+    },
+    "feign-death": {
+      "name": "Feign Death",
+      "description": "Touch a willing creature to make it appear dead; it is blinded, incapacitated, resistant to all damage except psychic, and undetectable as alive for 1 hour."
+    },
+    "meld-into-stone": {
+      "name": "Meld into Stone",
+      "description": "Step inside a Large or bigger piece of rock, merging with it and remaining there undetected for up to 8 hours; you can't be harmed while merged."
+    },
+    "plant-growth": {
+      "name": "Plant Growth",
+      "description": "Cause vegetation in a 100-foot radius to become overgrown and difficult to traverse, or in 8 hours enrich soil within a half-mile radius to yield twice the normal harvest."
+    },
+    "protection-from-energy": {
+      "name": "Protection from Energy",
+      "description": "A touched creature gains resistance to one energy type — acid, cold, fire, lightning, or thunder — for up to 1 hour."
+    },
+    "sleet-storm": {
+      "name": "Sleet Storm",
+      "description": "Freezing rain fills a 20-foot tall, 40-foot radius cylinder; the area is difficult terrain, creatures that fail Dexterity saves fall prone, and concentration checks are required."
+    },
+    "speak-with-plants": {
+      "name": "Speak with Plants",
+      "description": "Imbue plants around you with awareness; they can relay information, answer simple questions, and at your request hinder movement through the area."
+    },
+    "water-breathing": {
+      "name": "Water Breathing",
+      "description": "Up to 10 willing creatures can breathe underwater for 24 hours without any penalty."
+    },
+    "water-walk": {
+      "name": "Water Walk",
+      "description": "Up to 10 willing creatures can walk across liquids as if they were solid ground for 1 hour."
+    },
+    "wind-wall": {
+      "name": "Wind Wall",
+      "description": "A wall of strong wind rises from the ground; Small and smaller creatures are pushed back, ranged attacks through it are deflected, and gases are dispersed."
+    },
+    "blight": {
+      "name": "Blight",
+      "description": "Draw the moisture from a creature; it takes 8d8 necrotic damage on a failed Constitution save, or half on a success — plants are especially vulnerable."
+    },
+    "confusion": {
+      "name": "Confusion",
+      "description": "A wave of confusion sweeps through a 10-foot radius sphere; affected creatures may act randomly on their turns for up to 1 minute."
+    },
+    "conjure-minor-elementals": {
+      "name": "Conjure Minor Elementals",
+      "description": "Summon elemental spirits in CR combinations totaling up to 4 that obey your verbal commands for up to 1 hour."
+    },
+    "conjure-woodland-beings": {
+      "name": "Conjure Woodland Beings",
+      "description": "Summon fey spirits in CR combinations totaling up to 4 that obey your commands for up to 1 hour."
+    },
+    "control-water": {
+      "name": "Control Water",
+      "description": "Exert control over water in a 100-foot cube: flood, part, redirect its flow, or create a whirlpool for up to 10 minutes."
+    },
+    "dominate-beast": {
+      "name": "Dominate Beast",
+      "description": "A beast that fails a Wisdom save is charmed and you have a telepathic link to it; it follows your commands for up to 1 minute."
+    },
+    "freedom-of-movement": {
+      "name": "Freedom of Movement",
+      "description": "Touch a creature; difficult terrain costs it no extra movement and magic can't reduce its speed or cause it to be paralyzed or restrained for 1 hour."
+    },
+    "giant-insect": {
+      "name": "Giant Insect",
+      "description": "Transform up to 10 centipedes, 3 spiders, 5 wasps, or 1 scorpion into giant versions of themselves that obey your commands for up to 10 minutes."
+    },
+    "grasping-vine": {
+      "name": "Grasping Vine",
+      "description": "Command a vine to spring from the ground; on your command it makes a melee spell attack to pull a Large or smaller creature up to 20 feet toward the vine's base."
+    },
+    "hallucinatory-terrain": {
+      "name": "Hallucinatory Terrain",
+      "description": "Natural terrain in a 150-foot cube takes on the appearance of different natural terrain; the illusion persists for 24 hours or until dispelled."
+    },
+    "ice-storm": {
+      "name": "Ice Storm",
+      "description": "Hail and sleet fall in a 20-foot radius, 40-foot tall cylinder; creatures in the area take 2d8 bludgeoning and 4d6 cold damage, and the area becomes difficult terrain until your next turn."
+    },
+    "locate-creature": {
+      "name": "Locate Creature",
+      "description": "Sense the direction of a specific creature you name or describe within 1000 feet; blocked if the creature is in running water."
+    },
+    "polymorph": {
+      "name": "Polymorph",
+      "description": "Transform a creature you can see into a new form; it retains alignment but uses the target's game statistics except for Intelligence, Wisdom, and Charisma."
+    },
+    "stone-shape": {
+      "name": "Stone Shape",
+      "description": "Touch a Medium or smaller object of stone to reshape it — form a weapon, create a door in a wall, or make a small receptacle."
+    },
+    "stoneskin": {
+      "name": "Stoneskin",
+      "description": "The target's skin becomes as hard as stone, granting resistance to nonmagical bludgeoning, piercing, and slashing damage for up to 1 hour."
+    },
+    "wall-of-fire": {
+      "name": "Wall of Fire",
+      "description": "Create a wall of fire up to 60 feet long, 20 feet high, and 1 foot thick; creatures that enter or start their turn there take 5d8 fire damage."
+    },
+    "antilife-shell": {
+      "name": "Antilife Shell",
+      "description": "A shimmering barrier extends from you in a 10-foot radius, preventing living creatures from entering or passing through it for up to 1 hour."
+    },
+    "awaken": {
+      "name": "Awaken",
+      "description": "After spending 8 hours casting this spell, a touched plant or beast with Intelligence 3 or lower gains Intelligence 10 or your Intelligence score and the ability to speak one language you know."
+    },
+    "commune-with-nature": {
+      "name": "Commune with Nature",
+      "description": "Briefly commune with nature to gain knowledge of the surrounding territory within 3 miles, learning up to 3 facts about the land — terrain, water, plants, minerals, settlements, or creatures."
+    },
+    "conjure-elemental": {
+      "name": "Conjure Elemental",
+      "description": "Call forth an elemental of challenge rating 5 or lower from the appropriate elemental plane; it serves you for up to 1 hour or until its element is removed."
+    },
+    "contagion": {
+      "name": "Contagion",
+      "description": "Make a melee spell attack; a hit infects the target with one of six diseases that manifests after 3 consecutive failed Constitution saves, lasting 7 days."
+    },
+    "geas": {
+      "name": "Geas",
+      "description": "Issue a command that the target must obey for 30 days; each day it refuses or acts against the command it takes 5d10 psychic damage."
+    },
+    "greater-restoration": {
+      "name": "Greater Restoration",
+      "description": "Touch a creature to imbue it with positive energy, ending one effect reducing ability scores, one curse, one exhaustion level, one charm or fright effect, or one petrification."
+    },
+    "insect-plague": {
+      "name": "Insect Plague",
+      "description": "A sphere of biting and stinging insects fills a 20-foot radius; creatures there take 4d10 piercing damage on a failed Constitution save, and the area is lightly obscured."
+    },
+    "mass-cure-wounds": {
+      "name": "Mass Cure Wounds",
+      "description": "A wave of healing energy washes out from a point you choose; up to 6 creatures within 30 feet each regain 3d8 plus your spellcasting modifier hit points."
+    },
+    "planar-binding": {
+      "name": "Planar Binding",
+      "description": "Attempt to bind a celestial, elemental, fey, or fiend within a magic circle; on a failed Charisma save it is bound to serve you for 24 hours."
+    },
+    "reincarnate": {
+      "name": "Reincarnate",
+      "description": "Touch a dead humanoid that has been dead no more than 10 days; its soul returns to life in a new adult body of a race determined by rolling on a table."
+    },
+    "scrying": {
+      "name": "Scrying",
+      "description": "Observe a specific creature or location on the same plane; the target makes a Wisdom save with modifiers based on familiarity, and on a failure you see and hear it for up to 10 minutes."
+    },
+    "tree-stride": {
+      "name": "Tree Stride",
+      "description": "Enter a living tree and exit from another tree of the same kind within 500 feet as part of your movement, for up to 1 minute."
+    },
+    "wall-of-stone": {
+      "name": "Wall of Stone",
+      "description": "Create a nonmagical wall of solid stone up to 30 feet long, 20 feet high, and 6 inches thick that can bridge gaps; it becomes permanent if you maintain concentration for the full duration."
+    },
+    "mirror-image": {
+      "name": "Mirror Image",
+      "description": "Three illusory duplicates of yourself appear; each time a creature attacks you it may hit a duplicate instead, destroying it, until all are gone."
+    },
+    "misty-step": {
+      "name": "Misty Step",
+      "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see."
+    },
+    "blur": {
+      "name": "Blur",
+      "description": "Your body becomes blurred and shifting; attack rolls against you have disadvantage unless the attacker doesn't rely on sight."
+    },
+    "silence": {
+      "name": "Silence",
+      "description": "No sound can be created within or pass through a 20-foot radius sphere; creatures inside are immune to thunder damage and deafened."
+    },
+    "create-food-and-water": {
+      "name": "Create Food and Water",
+      "description": "Produce 45 pounds of food and 30 gallons of water in containers you can carry, sustaining up to 15 humanoids for one day."
+    },
+    "spider-climb": {
+      "name": "Spider Climb",
+      "description": "A touched creature gains the ability to move up, down, and across vertical and upside-down surfaces while keeping its hands free for up to 1 hour."
+    },
+    "divination": {
+      "name": "Divination",
+      "description": "Contact your deity or a divine proxy to receive guidance; the GM provides a truthful reply about a specific goal, event, or activity occurring within 7 days."
+    },
+    "invisibility": {
+      "name": "Invisibility",
+      "description": "A creature you touch becomes invisible for up to 1 hour; the effect ends if the target attacks or casts a spell."
+    },
+    "haste": {
+      "name": "Haste",
+      "description": "One willing creature gains doubled speed, +2 to AC, advantage on Dexterity saves, and an additional action on each of its turns for up to 1 minute."
+    },
+    "lightning-bolt": {
+      "name": "Lightning Bolt",
+      "description": "A stroke of lightning blasts out in a 100-foot line, dealing 8d6 lightning damage to each creature in the area on a failed Dexterity save."
+    },
+    "acid-arrow": {
+      "name": "Acid Arrow",
+      "description": "A shimmering green arrow strikes and splashes with acid; on a hit the target takes 4d4 acid damage immediately and 2d4 acid damage at the end of its next turn."
+    },
+    "darkness": {
+      "name": "Darkness",
+      "description": "Magical darkness spreads from a point or object in a 15-foot radius, blocking darkvision and overriding any light from spells of 2nd level or lower."
+    },
+    "stinking-cloud": {
+      "name": "Stinking Cloud",
+      "description": "A 20-foot radius of yellow-green fog fills the area; creatures that fail a Constitution save spend their turn retching and can't take actions."
+    },
+    "web": {
+      "name": "Web",
+      "description": "Thick, sticky webs fill a 20-foot cube; creatures in the area that fail a Dexterity save are restrained, and the area is difficult terrain."
+    },
+    "gaseous-form": {
+      "name": "Gaseous Form",
+      "description": "Transform a touched willing creature into a misty cloud that can fly at 10 feet, is immune to nonmagical damage, but can't attack, cast spells, or speak."
+    },
+    "greater-invisibility": {
+      "name": "Greater Invisibility",
+      "description": "You or a touched creature becomes invisible for up to 1 minute; the effect does not end if the target attacks or casts spells."
+    },
+    "cloudkill": {
+      "name": "Cloudkill",
+      "description": "A 20-foot radius sphere of yellow-green fog billows from a point; creatures inside take 5d8 poison damage on a failed Constitution save, and the cloud moves 10 feet each turn."
+    },
+    "slow": {
+      "name": "Slow",
+      "description": "Up to 6 creatures in a 40-foot cube are slowed on a failed Wisdom save: half movement, -2 to AC and Dex saves, no reactions, and only one action or bonus action per turn."
+    },
+    "cone-of-cold": {
+      "name": "Cone of Cold",
+      "description": "A blast of cold air erupts from your hands in a 60-foot cone; creatures take 8d8 cold damage on a failed Constitution save, or half on success — killed creatures become ice statues."
+    },
+    "passwall": {
+      "name": "Passwall",
+      "description": "A passage appears in a wooden, plaster, or stone wall at a point you touch; the passage is 5 feet wide, 8 feet tall, and up to 20 feet deep, lasting 1 hour."
+    },
+    "dream": {
+      "name": "Dream",
+      "description": "You or a willing creature enters a dream state and sends a message to a sleeping creature; a hostile target must succeed on a Wisdom save or be haunted by terrible nightmares."
+    }
   }
 }

@@ -154,6 +154,20 @@ export type PendingChoice =
       readonly source: SourceTag;
       readonly category: BundleCategory;
       readonly bundleIds: readonly string[];
+    }
+  | {
+      readonly type: 'spell-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly count: number;
+      readonly fromList: ClassId;
+      readonly maxLevel: import('@/types/spells').SpellLevel | null;
+      readonly alreadyChosen: readonly string[];
+    }
+  | {
+      readonly type: 'land-terrain-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
     };
 
 export interface ResolvedCharacter {

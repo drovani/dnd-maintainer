@@ -10,6 +10,7 @@ import type {
 } from '@/lib/dnd-helpers';
 import type { ChoiceKey } from '@/types/choices';
 import type { BundleCategory } from '@/types/items';
+import type { SpellLevel } from '@/types/spells';
 
 // Supporting types
 
@@ -204,6 +205,19 @@ export interface BundleChoiceGrant {
   readonly bundleIds: readonly string[];
 }
 
+export interface SpellChoiceGrant {
+  readonly type: 'spell-choice';
+  readonly key: ChoiceKey;
+  readonly count: number;
+  readonly fromList: ClassId;
+  readonly maxLevel: SpellLevel | null;
+}
+
+export interface LandTerrainChoiceGrant {
+  readonly type: 'land-terrain-choice';
+  readonly key: ChoiceKey;
+}
+
 export type Grant =
   | AbilityBonusGrant
   | AbilityChoiceGrant
@@ -224,4 +238,6 @@ export type Grant =
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant
   | EquipmentGrant
-  | BundleChoiceGrant;
+  | BundleChoiceGrant
+  | SpellChoiceGrant
+  | LandTerrainChoiceGrant;

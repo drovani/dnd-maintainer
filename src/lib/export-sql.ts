@@ -66,6 +66,7 @@ const TABLE_COLUMNS = {
     { name: 'eye_color', type: 'text' },
     { name: 'hair_color', type: 'text' },
     { name: 'skin_color', type: 'text' },
+    { name: 'prepared_spells', type: 'jsonb' },
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],
