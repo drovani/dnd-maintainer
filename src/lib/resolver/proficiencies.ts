@@ -114,12 +114,13 @@ export function resolveSkills(
     expertiseSkills.add(grant.skill);
   }
 
-  // Expertise choice grants — look up decisions, filter by grant's from pool
+  // Expertise choice grants — filter by grant's from pool and cap at grant.count
+  // so a malformed overfilled decision cannot double the PB on extra skills.
   for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
     const decision = choices[grant.key];
     if (decision?.type === 'expertise-choice') {
-      for (const skillId of decision.skills) {
-        if (grant.from !== null && !grant.from.includes(skillId)) continue;
+      const pool = decision.skills.filter((s) => grant.from === null || grant.from.includes(s));
+      for (const skillId of pool.slice(0, grant.count)) {
         expertiseSkills.add(skillId);
       }
     }

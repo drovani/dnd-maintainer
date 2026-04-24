@@ -207,7 +207,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         : [];
     const validTools =
       decision?.type === 'expertise-choice' ? decision.tools.filter((t) => grant.fromTools.includes(t)) : [];
-    if (!decision || decision.type !== 'expertise-choice' || validSkills.length + validTools.length < grant.count) {
+    if (!decision || decision.type !== 'expertise-choice' || validSkills.length + validTools.length !== grant.count) {
       pendingChoices.push({
         type: 'expertise-choice',
         choiceKey: grant.key,
@@ -219,13 +219,14 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
-  // Collect tool expertise from resolved expertise-choice decisions (filter by grant's fromTools pool)
+  // Collect tool expertise, filtered by fromTools and capped at grant.count so a
+  // malformed overfilled decision cannot double the PB on more tools than granted.
   const toolExpertise: ToolProficiencyId[] = [];
   for (const { grant } of collectGrantsByType(bundles, 'expertise-choice')) {
     const decision = choices[grant.key];
     if (decision?.type === 'expertise-choice') {
-      for (const toolId of decision.tools) {
-        if (!grant.fromTools.includes(toolId)) continue;
+      const pool = decision.tools.filter((t) => grant.fromTools.includes(t));
+      for (const toolId of pool.slice(0, grant.count)) {
         toolExpertise.push(toolId);
       }
     }

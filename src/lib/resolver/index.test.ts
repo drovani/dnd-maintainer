@@ -1109,6 +1109,36 @@ describe('expertise-choice count and validity validation', () => {
     expect(result.toolExpertise).not.toContain('herbalism-kit');
   });
 
+  it('overfilled decision emits pending and caps applied expertise at grant.count', () => {
+    // 3 proficient skills for a count-2 grant → should still be pending, and only 2 get expertise
+    const build: CharacterBuild = {
+      ...baseRogueL1Build,
+      choices: {
+        ...baseRogueL1Build.choices,
+        [expertiseKey0]: {
+          type: 'expertise-choice' as const,
+          skills: ['stealth', 'sleightofhand', 'perception'] as const,
+          tools: [] as const,
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(build);
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'expertise-choice');
+    expect(pending).toBeDefined();
+    const expertSkills = (['stealth', 'sleightofhand', 'perception'] as const).filter(
+      (s) => result.skills[s].expertise
+    );
+    expect(expertSkills.length).toBe(2);
+  });
+
   it('valid full decision (2 proficient skills) resolves cleanly with no pending choice', () => {
     // stealth and sleightofhand are both rogue proficiencies → count 2 satisfied
     const build: CharacterBuild = {
