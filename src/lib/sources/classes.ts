@@ -5,6 +5,11 @@ import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers';
 const EMPTY_LEVEL = { grants: [] } as const;
 
 export const CLASS_SOURCES: readonly ClassSource[] = [
+  /**
+   * Rage is re-emitted at L1/L3/L6/L9 with scaling usesCount; resolveFeatures
+   * in src/lib/resolver/features.ts dedupes by feature id, keeping the
+   * highest-rank (latest level) source.
+   */
   {
     id: 'barbarian',
     primaryAbility: 'str',
@@ -14,7 +19,6 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       suggestedBackground: 'outlander',
     }),
     levels: [
-      // Level 1
       {
         grants: [
           { type: 'hit-die', die: 12 },
@@ -51,23 +55,19 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'equipment', itemId: 'explorers-pack', quantity: 1 },
         ],
       },
-      // Level 2
       {
         grants: [
           { type: 'feature', feature: { id: 'barbarian-reckless-attack' } },
           { type: 'feature', feature: { id: 'barbarian-danger-sense' } },
         ],
       },
-      // Level 3 — subclass + rage scaling (dedupe keeps this usesCount: 3 over L1's 2)
       {
         grants: [
           { type: 'subclass', classId: 'barbarian', key: createChoiceKey('subclass', 'class', 'barbarian', 0) },
           { type: 'feature', feature: { id: 'barbarian-rage', usesPerRest: 'long', usesCount: 3 } },
         ],
       },
-      // Level 4 — ASI
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 0), points: 2 }] },
-      // Level 5 — Extra Attack + Fast Movement
       {
         grants: [
           { type: 'feature', feature: { id: 'barbarian-extra-attack' } },
@@ -75,15 +75,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'speed', mode: 'walk', value: 40 },
         ],
       },
-      // Level 6 — rage uses up (dedupe keeps usesCount: 4 over L3's 3)
       {
         grants: [{ type: 'feature', feature: { id: 'barbarian-rage', usesPerRest: 'long', usesCount: 4 } }],
       },
-      // Level 7 — Feral Instinct
       { grants: [{ type: 'feature', feature: { id: 'barbarian-feral-instinct' } }] },
-      // Level 8 — ASI
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 1), points: 2 }] },
-      // Level 9 — Brutal Critical + rage re-emit (usesCount: 4, same as L6)
       {
         grants: [
           { type: 'feature', feature: { id: 'barbarian-brutal-critical-1' } },
@@ -92,7 +88,6 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       },
       // Level 10 — path feature handled by subclass entries
       EMPTY_LEVEL,
-      // Levels 11-20
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,
