@@ -193,7 +193,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const totemFeatures: import('@/types/resolved').ResolvedFeature[] = [];
   for (const { grant, source } of collectGrantsByType(bundles, 'totem-animal-choice')) {
     const decision = choices[grant.key];
-    if (decision?.type === 'totem-animal-choice' && (TOTEM_ANIMALS as readonly string[]).includes(decision.animal)) {
+    if (decision?.type === 'totem-animal-choice' && TOTEM_ANIMALS.includes(decision.animal)) {
       totemFeatures.push({
         feature: { id: `${grant.featureIdPrefix}-${decision.animal}` },
         source,
