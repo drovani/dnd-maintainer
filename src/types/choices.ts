@@ -10,6 +10,7 @@ import type {
 } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/types/sources';
 import type { AbilityScores } from '@/types/database';
+import type { TotemAnimalId } from '@/types/grants';
 
 /**
  * Choice key format: `category:origin:id:index`
@@ -30,6 +31,7 @@ const CHOICE_CATEGORIES = [
   'subclass',
   'fighting-style-choice',
   'bundle-choice',
+  'totem-animal-choice',
 ] as const;
 export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number];
 
@@ -88,7 +90,8 @@ export type ChoiceDecision =
       readonly bundleId: string;
       /** Map of slotKey → chosen itemId. Empty object when the bundle has no slots. */
       readonly slotPicks: Readonly<Record<string, string>>;
-    };
+    }
+  | { readonly type: 'totem-animal-choice'; readonly animal: TotemAnimalId };
 
 export interface BuildLevel {
   readonly classId: ClassId;
