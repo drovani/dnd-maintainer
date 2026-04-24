@@ -45,7 +45,14 @@ export function ClassFeaturesStep() {
   const spellcasting = resolved?.spellcasting;
   const hasFightingStyles = fightingStyleChoices.length > 0;
   const hasSpellcasting = !!spellcasting;
-  const hasAnyContent = hasFightingStyles || hasSpellcasting;
+
+  const levelOneClassFeatures = useMemo(() => {
+    if (!resolved?.features) return [];
+    return resolved.features.filter((f) => f.source.origin === 'class' && f.source.level === 1);
+  }, [resolved]);
+  const hasLevelOneFeatures = levelOneClassFeatures.length > 0;
+
+  const hasAnyContent = hasFightingStyles || hasSpellcasting || hasLevelOneFeatures;
 
   return (
     <div className="space-y-6">
@@ -124,6 +131,24 @@ export function ClassFeaturesStep() {
               <span className="text-sm">{spellcasting.cantrips.join(', ')}</span>
             </div>
           )}
+        </div>
+      )}
+
+      {hasLevelOneFeatures && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold">{tc('characterBuilder.classFeatures.features')}</h3>
+          <ul className="space-y-3">
+            {levelOneClassFeatures.map(({ feature }) => (
+              <li key={feature.id} className="rounded-md border border-border p-3">
+                <div className="text-sm font-semibold">
+                  {t(`features.${feature.id}.name`, { defaultValue: feature.name ?? feature.id })}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t(`features.${feature.id}.description`, { defaultValue: feature.description ?? '' })}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

@@ -262,6 +262,7 @@
       "spellcasting": "Spellcasting",
       "basicVersion": "Spell management (basic version)",
       "cantrips": "Cantrips",
+      "features": "Class Features",
       "noClassChoices": "This class has no level-1 choices to make."
     },
     "equipment": {
