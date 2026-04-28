@@ -2,7 +2,7 @@ import { DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('build-reconstruction');
-import type { ClassId, RaceId } from '@/lib/dnd-helpers';
+import type { ClassId, SpeciesId } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
 import { isSubclassId } from '@/types/sources';
@@ -55,7 +55,7 @@ export function isCreationRow(row: BuildLevelRow): row is CreationRow {
 }
 
 export interface CharacterIdentity {
-  readonly race: RaceId | null;
+  readonly race: SpeciesId | null;
   readonly background: string | null;
 }
 
@@ -199,7 +199,7 @@ export function reconstructBuild(
     character.background !== null && isBackgroundId(character.background) ? character.background : null;
 
   return {
-    raceId: character.race as RaceId,
+    speciesId: character.race as SpeciesId,
     backgroundId,
     baseAbilities,
     abilityMethod,

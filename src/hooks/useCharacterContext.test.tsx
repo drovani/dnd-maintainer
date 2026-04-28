@@ -55,8 +55,8 @@ const wizardLevel2: BuildLevelRow = {
 const rows = [creationRow, fighterLevel1, wizardLevel2] as const;
 
 describe('resolveChoiceSequence', () => {
-  it('routes race choices to sequence 0', () => {
-    expect(resolveChoiceSequence('language-choice:race:human:0', rows)).toBe(0);
+  it('routes species choices to sequence 0', () => {
+    expect(resolveChoiceSequence('language-choice:species:human:0', rows)).toBe(0);
   });
 
   it('routes background choices to sequence 0', () => {
@@ -707,14 +707,14 @@ describe('CharacterProvider', () => {
     });
 
     act(() => {
-      result.current.makeChoice('language-choice:race:human:0', {
+      result.current.makeChoice('language-choice:species:human:0', {
         type: 'language-choice',
         languages: ['elvish'],
       });
     });
 
     const creationRowResult = result.current.rows.find((r) => r.sequence === 0);
-    expect(creationRowResult?.choices).toHaveProperty('language-choice:race:human:0');
+    expect(creationRowResult?.choices).toHaveProperty('language-choice:species:human:0');
   });
 
   it('clearChoice removes decision from the correct row', () => {
@@ -722,7 +722,7 @@ describe('CharacterProvider', () => {
     const creationWithChoice: BuildLevelRow = {
       ...creationRow,
       choices: {
-        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       },
     };
     const { result } = renderHook(() => useCharacterContext(), {
@@ -730,11 +730,11 @@ describe('CharacterProvider', () => {
     });
 
     act(() => {
-      result.current.clearChoice('language-choice:race:human:0');
+      result.current.clearChoice('language-choice:species:human:0');
     });
 
     const creationRowResult = result.current.rows.find((r) => r.sequence === 0);
-    expect(creationRowResult?.choices).not.toHaveProperty('language-choice:race:human:0');
+    expect(creationRowResult?.choices).not.toHaveProperty('language-choice:species:human:0');
   });
 
   it('makeChoice merges bundle-choice slotPicks when the bundleId matches the existing decision', () => {
@@ -883,7 +883,7 @@ describe('CharacterProvider', () => {
       const creationWithChoice: BuildLevelRow = {
         ...creationRow,
         choices: {
-          'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+          'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         },
       };
       const { result } = renderHook(() => useCharacterContext(), {
@@ -900,7 +900,7 @@ describe('CharacterProvider', () => {
 
       const creation = result.current.rows.find((r) => r.sequence === 0);
       // Original choice should still be present
-      expect(creation?.choices).toHaveProperty('language-choice:race:human:0');
+      expect(creation?.choices).toHaveProperty('language-choice:species:human:0');
       // New choice should also be present
       expect(creation?.choices).toHaveProperty('skill-choice:background:soldier:0');
     });
@@ -1051,7 +1051,7 @@ describe('CharacterProvider', () => {
         'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
         'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
         'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
-        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
         'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },

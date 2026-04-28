@@ -2,7 +2,7 @@ import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('random-npc');
-import { RACE_SOURCES } from '@/lib/sources/races';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import {
   DND_ALIGNMENTS,
   generateCharacterName,
@@ -11,7 +11,7 @@ import {
   type BackgroundId,
   type ClassId,
   type DndGender,
-  type RaceId,
+  type SpeciesId,
 } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { ClassSource } from '@/types/sources';
@@ -23,7 +23,7 @@ export type RandomNpcFailure = 'unknown-class' | 'name-generation' | 'empty-data
 
 interface RandomNpcBasicsBase {
   readonly gender: DndGender;
-  readonly race: RaceId;
+  readonly race: SpeciesId;
   readonly alignment: AlignmentId;
   readonly name: string;
   readonly classId: ClassId;
@@ -99,12 +99,12 @@ export function generateRandomNpcBasicsDetailed(
   }
 
   const gender = pick(['male', 'female'] as const, rng);
-  const raceSource = pick(RACE_SOURCES, rng);
+  const raceSource = pick(SPECIES_SOURCES, rng);
   const alignmentSource = pick(DND_ALIGNMENTS, rng);
   if (!gender || !raceSource || !alignmentSource) {
     logger.error('Empty data source for Quick NPC', {
       classId,
-      raceSources: RACE_SOURCES.length,
+      speciesSources: SPECIES_SOURCES.length,
       alignments: DND_ALIGNMENTS.length,
     });
     return { ok: false, failure: 'empty-data-source' };

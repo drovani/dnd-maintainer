@@ -23,7 +23,7 @@ import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { DND_RACES, DND_CLASSES } from '@/lib/dnd-helpers';
+import { DND_SPECIES, DND_CLASSES } from '@/lib/dnd-helpers';
 import type { StepType } from '@/types/character-builder';
 
 const logger = getLogger('character-builder');
@@ -155,7 +155,7 @@ function CharacterBuilderInner() {
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep);
 
-  const selectedRace = character.race ? DND_RACES.find((r) => r.id === character.race) : null;
+  const selectedRace = character.race ? DND_SPECIES.find((s) => s.id === character.race) : null;
   const selectedClass = character.class ? DND_CLASSES.find((c) => c.id === character.class) : null;
 
   const isReadyToFinalize =

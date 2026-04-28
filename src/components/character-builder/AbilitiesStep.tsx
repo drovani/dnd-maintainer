@@ -15,7 +15,7 @@ import {
   POINT_BUY_TOTAL,
   rollAbilityScores,
   STANDARD_ARRAY,
-  DND_RACES,
+  DND_SPECIES,
 } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react';
@@ -179,7 +179,7 @@ export function AbilitiesStep() {
   if (context.resolved) {
     for (const key of Object.keys(context.resolved.abilities) as Array<keyof AbilityScores>) {
       const bonusFromRace = context.resolved.abilities[key].bonuses
-        .filter((b) => b.source.origin === 'race')
+        .filter((b) => b.source.origin === 'species')
         .reduce((sum, b) => sum + b.value, 0);
       if (bonusFromRace !== 0) {
         racialBonuses[key] = bonusFromRace;
@@ -189,7 +189,7 @@ export function AbilitiesStep() {
 
   // Find selected race
   const raceId = context.character.race;
-  const selectedRace = raceId ? DND_RACES.find((r) => r.id === raceId) : undefined;
+  const selectedRace = raceId ? DND_SPECIES.find((s) => s.id === raceId) : undefined;
 
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
     const baseScore = baseAbilities[ability];

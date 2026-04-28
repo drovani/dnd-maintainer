@@ -34,8 +34,8 @@ describe('PhysicalCharacteristics', () => {
     expect(onChange).toHaveBeenCalledWith({ height: '5\'8"', weight: '182 lbs' });
   });
 
-  it('disables weight modifier input for halfling-lightfoot', () => {
-    render(<PhysicalCharacteristics raceId="halfling-lightfoot" height={null} weight={null} onChange={vi.fn()} />);
+  it('disables weight modifier input for halfling', () => {
+    render(<PhysicalCharacteristics raceId="halfling" height={null} weight={null} onChange={vi.fn()} />);
     const inputs = screen.getAllByRole('spinbutton');
     // height input should be enabled, weight input disabled
     const weightInput = inputs[1];
@@ -69,13 +69,13 @@ describe('PhysicalCharacteristics', () => {
     vi.useRealTimers();
   });
 
-  it('Average All on gnome-forest uses weight multiplier of 1', () => {
+  it('Average All on gnome uses weight multiplier of 1', () => {
     const onChange = vi.fn();
-    render(<PhysicalCharacteristics raceId="gnome-forest" height={null} weight={null} onChange={onChange} />, {
+    render(<PhysicalCharacteristics raceId="gnome" height={null} weight={null} onChange={onChange} />, {
       wrapper: createWrapper(),
     });
     fireEvent.click(screen.getByRole('button', { name: /averageAll/i }));
-    // gnome-forest: heightBase=35, averageDice(2,4)=6 → 41 inches = 3'5"
+    // gnome: heightBase=35, averageDice(2,4)=6 → 41 inches = 3'5"
     // weight: 35 + 6 * 1 = 41 lbs
     expect(onChange).toHaveBeenCalledWith({ height: '3\'5"', weight: '41 lbs' });
   });

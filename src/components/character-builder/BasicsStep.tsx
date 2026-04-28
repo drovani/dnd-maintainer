@@ -4,29 +4,20 @@ import { Button } from '@/components/ui/button';
 import { GenderToggle } from '@/components/ui/gender-toggle';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { usePlayerNames } from '@/hooks/useCharacters';
 import {
   DND_BACKGROUNDS,
   DND_CLASSES,
-  DND_RACE_GROUPS,
-  DND_RACES,
+  DND_SPECIES,
   generateCharacterName,
   isBackgroundId,
   type AlignmentId,
   type ClassId,
   type DndGender,
-  type RaceId,
+  type SpeciesId,
 } from '@/lib/dnd-helpers';
 import {
   generateRandomNpcBasicsDetailed,
@@ -72,7 +63,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const characterType = character.character_type ?? 'pc';
   const name = character.name ?? '';
   const playerName = character.player_name ?? '';
-  const race = (character.race ?? '') as RaceId | '';
+  const race = (character.race ?? '') as SpeciesId | '';
   const background = character.background ?? '';
   const alignment = character.alignment ?? '';
   const gender = character.gender ?? '';
@@ -126,7 +117,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     clearWatchdog();
   };
 
-  const handleRaceChange = (value: RaceId) => {
+  const handleRaceChange = (value: SpeciesId) => {
     cancelPendingAdvance();
     context.updateCharacter({ race: value });
   };
@@ -361,33 +352,17 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
             </Label>
             <Select
               value={race || null}
-              onValueChange={(value) => value && handleRaceChange(value as RaceId)}
-              items={DND_RACES.map((r) => ({ value: r.id, label: t(`races.${r.id}`) }))}
+              onValueChange={(value) => value && handleRaceChange(value as SpeciesId)}
+              items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`races.${s.id}`) }))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseRace')} />
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
-                {DND_RACE_GROUPS.map((group) => (
-                  <SelectGroup key={group.id}>
-                    {group.options.length > 1 && <SelectLabel>{t(`races.${group.id}`)}</SelectLabel>}
-                    {group.options.map((option) => {
-                      const raceItem = DND_RACES.find((r) => r.id === option.value);
-                      if (!raceItem) {
-                        logger.warn(`Race not found for "${option.value}" — check DND_RACES/DND_RACE_GROUPS data sync`);
-                        return null;
-                      }
-                      return (
-                        <SelectItem
-                          key={raceItem.id}
-                          value={raceItem.id}
-                          className={group.options.length > 1 ? 'pl-4' : ''}
-                        >
-                          {t(`races.${raceItem.id}`)}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectGroup>
+              <SelectContent>
+                {DND_SPECIES.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {t(`races.${s.id}`)}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

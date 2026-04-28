@@ -2,15 +2,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RollingNumber } from '@/components/ui/rolling-number';
-import type { RaceId } from '@/lib/dnd-helpers';
+import type { SpeciesId } from '@/lib/dnd-helpers';
 import { averageDice, rollDice } from '@/lib/dnd-helpers';
-import { diceRange, formatHeight, formatWeight, parseHeight, parseWeight, RACE_PHYSICALS } from '@/lib/race-physicals';
+import {
+  diceRange,
+  formatHeight,
+  formatWeight,
+  parseHeight,
+  parseWeight,
+  SPECIES_PHYSICALS,
+} from '@/lib/race-physicals';
 import { Calculator, Dices, Info } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface PhysicalCharacteristicsProps {
-  readonly raceId: RaceId | null;
+  readonly raceId: SpeciesId | null;
   readonly height: string | null;
   readonly weight: string | null;
   readonly onChange: (updates: { readonly height: string | null; readonly weight: string | null }) => void;
@@ -22,7 +29,7 @@ type RollingField = 'height' | 'weight' | 'all' | null;
 export function PhysicalCharacteristics({ raceId, height, weight, onChange, className }: PhysicalCharacteristicsProps) {
   const { t } = useTranslation('common');
 
-  const physicals = raceId ? RACE_PHYSICALS[raceId] : null;
+  const physicals = raceId ? SPECIES_PHYSICALS[raceId] : null;
 
   const [hMin, hMax] = physicals ? diceRange(physicals.heightDice) : [0, 0];
   const wDice = physicals?.weightRule.kind === 'variable' ? physicals.weightRule.dice : null;

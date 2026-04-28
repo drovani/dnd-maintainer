@@ -489,7 +489,7 @@ function CharacterSheetInner({
                                 ? t(`classes.${resolvedFeature.source.id}`)
                                 : resolvedFeature.source.origin === 'subclass'
                                   ? t(`subclasses.${resolvedFeature.source.id}.name`)
-                                  : resolvedFeature.source.origin === 'race'
+                                  : resolvedFeature.source.origin === 'species'
                                     ? t(`races.${resolvedFeature.source.id}`)
                                     : resolvedFeature.source.origin === 'background'
                                       ? t(`backgrounds.${resolvedFeature.source.id}`)
