@@ -1,4 +1,4 @@
-import type { RaceId, ClassId, BackgroundId, SizeId, AbilityKey } from '@/lib/dnd-helpers';
+import type { SpeciesId, ClassId, BackgroundId, SizeId, AbilityKey } from '@/lib/dnd-helpers';
 import type { Grant } from '@/types/grants';
 
 export const SUBCLASS_IDS = [
@@ -16,7 +16,7 @@ export function isSubclassId(s: string): s is SubclassId {
 }
 
 export type SourceTag =
-  | { readonly origin: 'race'; readonly id: RaceId }
+  | { readonly origin: 'species'; readonly id: SpeciesId }
   | { readonly origin: 'class'; readonly id: ClassId; readonly level: number }
   | { readonly origin: 'subclass'; readonly id: SubclassId; readonly classId: ClassId; readonly level: number }
   | { readonly origin: 'background'; readonly id: BackgroundId }
@@ -31,8 +31,8 @@ export interface GrantBundle {
   readonly grants: readonly Grant[];
 }
 
-export interface RaceSource {
-  readonly id: RaceId;
+export interface SpeciesSource {
+  readonly id: SpeciesId;
   readonly defaultSize: SizeId;
   readonly defaultSpeed: number;
   readonly grants: readonly Grant[];

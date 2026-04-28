@@ -203,14 +203,15 @@ export function getSpellSlots(className: string, level: number): number[] {
   return spellcasters[className.toLowerCase()]?.[level] || [];
 }
 
-export interface DndRace {
-  readonly id: RaceId;
+export interface DndSpecies {
+  readonly id: SpeciesId;
   readonly size: SizeId;
   readonly speed: number;
   readonly abilityBonuses: Partial<Record<AbilityKey, number>>;
   readonly languages: readonly LanguageId[];
   readonly languageChoices?: number;
   readonly weaponProficiencies?: readonly WeaponProficiencyId[];
+  readonly lineages?: readonly string[];
 }
 
 export interface DndClass {
@@ -367,96 +368,57 @@ export const DND_TOOL_PROFICIENCIES = [
 
 export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number];
 
-// Race ID convention: base races use plain IDs (e.g., 'human', 'tiefling'),
-// subraces use '{base}-{variant}' (e.g., 'dwarf-hill', 'elf-dark'),
-// half-races use 'half{race}' without hyphen (e.g., 'halfelf', 'halforc').
-export const DND_RACES = [
+export const DND_SPECIES = [
+  {
+    id: 'aasimar',
+    size: 'medium',
+    speed: 30,
+    abilityBonuses: { wis: 1, cha: 2 },
+    languages: ['common', 'celestial'],
+  },
   {
     id: 'dragonborn',
     size: 'medium',
     speed: 30,
     abilityBonuses: { str: 2, cha: 1 },
     languages: ['common', 'draconic'],
+    lineages: ['chromatic', 'metallic', 'gem'] as const,
   },
   {
-    id: 'dwarf-hill',
+    id: 'dwarf',
     size: 'medium',
     speed: 25,
-    abilityBonuses: { con: 2, wis: 1 },
-    languages: ['common', 'dwarvish'],
-  },
-  {
-    id: 'dwarf-mountain',
-    size: 'medium',
-    speed: 25,
-    abilityBonuses: { con: 2, str: 2 },
+    abilityBonuses: { con: 2 },
     languages: ['common', 'dwarvish'],
     weaponProficiencies: ['battleaxe', 'handaxe', 'lighthammer', 'warhammer'],
   },
   {
-    id: 'elf-dark',
+    id: 'elf',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { dex: 2, cha: 1 },
-    languages: ['common', 'elvish'],
-  },
-  {
-    id: 'elf-high',
-    size: 'medium',
-    speed: 30,
-    abilityBonuses: { dex: 2, int: 1 },
+    abilityBonuses: { dex: 2 },
     languages: ['common', 'elvish'],
     weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
   },
   {
-    id: 'elf-wood',
-    size: 'medium',
-    speed: 35,
-    abilityBonuses: { dex: 2, wis: 1 },
-    languages: ['common', 'elvish'],
-    weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
-  },
-  {
-    id: 'gnome-forest',
+    id: 'gnome',
     size: 'small',
     speed: 25,
-    abilityBonuses: { int: 2, dex: 1 },
+    abilityBonuses: { int: 2 },
     languages: ['common', 'gnomish'],
   },
   {
-    id: 'gnome-rock',
-    size: 'small',
-    speed: 25,
-    abilityBonuses: { int: 2, con: 1 },
-    languages: ['common', 'gnomish'],
-  },
-  {
-    id: 'halfelf',
-    size: 'medium',
-    speed: 30,
-    abilityBonuses: { cha: 2, int: 1, wis: 1 },
-    languages: ['common', 'elvish'],
-    languageChoices: 1,
-  },
-  {
-    id: 'halforc',
+    id: 'goliath',
     size: 'medium',
     speed: 30,
     abilityBonuses: { str: 2, con: 1 },
-    languages: ['common', 'orc'],
+    languages: ['common', 'giant'],
   },
   {
-    id: 'halfling-lightfoot',
+    id: 'halfling',
     size: 'small',
     speed: 25,
-    abilityBonuses: { dex: 2, cha: 1 },
-    languages: ['common', 'halfling'],
-  },
-  {
-    id: 'halfling-stout',
-    size: 'small',
-    speed: 25,
-    abilityBonuses: { dex: 2, con: 1 },
+    abilityBonuses: { dex: 2 },
     languages: ['common', 'halfling'],
   },
   {
@@ -468,27 +430,23 @@ export const DND_RACES = [
     languageChoices: 1,
   },
   {
+    id: 'orc',
+    size: 'medium',
+    speed: 30,
+    abilityBonuses: { str: 2, con: 1 },
+    languages: ['common', 'orc'],
+  },
+  {
     id: 'tiefling',
     size: 'medium',
     speed: 30,
     abilityBonuses: { cha: 2, int: 1 },
     languages: ['common', 'infernal'],
+    lineages: ['abyssal', 'chthonic', 'infernal'] as const,
   },
 ] as const;
 
-export type RaceId = (typeof DND_RACES)[number]['id'];
-
-export const DND_RACE_GROUPS = [
-  { id: 'dragonborn', options: [{ value: 'dragonborn' }] },
-  { id: 'dwarf', options: [{ value: 'dwarf-hill' }, { value: 'dwarf-mountain' }] },
-  { id: 'elf', options: [{ value: 'elf-dark' }, { value: 'elf-high' }, { value: 'elf-wood' }] },
-  { id: 'gnome', options: [{ value: 'gnome-forest' }, { value: 'gnome-rock' }] },
-  { id: 'halfelf', options: [{ value: 'halfelf' }] },
-  { id: 'halforc', options: [{ value: 'halforc' }] },
-  { id: 'halfling', options: [{ value: 'halfling-lightfoot' }, { value: 'halfling-stout' }] },
-  { id: 'human', options: [{ value: 'human' }] },
-  { id: 'tiefling', options: [{ value: 'tiefling' }] },
-] as const;
+export type SpeciesId = (typeof DND_SPECIES)[number]['id'];
 
 export const DND_CLASSES = [
   {
@@ -869,7 +827,8 @@ export type RaceNameData = {
   readonly clan: readonly string[];
 };
 
-export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
+export const DND_SPECIES_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
+  aasimar: { male: [], female: [], clan: [] },
   dragonborn: {
     male: [
       'Arjhan',
@@ -1051,102 +1010,7 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
     ],
     clan: ['Beren', 'Daergel', 'Folkor', 'Garrick', 'Nackle', 'Murnig', 'Ningel', 'Raulnor', 'Scheppen', 'Timbers'],
   },
-  halfelf: {
-    male: [
-      'Adran',
-      'Aramil',
-      'Beiro',
-      'Carric',
-      'Erdan',
-      'Galinndan',
-      'Hadarai',
-      'Immeral',
-      'Ivellios',
-      'Laucian',
-      'Mindartis',
-      'Paelias',
-      'Peren',
-      'Quarion',
-      'Riardon',
-    ],
-    female: [
-      'Adrie',
-      'Althaea',
-      'Andraste',
-      'Caelynn',
-      'Drusilia',
-      'Felosial',
-      'Ielenia',
-      'Jelenneth',
-      'Keyleth',
-      'Leshanna',
-      'Lia',
-      'Mialee',
-      'Naivara',
-      'Quelenna',
-      'Quillathe',
-    ],
-    clan: [
-      'Brightwood',
-      'Evenwood',
-      'Farleaf',
-      'Galanodel',
-      'Holimion',
-      'Moonshadow',
-      'Nailo',
-      'Siannodel',
-      'Silverfrond',
-      'Windriver',
-    ],
-  },
-  halforc: {
-    male: [
-      'Dench',
-      'Feng',
-      'Gell',
-      'Henk',
-      'Holg',
-      'Imsh',
-      'Keth',
-      'Krusk',
-      'Mhurren',
-      'Ront',
-      'Shump',
-      'Thokk',
-      'Urtra',
-      'Volen',
-      'Yargath',
-    ],
-    female: [
-      'Baggi',
-      'Emen',
-      'Engong',
-      'Kansif',
-      'Myev',
-      'Neega',
-      'Ovak',
-      'Ownka',
-      'Shautha',
-      'Sutha',
-      'Vola',
-      'Volen',
-      'Yevelda',
-      'Zharra',
-      'Zovak',
-    ],
-    clan: [
-      'Bloodfist',
-      'Dreadblade',
-      'Grimtusk',
-      'Ironhide',
-      'Marrowsmasher',
-      'Ragebringer',
-      'Skullcrusher',
-      'Stoneback',
-      'Thunderstep',
-      'Warchief',
-    ],
-  },
+  goliath: { male: [], female: [], clan: [] },
   halfling: {
     male: [
       'Alton',
@@ -1243,6 +1107,7 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
       'Stoneheart',
     ],
   },
+  orc: { male: [], female: [], clan: [] },
   tiefling: {
     male: [
       'Akmenos',
@@ -1293,17 +1158,6 @@ export const DND_RACE_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
   },
 };
 
-export function getBaseRaceId(raceId: string): string {
-  // Direct match first
-  if (raceId in DND_RACE_NAMES) return raceId;
-
-  // Subrace IDs: check first segment before the first dash
-  const firstSegment = raceId.split('-')[0];
-  if (firstSegment && firstSegment in DND_RACE_NAMES) return firstSegment;
-
-  return raceId;
-}
-
 export interface Proficiencies {
   readonly armor: readonly ArmorProficiencyId[];
   readonly weapons: readonly WeaponProficiencyId[];
@@ -1324,14 +1178,14 @@ const EMPTY_PROFICIENCIES: Proficiencies = {
 
 export function computeProficiencies(
   classId: ClassId | '',
-  raceId: RaceId | '',
+  raceId: SpeciesId | '',
   prev: Proficiencies,
   classChanged: boolean,
   raceChanged: boolean
 ): Proficiencies {
   if (!classChanged && !raceChanged) return prev;
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId);
-  const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId);
+  const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === raceId);
   const raceWeapons: WeaponProficiencyId[] = race?.weaponProficiencies ? [...race.weaponProficiencies] : [];
   return {
     armor: cls ? [...cls.armorProficiencies] : [],
@@ -1368,10 +1222,10 @@ export function toggleToolProficiencyChoice(
 
 export function toggleLanguageProficiencyChoice(
   proficiencies: Proficiencies,
-  raceId: RaceId | '',
+  raceId: SpeciesId | '',
   langId: LanguageId
 ): Proficiencies {
-  const race: DndRace | undefined = DND_RACES.find((r) => r.id === raceId);
+  const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === raceId);
   const maxChoices = race?.languageChoices ?? 0;
   if (maxChoices === 0) return proficiencies;
   if (proficiencies.languages.includes(langId)) {
@@ -1389,12 +1243,11 @@ export function toggleLanguageProficiencyChoice(
 export { EMPTY_PROFICIENCIES };
 
 export function generateCharacterName(
-  raceId: string,
+  raceId: SpeciesId,
   gender: DndGender,
   rng: () => number = Math.random
 ): string | null {
-  const baseId = getBaseRaceId(raceId);
-  const raceData = DND_RACE_NAMES[baseId];
+  const raceData = DND_SPECIES_NAMES[raceId];
   if (!raceData) return null;
 
   const firstNames = raceData[gender];
