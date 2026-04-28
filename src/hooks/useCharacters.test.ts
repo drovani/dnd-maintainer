@@ -24,7 +24,7 @@ const baseCharacter: Character = {
   name: 'Aria Silverwind',
   player_name: 'Alice',
   character_type: 'pc',
-  race: 'elf-high',
+  race: 'elf',
   class: 'wizard',
   subclass: null,
   level: 3,

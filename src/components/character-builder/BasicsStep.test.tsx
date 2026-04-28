@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { BasicsStep } from '@/components/character-builder/BasicsStep';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { RACE_SOURCES } from '@/lib/sources/races';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import * as randomNpcModule from '@/lib/character-builder/random-npc';
 import type { Character, AbilityScores } from '@/types/database';
 import type { BuildLevelRow, CreationRow, LevelRow } from '@/lib/build-reconstruction';
@@ -204,7 +204,7 @@ describe('BasicsStep', () => {
       ...contextCharacter,
       character_type: 'npc',
       name: 'Test Name',
-      race: RACE_SOURCES[0].id,
+      race: SPECIES_SOURCES[0].id,
       alignment: 'lg',
       class: 'fighter',
       level: 1,
@@ -236,7 +236,7 @@ describe('BasicsStep', () => {
     );
     const updateCall = mockUpdateCharacter.mock.calls[0][0] as Partial<Character>;
     expect(['male', 'female']).toContain(updateCall.gender);
-    expect(RACE_SOURCES.map((r) => r.id)).toContain(updateCall.race);
+    expect(SPECIES_SOURCES.map((r) => r.id)).toContain(updateCall.race);
     expect(updateCall.name).toBeTruthy();
 
     // updateCreation called with base_abilities
@@ -339,7 +339,7 @@ describe('BasicsStep', () => {
       ok: true,
       basics: {
         gender: 'female',
-        race: RACE_SOURCES[0].id,
+        race: SPECIES_SOURCES[0].id,
         alignment: 'n',
         name: 'Second Name',
         classId: 'fighter',
@@ -357,7 +357,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Second Name',
-      race: RACE_SOURCES[0].id,
+      race: SPECIES_SOURCES[0].id,
       alignment: 'n',
       class: 'fighter',
       level: 1,
@@ -387,7 +387,7 @@ describe('BasicsStep', () => {
       ok: true,
       basics: {
         gender: 'male',
-        race: RACE_SOURCES[0].id,
+        race: SPECIES_SOURCES[0].id,
         alignment: 'n',
         name: 'Test Name',
         classId: 'fighter',
@@ -407,7 +407,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Test Name',
-      race: RACE_SOURCES[0].id,
+      race: SPECIES_SOURCES[0].id,
       alignment: 'n',
       class: 'fighter',
       level: 1,
@@ -430,7 +430,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Test Name',
-      race: RACE_SOURCES[0].id,
+      race: SPECIES_SOURCES[0].id,
       alignment: 'lg',
       class: 'fighter',
       level: 1,
@@ -464,7 +464,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Manual Edit',
-      race: RACE_SOURCES[0].id,
+      race: SPECIES_SOURCES[0].id,
       alignment: 'lg',
       class: 'fighter',
       level: 1,

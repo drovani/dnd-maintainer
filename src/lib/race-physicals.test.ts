@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { diceRange, formatHeight, formatWeight, parseHeight, parseWeight, RACE_PHYSICALS } from './race-physicals';
+import { diceRange, formatHeight, formatWeight, parseHeight, parseWeight, SPECIES_PHYSICALS } from './race-physicals';
 
 describe('diceRange', () => {
   it('returns [count, count*sides]', () => {
@@ -48,11 +48,14 @@ describe('parseWeight', () => {
   });
 });
 
-describe('RACE_PHYSICALS', () => {
-  it('has entry for all 14 races', () => {
-    expect(RACE_PHYSICALS['human'].heightBase).toBe(56);
-    expect(RACE_PHYSICALS['gnome-forest'].weightRule.kind).toBe('fixed');
-    expect(RACE_PHYSICALS['halfling-lightfoot'].weightRule.kind).toBe('fixed');
-    expect(RACE_PHYSICALS['dragonborn'].weightRule.kind).toBe('variable');
+describe('SPECIES_PHYSICALS', () => {
+  it('has entries for all 10 species', () => {
+    expect(SPECIES_PHYSICALS['human'].heightBase).toBe(56);
+    expect(SPECIES_PHYSICALS['gnome'].weightRule.kind).toBe('fixed');
+    expect(SPECIES_PHYSICALS['halfling'].weightRule.kind).toBe('fixed');
+    expect(SPECIES_PHYSICALS['dragonborn'].weightRule.kind).toBe('variable');
+    expect(SPECIES_PHYSICALS['aasimar'].heightBase).toBe(56);
+    expect(SPECIES_PHYSICALS['goliath'].heightBase).toBe(76);
+    expect(SPECIES_PHYSICALS['orc'].heightBase).toBe(58);
   });
 });

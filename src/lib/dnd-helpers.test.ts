@@ -4,7 +4,7 @@ import {
   DND_BACKGROUNDS,
   DND_CLASSES,
   DND_LANGUAGES,
-  DND_RACES,
+  DND_SPECIES,
   DND_SIZES,
   DND_SKILLS,
   DND_TOOL_PROFICIENCIES,
@@ -14,7 +14,6 @@ import {
   computeProficiencies,
   generateCharacterName,
   getAbilityModifier,
-  getBaseRaceId,
   getPointBuyCost,
   getPointBuyDecrementReturn,
   getPointBuyEquivalent,
@@ -29,7 +28,7 @@ import {
   toggleLanguageProficiencyChoice,
   toggleToolProficiencyChoice,
 } from '@/lib/dnd-helpers';
-import type { DndClass, DndRace, Proficiencies } from '@/lib/dnd-helpers';
+import type { DndClass, DndSpecies, Proficiencies, SpeciesId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 // ---------------------------------------------------------------------------
@@ -296,44 +295,11 @@ describe('rollRandomLanguages', () => {
 });
 
 // ---------------------------------------------------------------------------
-// getBaseRaceId
-// ---------------------------------------------------------------------------
-describe('getBaseRaceId', () => {
-  it('returns the same id for a direct match (dragonborn)', () => {
-    expect(getBaseRaceId('dragonborn')).toBe('dragonborn');
-  });
-
-  it('returns base id for a subrace (dwarf-hill → dwarf)', () => {
-    expect(getBaseRaceId('dwarf-hill')).toBe('dwarf');
-  });
-
-  it('returns base id for another subrace (elf-dark → elf)', () => {
-    expect(getBaseRaceId('elf-dark')).toBe('elf');
-  });
-
-  it('returns halfelf directly (no hyphen, direct match)', () => {
-    expect(getBaseRaceId('halfelf')).toBe('halfelf');
-  });
-
-  it('returns halforc directly (no hyphen, direct match)', () => {
-    expect(getBaseRaceId('halforc')).toBe('halforc');
-  });
-
-  it('returns the original id unchanged for an unknown race', () => {
-    expect(getBaseRaceId('gibblegoble')).toBe('gibblegoble');
-  });
-
-  it('returns halfling for halfling-lightfoot', () => {
-    expect(getBaseRaceId('halfling-lightfoot')).toBe('halfling');
-  });
-});
-
-// ---------------------------------------------------------------------------
 // generateCharacterName
 // ---------------------------------------------------------------------------
 describe('generateCharacterName', () => {
   it('returns null for an unknown race', () => {
-    expect(generateCharacterName('gibblegoble', 'male')).toBeNull();
+    expect(generateCharacterName('orc' as SpeciesId, 'male')).toBeNull();
   });
 
   it('returns a "FirstName ClanName" string for a known race', () => {
@@ -351,9 +317,9 @@ describe('generateCharacterName', () => {
     expect(name).toBe('Ander Brightmantle');
   });
 
-  it('works with a subrace id (dwarf-hill) by resolving to base race', () => {
+  it('generates dwarf name from consolidated dwarf id', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0);
-    const name = generateCharacterName('dwarf-hill', 'female');
+    const name = generateCharacterName('dwarf', 'female');
     // first female dwarf name is 'Amber', first clan is 'Balderk'
     expect(name).toBe('Amber Balderk');
   });
@@ -370,7 +336,7 @@ describe('generateCharacterName', () => {
 // Static data shape and counts
 // ---------------------------------------------------------------------------
 describe.each<[string, ReadonlyArray<{ readonly id: string }>]>([
-  ['DND_RACES', DND_RACES],
+  ['DND_SPECIES', DND_SPECIES],
   ['DND_CLASSES', DND_CLASSES],
   ['DND_SKILLS', DND_SKILLS],
   ['DND_BACKGROUNDS', DND_BACKGROUNDS],
@@ -399,15 +365,15 @@ describe.each<[string, readonly string[]]>([
   });
 });
 
-describe('DND_RACES language data integrity', () => {
+describe('DND_SPECIES language data integrity', () => {
   it('every race has at least one language', () => {
-    for (const race of DND_RACES) {
+    for (const race of DND_SPECIES) {
       expect(race.languages.length).toBeGreaterThan(0);
     }
   });
 
   it('all race languages exist in DND_LANGUAGES', () => {
-    for (const race of DND_RACES) {
+    for (const race of DND_SPECIES) {
       for (const lang of race.languages) {
         expect(DND_LANGUAGES).toContain(lang);
       }
@@ -415,18 +381,18 @@ describe('DND_RACES language data integrity', () => {
   });
 });
 
-describe('DND_RACES size data integrity', () => {
+describe('DND_SPECIES size data integrity', () => {
   it('all race sizes exist in DND_SIZES', () => {
-    for (const race of DND_RACES) {
+    for (const race of DND_SPECIES) {
       expect(DND_SIZES).toContain(race.size);
     }
   });
 });
 
-describe('DND_RACES proficiency data integrity', () => {
+describe('DND_SPECIES proficiency data integrity', () => {
   it('all race weaponProficiencies exist in DND_WEAPON_PROFICIENCIES', () => {
-    for (const race of DND_RACES) {
-      const r = race as DndRace;
+    for (const race of DND_SPECIES) {
+      const r = race as DndSpecies;
       if (r.weaponProficiencies) {
         for (const weapon of r.weaponProficiencies) {
           expect(DND_WEAPON_PROFICIENCIES).toContain(weapon);
@@ -513,7 +479,7 @@ describe('computeProficiencies', () => {
   });
 
   it('includes race weapon proficiencies when no class is selected', () => {
-    const result = computeProficiencies('', 'dwarf-mountain', base, false, true);
+    const result = computeProficiencies('', 'dwarf', base, false, true);
     expect(result.weapons).toEqual(['battleaxe', 'handaxe', 'lighthammer', 'warhammer']);
     expect(result.armor).toEqual([]);
   });
@@ -525,16 +491,16 @@ describe('computeProficiencies', () => {
   });
 
   it('merges class and race weapon proficiencies', () => {
-    const result = computeProficiencies('rogue', 'elf-high', base, true, true);
+    const result = computeProficiencies('rogue', 'elf', base, true, true);
     // Rogue: simple, handcrossbow, longsword, rapier, shortsword
-    // Elf-High: longsword, shortsword, shortbow, longbow
+    // Elf: longsword, shortsword, shortbow, longbow
     expect(result.weapons).toContain('simple');
     expect(result.weapons).toContain('shortbow');
     expect(result.weapons).toContain('longbow');
   });
 
   it('deduplicates overlapping weapon proficiencies', () => {
-    const result = computeProficiencies('rogue', 'elf-high', base, true, true);
+    const result = computeProficiencies('rogue', 'elf', base, true, true);
     const longswordCount = result.weapons.filter((w) => w === 'longsword').length;
     const shortswordCount = result.weapons.filter((w) => w === 'shortsword').length;
     expect(longswordCount).toBe(1);
@@ -549,7 +515,7 @@ describe('computeProficiencies', () => {
 
   it('preserves toolChoices when only race changes', () => {
     const prev: Proficiencies = { ...base, toolChoices: ['drum'] };
-    const result = computeProficiencies('bard', 'halfelf', prev, false, true);
+    const result = computeProficiencies('bard', 'elf', prev, false, true);
     expect(result.toolChoices).toEqual(['drum']);
   });
 
@@ -575,7 +541,7 @@ describe('computeProficiencies', () => {
 
   it('resets both toolChoices and languageChoices when both class and race change', () => {
     const prev: Proficiencies = { ...base, toolChoices: ['drum', 'flute'], languageChoices: ['giant'] };
-    const result = computeProficiencies('fighter', 'halfelf', prev, true, true);
+    const result = computeProficiencies('fighter', 'elf', prev, true, true);
     expect(result.toolChoices).toEqual([]);
     expect(result.languageChoices).toEqual([]);
     expect(result.armor).toEqual(['light', 'medium', 'heavy', 'shields']);
@@ -670,10 +636,10 @@ describe('toggleLanguageProficiencyChoice', () => {
   it('rejects a language already in auto-granted languages and warns', () => {
     const dndHelpersLogger = getLogger('dnd-helpers');
     const warnSpy = vi.spyOn(dndHelpersLogger, 'warn').mockImplementation(() => {});
-    const prev: Proficiencies = { ...base, languages: ['common', 'elvish'] };
-    const result = toggleLanguageProficiencyChoice(prev, 'halfelf', 'elvish');
+    const prev: Proficiencies = { ...base, languages: ['common'] };
+    const result = toggleLanguageProficiencyChoice(prev, 'human', 'common');
     expect(result).toBe(prev);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('elvish'));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('common'));
   });
 });
 

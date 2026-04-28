@@ -325,7 +325,7 @@ describe('resolveEquipment via useDBInventory', () => {
     const { resolveCharacter } = await import('@/lib/resolver');
     const { collectBundles } = await import('@/lib/sources');
     const build = {
-      raceId: 'human' as import('@/lib/dnd-helpers').RaceId,
+      speciesId: 'human' as import('@/lib/dnd-helpers').SpeciesId,
       backgroundId: null,
       baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
       abilityMethod: 'standard-array' as const,

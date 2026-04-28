@@ -1,9 +1,9 @@
-import { isBackgroundId, type RaceId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers';
+import { isBackgroundId, type SpeciesId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('sources');
 import type {
-  RaceSource,
+  SpeciesSource,
   ClassSource,
   SubclassSource,
   SubclassId,
@@ -15,7 +15,7 @@ import type {
 } from '@/types/sources';
 import type { SubclassGrant, FightingStyleChoiceGrant } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
-import { RACE_SOURCES } from '@/lib/sources/races';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
@@ -25,7 +25,7 @@ import { FIGHTING_STYLE_SOURCES, getFightingStyleSource } from '@/lib/sources/fi
 import type { FightingStyleId } from '@/lib/dnd-helpers';
 
 export type {
-  RaceSource,
+  SpeciesSource,
   ClassSource,
   SubclassSource,
   SubclassId,
@@ -37,7 +37,7 @@ export type {
 };
 
 export {
-  RACE_SOURCES,
+  SPECIES_SOURCES,
   CLASS_SOURCES,
   SUBCLASS_SOURCES,
   BACKGROUND_SOURCES,
@@ -47,8 +47,8 @@ export {
 };
 export { getFightingStyleSource };
 
-export function getRaceSource(id: RaceId): RaceSource | undefined {
-  return RACE_SOURCES.find((r) => r.id === id);
+export function getSpeciesSource(id: SpeciesId): SpeciesSource | undefined {
+  return SPECIES_SOURCES.find((r) => r.id === id);
 }
 
 export function getClassSource(id: ClassId): ClassSource | undefined {
@@ -80,13 +80,13 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   const bundles: GrantBundle[] = [];
   const warnings: string[] = [];
 
-  // Race
-  const raceSource = getRaceSource(build.raceId);
-  if (raceSource) {
-    const tag: SourceTag = { origin: 'race', id: build.raceId };
-    bundles.push({ source: tag, grants: raceSource.grants });
+  // Species
+  const speciesSource = getSpeciesSource(build.speciesId);
+  if (speciesSource) {
+    const tag: SourceTag = { origin: 'species', id: build.speciesId };
+    bundles.push({ source: tag, grants: speciesSource.grants });
   } else {
-    const msg = `No source data found for race "${build.raceId}" — race grants will be empty`;
+    const msg = `No source data found for species "${build.speciesId}" — species grants will be empty`;
     warnings.push(msg);
     logger.warn(msg);
   }

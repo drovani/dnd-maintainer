@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getRaceSource,
+  getSpeciesSource,
   getClassSource,
   getSubclassSource,
   getBackgroundSource,
@@ -10,11 +10,11 @@ import {
 } from '@/lib/sources';
 import type { CharacterBuild } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
-import type { RaceId, BackgroundId, ClassId } from '@/lib/dnd-helpers';
+import type { SpeciesId, BackgroundId, ClassId } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/types/sources';
 
 const humanFighterL1Build: CharacterBuild = {
-  raceId: 'human' as RaceId,
+  speciesId: 'human' as SpeciesId,
   backgroundId: 'soldier' as BackgroundId,
   baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
   abilityMethod: 'standard-array',
@@ -24,9 +24,9 @@ const humanFighterL1Build: CharacterBuild = {
   activeItems: [],
 };
 
-describe('getRaceSource', () => {
-  it('returns a RaceSource for human with correct fields', () => {
-    const source = getRaceSource('human' as RaceId);
+describe('getSpeciesSource', () => {
+  it('returns a SpeciesSource for human with correct fields', () => {
+    const source = getSpeciesSource('human' as SpeciesId);
     expect(source).toBeDefined();
     expect(source?.id).toBe('human');
     expect(source?.defaultSize).toBe('medium');
@@ -93,22 +93,22 @@ describe('collectBundles', () => {
   it('does not throw for unknown IDs', () => {
     const unknownBuild: CharacterBuild = {
       ...humanFighterL1Build,
-      raceId: 'gnome-forest' as RaceId,
+      speciesId: 'unknown-species' as SpeciesId,
       backgroundId: 'hermit' as BackgroundId,
       levels: [],
     };
     expect(() => collectBundles(unknownBuild)).not.toThrow();
   });
 
-  it('populates warnings array for unknown race ID', () => {
+  it('populates warnings array for unknown species ID', () => {
     const unknownBuild: CharacterBuild = {
       ...humanFighterL1Build,
-      raceId: 'gnome-forest' as RaceId,
+      speciesId: 'unknown-species' as SpeciesId,
       levels: [],
     };
     const { warnings } = collectBundles(unknownBuild);
     expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings[0]).toContain('gnome-forest');
+    expect(warnings[0]).toContain('unknown-species');
   });
 
   it('populates warnings array for unknown feat ID', () => {

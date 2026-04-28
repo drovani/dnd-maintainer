@@ -20,14 +20,14 @@ describe('resolveCharacter', () => {
   it('collects resistance grants into resolved.resistances with source', () => {
     const bundles: readonly GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'tiefling' },
+        source: { origin: 'species', id: 'tiefling' },
         grants: [{ type: 'resistance', damageType: 'fire' }],
       },
     ];
     const result = resolveCharacter({ ...baseInput, bundles });
     expect(result.resistances).toHaveLength(1);
     expect(result.resistances[0].value).toBe('fire');
-    expect(result.resistances[0].sources[0]).toEqual({ origin: 'race', id: 'tiefling' });
+    expect(result.resistances[0].sources[0]).toEqual({ origin: 'species', id: 'tiefling' });
   });
 
   it('returns a valid ResolvedCharacter for empty input', () => {
@@ -110,7 +110,7 @@ describe('resolveCharacter', () => {
 
 describe('Human Fighter L1 integration', () => {
   const humanFighterBuild: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: 'soldier',
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
     abilityMethod: 'standard-array',
@@ -120,7 +120,7 @@ describe('Human Fighter L1 integration', () => {
       // Fighter fighting style choice
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       // Human language choice
-      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       // Soldier tool choice
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       // Soldier language choice
@@ -278,38 +278,38 @@ describe('Human Fighter L1 integration', () => {
   it('has pending ability-choice when no decision provided', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
-        grants: [{ type: 'ability-choice', key: 'ability-choice:race:human:0', count: 1, bonus: 1, from: null }],
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'ability-choice', key: 'ability-choice:species:human:0', count: 1, bonus: 1, from: null }],
       },
     ];
     const result = resolveCharacter({ ...baseInput, bundles });
     const pending = result.pendingChoices.find((c) => c.type === 'ability-choice');
     expect(pending).toBeDefined();
-    expect(pending?.choiceKey).toBe('ability-choice:race:human:0');
+    expect(pending?.choiceKey).toBe('ability-choice:species:human:0');
   });
 
   it('has pending ability-choice when decision is wrong type', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
-        grants: [{ type: 'ability-choice', key: 'ability-choice:race:human:0', count: 1, bonus: 1, from: null }],
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'ability-choice', key: 'ability-choice:species:human:0', count: 1, bonus: 1, from: null }],
       },
     ];
     // Provide a wrong-type decision for the same key
     const choices = {
-      'ability-choice:race:human:0': { type: 'skill-choice' as const, skills: ['athletics'] as const },
+      'ability-choice:species:human:0': { type: 'skill-choice' as const, skills: ['athletics'] as const },
     };
     const result = resolveCharacter({ ...baseInput, bundles, choices });
     const pending = result.pendingChoices.find((c) => c.type === 'ability-choice');
     expect(pending).toBeDefined();
-    expect(pending?.choiceKey).toBe('ability-choice:race:human:0');
+    expect(pending?.choiceKey).toBe('ability-choice:species:human:0');
   });
 
   it('has pending skill choice when not resolved', () => {
     const inputWithoutSkillChoice: ResolverInput = {
       ...input,
       choices: {
-        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
         'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
@@ -392,14 +392,14 @@ describe('Pending ASI and Subclass choices', () => {
 
 describe('Human Fighter L1 equipment integration', () => {
   const humanFighterEquipBuild: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: 'soldier',
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
     abilityMethod: 'standard-array',
     choices: {
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
-      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       // Fighter bundle choices
@@ -480,7 +480,7 @@ describe('Human Fighter L5 integration', () => {
   const asiKey = createChoiceKey('asi', 'class', 'fighter', 0);
 
   const fighterL5Build: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: 'soldier',
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
     abilityMethod: 'standard-array',
@@ -494,7 +494,7 @@ describe('Human Fighter L5 integration', () => {
     choices: {
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
-      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
@@ -560,7 +560,7 @@ describe('Human Fighter L5 integration', () => {
   it('has pending ASI and subclass when those choices are missing', () => {
     const incompleteChoices = {
       'skill-choice:class:fighter:0': { type: 'skill-choice' as const, skills: ['athletics', 'perception'] as const },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
       'tool-choice:background:soldier:0': { type: 'tool-choice' as const, tools: ['gaming-set-dice'] as const },
       'language-choice:background:soldier:0': { type: 'language-choice' as const, languages: ['dwarvish'] as const },
     };
@@ -575,7 +575,7 @@ describe('Rogue L1 integration', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
   const rogueL1Build: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -590,7 +590,7 @@ describe('Rogue L1 integration', () => {
         skills: ['stealth', 'sleightofhand'] as const,
         tools: [] as const,
       },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],
@@ -657,7 +657,7 @@ describe('Rogue L1 integration', () => {
           type: 'skill-choice',
           skills: ['stealth', 'deception', 'perception', 'sleightofhand'],
         },
-        'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       },
     };
     const result = resolveCharacter(inputNoExpertiseDecision);
@@ -672,7 +672,7 @@ describe('Rogue L3 + Thief subclass integration', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
   const rogueL3Build: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -692,7 +692,7 @@ describe('Rogue L3 + Thief subclass integration', () => {
         tools: [] as const,
       },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'thief' as SubclassId },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],
@@ -727,7 +727,7 @@ describe('Rogue L3 + Thief subclass integration', () => {
           skills: ['stealth', 'sleightofhand'] as const,
           tools: [] as const,
         },
-        'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+        'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
       } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     };
     const result = resolveCharacter(inputNoSubclass);
@@ -743,7 +743,7 @@ describe('Rogue L1 expertise-choice combined decision', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
   const rogueL1Build: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -758,7 +758,7 @@ describe('Rogue L1 expertise-choice combined decision', () => {
         skills: ['stealth'] as const,
         tools: ['thievestools'] as const,
       },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],
@@ -787,7 +787,7 @@ describe('Rogue L1 expertise-choice combined decision', () => {
           type: 'skill-choice' as const,
           skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
         },
-        'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+        'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
       } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     };
     const result = resolveCharacter(inputNoDecision);
@@ -805,7 +805,7 @@ describe('Rogue L6 second expertise-choice', () => {
   const subclassKey = createChoiceKey('subclass', 'class', 'rogue', 0);
 
   const rogueL6Build: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -833,7 +833,7 @@ describe('Rogue L6 second expertise-choice', () => {
         tools: [] as const,
       },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'thief' as SubclassId },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],
@@ -884,7 +884,7 @@ describe('Rogue L6 second expertise-choice', () => {
           tools: [] as const,
         },
         [subclassKey]: { type: 'subclass' as const, subclassId: 'thief' as SubclassId },
-        'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+        'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
       } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     };
     const result = resolveCharacter(inputPartial);
@@ -899,7 +899,7 @@ describe('Rogue L3 + Assassin subclass integration', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
   const rogueL3AssassinBuild: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -919,7 +919,7 @@ describe('Rogue L3 + Assassin subclass integration', () => {
         tools: [] as const,
       },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'assassin' as SubclassId },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],
@@ -953,7 +953,7 @@ describe('Rogue L3 + Arcane Trickster subclass integration', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
   const rogueL3ArcaneBuild: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -973,7 +973,7 @@ describe('Rogue L3 + Arcane Trickster subclass integration', () => {
         tools: [] as const,
       },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'arcanetrickster' as SubclassId },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],
@@ -1009,7 +1009,7 @@ describe('expertise-choice count and validity validation', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
   const baseRogueL1Build: CharacterBuild = {
-    raceId: 'human',
+    speciesId: 'human',
     backgroundId: null,
     baseAbilities: { str: 10, dex: 16, con: 12, int: 14, wis: 10, cha: 10 },
     abilityMethod: 'standard-array',
@@ -1019,7 +1019,7 @@ describe('expertise-choice count and validity validation', () => {
         type: 'skill-choice' as const,
         skills: ['stealth', 'deception', 'perception', 'sleightofhand'] as const,
       },
-      'language-choice:race:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
+      'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
     } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
     feats: [],
     activeItems: [],

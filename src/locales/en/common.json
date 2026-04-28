@@ -140,7 +140,7 @@
         "finalWeight": "Weight",
         "formula": "{{base}} + {{dice}}",
         "weightFormula": "{{base}} lbs + (height mod × {{dice}}) lbs",
-        "noRace": "Pick a race on the Basics step to set height and weight."
+        "noRace": "Pick a species on the Basics step to set height and weight."
       }
     },
     "pendingChoices": {

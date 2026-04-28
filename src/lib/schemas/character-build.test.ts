@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { CharacterBuildSchema, CharacterBuildSchemaStrict, ChoiceDecisionSchema } from '@/lib/schemas/character-build';
 
 const validBuild = {
-  raceId: 'human',
+  speciesId: 'human',
   backgroundId: 'soldier',
   baseAbilities: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
   abilityMethod: 'standard-array' as const,
@@ -32,10 +32,10 @@ describe('CharacterBuildSchema', () => {
     expect(tooHigh.success).toBe(false);
   });
 
-  it('rejects empty raceId', () => {
+  it('rejects empty speciesId', () => {
     const result = CharacterBuildSchema.safeParse({
       ...validBuild,
-      raceId: '',
+      speciesId: '',
     });
     expect(result.success).toBe(false);
   });
@@ -50,7 +50,7 @@ describe('CharacterBuildSchema', () => {
 
   it('accepts empty build (fresh character with empty arrays)', () => {
     const emptyBuild = {
-      raceId: 'human',
+      speciesId: 'human',
       backgroundId: 'soldier',
       baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       abilityMethod: 'standard-array' as const,

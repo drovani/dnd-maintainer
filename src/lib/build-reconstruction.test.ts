@@ -419,7 +419,7 @@ describe('Human Fighter Level 1 round-trip', () => {
     const build = reconstructBuild(character, rows, []);
 
     // Verify build shape
-    expect(build.raceId).toBe('human');
+    expect(build.speciesId).toBe('human');
     expect(build.backgroundId).toBe('soldier');
     expect(build.levels).toHaveLength(1);
     expect(build.levels[0].classId).toBe('fighter');

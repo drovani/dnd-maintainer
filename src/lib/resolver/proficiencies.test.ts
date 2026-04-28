@@ -348,7 +348,7 @@ describe('resolveProficiencies', () => {
   it('collects direct language proficiencies', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'proficiency', category: 'language', id: 'common' }],
       },
     ];
@@ -359,12 +359,12 @@ describe('resolveProficiencies', () => {
   it('resolves language-choice grants with decision', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [
           {
             type: 'proficiency-choice',
             category: 'language',
-            key: 'language-choice:race:human:0',
+            key: 'language-choice:species:human:0',
             count: 1,
             from: null,
           },
@@ -372,7 +372,7 @@ describe('resolveProficiencies', () => {
       },
     ];
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'language-choice:race:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
     };
     const result = resolveProficiencies(bundles, choices);
     expect(result.language.map((l) => l.value)).toContain('elvish');
@@ -382,12 +382,12 @@ describe('resolveProficiencies', () => {
   it('produces pending choice for unresolved language-choice', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [
           {
             type: 'proficiency-choice',
             category: 'language',
-            key: 'language-choice:race:human:0',
+            key: 'language-choice:species:human:0',
             count: 1,
             from: null,
           },
@@ -397,7 +397,7 @@ describe('resolveProficiencies', () => {
     const result = resolveProficiencies(bundles, NO_CHOICES);
     expect(result.pendingChoices).toHaveLength(1);
     expect(result.pendingChoices[0].type).toBe('language-choice');
-    expect(result.pendingChoices[0].choiceKey).toBe('language-choice:race:human:0');
+    expect(result.pendingChoices[0].choiceKey).toBe('language-choice:species:human:0');
   });
 
   it('resolves tool-choice grants with decision', () => {
@@ -426,7 +426,7 @@ describe('resolveProficiencies', () => {
   it('deduplicates proficiencies from multiple sources', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'proficiency', category: 'language', id: 'common' }],
       },
       {

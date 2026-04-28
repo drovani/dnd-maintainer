@@ -33,7 +33,7 @@ describe('resolveAbilities', () => {
   it('applies ability-bonus grants', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [
           { type: 'ability-bonus', ability: 'str', bonus: 1 },
           { type: 'ability-bonus', ability: 'dex', bonus: 2 },
@@ -47,7 +47,7 @@ describe('resolveAbilities', () => {
   });
 
   it('tracks bonus sources', () => {
-    const source = { origin: 'race' as const, id: 'human' as const };
+    const source = { origin: 'species' as const, id: 'human' as const };
     const bundles: GrantBundle[] = [
       {
         source,
@@ -64,7 +64,7 @@ describe('resolveAbilities', () => {
     const highBase = { ...BASE, str: 19 };
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'ability-bonus', ability: 'str', bonus: 3 }],
       },
     ];
@@ -76,11 +76,11 @@ describe('resolveAbilities', () => {
   it('applies ability-choice grants when decision exists', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [
           {
             type: 'ability-choice',
-            key: 'ability-choice:race:human:0',
+            key: 'ability-choice:species:human:0',
             count: 2,
             bonus: 1,
             from: ['str', 'dex'],
@@ -89,7 +89,7 @@ describe('resolveAbilities', () => {
       },
     ];
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-      'ability-choice:race:human:0': { type: 'ability-choice', abilities: ['str', 'con'] },
+      'ability-choice:species:human:0': { type: 'ability-choice', abilities: ['str', 'con'] },
     };
     const result = resolveAbilities(BASE, bundles, choices);
     expect(result.str.total).toBe(11);
@@ -100,11 +100,11 @@ describe('resolveAbilities', () => {
   it('does not apply ability-choice grants when no decision', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [
           {
             type: 'ability-choice',
-            key: 'ability-choice:race:human:0',
+            key: 'ability-choice:species:human:0',
             count: 2,
             bonus: 1,
             from: null,

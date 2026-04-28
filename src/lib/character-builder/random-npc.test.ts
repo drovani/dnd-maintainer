@@ -7,7 +7,7 @@ import {
   getQuickNpcClassIds,
 } from '@/lib/character-builder/random-npc';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { RACE_SOURCES } from '@/lib/sources/races';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import { DND_ALIGNMENTS } from '@/lib/dnd-helpers';
 import type { ClassSource } from '@/types/sources';
 
@@ -77,8 +77,8 @@ describe('generateRandomNpcBasics', () => {
     expect(result.suggestedBackground).toBe('soldier');
     // gender: pick(['male','female'], rng=0) → index 0 → 'male'
     expect(result.gender).toBe('male');
-    // race: pick(RACE_SOURCES, rng=0) → index 0
-    expect(result.race).toBe(RACE_SOURCES[0].id);
+    // race: pick(SPECIES_SOURCES, rng=0) → index 0
+    expect(result.race).toBe(SPECIES_SOURCES[0].id);
     // alignment: pick(DND_ALIGNMENTS, rng=0) → index 0
     expect(result.alignment).toBe(DND_ALIGNMENTS[0].id);
   });
@@ -95,7 +95,7 @@ describe('generateRandomNpcBasics', () => {
     expect(result).not.toBeNull();
     if (!result) return;
     expect(['male', 'female']).toContain(result.gender);
-    expect(RACE_SOURCES.map((r) => r.id)).toContain(result.race);
+    expect(SPECIES_SOURCES.map((r) => r.id)).toContain(result.race);
     expect(DND_ALIGNMENTS.map((a) => a.id)).toContain(result.alignment);
     expect(result.name).toContain(' ');
     // baseAbilities values should be a permutation of STANDARD_ARRAY

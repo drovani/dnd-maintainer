@@ -1,24 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getRaceSource } from '@/lib/sources';
-import type { RaceId } from '@/lib/dnd-helpers';
+import { getSpeciesSource } from '@/lib/sources';
 import { createChoiceKey } from '@/types/choices';
 
-const LIGHTFOOT_SHARED_FEATURE_IDS = [
-  'halfling-lucky',
-  'halfling-brave',
-  'halfling-nimbleness',
-  'halfling-naturally-stealthy',
-];
+const HALFLING_FEATURE_IDS = ['halfling-lucky', 'halfling-brave', 'halfling-nimbleness', 'halfling-naturally-stealthy'];
 
-const STOUT_SHARED_FEATURE_IDS = [
-  'halfling-lucky',
-  'halfling-brave',
-  'halfling-nimbleness',
-  'halfling-stout-resilience',
-];
-
-describe('Mountain Dwarf race source', () => {
-  const source = getRaceSource('dwarf-mountain' as RaceId);
+describe('Dwarf species source', () => {
+  const source = getSpeciesSource('dwarf');
 
   it('source is defined', () => {
     expect(source).toBeDefined();
@@ -85,7 +72,7 @@ describe('Mountain Dwarf race source', () => {
     expect(toolChoice).toEqual({
       type: 'proficiency-choice',
       category: 'tool',
-      key: createChoiceKey('tool-choice', 'race', 'dwarf-mountain', 0),
+      key: createChoiceKey('tool-choice', 'species', 'dwarf', 0),
       count: 1,
       from: ['smithstools', 'brewersupplies', 'masonstools'],
     });
@@ -106,8 +93,8 @@ describe('Mountain Dwarf race source', () => {
   });
 });
 
-describe('Lightfoot Halfling race source', () => {
-  const source = getRaceSource('halfling-lightfoot' as RaceId);
+describe('Halfling species source', () => {
+  const source = getSpeciesSource('halfling');
 
   it('source is defined', () => {
     expect(source).toBeDefined();
@@ -158,72 +145,11 @@ describe('Lightfoot Halfling race source', () => {
     const features = source?.grants.filter((g) => g.type === 'feature');
     expect(features).toHaveLength(4);
     const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
-    expect(featureIds).toEqual(expect.arrayContaining(LIGHTFOOT_SHARED_FEATURE_IDS));
+    expect(featureIds).toEqual(expect.arrayContaining(HALFLING_FEATURE_IDS));
   });
 
   it('grants no damage resistances', () => {
     const resistance = source?.grants.find((g) => g.type === 'resistance');
     expect(resistance).toBeUndefined();
-  });
-});
-
-describe('Stout Halfling race source', () => {
-  const source = getRaceSource('halfling-stout' as RaceId);
-
-  it('source is defined', () => {
-    expect(source).toBeDefined();
-  });
-
-  it('has correct defaults', () => {
-    expect(source?.defaultSize).toBe('small');
-    expect(source?.defaultSpeed).toBe(25);
-  });
-
-  it('grants +2 DEX and +1 CON', () => {
-    const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
-    expect(abilityBonuses).toEqual(
-      expect.arrayContaining([
-        { type: 'ability-bonus', ability: 'dex', bonus: 2 },
-        { type: 'ability-bonus', ability: 'con', bonus: 1 },
-      ])
-    );
-    expect(abilityBonuses).toHaveLength(2);
-  });
-
-  it('grants 25 ft walk speed', () => {
-    const speed = source?.grants.find((g) => g.type === 'speed');
-    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 25 });
-  });
-
-  it('grants Common and Halfling languages', () => {
-    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'halfling' },
-      ])
-    );
-  });
-
-  it('grants no armor, weapon, or tool proficiencies', () => {
-    const nonLanguageProficiencies = source?.grants.filter(
-      (g) => g.type === 'proficiency' && g.category !== 'language'
-    );
-    expect(nonLanguageProficiencies).toHaveLength(0);
-    const proficiencyChoices = source?.grants.filter((g) => g.type === 'proficiency-choice');
-    expect(proficiencyChoices).toHaveLength(0);
-  });
-
-  it('grants lucky, brave, halfling nimbleness, and stout resilience features', () => {
-    const features = source?.grants.filter((g) => g.type === 'feature');
-    expect(features).toHaveLength(4);
-    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
-    expect(featureIds).toEqual(expect.arrayContaining(STOUT_SHARED_FEATURE_IDS));
-  });
-
-  it('grants poison resistance', () => {
-    const resistance = source?.grants.find((g) => g.type === 'resistance');
-    expect(resistance).toEqual({ type: 'resistance', damageType: 'poison' });
   });
 });

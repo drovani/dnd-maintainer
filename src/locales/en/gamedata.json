@@ -1,22 +1,14 @@
 {
   "races": {
+    "aasimar": "Aasimar",
     "dragonborn": "Dragonborn",
-    "dwarf-hill": "Hill Dwarf",
     "dwarf": "Dwarf",
-    "dwarf-mountain": "Mountain Dwarf",
     "elf": "Elf",
-    "elf-dark": "Dark Elf (Drow)",
-    "elf-high": "High Elf",
-    "elf-wood": "Wood Elf",
     "gnome": "Gnome",
-    "gnome-forest": "Forest Gnome",
-    "gnome-rock": "Rock Gnome",
-    "halfelf": "Half-Elf",
-    "halforc": "Half-Orc",
+    "goliath": "Goliath",
     "halfling": "Halfling",
-    "halfling-lightfoot": "Lightfoot Halfling",
-    "halfling-stout": "Stout Halfling",
     "human": "Human",
+    "orc": "Orc",
     "tiefling": "Tiefling"
   },
   "creatureTypes": {

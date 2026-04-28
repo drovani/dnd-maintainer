@@ -82,7 +82,7 @@ describe('resolveSpeed', () => {
   it('collects walk speed from grants', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'speed', mode: 'walk', value: 30 }],
       },
     ];
@@ -94,7 +94,7 @@ describe('resolveSpeed', () => {
   it('takes highest value when same mode appears multiple times', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'speed', mode: 'walk', value: 30 }],
       },
       {
@@ -109,7 +109,7 @@ describe('resolveSpeed', () => {
   it('handles multiple speed modes independently', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [
           { type: 'speed', mode: 'walk', value: 30 },
           { type: 'speed', mode: 'swim', value: 30 },
@@ -148,7 +148,7 @@ describe('resolveAc', () => {
   it('natural armor mode uses baseAc', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'armor-class', calculation: { mode: 'natural', baseAc: 14 } }],
       },
     ];
@@ -237,7 +237,7 @@ describe('resolveAc', () => {
         grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
       },
       {
-        source: { origin: 'race', id: 'human' },
+        source: { origin: 'species', id: 'human' },
         grants: [{ type: 'armor-class', calculation: { mode: 'natural', baseAc: 15 } }],
       },
     ];

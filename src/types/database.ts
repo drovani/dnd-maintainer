@@ -1,4 +1,4 @@
-import type { AlignmentId, ClassId, DndGender, Proficiencies, RaceId, SizeId } from '@/lib/dnd-helpers';
+import type { AlignmentId, ClassId, DndGender, Proficiencies, SpeciesId, SizeId } from '@/lib/dnd-helpers';
 import type { ThemeId } from '@/lib/theme';
 
 export type { Proficiencies };
@@ -42,7 +42,7 @@ export interface Character {
   name: string;
   player_name: string | null;
   character_type: 'pc' | 'npc';
-  race: RaceId | null;
+  race: SpeciesId | null;
   class: ClassId | null;
   subclass: string | null;
   level: number;

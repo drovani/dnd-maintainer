@@ -61,7 +61,7 @@ const BUNDLE_TO_CLASS: ReadonlyMap<string, ClassId> = (() => {
  */
 export function getSourceDisplayName(source: SourceTag, tGamedata: TFunction<'gamedata'>): string {
   switch (source.origin) {
-    case 'race':
+    case 'species':
       return tGamedata(`races.${source.id}`, { defaultValue: source.id });
     case 'class':
       return tGamedata(`classes.${source.id}`, { defaultValue: source.id });
@@ -96,7 +96,7 @@ export function getGrantIcon(source: SourceTag, bundleCategory?: BundleCategory)
       return CLASS_ICONS[source.classId];
     case 'background':
       return BookOpen;
-    case 'race':
+    case 'species':
       return User;
     case 'pack':
       return Backpack;

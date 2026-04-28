@@ -1,7 +1,7 @@
-import type { RaceSource } from '@/types/sources';
+import type { SpeciesSource } from '@/types/sources';
 import { createChoiceKey } from '@/types/choices';
 
-export const RACE_SOURCES: readonly RaceSource[] = [
+export const SPECIES_SOURCES: readonly SpeciesSource[] = [
   {
     id: 'human',
     defaultSize: 'medium',
@@ -18,14 +18,20 @@ export const RACE_SOURCES: readonly RaceSource[] = [
       {
         type: 'proficiency-choice',
         category: 'language',
-        key: createChoiceKey('language-choice', 'race', 'human', 0),
+        key: createChoiceKey('language-choice', 'species', 'human', 0),
         count: 1,
         from: null,
       },
     ],
   },
   {
-    id: 'dwarf-mountain',
+    id: 'dragonborn',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [],
+  },
+  {
+    id: 'dwarf',
     defaultSize: 'medium',
     defaultSpeed: 25,
     grants: [
@@ -49,7 +55,7 @@ export const RACE_SOURCES: readonly RaceSource[] = [
       {
         type: 'proficiency-choice',
         category: 'tool',
-        key: createChoiceKey('tool-choice', 'race', 'dwarf-mountain', 0),
+        key: createChoiceKey('tool-choice', 'species', 'dwarf', 0),
         count: 1,
         from: ['smithstools', 'brewersupplies', 'masonstools'],
       },
@@ -86,7 +92,19 @@ export const RACE_SOURCES: readonly RaceSource[] = [
     ],
   },
   {
-    id: 'halfling-lightfoot',
+    id: 'elf',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [],
+  },
+  {
+    id: 'gnome',
+    defaultSize: 'small',
+    defaultSpeed: 25,
+    grants: [],
+  },
+  {
+    id: 'halfling',
     defaultSize: 'small',
     defaultSpeed: 25,
     grants: [
@@ -132,50 +150,9 @@ export const RACE_SOURCES: readonly RaceSource[] = [
     ],
   },
   {
-    id: 'halfling-stout',
-    defaultSize: 'small',
-    defaultSpeed: 25,
-    grants: [
-      { type: 'ability-bonus', ability: 'dex', bonus: 2 },
-      { type: 'ability-bonus', ability: 'con', bonus: 1 },
-      { type: 'speed', mode: 'walk', value: 25 },
-      { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'halfling' },
-      {
-        type: 'feature',
-        feature: {
-          id: 'halfling-lucky',
-          name: 'Lucky',
-          description:
-            'When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll.',
-        },
-      },
-      {
-        type: 'feature',
-        feature: {
-          id: 'halfling-brave',
-          name: 'Brave',
-          description: 'You have advantage on saving throws against being frightened.',
-        },
-      },
-      {
-        type: 'feature',
-        feature: {
-          id: 'halfling-nimbleness',
-          name: 'Halfling Nimbleness',
-          description: 'You can move through the space of any creature that is of a size larger than yours.',
-        },
-      },
-      { type: 'resistance', damageType: 'poison' },
-      {
-        type: 'feature',
-        feature: {
-          id: 'halfling-stout-resilience',
-          name: 'Stout Resilience',
-          description:
-            'You have advantage on saving throws against poison, and you have resistance against poison damage.',
-        },
-      },
-    ],
+    id: 'tiefling',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [],
   },
 ];

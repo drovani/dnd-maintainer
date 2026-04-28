@@ -90,8 +90,8 @@ describe('ProficienciesPanel', () => {
   it('renders language badges', () => {
     const resolved = buildMinimalResolved({
       languages: [
-        { value: 'common', sources: [{ origin: 'race', id: 'human' }] },
-        { value: 'elvish', sources: [{ origin: 'race', id: 'human' }] },
+        { value: 'common', sources: [{ origin: 'species', id: 'human' }] },
+        { value: 'elvish', sources: [{ origin: 'species', id: 'human' }] },
       ],
     });
     render(<ProficienciesPanel resolved={resolved} />);
@@ -101,7 +101,7 @@ describe('ProficienciesPanel', () => {
 
   it('omits armor section when armor proficiencies are empty', () => {
     const resolved = buildMinimalResolved({
-      languages: [{ value: 'common', sources: [{ origin: 'race', id: 'human' }] }],
+      languages: [{ value: 'common', sources: [{ origin: 'species', id: 'human' }] }],
     });
     render(<ProficienciesPanel resolved={resolved} />);
     // 'armor' section label should not be present (mock returns last segment)

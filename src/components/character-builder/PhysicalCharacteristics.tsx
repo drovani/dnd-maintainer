@@ -150,7 +150,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
             disabled={rollingField !== null}
           >
             <Calculator className="size-3.5" />
-            {t('characterBuilder.backstory.physicals.average')}
+            {t('characterBuilder.backstory.physicals.averageAll')}
           </Button>
           <Button
             type="button"
@@ -160,7 +160,7 @@ export function PhysicalCharacteristics({ raceId, height, weight, onChange, clas
             disabled={rollingField !== null}
           >
             <Dices className="size-3.5" />
-            {t('characterBuilder.backstory.physicals.roll')}
+            {t('characterBuilder.backstory.physicals.rollAll')}
           </Button>
         </div>
       </div>
