@@ -83,6 +83,50 @@ describe('getItemSource', () => {
   });
 });
 
+describe('all 2024 backgrounds have correct structure', () => {
+  const EXPECTED_BACKGROUNDS = [
+    { id: 'acolyte', fromPool: ['int', 'wis', 'cha'] },
+    { id: 'artisan', fromPool: ['str', 'dex', 'int'] },
+    { id: 'charlatan', fromPool: ['dex', 'con', 'cha'] },
+    { id: 'criminal', fromPool: ['dex', 'con', 'int'] },
+    { id: 'entertainer', fromPool: ['str', 'dex', 'cha'] },
+    { id: 'farmer', fromPool: ['str', 'con', 'wis'] },
+    { id: 'guard', fromPool: ['str', 'int', 'wis'] },
+    { id: 'guide', fromPool: ['dex', 'con', 'wis'] },
+    { id: 'hermit', fromPool: ['con', 'wis', 'cha'] },
+    { id: 'merchant', fromPool: ['con', 'int', 'cha'] },
+    { id: 'noble', fromPool: ['str', 'int', 'cha'] },
+    { id: 'sage', fromPool: ['con', 'int', 'wis'] },
+    { id: 'sailor', fromPool: ['str', 'dex', 'con'] },
+    { id: 'scribe', fromPool: ['dex', 'int', 'wis'] },
+    { id: 'soldier', fromPool: ['str', 'dex', 'con'] },
+    { id: 'wayfarer', fromPool: ['dex', 'wis', 'cha'] },
+  ] as const;
+
+  it.each(EXPECTED_BACKGROUNDS)('$id has ASI grant with 3 points and correct from pool', ({ id, fromPool }) => {
+    const source = getBackgroundSource(id as BackgroundId);
+    expect(source).toBeDefined();
+    const asiGrant = source?.grants.find((g) => g.type === 'asi');
+    expect(asiGrant).toBeDefined();
+    if (asiGrant?.type === 'asi') {
+      expect(asiGrant.points).toBe(3);
+      expect(asiGrant.from).toEqual(fromPool);
+    }
+  });
+
+  it.each(EXPECTED_BACKGROUNDS)('$id has exactly 2 skill proficiency grants', ({ id }) => {
+    const source = getBackgroundSource(id as BackgroundId);
+    const skillGrants = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'skill');
+    expect(skillGrants).toHaveLength(2);
+  });
+
+  it.each(EXPECTED_BACKGROUNDS)('$id has exactly 1 feat grant', ({ id }) => {
+    const source = getBackgroundSource(id as BackgroundId);
+    const featGrants = source?.grants.filter((g) => g.type === 'feat');
+    expect(featGrants).toHaveLength(1);
+  });
+});
+
 describe('collectBundles', () => {
   it('returns 3 bundles for Human Fighter L1 build', () => {
     const { bundles } = collectBundles(humanFighterL1Build);

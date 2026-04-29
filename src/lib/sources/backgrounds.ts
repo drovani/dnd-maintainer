@@ -201,6 +201,8 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         category: 'tool',
         key: createChoiceKey('tool-choice', 'background', 'guard', 0),
         count: 1,
+        // PHB 2024 p.180: Guard background grants a Musical Instrument proficiency
+        // (not a Gaming Set — counterintuitive given the martial flavor, but correct per RAW)
         from: MUSICAL_INSTRUMENTS,
       },
       {

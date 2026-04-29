@@ -46,10 +46,8 @@ export function resolveAbilities(
     const decision = choices[grant.key];
     if (decision?.type === 'asi') {
       const totalAllocated = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0);
-      if (totalAllocated > grant.points) {
-        logger.warn(
-          `ASI allocation for "${grant.key}" uses ${totalAllocated} points but grant allows ${grant.points} — skipping`
-        );
+      if (totalAllocated !== grant.points) {
+        logger.warn(`ASI allocation for "${grant.key}" uses ${totalAllocated} of ${grant.points} points — skipping`);
         continue;
       }
       if (grant.from != null) {

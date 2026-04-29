@@ -1019,6 +1019,30 @@ describe('Rogue L3 + Assassin subclass integration', () => {
   });
 });
 
+describe('FeatGrant graceful handling', () => {
+  it('does not emit any pending choices for a bundle containing only a feat grant', () => {
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'feat', featId: 'savage-attacker' }],
+      },
+    ];
+    const result = resolveCharacter({ ...baseInput, bundles });
+    // Feat grants are not yet implemented and must not add pending choices
+    expect(result.pendingChoices).toHaveLength(0);
+  });
+
+  it('does not throw when feat grants are present', () => {
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'feat', featId: 'savage-attacker' }],
+      },
+    ];
+    expect(() => resolveCharacter({ ...baseInput, bundles })).not.toThrow();
+  });
+});
+
 describe('Rogue L3 + Arcane Trickster subclass integration', () => {
   const subclassKey = createChoiceKey('subclass', 'class', 'rogue', 0);
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
