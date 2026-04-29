@@ -149,6 +149,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         choiceKey: grant.key,
         source,
         points: grant.points,
+        from: grant.from,
       });
     }
   }

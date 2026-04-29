@@ -52,6 +52,17 @@ export function resolveAbilities(
         );
         continue;
       }
+      if (grant.from != null) {
+        const invalidKeys = Object.keys(decision.allocation).filter(
+          (k) => (decision.allocation[k as AbilityKey] ?? 0) > 0 && !grant.from!.includes(k as AbilityKey)
+        );
+        if (invalidKeys.length > 0) {
+          logger.warn(
+            `ASI allocation for "${grant.key}" includes abilities [${invalidKeys.join(', ')}] outside allowed pool [${grant.from.join(', ')}] — skipping`
+          );
+          continue;
+        }
+      }
       for (const [ability, value] of Object.entries(decision.allocation)) {
         if (value !== undefined && value > 0) {
           bonusList[ability as AbilityKey].push({ value, source });

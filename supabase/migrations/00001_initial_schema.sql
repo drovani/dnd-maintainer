@@ -182,14 +182,11 @@ CREATE TABLE characters (
                     )),
     subclass        text,
     level           integer     NOT NULL DEFAULT 0,
-    -- TODO(#89): 2024 PHB defines 16 new backgrounds with ASI grants.
-    -- These 14 entries (13 named + 'custom') are 2014 PHB stubs retained for seed compatibility.
-    -- Replace when issue #89 lands.
     background      text
                     CHECK (background IS NULL OR background IN (
-                      'acolyte', 'charlatan', 'criminal', 'entertainer', 'folkhero',
-                      'guildartisan', 'hermit', 'noble', 'outlander', 'sage',
-                      'sailor', 'soldier', 'urchin', 'custom'
+                      'acolyte', 'artisan', 'charlatan', 'criminal', 'entertainer', 'farmer',
+                      'guard', 'guide', 'hermit', 'merchant', 'noble', 'sage',
+                      'sailor', 'scribe', 'soldier', 'wayfarer'
                     )),
     alignment       text        NOT NULL DEFAULT 'n'
                     CHECK (alignment IN ('lg', 'ng', 'cg', 'ln', 'n', 'cn', 'le', 'ne', 'ce')),

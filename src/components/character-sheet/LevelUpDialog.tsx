@@ -310,6 +310,7 @@ export function LevelUpDialog({
                   choiceKey: grant.key,
                   source: { origin: 'class', id: classId, level: targetLevel },
                   points: grant.points,
+                  from: grant.from,
                 } satisfies Extract<PendingChoice, { type: 'asi' }>
               }
               abilities={currentAbilities}

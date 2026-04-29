@@ -127,6 +127,7 @@ describe('resolveAbilities', () => {
             type: 'asi',
             key: 'asi:class:fighter:0',
             points: 2,
+            from: null,
           },
         ],
       },
@@ -149,6 +150,7 @@ describe('resolveAbilities', () => {
             type: 'asi',
             key: 'asi:class:fighter:0',
             points: 2,
+            from: null,
           },
         ],
       },
@@ -170,6 +172,7 @@ describe('resolveAbilities', () => {
             type: 'asi',
             key: 'asi:class:fighter:0',
             points: 2,
+            from: null,
           },
         ],
       },
@@ -193,6 +196,7 @@ describe('resolveAbilities', () => {
             type: 'asi',
             key: 'asi:class:fighter:0',
             points: 2,
+            from: null,
           },
         ],
       },
@@ -212,6 +216,7 @@ describe('resolveAbilities', () => {
             type: 'asi',
             key: 'asi:class:fighter:0',
             points: 2,
+            from: null,
           },
         ],
       },
@@ -223,5 +228,100 @@ describe('resolveAbilities', () => {
     expect(result.str.total).toBe(11);
     expect(result.dex.total).toBe(11);
     expect(result.con.total).toBe(10);
+  });
+
+  describe('ASI from background with from constraint', () => {
+    it('+2/+1 split within from pool applies both bonuses', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'background', id: 'acolyte' },
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:background:acolyte:0',
+              points: 3,
+              from: ['int', 'wis', 'cha'],
+            },
+          ],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:background:acolyte:0': { type: 'asi', allocation: { int: 2, wis: 1 } },
+      };
+      const result = resolveAbilities(BASE, bundles, choices);
+      expect(result.int.total).toBe(12);
+      expect(result.wis.total).toBe(11);
+      expect(result.cha.total).toBe(10);
+    });
+
+    it('+1/+1/+1 split across all three from abilities applies all bonuses', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'background', id: 'acolyte' },
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:background:acolyte:0',
+              points: 3,
+              from: ['int', 'wis', 'cha'],
+            },
+          ],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:background:acolyte:0': { type: 'asi', allocation: { int: 1, wis: 1, cha: 1 } },
+      };
+      const result = resolveAbilities(BASE, bundles, choices);
+      expect(result.int.total).toBe(11);
+      expect(result.wis.total).toBe(11);
+      expect(result.cha.total).toBe(11);
+    });
+
+    it('allocation outside from pool skips entire grant', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'background', id: 'acolyte' },
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:background:acolyte:0',
+              points: 3,
+              from: ['int', 'wis', 'cha'],
+            },
+          ],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:background:acolyte:0': { type: 'asi', allocation: { str: 2, wis: 1 } },
+      };
+      const result = resolveAbilities(BASE, bundles, choices);
+      for (const key of ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const) {
+        expect(result[key].total).toBe(10);
+      }
+    });
+
+    it('source attribution reflects background origin', () => {
+      const backgroundSource = { origin: 'background' as const, id: 'acolyte' as const };
+      const bundles: GrantBundle[] = [
+        {
+          source: backgroundSource,
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:background:acolyte:0',
+              points: 3,
+              from: ['int', 'wis', 'cha'],
+            },
+          ],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:background:acolyte:0': { type: 'asi', allocation: { wis: 2, cha: 1 } },
+      };
+      const result = resolveAbilities(BASE, bundles, choices);
+      expect(result.wis.bonuses).toHaveLength(1);
+      expect(result.wis.bonuses[0].source).toEqual(backgroundSource);
+      expect(result.wis.bonuses[0].source.origin).toBe('background');
+    });
   });
 });

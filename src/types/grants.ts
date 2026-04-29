@@ -177,6 +177,12 @@ export interface AsiGrant {
   readonly type: 'asi';
   readonly key: ChoiceKey;
   readonly points: number;
+  readonly from: readonly AbilityKey[] | null;
+}
+
+export interface FeatGrant {
+  readonly type: 'feat';
+  readonly featId: string;
 }
 
 export interface SubclassGrant {
@@ -242,4 +248,5 @@ export type Grant =
   | FightingStyleChoiceGrant
   | EquipmentGrant
   | BundleChoiceGrant
-  | LineageChoiceGrant;
+  | LineageChoiceGrant
+  | FeatGrant;

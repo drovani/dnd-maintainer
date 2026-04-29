@@ -76,6 +76,7 @@ function useAllChoiceGrants() {
         choiceKey: grant.key,
         source,
         points: grant.points,
+        from: grant.from,
       });
     }
 

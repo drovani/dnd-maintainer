@@ -362,6 +362,21 @@ export const DND_TOOL_PROFICIENCIES = [
   'gaming-set-three-dragon-ante',
   'disguisekit',
   'poisonerskit',
+  'calligrapherstools',
+  'carpentertools',
+  'cartographerstools',
+  'cobblerstools',
+  'cooksutensils',
+  'forgerykit',
+  'glassblowerstools',
+  'jewelerstools',
+  'leatherworkerstools',
+  'navigatorstools',
+  'painterstools',
+  'potterstools',
+  'tinkerstools',
+  'weaverstools',
+  'woodcarverstools',
 ] as const;
 
 export type ToolProficiencyId = (typeof DND_TOOL_PROFICIENCIES)[number];
@@ -679,19 +694,21 @@ export type SkillId = (typeof DND_SKILLS)[number]['id'];
 
 export const DND_BACKGROUNDS = [
   { id: 'acolyte' },
+  { id: 'artisan' },
   { id: 'charlatan' },
   { id: 'criminal' },
   { id: 'entertainer' },
-  { id: 'folkhero' },
-  { id: 'guildartisan' },
+  { id: 'farmer' },
+  { id: 'guard' },
+  { id: 'guide' },
   { id: 'hermit' },
+  { id: 'merchant' },
   { id: 'noble' },
-  { id: 'outlander' },
   { id: 'sage' },
   { id: 'sailor' },
+  { id: 'scribe' },
   { id: 'soldier' },
-  { id: 'urchin' },
-  { id: 'custom' },
+  { id: 'wayfarer' },
 ] as const;
 
 export type BackgroundId = (typeof DND_BACKGROUNDS)[number]['id'];

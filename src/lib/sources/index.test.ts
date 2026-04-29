@@ -66,8 +66,8 @@ describe('getBackgroundSource', () => {
     const source = getBackgroundSource('soldier' as BackgroundId);
     expect(source).toBeDefined();
     expect(source?.id).toBe('soldier');
-    // 2 skill + 1 tool + 1 tool-choice + 1 language-choice + 3 equipment = 8
-    expect(source?.grants).toHaveLength(8);
+    // 1 asi + 2 skill + 1 tool-choice + 1 language-choice + 1 feat = 6
+    expect(source?.grants).toHaveLength(6);
   });
 });
 

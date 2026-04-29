@@ -48,19 +48,21 @@
   },
   "backgrounds": {
     "acolyte": "Acolyte",
+    "artisan": "Artisan",
     "charlatan": "Charlatan",
     "criminal": "Criminal",
     "entertainer": "Entertainer",
-    "folkhero": "Folk Hero",
-    "guildartisan": "Guild Artisan",
+    "farmer": "Farmer",
+    "guard": "Guard",
+    "guide": "Guide",
     "hermit": "Hermit",
+    "merchant": "Merchant",
     "noble": "Noble",
-    "outlander": "Outlander",
     "sage": "Sage",
     "sailor": "Sailor",
+    "scribe": "Scribe",
     "soldier": "Soldier",
-    "urchin": "Urchin",
-    "custom": "Custom"
+    "wayfarer": "Wayfarer"
   },
   "alignments": {
     "lg": "Lawful Good",
@@ -215,7 +217,22 @@
     "brewersupplies": "Brewer's Supplies",
     "masonstools": "Mason's Tools",
     "disguisekit": "Disguise Kit",
-    "poisonerskit": "Poisoner's Kit"
+    "poisonerskit": "Poisoner's Kit",
+    "calligrapherstools": "Calligrapher's Supplies",
+    "carpentertools": "Carpenter's Tools",
+    "cartographerstools": "Cartographer's Tools",
+    "cobblerstools": "Cobbler's Tools",
+    "cooksutensils": "Cook's Utensils",
+    "forgerykit": "Forgery Kit",
+    "glassblowerstools": "Glassblower's Tools",
+    "jewelerstools": "Jeweler's Tools",
+    "leatherworkerstools": "Leatherworker's Tools",
+    "navigatorstools": "Navigator's Tools",
+    "painterstools": "Painter's Supplies",
+    "potterstools": "Potter's Tools",
+    "tinkerstools": "Tinker's Tools",
+    "weaverstools": "Weaver's Tools",
+    "woodcarverstools": "Woodcarver's Tools"
   },
   "features": {
     "fighter-fighting-style": {

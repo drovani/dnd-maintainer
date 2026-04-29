@@ -140,7 +140,13 @@ export type PendingChoice =
       readonly from: readonly SkillId[] | null;
       readonly fromTools: readonly ToolProficiencyId[];
     }
-  | { readonly type: 'asi'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly points: number }
+  | {
+      readonly type: 'asi';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly points: number;
+      readonly from: readonly AbilityKey[] | null;
+    }
   | { readonly type: 'subclass'; readonly choiceKey: ChoiceKey; readonly source: SourceTag; readonly classId: ClassId }
   | {
       readonly type: 'fighting-style-choice';

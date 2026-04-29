@@ -394,8 +394,8 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
           <div className="space-y-2">
             <Label>{tc('characterBuilder.fields.background')}</Label>
             {(() => {
-              const isCustom = background !== '' && (!isBackgroundId(background) || background === 'custom');
-              const dropdownValue = isCustom ? 'custom' : background || null;
+              const isCustom = background !== '' && !isBackgroundId(background);
+              const dropdownValue = isCustom ? null : background || null;
               return (
                 <>
                   <Select
@@ -420,8 +420,8 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                   {isCustom && (
                     <Input
                       placeholder={tc('characterBuilder.placeholders.enterCustomBackground')}
-                      value={background === 'custom' ? '' : background}
-                      onChange={(e) => handleBackgroundChange(e.target.value || 'custom')}
+                      value={background}
+                      onChange={(e) => handleBackgroundChange(e.target.value)}
                     />
                   )}
                 </>

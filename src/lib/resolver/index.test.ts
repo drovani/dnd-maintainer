@@ -123,6 +123,8 @@ describe('Human Fighter L1 integration', () => {
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       // Human language choice
       'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+      // Soldier background ASI choice (+2 STR, +1 CON)
+      'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
       // Soldier tool choice
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       // Soldier language choice
@@ -152,12 +154,12 @@ describe('Human Fighter L1 integration', () => {
     levels: humanFighterBuild.levels,
   };
 
-  it('has correct ability totals (2024 human grants no ability bonus)', () => {
+  it('has correct ability totals (2024 human grants no ability bonus, background grants +2 STR +1 CON)', () => {
     const result = resolveCharacter(input);
-    // 2024 human has no ASI — base scores only
-    expect(result.abilities.str.total).toBe(15);
+    // 2024 human has no ASI; soldier background grants +2 STR, +1 CON
+    expect(result.abilities.str.total).toBe(17);
     expect(result.abilities.dex.total).toBe(13);
-    expect(result.abilities.con.total).toBe(14);
+    expect(result.abilities.con.total).toBe(15);
     expect(result.abilities.int.total).toBe(8);
     expect(result.abilities.wis.total).toBe(10);
     expect(result.abilities.cha.total).toBe(12);
@@ -165,9 +167,9 @@ describe('Human Fighter L1 integration', () => {
 
   it('has correct ability modifiers', () => {
     const result = resolveCharacter(input);
-    expect(result.abilities.str.modifier).toBe(2); // (15-10)/2 = 2
+    expect(result.abilities.str.modifier).toBe(3); // (17-10)/2 = 3
     expect(result.abilities.dex.modifier).toBe(1); // (13-10)/2 = 1
-    expect(result.abilities.con.modifier).toBe(2); // (14-10)/2 = 2
+    expect(result.abilities.con.modifier).toBe(2); // (15-10)/2 = 2
     expect(result.abilities.int.modifier).toBe(-1); // (8-10)/2 = -1
     expect(result.abilities.wis.modifier).toBe(0); // (10-10)/2 = 0
     expect(result.abilities.cha.modifier).toBe(1); // (12-10)/2 = 1
@@ -204,9 +206,9 @@ describe('Human Fighter L1 integration', () => {
     expect(result.savingThrows.cha.proficient).toBe(false);
   });
 
-  it('STR saving throw bonus = STR mod (2) + proficiency (2) = 4', () => {
+  it('STR saving throw bonus = STR mod (3) + proficiency (2) = 5', () => {
     const result = resolveCharacter(input);
-    expect(result.savingThrows.str.bonus).toBe(4);
+    expect(result.savingThrows.str.bonus).toBe(5);
   });
 
   it('has 3 features: Resourceful (human), chosen fighting style, and Second Wind', () => {
@@ -335,7 +337,7 @@ describe('Pending ASI and Subclass choices', () => {
     const bundles: GrantBundle[] = [
       {
         source: { origin: 'class', id: 'fighter', level: 4 },
-        grants: [{ type: 'asi', key: asiKey, points: 2 }],
+        grants: [{ type: 'asi', key: asiKey, points: 2, from: null }],
       },
     ];
     const result = resolveCharacter({ ...baseInput, bundles });
@@ -351,7 +353,7 @@ describe('Pending ASI and Subclass choices', () => {
     const bundles: GrantBundle[] = [
       {
         source: { origin: 'class', id: 'fighter', level: 4 },
-        grants: [{ type: 'asi', key: asiKey, points: 2 }],
+        grants: [{ type: 'asi', key: asiKey, points: 2, from: null }],
       },
     ];
     const result = resolveCharacter({
@@ -406,6 +408,7 @@ describe('Human Fighter L1 equipment integration', () => {
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
       'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       // Fighter bundle choices
@@ -462,8 +465,8 @@ describe('Human Fighter L1 equipment integration', () => {
     });
     const longswordAttack = result.attacks.find((a) => a.weaponId === 'longsword');
     expect(longswordAttack).toBeDefined();
-    // STR 15 (no 2024 human ASI) → mod 2, prof 2 = 4
-    expect(longswordAttack!.attackBonus).toBe(4);
+    // STR 15 + background +2 = 17 → mod 3, prof 2 = 5
+    expect(longswordAttack!.attackBonus).toBe(5);
   });
 
   it('shield alone adds +2 to AC even without body armor', () => {
@@ -502,6 +505,7 @@ describe('Human Fighter L5 integration', () => {
       'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
@@ -535,10 +539,12 @@ describe('Human Fighter L5 integration', () => {
     expect(result.proficiencyBonus).toBe(3);
   });
 
-  it('applies ASI +2 STR on top of base (no 2024 human ASI)', () => {
+  it('applies class ASI +2 STR and background ASI +2 STR +1 CON on top of base', () => {
     const result = resolveCharacter(input);
-    // base 15 + ASI +2 = 17 (2024 human grants no ability bonus)
-    expect(result.abilities.str.total).toBe(17);
+    // base 15 + background +2 STR + class ASI +2 STR = 19 (2024 human grants no ability bonus)
+    expect(result.abilities.str.total).toBe(19);
+    // base 14 + background +1 CON = 15
+    expect(result.abilities.con.total).toBe(15);
   });
 
   it('has fighter-action-surge feature (level 2)', () => {
