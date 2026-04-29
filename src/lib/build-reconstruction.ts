@@ -1,4 +1,4 @@
-import { DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
+import { DND_CLASSES, isBackgroundId, isSpeciesId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('build-reconstruction');
@@ -77,6 +77,7 @@ export function reconstructBuild(
   equippedItems: readonly string[]
 ): CharacterBuild {
   if (!character.race) throw new Error('Character is missing required race');
+  if (!isSpeciesId(character.race)) throw new Error(`Character has invalid species ID: "${character.race}"`);
 
   const creationRow = rows.find((r): r is CreationRow => isCreationRow(r));
   if (!creationRow) {
@@ -199,7 +200,7 @@ export function reconstructBuild(
     character.background !== null && isBackgroundId(character.background) ? character.background : null;
 
   return {
-    speciesId: character.race as SpeciesId,
+    speciesId: character.race,
     backgroundId,
     baseAbilities,
     abilityMethod,

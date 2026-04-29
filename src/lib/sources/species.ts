@@ -155,4 +155,23 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     defaultSpeed: 30,
     grants: [],
   },
+  // Stub entries — grants filled in a later issue
+  {
+    id: 'aasimar',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [],
+  },
+  {
+    id: 'goliath',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [],
+  },
+  {
+    id: 'orc',
+    defaultSize: 'medium',
+    defaultSpeed: 30,
+    grants: [],
+  },
 ];

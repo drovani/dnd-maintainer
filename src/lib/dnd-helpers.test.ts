@@ -673,3 +673,20 @@ describe('averageDice', () => {
     expect(averageDice(count, sides)).toBe(expected);
   });
 });
+
+describe('DND_SPECIES lineages', () => {
+  it('dragonborn has chromatic, metallic, gem lineages', () => {
+    const s = DND_SPECIES.find((s) => s.id === 'dragonborn') as DndSpecies | undefined;
+    expect(s?.lineages).toEqual(['chromatic', 'metallic', 'gem']);
+  });
+
+  it('tiefling has abyssal, chthonic, infernal lineages', () => {
+    const s = DND_SPECIES.find((s) => s.id === 'tiefling') as DndSpecies | undefined;
+    expect(s?.lineages).toEqual(['abyssal', 'chthonic', 'infernal']);
+  });
+
+  it('species without lineages do not have the field', () => {
+    const human = DND_SPECIES.find((s) => s.id === 'human') as DndSpecies | undefined;
+    expect(human?.lineages).toBeUndefined();
+  });
+});

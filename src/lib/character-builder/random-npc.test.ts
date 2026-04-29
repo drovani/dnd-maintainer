@@ -83,15 +83,20 @@ describe('generateRandomNpcBasics', () => {
     expect(result.alignment).toBe(DND_ALIGNMENTS[0].id);
   });
 
-  it('with rng=()=>0.999 picks dex=15 (last element of ["str","dex"])', () => {
-    const result = generateRandomNpcBasics('fighter', () => 0.999);
+  it('with rng=()=>0.65 picks dex=15 (last element of ["str","dex"]) via tiefling', () => {
+    // rng=()=>0.65: gender=female (idx 1), species=tiefling (idx 6 of 10, has names),
+    // alignment=cn (idx 5), name picks from tiefling data, highestAbility=dex (idx 1 of 2)
+    const result = generateRandomNpcBasics('fighter', () => 0.65);
     expect(result).not.toBeNull();
     if (!result || result.targetStep !== 'skills') return;
     expect(result.baseAbilities.dex).toBe(15);
   });
 
-  it('with default Math.random returns a valid result within expected pools', () => {
-    const result = generateRandomNpcBasics('fighter');
+  it('with rng=()=>0.3 returns a valid result within expected pools via elf', () => {
+    // rng=()=>0.3: gender=male (idx 0), species=elf (idx 3 of 10, has names),
+    // alignment=cg (idx 2), highestAbility=str (idx 0 of 2)
+    // Using a fixed rng avoids the ~30% chance of picking aasimar/goliath/orc (no name data).
+    const result = generateRandomNpcBasics('fighter', () => 0.3);
     expect(result).not.toBeNull();
     if (!result) return;
     expect(['male', 'female']).toContain(result.gender);
@@ -141,5 +146,13 @@ describe('generateRandomNpcBasicsDetailed', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.basics.targetStep).toBe('skills');
+  });
+
+  it('reports failure="name-generation" when selected species has no name data (e.g. orc)', () => {
+    // rng=()=>0.95: gender=female (idx 1 of 2), species=orc (idx 9 of 10, no name data)
+    const result = generateRandomNpcBasicsDetailed('fighter', () => 0.95);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.failure).toBe('name-generation');
   });
 });

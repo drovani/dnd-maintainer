@@ -40,4 +40,9 @@ describe('parseChoiceKey', () => {
     const parsed = parseChoiceKey(key);
     expect(parsed).toEqual({ category: 'asi', origin: 'class', id: 'fighter', index: 2 });
   });
+
+  it('parses a species-origin choice key', () => {
+    const result = parseChoiceKey('language-choice:species:human:0');
+    expect(result).toEqual({ category: 'language-choice', origin: 'species', id: 'human', index: 0 });
+  });
 });

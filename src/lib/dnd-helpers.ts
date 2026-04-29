@@ -697,6 +697,12 @@ export function isBackgroundId(value: string): value is BackgroundId {
   return BACKGROUND_ID_SET.has(value);
 }
 
+const SPECIES_ID_SET: ReadonlySet<string> = new Set(DND_SPECIES.map((s) => s.id));
+
+export function isSpeciesId(value: string): value is SpeciesId {
+  return SPECIES_ID_SET.has(value);
+}
+
 export const DND_ALIGNMENTS = [
   { id: 'lg' },
   { id: 'ng' },
@@ -821,13 +827,13 @@ export function rollAbilityScores(): number[] {
 
 export type DndGender = 'male' | 'female';
 
-export type RaceNameData = {
+export type SpeciesNameData = {
   readonly [G in DndGender]: readonly string[];
 } & {
   readonly clan: readonly string[];
 };
 
-export const DND_SPECIES_NAMES: Readonly<Partial<Record<string, RaceNameData>>> = {
+export const DND_SPECIES_NAMES: Readonly<Partial<Record<SpeciesId, SpeciesNameData>>> = {
   aasimar: { male: [], female: [], clan: [] },
   dragonborn: {
     male: [
@@ -1178,14 +1184,14 @@ const EMPTY_PROFICIENCIES: Proficiencies = {
 
 export function computeProficiencies(
   classId: ClassId | '',
-  raceId: SpeciesId | '',
+  speciesId: SpeciesId | '',
   prev: Proficiencies,
   classChanged: boolean,
   raceChanged: boolean
 ): Proficiencies {
   if (!classChanged && !raceChanged) return prev;
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId);
-  const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === raceId);
+  const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === speciesId);
   const raceWeapons: WeaponProficiencyId[] = race?.weaponProficiencies ? [...race.weaponProficiencies] : [];
   return {
     armor: cls ? [...cls.armorProficiencies] : [],
@@ -1222,10 +1228,10 @@ export function toggleToolProficiencyChoice(
 
 export function toggleLanguageProficiencyChoice(
   proficiencies: Proficiencies,
-  raceId: SpeciesId | '',
+  speciesId: SpeciesId | '',
   langId: LanguageId
 ): Proficiencies {
-  const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === raceId);
+  const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === speciesId);
   const maxChoices = race?.languageChoices ?? 0;
   if (maxChoices === 0) return proficiencies;
   if (proficiencies.languages.includes(langId)) {
@@ -1243,11 +1249,11 @@ export function toggleLanguageProficiencyChoice(
 export { EMPTY_PROFICIENCIES };
 
 export function generateCharacterName(
-  raceId: SpeciesId,
+  speciesId: SpeciesId,
   gender: DndGender,
   rng: () => number = Math.random
 ): string | null {
-  const raceData = DND_SPECIES_NAMES[raceId];
+  const raceData = DND_SPECIES_NAMES[speciesId];
   if (!raceData) return null;
 
   const firstNames = raceData[gender];
