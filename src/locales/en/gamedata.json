@@ -323,8 +323,8 @@
       "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
     },
     "dwarf-darkvision": {
-      "name": "Darkvision",
-      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+      "name": "Darkvision (120 ft.)",
+      "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
     },
     "dwarf-dwarven-resilience": {
       "name": "Dwarven Resilience",
@@ -341,10 +341,6 @@
     "halfling-brave": {
       "name": "Brave",
       "description": "You have advantage on saving throws against being frightened."
-    },
-    "halfling-nimbleness": {
-      "name": "Halfling Nimbleness",
-      "description": "You can move through the space of any creature that is of a size larger than yours."
     },
     "halfling-naturally-stealthy": {
       "name": "Naturally Stealthy",
@@ -585,6 +581,82 @@
     "tiefling-fiendish-legacy-infernal": {
       "name": "Fiendish Legacy (Infernal)",
       "description": "You are the recipient of an infernal legacy. You have Resistance to Fire damage. You also know the Fire Bolt cantrip. Starting at 3rd level, you can cast Hellish Rebuke. Starting at 5th level, you can also cast Darkness."
+    },
+    "elf-drow-darkvision": {
+      "name": "Drow Darkvision (120 ft.)",
+      "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "elf-drow-dancing-lights": {
+      "name": "Dancing Lights",
+      "description": "You know the Dancing Lights cantrip. Charisma is your spellcasting ability for it."
+    },
+    "elf-drow-faerie-fire": {
+      "name": "Faerie Fire",
+      "description": "Starting at 3rd level, you can cast Faerie Fire using this trait. Charisma is your spellcasting ability for it."
+    },
+    "elf-drow-darkness": {
+      "name": "Darkness",
+      "description": "Starting at 5th level, you can cast Darkness using this trait. Charisma is your spellcasting ability for it."
+    },
+    "elf-high-elf-cantrip": {
+      "name": "High Elf Cantrip",
+      "description": "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it."
+    },
+    "elf-high-elf-detect-magic": {
+      "name": "Detect Magic",
+      "description": "Starting at 3rd level, you can cast Detect Magic using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "elf-high-elf-misty-step": {
+      "name": "Misty Step",
+      "description": "Starting at 5th level, you can cast Misty Step using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "elf-wood-elf-druidcraft": {
+      "name": "Druidcraft",
+      "description": "You know the Druidcraft cantrip. Wisdom is your spellcasting ability for it."
+    },
+    "elf-wood-elf-longstrider": {
+      "name": "Longstrider",
+      "description": "Starting at 3rd level, you can cast Longstrider using this trait. Wisdom is your spellcasting ability for it."
+    },
+    "elf-wood-elf-pass-without-trace": {
+      "name": "Pass Without Trace",
+      "description": "Starting at 5th level, you can cast Pass Without Trace using this trait. Wisdom is your spellcasting ability for it."
+    },
+    "gnome-forest-minor-illusion": {
+      "name": "Minor Illusion",
+      "description": "You know the Minor Illusion cantrip. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-forest-speak-with-animals": {
+      "name": "Speak with Animals",
+      "description": "Starting at 3rd level, you can cast Speak with Animals using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-forest-misty-step": {
+      "name": "Misty Step",
+      "description": "Starting at 5th level, you can cast Misty Step using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-rock-mending": {
+      "name": "Mending",
+      "description": "You know the Mending cantrip. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-rock-prestidigitation": {
+      "name": "Prestidigitation",
+      "description": "Starting at 3rd level, you can cast Prestidigitation using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-rock-animate-objects": {
+      "name": "Animate Objects",
+      "description": "Starting at 5th level, you can cast Animate Objects using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-deep-darkvision": {
+      "name": "Deep Gnome Darkvision (120 ft.)",
+      "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "gnome-deep-disguise-self": {
+      "name": "Disguise Self",
+      "description": "Starting at 3rd level, you can cast Disguise Self using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "gnome-deep-nondetection": {
+      "name": "Nondetection",
+      "description": "Starting at 5th level, you can cast Nondetection using this trait. Intelligence is your spellcasting ability for it."
     }
   },
   "subclasses": {

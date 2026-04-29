@@ -1012,6 +1012,74 @@ describe('Rogue L3 + Arcane Trickster subclass integration', () => {
   });
 });
 
+describe('Dragonborn lineage-choice integration', () => {
+  const lineageKey = createChoiceKey('lineage-choice', 'species', 'dragonborn', 0);
+
+  const dragonbornBuild: CharacterBuild = {
+    speciesId: 'dragonborn',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
+      'bundle-choice:class:fighter:1': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: { weapon: 'longsword', shield: 'shield' },
+      },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  it('emits a pending lineage-choice with 15 options when no lineage decision is made', () => {
+    const { bundles } = collectBundles(dragonbornBuild);
+    const input: ResolverInput = {
+      baseAbilities: dragonbornBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: dragonbornBuild.choices,
+      levels: dragonbornBuild.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(lineageKey);
+    if (pending?.type === 'lineage-choice') {
+      expect(pending.from.length).toBe(15);
+      expect(pending.speciesId).toBe('dragonborn');
+    }
+  });
+
+  it('resolves fire resistance and breath feature when chromatic-red lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...dragonbornBuild,
+      choices: {
+        ...dragonbornBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'chromatic-red' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('fire');
+    expect(result.features.map((f) => f.feature.id)).toContain('dragonborn-breath-chromatic-red');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+});
+
 describe('expertise-choice count and validity validation', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 

@@ -13,9 +13,9 @@ import type {
   GrantBundle,
   SourceTag,
 } from '@/types/sources';
-import type { SubclassGrant, FightingStyleChoiceGrant } from '@/types/grants';
+import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
-import { SPECIES_SOURCES } from '@/lib/sources/species';
+import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
@@ -175,6 +175,32 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           warnings.push(msg);
           logger.warn(msg);
         }
+      }
+    }
+  }
+
+  // Lineage choices — expand chosen lineage into grant bundles
+  const allLineageChoiceGrants: { grant: LineageChoiceGrant; source: SourceTag }[] = [];
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'lineage-choice') {
+        allLineageChoiceGrants.push({ grant: grant as LineageChoiceGrant, source: bundle.source });
+      }
+    }
+  }
+
+  for (const { grant, source } of allLineageChoiceGrants) {
+    const decision = build.choices[grant.key];
+    if (decision?.type === 'lineage-choice') {
+      const speciesId = grant.speciesId as keyof typeof LINEAGE_GRANTS_REGISTRY;
+      const speciesRegistry = LINEAGE_GRANTS_REGISTRY[speciesId];
+      const lineageGrants = speciesRegistry?.[decision.lineageId];
+      if (lineageGrants) {
+        bundles.push({ source, grants: lineageGrants });
+      } else {
+        const msg = `No grants for lineage "${decision.lineageId}" of species "${grant.speciesId}"`;
+        warnings.push(msg);
+        logger.warn(msg);
       }
     }
   }

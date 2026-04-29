@@ -134,6 +134,17 @@ function useAllChoiceGrants() {
       });
     }
 
+    // lineage-choice grants
+    for (const { grant, source } of collectGrantsByType(bundles, 'lineage-choice')) {
+      allGrants.push({
+        type: 'lineage-choice',
+        choiceKey: grant.key,
+        source,
+        speciesId: grant.speciesId,
+        from: grant.from,
+      });
+    }
+
     return allGrants;
   }, [bundles, buildChoices]);
 }

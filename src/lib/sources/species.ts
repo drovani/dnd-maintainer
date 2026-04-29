@@ -1,10 +1,11 @@
 import type { SpeciesSource } from '@/types/sources';
 import type { Grant } from '@/types/grants';
+import type { SpeciesId } from '@/lib/dnd-helpers';
 import { createChoiceKey } from '@/types/choices';
 
 // Per-lineage sub-grants for Dragonborn. Keyed by lineage ID.
 // Chromatic/metallic get 60 ft darkvision; gem get 120 ft darkvision.
-export const DRAGONBORN_LINEAGE_GRANTS: Readonly<Record<string, readonly Grant[]>> = {
+export const DRAGONBORN_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {
   'chromatic-black': [
     { type: 'resistance', damageType: 'acid' },
     { type: 'feature', feature: { id: 'dragonborn-darkvision' } },
@@ -83,7 +84,7 @@ export const DRAGONBORN_LINEAGE_GRANTS: Readonly<Record<string, readonly Grant[]
 } as const;
 
 // Per-ancestry sub-grants for Goliath. Keyed by giant ancestry ID.
-export const GOLIATH_ANCESTRY_GRANTS: Readonly<Record<string, readonly Grant[]>> = {
+export const GOLIATH_ANCESTRY_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {
   cloud: [{ type: 'feature', feature: { id: 'goliath-giant-ancestry-cloud' } }],
   fire: [{ type: 'feature', feature: { id: 'goliath-giant-ancestry-fire' } }],
   frost: [{ type: 'feature', feature: { id: 'goliath-giant-ancestry-frost' } }],
@@ -93,7 +94,7 @@ export const GOLIATH_ANCESTRY_GRANTS: Readonly<Record<string, readonly Grant[]>>
 } as const;
 
 // Per-lineage sub-grants for Tiefling. Keyed by lineage ID.
-export const TIEFLING_LINEAGE_GRANTS: Readonly<Record<string, readonly Grant[]>> = {
+export const TIEFLING_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {
   abyssal: [
     { type: 'resistance', damageType: 'poison' },
     { type: 'feature', feature: { id: 'tiefling-fiendish-legacy-abyssal' } },
@@ -107,6 +108,55 @@ export const TIEFLING_LINEAGE_GRANTS: Readonly<Record<string, readonly Grant[]>>
     { type: 'feature', feature: { id: 'tiefling-fiendish-legacy-infernal' } },
   ],
 } as const;
+
+// Per-lineage sub-grants for Elf. Keyed by lineage ID.
+export const ELF_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {
+  drow: [
+    { type: 'feature', feature: { id: 'elf-drow-darkvision' } },
+    { type: 'feature', feature: { id: 'elf-drow-dancing-lights' } },
+    { type: 'feature', feature: { id: 'elf-drow-faerie-fire' } },
+    { type: 'feature', feature: { id: 'elf-drow-darkness' } },
+  ],
+  'high-elf': [
+    { type: 'feature', feature: { id: 'elf-high-elf-cantrip' } },
+    { type: 'feature', feature: { id: 'elf-high-elf-detect-magic' } },
+    { type: 'feature', feature: { id: 'elf-high-elf-misty-step' } },
+  ],
+  'wood-elf': [
+    { type: 'speed', mode: 'walk', value: 35 },
+    { type: 'feature', feature: { id: 'elf-wood-elf-druidcraft' } },
+    { type: 'feature', feature: { id: 'elf-wood-elf-longstrider' } },
+    { type: 'feature', feature: { id: 'elf-wood-elf-pass-without-trace' } },
+  ],
+} as const;
+
+// Per-lineage sub-grants for Gnome. Keyed by lineage ID.
+export const GNOME_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {
+  forest: [
+    { type: 'feature', feature: { id: 'gnome-forest-minor-illusion' } },
+    { type: 'feature', feature: { id: 'gnome-forest-speak-with-animals' } },
+    { type: 'feature', feature: { id: 'gnome-forest-misty-step' } },
+  ],
+  rock: [
+    { type: 'feature', feature: { id: 'gnome-rock-mending' } },
+    { type: 'feature', feature: { id: 'gnome-rock-prestidigitation' } },
+    { type: 'feature', feature: { id: 'gnome-rock-animate-objects' } },
+  ],
+  deep: [
+    { type: 'feature', feature: { id: 'gnome-deep-darkvision' } },
+    { type: 'feature', feature: { id: 'gnome-deep-disguise-self' } },
+    { type: 'feature', feature: { id: 'gnome-deep-nondetection' } },
+  ],
+} as const;
+
+// Registry mapping SpeciesId → the species' lineage grant map.
+export const LINEAGE_GRANTS_REGISTRY = {
+  dragonborn: DRAGONBORN_LINEAGE_GRANTS,
+  tiefling: TIEFLING_LINEAGE_GRANTS,
+  goliath: GOLIATH_ANCESTRY_GRANTS,
+  elf: ELF_LINEAGE_GRANTS,
+  gnome: GNOME_LINEAGE_GRANTS,
+} as const satisfies Partial<Record<SpeciesId, Readonly<Partial<Record<string, readonly Grant[]>>>>>;
 
 export const SPECIES_SOURCES: readonly SpeciesSource[] = [
   // Human (2024 PHB) — no ASIs; gains Heroic Inspiration (Resourceful), skill + language choice

@@ -185,6 +185,20 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved lineage-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'lineage-choice')) {
+    const decision = choices[grant.key];
+    if (!decision || decision.type !== 'lineage-choice') {
+      pendingChoices.push({
+        type: 'lineage-choice',
+        choiceKey: grant.key,
+        source,
+        speciesId: grant.speciesId,
+        from: grant.from,
+      });
+    }
+  }
+
   // Unresolved subclass grants
   for (const { grant, source } of collectGrantsByType(bundles, 'subclass')) {
     const decision = choices[grant.key];

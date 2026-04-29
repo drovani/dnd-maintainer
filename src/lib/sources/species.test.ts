@@ -5,6 +5,9 @@ import {
   DRAGONBORN_LINEAGE_GRANTS,
   GOLIATH_ANCESTRY_GRANTS,
   TIEFLING_LINEAGE_GRANTS,
+  ELF_LINEAGE_GRANTS,
+  GNOME_LINEAGE_GRANTS,
+  LINEAGE_GRANTS_REGISTRY,
 } from '@/lib/sources/species';
 import { DND_SPECIES } from '@/lib/dnd-helpers';
 import { createChoiceKey } from '@/types/choices';
@@ -401,8 +404,9 @@ describe('Dragonborn species source (2024 PHB)', () => {
 
   it('each dragonborn lineage grant includes a resistance and two features', () => {
     for (const [lineageId, grants] of Object.entries(DRAGONBORN_LINEAGE_GRANTS)) {
-      const resistance = grants.find((g) => g.type === 'resistance');
-      const features = grants.filter((g) => g.type === 'feature');
+      const safeGrants = grants!;
+      const resistance = safeGrants.find((g) => g.type === 'resistance');
+      const features = safeGrants.filter((g) => g.type === 'feature');
       expect(resistance).toBeDefined();
       expect(features).toHaveLength(2);
       const featureIds = features.map((g) => g.type === 'feature' && g.feature.id);
@@ -413,7 +417,7 @@ describe('Dragonborn species source (2024 PHB)', () => {
   it('gem lineages have 120 ft darkvision; chromatic and metallic have 60 ft', () => {
     const gemLineages = ['gem-amethyst', 'gem-emerald', 'gem-sapphire', 'gem-topaz', 'gem-crystal'];
     for (const lineageId of gemLineages) {
-      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId];
+      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId]!;
       const featureIds = grants.filter((g) => g.type === 'feature').map((g) => g.type === 'feature' && g.feature.id);
       expect(featureIds).toContain('dragonborn-darkvision-120');
     }
@@ -430,7 +434,7 @@ describe('Dragonborn species source (2024 PHB)', () => {
       'metallic-silver',
     ];
     for (const lineageId of nonGemLineages) {
-      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId];
+      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId]!;
       const featureIds = grants.filter((g) => g.type === 'feature').map((g) => g.type === 'feature' && g.feature.id);
       expect(featureIds).toContain('dragonborn-darkvision');
     }
@@ -580,13 +584,46 @@ describe('Tiefling species source (2024 PHB)', () => {
 
   it('each tiefling lineage grant includes a resistance and a fiendish legacy feature', () => {
     for (const [lineageId, grants] of Object.entries(TIEFLING_LINEAGE_GRANTS)) {
-      const resistance = grants.find((g) => g.type === 'resistance');
-      const feature = grants.find((g) => g.type === 'feature');
+      const safeGrants = grants!;
+      const resistance = safeGrants.find((g) => g.type === 'resistance');
+      const feature = safeGrants.find((g) => g.type === 'feature');
       expect(resistance).toBeDefined();
       expect(feature).toBeDefined();
       if (feature?.type === 'feature') {
         expect(feature.feature.id).toBe(`tiefling-fiendish-legacy-${lineageId}`);
       }
     }
+  });
+});
+
+describe('ELF_LINEAGE_GRANTS', () => {
+  it('has exactly 3 keys', () => {
+    expect(Object.keys(ELF_LINEAGE_GRANTS)).toHaveLength(3);
+  });
+
+  it('drow lineage includes a feature with id elf-drow-darkvision', () => {
+    const drowGrants = ELF_LINEAGE_GRANTS['drow'];
+    expect(drowGrants).toBeDefined();
+    const darkvision = drowGrants?.find((g) => g.type === 'feature' && g.feature.id === 'elf-drow-darkvision');
+    expect(darkvision).toBeDefined();
+  });
+
+  it('wood-elf lineage includes a speed grant of 35 ft walk', () => {
+    const woodElfGrants = ELF_LINEAGE_GRANTS['wood-elf'];
+    expect(woodElfGrants).toBeDefined();
+    const speedGrant = woodElfGrants?.find((g) => g.type === 'speed');
+    expect(speedGrant).toEqual({ type: 'speed', mode: 'walk', value: 35 });
+  });
+});
+
+describe('GNOME_LINEAGE_GRANTS', () => {
+  it('has exactly 3 keys', () => {
+    expect(Object.keys(GNOME_LINEAGE_GRANTS)).toHaveLength(3);
+  });
+});
+
+describe('LINEAGE_GRANTS_REGISTRY', () => {
+  it('has exactly 5 keys', () => {
+    expect(Object.keys(LINEAGE_GRANTS_REGISTRY)).toHaveLength(5);
   });
 });

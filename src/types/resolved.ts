@@ -162,7 +162,7 @@ export type PendingChoice =
       readonly choiceKey: ChoiceKey;
       readonly source: SourceTag;
       readonly speciesId: SpeciesId;
-      readonly options: readonly string[];
+      readonly from: readonly string[];
     };
 
 export interface ResolvedCharacter {

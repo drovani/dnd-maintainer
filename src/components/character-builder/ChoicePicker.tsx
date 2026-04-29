@@ -190,6 +190,47 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
     );
   }
 
+  if (choice.type === 'lineage-choice') {
+    const { speciesId, from } = choice;
+    const currentLineageId = currentDecision?.type === 'lineage-choice' ? currentDecision.lineageId : undefined;
+
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{tc('characterBuilder.pendingChoices.lineageChoice')}</p>
+        <div className="space-y-1">
+          {from.map((lineageId) => {
+            const radioId = `choice-lineage-${choice.choiceKey}-${lineageId}`;
+            const labelKey = `lineages.${speciesId}.${lineageId}` as `lineages.${typeof speciesId}.${string}`;
+            const label = t(labelKey, { defaultValue: lineageId });
+            return (
+              <div
+                key={lineageId}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <input
+                  type="radio"
+                  id={radioId}
+                  name={`choice-lineage-${choice.choiceKey}`}
+                  checked={currentLineageId === lineageId}
+                  onChange={() => onDecide(choice.choiceKey, { type: 'lineage-choice', lineageId })}
+                  className="size-4 text-primary"
+                />
+                <Label htmlFor={radioId} className="flex-1 cursor-pointer">
+                  {label}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+        {currentLineageId !== undefined && (
+          <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+            {tc('characterBuilder.equipment.clearSelection')}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   if (choice.type === 'bundle-choice') {
     const currentBundleId = currentDecision?.type === 'bundle-choice' ? currentDecision.bundleId : undefined;
     const currentSlotPicks = currentDecision?.type === 'bundle-choice' ? currentDecision.slotPicks : {};

@@ -7,6 +7,7 @@ import type {
   WeaponProficiencyId,
   ToolProficiencyId,
   LanguageId,
+  SpeciesId,
 } from '@/lib/dnd-helpers';
 import type { ChoiceKey } from '@/types/choices';
 import type { BundleCategory } from '@/types/items';
@@ -215,7 +216,7 @@ export interface BundleChoiceGrant {
 export interface LineageChoiceGrant {
   readonly type: 'lineage-choice';
   readonly key: ChoiceKey;
-  readonly speciesId: string;
+  readonly speciesId: SpeciesId;
   readonly from: readonly string[];
 }
 
