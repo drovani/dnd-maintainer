@@ -5,6 +5,7 @@ const logger = getLogger('random-npc');
 import { SPECIES_SOURCES } from '@/lib/sources/species';
 import {
   DND_ALIGNMENTS,
+  DND_SPECIES_NAMES,
   generateCharacterName,
   type AbilityKey,
   type AlignmentId,
@@ -23,7 +24,7 @@ export type RandomNpcFailure = 'unknown-class' | 'name-generation' | 'empty-data
 
 interface RandomNpcBasicsBase {
   readonly gender: DndGender;
-  readonly race: SpeciesId;
+  readonly species: SpeciesId;
   readonly alignment: AlignmentId;
   readonly name: string;
   readonly classId: ClassId;
@@ -99,21 +100,25 @@ export function generateRandomNpcBasicsDetailed(
   }
 
   const gender = pick(['male', 'female'] as const, rng);
-  const raceSource = pick(SPECIES_SOURCES, rng);
+  const eligibleSpecies = SPECIES_SOURCES.filter((s) => {
+    const nameData = DND_SPECIES_NAMES[s.id];
+    return nameData && nameData.male.length > 0 && nameData.female.length > 0;
+  });
+  const raceSource = pick(eligibleSpecies, rng);
   const alignmentSource = pick(DND_ALIGNMENTS, rng);
   if (!gender || !raceSource || !alignmentSource) {
     logger.error('Empty data source for Quick NPC', {
       classId,
-      speciesSources: SPECIES_SOURCES.length,
+      eligibleSpecies: eligibleSpecies.length,
       alignments: DND_ALIGNMENTS.length,
     });
     return { ok: false, failure: 'empty-data-source' };
   }
-  const race = raceSource.id;
+  const species = raceSource.id;
   const alignment = alignmentSource.id;
-  const name = generateCharacterName(race, gender, rng);
+  const name = generateCharacterName(species, gender, rng);
   if (!name) {
-    logger.error('Name generation returned null', { classId, race, gender });
+    logger.error('Name generation returned null', { classId, species, gender });
     return { ok: false, failure: 'name-generation' };
   }
 
@@ -121,7 +126,7 @@ export function generateRandomNpcBasicsDetailed(
   if (!qb) {
     return {
       ok: true,
-      basics: { gender, race, alignment, name, classId, targetStep: 'abilities' },
+      basics: { gender, species, alignment, name, classId, targetStep: 'abilities' },
     };
   }
 
@@ -136,7 +141,7 @@ export function generateRandomNpcBasicsDetailed(
     ok: true,
     basics: {
       gender,
-      race,
+      species,
       alignment,
       name,
       classId,

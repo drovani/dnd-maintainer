@@ -65,7 +65,7 @@ const CharacterContext = createContext<CharacterContextValue | null>(null);
  * Determine which row sequence a choice key belongs to.
  *
  * Key format: `category:origin:id:index`
- * Keys with `:race:` or `:background:` go to sequence-0.
+ * Keys with `:species:` or `:background:` go to sequence-0.
  * Keys with `:class:` go to the matching level row (by class_id embedded in the key).
  * Unknown origins cause `parseChoiceKey` to throw.
  * Also throws if origin is 'class' but no active level row exists for the specified class.

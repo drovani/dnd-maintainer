@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface PhysicalCharacteristicsProps {
-  readonly raceId: SpeciesId | null;
+  readonly speciesId: SpeciesId | null;
   readonly height: string | null;
   readonly weight: string | null;
   readonly onChange: (updates: { readonly height: string | null; readonly weight: string | null }) => void;
@@ -26,10 +26,16 @@ interface PhysicalCharacteristicsProps {
 
 type RollingField = 'height' | 'weight' | 'all' | null;
 
-export function PhysicalCharacteristics({ raceId, height, weight, onChange, className }: PhysicalCharacteristicsProps) {
+export function PhysicalCharacteristics({
+  speciesId,
+  height,
+  weight,
+  onChange,
+  className,
+}: PhysicalCharacteristicsProps) {
   const { t } = useTranslation('common');
 
-  const physicals = raceId ? SPECIES_PHYSICALS[raceId] : null;
+  const physicals = speciesId ? SPECIES_PHYSICALS[speciesId] : null;
 
   const [hMin, hMax] = physicals ? diceRange(physicals.heightDice) : [0, 0];
   const wDice = physicals?.weightRule.kind === 'variable' ? physicals.weightRule.dice : null;

@@ -205,10 +205,10 @@ describe('ClassFeaturesStep', () => {
           feature: { id: 'rogue-sneak-attack' },
           source: { origin: 'class', id: 'rogue', level: 1 },
         },
-        // race feature — should NOT render
+        // species feature — should NOT render
         {
           feature: { id: 'darkvision' },
-          source: { origin: 'race', id: 'elf-high', level: 0 },
+          source: { origin: 'species', id: 'elf', level: 0 },
         },
         // class L3 feature — should NOT render
         {

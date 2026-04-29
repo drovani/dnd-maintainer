@@ -13,7 +13,7 @@ export function BackstoryStep() {
     <div className="flex flex-col gap-6">
       <PhysicalCharacteristics
         key={context.character.race ?? 'none'}
-        raceId={character.race}
+        speciesId={character.race}
         height={character.height ?? null}
         weight={character.weight ?? null}
         onChange={(updates) => context.updateCharacter(updates)}

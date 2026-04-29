@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { reconstructBuild } from '@/lib/build-reconstruction';
 import type { BuildLevelRow, CharacterIdentity } from '@/lib/build-reconstruction';
+import type { SpeciesId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 import { collectBundles } from '@/lib/sources/index';
 import { resolveCharacter } from '@/lib/resolver/index';
@@ -44,6 +45,12 @@ describe('reconstructBuild', () => {
     expect(() => reconstructBuild({ race: null, background: 'soldier' }, [creationRow], [])).toThrow(
       'Character is missing required race'
     );
+  });
+
+  it('throws when character.race is not a valid SpeciesId', () => {
+    expect(() =>
+      reconstructBuild({ race: 'dwarf-hill' as SpeciesId, background: 'soldier' }, [creationRow], [])
+    ).toThrow(/invalid species/i);
   });
 
   it('allows null background', () => {

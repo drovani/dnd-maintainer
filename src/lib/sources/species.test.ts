@@ -1,8 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { getSpeciesSource } from '@/lib/sources';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
+import { DND_SPECIES } from '@/lib/dnd-helpers';
 import { createChoiceKey } from '@/types/choices';
 
 const HALFLING_FEATURE_IDS = ['halfling-lucky', 'halfling-brave', 'halfling-nimbleness', 'halfling-naturally-stealthy'];
+
+describe('SPECIES_SOURCES cross-reference', () => {
+  it('every SpeciesId has a SPECIES_SOURCES entry', () => {
+    for (const s of DND_SPECIES) {
+      expect(getSpeciesSource(s.id)).toBeDefined();
+    }
+  });
+
+  it('SPECIES_SOURCES has exactly 10 entries', () => {
+    expect(SPECIES_SOURCES).toHaveLength(10);
+  });
+});
 
 describe('Dwarf species source', () => {
   const source = getSpeciesSource('dwarf');

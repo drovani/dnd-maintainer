@@ -17,15 +17,15 @@ vi.mock('react-i18next', () => ({
 }));
 
 describe('PhysicalCharacteristics', () => {
-  it('renders noRace message when raceId is null', () => {
-    render(<PhysicalCharacteristics raceId={null} height={null} weight={null} onChange={vi.fn()} />);
+  it('renders noRace message when speciesId is null', () => {
+    render(<PhysicalCharacteristics speciesId={null} height={null} weight={null} onChange={vi.fn()} />);
     expect(screen.getByText(/noRace/i)).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton')).toBeNull();
   });
 
   it('clicking Average All calls onChange with computed human averages', () => {
     const onChange = vi.fn();
-    render(<PhysicalCharacteristics raceId="human" height={null} weight={null} onChange={onChange} />);
+    render(<PhysicalCharacteristics speciesId="human" height={null} weight={null} onChange={onChange} />);
 
     fireEvent.click(screen.getByRole('button', { name: /averageAll/i }));
 
@@ -35,7 +35,7 @@ describe('PhysicalCharacteristics', () => {
   });
 
   it('disables weight modifier input for halfling', () => {
-    render(<PhysicalCharacteristics raceId="halfling" height={null} weight={null} onChange={vi.fn()} />);
+    render(<PhysicalCharacteristics speciesId="halfling" height={null} weight={null} onChange={vi.fn()} />);
     const inputs = screen.getAllByRole('spinbutton');
     // height input should be enabled, weight input disabled
     const weightInput = inputs[1];
@@ -43,7 +43,7 @@ describe('PhysicalCharacteristics', () => {
   });
 
   it('derives modifier inputs from existing height and weight strings', () => {
-    render(<PhysicalCharacteristics raceId="human" height={`5'10"`} weight="180 lbs" onChange={vi.fn()} />);
+    render(<PhysicalCharacteristics speciesId="human" height={`5'10"`} weight="180 lbs" onChange={vi.fn()} />);
     // human: heightBase=56, 70-56=14; weightBase=110, (180-110)/14=5
     const inputs = screen.getAllByRole('spinbutton');
     expect(inputs[0]).toHaveValue(14);
@@ -56,7 +56,7 @@ describe('PhysicalCharacteristics', () => {
   it('Roll All calls onChange with values in valid range after animation', async () => {
     vi.useFakeTimers();
     const onChange = vi.fn();
-    render(<PhysicalCharacteristics raceId="human" height={null} weight={null} onChange={onChange} />, {
+    render(<PhysicalCharacteristics speciesId="human" height={null} weight={null} onChange={onChange} />, {
       wrapper: createWrapper(),
     });
     fireEvent.click(screen.getByRole('button', { name: /rollAll/i }));
@@ -71,7 +71,7 @@ describe('PhysicalCharacteristics', () => {
 
   it('Average All on gnome uses weight multiplier of 1', () => {
     const onChange = vi.fn();
-    render(<PhysicalCharacteristics raceId="gnome" height={null} weight={null} onChange={onChange} />, {
+    render(<PhysicalCharacteristics speciesId="gnome" height={null} weight={null} onChange={onChange} />, {
       wrapper: createWrapper(),
     });
     fireEvent.click(screen.getByRole('button', { name: /averageAll/i }));

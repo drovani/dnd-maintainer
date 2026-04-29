@@ -14,7 +14,7 @@ export interface SpeciesPhysicals {
   readonly weightRule: WeightRule;
 }
 
-// PHB Chapter 4 height/weight table. Exhaustive by design — adding a SpeciesId without an entry fails typecheck.
+// Height/weight data (PHB 2024 and related sources). Exhaustive by design — adding a SpeciesId without an entry fails typecheck.
 export const SPECIES_PHYSICALS: Readonly<Record<SpeciesId, SpeciesPhysicals>> = {
   aasimar: {
     heightBase: 56,

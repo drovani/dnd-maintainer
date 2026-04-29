@@ -339,7 +339,7 @@ describe('BasicsStep', () => {
       ok: true,
       basics: {
         gender: 'female',
-        race: SPECIES_SOURCES[0].id,
+        species: SPECIES_SOURCES[0].id,
         alignment: 'n',
         name: 'Second Name',
         classId: 'fighter',
@@ -387,7 +387,7 @@ describe('BasicsStep', () => {
       ok: true,
       basics: {
         gender: 'male',
-        race: SPECIES_SOURCES[0].id,
+        species: SPECIES_SOURCES[0].id,
         alignment: 'n',
         name: 'Test Name',
         classId: 'fighter',

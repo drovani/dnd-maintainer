@@ -163,7 +163,7 @@ export interface AcBonusGrant {
 export interface SpellcastingGrant {
   readonly type: 'spellcasting';
   readonly ability: AbilityKey;
-  readonly source: 'class' | 'race' | 'feat';
+  readonly source: 'class' | 'species' | 'feat';
 }
 
 export interface SpellGrant {

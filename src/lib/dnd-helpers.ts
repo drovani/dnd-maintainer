@@ -373,14 +373,14 @@ export const DND_SPECIES = [
     id: 'aasimar',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { wis: 1, cha: 2 },
+    abilityBonuses: {},
     languages: ['common', 'celestial'],
   },
   {
     id: 'dragonborn',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { str: 2, cha: 1 },
+    abilityBonuses: {},
     languages: ['common', 'draconic'],
     lineages: ['chromatic', 'metallic', 'gem'] as const,
   },
@@ -388,7 +388,7 @@ export const DND_SPECIES = [
     id: 'dwarf',
     size: 'medium',
     speed: 25,
-    abilityBonuses: { con: 2 },
+    abilityBonuses: { str: 2, con: 2 },
     languages: ['common', 'dwarvish'],
     weaponProficiencies: ['battleaxe', 'handaxe', 'lighthammer', 'warhammer'],
   },
@@ -396,7 +396,7 @@ export const DND_SPECIES = [
     id: 'elf',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { dex: 2 },
+    abilityBonuses: {},
     languages: ['common', 'elvish'],
     weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
   },
@@ -404,21 +404,21 @@ export const DND_SPECIES = [
     id: 'gnome',
     size: 'small',
     speed: 25,
-    abilityBonuses: { int: 2 },
+    abilityBonuses: {},
     languages: ['common', 'gnomish'],
   },
   {
     id: 'goliath',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { str: 2, con: 1 },
+    abilityBonuses: {},
     languages: ['common', 'giant'],
   },
   {
     id: 'halfling',
     size: 'small',
     speed: 25,
-    abilityBonuses: { dex: 2 },
+    abilityBonuses: { dex: 2, cha: 1 },
     languages: ['common', 'halfling'],
   },
   {
@@ -433,14 +433,14 @@ export const DND_SPECIES = [
     id: 'orc',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { str: 2, con: 1 },
+    abilityBonuses: {},
     languages: ['common', 'orc'],
   },
   {
     id: 'tiefling',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { cha: 2, int: 1 },
+    abilityBonuses: {},
     languages: ['common', 'infernal'],
     lineages: ['abyssal', 'chthonic', 'infernal'] as const,
   },
@@ -1187,9 +1187,9 @@ export function computeProficiencies(
   speciesId: SpeciesId | '',
   prev: Proficiencies,
   classChanged: boolean,
-  raceChanged: boolean
+  speciesChanged: boolean
 ): Proficiencies {
-  if (!classChanged && !raceChanged) return prev;
+  if (!classChanged && !speciesChanged) return prev;
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId);
   const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === speciesId);
   const raceWeapons: WeaponProficiencyId[] = race?.weaponProficiencies ? [...race.weaponProficiencies] : [];
@@ -1199,7 +1199,7 @@ export function computeProficiencies(
     tools: cls ? [...cls.toolProficiencies] : [],
     toolChoices: classChanged ? [] : prev.toolChoices,
     languages: race ? [...race.languages] : [],
-    languageChoices: raceChanged ? [] : prev.languageChoices,
+    languageChoices: speciesChanged ? [] : prev.languageChoices,
   };
 }
 

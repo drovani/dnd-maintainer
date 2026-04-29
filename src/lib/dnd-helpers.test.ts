@@ -20,6 +20,7 @@ import {
   getPointBuyIncrementCost,
   getProficiencyBonus,
   getSpellSlots,
+  isSpeciesId,
   roll4d6DropLowest,
   rollAbilityScores,
   rollDice,
@@ -399,6 +400,30 @@ describe('DND_SPECIES proficiency data integrity', () => {
         }
       }
     }
+  });
+});
+
+describe('DND_SPECIES count', () => {
+  it('DND_SPECIES has exactly 10 entries', () => {
+    expect(DND_SPECIES).toHaveLength(10);
+  });
+});
+
+describe('isSpeciesId', () => {
+  it('returns true for all 10 valid SpeciesIds', () => {
+    for (const s of DND_SPECIES) {
+      expect(isSpeciesId(s.id)).toBe(true);
+    }
+  });
+  it('returns false for removed subrace IDs', () => {
+    expect(isSpeciesId('dwarf-hill')).toBe(false);
+    expect(isSpeciesId('elf-high')).toBe(false);
+    expect(isSpeciesId('halfelf')).toBe(false);
+    expect(isSpeciesId('halforc')).toBe(false);
+  });
+  it('returns false for arbitrary strings', () => {
+    expect(isSpeciesId('gibblegoble')).toBe(false);
+    expect(isSpeciesId('')).toBe(false);
   });
 });
 

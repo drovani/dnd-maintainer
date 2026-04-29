@@ -186,7 +186,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         character_type: 'npc',
         player_name: '',
         gender: basics.gender,
-        race: basics.race,
+        race: basics.species,
         alignment: basics.alignment,
         name: basics.name,
         class: classId,

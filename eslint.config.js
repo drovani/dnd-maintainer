@@ -7,7 +7,7 @@ import prettierConfig from 'eslint-config-prettier';
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'node_modules/'],
+    ignores: ['dist/', 'node_modules/', '.claude/'],
   },
   {
     linterOptions: {

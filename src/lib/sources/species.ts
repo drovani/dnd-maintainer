@@ -28,7 +28,7 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     id: 'dragonborn',
     defaultSize: 'medium',
     defaultSpeed: 30,
-    grants: [],
+    grants: [], // TODO: fill in grants — see follow-up issue
   },
   {
     id: 'dwarf',
@@ -95,13 +95,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     id: 'elf',
     defaultSize: 'medium',
     defaultSpeed: 30,
-    grants: [],
+    grants: [], // TODO: fill in grants — see follow-up issue
   },
   {
     id: 'gnome',
     defaultSize: 'small',
     defaultSpeed: 25,
-    grants: [],
+    grants: [], // TODO: fill in grants — see follow-up issue
   },
   {
     id: 'halfling',
@@ -153,7 +153,7 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     id: 'tiefling',
     defaultSize: 'medium',
     defaultSpeed: 30,
-    grants: [],
+    grants: [], // TODO: fill in grants — see follow-up issue
   },
   // Stub entries — grants filled in a later issue
   {
