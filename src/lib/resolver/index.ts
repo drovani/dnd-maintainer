@@ -1,5 +1,5 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers';
-import type { ToolProficiencyId, SkillId } from '@/lib/dnd-helpers';
+import type { AbilityKey, ToolProficiencyId, SkillId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
@@ -142,7 +142,16 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     const decision = choices[grant.key];
     const totalAllocated =
       decision?.type === 'asi' ? Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0) : 0;
-    const isValid = decision?.type === 'asi' && totalAllocated === grant.points;
+    const isValid = (() => {
+      if (decision?.type !== 'asi') return false;
+      if (totalAllocated !== grant.points) return false;
+      if (grant.from != null) {
+        return Object.entries(decision.allocation).every(
+          ([k, v]) => (v ?? 0) === 0 || grant.from!.includes(k as AbilityKey)
+        );
+      }
+      return true;
+    })();
     if (!isValid) {
       pendingChoices.push({
         type: 'asi',
@@ -152,6 +161,11 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         from: grant.from,
       });
     }
+  }
+
+  // Unresolved feat grants — not yet implemented; log each for diagnostics
+  for (const { grant } of collectGrantsByType(bundles, 'feat')) {
+    logger.debug(`FeatGrant "${grant.featId}" is not yet implemented — skipping (see issue #5)`);
   }
 
   // Unresolved or invalid fighting-style-choice grants (single pass)

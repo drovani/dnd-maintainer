@@ -346,6 +346,7 @@ describe('Pending ASI and Subclass choices', () => {
     expect(pending?.choiceKey).toBe(asiKey);
     if (pending?.type === 'asi') {
       expect(pending.points).toBe(2);
+      expect(pending.from).toBeNull();
     }
   });
 
@@ -394,6 +395,63 @@ describe('Pending ASI and Subclass choices', () => {
       choices: { [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId } },
     });
     const pending = result.pendingChoices.find((c) => c.type === 'subclass');
+    expect(pending).toBeUndefined();
+  });
+});
+
+describe('ASI from-constraint validation', () => {
+  it('emits pending ASI with from pool when background soldier has no decision', () => {
+    const soldierAsiKey = createChoiceKey('asi', 'background', 'soldier', 0);
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'asi', key: soldierAsiKey, points: 3, from: ['str', 'dex', 'con'] }],
+      },
+    ];
+    const result = resolveCharacter({ ...baseInput, bundles });
+    const pending = result.pendingChoices.find((c) => c.type === 'asi');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(soldierAsiKey);
+    if (pending?.type === 'asi') {
+      expect(pending.points).toBe(3);
+      expect(pending.from).toEqual(['str', 'dex', 'con']);
+    }
+  });
+
+  it('emits pending ASI when allocation uses abilities outside the from pool', () => {
+    // Acolyte grants ASI from ['int', 'wis', 'cha']; putting points in 'str' is invalid
+    const acolyteAsiKey = createChoiceKey('asi', 'background', 'acolyte', 0);
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'acolyte' },
+        grants: [{ type: 'asi', key: acolyteAsiKey, points: 3, from: ['int', 'wis', 'cha'] }],
+      },
+    ];
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles,
+      // Points total is correct (3) but 'str' is outside the ['int', 'wis', 'cha'] pool
+      choices: { [acolyteAsiKey]: { type: 'asi', allocation: { str: 2, wis: 1 } } as const },
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'asi');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(acolyteAsiKey);
+  });
+
+  it('does not emit pending ASI when all allocations are within the from pool', () => {
+    const soldierAsiKey = createChoiceKey('asi', 'background', 'soldier', 0);
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'asi', key: soldierAsiKey, points: 3, from: ['str', 'dex', 'con'] }],
+      },
+    ];
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles,
+      choices: { [soldierAsiKey]: { type: 'asi', allocation: { str: 2, con: 1 } } as const },
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'asi');
     expect(pending).toBeUndefined();
   });
 });

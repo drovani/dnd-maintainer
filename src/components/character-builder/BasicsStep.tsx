@@ -13,7 +13,6 @@ import {
   DND_CLASSES,
   DND_SPECIES,
   generateCharacterName,
-  isBackgroundId,
   type AlignmentId,
   type ClassId,
   type DndGender,
@@ -393,40 +392,25 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
 
           <div className="space-y-2">
             <Label>{tc('characterBuilder.fields.background')}</Label>
-            {(() => {
-              const isCustom = background !== '' && !isBackgroundId(background);
-              const dropdownValue = isCustom ? null : background || null;
-              return (
-                <>
-                  <Select
-                    value={dropdownValue}
-                    onValueChange={(value) => {
-                      if (!value) return;
-                      handleBackgroundChange(value);
-                    }}
-                    items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DND_BACKGROUNDS.map((bg) => (
-                        <SelectItem key={bg.id} value={bg.id}>
-                          {t(`backgrounds.${bg.id}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {isCustom && (
-                    <Input
-                      placeholder={tc('characterBuilder.placeholders.enterCustomBackground')}
-                      value={background}
-                      onChange={(e) => handleBackgroundChange(e.target.value)}
-                    />
-                  )}
-                </>
-              );
-            })()}
+            <Select
+              value={background || null}
+              onValueChange={(value) => {
+                if (!value) return;
+                handleBackgroundChange(value);
+              }}
+              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_BACKGROUNDS.map((bg) => (
+                  <SelectItem key={bg.id} value={bg.id}>
+                    {t(`backgrounds.${bg.id}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
