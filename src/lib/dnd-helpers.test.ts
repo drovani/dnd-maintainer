@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   DND_ALIGNMENTS,
   DND_ARMOR_PROFICIENCIES,
@@ -713,5 +715,27 @@ describe('DND_SPECIES lineages', () => {
   it('species without lineages do not have the field', () => {
     const human = DND_SPECIES.find((s) => s.id === 'human') as DndSpecies | undefined;
     expect(human?.lineages).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DB migration sync check — species CHECK constraint must match DND_SPECIES IDs
+// ---------------------------------------------------------------------------
+describe('DB migration species CHECK constraint sync', () => {
+  const migrationSql = fs.readFileSync(
+    path.resolve(__dirname, '../../supabase/migrations/00001_initial_schema.sql'),
+    'utf-8'
+  );
+
+  it('CHECK constraint species values exactly match DND_SPECIES ids', () => {
+    const match = migrationSql.match(/CHECK\s*\(species\s+IS\s+NULL\s+OR\s+species\s+IN\s*\(([\s\S]*?)\)\s*\)/i);
+    expect(match).not.toBeNull();
+    const dbValues = match![1]
+      .replace(/'/g, '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    const expectedIds = DND_SPECIES.map((s) => s.id).sort();
+    expect(dbValues.sort()).toEqual(expectedIds);
   });
 });

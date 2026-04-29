@@ -270,6 +270,54 @@ describe('generateSeedSql', () => {
     const characterPos = sql.indexOf('INSERT INTO characters');
     expect(campaignPos).toBeLessThan(characterPos);
   });
+
+  it('character INSERT uses species column not race', () => {
+    const data: ExportData = {
+      ...emptyData,
+      characters: [
+        {
+          id: 'ch1',
+          campaign_id: 'c1',
+          name: 'Hero',
+          character_type: 'pc',
+          player_name: null,
+          species: 'human',
+          class: 'fighter',
+          subclass: null,
+          level: 1,
+          background: null,
+          alignment: null,
+          hit_points_max: 10,
+          armor_class: 10,
+          speed: 30,
+          proficiency_bonus: 2,
+          notes: null,
+          personality_traits: null,
+          ideals: null,
+          bonds: null,
+          flaws: null,
+          appearance: null,
+          backstory: null,
+          portrait_url: null,
+          is_active: true,
+          status: 'draft',
+          gender: null,
+          size: 'medium',
+          age: null,
+          height: null,
+          weight: null,
+          eye_color: null,
+          hair_color: null,
+          skin_color: null,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+    };
+    const sql = generateSeedSql(data);
+    expect(sql).toContain('species');
+    expect(sql).not.toContain('race');
+  });
 });
 
 // ---------------------------------------------------------------------------

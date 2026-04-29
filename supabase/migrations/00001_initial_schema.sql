@@ -3,11 +3,9 @@
 -- Description: Single squashed migration replacing the original 13 migrations.
 --   This is a DESTRUCTIVE reset — all previous migration history is discarded.
 --   Reflects the 2024 D&D ruleset: simplified species IDs, no is_npc computed column,
---   source/grant/resolver skeleton tables, slug support, and alignment required by default.
+--   slug support, and alignment required by default.
 
--- Enable necessary extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- gen_random_uuid() is a PG 13+ built-in; no uuid-ossp extension needed.
 
 -- ============================================================================
 -- Utility: update_updated_at_column()
@@ -25,8 +23,7 @@ $$ LANGUAGE plpgsql;
 -- Slug generation function
 -- ============================================================================
 
--- STABLE: pure computation with no table lookups, but STABLE (not IMMUTABLE)
--- so Postgres won't cache results across plan invalidations if we ever change the algorithm.
+-- STABLE (not IMMUTABLE): same inputs produce same output within one command, but Postgres cannot pre-evaluate at plan time.
 CREATE OR REPLACE FUNCTION generate_slug(entity_name text, entity_id uuid)
 RETURNS text
 LANGUAGE plpgsql
@@ -338,7 +335,7 @@ CREATE TABLE character_build_levels (
     deleted_at      timestamptz,
     created_at      timestamptz NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     UNIQUE (character_id, sequence),
-    CHECK (asi_allocation IS NULL OR feat_id IS NULL),
+    CHECK (asi_allocation IS NULL OR feat_id IS NULL),  -- ASI and feat are mutually exclusive at each level-up
     CHECK (
       (sequence = 0 AND class_id IS NULL AND class_level IS NULL)
       OR
@@ -367,7 +364,7 @@ CREATE TABLE character_items (
 );
 
 COMMENT ON COLUMN character_items.source IS
-  'Provenance tag mirroring TypeScript SourceTag. Written at materialization (grant-sourced) or by loot/gift flows.';
+  'Provenance tag mirroring TypeScript SourceTag (src/types/sources.ts). Written at materialization (grant-sourced) or by loot flows. Validated in application layer.';
 
 CREATE INDEX IF NOT EXISTS idx_character_items_character     ON character_items(character_id);
 CREATE INDEX IF NOT EXISTS idx_character_items_source_origin ON character_items((source->>'origin'));
