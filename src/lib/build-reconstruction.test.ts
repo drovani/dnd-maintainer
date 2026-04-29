@@ -401,7 +401,11 @@ describe('Human Fighter Level 1 round-trip', () => {
         hp_roll: null,
         feat_id: null,
         asi_allocation: null,
-        choices: {},
+        choices: {
+          // 2024 human grants 1 free skill choice
+          'skill-choice:species:human:0': { type: 'skill-choice', skills: ['perception'] },
+          'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        },
         deleted_at: null,
       },
       {
@@ -441,19 +445,19 @@ describe('Human Fighter Level 1 round-trip', () => {
       levels: build.levels,
     });
 
-    // Abilities: base + 1 human racial bonus to each
-    expect(resolved.abilities.str.total).toBe(16); // 15 + 1
-    expect(resolved.abilities.dex.total).toBe(14); // 13 + 1
-    expect(resolved.abilities.con.total).toBe(15); // 14 + 1
-    expect(resolved.abilities.int.total).toBe(9); // 8 + 1
-    expect(resolved.abilities.wis.total).toBe(11); // 10 + 1
-    expect(resolved.abilities.cha.total).toBe(13); // 12 + 1
+    // Abilities: 2024 human grants no ability bonus — base scores only
+    expect(resolved.abilities.str.total).toBe(15); // base 15
+    expect(resolved.abilities.dex.total).toBe(13); // base 13
+    expect(resolved.abilities.con.total).toBe(14); // base 14
+    expect(resolved.abilities.int.total).toBe(8); // base 8
+    expect(resolved.abilities.wis.total).toBe(10); // base 10
+    expect(resolved.abilities.cha.total).toBe(12); // base 12
 
-    // HP: d10 max at level 1 + CON modifier (15 → +2)
+    // HP: d10 max at level 1 + CON modifier (14 → +2)
     expect(resolved.hitPoints.max).toBe(12); // 10 + 2
 
-    // AC: armored = 10 + DEX modifier (14 → +2)
-    expect(resolved.armorClass.effective).toBe(13); // 10 + 2 (DEX) + 1 (Defense style)
+    // AC: armored = 10 + DEX modifier (13 → +1) + Defense style bonus (1)
+    expect(resolved.armorClass.effective).toBe(12); // 10 + 1 (DEX) + 1 (Defense style)
 
     // Speed: from human race
     expect(resolved.speed['walk']?.value).toBe(30);

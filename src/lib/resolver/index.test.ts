@@ -117,6 +117,8 @@ describe('Human Fighter L1 integration', () => {
     choices: {
       // Fighter skill choices (2 from list)
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      // Human skill choice (2024: 1 free skill)
+      'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
       // Fighter fighting style choice
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       // Human language choice
@@ -150,25 +152,25 @@ describe('Human Fighter L1 integration', () => {
     levels: humanFighterBuild.levels,
   };
 
-  it('has correct ability totals with +1 human racial bonus to each', () => {
+  it('has correct ability totals (2024 human grants no ability bonus)', () => {
     const result = resolveCharacter(input);
-    // Base + 1 human racial bonus
-    expect(result.abilities.str.total).toBe(16); // 15+1
-    expect(result.abilities.dex.total).toBe(14); // 13+1
-    expect(result.abilities.con.total).toBe(15); // 14+1
-    expect(result.abilities.int.total).toBe(9); // 8+1
-    expect(result.abilities.wis.total).toBe(11); // 10+1
-    expect(result.abilities.cha.total).toBe(13); // 12+1
+    // 2024 human has no ASI — base scores only
+    expect(result.abilities.str.total).toBe(15);
+    expect(result.abilities.dex.total).toBe(13);
+    expect(result.abilities.con.total).toBe(14);
+    expect(result.abilities.int.total).toBe(8);
+    expect(result.abilities.wis.total).toBe(10);
+    expect(result.abilities.cha.total).toBe(12);
   });
 
   it('has correct ability modifiers', () => {
     const result = resolveCharacter(input);
-    expect(result.abilities.str.modifier).toBe(3); // (16-10)/2 = 3
-    expect(result.abilities.dex.modifier).toBe(2); // (14-10)/2 = 2
-    expect(result.abilities.con.modifier).toBe(2); // (15-10)/2 = 2
-    expect(result.abilities.int.modifier).toBe(-1); // (9-10)/2 = -0.5 → -1
-    expect(result.abilities.wis.modifier).toBe(0); // (11-10)/2 = 0.5 → 0
-    expect(result.abilities.cha.modifier).toBe(1); // (13-10)/2 = 1.5 → 1
+    expect(result.abilities.str.modifier).toBe(2); // (15-10)/2 = 2
+    expect(result.abilities.dex.modifier).toBe(1); // (13-10)/2 = 1
+    expect(result.abilities.con.modifier).toBe(2); // (14-10)/2 = 2
+    expect(result.abilities.int.modifier).toBe(-1); // (8-10)/2 = -1
+    expect(result.abilities.wis.modifier).toBe(0); // (10-10)/2 = 0
+    expect(result.abilities.cha.modifier).toBe(1); // (12-10)/2 = 1
   });
 
   it('HP max = 10 (fighter die) + 2 (CON mod) = 12', () => {
@@ -176,9 +178,9 @@ describe('Human Fighter L1 integration', () => {
     expect(result.hitPoints.max).toBe(12);
   });
 
-  it('AC = 10 + DEX modifier (2) + Defense style bonus (1) = 13', () => {
+  it('AC = 10 + DEX modifier (1) + Defense style bonus (1) = 12', () => {
     const result = resolveCharacter(input);
-    expect(result.armorClass.effective).toBe(13);
+    expect(result.armorClass.effective).toBe(12);
   });
 
   it('walk speed = 30', () => {
@@ -202,15 +204,16 @@ describe('Human Fighter L1 integration', () => {
     expect(result.savingThrows.cha.proficient).toBe(false);
   });
 
-  it('STR saving throw bonus = STR mod (3) + proficiency (2) = 5', () => {
+  it('STR saving throw bonus = STR mod (2) + proficiency (2) = 4', () => {
     const result = resolveCharacter(input);
-    expect(result.savingThrows.str.bonus).toBe(5);
+    expect(result.savingThrows.str.bonus).toBe(4);
   });
 
-  it('has 2 features: chosen fighting style and Second Wind', () => {
+  it('has 3 features: Resourceful (human), chosen fighting style, and Second Wind', () => {
     const result = resolveCharacter(input);
-    expect(result.features).toHaveLength(2);
+    expect(result.features).toHaveLength(3);
     const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('human-resourceful');
     expect(featureIds).toContain('fighting-style-defense');
     expect(featureIds).toContain('fighter-second-wind');
   });
@@ -260,9 +263,9 @@ describe('Human Fighter L1 integration', () => {
     expect(result.hitDie[0].count).toBe(1);
   });
 
-  it('initiative equals DEX modifier (2)', () => {
+  it('initiative equals DEX modifier (1) — DEX 13, no 2024 human bonus', () => {
     const result = resolveCharacter(input);
-    expect(result.initiative).toBe(2);
+    expect(result.initiative).toBe(1);
   });
 
   it('spellcasting is null (fighter has no spellcasting at L1)', () => {
@@ -305,7 +308,7 @@ describe('Human Fighter L1 integration', () => {
     expect(pending?.choiceKey).toBe('ability-choice:species:human:0');
   });
 
-  it('has pending skill choice when not resolved', () => {
+  it('has pending skill choice when not resolved (species choice emitted before class choice)', () => {
     const inputWithoutSkillChoice: ResolverInput = {
       ...input,
       choices: {
@@ -315,9 +318,12 @@ describe('Human Fighter L1 integration', () => {
       },
     };
     const result = resolveCharacter(inputWithoutSkillChoice);
-    const skillPending = result.pendingChoices.find((c) => c.type === 'skill-choice');
-    expect(skillPending).toBeDefined();
-    expect(skillPending?.choiceKey).toBe('skill-choice:class:fighter:0');
+    const allSkillPending = result.pendingChoices.filter((c) => c.type === 'skill-choice');
+    // 2024 human grants a free skill choice (species:human:0) plus fighter class choice
+    expect(allSkillPending.length).toBeGreaterThanOrEqual(1);
+    const choiceKeys = allSkillPending.map((c) => c.choiceKey);
+    expect(choiceKeys).toContain('skill-choice:class:fighter:0');
+    expect(choiceKeys).toContain('skill-choice:species:human:0');
   });
 });
 
@@ -456,8 +462,8 @@ describe('Human Fighter L1 equipment integration', () => {
     });
     const longswordAttack = result.attacks.find((a) => a.weaponId === 'longsword');
     expect(longswordAttack).toBeDefined();
-    // STR 15+1(human) = 16 → mod 3, prof 2 = 5
-    expect(longswordAttack!.attackBonus).toBe(5);
+    // STR 15 (no 2024 human ASI) → mod 2, prof 2 = 4
+    expect(longswordAttack!.attackBonus).toBe(4);
   });
 
   it('shield alone adds +2 to AC even without body armor', () => {
@@ -469,8 +475,8 @@ describe('Human Fighter L1 equipment integration', () => {
       levels: humanFighterEquipBuild.levels,
       equippedItemIds: ['shield'],
     });
-    // Unequipped armor → base 10 + DEX mod 2 = 12, plus shield +2 = 14
-    expect(result.armorClass.effective).toBe(14);
+    // Unequipped armor → base 10 + DEX mod 1 (DEX 13, no 2024 human ASI) = 11, plus shield +2 = 13
+    expect(result.armorClass.effective).toBe(13);
     expect(result.armorClass.bonuses.some((b) => b.value === 2)).toBe(true);
   });
 });
@@ -493,6 +499,7 @@ describe('Human Fighter L5 integration', () => {
     ],
     choices: {
       'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
       'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
       'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
@@ -528,10 +535,10 @@ describe('Human Fighter L5 integration', () => {
     expect(result.proficiencyBonus).toBe(3);
   });
 
-  it('applies ASI +2 STR on top of base + human bonus', () => {
+  it('applies ASI +2 STR on top of base (no 2024 human ASI)', () => {
     const result = resolveCharacter(input);
-    // base 15 + human +1 + ASI +2 = 18
-    expect(result.abilities.str.total).toBe(18);
+    // base 15 + ASI +2 = 17 (2024 human grants no ability bonus)
+    expect(result.abilities.str.total).toBe(17);
   });
 
   it('has fighter-action-surge feature (level 2)', () => {

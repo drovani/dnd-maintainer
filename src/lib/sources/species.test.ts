@@ -1,10 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { getSpeciesSource } from '@/lib/sources';
-import { SPECIES_SOURCES } from '@/lib/sources/species';
+import {
+  SPECIES_SOURCES,
+  DRAGONBORN_LINEAGE_GRANTS,
+  GOLIATH_ANCESTRY_GRANTS,
+  TIEFLING_LINEAGE_GRANTS,
+} from '@/lib/sources/species';
 import { DND_SPECIES } from '@/lib/dnd-helpers';
 import { createChoiceKey } from '@/types/choices';
-
-const HALFLING_FEATURE_IDS = ['halfling-lucky', 'halfling-brave', 'halfling-nimbleness', 'halfling-naturally-stealthy'];
 
 describe('SPECIES_SOURCES cross-reference', () => {
   it('every SpeciesId has a SPECIES_SOURCES entry', () => {
@@ -18,8 +21,8 @@ describe('SPECIES_SOURCES cross-reference', () => {
   });
 });
 
-describe('Dwarf species source', () => {
-  const source = getSpeciesSource('dwarf');
+describe('Human species source (2024 PHB)', () => {
+  const source = getSpeciesSource('human');
 
   it('source is defined', () => {
     expect(source).toBeDefined();
@@ -27,23 +30,74 @@ describe('Dwarf species source', () => {
 
   it('has correct defaults', () => {
     expect(source?.defaultSize).toBe('medium');
-    expect(source?.defaultSpeed).toBe(25);
+    expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants +2 STR and +2 CON', () => {
+  it('grants no ability bonuses', () => {
     const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
-    expect(abilityBonuses).toEqual(
-      expect.arrayContaining([
-        { type: 'ability-bonus', ability: 'str', bonus: 2 },
-        { type: 'ability-bonus', ability: 'con', bonus: 2 },
-      ])
-    );
-    expect(abilityBonuses).toHaveLength(2);
+    expect(abilityBonuses).toHaveLength(0);
   });
 
-  it('grants 25 ft walk speed', () => {
+  it('grants 30 ft walk speed', () => {
     const speed = source?.grants.find((g) => g.type === 'speed');
-    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 25 });
+    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 30 });
+  });
+
+  it('grants Common language', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toEqual(expect.arrayContaining([{ type: 'proficiency', category: 'language', id: 'common' }]));
+  });
+
+  it('grants one language choice from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'human', 0),
+      count: 1,
+      from: null,
+    });
+  });
+
+  it('grants one skill choice from any skill', () => {
+    const skillChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'skill');
+    expect(skillChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'skill',
+      key: createChoiceKey('skill-choice', 'species', 'human', 0),
+      count: 1,
+      from: null,
+    });
+  });
+
+  it('grants Resourceful feature', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(1);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toContain('human-resourceful');
+  });
+});
+
+describe('Dwarf species source (2024 PHB)', () => {
+  const source = getSpeciesSource('dwarf');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults (30 ft speed in 2024)', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants no ability bonuses', () => {
+    const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
+    expect(abilityBonuses).toHaveLength(0);
+  });
+
+  it('grants 30 ft walk speed', () => {
+    const speed = source?.grants.find((g) => g.type === 'speed');
+    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 30 });
   });
 
   it('grants Common and Dwarvish languages', () => {
@@ -57,47 +111,26 @@ describe('Dwarf species source', () => {
     );
   });
 
-  it('grants light and medium armor proficiency', () => {
-    const armor = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'armor');
-    expect(armor).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'armor', id: 'light' },
-        { type: 'proficiency', category: 'armor', id: 'medium' },
-      ])
+  it('grants no armor, weapon, or tool proficiencies', () => {
+    const nonLanguageProficiencies = source?.grants.filter(
+      (g) => g.type === 'proficiency' && g.category !== 'language' && g.category !== 'skill'
     );
-    expect(armor).toHaveLength(2);
+    expect(nonLanguageProficiencies).toHaveLength(0);
+    const proficiencyChoices = source?.grants.filter((g) => g.type === 'proficiency-choice');
+    expect(proficiencyChoices).toHaveLength(0);
   });
 
-  it('grants dwarven weapon proficiencies', () => {
-    const weapons = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'weapon');
-    expect(weapons).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'weapon', id: 'battleaxe' },
-        { type: 'proficiency', category: 'weapon', id: 'handaxe' },
-        { type: 'proficiency', category: 'weapon', id: 'lighthammer' },
-        { type: 'proficiency', category: 'weapon', id: 'warhammer' },
-      ])
-    );
-    expect(weapons).toHaveLength(4);
-  });
-
-  it('grants tool proficiency choice from artisan tools', () => {
-    const toolChoice = source?.grants.find((g) => g.type === 'proficiency-choice');
-    expect(toolChoice).toEqual({
-      type: 'proficiency-choice',
-      category: 'tool',
-      key: createChoiceKey('tool-choice', 'species', 'dwarf', 0),
-      count: 1,
-      from: ['smithstools', 'brewersupplies', 'masonstools'],
-    });
-  });
-
-  it('grants darkvision, dwarven resilience, and stonecunning features', () => {
+  it('grants darkvision, dwarven-resilience, stonecunning, dwarven-toughness features', () => {
     const features = source?.grants.filter((g) => g.type === 'feature');
-    expect(features).toHaveLength(3);
+    expect(features).toHaveLength(4);
     const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
     expect(featureIds).toEqual(
-      expect.arrayContaining(['dwarf-darkvision', 'dwarf-dwarven-resilience', 'dwarf-stonecunning'])
+      expect.arrayContaining([
+        'dwarf-darkvision',
+        'dwarf-dwarven-resilience',
+        'dwarf-stonecunning',
+        'dwarf-dwarven-toughness',
+      ])
     );
   });
 
@@ -105,45 +138,132 @@ describe('Dwarf species source', () => {
     const resistance = source?.grants.find((g) => g.type === 'resistance');
     expect(resistance).toEqual({ type: 'resistance', damageType: 'poison' });
   });
+
+  it('grants +1 HP per level bonus', () => {
+    const hpBonus = source?.grants.find((g) => g.type === 'hp-bonus');
+    expect(hpBonus).toEqual({ type: 'hp-bonus', perLevel: 1 });
+  });
 });
 
-describe('Halfling species source', () => {
-  const source = getSpeciesSource('halfling');
+describe('Elf species source (2024 PHB)', () => {
+  const source = getSpeciesSource('elf');
 
   it('source is defined', () => {
     expect(source).toBeDefined();
   });
 
   it('has correct defaults', () => {
-    expect(source?.defaultSize).toBe('small');
-    expect(source?.defaultSpeed).toBe(25);
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants +2 DEX and +1 CHA', () => {
-    const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
-    expect(abilityBonuses).toEqual(
-      expect.arrayContaining([
-        { type: 'ability-bonus', ability: 'dex', bonus: 2 },
-        { type: 'ability-bonus', ability: 'cha', bonus: 1 },
-      ])
-    );
-    expect(abilityBonuses).toHaveLength(2);
-  });
-
-  it('grants 25 ft walk speed', () => {
-    const speed = source?.grants.find((g) => g.type === 'speed');
-    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 25 });
-  });
-
-  it('grants Common and Halfling languages', () => {
+  it('grants Common and Elvish languages', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
     expect(languages).toHaveLength(2);
     expect(languages).toEqual(
       expect.arrayContaining([
         { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'halfling' },
+        { type: 'proficiency', category: 'language', id: 'elvish' },
       ])
     );
+  });
+
+  it('grants skill choice from Insight, Perception, or Survival', () => {
+    const skillChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'skill');
+    expect(skillChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'skill',
+      key: createChoiceKey('skill-choice', 'species', 'elf', 0),
+      count: 1,
+      from: ['insight', 'perception', 'survival'],
+    });
+  });
+
+  it('grants darkvision, fey-ancestry, and trance features', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(3);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(expect.arrayContaining(['elf-darkvision', 'elf-fey-ancestry', 'elf-trance']));
+  });
+
+  it('grants lineage choice from Drow, High Elf, Wood Elf', () => {
+    const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
+    expect(lineageGrant).toEqual({
+      type: 'lineage-choice',
+      key: createChoiceKey('lineage-choice', 'species', 'elf', 0),
+      speciesId: 'elf',
+      from: ['drow', 'high-elf', 'wood-elf'],
+    });
+  });
+});
+
+describe('Gnome species source (2024 PHB)', () => {
+  const source = getSpeciesSource('gnome');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults (30 ft speed in 2024, small size)', () => {
+    expect(source?.defaultSize).toBe('small');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants Common and Gnomish languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'gnomish' },
+      ])
+    );
+  });
+
+  it('grants darkvision and gnomish-cunning features', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(2);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(expect.arrayContaining(['gnome-darkvision', 'gnome-gnomish-cunning']));
+  });
+
+  it('grants lineage choice from Forest, Rock, Deep', () => {
+    const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
+    expect(lineageGrant).toEqual({
+      type: 'lineage-choice',
+      key: createChoiceKey('lineage-choice', 'species', 'gnome', 0),
+      speciesId: 'gnome',
+      from: ['forest', 'rock', 'deep'],
+    });
+  });
+});
+
+describe('Halfling species source (2024 PHB)', () => {
+  const source = getSpeciesSource('halfling');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults (30 ft speed in 2024, small size)', () => {
+    expect(source?.defaultSize).toBe('small');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants no ability bonuses', () => {
+    const abilityBonuses = source?.grants.filter((g) => g.type === 'ability-bonus');
+    expect(abilityBonuses).toHaveLength(0);
+  });
+
+  it('grants 30 ft walk speed', () => {
+    const speed = source?.grants.find((g) => g.type === 'speed');
+    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 30 });
+  });
+
+  it('grants Common only (no Halfling language in 2024)', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
   });
 
   it('grants no armor, weapon, or tool proficiencies', () => {
@@ -155,15 +275,318 @@ describe('Halfling species source', () => {
     expect(proficiencyChoices).toHaveLength(0);
   });
 
-  it('grants lucky, brave, halfling nimbleness, and naturally stealthy features', () => {
+  it('grants brave, halfling-nimbleness, lucky, and naturally-stealthy features', () => {
     const features = source?.grants.filter((g) => g.type === 'feature');
     expect(features).toHaveLength(4);
     const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
-    expect(featureIds).toEqual(expect.arrayContaining(HALFLING_FEATURE_IDS));
+    expect(featureIds).toEqual(
+      expect.arrayContaining([
+        'halfling-brave',
+        'halfling-halfling-nimbleness',
+        'halfling-lucky',
+        'halfling-naturally-stealthy',
+      ])
+    );
   });
 
   it('grants no damage resistances', () => {
     const resistance = source?.grants.find((g) => g.type === 'resistance');
     expect(resistance).toBeUndefined();
+  });
+});
+
+describe('Aasimar species source (2024 PHB)', () => {
+  const source = getSpeciesSource('aasimar');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants Common and Celestial languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'celestial' },
+      ])
+    );
+  });
+
+  it('grants necrotic and radiant resistances', () => {
+    const resistances = source?.grants.filter((g) => g.type === 'resistance');
+    expect(resistances).toHaveLength(2);
+    expect(resistances).toEqual(
+      expect.arrayContaining([
+        { type: 'resistance', damageType: 'necrotic' },
+        { type: 'resistance', damageType: 'radiant' },
+      ])
+    );
+  });
+
+  it('grants darkvision, celestial-resistance, healing-hands, light-bearer, celestial-revelation features', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(5);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(
+      expect.arrayContaining([
+        'aasimar-darkvision',
+        'aasimar-celestial-resistance',
+        'aasimar-healing-hands',
+        'aasimar-light-bearer',
+        'aasimar-celestial-revelation',
+      ])
+    );
+  });
+});
+
+describe('Dragonborn species source (2024 PHB)', () => {
+  const source = getSpeciesSource('dragonborn');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants Common and Draconic languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'draconic' },
+      ])
+    );
+  });
+
+  it('grants lineage choice from all 15 draconic lineages', () => {
+    const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
+    expect(lineageGrant).toBeDefined();
+    if (lineageGrant?.type !== 'lineage-choice') return;
+    expect(lineageGrant.speciesId).toBe('dragonborn');
+    expect(lineageGrant.from).toHaveLength(15);
+    expect(lineageGrant.from).toEqual(
+      expect.arrayContaining([
+        'chromatic-black',
+        'chromatic-blue',
+        'chromatic-green',
+        'chromatic-red',
+        'chromatic-white',
+        'metallic-brass',
+        'metallic-bronze',
+        'metallic-copper',
+        'metallic-gold',
+        'metallic-silver',
+        'gem-amethyst',
+        'gem-emerald',
+        'gem-sapphire',
+        'gem-topaz',
+        'gem-crystal',
+      ])
+    );
+  });
+
+  it('DRAGONBORN_LINEAGE_GRANTS has exactly 15 entries', () => {
+    expect(Object.keys(DRAGONBORN_LINEAGE_GRANTS)).toHaveLength(15);
+  });
+
+  it('each dragonborn lineage grant includes a resistance and two features', () => {
+    for (const [lineageId, grants] of Object.entries(DRAGONBORN_LINEAGE_GRANTS)) {
+      const resistance = grants.find((g) => g.type === 'resistance');
+      const features = grants.filter((g) => g.type === 'feature');
+      expect(resistance).toBeDefined();
+      expect(features).toHaveLength(2);
+      const featureIds = features.map((g) => g.type === 'feature' && g.feature.id);
+      expect(featureIds).toContain(`dragonborn-breath-${lineageId}`);
+    }
+  });
+
+  it('gem lineages have 120 ft darkvision; chromatic and metallic have 60 ft', () => {
+    const gemLineages = ['gem-amethyst', 'gem-emerald', 'gem-sapphire', 'gem-topaz', 'gem-crystal'];
+    for (const lineageId of gemLineages) {
+      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId];
+      const featureIds = grants.filter((g) => g.type === 'feature').map((g) => g.type === 'feature' && g.feature.id);
+      expect(featureIds).toContain('dragonborn-darkvision-120');
+    }
+    const nonGemLineages = [
+      'chromatic-black',
+      'chromatic-blue',
+      'chromatic-green',
+      'chromatic-red',
+      'chromatic-white',
+      'metallic-brass',
+      'metallic-bronze',
+      'metallic-copper',
+      'metallic-gold',
+      'metallic-silver',
+    ];
+    for (const lineageId of nonGemLineages) {
+      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId];
+      const featureIds = grants.filter((g) => g.type === 'feature').map((g) => g.type === 'feature' && g.feature.id);
+      expect(featureIds).toContain('dragonborn-darkvision');
+    }
+  });
+});
+
+describe('Goliath species source (2024 PHB)', () => {
+  const source = getSpeciesSource('goliath');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults (35 ft speed)', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(35);
+  });
+
+  it('grants 35 ft walk speed', () => {
+    const speed = source?.grants.find((g) => g.type === 'speed');
+    expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 35 });
+  });
+
+  it('grants Common and Giant languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'giant' },
+      ])
+    );
+  });
+
+  it('grants Athletics skill proficiency', () => {
+    const skillProf = source?.grants.find((g) => g.type === 'proficiency' && g.category === 'skill');
+    expect(skillProf).toEqual({ type: 'proficiency', category: 'skill', id: 'athletics' });
+  });
+
+  it('grants large-form and powerful-build features', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(2);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(expect.arrayContaining(['goliath-large-form', 'goliath-powerful-build']));
+  });
+
+  it('grants lineage choice from all 6 giant ancestries', () => {
+    const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
+    expect(lineageGrant).toEqual({
+      type: 'lineage-choice',
+      key: createChoiceKey('lineage-choice', 'species', 'goliath', 0),
+      speciesId: 'goliath',
+      from: ['cloud', 'fire', 'frost', 'hill', 'stone', 'storm'],
+    });
+  });
+
+  it('GOLIATH_ANCESTRY_GRANTS has exactly 6 entries', () => {
+    expect(Object.keys(GOLIATH_ANCESTRY_GRANTS)).toHaveLength(6);
+  });
+});
+
+describe('Orc species source (2024 PHB)', () => {
+  const source = getSpeciesSource('orc');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants Common and Orc languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'orc' },
+      ])
+    );
+  });
+
+  it('grants adrenaline-rush, darkvision, powerful-build, relentless-endurance features', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(4);
+    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
+    expect(featureIds).toEqual(
+      expect.arrayContaining([
+        'orc-adrenaline-rush',
+        'orc-darkvision',
+        'orc-powerful-build',
+        'orc-relentless-endurance',
+      ])
+    );
+  });
+
+  it('grants no damage resistances', () => {
+    const resistance = source?.grants.find((g) => g.type === 'resistance');
+    expect(resistance).toBeUndefined();
+  });
+});
+
+describe('Tiefling species source (2024 PHB)', () => {
+  const source = getSpeciesSource('tiefling');
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has correct defaults', () => {
+    expect(source?.defaultSize).toBe('medium');
+    expect(source?.defaultSpeed).toBe(30);
+  });
+
+  it('grants Common and Infernal languages', () => {
+    const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
+    expect(languages).toHaveLength(2);
+    expect(languages).toEqual(
+      expect.arrayContaining([
+        { type: 'proficiency', category: 'language', id: 'common' },
+        { type: 'proficiency', category: 'language', id: 'infernal' },
+      ])
+    );
+  });
+
+  it('grants darkvision feature', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    expect(features).toHaveLength(1);
+    expect(features?.[0]).toEqual({ type: 'feature', feature: { id: 'tiefling-darkvision' } });
+  });
+
+  it('grants lineage choice from Abyssal, Chthonic, Infernal', () => {
+    const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
+    expect(lineageGrant).toEqual({
+      type: 'lineage-choice',
+      key: createChoiceKey('lineage-choice', 'species', 'tiefling', 0),
+      speciesId: 'tiefling',
+      from: ['abyssal', 'chthonic', 'infernal'],
+    });
+  });
+
+  it('TIEFLING_LINEAGE_GRANTS has exactly 3 entries', () => {
+    expect(Object.keys(TIEFLING_LINEAGE_GRANTS)).toHaveLength(3);
+  });
+
+  it('each tiefling lineage grant includes a resistance and a fiendish legacy feature', () => {
+    for (const [lineageId, grants] of Object.entries(TIEFLING_LINEAGE_GRANTS)) {
+      const resistance = grants.find((g) => g.type === 'resistance');
+      const feature = grants.find((g) => g.type === 'feature');
+      expect(resistance).toBeDefined();
+      expect(feature).toBeDefined();
+      if (feature?.type === 'feature') {
+        expect(feature.feature.id).toBe(`tiefling-fiendish-legacy-${lineageId}`);
+      }
+    }
   });
 });

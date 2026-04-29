@@ -401,6 +401,190 @@
     "arcanetrickster-magical-ambush": {
       "name": "Magical Ambush",
       "description": "If hidden when you cast a spell, the target has disadvantage on saving throws against it this turn."
+    },
+    "human-resourceful": {
+      "name": "Resourceful",
+      "description": "You gain Heroic Inspiration whenever you finish a Long Rest."
+    },
+    "dwarf-dwarven-toughness": {
+      "name": "Dwarven Toughness",
+      "description": "Your Hit Point maximum increases by 1, and it increases by 1 again whenever you gain a level."
+    },
+    "elf-darkvision": {
+      "name": "Darkvision (60 ft.)",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "elf-fey-ancestry": {
+      "name": "Fey Ancestry",
+      "description": "You have Advantage on saving throws you make to avoid or end the Charmed condition."
+    },
+    "elf-trance": {
+      "name": "Trance",
+      "description": "You don't need to sleep, and magic can't put you to sleep. You can finish a Long Rest in 4 hours if you spend those hours in a trancelike meditation."
+    },
+    "gnome-darkvision": {
+      "name": "Darkvision (60 ft.)",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "gnome-gnomish-cunning": {
+      "name": "Gnomish Cunning",
+      "description": "You have Advantage on Intelligence, Wisdom, and Charisma saving throws."
+    },
+    "halfling-halfling-nimbleness": {
+      "name": "Halfling Nimbleness",
+      "description": "You can move through the space of any creature of a size larger than yours."
+    },
+    "aasimar-darkvision": {
+      "name": "Darkvision (60 ft.)",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "aasimar-celestial-resistance": {
+      "name": "Celestial Resistance",
+      "description": "You have resistance to Necrotic damage and Radiant damage."
+    },
+    "aasimar-healing-hands": {
+      "name": "Healing Hands",
+      "description": "As a Magic action, you touch a creature and roll a number of d4s equal to your Proficiency Bonus. The creature regains a number of Hit Points equal to the total rolled."
+    },
+    "aasimar-light-bearer": {
+      "name": "Light Bearer",
+      "description": "You know the Light cantrip. Charisma is your spellcasting ability for it."
+    },
+    "aasimar-celestial-revelation": {
+      "name": "Celestial Revelation",
+      "description": "When you reach character level 3, you can transform as a Bonus Action. Your transformation lasts for 1 minute or until you end it as a Bonus Action."
+    },
+    "dragonborn-darkvision": {
+      "name": "Darkvision (60 ft.)",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "dragonborn-darkvision-120": {
+      "name": "Darkvision (120 ft.)",
+      "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "dragonborn-breath-chromatic-black": {
+      "name": "Breath Weapon (Acid)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-chromatic-blue": {
+      "name": "Breath Weapon (Lightning)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-chromatic-green": {
+      "name": "Breath Weapon (Poison)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-chromatic-red": {
+      "name": "Breath Weapon (Fire)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-chromatic-white": {
+      "name": "Breath Weapon (Cold)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-metallic-brass": {
+      "name": "Breath Weapon (Fire)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-metallic-bronze": {
+      "name": "Breath Weapon (Lightning)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-metallic-copper": {
+      "name": "Breath Weapon (Acid)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-metallic-gold": {
+      "name": "Breath Weapon (Fire)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-metallic-silver": {
+      "name": "Breath Weapon (Cold)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-gem-amethyst": {
+      "name": "Breath Weapon (Force)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-gem-emerald": {
+      "name": "Breath Weapon (Psychic)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-gem-sapphire": {
+      "name": "Breath Weapon (Thunder)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-gem-topaz": {
+      "name": "Breath Weapon (Necrotic)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "dragonborn-breath-gem-crystal": {
+      "name": "Breath Weapon (Radiant)",
+      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
+    },
+    "goliath-large-form": {
+      "name": "Large Form",
+      "description": "Starting at character level 5, you can change your size to Large as a Bonus Action if you're in a big enough space. This transformation lasts until you end it as a Bonus Action or until you die."
+    },
+    "goliath-powerful-build": {
+      "name": "Powerful Build",
+      "description": "You have Advantage on any saving throw you make to end the Grappled condition. You also count as one size larger when determining your carrying capacity."
+    },
+    "goliath-giant-ancestry-cloud": {
+      "name": "Giant Ancestry (Cloud)",
+      "description": "You are descended from Cloud Giants. You can cast Fog Cloud with this trait. Starting at 3rd level, you can cast Misty Step with it. Starting at 5th level, you can also cast Cloud of Daggers with it."
+    },
+    "goliath-giant-ancestry-fire": {
+      "name": "Giant Ancestry (Fire)",
+      "description": "You are descended from Fire Giants. You can cast Burning Hands with this trait. Starting at 3rd level, you can cast Flame Blade with it. Starting at 5th level, you can also cast Fireball with it."
+    },
+    "goliath-giant-ancestry-frost": {
+      "name": "Giant Ancestry (Frost)",
+      "description": "You are descended from Frost Giants. You can cast Armor of Agathys with this trait. Starting at 3rd level, you can cast Hold Person with it. Starting at 5th level, you can also cast Sleet Storm with it."
+    },
+    "goliath-giant-ancestry-hill": {
+      "name": "Giant Ancestry (Hill)",
+      "description": "You are descended from Hill Giants. You can cast Speak with Animals with this trait. Starting at 3rd level, you can cast Entangle with it. Starting at 5th level, you can also cast Erupting Earth with it."
+    },
+    "goliath-giant-ancestry-stone": {
+      "name": "Giant Ancestry (Stone)",
+      "description": "You are descended from Stone Giants. You can cast Entangle with this trait. Starting at 3rd level, you can cast Spike Growth with it. Starting at 5th level, you can also cast Meld into Stone with it."
+    },
+    "goliath-giant-ancestry-storm": {
+      "name": "Giant Ancestry (Storm)",
+      "description": "You are descended from Storm Giants. You can cast Thunderwave with this trait. Starting at 3rd level, you can cast Levitate with it. Starting at 5th level, you can also cast Call Lightning with it."
+    },
+    "orc-adrenaline-rush": {
+      "name": "Adrenaline Rush",
+      "description": "You can take the Dash action as a Bonus Action. When you do, you gain a number of Temporary Hit Points equal to your Proficiency Bonus."
+    },
+    "orc-darkvision": {
+      "name": "Darkvision (120 ft.)",
+      "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "orc-powerful-build": {
+      "name": "Powerful Build",
+      "description": "You have Advantage on any saving throw you make to end the Grappled condition. You also count as one size larger when determining your carrying capacity."
+    },
+    "orc-relentless-endurance": {
+      "name": "Relentless Endurance",
+      "description": "When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Point instead. Once you use this trait, you can't do so again until you finish a Long Rest."
+    },
+    "tiefling-darkvision": {
+      "name": "Darkvision (60 ft.)",
+      "description": "You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light."
+    },
+    "tiefling-fiendish-legacy-abyssal": {
+      "name": "Fiendish Legacy (Abyssal)",
+      "description": "You are the recipient of a demonic legacy. You have Resistance to Poison damage. You also know the Poison Spray cantrip. Starting at 3rd level, you can cast Ray of Sickness. Starting at 5th level, you can also cast Hold Person."
+    },
+    "tiefling-fiendish-legacy-chthonic": {
+      "name": "Fiendish Legacy (Chthonic)",
+      "description": "You are the recipient of a chthonic legacy. You have Resistance to Necrotic damage. You also know the Chill Touch cantrip. Starting at 3rd level, you can cast False Life. Starting at 5th level, you can also cast Ray of Enfeeblement."
+    },
+    "tiefling-fiendish-legacy-infernal": {
+      "name": "Fiendish Legacy (Infernal)",
+      "description": "You are the recipient of an infernal legacy. You have Resistance to Fire damage. You also know the Fire Bolt cantrip. Starting at 3rd level, you can cast Hellish Rebuke. Starting at 5th level, you can also cast Darkness."
     }
   },
   "subclasses": {
@@ -478,9 +662,19 @@
     "shield": "Shield"
   },
   "damageTypes": {
+    "acid": "Acid",
     "bludgeoning": "Bludgeoning",
+    "cold": "Cold",
+    "fire": "Fire",
+    "force": "Force",
+    "lightning": "Lightning",
+    "necrotic": "Necrotic",
     "piercing": "Piercing",
-    "slashing": "Slashing"
+    "poison": "Poison",
+    "psychic": "Psychic",
+    "radiant": "Radiant",
+    "slashing": "Slashing",
+    "thunder": "Thunder"
   },
   "items": {
     "weapons": {
@@ -590,6 +784,48 @@
     "ranged-weapon": "Ranged Weapon",
     "pack": "Pack",
     "gear": "Gear"
+  },
+  "lineages": {
+    "dragonborn": {
+      "chromatic-black": "Chromatic (Black)",
+      "chromatic-blue": "Chromatic (Blue)",
+      "chromatic-green": "Chromatic (Green)",
+      "chromatic-red": "Chromatic (Red)",
+      "chromatic-white": "Chromatic (White)",
+      "metallic-brass": "Metallic (Brass)",
+      "metallic-bronze": "Metallic (Bronze)",
+      "metallic-copper": "Metallic (Copper)",
+      "metallic-gold": "Metallic (Gold)",
+      "metallic-silver": "Metallic (Silver)",
+      "gem-amethyst": "Gem (Amethyst)",
+      "gem-emerald": "Gem (Emerald)",
+      "gem-sapphire": "Gem (Sapphire)",
+      "gem-topaz": "Gem (Topaz)",
+      "gem-crystal": "Gem (Crystal)"
+    },
+    "tiefling": {
+      "abyssal": "Abyssal",
+      "chthonic": "Chthonic",
+      "infernal": "Infernal"
+    },
+    "elf": {
+      "drow": "Drow",
+      "high-elf": "High Elf",
+      "wood-elf": "Wood Elf"
+    },
+    "gnome": {
+      "forest": "Forest Gnome",
+      "rock": "Rock Gnome",
+      "deep": "Deep Gnome (Svirfneblin)"
+    },
+    "goliath": {
+      "cloud": "Cloud Giant",
+      "fire": "Fire Giant",
+      "frost": "Frost Giant",
+      "hill": "Hill Giant",
+      "stone": "Stone Giant",
+      "storm": "Storm Giant"
+    }
   },
   "gender": {
     "male": "Male",

@@ -212,6 +212,13 @@ export interface BundleChoiceGrant {
   readonly bundleIds: readonly string[];
 }
 
+export interface LineageChoiceGrant {
+  readonly type: 'lineage-choice';
+  readonly key: ChoiceKey;
+  readonly speciesId: string;
+  readonly from: readonly string[];
+}
+
 export type Grant =
   | AbilityBonusGrant
   | AbilityChoiceGrant
@@ -233,4 +240,5 @@ export type Grant =
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant
   | EquipmentGrant
-  | BundleChoiceGrant;
+  | BundleChoiceGrant
+  | LineageChoiceGrant;

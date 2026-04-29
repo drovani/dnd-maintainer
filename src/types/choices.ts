@@ -30,6 +30,7 @@ const CHOICE_CATEGORIES = [
   'subclass',
   'fighting-style-choice',
   'bundle-choice',
+  'lineage-choice',
 ] as const;
 export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number];
 
@@ -92,7 +93,8 @@ export type ChoiceDecision =
       readonly bundleId: string;
       /** Map of slotKey → chosen itemId. Empty object when the bundle has no slots. */
       readonly slotPicks: Readonly<Record<string, string>>;
-    };
+    }
+  | { readonly type: 'lineage-choice'; readonly lineageId: string };
 
 export interface BuildLevel {
   readonly classId: ClassId;

@@ -19,6 +19,7 @@ import type {
   WeaponRange,
   BundleCategory,
 } from '@/types/items';
+import type { SpeciesId } from '@/lib/dnd-helpers';
 
 export interface Sourced<T> {
   readonly value: T;
@@ -155,6 +156,13 @@ export type PendingChoice =
       readonly source: SourceTag;
       readonly category: BundleCategory;
       readonly bundleIds: readonly string[];
+    }
+  | {
+      readonly type: 'lineage-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly speciesId: SpeciesId;
+      readonly options: readonly string[];
     };
 
 export interface ResolvedCharacter {
