@@ -316,7 +316,7 @@ describe('generateSeedSql', () => {
     };
     const sql = generateSeedSql(data);
     expect(sql).toContain('species');
-    expect(sql).not.toContain('race');
+    expect(sql).not.toMatch(/\brace\b/);
   });
 });
 

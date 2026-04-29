@@ -739,3 +739,47 @@ describe('DB migration species CHECK constraint sync', () => {
     expect(dbValues.sort()).toEqual(expectedIds);
   });
 });
+
+// ---------------------------------------------------------------------------
+// DB migration sync check — class CHECK constraint must match DND_CLASSES IDs
+// ---------------------------------------------------------------------------
+describe('DB migration class CHECK constraint sync', () => {
+  const migrationSql = fs.readFileSync(
+    path.resolve(__dirname, '../../supabase/migrations/00001_initial_schema.sql'),
+    'utf-8'
+  );
+
+  it('CHECK constraint class values exactly match DND_CLASSES ids', () => {
+    const match = migrationSql.match(/CHECK\s*\(class\s+IS\s+NULL\s+OR\s+class\s+IN\s*\(([\s\S]*?)\)\s*\)/i);
+    expect(match).not.toBeNull();
+    const dbValues = match![1]
+      .replace(/'/g, '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    const expectedIds = DND_CLASSES.map((c) => c.id).sort();
+    expect(dbValues.sort()).toEqual(expectedIds);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DB migration sync check — background CHECK constraint must match DND_BACKGROUNDS IDs
+// ---------------------------------------------------------------------------
+describe('DB migration background CHECK constraint sync', () => {
+  const migrationSql = fs.readFileSync(
+    path.resolve(__dirname, '../../supabase/migrations/00001_initial_schema.sql'),
+    'utf-8'
+  );
+
+  it('CHECK constraint background values exactly match DND_BACKGROUNDS ids', () => {
+    const match = migrationSql.match(/CHECK\s*\(background\s+IS\s+NULL\s+OR\s+background\s+IN\s*\(([\s\S]*?)\)\s*\)/i);
+    expect(match).not.toBeNull();
+    const dbValues = match![1]
+      .replace(/'/g, '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    const expectedIds = DND_BACKGROUNDS.map((b) => b.id).sort();
+    expect(dbValues.sort()).toEqual(expectedIds);
+  });
+});

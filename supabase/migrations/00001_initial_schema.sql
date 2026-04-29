@@ -108,7 +108,8 @@ BEGIN
 
   ELSIF TG_OP = 'UPDATE' THEN
     IF OLD.name IS DISTINCT FROM NEW.name THEN
-      -- Preserve old slugs so previous URLs continue to resolve via lookup
+      -- Preserve old slugs so previous URLs continue to resolve; lookup is performed
+      -- in the application layer using the GIN index on previous_slugs.
       IF OLD.slug <> '' AND NOT (OLD.slug = ANY(NEW.previous_slugs)) THEN
         NEW.previous_slugs := NEW.previous_slugs || OLD.slug;
       END IF;
@@ -181,6 +182,9 @@ CREATE TABLE characters (
                     )),
     subclass        text,
     level           integer     NOT NULL DEFAULT 0,
+    -- TODO(#89): 2024 PHB defines 16 new backgrounds with ASI grants.
+    -- These 14 entries (13 named + 'custom') are 2014 PHB stubs retained for seed compatibility.
+    -- Replace when issue #89 lands.
     background      text
                     CHECK (background IS NULL OR background IN (
                       'acolyte', 'charlatan', 'criminal', 'entertainer', 'folkhero',
@@ -376,6 +380,8 @@ CREATE TRIGGER update_character_items_updated_at
 -- ============================================================================
 -- Row Level Security (permissive — no auth policies yet)
 -- Replace with user-scoped policies once authentication is implemented.
+-- WARNING: anon role currently has unrestricted DML on all tables via the GRANTs above.
+-- This is intentional for local development only — not for production.
 -- ============================================================================
 
 ALTER TABLE campaigns             ENABLE ROW LEVEL SECURITY;

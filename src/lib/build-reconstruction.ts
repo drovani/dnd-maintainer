@@ -14,7 +14,7 @@ import { CLASS_SOURCES } from '@/lib/sources/classes';
  * A single row from `character_build_levels`.
  *
  * - **sequence === 0**: Creation row — carries `base_abilities`, `ability_method`,
- *   and race/background choices. `class_id` and `class_level` are null.
+ *   and species/background choices. `class_id` and `class_level` are null.
  * - **sequence > 0**: Level row — carries `class_id`, `class_level`, and class
  *   choices. `base_abilities` and `ability_method` are null.
  */
