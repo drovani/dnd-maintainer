@@ -393,14 +393,9 @@ describe('DND_SPECIES size data integrity', () => {
 });
 
 describe('DND_SPECIES proficiency data integrity', () => {
-  it('all race weaponProficiencies exist in DND_WEAPON_PROFICIENCIES', () => {
+  it('no species has weapon proficiencies (2024 PHB removed species weapon profs)', () => {
     for (const race of DND_SPECIES) {
-      const r = race as DndSpecies;
-      if (r.weaponProficiencies) {
-        for (const weapon of r.weaponProficiencies) {
-          expect(DND_WEAPON_PROFICIENCIES).toContain(weapon);
-        }
-      }
+      expect(race).not.toHaveProperty('weaponProficiencies');
     }
   });
 });
@@ -507,7 +502,7 @@ describe('computeProficiencies', () => {
 
   it('includes race weapon proficiencies when no class is selected', () => {
     const result = computeProficiencies('', 'dwarf', base, false, true);
-    expect(result.weapons).toEqual(['battleaxe', 'handaxe', 'lighthammer', 'warhammer']);
+    expect(result.weapons).toEqual([]);
     expect(result.armor).toEqual([]);
   });
 
@@ -517,21 +512,18 @@ describe('computeProficiencies', () => {
     expect(result.languageChoices).toEqual([]);
   });
 
-  it('merges class and race weapon proficiencies', () => {
+  it('merges class weapon proficiencies (race no longer provides them)', () => {
     const result = computeProficiencies('rogue', 'elf', base, true, true);
     // Rogue: simple, handcrossbow, longsword, rapier, shortsword
-    // Elf: longsword, shortsword, shortbow, longbow
     expect(result.weapons).toContain('simple');
-    expect(result.weapons).toContain('shortbow');
-    expect(result.weapons).toContain('longbow');
+    expect(result.weapons).not.toContain('shortbow');
+    expect(result.weapons).not.toContain('longbow');
   });
 
-  it('deduplicates overlapping weapon proficiencies', () => {
+  it('weapons come from class only, not race', () => {
     const result = computeProficiencies('rogue', 'elf', base, true, true);
     const longswordCount = result.weapons.filter((w) => w === 'longsword').length;
-    const shortswordCount = result.weapons.filter((w) => w === 'shortsword').length;
     expect(longswordCount).toBe(1);
-    expect(shortswordCount).toBe(1);
   });
 
   it('resets toolChoices when class changes', () => {
@@ -702,9 +694,25 @@ describe('averageDice', () => {
 });
 
 describe('DND_SPECIES lineages', () => {
-  it('dragonborn has chromatic, metallic, gem lineages', () => {
+  it('dragonborn has all 15 specific dragon lineages', () => {
     const s = DND_SPECIES.find((s) => s.id === 'dragonborn') as DndSpecies | undefined;
-    expect(s?.lineages).toEqual(['chromatic', 'metallic', 'gem']);
+    expect(s?.lineages).toEqual([
+      'black',
+      'blue',
+      'brass',
+      'bronze',
+      'copper',
+      'gold',
+      'green',
+      'red',
+      'silver',
+      'white',
+      'amethyst',
+      'crystal',
+      'emerald',
+      'sapphire',
+      'topaz',
+    ]);
   });
 
   it('tiefling has abyssal, chthonic, infernal lineages', () => {

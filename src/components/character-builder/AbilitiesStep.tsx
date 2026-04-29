@@ -15,7 +15,6 @@ import {
   POINT_BUY_TOTAL,
   rollAbilityScores,
   STANDARD_ARRAY,
-  DND_SPECIES,
 } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react';
@@ -187,10 +186,6 @@ export function AbilitiesStep() {
     }
   }
 
-  // Find selected species
-  const raceId = context.character.species;
-  const selectedRace = raceId ? DND_SPECIES.find((s) => s.id === raceId) : undefined;
-
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
     const baseScore = baseAbilities[ability];
     const raceBonus = racialBonuses[ability] ?? 0;
@@ -204,20 +199,6 @@ export function AbilitiesStep() {
           <Label className="text-xs font-semibold text-muted-foreground">{t(`abilities.${ability}`)}</Label>
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">{scoreInput}</div>
-            {raceBonus > 0 && selectedRace && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] shrink-0 px-1.5 py-0 cursor-default select-none"
-                title={tc('characterBuilder.abilities.racialBonus', {
-                  race: t(`races.${selectedRace.id}`),
-                  bonuses: Object.entries(selectedRace.abilityBonuses)
-                    .map(([ab, val]) => `+${val} ${t(`abilities.${ab as keyof AbilityScores}`)}`)
-                    .join(', '),
-                })}
-              >
-                +{raceBonus}
-              </Badge>
-            )}
             <div className="flex items-baseline gap-2 ml-auto">
               <span className="text-sm font-bold">{totalScore}</span>
               <span className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}>

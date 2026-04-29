@@ -207,10 +207,8 @@ export interface DndSpecies {
   readonly id: SpeciesId;
   readonly size: SizeId;
   readonly speed: number;
-  readonly abilityBonuses: Partial<Record<AbilityKey, number>>;
   readonly languages: readonly LanguageId[];
   readonly languageChoices?: number;
-  readonly weaponProficiencies?: readonly WeaponProficiencyId[];
   readonly lineages?: readonly string[];
 }
 
@@ -373,59 +371,68 @@ export const DND_SPECIES = [
     id: 'aasimar',
     size: 'medium',
     speed: 30,
-    abilityBonuses: {},
     languages: ['common', 'celestial'],
   },
   {
     id: 'dragonborn',
     size: 'medium',
     speed: 30,
-    abilityBonuses: {},
     languages: ['common', 'draconic'],
-    lineages: ['chromatic', 'metallic', 'gem'] as const,
+    lineages: [
+      'black',
+      'blue',
+      'brass',
+      'bronze',
+      'copper',
+      'gold',
+      'green',
+      'red',
+      'silver',
+      'white',
+      'amethyst',
+      'crystal',
+      'emerald',
+      'sapphire',
+      'topaz',
+    ] as const,
   },
   {
     id: 'dwarf',
     size: 'medium',
-    speed: 25,
-    abilityBonuses: { str: 2, con: 2 },
+    speed: 30,
     languages: ['common', 'dwarvish'],
-    weaponProficiencies: ['battleaxe', 'handaxe', 'lighthammer', 'warhammer'],
   },
   {
     id: 'elf',
     size: 'medium',
     speed: 30,
-    abilityBonuses: {},
     languages: ['common', 'elvish'],
-    weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
+    lineages: ['drow', 'high-elf', 'wood-elf'] as const,
   },
   {
     id: 'gnome',
     size: 'small',
-    speed: 25,
-    abilityBonuses: {},
+    speed: 30,
     languages: ['common', 'gnomish'],
+    lineages: ['forest', 'rock', 'deep'] as const,
   },
   {
     id: 'goliath',
     size: 'medium',
-    speed: 30,
-    abilityBonuses: {},
+    speed: 35,
     languages: ['common', 'giant'],
+    lineages: ['cloud', 'fire', 'frost', 'hill', 'stone', 'storm'] as const,
   },
   {
     id: 'halfling',
     size: 'small',
-    speed: 25,
-    abilityBonuses: { dex: 2, cha: 1 },
-    languages: ['common', 'halfling'],
+    speed: 30,
+    languages: ['common'],
   },
   {
     id: 'human',
     size: 'medium',
     speed: 30,
-    abilityBonuses: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 },
     languages: ['common'],
     languageChoices: 1,
   },
@@ -433,14 +440,12 @@ export const DND_SPECIES = [
     id: 'orc',
     size: 'medium',
     speed: 30,
-    abilityBonuses: {},
     languages: ['common', 'orc'],
   },
   {
     id: 'tiefling',
     size: 'medium',
     speed: 30,
-    abilityBonuses: {},
     languages: ['common', 'infernal'],
     lineages: ['abyssal', 'chthonic', 'infernal'] as const,
   },
@@ -1192,10 +1197,9 @@ export function computeProficiencies(
   if (!classChanged && !speciesChanged) return prev;
   const cls: DndClass | undefined = DND_CLASSES.find((c) => c.id === classId);
   const race: DndSpecies | undefined = DND_SPECIES.find((r) => r.id === speciesId);
-  const raceWeapons: WeaponProficiencyId[] = race?.weaponProficiencies ? [...race.weaponProficiencies] : [];
   return {
     armor: cls ? [...cls.armorProficiencies] : [],
-    weapons: [...new Set([...(cls ? [...cls.weaponProficiencies] : []), ...raceWeapons])],
+    weapons: cls ? [...cls.weaponProficiencies] : [],
     tools: cls ? [...cls.toolProficiencies] : [],
     toolChoices: classChanged ? [] : prev.toolChoices,
     languages: race ? [...race.languages] : [],
