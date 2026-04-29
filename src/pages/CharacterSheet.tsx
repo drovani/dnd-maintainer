@@ -272,7 +272,7 @@ function CharacterSheetInner({
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.race')}</span>
               <p className="text-foreground font-semibold">
-                {character.race ? t(`races.${character.race}`, { defaultValue: character.race }) : ''}
+                {character.species ? t(`races.${character.species}`, { defaultValue: character.species }) : ''}
               </p>
             </div>
             <div>

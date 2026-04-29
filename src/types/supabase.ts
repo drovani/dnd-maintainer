@@ -215,10 +215,10 @@ export type Database = {
           portrait_url: string | null
           previous_slugs: string[]
           proficiency_bonus: number | null
-          race: string | null
           size: string | null
           skin_color: string | null
           slug: string
+          species: string | null
           speed: number | null
           status: string
           subclass: string | null
@@ -254,10 +254,10 @@ export type Database = {
           portrait_url?: string | null
           previous_slugs?: string[]
           proficiency_bonus?: number | null
-          race?: string | null
           size?: string | null
           skin_color?: string | null
           slug?: string
+          species?: string | null
           speed?: number | null
           status?: string
           subclass?: string | null
@@ -293,10 +293,10 @@ export type Database = {
           portrait_url?: string | null
           previous_slugs?: string[]
           proficiency_bonus?: number | null
-          race?: string | null
           size?: string | null
           skin_color?: string | null
           slug?: string
+          species?: string | null
           speed?: number | null
           status?: string
           subclass?: string | null

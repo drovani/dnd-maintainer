@@ -230,7 +230,7 @@ describe('generateSeedSql', () => {
           name: 'Hero',
           character_type: 'pc',
           player_name: null,
-          race: 'human',
+          species: 'human',
           class: 'fighter',
           subclass: null,
           level: 1,

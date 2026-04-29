@@ -7,7 +7,7 @@ import { collectBundles } from '@/lib/sources/index';
 import { resolveCharacter } from '@/lib/resolver/index';
 import { createChoiceKey } from '@/types/choices';
 
-const identity: CharacterIdentity = { race: 'human', background: 'soldier' };
+const identity: CharacterIdentity = { species: 'human', background: 'soldier' };
 
 const creationRow: BuildLevelRow = {
   sequence: 0,
@@ -41,20 +41,20 @@ describe('reconstructBuild', () => {
     expect(() => reconstructBuild(identity, [levelRow], [])).toThrow('Missing creation row (sequence 0)');
   });
 
-  it('throws when race is null', () => {
-    expect(() => reconstructBuild({ race: null, background: 'soldier' }, [creationRow], [])).toThrow(
-      'Character is missing required race'
+  it('throws when species is null', () => {
+    expect(() => reconstructBuild({ species: null, background: 'soldier' }, [creationRow], [])).toThrow(
+      'Character is missing required species'
     );
   });
 
-  it('throws when character.race is not a valid SpeciesId', () => {
+  it('throws when character.species is not a valid SpeciesId', () => {
     expect(() =>
-      reconstructBuild({ race: 'dwarf-hill' as SpeciesId, background: 'soldier' }, [creationRow], [])
+      reconstructBuild({ species: 'dwarf-hill' as SpeciesId, background: 'soldier' }, [creationRow], [])
     ).toThrow(/invalid species/i);
   });
 
   it('allows null background', () => {
-    const result = reconstructBuild({ race: 'human', background: null }, [creationRow], []);
+    const result = reconstructBuild({ species: 'human', background: null }, [creationRow], []);
     expect(result.backgroundId).toBeNull();
   });
 
@@ -386,7 +386,7 @@ describe('reconstructBuild', () => {
 describe('Human Fighter Level 1 round-trip', () => {
   it('reconstructs and resolves a complete Human Fighter L1', () => {
     const character: CharacterIdentity = {
-      race: 'human',
+      species: 'human',
       background: 'soldier',
     };
 

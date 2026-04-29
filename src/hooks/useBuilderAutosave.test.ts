@@ -25,7 +25,7 @@ const basePayload: AutosavePayload = {
     name: 'Hero Draft',
     character_type: 'pc' as const,
     player_name: 'Bob',
-    race: 'human' as const,
+    species: 'human' as const,
     class: 'fighter' as const,
     subclass: null,
     level: 1,

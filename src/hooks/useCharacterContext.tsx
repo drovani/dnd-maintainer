@@ -231,16 +231,20 @@ function tryDeriveAndResolve(
   // Exclude soft-deleted rows before reconstruction
   const activeRows = rows.filter((r) => r.deleted_at == null);
 
-  // Race is the minimum identity field needed to build anything. When it's missing
+  // Species is the minimum identity field needed to build anything. When it's missing
   // (new character mid-creation), return an "incomplete" state silently — this is
   // the normal pre-population condition, not an error worth surfacing or logging.
-  if (!character.race) {
+  if (!character.species) {
     return { status: 'incomplete', build: null, bundles: [], resolved: null, error: null, warnings: [] };
   }
 
   let build: CharacterBuild;
   try {
-    build = reconstructBuild({ race: character.race, background: character.background }, activeRows, equippedItems);
+    build = reconstructBuild(
+      { species: character.species, background: character.background },
+      activeRows,
+      equippedItems
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error';
     logger.error('Failed to reconstruct character build:', { characterId: character.id, error: err });
@@ -347,9 +351,9 @@ export function CharacterProvider({
   const updateCharacter = useCallback((updates: Readonly<Partial<Character>>) => {
     setCharacter((prev) => {
       const next = { ...prev, ...updates };
-      // When race changes, also set size from species source
-      if ('race' in updates && updates.race !== prev.race && updates.race) {
-        const speciesSource = getSpeciesSource(updates.race);
+      // When species changes, also set size from species source
+      if ('species' in updates && updates.species !== prev.species && updates.species) {
+        const speciesSource = getSpeciesSource(updates.species);
         if (speciesSource) {
           next.size = speciesSource.defaultSize;
         }

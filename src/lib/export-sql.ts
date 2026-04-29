@@ -38,7 +38,7 @@ const TABLE_COLUMNS = {
     { name: 'name', type: 'text' },
     { name: 'character_type', type: 'text' },
     { name: 'player_name', type: 'text' },
-    { name: 'race', type: 'text' },
+    { name: 'species', type: 'text' },
     { name: 'class', type: 'text' },
     { name: 'subclass', type: 'text' },
     { name: 'level', type: 'integer' },

@@ -70,7 +70,7 @@ function buildSeedCharacter(campaignId: string): Character {
     name: '',
     player_name: null,
     character_type: 'pc',
-    race: null,
+    species: null,
     class: null,
     subclass: null,
     level: 0,
@@ -134,7 +134,7 @@ function CharacterBuilderInner() {
   latestPayloadRef.current = { character, rows, resolved };
 
   // Required fields before any draft can be saved
-  const hasRequiredFields = !!character.name && !!character.race && !!character.class && !!character.alignment;
+  const hasRequiredFields = !!character.name && !!character.species && !!character.class && !!character.alignment;
 
   // Autosave when isDirty changes to true — debounced 500ms, only if required fields present
   useEffect(() => {
@@ -155,12 +155,12 @@ function CharacterBuilderInner() {
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === currentStep);
 
-  const selectedRace = character.race ? DND_SPECIES.find((s) => s.id === character.race) : null;
+  const selectedRace = character.species ? DND_SPECIES.find((s) => s.id === character.species) : null;
   const selectedClass = character.class ? DND_CLASSES.find((c) => c.id === character.class) : null;
 
   const isReadyToFinalize =
     !!character.name &&
-    !!character.race &&
+    !!character.species &&
     !!character.class &&
     !!character.background &&
     (resolved?.pendingChoices.length ?? 0) === 0;
@@ -169,7 +169,7 @@ function CharacterBuilderInner() {
   const finalizeBlockers: readonly string[] = (() => {
     const reasons: string[] = [];
     if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'));
-    if (!character.race) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'));
+    if (!character.species) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'));
     if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'));
     if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'));
     for (const pending of resolved?.pendingChoices ?? []) {

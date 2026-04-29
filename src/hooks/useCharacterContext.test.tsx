@@ -93,7 +93,7 @@ function buildSeedCharacter(overrides: Partial<Character> = {}): Character {
     name: 'Test Character',
     player_name: null,
     character_type: 'pc',
-    race: 'human',
+    species: 'human',
     class: 'fighter',
     subclass: null,
     level: 1,
@@ -166,17 +166,17 @@ describe('CharacterProvider', () => {
     expect(result.current.rows[0].base_abilities?.str).toBe(15);
   });
 
-  it('updateCharacter sets race and auto-updates size', () => {
-    const character = buildSeedCharacter({ race: null, size: null });
+  it('updateCharacter sets species and auto-updates size', () => {
+    const character = buildSeedCharacter({ species: null, size: null });
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, []),
     });
 
     act(() => {
-      result.current.updateCharacter({ race: 'human' });
+      result.current.updateCharacter({ species: 'human' });
     });
 
-    expect(result.current.character.race).toBe('human');
+    expect(result.current.character.species).toBe('human');
     expect(result.current.character.size).toBe('medium');
     expect(result.current.isDirty).toBe(true);
   });
@@ -847,11 +847,11 @@ describe('CharacterProvider', () => {
     expect(result.current.buildError).toBeNull();
   });
 
-  it('returns a silent incomplete state (no buildError) when character has no race', () => {
-    // Missing race is the normal mid-creation condition — the hook should return
+  it('returns a silent incomplete state (no buildError) when character has no species', () => {
+    // Missing species is the normal mid-creation condition — the hook should return
     // { build: null, resolved: null, buildError: null } rather than surfacing an
     // "error" that would render as a red banner in the builder UI.
-    const character = buildSeedCharacter({ race: null });
+    const character = buildSeedCharacter({ species: null });
     const { result } = renderHook(() => useCharacterContext(), {
       wrapper: createWrapper(character, [creationRow, fighterLevel1]),
     });

@@ -66,7 +66,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             name: character.name,
             character_type: character.character_type,
             player_name: character.player_name,
-            race: character.race,
+            species: character.species,
             class: character.class,
             subclass: character.subclass,
             level: activeLevel > 0 ? activeLevel : character.level,

@@ -303,7 +303,7 @@ describe('index.html theme constants sync', () => {
 // ---------------------------------------------------------------------------
 describe('DB migration theme CHECK constraint sync', () => {
   const migrationSql = fs.readFileSync(
-    path.resolve(__dirname, '../../supabase/migrations/00007_add_campaign_theme.sql'),
+    path.resolve(__dirname, '../../supabase/migrations/00001_initial_schema.sql'),
     'utf-8'
   );
 

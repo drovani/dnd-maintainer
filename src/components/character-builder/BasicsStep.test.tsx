@@ -110,7 +110,7 @@ function buildSeedCharacter(): Character {
     name: '',
     player_name: null,
     character_type: 'pc',
-    race: null,
+    species: null,
     class: null,
     subclass: null,
     level: 0,
@@ -204,7 +204,7 @@ describe('BasicsStep', () => {
       ...contextCharacter,
       character_type: 'npc',
       name: 'Test Name',
-      race: SPECIES_SOURCES[0].id,
+      species: SPECIES_SOURCES[0].id,
       alignment: 'lg',
       class: 'fighter',
       level: 1,
@@ -236,7 +236,7 @@ describe('BasicsStep', () => {
     );
     const updateCall = mockUpdateCharacter.mock.calls[0][0] as Partial<Character>;
     expect(['male', 'female']).toContain(updateCall.gender);
-    expect(SPECIES_SOURCES.map((r) => r.id)).toContain(updateCall.race);
+    expect(SPECIES_SOURCES.map((r) => r.id)).toContain(updateCall.species);
     expect(updateCall.name).toBeTruthy();
 
     // updateCreation called with base_abilities
@@ -357,7 +357,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Second Name',
-      race: SPECIES_SOURCES[0].id,
+      species: SPECIES_SOURCES[0].id,
       alignment: 'n',
       class: 'fighter',
       level: 1,
@@ -407,7 +407,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Test Name',
-      race: SPECIES_SOURCES[0].id,
+      species: SPECIES_SOURCES[0].id,
       alignment: 'n',
       class: 'fighter',
       level: 1,
@@ -430,7 +430,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Test Name',
-      race: SPECIES_SOURCES[0].id,
+      species: SPECIES_SOURCES[0].id,
       alignment: 'lg',
       class: 'fighter',
       level: 1,
@@ -464,7 +464,7 @@ describe('BasicsStep', () => {
     contextCharacter = {
       ...contextCharacter,
       name: 'Manual Edit',
-      race: SPECIES_SOURCES[0].id,
+      species: SPECIES_SOURCES[0].id,
       alignment: 'lg',
       class: 'fighter',
       level: 1,

@@ -42,7 +42,7 @@ export interface Character {
   name: string;
   player_name: string | null;
   character_type: 'pc' | 'npc';
-  race: SpeciesId | null;
+  species: SpeciesId | null;
   class: ClassId | null;
   subclass: string | null;
   level: number;
@@ -151,7 +151,7 @@ export type CharacterSummary = Pick<
   | 'name'
   | 'player_name'
   | 'character_type'
-  | 'race'
+  | 'species'
   | 'class'
   | 'subclass'
   | 'level'

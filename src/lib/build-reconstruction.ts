@@ -55,7 +55,7 @@ export function isCreationRow(row: BuildLevelRow): row is CreationRow {
 }
 
 export interface CharacterIdentity {
-  readonly race: SpeciesId | null;
+  readonly species: SpeciesId | null;
   readonly background: string | null;
 }
 
@@ -76,8 +76,8 @@ export function reconstructBuild(
   rows: readonly BuildLevelRow[],
   equippedItems: readonly string[]
 ): CharacterBuild {
-  if (!character.race) throw new Error('Character is missing required race');
-  if (!isSpeciesId(character.race)) throw new Error(`Character has invalid species ID: "${character.race}"`);
+  if (!character.species) throw new Error('Character is missing required species');
+  if (!isSpeciesId(character.species)) throw new Error(`Character has invalid species ID: "${character.species}"`);
 
   const creationRow = rows.find((r): r is CreationRow => isCreationRow(r));
   if (!creationRow) {
@@ -200,7 +200,7 @@ export function reconstructBuild(
     character.background !== null && isBackgroundId(character.background) ? character.background : null;
 
   return {
-    speciesId: character.race,
+    speciesId: character.species,
     backgroundId,
     baseAbilities,
     abilityMethod,

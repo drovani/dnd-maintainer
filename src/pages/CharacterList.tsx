@@ -37,7 +37,7 @@ export default function CharacterList() {
         (c) =>
           c.name.toLowerCase().includes(query) ||
           c.player_name?.toLowerCase().includes(query) ||
-          c.race?.toLowerCase().includes(query) ||
+          c.species?.toLowerCase().includes(query) ||
           c.class?.toLowerCase().includes(query)
       );
     }
@@ -206,7 +206,7 @@ export default function CharacterList() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.race')}</span>
                     <span className="text-foreground">
-                      {character.race ? tg(`races.${character.race}`, { defaultValue: character.race }) : ''}
+                      {character.species ? tg(`races.${character.species}`, { defaultValue: character.species }) : ''}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

@@ -187,8 +187,8 @@ export function AbilitiesStep() {
     }
   }
 
-  // Find selected race
-  const raceId = context.character.race;
+  // Find selected species
+  const raceId = context.character.species;
   const selectedRace = raceId ? DND_SPECIES.find((s) => s.id === raceId) : undefined;
 
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {

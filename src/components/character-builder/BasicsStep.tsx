@@ -63,7 +63,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const characterType = character.character_type ?? 'pc';
   const name = character.name ?? '';
   const playerName = character.player_name ?? '';
-  const race = (character.race ?? '') as SpeciesId | '';
+  const race = (character.species ?? '') as SpeciesId | '';
   const background = character.background ?? '';
   const alignment = character.alignment ?? '';
   const gender = character.gender ?? '';
@@ -97,7 +97,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   useEffect(() => {
     const target = pendingAdvanceRef.current;
     if (!target) return;
-    const basicsReady = !!character.name && !!character.race && !!character.class && !!character.alignment;
+    const basicsReady = !!character.name && !!character.species && !!character.class && !!character.alignment;
     if (!basicsReady) return;
     // If targeting 'skills', also wait until base_abilities have committed.
     if (target === 'skills') {
@@ -119,7 +119,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
 
   const handleRaceChange = (value: SpeciesId) => {
     cancelPendingAdvance();
-    context.updateCharacter({ race: value });
+    context.updateCharacter({ species: value });
   };
 
   const handleClassChange = (value: ClassId) => {
@@ -158,7 +158,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
 
   const hasUserEnteredData = (): boolean =>
     !!character.name ||
-    !!character.race ||
+    !!character.species ||
     !!character.alignment ||
     !!character.background ||
     !!character.gender ||
@@ -186,7 +186,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         character_type: 'npc',
         player_name: '',
         gender: basics.gender,
-        race: basics.species,
+        species: basics.species,
         alignment: basics.alignment,
         name: basics.name,
         class: classId,
