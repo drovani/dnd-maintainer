@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
 import { useCharacterContext, type CreationUpdates } from '@/hooks/useCharacterContext';
 import {
   getAbilityModifier,
@@ -17,6 +16,7 @@ import {
   rollAbilityScores,
   STANDARD_ARRAY,
 } from '@/lib/dnd-helpers';
+import type { AbilityKey } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -174,9 +174,34 @@ export function AbilitiesStep() {
     updateAbility(ability, current - 1);
   };
 
-  const pendingAsiChoices = (context.resolved?.pendingChoices ?? []).filter(
-    (c): c is Extract<typeof c, { type: 'asi' }> => c.type === 'asi'
+  // Background ASI — at most one pending choice (one background per character)
+  const backgroundAsiChoice = (context.resolved?.pendingChoices ?? []).find(
+    (c): c is Extract<typeof c, { type: 'asi' }> => c.type === 'asi' && c.source.origin === 'background'
   );
+  const backgroundAsiDecision = backgroundAsiChoice ? context.build?.choices[backgroundAsiChoice.choiceKey] : undefined;
+  const backgroundAsiAllocation: Partial<Record<AbilityKey, number>> =
+    backgroundAsiDecision?.type === 'asi' ? backgroundAsiDecision.allocation : {};
+  const backgroundAsiPointsUsed = Object.values(backgroundAsiAllocation).reduce((s, v) => s + (v ?? 0), 0);
+  const backgroundAsiPointsRemaining = (backgroundAsiChoice?.points ?? 0) - backgroundAsiPointsUsed;
+
+  const incrementBackgroundAsi = (ability: AbilityKey) => {
+    if (!backgroundAsiChoice) return;
+    if (backgroundAsiPointsRemaining <= 0) return;
+    const currentTotal = context.resolved?.abilities[ability].total ?? 10;
+    const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
+    if (currentTotal + 1 > 20) return;
+    const next = { ...backgroundAsiAllocation, [ability]: currentAlloc + 1 };
+    context.makeChoice(backgroundAsiChoice.choiceKey, { type: 'asi', allocation: next });
+  };
+
+  const decrementBackgroundAsi = (ability: AbilityKey) => {
+    if (!backgroundAsiChoice) return;
+    const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
+    if (currentAlloc <= 0) return;
+    const next = { ...backgroundAsiAllocation, [ability]: currentAlloc - 1 };
+    if (next[ability] === 0) delete next[ability];
+    context.makeChoice(backgroundAsiChoice.choiceKey, { type: 'asi', allocation: next });
+  };
 
   // Compute racial bonuses from resolved abilities
   const racialBonuses: Partial<AbilityScores> = {};
@@ -191,12 +216,19 @@ export function AbilitiesStep() {
     }
   }
 
+  const backgroundId = context.build?.backgroundId;
+  const backgroundName = backgroundId ? t(`backgrounds.${backgroundId}` as `backgrounds.${typeof backgroundId}`) : null;
+
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
     const baseScore = baseAbilities[ability];
     const raceBonus = racialBonuses[ability] ?? 0;
     const resolvedTotal = context.resolved?.abilities[ability].total;
     const totalScore = resolvedTotal ?? baseScore + raceBonus;
     const modifier = getAbilityModifier(totalScore);
+    const inBgAsiPool = backgroundAsiChoice?.from?.includes(ability as AbilityKey) ?? false;
+    const bgAlloc = inBgAsiPool ? (backgroundAsiAllocation[ability as AbilityKey] ?? 0) : 0;
+    const canInc = inBgAsiPool && backgroundAsiPointsRemaining > 0 && totalScore < 20;
+    const canDec = inBgAsiPool && bgAlloc > 0;
 
     return (
       <Card key={ability}>
@@ -212,6 +244,34 @@ export function AbilitiesStep() {
               </span>
             </div>
           </div>
+          {inBgAsiPool && (
+            <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+              <span className="text-xs text-muted-foreground flex-1">
+                {backgroundName
+                  ? tc('characterBuilder.abilities.backgroundBonus', { background: backgroundName })
+                  : tc('characterBuilder.abilities.backgroundAsi')}
+                {bgAlloc > 0 && <span className="ml-1 font-semibold text-green-600">+{bgAlloc}</span>}
+              </span>
+              <Button
+                variant="outline"
+                size="xs"
+                disabled={!canDec}
+                onClick={() => decrementBackgroundAsi(ability as AbilityKey)}
+                aria-label={tc('characterSheet.asi.decreaseAbility', { ability: t(`abilities.${ability}`) })}
+              >
+                <ChevronDown className="size-3" />
+              </Button>
+              <Button
+                variant="outline"
+                size="xs"
+                disabled={!canInc}
+                onClick={() => incrementBackgroundAsi(ability as AbilityKey)}
+                aria-label={tc('characterSheet.asi.increaseAbility', { ability: t(`abilities.${ability}`) })}
+              >
+                <ChevronUp className="size-3" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -441,20 +501,21 @@ export function AbilitiesStep() {
         </TabsContent>
       </Tabs>
 
-      {pendingAsiChoices.length > 0 && context.resolved && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold">{tc('characterBuilder.abilities.backgroundAsi')}</h3>
-          {pendingAsiChoices.map((choice) => (
-            <AsiAllocator
-              key={choice.choiceKey}
-              choice={choice}
-              abilities={context.resolved!.abilities}
-              currentDecision={context.build?.choices[choice.choiceKey]}
-              onDecide={(key, allocation) => context.makeChoice(key, { type: 'asi', allocation })}
-              onClear={context.clearChoice}
-            />
-          ))}
-        </div>
+      {backgroundAsiChoice && (
+        <p className="text-sm text-muted-foreground">
+          {tc('characterBuilder.abilities.backgroundAsiHint', {
+            background: backgroundName,
+            points: backgroundAsiChoice.points,
+            abilities: backgroundAsiChoice.from?.map((a) => t(`abilities.${a}`)).join(', '),
+          })}
+          {backgroundAsiPointsRemaining > 0 && (
+            <span className="ml-1 font-medium text-foreground">
+              {tc('characterBuilder.abilities.backgroundAsiRemaining', {
+                count: backgroundAsiPointsRemaining,
+              })}
+            </span>
+          )}
+        </p>
       )}
     </div>
   );
