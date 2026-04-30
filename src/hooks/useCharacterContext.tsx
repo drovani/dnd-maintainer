@@ -141,7 +141,18 @@ function findGrantRowIndex(
  */
 function applyDecisionToRows(rows: BuildLevelRow[], choiceKey: ChoiceKey, decision: ChoiceDecision): string | null {
   if (decision.type === 'subclass' || decision.type === 'asi') {
-    const { id: classId, index: grantIndex } = parseChoiceKey(choiceKey);
+    const { origin, id: classId, index: grantIndex } = parseChoiceKey(choiceKey);
+    // Background (and future species) ASIs are stored in the creation row's choices JSONB,
+    // not in a class level row's asi_allocation column.
+    if (decision.type === 'asi' && (origin === 'background' || origin === 'species')) {
+      const idx = rows.findIndex((r) => r.sequence === 0);
+      if (idx === -1) return 'No creation row found for background ASI choice';
+      rows[idx] = {
+        ...rows[idx],
+        choices: { ...(rows[idx].choices ?? {}), [choiceKey]: decision },
+      };
+      return null;
+    }
     const result = findGrantRowIndex(classId, decision.type, grantIndex, rows);
     if (!result.ok) return result.error;
     if (decision.type === 'subclass') {

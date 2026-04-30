@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
 import { useCharacterContext, type CreationUpdates } from '@/hooks/useCharacterContext';
 import {
   getAbilityModifier,
@@ -172,6 +173,10 @@ export function AbilitiesStep() {
     if (current <= 8) return;
     updateAbility(ability, current - 1);
   };
+
+  const pendingAsiChoices = (context.resolved?.pendingChoices ?? []).filter(
+    (c): c is Extract<typeof c, { type: 'asi' }> => c.type === 'asi'
+  );
 
   // Compute racial bonuses from resolved abilities
   const racialBonuses: Partial<AbilityScores> = {};
@@ -435,6 +440,22 @@ export function AbilitiesStep() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {pendingAsiChoices.length > 0 && context.resolved && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold">{tc('characterBuilder.abilities.backgroundAsi')}</h3>
+          {pendingAsiChoices.map((choice) => (
+            <AsiAllocator
+              key={choice.choiceKey}
+              choice={choice}
+              abilities={context.resolved!.abilities}
+              currentDecision={context.build?.choices[choice.choiceKey]}
+              onDecide={(key, allocation) => context.makeChoice(key, { type: 'asi', allocation })}
+              onClear={context.clearChoice}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
