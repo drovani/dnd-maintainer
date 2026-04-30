@@ -174,33 +174,35 @@ export function AbilitiesStep() {
     updateAbility(ability, current - 1);
   };
 
-  // Background ASI — at most one pending choice (one background per character)
-  const backgroundAsiChoice = (context.resolved?.pendingChoices ?? []).find(
-    (c): c is Extract<typeof c, { type: 'asi' }> => c.type === 'asi' && c.source.origin === 'background'
-  );
-  const backgroundAsiDecision = backgroundAsiChoice ? context.build?.choices[backgroundAsiChoice.choiceKey] : undefined;
+  // Background ASI — source from bundles so it stays visible even after fully allocated
+  const backgroundAsiGrant = context.bundles
+    .filter((b) => b.source.origin === 'background')
+    .flatMap((b) => b.grants)
+    .find((g): g is Extract<typeof g, { type: 'asi' }> => g.type === 'asi');
+  const backgroundAsiChoiceKey = backgroundAsiGrant?.key;
+  const backgroundAsiDecision = backgroundAsiChoiceKey ? context.build?.choices[backgroundAsiChoiceKey] : undefined;
   const backgroundAsiAllocation: Partial<Record<AbilityKey, number>> =
     backgroundAsiDecision?.type === 'asi' ? backgroundAsiDecision.allocation : {};
   const backgroundAsiPointsUsed = Object.values(backgroundAsiAllocation).reduce((s, v) => s + (v ?? 0), 0);
-  const backgroundAsiPointsRemaining = (backgroundAsiChoice?.points ?? 0) - backgroundAsiPointsUsed;
+  const backgroundAsiPointsRemaining = (backgroundAsiGrant?.points ?? 0) - backgroundAsiPointsUsed;
 
   const incrementBackgroundAsi = (ability: AbilityKey) => {
-    if (!backgroundAsiChoice) return;
+    if (!backgroundAsiChoiceKey) return;
     if (backgroundAsiPointsRemaining <= 0) return;
     const currentTotal = context.resolved?.abilities[ability].total ?? 10;
     const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
     if (currentTotal + 1 > 20) return;
     const next = { ...backgroundAsiAllocation, [ability]: currentAlloc + 1 };
-    context.makeChoice(backgroundAsiChoice.choiceKey, { type: 'asi', allocation: next });
+    context.makeChoice(backgroundAsiChoiceKey, { type: 'asi', allocation: next });
   };
 
   const decrementBackgroundAsi = (ability: AbilityKey) => {
-    if (!backgroundAsiChoice) return;
+    if (!backgroundAsiChoiceKey) return;
     const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
     if (currentAlloc <= 0) return;
     const next = { ...backgroundAsiAllocation, [ability]: currentAlloc - 1 };
     if (next[ability] === 0) delete next[ability];
-    context.makeChoice(backgroundAsiChoice.choiceKey, { type: 'asi', allocation: next });
+    context.makeChoice(backgroundAsiChoiceKey, { type: 'asi', allocation: next });
   };
 
   // Compute racial bonuses from resolved abilities
@@ -225,7 +227,7 @@ export function AbilitiesStep() {
     const resolvedTotal = context.resolved?.abilities[ability].total;
     const totalScore = resolvedTotal ?? baseScore + raceBonus;
     const modifier = getAbilityModifier(totalScore);
-    const inBgAsiPool = backgroundAsiChoice?.from?.includes(ability as AbilityKey) ?? false;
+    const inBgAsiPool = backgroundAsiGrant?.from?.includes(ability as AbilityKey) ?? false;
     const bgAlloc = inBgAsiPool ? (backgroundAsiAllocation[ability as AbilityKey] ?? 0) : 0;
     const canInc = inBgAsiPool && backgroundAsiPointsRemaining > 0 && totalScore < 20;
     const canDec = inBgAsiPool && bgAlloc > 0;
@@ -501,12 +503,12 @@ export function AbilitiesStep() {
         </TabsContent>
       </Tabs>
 
-      {backgroundAsiChoice && (
+      {backgroundAsiGrant && (
         <p className="text-sm text-muted-foreground">
           {tc('characterBuilder.abilities.backgroundAsiHint', {
             background: backgroundName,
-            points: backgroundAsiChoice.points,
-            abilities: backgroundAsiChoice.from?.map((a) => t(`abilities.${a}`)).join(', '),
+            points: backgroundAsiGrant.points,
+            abilities: backgroundAsiGrant.from?.map((a) => t(`abilities.${a}`)).join(', '),
           })}
           {backgroundAsiPointsRemaining > 0 && (
             <span className="ml-1 font-medium text-foreground">
