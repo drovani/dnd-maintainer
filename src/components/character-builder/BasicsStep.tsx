@@ -194,6 +194,12 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
       });
       if (basics.targetStep === 'skills') {
         context.updateCreation({ base_abilities: basics.baseAbilities });
+        if (basics.backgroundAsiDecision) {
+          context.makeChoice(basics.backgroundAsiDecision.key, {
+            type: 'asi',
+            allocation: basics.backgroundAsiDecision.allocation,
+          });
+        }
       }
     } catch (err) {
       pendingAdvanceRef.current = null;

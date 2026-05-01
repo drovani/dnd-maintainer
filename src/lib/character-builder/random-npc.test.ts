@@ -5,10 +5,13 @@ import {
   generateRandomNpcBasics,
   generateRandomNpcBasicsDetailed,
   getQuickNpcClassIds,
+  randomAsiAllocation,
 } from '@/lib/character-builder/random-npc';
+import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { SPECIES_SOURCES } from '@/lib/sources/species';
 import { DND_ALIGNMENTS } from '@/lib/dnd-helpers';
+import { createChoiceKey } from '@/types/choices';
 import type { ClassSource } from '@/types/sources';
 
 describe('getQuickNpcClassIds', () => {
@@ -60,6 +63,40 @@ describe('assignStandardArray', () => {
   });
 });
 
+describe('randomAsiAllocation', () => {
+  it('distributes 3 points giving min(2,remaining) per ability in shuffled order with rng=0', () => {
+    // shuffle(['str','dex','con'], rng=0):
+    //   i=2: j=floor(0*3)=0 → ['con','dex','str']
+    //   i=1: j=floor(0*2)=0 → ['dex','con','str']
+    // Distribute 3: dex gets 2, con gets 1, str gets 0 → { dex: 2, con: 1 }
+    const result = randomAsiAllocation(3, ['str', 'dex', 'con'], () => 0);
+    expect(result).toEqual({ dex: 2, con: 1 });
+  });
+
+  it('allocation values sum to exactly points', () => {
+    for (const rng of [() => 0, () => 0.5, () => 0.999]) {
+      const result = randomAsiAllocation(3, ['str', 'dex', 'con'], rng);
+      const sum = Object.values(result).reduce((a, b) => a + b, 0);
+      expect(sum).toBe(3);
+    }
+  });
+
+  it('all allocated ability keys are from the provided pool', () => {
+    const from = ['int', 'wis', 'cha'] as const;
+    const result = randomAsiAllocation(3, from, () => 0.5);
+    for (const key of Object.keys(result)) {
+      expect(from).toContain(key);
+    }
+  });
+
+  it('each ability receives at most 2 points', () => {
+    const result = randomAsiAllocation(3, ['str', 'dex', 'con'], () => 0);
+    for (const val of Object.values(result)) {
+      expect(val).toBeLessThanOrEqual(2);
+    }
+  });
+});
+
 describe('generateRandomNpcBasics', () => {
   it('returns null for an unknown classId', () => {
     // Cast to bypass TypeScript so we can test the guard
@@ -81,6 +118,10 @@ describe('generateRandomNpcBasics', () => {
     expect(result.species).toBe(SPECIES_SOURCES[0].id);
     // alignment: pick(DND_ALIGNMENTS, rng=0) → index 0
     expect(result.alignment).toBe(DND_ALIGNMENTS[0].id);
+    // backgroundAsiDecision: soldier from=['str','dex','con'], shuffle with rng=0 → ['dex','con','str'] → { dex: 2, con: 1 }
+    expect(result.backgroundAsiDecision).toBeDefined();
+    expect(result.backgroundAsiDecision?.key).toBe(createChoiceKey('asi', 'background', 'soldier', 0));
+    expect(result.backgroundAsiDecision?.allocation).toEqual({ dex: 2, con: 1 });
   });
 
   it('with rng=()=>0.65 picks dex=15 (last element of ["str","dex"]) via gnome', () => {
@@ -109,12 +150,25 @@ describe('generateRandomNpcBasics', () => {
     expect(values).toEqual([...STANDARD_ARRAY]);
   });
 
-  it('targetStep is skills and baseAbilities/suggestedBackground are present for fighter', () => {
+  it('targetStep is skills and baseAbilities/suggestedBackground/backgroundAsiDecision are present for fighter', () => {
     const fighterResult = generateRandomNpcBasics('fighter', () => 0);
     expect(fighterResult?.targetStep).toBe('skills');
     if (!fighterResult || fighterResult.targetStep !== 'skills') return;
     expect(fighterResult.baseAbilities).toBeDefined();
     expect(fighterResult.suggestedBackground).toBeDefined();
+    // Every BACKGROUND_SOURCES entry has a non-null from pool, so backgroundAsiDecision is always set
+    expect(fighterResult.backgroundAsiDecision).toBeDefined();
+    const bgSource = BACKGROUND_SOURCES.find((b) => b.id === fighterResult.suggestedBackground);
+    const asiGrant = bgSource?.grants.find((g) => g.type === 'asi');
+    expect(fighterResult.backgroundAsiDecision?.key).toBe(asiGrant?.key);
+    // Allocation total must be ≤ 3 and all keys must be in the background's from pool
+    const total = Object.values(fighterResult.backgroundAsiDecision?.allocation ?? {}).reduce((a, b) => a + b, 0);
+    expect(total).toBeLessThanOrEqual(3);
+    if (asiGrant && asiGrant.from) {
+      for (const key of Object.keys(fighterResult.backgroundAsiDecision?.allocation ?? {})) {
+        expect(asiGrant.from).toContain(key);
+      }
+    }
   });
 
   it('returns targetStep=abilities for a class without quickBuild data', () => {

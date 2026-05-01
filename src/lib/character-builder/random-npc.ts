@@ -1,4 +1,5 @@
 import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('random-npc');
@@ -16,6 +17,7 @@ import {
 } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { ClassSource } from '@/types/sources';
+import type { ChoiceKey } from '@/types/choices';
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const;
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -35,6 +37,10 @@ export type RandomNpcBasics =
       readonly targetStep: 'skills';
       readonly baseAbilities: AbilityScores;
       readonly suggestedBackground: BackgroundId;
+      readonly backgroundAsiDecision?: {
+        readonly key: ChoiceKey;
+        readonly allocation: Partial<Record<AbilityKey, number>>;
+      };
     })
   | (RandomNpcBasicsBase & {
       readonly targetStep: 'abilities';
@@ -81,6 +87,28 @@ export function assignStandardArray(highest: AbilityKey, secondary: AbilityKey, 
     scores[key] = shuffledRemainder[idx];
   });
   return scores;
+}
+
+/**
+ * Distribute `points` ASI points across a shuffled `from` pool.
+ * Gives min(2, remaining) to each ability in order until points are exhausted.
+ * e.g. points=3, shuffled=['str','con','dex'] → { str: 2, con: 1 }
+ */
+export function randomAsiAllocation(
+  points: number,
+  from: readonly AbilityKey[],
+  rng: Rng
+): Partial<Record<AbilityKey, number>> {
+  const shuffled = shuffle(from, rng);
+  const allocation: Partial<Record<AbilityKey, number>> = {};
+  let remaining = points;
+  for (const ability of shuffled) {
+    if (remaining <= 0) break;
+    const give = Math.min(2, remaining);
+    allocation[ability] = give;
+    remaining -= give;
+  }
+  return allocation;
 }
 
 /**
@@ -137,6 +165,16 @@ export function generateRandomNpcBasicsDetailed(
   }
   const baseAbilities = assignStandardArray(highest, qb.secondaryAbility, rng);
 
+  const bgSource = BACKGROUND_SOURCES.find((b) => b.id === qb.suggestedBackground);
+  const asiGrant = bgSource?.grants.find((g) => g.type === 'asi');
+  const backgroundAsiDecision =
+    asiGrant && asiGrant.from !== null
+      ? {
+          key: asiGrant.key,
+          allocation: randomAsiAllocation(asiGrant.points, asiGrant.from, rng),
+        }
+      : undefined;
+
   return {
     ok: true,
     basics: {
@@ -148,6 +186,7 @@ export function generateRandomNpcBasicsDetailed(
       baseAbilities,
       suggestedBackground: qb.suggestedBackground,
       targetStep: 'skills',
+      ...(backgroundAsiDecision !== undefined ? { backgroundAsiDecision } : {}),
     },
   };
 }
