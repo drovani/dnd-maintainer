@@ -1,5 +1,6 @@
 import { useCharacters } from '@/hooks/useCharacters';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { isBackgroundId } from '@/lib/dnd-helpers';
 import { Plus, Search, User, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -209,6 +210,12 @@ export default function CharacterList() {
                       {character.species ? tg(`races.${character.species}`, { defaultValue: character.species }) : ''}
                     </span>
                   </div>
+                  {character.background && isBackgroundId(character.background) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('characterList.background')}</span>
+                      <span className="text-foreground">{tg(`backgrounds.${character.background}`)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('characterList.class')}</span>
                     <span className="text-foreground">

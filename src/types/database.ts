@@ -152,6 +152,7 @@ export type CharacterSummary = Pick<
   | 'player_name'
   | 'character_type'
   | 'species'
+  | 'background'
   | 'class'
   | 'subclass'
   | 'level'

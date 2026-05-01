@@ -510,6 +510,7 @@
     "noCharactersFound": "No characters found",
     "player": "Player: {{name}}",
     "race": "Race",
+    "background": "Background",
     "class": "Class",
     "level": "Level",
     "hp": "HP",
