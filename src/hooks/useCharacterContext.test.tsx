@@ -1018,6 +1018,62 @@ describe('CharacterProvider', () => {
     });
   });
 
+  describe('background ASI choices', () => {
+    it('makeChoice stores background ASI in creation row choices JSONB, not asi_allocation column', () => {
+      const character = buildSeedCharacter();
+      const { result } = renderHook(() => useCharacterContext(), {
+        wrapper: createWrapper(character, [creationRow]),
+      });
+
+      act(() => {
+        result.current.makeChoice('asi:background:soldier:0', {
+          type: 'asi',
+          allocation: { str: 2, con: 1 },
+        });
+      });
+
+      const creation = result.current.rows.find((r) => r.sequence === 0);
+      // Decision must live in choices JSONB
+      expect(creation?.choices).toHaveProperty('asi:background:soldier:0');
+      expect(
+        (creation?.choices?.['asi:background:soldier:0'] as { allocation?: Record<string, number> })?.allocation
+      ).toEqual({
+        str: 2,
+        con: 1,
+      });
+      // The dedicated asi_allocation column must NOT be set
+      expect(creation?.asi_allocation).toBeNull();
+      expect(result.current.isDirty).toBe(true);
+    });
+
+    it('clearChoice removes background ASI from creation row choices without toast.error', () => {
+      const character = buildSeedCharacter();
+      const { result } = renderHook(() => useCharacterContext(), {
+        wrapper: createWrapper(character, [creationRow]),
+      });
+
+      // First set the decision
+      act(() => {
+        result.current.makeChoice('asi:background:soldier:0', {
+          type: 'asi',
+          allocation: { str: 2, con: 1 },
+        });
+      });
+
+      const creationAfterMake = result.current.rows.find((r) => r.sequence === 0);
+      expect(creationAfterMake?.choices).toHaveProperty('asi:background:soldier:0');
+
+      // Now clear it
+      act(() => {
+        result.current.clearChoice('asi:background:soldier:0');
+      });
+
+      const creation = result.current.rows.find((r) => r.sequence === 0);
+      expect(creation?.choices).not.toHaveProperty('asi:background:soldier:0');
+      expect(result.current.isDirty).toBe(true);
+    });
+  });
+
   it('throws when useCharacterContext is used outside provider', () => {
     expect(() => {
       renderHook(() => useCharacterContext());
