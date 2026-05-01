@@ -1,4 +1,4 @@
-import type { SpeciesId, ClassId, BackgroundId, SizeId, AbilityKey } from '@/lib/dnd-helpers';
+import type { SpeciesId, ClassId, BackgroundId, SizeId, AbilityKey, FeatId } from '@/lib/dnd-helpers';
 import type { Grant } from '@/types/grants';
 
 export const SUBCLASS_IDS = [
@@ -98,6 +98,9 @@ export interface BackgroundSource {
   readonly grants: readonly Grant[];
 }
 
+export const FEAT_CATEGORIES = ['origin', 'general', 'fightingStyle', 'epicBoon'] as const;
+export type FeatCategory = (typeof FEAT_CATEGORIES)[number];
+
 export type FeatPrerequisite =
   | { readonly type: 'ability-minimum'; readonly ability: AbilityKey; readonly minimum: number }
   | { readonly type: 'proficiency'; readonly category: 'armor' | 'weapon'; readonly id: string }
@@ -106,7 +109,8 @@ export type FeatPrerequisite =
   | { readonly type: 'level-minimum'; readonly level: number };
 
 export interface FeatSource {
-  readonly id: string;
+  readonly id: FeatId;
+  readonly category: FeatCategory;
   readonly prerequisites: readonly FeatPrerequisite[];
   readonly grants: readonly Grant[];
 }
