@@ -1,6 +1,7 @@
 import type {
   AbilityKey,
   ClassId,
+  FeatId,
   FightingStyleId,
   SkillId,
   ArmorProficiencyId,
@@ -182,7 +183,7 @@ export interface AsiGrant {
 
 export interface FeatGrant {
   readonly type: 'feat';
-  readonly featId: string;
+  readonly featId: FeatId;
 }
 
 export interface SubclassGrant {
