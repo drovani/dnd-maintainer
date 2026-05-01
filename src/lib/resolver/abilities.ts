@@ -46,18 +46,16 @@ export function resolveAbilities(
     const decision = choices[grant.key];
     if (decision?.type === 'asi') {
       const totalAllocated = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0);
-      if (totalAllocated !== grant.points) {
-        logger.warn(`ASI allocation for "${grant.key}" uses ${totalAllocated} of ${grant.points} points — skipping`);
+      if (totalAllocated > grant.points) {
+        logger.warn(`ASI grant "${grant.key}" over-allocated (${totalAllocated}/${grant.points}) — skipping`);
         continue;
       }
       if (grant.from != null) {
-        const invalidKeys = Object.keys(decision.allocation).filter(
+        const hasOutOfPool = Object.keys(decision.allocation).some(
           (k) => (decision.allocation[k as AbilityKey] ?? 0) > 0 && !grant.from!.includes(k as AbilityKey)
         );
-        if (invalidKeys.length > 0) {
-          logger.warn(
-            `ASI allocation for "${grant.key}" includes abilities [${invalidKeys.join(', ')}] outside allowed pool [${grant.from.join(', ')}] — skipping`
-          );
+        if (hasOutOfPool) {
+          logger.warn(`ASI grant "${grant.key}" has out-of-pool allocation — skipping`);
           continue;
         }
       }
