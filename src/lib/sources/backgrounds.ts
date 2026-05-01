@@ -201,9 +201,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         category: 'tool',
         key: createChoiceKey('tool-choice', 'background', 'guard', 0),
         count: 1,
-        // PHB 2024 p.180: Guard background grants a Musical Instrument proficiency
-        // (not a Gaming Set — counterintuitive given the martial flavor, but correct per RAW)
-        from: MUSICAL_INSTRUMENTS,
+        from: GAMING_SETS,
       },
       {
         type: 'proficiency-choice',
@@ -256,7 +254,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         count: 1,
         from: null,
       },
-      { type: 'feat', featId: 'magic-initiate-druid' },
+      { type: 'feat', featId: 'healer' },
     ],
   },
   {
@@ -340,7 +338,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         points: 3,
         from: ['str', 'dex', 'con'],
       },
-      { type: 'proficiency', category: 'skill', id: 'athletics' },
+      { type: 'proficiency', category: 'skill', id: 'acrobatics' },
       { type: 'proficiency', category: 'skill', id: 'perception' },
       { type: 'proficiency', category: 'tool', id: 'navigatorstools' },
       {
