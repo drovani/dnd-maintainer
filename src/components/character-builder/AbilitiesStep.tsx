@@ -227,7 +227,9 @@ export function AbilitiesStep() {
     const resolvedTotal = context.resolved?.abilities[ability].total;
     const totalScore = resolvedTotal ?? baseScore + raceBonus;
     const modifier = getAbilityModifier(totalScore);
-    const inBgAsiPool = backgroundAsiGrant?.from?.includes(ability as AbilityKey) ?? false;
+    const inBgAsiPool =
+      backgroundAsiGrant != null &&
+      (backgroundAsiGrant.from == null || backgroundAsiGrant.from.includes(ability as AbilityKey));
     const bgAlloc = inBgAsiPool ? (backgroundAsiAllocation[ability as AbilityKey] ?? 0) : 0;
     const canInc = inBgAsiPool && backgroundAsiPointsRemaining > 0 && totalScore < 20;
     const canDec = inBgAsiPool && bgAlloc > 0;
@@ -508,7 +510,10 @@ export function AbilitiesStep() {
           {tc('characterBuilder.abilities.backgroundAsiHint', {
             background: backgroundName,
             points: backgroundAsiGrant.points,
-            abilities: backgroundAsiGrant.from?.map((a) => t(`abilities.${a}`)).join(', '),
+            abilities:
+              backgroundAsiGrant.from != null
+                ? backgroundAsiGrant.from.map((a) => t(`abilities.${a}`)).join(', ')
+                : tc('characterBuilder.abilities.anyAbility'),
           })}
           {backgroundAsiPointsRemaining > 0 && (
             <span className="ml-1 font-medium text-foreground">

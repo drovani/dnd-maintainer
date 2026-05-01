@@ -230,6 +230,7 @@
       "racialBonus": "{{race}} Racial Bonus: {{bonuses}}",
       "backgroundAsi": "Background bonus",
       "backgroundBonus": "{{background}} bonus",
+      "anyAbility": "any ability",
       "backgroundAsiHint": "{{background}} provides {{points}} points to distribute across {{abilities}}.",
       "backgroundAsiRemaining": "({{count}} point remaining)",
       "backgroundAsiRemaining_plural": "({{count}} points remaining)"
