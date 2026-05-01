@@ -72,8 +72,17 @@ describe('getBackgroundSource', () => {
 });
 
 describe('getFeatSource', () => {
-  it('returns undefined', () => {
-    expect(getFeatSource('alert')).toBeUndefined();
+  it('returns a FeatSource for alert with origin category', () => {
+    const source = getFeatSource('alert');
+    expect(source).toBeDefined();
+    expect(source?.id).toBe('alert');
+    expect(source?.category).toBe('origin');
+    expect(source?.prerequisites).toHaveLength(0);
+    expect(source?.grants).toHaveLength(1);
+  });
+
+  it('returns undefined for unknown feat', () => {
+    expect(getFeatSource('nonexistent-feat')).toBeUndefined();
   });
 });
 
@@ -128,10 +137,10 @@ describe('all 2024 backgrounds have correct structure', () => {
 });
 
 describe('collectBundles', () => {
-  it('returns 3 bundles for Human Fighter L1 build', () => {
+  it('returns 4 bundles for Human Fighter L1 build', () => {
     const { bundles } = collectBundles(humanFighterL1Build);
-    // race bundle + class L1 bundle + background bundle = 3
-    expect(bundles).toHaveLength(3);
+    // race bundle + class L1 bundle + background bundle + background origin feat bundle = 4
+    expect(bundles).toHaveLength(4);
   });
 
   it('does not throw for unknown IDs', () => {
@@ -165,7 +174,7 @@ describe('collectBundles', () => {
     expect(warnings[0]).toContain('nonexistent-feat');
   });
 
-  it('returns 5 bundles for Fighter L3 without subclass decision', () => {
+  it('returns 6 bundles for Fighter L3 without subclass decision', () => {
     const l3Build: CharacterBuild = {
       ...humanFighterL1Build,
       levels: [
@@ -175,8 +184,9 @@ describe('collectBundles', () => {
       ],
     };
     const { bundles } = collectBundles(l3Build);
-    // race bundle + class L1 + class L2 + class L3 + background = 5 (no subclass bundle since no decision)
-    expect(bundles).toHaveLength(5);
+    // race bundle + class L1 + class L2 + class L3 + background + background origin feat = 6
+    // (no subclass bundle since no decision)
+    expect(bundles).toHaveLength(6);
   });
 
   it('includes champion subclass bundle at L3 when champion is chosen', () => {
@@ -193,8 +203,8 @@ describe('collectBundles', () => {
       },
     };
     const { bundles } = collectBundles(l3BuildWithChampion);
-    // race + class L1 + class L2 + class L3 + background + champion L3 subclass bundle = 6
-    expect(bundles).toHaveLength(6);
+    // race + class L1 + class L2 + class L3 + background + background origin feat + champion L3 subclass bundle = 7
+    expect(bundles).toHaveLength(7);
     const subclassBundles = bundles.filter((b) => b.source.origin === 'subclass');
     expect(subclassBundles).toHaveLength(1);
     const subclassBundle = subclassBundles[0];
@@ -224,6 +234,7 @@ describe('collectBundles', () => {
     };
     const { bundles } = collectBundles(l3BuildWithChampion);
     const subclassBundles = bundles.filter((b) => b.source.origin === 'subclass');
-    expect(subclassBundles).toHaveLength(1); // only L3 feature, not L7, L10, L15, L18
+    // only L3 feature, not L7, L10, L15, L18
+    expect(subclassBundles).toHaveLength(1);
   });
 });

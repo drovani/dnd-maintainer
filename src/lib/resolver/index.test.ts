@@ -211,13 +211,14 @@ describe('Human Fighter L1 integration', () => {
     expect(result.savingThrows.str.bonus).toBe(5);
   });
 
-  it('has 3 features: Resourceful (human), chosen fighting style, and Second Wind', () => {
+  it('has 4 features: Resourceful (human), chosen fighting style, Second Wind, and savage-attacker feat (soldier background)', () => {
     const result = resolveCharacter(input);
-    expect(result.features).toHaveLength(3);
+    expect(result.features).toHaveLength(4);
     const featureIds = result.features.map((f) => f.feature.id);
     expect(featureIds).toContain('human-resourceful');
     expect(featureIds).toContain('fighting-style-defense');
     expect(featureIds).toContain('fighter-second-wind');
+    expect(featureIds).toContain('feat-savage-attacker');
   });
 
   it('armor proficiencies include light, medium, heavy, shields', () => {
@@ -1328,5 +1329,40 @@ describe('expertise-choice count and validity validation', () => {
     expect(pending).toBeUndefined();
     expect(result.skills.stealth.expertise).toBe(true);
     expect(result.skills.sleightofhand.expertise).toBe(true);
+  });
+});
+
+describe('feat grant expansion via background', () => {
+  it('resolves feat feature from background origin feat grant (soldier → savage-attacker)', () => {
+    // soldier background grants { type: 'feat', featId: 'savage-attacker' }
+    // collectBundles should expand that into a feat bundle with feat-savage-attacker feature
+    const build: CharacterBuild = {
+      speciesId: 'human' as Parameters<typeof collectBundles>[0]['speciesId'],
+      backgroundId: 'soldier' as Parameters<typeof collectBundles>[0]['backgroundId'],
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {},
+      feats: [],
+      activeItems: [],
+    };
+
+    const { bundles } = collectBundles(build);
+
+    // There should be a bundle sourced from the savage-attacker feat
+    const featBundle = bundles.find((b) => b.source.origin === 'feat' && b.source.id === 'savage-attacker');
+    expect(featBundle).toBeDefined();
+
+    // Resolving the character should include the feat-savage-attacker feature
+    const input: ResolverInput = {
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+    };
+    const result = resolveCharacter(input);
+    const savageAttackerFeature = result.features.find((f) => f.feature.id === 'feat-savage-attacker');
+    expect(savageAttackerFeature).toBeDefined();
   });
 });
