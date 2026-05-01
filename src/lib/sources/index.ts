@@ -13,7 +13,7 @@ import type {
   GrantBundle,
   SourceTag,
 } from '@/types/sources';
-import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant } from '@/types/grants';
+import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant, FeatGrant } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
@@ -66,6 +66,9 @@ export function getBackgroundSource(id: BackgroundId): BackgroundSource | undefi
 export function getFeatSource(id: string): FeatSource | undefined {
   return FEAT_SOURCES.find((f) => f.id === id);
 }
+
+export { FEAT_CATEGORIES } from '@/types/sources';
+export type { FeatCategory } from '@/types/sources';
 
 export function getItemSource(id: string): ItemSource | undefined {
   return ITEM_SOURCES.find((i) => i.id === id);
@@ -214,7 +217,28 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     }
   }
 
-  // Feats
+  // Expand FeatGrant grants embedded in already-collected bundles (e.g. background origin feats).
+  // Snapshot current length to avoid iterating bundles we add in this pass.
+  const preFeatExpansionLength = bundles.length;
+  for (let i = 0; i < preFeatExpansionLength; i++) {
+    const bundle = bundles[i];
+    for (const grant of bundle.grants) {
+      if (grant.type === 'feat') {
+        const featGrant = grant as FeatGrant;
+        const featSource = getFeatSource(featGrant.featId);
+        if (featSource) {
+          const tag: SourceTag = { origin: 'feat', id: featGrant.featId };
+          bundles.push({ source: tag, grants: featSource.grants });
+        } else {
+          const msg = `No source data found for feat "${featGrant.featId}" — feat grants will be empty`;
+          warnings.push(msg);
+          logger.warn(msg);
+        }
+      }
+    }
+  }
+
+  // Feats explicitly listed in the build (manually chosen at level-up)
   for (const featId of build.feats) {
     const featSource = getFeatSource(featId);
     if (featSource) {
