@@ -674,6 +674,438 @@
     "gnome-deep-nondetection": {
       "name": "Nondetection",
       "description": "Starting at 5th level, you can cast Nondetection using this trait. Intelligence is your spellcasting ability for it."
+    },
+    "barbarian-rage": {
+      "name": "Rage",
+      "description": "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action."
+    },
+    "barbarian-unarmored-defense": {
+      "name": "Unarmored Defense",
+      "description": "While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier."
+    },
+    "barbarian-reckless-attack": {
+      "name": "Reckless Attack",
+      "description": "You can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly."
+    },
+    "barbarian-danger-sense": {
+      "name": "Danger Sense",
+      "description": "You gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger."
+    },
+    "barbarian-extra-attack": {
+      "name": "Extra Attack",
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    "barbarian-fast-movement": {
+      "name": "Fast Movement",
+      "description": "Your speed increases by 10 feet while you aren't wearing heavy armor."
+    },
+    "barbarian-feral-instinct": {
+      "name": "Feral Instinct",
+      "description": "Your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."
+    },
+    "barbarian-instinctive-pounce": {
+      "name": "Instinctive Pounce",
+      "description": "As part of the bonus action you take to enter your rage, you can move up to half your speed."
+    },
+    "barbarian-brutal-strike": {
+      "name": "Brutal Strike",
+      "description": "If you use Reckless Attack, you can forgo advantage on one Strength-based attack roll and instead have that attack deal extra damage."
+    },
+    "barbarian-relentless-rage": {
+      "name": "Relentless Rage",
+      "description": "Your rage can keep you fighting despite grievous wounds. If you drop to 0 hit points while you're raging and don't die outright, you can make a DC 10 Constitution saving throw."
+    },
+    "barbarian-improved-brutal-strike": {
+      "name": "Improved Brutal Strike",
+      "description": "Your Brutal Strike feature improves, granting additional effects when you forgo advantage."
+    },
+    "barbarian-persistent-rage": {
+      "name": "Persistent Rage",
+      "description": "Your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."
+    },
+    "barbarian-improved-brutal-strike-2": {
+      "name": "Improved Brutal Strike (Greater)",
+      "description": "Your Brutal Strike feature improves further."
+    },
+    "barbarian-indomitable-might": {
+      "name": "Indomitable Might",
+      "description": "If your total for a Strength check is less than your Strength score, you can use that score in place of the total."
+    },
+    "barbarian-primal-champion": {
+      "name": "Primal Champion",
+      "description": "You embody primal power. Your Strength score increases by 4, and your Constitution score increases by 4. Your maximum for those scores is now 24."
+    },
+    "bard-bardic-inspiration": {
+      "name": "Bardic Inspiration",
+      "description": "You can inspire others through stirring words or music. As a bonus action, you can expend one use of Bardic Inspiration to give a creature you can see within 60 feet an inspiration die."
+    },
+    "bard-jack-of-all-trades": {
+      "name": "Jack of All Trades",
+      "description": "You can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus."
+    },
+    "bard-song-of-rest": {
+      "name": "Song of Rest",
+      "description": "You can use soothing music or oration to help revitalize your wounded allies during a short rest."
+    },
+    "bard-font-of-inspiration": {
+      "name": "Font of Inspiration",
+      "description": "You regain all of your expended uses of Bardic Inspiration when you finish a short or long rest."
+    },
+    "bard-countercharm": {
+      "name": "Countercharm",
+      "description": "You gain the ability to use musical notes or words of power to disrupt mind-influencing effects."
+    },
+    "bard-magical-secrets": {
+      "name": "Magical Secrets",
+      "description": "You have plundered magical knowledge from a wide spectrum of disciplines. Choose two spells from any classes."
+    },
+    "bard-superior-inspiration": {
+      "name": "Superior Inspiration",
+      "description": "When you roll initiative and have no uses of Bardic Inspiration left, you regain one use."
+    },
+    "bard-words-of-creation": {
+      "name": "Words of Creation",
+      "description": "You have mastered the Words of Creation, the primordial language of the universe."
+    },
+    "bard-epic-boon": {
+      "name": "Epic Boon",
+      "description": "You gain an Epic Boon feat or another feat of your choice."
+    },
+    "cleric-divine-order": {
+      "name": "Divine Order",
+      "description": "You have dedicated yourself to one of two divine orders: Protector or Thaumaturge."
+    },
+    "cleric-channel-divinity": {
+      "name": "Channel Divinity",
+      "description": "You gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects."
+    },
+    "cleric-holy-order": {
+      "name": "Holy Order",
+      "description": "You gain one of the following options of your choice: Protector, Thaumaturge, or War Priest."
+    },
+    "cleric-smite-undead": {
+      "name": "Smite Undead",
+      "description": "You can cause your Turn Undead feature to smite the undead. When you use Turn Undead, you can expend a spell slot to deal Radiant damage to undead that fail their saving throws."
+    },
+    "cleric-blessed-strikes": {
+      "name": "Blessed Strikes",
+      "description": "Divine power infuses you in battle. When you deal damage to a creature, you can also deal 1d8 Radiant damage to that creature."
+    },
+    "cleric-divine-intervention": {
+      "name": "Divine Intervention",
+      "description": "You can call on your deity to intervene on your behalf. As an action, describe the assistance you seek, and roll percentile dice."
+    },
+    "cleric-channel-divinity-3": {
+      "name": "Channel Divinity (3/Rest)",
+      "description": "You can use Channel Divinity three times between rests."
+    },
+    "cleric-greater-divine-intervention": {
+      "name": "Greater Divine Intervention",
+      "description": "Your Divine Intervention now always succeeds. Once you use it, you can't use it again until 2d4 days have passed."
+    },
+    "druid-primal-order": {
+      "name": "Primal Order",
+      "description": "You have dedicated yourself to one of the following sacred roles of your choice: Magician or Warden."
+    },
+    "druid-wild-shape": {
+      "name": "Wild Shape",
+      "description": "You can use your action to magically assume the shape of a beast that you have seen before."
+    },
+    "druid-wild-companion": {
+      "name": "Wild Companion",
+      "description": "You can expend a spell slot to cast Find Familiar without material components, calling a spirit that takes the form of a beast."
+    },
+    "druid-wild-shape-improvement-1": {
+      "name": "Wild Shape Improvement",
+      "description": "Your Wild Shape improves, allowing you to transform into beasts with a higher challenge rating."
+    },
+    "druid-wild-resurgence": {
+      "name": "Wild Resurgence",
+      "description": "Once on each of your turns, if you have no uses of Wild Shape left, you can give yourself one use by expending a spell slot."
+    },
+    "druid-wild-shape-improvement-2": {
+      "name": "Wild Shape Improvement (Greater)",
+      "description": "Your Wild Shape improves further, allowing you to transform into beasts with a higher challenge rating."
+    },
+    "druid-elemental-fury": {
+      "name": "Elemental Fury",
+      "description": "The might of the elements flows through you. You gain the Potent Spellcasting or Primal Strike feature."
+    },
+    "druid-improved-elemental-fury": {
+      "name": "Improved Elemental Fury",
+      "description": "The power you gained from the Elemental Fury feature becomes mightier."
+    },
+    "druid-beast-spells": {
+      "name": "Beast Spells",
+      "description": "You can cast many of your Druid spells in any shape you assume using Wild Shape."
+    },
+    "druid-archdruid": {
+      "name": "Archdruid",
+      "description": "The vitality of nature constantly blooms within you, granting you the following benefits."
+    },
+    "monk-martial-arts": {
+      "name": "Martial Arts",
+      "description": "Your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons."
+    },
+    "monk-unarmored-defense": {
+      "name": "Unarmored Defense",
+      "description": "While you are wearing no armor and not wielding a shield, your AC equals 10 + your Dexterity modifier + your Wisdom modifier."
+    },
+    "monk-focus-points": {
+      "name": "Focus Points",
+      "description": "Your training allows you to harness the mystic energy of Focus Points. Your Monk level determines the number of points you have."
+    },
+    "monk-unarmored-movement": {
+      "name": "Unarmored Movement",
+      "description": "Your speed increases by 10 feet while you are not wearing armor or wielding a shield."
+    },
+    "monk-uncanny-metabolism": {
+      "name": "Uncanny Metabolism",
+      "description": "When you roll Initiative, you can regain all expended Focus Points. When you do so, roll your Martial Arts die, and regain a number of Hit Points equal to your Monk level plus the number rolled."
+    },
+    "monk-deflect-attacks": {
+      "name": "Deflect Attacks",
+      "description": "You can use your reaction to deflect the strike when you are hit by an attack. When you do so, the damage you take from the attack is reduced."
+    },
+    "monk-slow-fall": {
+      "name": "Slow Fall",
+      "description": "You can use your reaction when you fall to reduce any fall damage you take by an amount equal to five times your Monk level."
+    },
+    "monk-extra-attack": {
+      "name": "Extra Attack",
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    "monk-stunning-strike": {
+      "name": "Stunning Strike",
+      "description": "You can interfere with the flow of ki in an opponent's body. When you hit another creature with an attack, you can spend 1 focus point to attempt a stunning strike."
+    },
+    "monk-empowered-strikes": {
+      "name": "Empowered Strikes",
+      "description": "Whenever you deal damage with your Unarmed Strike, it can deal your choice of Force damage or its normal damage type."
+    },
+    "monk-evasion": {
+      "name": "Evasion",
+      "description": "When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed."
+    },
+    "monk-stillness-of-mind": {
+      "name": "Stillness of Mind",
+      "description": "You can use your action to end one effect on yourself that is causing you to be charmed or frightened."
+    },
+    "monk-acrobatic-movement": {
+      "name": "Acrobatic Movement",
+      "description": "While you aren't wearing armor or wielding a shield, you gain the ability to move along vertical surfaces and across liquids on your turn without falling during the move."
+    },
+    "monk-heightened-focus": {
+      "name": "Heightened Focus",
+      "description": "Your Flurry of Blows, Patient Defense, and Step of the Wind gain additional benefits."
+    },
+    "monk-self-restoration": {
+      "name": "Self-Restoration",
+      "description": "Through sheer force of will, you can remove one of the following conditions from yourself at the end of each of your turns: Charmed, Frightened, or Poisoned."
+    },
+    "monk-disciplined-survivor": {
+      "name": "Disciplined Survivor",
+      "description": "Your physical and mental discipline grant you proficiency in all saving throws. Additionally, whenever you make a saving throw and fail, you can spend 1 focus point to reroll it and take the second result."
+    },
+    "monk-perfect-focus": {
+      "name": "Perfect Focus",
+      "description": "When you roll Initiative and have fewer than 4 Focus Points, you regain Focus Points equal to 4 minus your current total."
+    },
+    "monk-diamond-soul": {
+      "name": "Diamond Soul",
+      "description": "Your mastery of ki grants you proficiency in all saving throws. Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."
+    },
+    "monk-superior-defense": {
+      "name": "Superior Defense",
+      "description": "At the start of your turn, you can spend 3 Focus Points to perfectly clear your mind and body, gaining resistance to all damage except Force damage until the start of your next turn."
+    },
+    "monk-body-and-mind": {
+      "name": "Body and Mind",
+      "description": "You have honed your body and mind to new heights. Your Dexterity and Wisdom scores increase by 4, and your maximum for those scores is now 25."
+    },
+    "monk-epic-boon": {
+      "name": "Epic Boon",
+      "description": "You gain an Epic Boon feat or another feat of your choice."
+    },
+    "paladin-lay-on-hands": {
+      "name": "Lay On Hands",
+      "description": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5."
+    },
+    "paladin-divine-sense": {
+      "name": "Divine Sense",
+      "description": "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears."
+    },
+    "paladin-divine-smite": {
+      "name": "Divine Smite",
+      "description": "When you hit a creature with a melee weapon attack, you can expend one spell slot to deal Radiant damage to the target, in addition to the weapon's damage."
+    },
+    "paladin-channel-divinity": {
+      "name": "Channel Divinity",
+      "description": "Your sacred oath lets you channel divine energy to fuel magical effects. Each Channel Divinity option provided by your oath explains how to use it."
+    },
+    "paladin-extra-attack": {
+      "name": "Extra Attack",
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    "paladin-faithful-steed": {
+      "name": "Faithful Steed",
+      "description": "You can call on the aid of an otherworldly steed. You always have the Find Steed spell prepared."
+    },
+    "paladin-aura-of-protection": {
+      "name": "Aura of Protection",
+      "description": "Whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier."
+    },
+    "paladin-abjure-foes": {
+      "name": "Abjure Foes",
+      "description": "As a Magic action, you can expend one use of your Channel Divinity to overwhelm foes with divine awe."
+    },
+    "paladin-aura-of-courage": {
+      "name": "Aura of Courage",
+      "description": "You and friendly creatures within 10 feet of you can't be frightened while you are conscious."
+    },
+    "paladin-radiant-strikes": {
+      "name": "Radiant Strikes",
+      "description": "You are so suffused with divine might that your weapon strikes carry supernatural power with them. When you hit a target with a melee weapon attack, the target takes an extra 1d8 Radiant damage."
+    },
+    "paladin-restoring-touch": {
+      "name": "Restoring Touch",
+      "description": "When you use Lay On Hands on a creature, you can also remove one or more of the following conditions from the creature: Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned."
+    },
+    "paladin-aura-expansion": {
+      "name": "Aura Expansion",
+      "description": "Your Aura of Protection now extends 30 feet rather than 10 feet."
+    },
+    "ranger-favored-enemy": {
+      "name": "Favored Enemy",
+      "description": "You have advantage on Wisdom (Survival) checks to track your favored enemies, as well as on Intelligence checks to recall information about them."
+    },
+    "ranger-weapon-mastery": {
+      "name": "Weapon Mastery",
+      "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency."
+    },
+    "ranger-deft-explorer": {
+      "name": "Deft Explorer",
+      "description": "You are an unsurpassed explorer and survivor, both in the wilderness and in dealing with others on your travels."
+    },
+    "ranger-roving": {
+      "name": "Roving",
+      "description": "Your walking speed increases by 10, and you gain a climbing speed and a swimming speed equal to your walking speed."
+    },
+    "ranger-extra-attack": {
+      "name": "Extra Attack",
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+    },
+    "ranger-conjure-barrage": {
+      "name": "Conjure Barrage",
+      "description": "You always have the Conjure Barrage spell prepared."
+    },
+    "ranger-tireless": {
+      "name": "Tireless",
+      "description": "As an action, you can give yourself a number of temporary hit points equal to 1d8 plus your Wisdom modifier. You can use this action a number of times equal to your Wisdom modifier."
+    },
+    "ranger-relentless-hunter": {
+      "name": "Relentless Hunter",
+      "description": "Taking damage can't break your concentration on Hunter's Mark."
+    },
+    "ranger-natures-veil": {
+      "name": "Nature's Veil",
+      "description": "You can use nature magic to hide your presence. As a bonus action, you can magically become invisible, along with any equipment you are wearing or carrying, until the start of your next turn."
+    },
+    "ranger-conjure-volley": {
+      "name": "Conjure Volley",
+      "description": "You always have the Conjure Volley spell prepared."
+    },
+    "ranger-swift-quiver": {
+      "name": "Swift Quiver",
+      "description": "You always have the Swift Quiver spell prepared."
+    },
+    "ranger-epic-boon": {
+      "name": "Epic Boon",
+      "description": "You gain an Epic Boon feat or another feat of your choice."
+    },
+    "sorcerer-innate-sorcery": {
+      "name": "Innate Sorcery",
+      "description": "An event in your past, or in the past of a parent or ancestor, left an indelible mark on you, infusing you with a mote of magic. This unpredictable magic is a sorcery that is part of you."
+    },
+    "sorcerer-font-of-magic": {
+      "name": "Font of Magic",
+      "description": "You tap into a deep wellspring of magic within yourself. This wellspring is represented by sorcery points, which allow you to create a variety of magical effects."
+    },
+    "sorcerer-metamagic": {
+      "name": "Metamagic",
+      "description": "You gain the ability to twist your spells to suit your needs. You gain two of the following Metamagic options of your choice."
+    },
+    "sorcerer-sorcery-incarnate": {
+      "name": "Sorcery Incarnate",
+      "description": "If you have no uses of Innate Sorcery left, you can use it again, and you regain all expended uses when you finish a Long Rest."
+    },
+    "sorcerer-metamagic-options": {
+      "name": "Metamagic Options",
+      "description": "You gain two more Metamagic options of your choice."
+    },
+    "sorcerer-arcane-apotheosis": {
+      "name": "Arcane Apotheosis",
+      "description": "While your Innate Sorcery feature is active, you can use one Metamagic option on each of your turns without expending Sorcery Points on it."
+    },
+    "sorcerer-sorcerous-restoration": {
+      "name": "Sorcerous Restoration",
+      "description": "When you finish a Short Rest, you regain expended Sorcery Points, but no more than a number equal to half your Sorcerer level."
+    },
+    "warlock-eldritch-invocations": {
+      "name": "Eldritch Invocations",
+      "description": "In your study of occult lore, you have unearthed Eldritch Invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability."
+    },
+    "warlock-magical-cunning": {
+      "name": "Magical Cunning",
+      "description": "You can perform an esoteric rite for 1 minute. At the end of it, you regain expended Pact Magic spell slots up to half of their maximum number (round up)."
+    },
+    "warlock-pact-magic-enhancement": {
+      "name": "Pact Magic Enhancement",
+      "description": "Your pact magic grows as you advance, granting you additional spell slots."
+    },
+    "warlock-pact-boon": {
+      "name": "Pact Boon",
+      "description": "Your otherworldly patron bestows a gift upon you for your loyal service. You gain one of the following features of your choice: Pact of the Blade, Pact of the Chain, or Pact of the Tome."
+    },
+    "warlock-mystic-arcanum-6": {
+      "name": "Mystic Arcanum (6th Level)",
+      "description": "Your patron bestows upon you a magical secret called an arcanum. Choose one 6th-level spell from the warlock spell list as this arcanum."
+    },
+    "warlock-mystic-arcanum-7": {
+      "name": "Mystic Arcanum (7th Level)",
+      "description": "Your patron bestows upon you a magical secret called an arcanum. Choose one 7th-level spell from the warlock spell list as this arcanum."
+    },
+    "warlock-mystic-arcanum-8": {
+      "name": "Mystic Arcanum (8th Level)",
+      "description": "Your patron bestows upon you a magical secret called an arcanum. Choose one 8th-level spell from the warlock spell list as this arcanum."
+    },
+    "warlock-mystic-arcanum-9": {
+      "name": "Mystic Arcanum (9th Level)",
+      "description": "Your patron bestows upon you a magical secret called an arcanum. Choose one 9th-level spell from the warlock spell list as this arcanum."
+    },
+    "warlock-eldritch-master": {
+      "name": "Eldritch Master",
+      "description": "You can draw on your inner reserve of mystical power while entreating your patron to regain expended spell slots. You can spend 1 minute entreating your patron for aid to regain all your expended Pact Magic spell slots."
+    },
+    "wizard-arcane-recovery": {
+      "name": "Arcane Recovery",
+      "description": "You have learned to regain some of your magical energy by studying your spellbook. Once per day when you finish a short rest, you can choose expended spell slots to recover."
+    },
+    "wizard-scholar": {
+      "name": "Scholar",
+      "description": "You have an exceptional understanding of magical theory. Whenever you gain a Wizard level, you can add two Wizard spells to your spellbook for free."
+    },
+    "wizard-memorize-spell": {
+      "name": "Memorize Spell",
+      "description": "Whenever you finish a Short Rest, you can study your spellbook and replace one of the level 1+ Wizard spells you have prepared for your Spellcasting feature with another level 1+ spell from your spellbook."
+    },
+    "wizard-spell-mastery": {
+      "name": "Spell Mastery",
+      "description": "You have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level and a 2nd-level wizard spell that you have in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared."
+    },
+    "wizard-signature-spells": {
+      "name": "Signature Spells",
+      "description": "You gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells."
     }
   },
   "subclasses": {
