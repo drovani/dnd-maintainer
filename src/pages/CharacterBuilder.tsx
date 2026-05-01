@@ -23,7 +23,7 @@ import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { DND_SPECIES, DND_CLASSES } from '@/lib/dnd-helpers';
+import { DND_SPECIES, DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
 import type { StepType } from '@/types/character-builder';
 
 const logger = getLogger('character-builder');
@@ -298,6 +298,9 @@ function CharacterBuilderInner() {
               {tg(`races.${selectedRace.id}`)}
               {' · '}
               {tg(`classes.${selectedClass.id}`)}
+              {character.background && isBackgroundId(character.background) && (
+                <> ({tg(`backgrounds.${character.background}`)})</>
+              )}
             </>
           )}
         </div>

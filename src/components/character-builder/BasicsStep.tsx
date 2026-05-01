@@ -193,13 +193,19 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
       });
       if (basics.targetStep === 'skills') {
-        context.updateCreation({ base_abilities: basics.baseAbilities });
-        if (basics.backgroundAsiDecision) {
-          context.makeChoice(basics.backgroundAsiDecision.key, {
-            type: 'asi',
-            allocation: basics.backgroundAsiDecision.allocation,
-          });
-        }
+        context.updateCreation({
+          base_abilities: basics.baseAbilities,
+          ...(basics.backgroundAsiDecision
+            ? {
+                choices: {
+                  [basics.backgroundAsiDecision.key]: {
+                    type: 'asi' as const,
+                    allocation: basics.backgroundAsiDecision.allocation,
+                  },
+                },
+              }
+            : {}),
+        });
       }
     } catch (err) {
       pendingAdvanceRef.current = null;
