@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { getClassSource } from '@/lib/sources';
 import { createChoiceKey } from '@/types/choices';
+import { CLASS_SOURCES } from '@/lib/sources/classes';
 import type { ClassId } from '@/lib/dnd-helpers';
 
 describe('Fighter class levels 2–10 grant structures', () => {
@@ -274,5 +275,642 @@ describe('Rogue class grant structures', () => {
       expect(grant.category).toBe('pack');
       expect(grant.bundleIds).toEqual(['burglars-pack', 'dungeoneers-pack', 'explorers-pack']);
     }
+  });
+});
+
+describe('CLASS_SOURCES contains all 12 classes', () => {
+  it('has exactly 12 class sources', () => {
+    expect(CLASS_SOURCES).toHaveLength(12);
+  });
+
+  it('contains all expected class IDs', () => {
+    const ids = CLASS_SOURCES.map((c) => c.id);
+    expect(ids).toContain('barbarian');
+    expect(ids).toContain('bard');
+    expect(ids).toContain('cleric');
+    expect(ids).toContain('druid');
+    expect(ids).toContain('fighter');
+    expect(ids).toContain('monk');
+    expect(ids).toContain('paladin');
+    expect(ids).toContain('ranger');
+    expect(ids).toContain('rogue');
+    expect(ids).toContain('sorcerer');
+    expect(ids).toContain('warlock');
+    expect(ids).toContain('wizard');
+  });
+
+  it('every class has exactly 20 levels', () => {
+    for (const classSource of CLASS_SOURCES) {
+      expect(classSource.levels, `${classSource.id} should have 20 levels`).toHaveLength(20);
+    }
+  });
+
+  it('every class has a subclass grant at level 3 (index 2)', () => {
+    for (const classSource of CLASS_SOURCES) {
+      const level3Grants = classSource.levels[2].grants;
+      const subclassGrant = level3Grants.find((g) => g.type === 'subclass');
+      expect(subclassGrant, `${classSource.id} should have a subclass grant at level 3`).toBeDefined();
+      if (subclassGrant?.type === 'subclass') {
+        expect(subclassGrant.classId).toBe(classSource.id);
+      }
+    }
+  });
+});
+
+describe('Barbarian class grant structures', () => {
+  const source = getClassSource('barbarian' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 12', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(12);
+    }
+  });
+
+  it('level 1 has barbarian unarmored AC formula', () => {
+    const acGrant = source?.levels[0].grants.find((g) => g.type === 'armor-class');
+    expect(acGrant?.type).toBe('armor-class');
+    if (acGrant?.type === 'armor-class') {
+      expect(acGrant.calculation.mode).toBe('unarmored');
+      if (acGrant.calculation.mode === 'unarmored') {
+        expect(acGrant.calculation.formula).toBe('barbarian');
+      }
+    }
+  });
+
+  it('level 1 has rage and unarmored-defense features', () => {
+    const features = source?.levels[0].grants.filter((g) => g.type === 'feature');
+    const featureIds = features?.map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('barbarian-rage');
+    expect(featureIds).toContain('barbarian-unarmored-defense');
+  });
+
+  it('level 3 has a subclass grant for barbarian', () => {
+    const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
+    expect(grant?.type).toBe('subclass');
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('barbarian');
+      expect(grant.key).toBe(createChoiceKey('subclass', 'class', 'barbarian', 0));
+    }
+  });
+
+  it('level 4 has an ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'barbarian', 0));
+      expect(grant.points).toBe(2);
+    }
+  });
+
+  it('level 5 has extra-attack and fast-movement features', () => {
+    const featureIds = source?.levels[4].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('barbarian-extra-attack');
+    expect(featureIds).toContain('barbarian-fast-movement');
+  });
+
+  it('level 20 has primal-champion feature', () => {
+    const grant = source?.levels[19].grants.find((g) => g.type === 'feature');
+    expect(grant?.type).toBe('feature');
+    if (grant?.type === 'feature') {
+      expect(grant.feature.id).toBe('barbarian-primal-champion');
+    }
+  });
+});
+
+describe('Bard class grant structures', () => {
+  const source = getClassSource('bard' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 8', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(8);
+    }
+  });
+
+  it('level 1 has spellcasting grant with cha', () => {
+    const grant = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(grant?.type).toBe('spellcasting');
+    if (grant?.type === 'spellcasting') {
+      expect(grant.ability).toBe('cha');
+    }
+  });
+
+  it('level 1 has bardic-inspiration feature', () => {
+    const featureIds = source?.levels[0].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('bard-bardic-inspiration');
+  });
+
+  it('level 3 has subclass and expertise-choice grants', () => {
+    const grants = source?.levels[2].grants ?? [];
+    expect(grants.find((g) => g.type === 'subclass')).toBeDefined();
+    const expertiseGrant = grants.find((g) => g.type === 'expertise-choice');
+    expect(expertiseGrant?.type).toBe('expertise-choice');
+    if (expertiseGrant?.type === 'expertise-choice') {
+      expect(expertiseGrant.key).toBe(createChoiceKey('expertise-choice', 'class', 'bard', 0));
+      expect(expertiseGrant.count).toBe(2);
+    }
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'bard', 0));
+    }
+  });
+
+  it('level 10 has magical-secrets feature and second expertise-choice', () => {
+    const grants = source?.levels[9].grants ?? [];
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('bard-magical-secrets');
+    const expertiseGrant = grants.find((g) => g.type === 'expertise-choice');
+    expect(expertiseGrant?.type).toBe('expertise-choice');
+    if (expertiseGrant?.type === 'expertise-choice') {
+      expect(expertiseGrant.key).toBe(createChoiceKey('expertise-choice', 'class', 'bard', 1));
+    }
+  });
+});
+
+describe('Cleric class grant structures', () => {
+  const source = getClassSource('cleric' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 8 and spellcasting with wis', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(8);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('wis');
+    }
+  });
+
+  it('level 1 has divine-order feature', () => {
+    const featureIds = source?.levels[0].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('cleric-divine-order');
+  });
+
+  it('level 3 has subclass grant for cleric', () => {
+    const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
+    expect(grant?.type).toBe('subclass');
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('cleric');
+    }
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'cleric', 0));
+    }
+  });
+
+  it('level 20 has greater-divine-intervention feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('cleric-greater-divine-intervention');
+  });
+});
+
+describe('Druid class grant structures', () => {
+  const source = getClassSource('druid' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 8 and spellcasting with wis', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(8);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('wis');
+    }
+  });
+
+  it('level 1 has nonmetal armor proficiencies', () => {
+    const armorIds = source?.levels[0].grants
+      .filter((g) => g.type === 'proficiency' && g.category === 'armor')
+      .map((g) => (g.type === 'proficiency' ? g.id : ''));
+    expect(armorIds).toContain('medium-nonmetal');
+    expect(armorIds).toContain('shields-nonmetal');
+  });
+
+  it('level 2 has wild-shape and wild-companion features', () => {
+    const featureIds = source?.levels[1].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('druid-wild-shape');
+    expect(featureIds).toContain('druid-wild-companion');
+  });
+
+  it('level 3 has subclass grant for druid', () => {
+    const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
+    expect(grant?.type).toBe('subclass');
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('druid');
+    }
+  });
+
+  it('level 4 has ASI (index 0) and wild-shape-improvement-1', () => {
+    const grants = source?.levels[3].grants ?? [];
+    expect(grants.find((g) => g.type === 'asi')).toBeDefined();
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('druid-wild-shape-improvement-1');
+  });
+
+  it('level 20 has archdruid feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('druid-archdruid');
+  });
+});
+
+describe('Monk class grant structures', () => {
+  const source = getClassSource('monk' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 8 and monk unarmored AC formula', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(8);
+    }
+    const acGrant = source?.levels[0].grants.find((g) => g.type === 'armor-class');
+    if (acGrant?.type === 'armor-class' && acGrant.calculation.mode === 'unarmored') {
+      expect(acGrant.calculation.formula).toBe('monk');
+    }
+  });
+
+  it('level 2 has focus-points feature (not ki)', () => {
+    const featureIds = source?.levels[1].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('monk-focus-points');
+  });
+
+  it('level 3 has subclass grant and deflect-attacks feature', () => {
+    const grants = source?.levels[2].grants ?? [];
+    expect(grants.find((g) => g.type === 'subclass')).toBeDefined();
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('monk-deflect-attacks');
+  });
+
+  it('level 4 has ASI (index 0) and slow-fall feature', () => {
+    const grants = source?.levels[3].grants ?? [];
+    expect(grants.find((g) => g.type === 'asi')).toBeDefined();
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('monk-slow-fall');
+  });
+
+  it('level 20 has epic-boon feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('monk-epic-boon');
+  });
+});
+
+describe('Paladin class grant structures', () => {
+  const source = getClassSource('paladin' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 10 and spellcasting with cha', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(10);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('cha');
+    }
+  });
+
+  it('level 1 has lay-on-hands and divine-sense features', () => {
+    const featureIds = source?.levels[0].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('paladin-lay-on-hands');
+    expect(featureIds).toContain('paladin-divine-sense');
+  });
+
+  it('level 3 has subclass grant for paladin', () => {
+    const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
+    expect(grant?.type).toBe('subclass');
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('paladin');
+    }
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'paladin', 0));
+    }
+  });
+
+  it('level 6 has aura-of-protection feature', () => {
+    const featureIds = source?.levels[5].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('paladin-aura-of-protection');
+  });
+});
+
+describe('Ranger class grant structures', () => {
+  const source = getClassSource('ranger' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 10 but no spellcasting', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(10);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting).toBeUndefined();
+  });
+
+  it('level 2 has spellcasting with wis and fighting-style-choice', () => {
+    const grants = source?.levels[1].grants ?? [];
+    const spellcasting = grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('wis');
+    }
+    const fightingStyle = grants.find((g) => g.type === 'fighting-style-choice');
+    expect(fightingStyle?.type).toBe('fighting-style-choice');
+    if (fightingStyle?.type === 'fighting-style-choice') {
+      expect(fightingStyle.key).toBe(createChoiceKey('fighting-style-choice', 'class', 'ranger', 0));
+    }
+  });
+
+  it('level 3 has subclass grant and roving feature', () => {
+    const grants = source?.levels[2].grants ?? [];
+    expect(grants.find((g) => g.type === 'subclass')).toBeDefined();
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('ranger-roving');
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'ranger', 0));
+    }
+  });
+
+  it('level 6 has expertise-choice (index 0)', () => {
+    const grant = source?.levels[5].grants.find((g) => g.type === 'expertise-choice');
+    expect(grant?.type).toBe('expertise-choice');
+    if (grant?.type === 'expertise-choice') {
+      expect(grant.key).toBe(createChoiceKey('expertise-choice', 'class', 'ranger', 0));
+    }
+  });
+});
+
+describe('Sorcerer class grant structures', () => {
+  const source = getClassSource('sorcerer' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 6 and spellcasting with cha', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(6);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('cha');
+    }
+  });
+
+  it('level 1 has innate-sorcery feature', () => {
+    const featureIds = source?.levels[0].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('sorcerer-innate-sorcery');
+  });
+
+  it('level 3 has subclass grant for sorcerer', () => {
+    const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
+    expect(grant?.type).toBe('subclass');
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('sorcerer');
+    }
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'sorcerer', 0));
+    }
+  });
+
+  it('level 20 has sorcerous-restoration feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('sorcerer-sorcerous-restoration');
+  });
+});
+
+describe('Warlock class grant structures', () => {
+  const source = getClassSource('warlock' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 8 and spellcasting with cha', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(8);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('cha');
+    }
+  });
+
+  it('level 1 has eldritch-invocations and magical-cunning features', () => {
+    const featureIds = source?.levels[0].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('warlock-eldritch-invocations');
+    expect(featureIds).toContain('warlock-magical-cunning');
+  });
+
+  it('level 3 has subclass grant and pact-boon feature', () => {
+    const grants = source?.levels[2].grants ?? [];
+    expect(grants.find((g) => g.type === 'subclass')).toBeDefined();
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('warlock-pact-boon');
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'warlock', 0));
+    }
+  });
+
+  it('level 11 has mystic-arcanum-6 feature', () => {
+    const featureIds = source?.levels[10].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('warlock-mystic-arcanum-6');
+  });
+
+  it('level 20 has eldritch-master feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('warlock-eldritch-master');
+  });
+});
+
+describe('Wizard class grant structures', () => {
+  const source = getClassSource('wizard' as ClassId);
+
+  it('source is defined', () => {
+    expect(source).toBeDefined();
+  });
+
+  it('has exactly 20 levels', () => {
+    expect(source?.levels).toHaveLength(20);
+  });
+
+  it('level 1 has hit-die 6 and spellcasting with int', () => {
+    const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    if (hitDie?.type === 'hit-die') {
+      expect(hitDie.die).toBe(6);
+    }
+    const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    if (spellcasting?.type === 'spellcasting') {
+      expect(spellcasting.ability).toBe('int');
+    }
+  });
+
+  it('level 1 has arcane-recovery feature', () => {
+    const featureIds = source?.levels[0].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('wizard-arcane-recovery');
+  });
+
+  it('level 3 has subclass grant for wizard', () => {
+    const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
+    expect(grant?.type).toBe('subclass');
+    if (grant?.type === 'subclass') {
+      expect(grant.classId).toBe('wizard');
+    }
+  });
+
+  it('level 4 has ASI (index 0)', () => {
+    const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
+    expect(grant?.type).toBe('asi');
+    if (grant?.type === 'asi') {
+      expect(grant.key).toBe(createChoiceKey('asi', 'class', 'wizard', 0));
+    }
+  });
+
+  it('level 18 has spell-mastery feature', () => {
+    const featureIds = source?.levels[17].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('wizard-spell-mastery');
+  });
+
+  it('level 20 has signature-spells feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('wizard-signature-spells');
   });
 });
