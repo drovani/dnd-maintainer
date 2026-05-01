@@ -402,6 +402,7 @@ describe('Bard class grant structures', () => {
 
   it('level 1 has hit-die 8', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(8);
     }
@@ -438,6 +439,7 @@ describe('Bard class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'bard', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
@@ -468,10 +470,12 @@ describe('Cleric class grant structures', () => {
 
   it('level 1 has hit-die 8 and spellcasting with wis', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(8);
     }
     const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
     if (spellcasting?.type === 'spellcasting') {
       expect(spellcasting.ability).toBe('wis');
     }
@@ -497,6 +501,7 @@ describe('Cleric class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'cleric', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
@@ -521,10 +526,12 @@ describe('Druid class grant structures', () => {
 
   it('level 1 has hit-die 8 and spellcasting with wis', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(8);
     }
     const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
     if (spellcasting?.type === 'spellcasting') {
       expect(spellcasting.ability).toBe('wis');
     }
@@ -556,7 +563,11 @@ describe('Druid class grant structures', () => {
 
   it('level 4 has ASI (index 0) and wild-shape-improvement-1', () => {
     const grants = source?.levels[3].grants ?? [];
-    expect(grants.find((g) => g.type === 'asi')).toBeDefined();
+    const asiGrant = grants.find((g) => g.type === 'asi');
+    expect(asiGrant?.type).toBe('asi');
+    if (asiGrant?.type === 'asi') {
+      expect(asiGrant.points).toBe(2);
+    }
     const featureIds = grants
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
@@ -584,6 +595,7 @@ describe('Monk class grant structures', () => {
 
   it('level 1 has hit-die 8 and monk unarmored AC formula', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(8);
     }
@@ -611,7 +623,11 @@ describe('Monk class grant structures', () => {
 
   it('level 4 has ASI (index 0) and slow-fall feature', () => {
     const grants = source?.levels[3].grants ?? [];
-    expect(grants.find((g) => g.type === 'asi')).toBeDefined();
+    const asiGrant = grants.find((g) => g.type === 'asi');
+    expect(asiGrant?.type).toBe('asi');
+    if (asiGrant?.type === 'asi') {
+      expect(asiGrant.points).toBe(2);
+    }
     const featureIds = grants
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
@@ -639,10 +655,12 @@ describe('Paladin class grant structures', () => {
 
   it('level 1 has hit-die 10 and spellcasting with cha', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(10);
     }
     const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
     if (spellcasting?.type === 'spellcasting') {
       expect(spellcasting.ability).toBe('cha');
     }
@@ -669,6 +687,7 @@ describe('Paladin class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'paladin', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
@@ -677,6 +696,13 @@ describe('Paladin class grant structures', () => {
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
     expect(featureIds).toContain('paladin-aura-of-protection');
+  });
+
+  it('level 20 has epic-boon feature', () => {
+    const featureIds = source?.levels[19].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('paladin-epic-boon');
   });
 });
 
@@ -693,6 +719,7 @@ describe('Ranger class grant structures', () => {
 
   it('level 1 has hit-die 10 but no spellcasting', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(10);
     }
@@ -728,6 +755,7 @@ describe('Ranger class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'ranger', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
@@ -753,10 +781,12 @@ describe('Sorcerer class grant structures', () => {
 
   it('level 1 has hit-die 6 and spellcasting with cha', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(6);
     }
     const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
     if (spellcasting?.type === 'spellcasting') {
       expect(spellcasting.ability).toBe('cha');
     }
@@ -782,6 +812,7 @@ describe('Sorcerer class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'sorcerer', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
@@ -806,10 +837,12 @@ describe('Warlock class grant structures', () => {
 
   it('level 1 has hit-die 8 and spellcasting with cha', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(8);
     }
     const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
     if (spellcasting?.type === 'spellcasting') {
       expect(spellcasting.ability).toBe('cha');
     }
@@ -837,6 +870,7 @@ describe('Warlock class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'warlock', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
@@ -868,10 +902,12 @@ describe('Wizard class grant structures', () => {
 
   it('level 1 has hit-die 6 and spellcasting with int', () => {
     const hitDie = source?.levels[0].grants.find((g) => g.type === 'hit-die');
+    expect(hitDie?.type).toBe('hit-die');
     if (hitDie?.type === 'hit-die') {
       expect(hitDie.die).toBe(6);
     }
     const spellcasting = source?.levels[0].grants.find((g) => g.type === 'spellcasting');
+    expect(spellcasting?.type).toBe('spellcasting');
     if (spellcasting?.type === 'spellcasting') {
       expect(spellcasting.ability).toBe('int');
     }
@@ -897,6 +933,7 @@ describe('Wizard class grant structures', () => {
     expect(grant?.type).toBe('asi');
     if (grant?.type === 'asi') {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'wizard', 0));
+      expect(grant.points).toBe(2);
     }
   });
 
