@@ -163,11 +163,6 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
-  // Unresolved feat grants — not yet implemented; log each for diagnostics
-  for (const { grant } of collectGrantsByType(bundles, 'feat')) {
-    logger.warn(`FeatGrant "${grant.featId}" is not yet implemented — skipping (see issue #5)`);
-  }
-
   // Unresolved or invalid fighting-style-choice grants (single pass)
   const allFightingStyleDecisions: FightingStyleId[] = [];
   const fightingStyleGrants = collectGrantsByType(bundles, 'fighting-style-choice');
