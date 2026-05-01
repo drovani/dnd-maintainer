@@ -10,6 +10,7 @@ D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, charact
 
 - `npm run dev` — start Vite dev server on port 5173
 - `npm run build` — typecheck with `tsc -b` then build with Vite
+- `npm run typecheck` — typecheck only, no build (`tsc -b --noEmit`)
 - `npm run lint` — ESLint with `--max-warnings 0`
 - `npm run preview` — preview production build
 - `npx supabase <command>` — always run Supabase CLI via `npx` (not bare `supabase`)
@@ -52,7 +53,7 @@ Prettier + `eslint --fix` run automatically on every file Claude writes or edits
 
 ### Routing
 
-All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope. The character builder lives at `/campaign/:id/character/new` with a 7-step wizard (Basics → Abilities → Skills → Proficiencies → Equipment → Spells → Backstory), autosave via `useBuilderAutosave()`, and dedicated step components in `src/components/character-builder/`.
+All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope. The character builder lives at `/campaign/:id/character/new` with a 7-step wizard (Basics → Abilities → Skills → Class Features → Proficiencies → Equipment → Backstory), autosave via `useBuilderAutosave()`, and dedicated step components in `src/components/character-builder/`. There is no dedicated Spells step — spellcasting is a stub (`src/lib/resolver/spellcasting.ts` returns `null`).
 
 ### Internationalization (i18n)
 
@@ -69,6 +70,13 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 ### D&D Game Data
 
 `src/lib/dnd-helpers.ts` contains D&D 5e reference data (races, classes, skills, backgrounds, alignments) and utility functions (ability modifier calculation, proficiency bonus, spell slot tables). Race/class/background data uses ID-based keys that correspond to translation keys in `gamedata.json`.
+
+`src/lib/sources/` implements the **Source → Grant → Resolver pipeline**:
+
+- `classes.ts` / `subclasses.ts` / `species.ts` / `backgrounds.ts` / `feats.ts` — define `*Source` objects with per-level `Grant[]` arrays
+- `index.ts` — `collectBundles(build)` assembles `GrantBundle[]` from all active sources for a character build
+- `src/lib/resolver/` — `resolveCharacter(bundles, choices)` resolves bundles into a `ResolvedCharacter` (proficiencies, features, pending choices, etc.)
+- All 12 classes have `ClassSource` entries; Fighter and Rogue are the only classes with `SubclassSource` entries so far
 
 ### Database Schema
 

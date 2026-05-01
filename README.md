@@ -5,7 +5,7 @@ A free, open-source campaign management tool for D&D 5th Edition. Run it locally
 ## Features
 
 - **Campaign Management** — Create and manage multiple campaigns with setting info, status tracking, and a dashboard overview
-- **Character Builder** — 7-step wizard (Basics → Abilities → Skills → Proficiencies → Equipment → Spells → Backstory) with autosave
+- **Character Builder** — 7-step wizard (Basics → Abilities → Skills → Class Features → Proficiencies → Equipment → Backstory) with autosave
 - **Character Sheets** — Build and track PCs and NPCs with full 5e stats: ability scores, skills, equipment, spells, and backstory
 - **Session Log** — Record session summaries, XP awards, loot tracking, and link encounters to sessions
 - **Encounter Tracker** — Plan encounters with combatant lists and status tracking
