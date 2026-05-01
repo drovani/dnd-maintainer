@@ -10,7 +10,7 @@ import {
 } from '@/lib/sources';
 import type { CharacterBuild } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
-import type { SpeciesId, BackgroundId, ClassId } from '@/lib/dnd-helpers';
+import type { SpeciesId, BackgroundId, ClassId, FeatId } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/types/sources';
 
 const humanFighterL1Build: CharacterBuild = {
@@ -82,7 +82,7 @@ describe('getFeatSource', () => {
   });
 
   it('returns undefined for unknown feat', () => {
-    expect(getFeatSource('nonexistent-feat')).toBeUndefined();
+    expect(getFeatSource('nonexistent-feat' as FeatId)).toBeUndefined();
   });
 });
 
@@ -172,6 +172,15 @@ describe('collectBundles', () => {
     const { warnings } = collectBundles(unknownFeatBuild);
     expect(warnings.length).toBeGreaterThan(0);
     expect(warnings[0]).toContain('nonexistent-feat');
+  });
+
+  it('includes a feat bundle when a valid feat is in build.feats', () => {
+    const build: CharacterBuild = { ...humanFighterL1Build, feats: ['alert' as FeatId] };
+    const { bundles, warnings } = collectBundles(build);
+    expect(warnings).toHaveLength(0);
+    const featBundle = bundles.find((b) => b.source.origin === 'feat' && b.source.id === 'alert');
+    expect(featBundle).toBeDefined();
+    expect(featBundle?.grants).toHaveLength(1);
   });
 
   it('returns 6 bundles for Fighter L3 without subclass decision', () => {

@@ -1020,7 +1020,7 @@ describe('Rogue L3 + Assassin subclass integration', () => {
   });
 });
 
-describe('FeatGrant graceful handling', () => {
+describe('FeatGrant passthrough behavior', () => {
   it('does not emit any pending choices for a bundle containing only a feat grant', () => {
     const bundles: readonly GrantBundle[] = [
       {
@@ -1029,7 +1029,7 @@ describe('FeatGrant graceful handling', () => {
       },
     ];
     const result = resolveCharacter({ ...baseInput, bundles });
-    // Feat grants are not yet implemented and must not add pending choices
+    // Feat grants reaching the resolver are a bug — they should have been expanded by collectBundles first
     expect(result.pendingChoices).toHaveLength(0);
   });
 

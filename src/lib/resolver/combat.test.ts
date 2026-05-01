@@ -98,7 +98,7 @@ describe('resolveSpeed', () => {
         grants: [{ type: 'speed', mode: 'walk', value: 30 }],
       },
       {
-        source: { origin: 'feat', id: 'mobile' },
+        source: { origin: 'feat', id: 'mobile' as import('@/lib/dnd-helpers').FeatId },
         grants: [{ type: 'speed', mode: 'walk', value: 40 }],
       },
     ];

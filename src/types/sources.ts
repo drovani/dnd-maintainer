@@ -20,7 +20,7 @@ export type SourceTag =
   | { readonly origin: 'class'; readonly id: ClassId; readonly level: number }
   | { readonly origin: 'subclass'; readonly id: SubclassId; readonly classId: ClassId; readonly level: number }
   | { readonly origin: 'background'; readonly id: BackgroundId }
-  | { readonly origin: 'feat'; readonly id: string }
+  | { readonly origin: 'feat'; readonly id: FeatId }
   | { readonly origin: 'item'; readonly id: string }
   | { readonly origin: 'bundle'; readonly id: string }
   | { readonly origin: 'pack'; readonly id: string }

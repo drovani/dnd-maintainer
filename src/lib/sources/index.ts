@@ -1,4 +1,4 @@
-import { isBackgroundId, type SpeciesId, type ClassId, type BackgroundId } from '@/lib/dnd-helpers';
+import { isBackgroundId, type SpeciesId, type ClassId, type BackgroundId, type FeatId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('sources');
@@ -13,7 +13,7 @@ import type {
   GrantBundle,
   SourceTag,
 } from '@/types/sources';
-import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant, FeatGrant } from '@/types/grants';
+import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
@@ -63,7 +63,7 @@ export function getBackgroundSource(id: BackgroundId): BackgroundSource | undefi
   return BACKGROUND_SOURCES.find((b) => b.id === id);
 }
 
-export function getFeatSource(id: string): FeatSource | undefined {
+export function getFeatSource(id: FeatId): FeatSource | undefined {
   return FEAT_SOURCES.find((f) => f.id === id);
 }
 
@@ -224,13 +224,12 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     const bundle = bundles[i];
     for (const grant of bundle.grants) {
       if (grant.type === 'feat') {
-        const featGrant = grant as FeatGrant;
-        const featSource = getFeatSource(featGrant.featId);
+        const featSource = getFeatSource(grant.featId);
         if (featSource) {
-          const tag: SourceTag = { origin: 'feat', id: featGrant.featId };
+          const tag: SourceTag = { origin: 'feat', id: grant.featId };
           bundles.push({ source: tag, grants: featSource.grants });
         } else {
-          const msg = `No source data found for feat "${featGrant.featId}" — feat grants will be empty`;
+          const msg = `No source data found for feat "${grant.featId}" — feat grants will be empty`;
           warnings.push(msg);
           logger.warn(msg);
         }
@@ -240,9 +239,9 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
 
   // Feats explicitly listed in the build (manually chosen at level-up)
   for (const featId of build.feats) {
-    const featSource = getFeatSource(featId);
+    const featSource = getFeatSource(featId as FeatId);
     if (featSource) {
-      const tag: SourceTag = { origin: 'feat', id: featId };
+      const tag: SourceTag = { origin: 'feat', id: featId as FeatId };
       bundles.push({ source: tag, grants: featSource.grants });
     } else {
       const msg = `No source data found for feat "${featId}" — feat grants will be empty`;

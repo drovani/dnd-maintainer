@@ -75,7 +75,7 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     grants: [{ type: 'feature', feature: { id: 'feat-tough' } }],
   },
 
-  // Fighting Style feats — mirrors FIGHTING_STYLE_SOURCES grants
+  // Fighting Style feats — grants must be kept manually in sync with FIGHTING_STYLE_SOURCES
   {
     id: 'archery',
     category: 'fightingStyle',

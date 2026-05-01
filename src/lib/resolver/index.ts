@@ -163,6 +163,11 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Diagnostic: any feat grant that reaches the resolver was not expanded by collectBundles — this is a bug
+  for (const { grant } of collectGrantsByType(bundles, 'feat')) {
+    logger.warn(`BUG: unexpanded FeatGrant "${grant.featId}" reached resolver — nested feat grants are not supported`);
+  }
+
   // Unresolved or invalid fighting-style-choice grants (single pass)
   const allFightingStyleDecisions: FightingStyleId[] = [];
   const fightingStyleGrants = collectGrantsByType(bundles, 'fighting-style-choice');
