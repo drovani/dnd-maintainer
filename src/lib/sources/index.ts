@@ -239,9 +239,9 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
 
   // Feats explicitly listed in the build (manually chosen at level-up)
   for (const featId of build.feats) {
-    const featSource = getFeatSource(featId as FeatId);
+    const featSource = getFeatSource(featId);
     if (featSource) {
-      const tag: SourceTag = { origin: 'feat', id: featId as FeatId };
+      const tag: SourceTag = { origin: 'feat', id: featId };
       bundles.push({ source: tag, grants: featSource.grants });
     } else {
       const msg = `No source data found for feat "${featId}" — feat grants will be empty`;

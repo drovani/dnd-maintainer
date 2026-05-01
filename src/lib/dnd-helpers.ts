@@ -762,6 +762,10 @@ export const FEAT_IDS = [
 
 export type FeatId = (typeof FEAT_IDS)[number];
 
+export function isFeatId(value: string): value is FeatId {
+  return (FEAT_IDS as readonly string[]).includes(value);
+}
+
 export const DND_SKILLS = [
   { id: 'acrobatics', ability: 'dex' },
   { id: 'animalhandling', ability: 'wis' },

@@ -75,4 +75,23 @@ describe('FEAT_SOURCES', () => {
     const unique = new Set(ids);
     expect(unique.size).toBe(ids.length);
   });
+
+  it('has exactly 84 entries', () => {
+    expect(FEAT_SOURCES).toHaveLength(84);
+  });
+
+  it('all fightingStyle feats have no prerequisites', () => {
+    const feats = FEAT_SOURCES.filter((f) => f.category === 'fightingStyle');
+    expect(feats.length).toBeGreaterThan(0);
+    for (const feat of feats) {
+      expect(feat.prerequisites).toHaveLength(0);
+    }
+  });
+
+  it('defense fightingStyle feat grants both a feature and an ac-bonus of 1', () => {
+    const defense = FEAT_SOURCES.find((f) => f.id === 'defense');
+    expect(defense?.grants).toHaveLength(2);
+    expect(defense?.grants.some((g) => g.type === 'feature')).toBe(true);
+    expect(defense?.grants.some((g) => g.type === 'ac-bonus' && g.bonus === 1)).toBe(true);
+  });
 });

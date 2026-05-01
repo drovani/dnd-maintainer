@@ -1,4 +1,4 @@
-import { DND_CLASSES, isBackgroundId, isSpeciesId } from '@/lib/dnd-helpers';
+import { DND_CLASSES, isBackgroundId, isFeatId, isSpeciesId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('build-reconstruction');
@@ -121,9 +121,10 @@ export function reconstructBuild(
     hpRoll: row.hp_roll ?? null,
   }));
 
-  const feats: string[] = levelRows
+  const feats = levelRows
     .filter((row): row is LevelRow & { feat_id: string } => row.feat_id !== null)
-    .map((row) => row.feat_id);
+    .map((row) => row.feat_id)
+    .filter(isFeatId);
 
   // Build choices map
   const choices: Record<ChoiceKey, ChoiceDecision> = {} as Record<ChoiceKey, ChoiceDecision>;

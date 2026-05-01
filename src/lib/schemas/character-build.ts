@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { DND_SKILLS, DND_TOOL_PROFICIENCIES, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+import {
+  DND_SKILLS,
+  DND_TOOL_PROFICIENCIES,
+  isFeatId,
+  type FeatId,
+  type SkillId,
+  type ToolProficiencyId,
+} from '@/lib/dnd-helpers';
 
 const SKILL_IDS = DND_SKILLS.map((s) => s.id) as [SkillId, ...SkillId[]];
 const TOOL_IDS = DND_TOOL_PROFICIENCIES as unknown as [ToolProficiencyId, ...ToolProficiencyId[]];
@@ -48,7 +55,10 @@ export const CharacterBuildSchema = z.object({
   abilityMethod: z.enum(['standard-array', 'point-buy', 'rolling']),
   levels: z.array(BuildLevelSchema).readonly(),
   choices: z.record(z.string(), ChoiceDecisionSchema),
-  feats: z.array(z.string()).readonly(),
+  feats: z
+    .array(z.string().refine(isFeatId, { message: 'Unknown feat ID' }))
+    .transform((arr) => arr as FeatId[])
+    .readonly(),
   activeItems: z.array(z.string()).readonly(),
 });
 

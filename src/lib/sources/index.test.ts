@@ -167,7 +167,7 @@ describe('collectBundles', () => {
   it('populates warnings array for unknown feat ID', () => {
     const unknownFeatBuild: CharacterBuild = {
       ...humanFighterL1Build,
-      feats: ['nonexistent-feat'],
+      feats: ['nonexistent-feat' as FeatId],
     };
     const { warnings } = collectBundles(unknownFeatBuild);
     expect(warnings.length).toBeGreaterThan(0);

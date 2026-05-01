@@ -1,5 +1,6 @@
 import type {
   AbilityKey,
+  FeatId,
   FightingStyleId,
   SkillId,
   ToolProficiencyId,
@@ -109,6 +110,6 @@ export interface CharacterBuild {
   readonly abilityMethod: 'standard-array' | 'point-buy' | 'rolling';
   readonly levels: readonly BuildLevel[];
   readonly choices: Readonly<Record<ChoiceKey, ChoiceDecision>>;
-  readonly feats: readonly string[];
+  readonly feats: readonly FeatId[];
   readonly activeItems: readonly string[];
 }
