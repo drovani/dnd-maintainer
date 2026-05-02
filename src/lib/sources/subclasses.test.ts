@@ -1,6 +1,73 @@
 import { describe, it, expect } from 'vitest';
-import { getSubclassSource } from '@/lib/sources';
+import { getSubclassSource, SUBCLASS_SOURCES } from '@/lib/sources';
+import { SUBCLASS_IDS } from '@/types/sources';
 import type { SubclassId } from '@/types/sources';
+
+describe('SUBCLASS_IDS completeness', () => {
+  it('has exactly 48 entries (4 per class × 12 classes)', () => {
+    expect(SUBCLASS_IDS).toHaveLength(48);
+  });
+
+  it.each(SUBCLASS_IDS)('SUBCLASS_IDS entry "%s" has a matching SUBCLASS_SOURCES entry', (id) => {
+    const source = SUBCLASS_SOURCES.find((s) => s.id === id);
+    expect(source).toBeDefined();
+  });
+});
+
+describe('SUBCLASS_SOURCES stubs', () => {
+  const stubIds = SUBCLASS_IDS.filter(
+    (id) => !['champion', 'battlemaster', 'eldritchknight', 'thief', 'assassin', 'arcanetrickster'].includes(id)
+  );
+
+  it.each(stubIds)('stub "%s" has a non-empty classId and features: []', (id) => {
+    const source = SUBCLASS_SOURCES.find((s) => s.id === id);
+    expect(source).toBeDefined();
+    expect(source!.classId).toBeTruthy();
+    expect(source!.features).toEqual([]);
+  });
+});
+
+describe('SUBCLASS_SOURCES class coverage', () => {
+  const classIds = [
+    'barbarian',
+    'bard',
+    'cleric',
+    'druid',
+    'fighter',
+    'monk',
+    'paladin',
+    'ranger',
+    'rogue',
+    'sorcerer',
+    'warlock',
+    'wizard',
+  ] as const;
+
+  it.each(classIds)('class "%s" has exactly 4 subclasses in SUBCLASS_SOURCES', (classId) => {
+    const count = SUBCLASS_SOURCES.filter((s) => s.classId === classId).length;
+    expect(count).toBe(4);
+  });
+});
+
+describe('assassin skill-expertise grant', () => {
+  it('assassin has a skill-expertise: deception grant at level 9', () => {
+    const source = getSubclassSource('assassin');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    const expertiseGrant = level9?.grants.find((g) => g.type === 'skill-expertise' && g.skill === 'deception');
+    expect(expertiseGrant).toBeDefined();
+  });
+});
+
+describe('thief skill-expertise grant', () => {
+  it('thief has a skill-expertise: stealth grant at level 9', () => {
+    const source = getSubclassSource('thief');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    const expertiseGrant = level9?.grants.find((g) => g.type === 'skill-expertise' && g.skill === 'stealth');
+    expect(expertiseGrant).toBeDefined();
+  });
+});
 
 describe('getSubclassSource — Champion', () => {
   it('returns defined for champion', () => {
