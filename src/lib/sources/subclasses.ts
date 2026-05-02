@@ -3,6 +3,91 @@ import { createChoiceKey } from '@/types/choices';
 import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers';
 
 export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
+  // Barbarian subclasses
+  {
+    id: 'berserker',
+    classId: 'barbarian',
+    features: [],
+  },
+  {
+    id: 'wildheart',
+    classId: 'barbarian',
+    features: [],
+  },
+  {
+    id: 'worldtree',
+    classId: 'barbarian',
+    features: [],
+  },
+  {
+    id: 'zealot',
+    classId: 'barbarian',
+    features: [],
+  },
+  // Bard subclasses
+  {
+    id: 'collegedance',
+    classId: 'bard',
+    features: [],
+  },
+  {
+    id: 'collegeglamour',
+    classId: 'bard',
+    features: [],
+  },
+  {
+    id: 'collegelore',
+    classId: 'bard',
+    features: [],
+  },
+  {
+    id: 'collegevalor',
+    classId: 'bard',
+    features: [],
+  },
+  // Cleric subclasses
+  {
+    id: 'lifedomain',
+    classId: 'cleric',
+    features: [],
+  },
+  {
+    id: 'lightdomain',
+    classId: 'cleric',
+    features: [],
+  },
+  {
+    id: 'trickerydomain',
+    classId: 'cleric',
+    features: [],
+  },
+  {
+    id: 'wardomain',
+    classId: 'cleric',
+    features: [],
+  },
+  // Druid subclasses
+  {
+    id: 'circleland',
+    classId: 'druid',
+    features: [],
+  },
+  {
+    id: 'circlemoon',
+    classId: 'druid',
+    features: [],
+  },
+  {
+    id: 'circlesea',
+    classId: 'druid',
+    features: [],
+  },
+  {
+    id: 'circlestars',
+    classId: 'druid',
+    features: [],
+  },
+  // Fighter subclasses
   {
     id: 'champion',
     classId: 'fighter',
@@ -59,6 +144,75 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
     ],
   },
   {
+    id: 'psiwarrior',
+    classId: 'fighter',
+    features: [],
+  },
+  // Monk subclasses
+  {
+    id: 'warriorofmercy',
+    classId: 'monk',
+    features: [],
+  },
+  {
+    id: 'warriorofshadow',
+    classId: 'monk',
+    features: [],
+  },
+  {
+    id: 'warriorofelements',
+    classId: 'monk',
+    features: [],
+  },
+  {
+    id: 'warrioropenhand',
+    classId: 'monk',
+    features: [],
+  },
+  // Paladin subclasses
+  {
+    id: 'oathofdevotion',
+    classId: 'paladin',
+    features: [],
+  },
+  {
+    id: 'oathofglory',
+    classId: 'paladin',
+    features: [],
+  },
+  {
+    id: 'oathofancients',
+    classId: 'paladin',
+    features: [],
+  },
+  {
+    id: 'oathofvengeance',
+    classId: 'paladin',
+    features: [],
+  },
+  // Ranger subclasses
+  {
+    id: 'beastmaster',
+    classId: 'ranger',
+    features: [],
+  },
+  {
+    id: 'feywanderer',
+    classId: 'ranger',
+    features: [],
+  },
+  {
+    id: 'gloomstalker',
+    classId: 'ranger',
+    features: [],
+  },
+  {
+    id: 'hunter',
+    classId: 'ranger',
+    features: [],
+  },
+  // Rogue subclasses
+  {
     id: 'thief',
     classId: 'rogue',
     features: [
@@ -100,5 +254,73 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       },
       { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'arcanetrickster-magical-ambush' } }] },
     ],
+  },
+  {
+    id: 'soulknife',
+    classId: 'rogue',
+    features: [],
+  },
+  // Sorcerer subclasses
+  {
+    id: 'aberrantsorcery',
+    classId: 'sorcerer',
+    features: [],
+  },
+  {
+    id: 'clockworksorcery',
+    classId: 'sorcerer',
+    features: [],
+  },
+  {
+    id: 'draconicsorcery',
+    classId: 'sorcerer',
+    features: [],
+  },
+  {
+    id: 'wildmagicsorcery',
+    classId: 'sorcerer',
+    features: [],
+  },
+  // Warlock subclasses
+  {
+    id: 'archfeypatron',
+    classId: 'warlock',
+    features: [],
+  },
+  {
+    id: 'celestialpatron',
+    classId: 'warlock',
+    features: [],
+  },
+  {
+    id: 'fiendpatron',
+    classId: 'warlock',
+    features: [],
+  },
+  {
+    id: 'greatoldonepatron',
+    classId: 'warlock',
+    features: [],
+  },
+  // Wizard subclasses
+  {
+    id: 'abjurer',
+    classId: 'wizard',
+    features: [],
+  },
+  {
+    id: 'diviner',
+    classId: 'wizard',
+    features: [],
+  },
+  {
+    id: 'evoker',
+    classId: 'wizard',
+    features: [],
+  },
+  {
+    id: 'illusionist',
+    classId: 'wizard',
+    features: [],
   },
 ];

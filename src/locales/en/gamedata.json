@@ -1113,6 +1113,70 @@
     }
   },
   "subclasses": {
+    "berserker": {
+      "name": "Path of the Berserker",
+      "description": "For some Barbarians, rage is a means to an end — that end being violence. The Path of the Berserker is a path of untrammeled fury, slick with blood."
+    },
+    "wildheart": {
+      "name": "Path of the Wild Heart",
+      "description": "Barbarians who follow the Path of the Wild Heart view themselves as kin to animals. They learn magical means to communicate with animals, and some can temporarily take on animal characteristics."
+    },
+    "worldtree": {
+      "name": "Path of the World Tree",
+      "description": "Barbarians who follow the Path of the World Tree connect with the cosmic tree Yggdrasil through their Rage. This connection grants them incredible vitality and the ability to manifest the power of the tree."
+    },
+    "zealot": {
+      "name": "Path of the Zealot",
+      "description": "Barbarians who walk the Path of the Zealot receive boons from a god or pantheon. These warriors channel divine power in their Rage, and some are so suffused with holy power that they are hard to kill."
+    },
+    "collegedance": {
+      "name": "College of Dance",
+      "description": "Bards of the College of Dance know that the Words of Creation can't be contained in speech or song alone; they are uttered by the movements of celestial bodies and the dance of creatures great and small."
+    },
+    "collegeglamour": {
+      "name": "College of Glamour",
+      "description": "The College of Glamour traces its origins to the beguiling magic of the Feywild. Bards who attend this college are trained in the ways of enchantment and illusion, and they learn to use their captivating artistry to influence minds and dazzle the senses."
+    },
+    "collegelore": {
+      "name": "College of Lore",
+      "description": "Bards of the College of Lore know something about most things, collecting bits of knowledge from sources as diverse as scholarly tomes and peasant tales. Whether singing folk ballads in taverns or elaborate compositions in royal courts, these Bards use their gifts to hold audiences spellbound."
+    },
+    "collegevalor": {
+      "name": "College of Valor",
+      "description": "Bards of the College of Valor are daring skalds whose tales keep alive the memory of the great heroes of the past, and thereby inspire a new generation of heroes. These Bards gather in mead halls or around great bonfires to sing the deeds of the mighty."
+    },
+    "lifedomain": {
+      "name": "Life Domain",
+      "description": "The Life Domain focuses on the vibrant positive energy — one of the fundamental forces of the universe — that sustains all life. Clerics who tap into this domain are exceptional healers among the servants of the gods."
+    },
+    "lightdomain": {
+      "name": "Light Domain",
+      "description": "Gods of light promote the ideals of rebirth and renewal, truth, vigilance, and beauty, often using the symbol of the sun. The Light Domain is associated with light, healing, truth, and fire."
+    },
+    "trickerydomain": {
+      "name": "Trickery Domain",
+      "description": "Gods of trickery are mischief-makers and instigators who stand as a constant challenge to the accepted order among both gods and mortals. Clerics of these gods are a disruptive force in the world, puncturing pride, mocking tyrants, stealing from the rich, and undermining evil."
+    },
+    "wardomain": {
+      "name": "War Domain",
+      "description": "War has many manifestations. It can make heroes of ordinary people. It can be desperate and horrific, with acts of cruelty and cowardice eclipsing instances of excellence and courage. In either case, the gods of war watch over warriors and reward them for their great deeds."
+    },
+    "circleland": {
+      "name": "Circle of the Land",
+      "description": "The Circle of the Land is made up of mystics and sages who safeguard ancient knowledge and rites through a vast oral tradition. These Druids meet within sacred circles of trees or standing stones to whisper primal secrets in Druidic."
+    },
+    "circlemoon": {
+      "name": "Circle of the Moon",
+      "description": "Druids of the Circle of the Moon are fierce guardians of the wilds. Their order gathers under the full moon to share news and trade warnings. They haunt the deepest parts of the wilderness, where they might go for weeks on end before crossing paths with another humanoid creature."
+    },
+    "circlesea": {
+      "name": "Circle of the Sea",
+      "description": "Druids of the Circle of the Sea draw on the tempestuous forces of oceans and storms. Some of these Druids are coastal sentinels, defenders of fishing communities, and sailors who ply their trade on the open sea."
+    },
+    "circlestars": {
+      "name": "Circle of the Stars",
+      "description": "The Circle of the Stars allows Druids to draw power from constellations. These Druids have tracked heavenly patterns since time immemorial, cataloging their observations and learning to call upon the constellations for aid."
+    },
     "champion": {
       "name": "Champion",
       "description": "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
@@ -1125,17 +1189,121 @@
       "name": "Eldritch Knight",
       "description": "The Eldritch Knight combines martial prowess with careful study of magic. These fighters learn to cast spells from the wizard spell list, weaving magic into their weapon strikes and defenses."
     },
+    "psiwarrior": {
+      "name": "Psi Warrior",
+      "description": "Psi Warriors awaken the power of the mind to augment their physical might. Their psionic abilities make them formidable combatants, and they can push their power further by expending Psionic Energy Dice to empower their attacks and defenses."
+    },
+    "warriorofmercy": {
+      "name": "Warrior of Mercy",
+      "description": "Warriors of Mercy manipulate the life force of others. These Monks are wandering physicians, healing the sick and aiding the needy or, when the situation demands, using their power to kill."
+    },
+    "warriorofshadow": {
+      "name": "Warrior of Shadow",
+      "description": "Warriors of Shadow practice stealth and deception. These Monks use Shadow Arts and Shadow Step to move through darkness and strike without warning."
+    },
+    "warriorofelements": {
+      "name": "Warrior of the Elements",
+      "description": "Warriors of the Elements channel the power of the four elements — air, earth, fire, and water — through their Unarmored body."
+    },
+    "warrioropenhand": {
+      "name": "Warrior of the Open Hand",
+      "description": "Warriors of the Open Hand are the ultimate masters of martial arts combat, whether armed or unarmed. They learn techniques to push and trip their opponents, manipulate ki to heal damage to their bodies, and practice advanced meditation."
+    },
+    "oathofdevotion": {
+      "name": "Oath of Devotion",
+      "description": "The Oath of Devotion binds a Paladin to the loftiest ideals of justice, virtue, and order. Sometimes called cavaliers, white knights, or holy warriors, these Paladins meet the ideal of the knight in shining armor."
+    },
+    "oathofglory": {
+      "name": "Oath of Glory",
+      "description": "Paladins who take the Oath of Glory believe they and their companions are fated to achieve glory through deeds of heroism. They train diligently and encourage their companions to push themselves to be all they can be."
+    },
+    "oathofancients": {
+      "name": "Oath of the Ancients",
+      "description": "The Oath of the Ancients is as old as the first elves who marveled at the stars and the ancient fey who roamed through the forest glades. Paladins who swear this oath cast their lot with the side of the light in the cosmic struggle against darkness."
+    },
+    "oathofvengeance": {
+      "name": "Oath of Vengeance",
+      "description": "The Oath of Vengeance is a solemn commitment to punish those who have committed a grievous sin. When evil forces slaughter helpless villagers, when an entire people turns against the will of the gods, when a thieves' guild grows too violent and powerful, when a dragon rampages through the countryside — at times like these, a Paladin arises to restore justice."
+    },
+    "beastmaster": {
+      "name": "Beast Master",
+      "description": "The Beast Master subclass forges a primal bond with an animal, and that bond — the ranger and the beast acting as one — lets the ranger do exceptional things. The subclass features give the ranger powerful options in combat, exploration, and social situations."
+    },
+    "feywanderer": {
+      "name": "Fey Wanderer",
+      "description": "A magic well beyond the mere Fey touched some Rangers, infusing them with a supernatural allure and inspiring them with the magic of the Feywild. Rangers who follow the Fey Wanderer path wield a combination of their Ranger abilities and Feywild magic."
+    },
+    "gloomstalker": {
+      "name": "Gloom Stalker",
+      "description": "Gloom Stalkers are at home in the darkest places: deep under the earth, in gloomy alleyways, in primeval forests, and wherever else the light dims. Most folk enter such places with trepidation, but a Gloom Stalker ventures into the darkness with purpose."
+    },
+    "hunter": {
+      "name": "Hunter",
+      "description": "You stalk prey in the wilds and elsewhere, using your abilities as a Hunter to protect nature and people everywhere. As you hone your skills, you learn specialized techniques for fighting the monsters that threaten the wilds."
+    },
     "thief": {
       "name": "Thief",
-      "description": "You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype."
+      "description": "You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype, but so do Rogues who prefer to think of themselves as professional treasure seekers, explorers, delvers, and investigators."
     },
     "assassin": {
       "name": "Assassin",
-      "description": "You focus your training on the grim art of death. Hired killers, spies, bounty hunters, and specially anointed priests follow this archetype."
+      "description": "You hone your skills in the grim art of death. Assassins learn to dispatch foes quickly and to infiltrate dangerous locations, often making use of disguises and poisons."
     },
     "arcanetrickster": {
       "name": "Arcane Trickster",
-      "description": "Some rogues enhance their fine-honed skills of stealth and agility with magic, learning tricks of enchantment and illusion."
+      "description": "Some Rogues enhance their fine-honed skills of stealth and agility with magic, learning tricks of enchantment and illusion. These Rogues include pickpockets and burglars, but also swindlers, tricksters, and a few who are called, with some affection, 'lovable scoundrels.'"
+    },
+    "soulknife": {
+      "name": "Soulknife",
+      "description": "A Soulknife strikes with the mind, cutting through barriers both physical and psychic. These Rogues discover psionic power within themselves and learn to augment their skills with it."
+    },
+    "aberrantsorcery": {
+      "name": "Aberrant Sorcery",
+      "description": "An alien influence has wrapped its tendrils around your soul, warping your sorcery. Perhaps you were exposed to a Far Realm phenomenon, or maybe you were born somewhere that was touched by the Far Realm."
+    },
+    "clockworksorcery": {
+      "name": "Clockwork Sorcery",
+      "description": "The cosmic force of order has suffused you with magic. That power arises from the plane of Mechanus or a realm like it — a clockwork cosmos of perfect law and order."
+    },
+    "draconicsorcery": {
+      "name": "Draconic Sorcery",
+      "description": "Your innate magic comes from the gift of a dragon. Perhaps an ancestor was ensorcelled by a dragon, or you ingested dragon blood, or your birth was prophesied. Whatever the origin, your lineage shows through in the draconic magic you wield."
+    },
+    "wildmagicsorcery": {
+      "name": "Wild Magic Sorcery",
+      "description": "Your innate magic comes from the forces of chaos that underlie the order of creation. You might have endured exposure to raw magic, or you were simply born in the midst of a magical disturbance."
+    },
+    "archfeypatron": {
+      "name": "The Archfey Patron",
+      "description": "Your patron is a lord or lady of the fey, a creature of legend who holds secrets that were forgotten before the mortal races were born. This being's motivations are often inscrutable, and sometimes whimsical, and might involve the your ruin or your saving grace."
+    },
+    "celestialpatron": {
+      "name": "The Celestial Patron",
+      "description": "Your pact draws on the power of the Upper Planes, the realms of everlasting bliss. You might have saved a celestial's life, proved yourself worthy in a divine test, or your bloodline carries a trace of celestial power."
+    },
+    "fiendpatron": {
+      "name": "The Fiend Patron",
+      "description": "You have made a pact with a fiend from the lower planes of existence, a being whose aims are evil, even if you strive against those aims. Such entities desire the corruption or destruction of all things."
+    },
+    "greatoldonepatron": {
+      "name": "The Great Old One Patron",
+      "description": "Your patron is a mysterious entity whose nature is utterly foreign to the fabric of reality. It might come from the Far Realm, the space beyond reality, or it could be one of the elder gods known only in legends."
+    },
+    "abjurer": {
+      "name": "School of Abjuration",
+      "description": "The School of Abjuration emphasizes magic that blocks, banishes, or protects. Detractors of this school say that its adherents are cowardly — that abjuration is the magic of hiding behind walls and barriers. Practitioners clarify that no one wants to be behind a wall more than the enemy."
+    },
+    "diviner": {
+      "name": "School of Divination",
+      "description": "The counsel of a Diviner is sought by royalty and commoners alike, for all seek a clearer window onto the future and a better understanding of the past. Diviners learn to peer through the veil of time and space to detect threats and gather information."
+    },
+    "evoker": {
+      "name": "School of Evocation",
+      "description": "You focus your study on magic that creates powerful elemental effects such as bitter cold, searing flame, rolling thunder, crackling lightning, and burning acid. Some evokers find employment in military forces, serving as artillery to blast enemy armies from afar."
+    },
+    "illusionist": {
+      "name": "School of Illusion",
+      "description": "You focus your studies on magic that dazzles the senses, befuddles the mind, and tricks even the wisest folk. Your magic is subtle, but the illusions crafted by your keen mind make the impossible seem real."
     }
   },
   "fightingStyles": {
