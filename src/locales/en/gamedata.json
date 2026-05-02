@@ -281,7 +281,7 @@
     },
     "battlemaster-know-your-enemy": {
       "name": "Know Your Enemy",
-      "description": "Study a creature for 1 minute to learn how it compares to you in two characteristics."
+      "description": "As a Bonus Action, you can study a creature you can observe for at least 1 round. You learn how the creature compares to you in two characteristics of your choice: STR score, DEX score, CON score, AC, current HP, total class levels (if any), or Fighter levels (if any)."
     },
     "battlemaster-improved-combat-superiority": {
       "name": "Improved Combat Superiority",
@@ -397,15 +397,15 @@
     },
     "thief-supreme-sneak": {
       "name": "Supreme Sneak",
-      "description": "You have advantage on DEX (Stealth) checks if you move no more than half your speed on the same turn."
+      "description": "You gain Expertise in the Stealth skill. In addition, you can take the Hide action as a Bonus Action."
     },
     "assassin-assassinate": {
       "name": "Assassinate",
-      "description": "You have advantage on attack rolls against creatures that haven't taken a turn yet. Any hit against a surprised creature is a critical hit."
+      "description": "You are at your deadliest when you get the drop on your foes. You have Advantage on attack rolls against any creature that hasn't taken a turn yet in combat. In addition, any hit you score against a creature that is Surprised is a Critical Hit."
     },
     "assassin-infiltration-expertise": {
       "name": "Infiltration Expertise",
-      "description": "You can create false identities. Spend 7 days and 25 gp to establish history, profession, and affiliations for an identity."
+      "description": "You can spend 7 days and 25 GP to establish a false identity. You also gain Expertise in the Deception skill if you don't already have it."
     },
     "arcanetrickster-mage-hand-legerdemain": {
       "name": "Mage Hand Legerdemain",

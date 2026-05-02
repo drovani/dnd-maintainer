@@ -223,7 +223,13 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
           { type: 'feature', feature: { id: 'thief-second-story-work' } },
         ],
       },
-      { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'thief-supreme-sneak' } }] },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'skill-expertise', skill: 'stealth' },
+          { type: 'feature', feature: { id: 'thief-supreme-sneak' } },
+        ],
+      },
     ],
   },
   {
@@ -238,7 +244,13 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
           { type: 'feature', feature: { id: 'assassin-assassinate' } },
         ],
       },
-      { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'assassin-infiltration-expertise' } }] },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'skill-expertise', skill: 'deception' },
+          { type: 'feature', feature: { id: 'assassin-infiltration-expertise' } },
+        ],
+      },
     ],
   },
   {
