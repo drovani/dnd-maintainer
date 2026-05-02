@@ -176,4 +176,5 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
   illusionist: { features: [] },
 };
 
-export const isSubclassId = (id: string): id is SubclassId => id in SUBCLASS_SOURCES;
+export const isSubclassId = (id: string): id is SubclassId =>
+  Object.prototype.hasOwnProperty.call(SUBCLASS_SOURCES, id);

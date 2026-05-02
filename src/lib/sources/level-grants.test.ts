@@ -50,6 +50,14 @@ describe('getGrantsForLevel', () => {
     expect(preview.subclassGrants[1].type).toBe('ability-check-bonus');
   });
 
+  it('returns empty subclass grants when subclassId belongs to a different class', () => {
+    // Regression guard: cross-class subclassId must not return another class's grants.
+    // thief has 2 feature grants at level 3; without the SUBCLASS_IDS_BY_CLASS guard,
+    // getGrantsForLevel('fighter', 3, 'thief') would silently return them.
+    const preview = getGrantsForLevel('fighter', 3, 'thief');
+    expect(preview.subclassGrants).toHaveLength(0);
+  });
+
   it('returns empty grants and warns for unknown classId', () => {
     const logger = getLogger('sources.level-grants');
     const warnSpy = vi.spyOn(logger, 'warn');
