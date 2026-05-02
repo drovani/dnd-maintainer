@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
+import { SUBCLASS_SOURCES, SUBCLASS_IDS_BY_CLASS } from '@/lib/sources/subclasses';
 import type { PendingChoice } from '@/types/resolved';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
-import type { SubclassId } from '@/types/sources';
-import { isSubclassId } from '@/types/sources';
+import type { SubclassId } from '@/lib/sources/subclasses';
+import { isSubclassId } from '@/lib/sources/subclasses';
 import { useTranslation } from 'react-i18next';
 
 interface SubclassPickerProps {
@@ -28,7 +28,9 @@ export function SubclassPicker({ choice, currentDecision, onDecide, onClear, aut
   const [selected, setSelected] = useState<SubclassId | null>(existingSubclassId);
   const hasExistingDecision = existingSubclassId !== null;
 
-  const subclasses = SUBCLASS_SOURCES.filter((sc) => sc.classId === choice.classId);
+  const subclasses = SUBCLASS_IDS_BY_CLASS[choice.classId]
+    .map((id) => ({ id, ...SUBCLASS_SOURCES[id] }))
+    .sort((a, b) => t(`subclasses.${a.id}.name`).localeCompare(t(`subclasses.${b.id}.name`)));
   const className = t(`classes.${choice.classId}`, { defaultValue: choice.classId });
 
   const handleSelect = (id: SubclassId) => {

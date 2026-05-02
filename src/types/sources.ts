@@ -1,73 +1,9 @@
 import type { SpeciesId, ClassId, BackgroundId, SizeId, AbilityKey, FeatId } from '@/lib/dnd-helpers';
 import type { Grant } from '@/types/grants';
+import type { SubclassId } from '@/lib/sources/subclasses';
 
-export const SUBCLASS_IDS = [
-  // Barbarian
-  'berserker',
-  'wildheart',
-  'worldtree',
-  'zealot',
-  // Bard
-  'collegedance',
-  'collegeglamour',
-  'collegelore',
-  'collegevalor',
-  // Cleric
-  'lifedomain',
-  'lightdomain',
-  'trickerydomain',
-  'wardomain',
-  // Druid
-  'circleland',
-  'circlemoon',
-  'circlesea',
-  'circlestars',
-  // Fighter
-  'champion',
-  'battlemaster',
-  'eldritchknight',
-  'psiwarrior',
-  // Monk
-  'warriorofmercy',
-  'warriorofshadow',
-  'warriorofelements',
-  'warrioropenhand',
-  // Paladin
-  'oathofdevotion',
-  'oathofglory',
-  'oathofancients',
-  'oathofvengeance',
-  // Ranger
-  'beastmaster',
-  'feywanderer',
-  'gloomstalker',
-  'hunter',
-  // Rogue
-  'thief',
-  'assassin',
-  'arcanetrickster',
-  'soulknife',
-  // Sorcerer
-  'aberrantsorcery',
-  'clockworksorcery',
-  'draconicsorcery',
-  'wildmagicsorcery',
-  // Warlock
-  'archfeypatron',
-  'celestialpatron',
-  'fiendpatron',
-  'greatoldonepatron',
-  // Wizard
-  'abjurer',
-  'diviner',
-  'evoker',
-  'illusionist',
-] as const;
-export type SubclassId = (typeof SUBCLASS_IDS)[number];
-
-export function isSubclassId(s: string): s is SubclassId {
-  return (SUBCLASS_IDS as readonly string[]).includes(s);
-}
+export type { SubclassId } from '@/lib/sources/subclasses';
+export { isSubclassId } from '@/lib/sources/subclasses';
 
 export type SourceTag =
   | { readonly origin: 'species'; readonly id: SpeciesId }
@@ -142,8 +78,6 @@ export interface SubclassFeature {
 }
 
 export interface SubclassSource {
-  readonly id: SubclassId;
-  readonly classId: ClassId;
   readonly features: readonly SubclassFeature[];
 }
 

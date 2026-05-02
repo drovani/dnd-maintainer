@@ -1,96 +1,49 @@
-import type { SubclassSource } from '@/types/sources';
+import type { ClassId } from '@/lib/dnd-helpers';
+import type { SubclassFeature, SubclassSource } from '@/types/sources';
 import { createChoiceKey } from '@/types/choices';
 import { FIGHTING_STYLE_IDS } from '@/lib/dnd-helpers';
 
-export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
-  // Barbarian subclasses
-  {
-    id: 'berserker',
-    classId: 'barbarian',
-    features: [],
-  },
-  {
-    id: 'wildheart',
-    classId: 'barbarian',
-    features: [],
-  },
-  {
-    id: 'worldtree',
-    classId: 'barbarian',
-    features: [],
-  },
-  {
-    id: 'zealot',
-    classId: 'barbarian',
-    features: [],
-  },
-  // Bard subclasses
-  {
-    id: 'collegedance',
-    classId: 'bard',
-    features: [],
-  },
-  {
-    id: 'collegeglamour',
-    classId: 'bard',
-    features: [],
-  },
-  {
-    id: 'collegelore',
-    classId: 'bard',
-    features: [],
-  },
-  {
-    id: 'collegevalor',
-    classId: 'bard',
-    features: [],
-  },
-  // Cleric subclasses
-  {
-    id: 'lifedomain',
-    classId: 'cleric',
-    features: [],
-  },
-  {
-    id: 'lightdomain',
-    classId: 'cleric',
-    features: [],
-  },
-  {
-    id: 'trickerydomain',
-    classId: 'cleric',
-    features: [],
-  },
-  {
-    id: 'wardomain',
-    classId: 'cleric',
-    features: [],
-  },
-  // Druid subclasses
-  {
-    id: 'circleland',
-    classId: 'druid',
-    features: [],
-  },
-  {
-    id: 'circlemoon',
-    classId: 'druid',
-    features: [],
-  },
-  {
-    id: 'circlesea',
-    classId: 'druid',
-    features: [],
-  },
-  {
-    id: 'circlestars',
-    classId: 'druid',
-    features: [],
-  },
-  // Fighter subclasses
-  {
-    id: 'champion',
-    classId: 'fighter',
+export const SUBCLASS_IDS_BY_CLASS = {
+  barbarian: ['berserker', 'wildheart', 'worldtree', 'zealot'],
+  bard: ['collegedance', 'collegeglamour', 'collegelore', 'collegevalor'],
+  cleric: ['lifedomain', 'lightdomain', 'trickerydomain', 'wardomain'],
+  druid: ['circleland', 'circlemoon', 'circlesea', 'circlestars'],
+  fighter: ['champion', 'battlemaster', 'eldritchknight', 'psiwarrior'],
+  monk: ['warriorofmercy', 'warriorofshadow', 'warriorofelements', 'warrioropenhand'],
+  paladin: ['oathofdevotion', 'oathofglory', 'oathofancients', 'oathofvengeance'],
+  ranger: ['beastmaster', 'feywanderer', 'gloomstalker', 'hunter'],
+  rogue: ['thief', 'assassin', 'arcanetrickster', 'soulknife'],
+  sorcerer: ['aberrantsorcery', 'clockworksorcery', 'draconicsorcery', 'wildmagicsorcery'],
+  warlock: ['archfeypatron', 'celestialpatron', 'fiendpatron', 'greatoldonepatron'],
+  wizard: ['abjurer', 'diviner', 'evoker', 'illusionist'],
+} as const satisfies Record<ClassId, readonly [string, string, string, string]>;
+
+export type SubclassId = (typeof SUBCLASS_IDS_BY_CLASS)[ClassId][number];
+export const SUBCLASS_IDS: readonly SubclassId[] = Object.values(SUBCLASS_IDS_BY_CLASS).flat() as SubclassId[];
+
+export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
+  // Barbarian
+  berserker: { features: [] },
+  wildheart: { features: [] },
+  worldtree: { features: [] },
+  zealot: { features: [] },
+  // Bard
+  collegedance: { features: [] },
+  collegeglamour: { features: [] },
+  collegelore: { features: [] },
+  collegevalor: { features: [] },
+  // Cleric
+  lifedomain: { features: [] },
+  lightdomain: { features: [] },
+  trickerydomain: { features: [] },
+  wardomain: { features: [] },
+  // Druid
+  circleland: { features: [] },
+  circlemoon: { features: [] },
+  circlesea: { features: [] },
+  circlestars: { features: [] },
+  // Fighter
+  champion: {
     features: [
       { classLevel: 3, grants: [{ type: 'feature', feature: { id: 'champion-improved-critical' } }] },
       {
@@ -119,11 +72,9 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       },
       { classLevel: 15, grants: [{ type: 'feature', feature: { id: 'champion-superior-critical' } }] },
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'champion-survivor' } }] },
-    ],
+    ] satisfies readonly SubclassFeature[],
   },
-  {
-    id: 'battlemaster',
-    classId: 'fighter',
+  battlemaster: {
     features: [
       { classLevel: 3, grants: [{ type: 'feature', feature: { id: 'battlemaster-combat-superiority' } }] },
       { classLevel: 7, grants: [{ type: 'feature', feature: { id: 'battlemaster-know-your-enemy' } }] },
@@ -132,9 +83,7 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'battlemaster-superior-combat-superiority' } }] },
     ],
   },
-  {
-    id: 'eldritchknight',
-    classId: 'fighter',
+  eldritchknight: {
     features: [
       { classLevel: 3, grants: [{ type: 'feature', feature: { id: 'eldritchknight-spellcasting' } }] },
       { classLevel: 7, grants: [{ type: 'feature', feature: { id: 'eldritchknight-war-magic' } }] },
@@ -143,78 +92,24 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'eldritchknight-improved-war-magic' } }] },
     ],
   },
-  {
-    id: 'psiwarrior',
-    classId: 'fighter',
-    features: [],
-  },
-  // Monk subclasses
-  {
-    id: 'warriorofmercy',
-    classId: 'monk',
-    features: [],
-  },
-  {
-    id: 'warriorofshadow',
-    classId: 'monk',
-    features: [],
-  },
-  {
-    id: 'warriorofelements',
-    classId: 'monk',
-    features: [],
-  },
-  {
-    id: 'warrioropenhand',
-    classId: 'monk',
-    features: [],
-  },
-  // Paladin subclasses
-  {
-    id: 'oathofdevotion',
-    classId: 'paladin',
-    features: [],
-  },
-  {
-    id: 'oathofglory',
-    classId: 'paladin',
-    features: [],
-  },
-  {
-    id: 'oathofancients',
-    classId: 'paladin',
-    features: [],
-  },
-  {
-    id: 'oathofvengeance',
-    classId: 'paladin',
-    features: [],
-  },
-  // Ranger subclasses
-  {
-    id: 'beastmaster',
-    classId: 'ranger',
-    features: [],
-  },
-  {
-    id: 'feywanderer',
-    classId: 'ranger',
-    features: [],
-  },
-  {
-    id: 'gloomstalker',
-    classId: 'ranger',
-    features: [],
-  },
-  {
-    id: 'hunter',
-    classId: 'ranger',
-    features: [],
-  },
-  // Rogue subclasses
-  {
-    id: 'thief',
-    classId: 'rogue',
+  psiwarrior: { features: [] },
+  // Monk
+  warriorofmercy: { features: [] },
+  warriorofshadow: { features: [] },
+  warriorofelements: { features: [] },
+  warrioropenhand: { features: [] },
+  // Paladin
+  oathofdevotion: { features: [] },
+  oathofglory: { features: [] },
+  oathofancients: { features: [] },
+  oathofvengeance: { features: [] },
+  // Ranger
+  beastmaster: { features: [] },
+  feywanderer: { features: [] },
+  gloomstalker: { features: [] },
+  hunter: { features: [] },
+  // Rogue
+  thief: {
     features: [
       {
         classLevel: 3,
@@ -232,9 +127,7 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       },
     ],
   },
-  {
-    id: 'assassin',
-    classId: 'rogue',
+  assassin: {
     features: [
       {
         classLevel: 3,
@@ -253,9 +146,7 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       },
     ],
   },
-  {
-    id: 'arcanetrickster',
-    classId: 'rogue',
+  arcanetrickster: {
     features: [
       {
         classLevel: 3,
@@ -267,72 +158,22 @@ export const SUBCLASS_SOURCES: readonly SubclassSource[] = [
       { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'arcanetrickster-magical-ambush' } }] },
     ],
   },
-  {
-    id: 'soulknife',
-    classId: 'rogue',
-    features: [],
-  },
-  // Sorcerer subclasses
-  {
-    id: 'aberrantsorcery',
-    classId: 'sorcerer',
-    features: [],
-  },
-  {
-    id: 'clockworksorcery',
-    classId: 'sorcerer',
-    features: [],
-  },
-  {
-    id: 'draconicsorcery',
-    classId: 'sorcerer',
-    features: [],
-  },
-  {
-    id: 'wildmagicsorcery',
-    classId: 'sorcerer',
-    features: [],
-  },
-  // Warlock subclasses
-  {
-    id: 'archfeypatron',
-    classId: 'warlock',
-    features: [],
-  },
-  {
-    id: 'celestialpatron',
-    classId: 'warlock',
-    features: [],
-  },
-  {
-    id: 'fiendpatron',
-    classId: 'warlock',
-    features: [],
-  },
-  {
-    id: 'greatoldonepatron',
-    classId: 'warlock',
-    features: [],
-  },
-  // Wizard subclasses
-  {
-    id: 'abjurer',
-    classId: 'wizard',
-    features: [],
-  },
-  {
-    id: 'diviner',
-    classId: 'wizard',
-    features: [],
-  },
-  {
-    id: 'evoker',
-    classId: 'wizard',
-    features: [],
-  },
-  {
-    id: 'illusionist',
-    classId: 'wizard',
-    features: [],
-  },
-];
+  soulknife: { features: [] },
+  // Sorcerer
+  aberrantsorcery: { features: [] },
+  clockworksorcery: { features: [] },
+  draconicsorcery: { features: [] },
+  wildmagicsorcery: { features: [] },
+  // Warlock
+  archfeypatron: { features: [] },
+  celestialpatron: { features: [] },
+  fiendpatron: { features: [] },
+  greatoldonepatron: { features: [] },
+  // Wizard
+  abjurer: { features: [] },
+  diviner: { features: [] },
+  evoker: { features: [] },
+  illusionist: { features: [] },
+};
+
+export const isSubclassId = (id: string): id is SubclassId => id in SUBCLASS_SOURCES;

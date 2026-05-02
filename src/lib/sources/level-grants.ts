@@ -3,9 +3,9 @@ import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('sources.level-grants');
 import type { ClassId } from '@/lib/dnd-helpers';
-import type { SubclassId } from '@/types/sources';
+import type { SubclassId } from '@/lib/sources/subclasses';
+import { SUBCLASS_SOURCES, SUBCLASS_IDS_BY_CLASS } from '@/lib/sources/subclasses';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
 
 export interface LevelGrantPreview {
   readonly classGrants: readonly Grant[];
@@ -28,8 +28,8 @@ export function getGrantsForLevel(
   const classGrants = classSource?.levels[targetClassLevel - 1]?.grants ?? [];
 
   let subclassGrants: readonly Grant[] = [];
-  if (subclassId) {
-    const subclassSource = SUBCLASS_SOURCES.find((sc) => sc.id === subclassId && sc.classId === classId);
+  if (subclassId && (SUBCLASS_IDS_BY_CLASS[classId] as readonly SubclassId[]).includes(subclassId)) {
+    const subclassSource = SUBCLASS_SOURCES[subclassId];
     const feature = subclassSource?.features.find((f) => f.classLevel === targetClassLevel);
     subclassGrants = feature?.grants ?? [];
   }

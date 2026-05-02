@@ -1,73 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getSubclassSource, SUBCLASS_SOURCES } from '@/lib/sources';
-import { SUBCLASS_IDS } from '@/types/sources';
-import type { SubclassId } from '@/types/sources';
-
-describe('SUBCLASS_IDS completeness', () => {
-  it('has exactly 48 entries (4 per class × 12 classes)', () => {
-    expect(SUBCLASS_IDS).toHaveLength(48);
-  });
-
-  it.each(SUBCLASS_IDS)('SUBCLASS_IDS entry "%s" has a matching SUBCLASS_SOURCES entry', (id) => {
-    const source = SUBCLASS_SOURCES.find((s) => s.id === id);
-    expect(source).toBeDefined();
-  });
-
-  it('SUBCLASS_SOURCES has no duplicate ids', () => {
-    const ids = SUBCLASS_SOURCES.map((s) => s.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-});
-
-describe('SUBCLASS_SOURCES stubs', () => {
-  const stubIds = SUBCLASS_IDS.filter(
-    (id) => !['champion', 'battlemaster', 'eldritchknight', 'thief', 'assassin', 'arcanetrickster'].includes(id)
-  );
-
-  const validClassIds = [
-    'barbarian',
-    'bard',
-    'cleric',
-    'druid',
-    'fighter',
-    'monk',
-    'paladin',
-    'ranger',
-    'rogue',
-    'sorcerer',
-    'warlock',
-    'wizard',
-  ] as const;
-
-  it.each(stubIds)('stub "%s" has a valid classId and features: []', (id) => {
-    const source = SUBCLASS_SOURCES.find((s) => s.id === id);
-    expect(source).toBeDefined();
-    expect(validClassIds).toContain(source!.classId);
-    expect(source!.features).toEqual([]);
-  });
-});
-
-describe('SUBCLASS_SOURCES class coverage', () => {
-  const classIds = [
-    'barbarian',
-    'bard',
-    'cleric',
-    'druid',
-    'fighter',
-    'monk',
-    'paladin',
-    'ranger',
-    'rogue',
-    'sorcerer',
-    'warlock',
-    'wizard',
-  ] as const;
-
-  it.each(classIds)('class "%s" has exactly 4 subclasses in SUBCLASS_SOURCES', (classId) => {
-    const count = SUBCLASS_SOURCES.filter((s) => s.classId === classId).length;
-    expect(count).toBe(4);
-  });
-});
+import { getSubclassSource } from '@/lib/sources';
+import type { SubclassId } from '@/lib/sources/subclasses';
 
 describe('assassin skill-expertise grant', () => {
   it('assassin level 9 has exactly 2 grants: feature and skill-expertise: deception', () => {
@@ -105,11 +38,6 @@ describe('thief skill-expertise grant', () => {
 describe('getSubclassSource — Champion', () => {
   it('returns defined for champion', () => {
     expect(getSubclassSource('champion')).toBeDefined();
-  });
-
-  it('champion has classId fighter', () => {
-    const source = getSubclassSource('champion');
-    expect(source?.classId).toBe('fighter');
   });
 
   it('champion has 5 features', () => {

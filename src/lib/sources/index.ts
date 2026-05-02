@@ -6,18 +6,18 @@ import type {
   SpeciesSource,
   ClassSource,
   SubclassSource,
-  SubclassId,
   BackgroundSource,
   FeatSource,
   ItemSource,
   GrantBundle,
   SourceTag,
 } from '@/types/sources';
+import type { SubclassId } from '@/lib/sources/subclasses';
 import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
+import { SUBCLASS_SOURCES, SUBCLASS_IDS, SUBCLASS_IDS_BY_CLASS, isSubclassId } from '@/lib/sources/subclasses';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { FEAT_SOURCES } from '@/lib/sources/feats';
 import { ITEM_SOURCES } from '@/lib/sources/items';
@@ -40,6 +40,9 @@ export {
   SPECIES_SOURCES,
   CLASS_SOURCES,
   SUBCLASS_SOURCES,
+  SUBCLASS_IDS,
+  SUBCLASS_IDS_BY_CLASS,
+  isSubclassId,
   BACKGROUND_SOURCES,
   FEAT_SOURCES,
   ITEM_SOURCES,
@@ -56,7 +59,7 @@ export function getClassSource(id: ClassId): ClassSource | undefined {
 }
 
 export function getSubclassSource(id: SubclassId): SubclassSource | undefined {
-  return SUBCLASS_SOURCES.find((s) => s.id === id);
+  return SUBCLASS_SOURCES[id];
 }
 
 export function getBackgroundSource(id: BackgroundId): BackgroundSource | undefined {
