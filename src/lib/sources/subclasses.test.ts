@@ -12,6 +12,11 @@ describe('SUBCLASS_IDS completeness', () => {
     const source = SUBCLASS_SOURCES.find((s) => s.id === id);
     expect(source).toBeDefined();
   });
+
+  it('SUBCLASS_SOURCES has no duplicate ids', () => {
+    const ids = SUBCLASS_SOURCES.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
 });
 
 describe('SUBCLASS_SOURCES stubs', () => {
@@ -19,10 +24,25 @@ describe('SUBCLASS_SOURCES stubs', () => {
     (id) => !['champion', 'battlemaster', 'eldritchknight', 'thief', 'assassin', 'arcanetrickster'].includes(id)
   );
 
-  it.each(stubIds)('stub "%s" has a non-empty classId and features: []', (id) => {
+  const validClassIds = [
+    'barbarian',
+    'bard',
+    'cleric',
+    'druid',
+    'fighter',
+    'monk',
+    'paladin',
+    'ranger',
+    'rogue',
+    'sorcerer',
+    'warlock',
+    'wizard',
+  ] as const;
+
+  it.each(stubIds)('stub "%s" has a valid classId and features: []', (id) => {
     const source = SUBCLASS_SOURCES.find((s) => s.id === id);
     expect(source).toBeDefined();
-    expect(source!.classId).toBeTruthy();
+    expect(validClassIds).toContain(source!.classId);
     expect(source!.features).toEqual([]);
   });
 });
@@ -50,22 +70,35 @@ describe('SUBCLASS_SOURCES class coverage', () => {
 });
 
 describe('assassin skill-expertise grant', () => {
-  it('assassin has a skill-expertise: deception grant at level 9', () => {
+  it('assassin level 9 has exactly 2 grants: feature and skill-expertise: deception', () => {
     const source = getSubclassSource('assassin');
     const level9 = source?.features.find((f) => f.classLevel === 9);
     expect(level9).toBeDefined();
-    const expertiseGrant = level9?.grants.find((g) => g.type === 'skill-expertise' && g.skill === 'deception');
-    expect(expertiseGrant).toBeDefined();
+    expect(level9!.grants).toHaveLength(2);
+    expect(level9!.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'assassin-infiltration-expertise' }),
+        }),
+        expect.objectContaining({ type: 'skill-expertise', skill: 'deception' }),
+      ])
+    );
   });
 });
 
 describe('thief skill-expertise grant', () => {
-  it('thief has a skill-expertise: stealth grant at level 9', () => {
+  it('thief level 9 has exactly 2 grants: feature and skill-expertise: stealth', () => {
     const source = getSubclassSource('thief');
     const level9 = source?.features.find((f) => f.classLevel === 9);
     expect(level9).toBeDefined();
-    const expertiseGrant = level9?.grants.find((g) => g.type === 'skill-expertise' && g.skill === 'stealth');
-    expect(expertiseGrant).toBeDefined();
+    expect(level9!.grants).toHaveLength(2);
+    expect(level9!.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'thief-supreme-sneak' }) }),
+        expect.objectContaining({ type: 'skill-expertise', skill: 'stealth' }),
+      ])
+    );
   });
 });
 
