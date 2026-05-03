@@ -90,6 +90,11 @@ export interface ResolvedArmorClass {
   readonly effective: number;
 }
 
+export interface PactMagic {
+  readonly count: number;
+  readonly slotLevel: number;
+}
+
 export interface ResolvedSpellcasting {
   readonly ability: AbilityKey;
   readonly spellSaveDC: number;
@@ -98,6 +103,8 @@ export interface ResolvedSpellcasting {
   readonly knownSpells: readonly string[];
   readonly alwaysPreparedSpells: readonly string[];
   readonly slots: readonly number[];
+  readonly preparedCount: number;
+  readonly pactMagic: PactMagic | null;
 }
 
 export type PendingChoice =

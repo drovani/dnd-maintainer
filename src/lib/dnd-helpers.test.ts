@@ -16,6 +16,8 @@ import {
   computeProficiencies,
   generateCharacterName,
   getAbilityModifier,
+  getPactMagicSlots,
+  getPreparedSpellCount,
   getPointBuyCost,
   getPointBuyDecrementReturn,
   getPointBuyEquivalent,
@@ -104,6 +106,68 @@ describe('getSpellSlots', () => {
 
   it('is case-insensitive for class name', () => {
     expect(getSpellSlots('Wizard', 1)).toEqual(getSpellSlots('wizard', 1));
+  });
+
+  it('returns empty array for warlock (Pact Magic is separate)', () => {
+    expect(getSpellSlots('warlock', 5)).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getPactMagicSlots
+// ---------------------------------------------------------------------------
+describe('getPactMagicSlots', () => {
+  it.each<[number, number, number]>([
+    [1, 1, 1],
+    [2, 2, 1],
+    [3, 2, 2],
+    [4, 2, 2],
+    [5, 2, 3],
+    [6, 2, 3],
+    [7, 2, 4],
+    [8, 2, 4],
+    [9, 2, 5],
+    [10, 2, 5],
+    [11, 3, 5],
+    [16, 3, 5],
+    [17, 4, 5],
+    [20, 4, 5],
+  ])('level %i: count=%i slotLevel=%i', (level, count, slotLevel) => {
+    expect(getPactMagicSlots(level)).toEqual({ count, slotLevel });
+  });
+
+  it('returns count 0 slotLevel 0 for level 0', () => {
+    expect(getPactMagicSlots(0)).toEqual({ count: 0, slotLevel: 0 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getPreparedSpellCount
+// ---------------------------------------------------------------------------
+describe('getPreparedSpellCount', () => {
+  it.each<[string, number, number, number]>([
+    ['cleric', 5, 3, 8],
+    ['cleric', 1, -2, 1],
+    ['cleric', 1, 0, 1],
+    ['druid', 3, 2, 5],
+    ['wizard', 5, 3, 8],
+    ['paladin', 4, 1, 5],
+    ['ranger', 8, 2, 10],
+  ])('%s level %i abilityMod %i → preparedCount %i', (classId, classLevel, abilityMod, expected) => {
+    expect(getPreparedSpellCount(classId, classLevel, abilityMod)).toBe(expected);
+  });
+
+  it('floors prepared count at 1 when level + mod is 0 or negative', () => {
+    expect(getPreparedSpellCount('cleric', 1, -2)).toBe(1);
+    expect(getPreparedSpellCount('cleric', 2, -3)).toBe(1);
+  });
+
+  it.each(['bard', 'sorcerer', 'warlock'])('%s returns 0 (known-spell caster)', (classId) => {
+    expect(getPreparedSpellCount(classId, 5, 3)).toBe(0);
+  });
+
+  it('fighter returns 0 (non-caster)', () => {
+    expect(getPreparedSpellCount('fighter', 5, 2)).toBe(0);
   });
 });
 

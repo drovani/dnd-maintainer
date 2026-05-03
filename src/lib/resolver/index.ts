@@ -63,7 +63,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const features = resolveFeatures(bundles);
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level);
   const speed = resolveSpeed(bundles);
-  const spellcasting = resolveSpellcasting(bundles);
+  const spellcasting = resolveSpellcasting(bundles, abilities, proficiencyBonus, level);
 
   // Equipment resolution — finalized characters read from DB inventory directly
   const equipmentResult =

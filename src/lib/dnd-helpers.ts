@@ -154,28 +154,6 @@ export function getSpellSlots(className: string, level: number): number[] {
       19: [4, 3, 3, 3, 3, 2, 1, 1, 1],
       20: [4, 3, 3, 3, 3, 2, 2, 1, 1],
     },
-    warlock: {
-      1: [1],
-      2: [2],
-      3: [2, 2],
-      4: [2, 2],
-      5: [2, 2, 2],
-      6: [2, 2, 2],
-      7: [2, 2, 2, 2],
-      8: [2, 2, 2, 2],
-      9: [2, 2, 2, 2, 2],
-      10: [2, 2, 2, 2, 2],
-      11: [3, 3, 3, 3, 3],
-      12: [3, 3, 3, 3, 3],
-      13: [3, 3, 3, 3, 3],
-      14: [3, 3, 3, 3, 3],
-      15: [3, 3, 3, 3, 3],
-      16: [3, 3, 3, 3, 3],
-      17: [4, 4, 4, 4, 4],
-      18: [4, 4, 4, 4, 4],
-      19: [4, 4, 4, 4, 4],
-      20: [4, 4, 4, 4, 4],
-    },
     wizard: {
       1: [2],
       2: [3],
@@ -201,6 +179,25 @@ export function getSpellSlots(className: string, level: number): number[] {
   };
 
   return spellcasters[className.toLowerCase()]?.[level] || [];
+}
+
+export function getPactMagicSlots(level: number): { readonly count: number; readonly slotLevel: number } {
+  if (level <= 0) return { count: 0, slotLevel: 0 };
+  if (level === 1) return { count: 1, slotLevel: 1 };
+  if (level === 2) return { count: 2, slotLevel: 1 };
+  if (level <= 4) return { count: 2, slotLevel: 2 };
+  if (level <= 6) return { count: 2, slotLevel: 3 };
+  if (level <= 8) return { count: 2, slotLevel: 4 };
+  if (level <= 10) return { count: 2, slotLevel: 5 };
+  if (level <= 16) return { count: 3, slotLevel: 5 };
+  return { count: 4, slotLevel: 5 };
+}
+
+const PREPARED_CASTER_CLASSES: ReadonlySet<string> = new Set(['cleric', 'druid', 'wizard', 'paladin', 'ranger']);
+
+export function getPreparedSpellCount(classId: string, classLevel: number, abilityMod: number): number {
+  if (!PREPARED_CASTER_CLASSES.has(classId)) return 0;
+  return Math.max(1, classLevel + abilityMod);
 }
 
 export interface DndSpecies {

@@ -74,6 +74,8 @@ function wizardSpellcasting(): ResolvedSpellcasting {
     knownSpells: [],
     alwaysPreparedSpells: [],
     slots: [2],
+    preparedCount: 3,
+    pactMagic: null,
   };
 }
 
