@@ -127,14 +127,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: ['bagpipes', 'drum', 'dulcimer', 'flute', 'lute', 'lyre', 'horn', 'panflute', 'shawm', 'viol'],
           },
           { type: 'spellcasting', ability: 'cha', source: 'class' },
-          {
-            type: 'feature',
-            feature: {
-              id: 'bard-bardic-inspiration',
-              description:
-                'As a Bonus Action, give one creature within 60 feet (other than yourself) a Bardic Inspiration die — a d6. The creature can add the die to one ability check, attack roll, or saving throw they make within 10 minutes. They can also spend the die on a damage or healing roll of a spell they cast (Magical Inspiration). The die is expended on use. You have a number of uses equal to your Charisma modifier (minimum 1), regained on a long rest.',
-            },
-          },
+          { type: 'feature', feature: { id: 'bard-bardic-inspiration' } },
           { type: 'armor-class', calculation: { mode: 'armored' } },
         ],
       },
