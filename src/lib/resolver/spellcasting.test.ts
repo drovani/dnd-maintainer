@@ -46,11 +46,34 @@ function makePaladinBundles(level: number): GrantBundle[] {
   ];
 }
 
-function makeRangerBundles(level: number): GrantBundle[] {
+function makeRangerBundles({ level }: { level: number }): GrantBundle[] {
+  // Ranger gains spellcasting at L2 (verified in src/lib/sources/classes.ts).
+  // An L1 ranger bundle must not include the spellcasting grant.
+  if (level < 2) {
+    return [{ source: { origin: 'class', id: 'ranger', level }, grants: [] }];
+  }
   return [
     {
       source: { origin: 'class', id: 'ranger', level },
       grants: [{ type: 'spellcasting', ability: 'wis', source: 'class' }],
+    },
+  ];
+}
+
+function makeDruidBundles(level: number): GrantBundle[] {
+  return [
+    {
+      source: { origin: 'class', id: 'druid', level },
+      grants: [{ type: 'spellcasting', ability: 'wis', source: 'class' }],
+    },
+  ];
+}
+
+function makeWizardBundles(level: number): GrantBundle[] {
+  return [
+    {
+      source: { origin: 'class', id: 'wizard', level },
+      grants: [{ type: 'spellcasting', ability: 'int', source: 'class' }],
     },
   ];
 }
@@ -184,7 +207,7 @@ describe('resolveSpellcasting', () => {
 
     it('ranger L8 wis+2 → 10', () => {
       const abilities = makeAbilities({ wis: 14 });
-      const result = resolveSpellcasting(makeRangerBundles(8), abilities, 3, 8);
+      const result = resolveSpellcasting(makeRangerBundles({ level: 8 }), abilities, 3, 8);
       expect(result!.preparedCount).toBe(10);
     });
 
@@ -248,5 +271,81 @@ describe('resolveSpellcasting', () => {
     expect(result!.slots).toEqual([]);
     expect(result!.pactMagic).toBeNull();
     expect(result!.preparedCount).toBe(0);
+  });
+
+  describe('full caster (druid) spell slots', () => {
+    const abilities = makeAbilities({ wis: 14 });
+
+    it('level 5: [4, 3, 2]', () => {
+      const result = resolveSpellcasting(makeDruidBundles(5), abilities, 3, 5);
+      expect(result!.slots).toEqual([4, 3, 2]);
+      expect(result!.pactMagic).toBeNull();
+    });
+
+    it('level 5 wis+2 → preparedCount 7 (level + wisMod)', () => {
+      // max(1, 5 + 2) = 7
+      const result = resolveSpellcasting(makeDruidBundles(5), abilities, 3, 5);
+      expect(result!.preparedCount).toBe(7);
+    });
+  });
+
+  describe('full caster (wizard) spell slots', () => {
+    it('level 1 int+4 → slots [2], preparedCount 5', () => {
+      // max(1, 1 + 4) = 5
+      const abilities = makeAbilities({ int: 18 });
+      const result = resolveSpellcasting(makeWizardBundles(1), abilities, 2, 1);
+      expect(result!.slots).toEqual([2]);
+      expect(result!.pactMagic).toBeNull();
+      expect(result!.preparedCount).toBe(5);
+    });
+  });
+
+  describe('half caster (ranger) caster gate at level 2', () => {
+    it('level 1: no spellcasting grant → resolveSpellcasting returns null', () => {
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(makeRangerBundles({ level: 1 }), abilities, 2, 1);
+      expect(result).toBeNull();
+    });
+
+    it('level 2: slots [2], positive preparedCount', () => {
+      // max(1, 2 + 2) = 4
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(makeRangerBundles({ level: 2 }), abilities, 2, 2);
+      expect(result!.slots).toEqual([2]);
+      expect(result!.preparedCount).toBeGreaterThan(0);
+    });
+  });
+
+  describe('class vs feat spellcasting grant precedence', () => {
+    it('class grant takes priority over feat grant: ability and slots follow cleric, not feat', () => {
+      // Both a class spellcasting grant (cleric, wis) and a feat grant (magic-initiate, int)
+      // are present. The resolver must select the class grant.
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          grants: [{ type: 'spellcasting', ability: 'wis', source: 'class' }],
+        },
+        {
+          source: { origin: 'feat', id: 'magic-initiate-wizard' },
+          grants: [{ type: 'spellcasting', ability: 'int', source: 'feat' }],
+        },
+      ];
+      // wis 16 (+3), int 18 (+4) — ensure the two abilities are distinguishable
+      const abilities = makeAbilities({ wis: 16, int: 18 });
+      const result = resolveSpellcasting(bundles, abilities, 2, 1);
+      expect(result).not.toBeNull();
+      expect(result!.ability).toBe('wis');
+      expect(result!.slots).toEqual([2]); // cleric L1 full-caster slots
+      expect(result!.preparedCount).toBe(4); // max(1, 1 + 3)
+    });
+  });
+
+  describe('cantrips behavior', () => {
+    it('cleric L1: cantrips is always []', () => {
+      // TODO(#93 followup): cantrip detection requires SpellGrant.level field; deferred.
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(makeClericBundles(1), abilities, 2, 1);
+      expect(result!.cantrips).toEqual([]);
+    });
   });
 });

@@ -90,11 +90,16 @@ export interface ResolvedArmorClass {
   readonly effective: number;
 }
 
-export interface PactMagic {
+export interface ResolvedPactMagic {
   readonly count: number;
   readonly slotLevel: number;
 }
 
+/**
+ * Resolved spellcasting state. Invariant: warlocks have `pactMagic !== null` and `slots` is empty;
+ * all other casters have `pactMagic === null` and use `slots`. `preparedCount` is `0` for known-spell
+ * casters (bard, sorcerer, warlock) and non-class spellcasting sources.
+ */
 export interface ResolvedSpellcasting {
   readonly ability: AbilityKey;
   readonly spellSaveDC: number;
@@ -104,7 +109,7 @@ export interface ResolvedSpellcasting {
   readonly alwaysPreparedSpells: readonly string[];
   readonly slots: readonly number[];
   readonly preparedCount: number;
-  readonly pactMagic: PactMagic | null;
+  readonly pactMagic: ResolvedPactMagic | null;
 }
 
 export type PendingChoice =
