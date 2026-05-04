@@ -457,7 +457,7 @@ function CharacterSheetInner({
             </div>
 
             {/* Attacks */}
-            {resolved && <AttacksPanel attacks={resolved.attacks} />}
+            {resolved && <AttacksPanel attacks={resolved.attacks} weaponMasteries={resolved.weaponMasteries} />}
 
             {/* Proficiencies */}
             {resolved && <ProficienciesPanel resolved={resolved} />}

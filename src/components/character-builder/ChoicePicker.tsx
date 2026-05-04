@@ -6,10 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DND_LANGUAGES, DND_SKILLS, type LanguageId, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
-import { getItemDef, getItemNameKey } from '@/lib/sources/items';
+import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
-import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items';
+import type { BundleSlot, ItemDef, SlotFilter, WeaponMasteryId } from '@/types/items';
 import type { PendingChoice } from '@/types/resolved';
 import { getGrantIcon } from '@/lib/class-icons';
 import type { TFunction } from 'i18next';
@@ -302,6 +302,66 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
                 onSelect={() => selectBundle(bundleId)}
                 onSlotPick={(slotKey, itemId) => updateSlotPick(bundleId, slotKey, itemId)}
               />
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (choice.type === 'weapon-mastery-choice') {
+    const current = currentDecision?.type === 'weapon-mastery-choice' ? currentDecision.weaponIds : [];
+    const atMax = current.length >= choice.count;
+    const weaponDefMap = new Map(WEAPON_CATALOG.filter((w) => w.mastery !== undefined).map((w) => [w.id, w]));
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            {tc('characterBuilder.pendingChoices.weaponMasteryChoice', { count: choice.count })}
+          </p>
+          <Badge variant="outline" className="text-xs">
+            {current.length} / {choice.count}
+          </Badge>
+        </div>
+        <div className="space-y-1">
+          {choice.from.map((weaponId) => {
+            const weaponDef = weaponDefMap.get(weaponId);
+            if (!weaponDef) return null;
+            const mastery = weaponDef.mastery as WeaponMasteryId;
+            const isSelected = current.includes(weaponId);
+            const isAlreadyChosen = choice.alreadyChosen.includes(weaponId) && !isSelected;
+            const isDisabled = (atMax && !isSelected) || isAlreadyChosen;
+            const weaponName = t(getItemNameKey('weapon', weaponId), { defaultValue: weaponId });
+            const masteryName = t(`weaponMasteries.${mastery}.name`);
+            return (
+              <div
+                key={weaponId}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <Checkbox
+                  id={`choice-mastery-${choice.choiceKey}-${weaponId}`}
+                  checked={isSelected}
+                  disabled={isDisabled}
+                  onCheckedChange={(checked) => {
+                    const next = checked ? [...current, weaponId] : current.filter((id) => id !== weaponId);
+                    if (next.length === 0) {
+                      onClear(choice.choiceKey);
+                    } else {
+                      onDecide(choice.choiceKey, { type: 'weapon-mastery-choice', weaponIds: next });
+                    }
+                  }}
+                />
+                <Label
+                  htmlFor={`choice-mastery-${choice.choiceKey}-${weaponId}`}
+                  className="flex-1 cursor-pointer flex items-center gap-2"
+                >
+                  {weaponName}
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    {masteryName}
+                  </Badge>
+                </Label>
+              </div>
             );
           })}
         </div>

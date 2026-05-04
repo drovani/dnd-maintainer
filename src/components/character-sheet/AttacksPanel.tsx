@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown';
 import { formatSigned } from '@/lib/format';
 import type { ResolvedAttack } from '@/types/resolved';
+import type { WeaponMasteryId } from '@/types/items';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { getItemNameKey } from '@/lib/sources/items';
@@ -9,12 +10,14 @@ import { useTranslation } from 'react-i18next';
 
 interface AttacksPanelProps {
   readonly attacks: readonly ResolvedAttack[];
+  readonly weaponMasteries?: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[];
 }
 
-export function AttacksPanel({ attacks }: AttacksPanelProps) {
+export function AttacksPanel({ attacks, weaponMasteries }: AttacksPanelProps) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const masteryMap = new Map(weaponMasteries?.map((m) => [m.weaponId, m.masteryId]) ?? []);
 
   const toggleRow = (index: number) => {
     setExpandedRows((prev) => {
@@ -48,6 +51,8 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
             const damageType = t(`damageTypes.${attack.damageType}`);
             const damageStr = `${attack.damageDice}${attack.damageBonus !== 0 ? formatSigned(attack.damageBonus) : ''} ${damageType}`;
 
+            const mastery = masteryMap.get(attack.weaponId);
+
             return (
               <div key={attack.weaponId}>
                 <button
@@ -62,6 +67,11 @@ export function AttacksPanel({ attacks }: AttacksPanelProps) {
                       <ChevronRight className="size-3 text-muted-foreground shrink-0" />
                     )}
                     {weaponName}
+                    {mastery !== undefined && (
+                      <Badge variant="secondary" className="text-[10px] py-0 font-normal">
+                        {t(`weaponMasteries.${mastery}.name`)}
+                      </Badge>
+                    )}
                   </span>
                   <span className="font-mono font-bold text-foreground text-center">
                     {formatSigned(attack.attackBonus)}

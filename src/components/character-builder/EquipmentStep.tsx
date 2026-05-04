@@ -1,6 +1,6 @@
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
-import { getItemDef, getItemNameKey } from '@/lib/sources/items';
+import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { BUNDLE_CATEGORIES } from '@/types/items';
 import { useTranslation } from 'react-i18next';
 import { ChoicePicker } from './ChoicePicker';
@@ -14,6 +14,37 @@ export function EquipmentStep() {
   const { bundles, resolved, build } = context;
 
   const allEquipment = resolved?.equipment ?? [];
+
+  // Weapon mastery choices — show all grants so pickers stay visible after a decision is made
+  const weaponMasteryGrantTags = collectGrantsByType(bundles, 'weapon-mastery-choice').filter(
+    (tg) => tg.source.origin === 'class'
+  );
+  // Compute eligible weapons from proficiencies (mirrors resolver logic)
+  const weaponProfValues = new Set(resolved?.weaponProficiencies?.map((p) => p.value) ?? []);
+  const eligibleWeaponIds = WEAPON_CATALOG.filter(
+    (w) => w.mastery !== undefined && (weaponProfValues.has(w.category) || weaponProfValues.has(w.weaponProficiencyId))
+  ).map((w) => w.id);
+
+  const weaponMasteryChoices: readonly (PendingChoice & { type: 'weapon-mastery-choice' })[] =
+    weaponMasteryGrantTags.map(({ grant, source }) => {
+      const alreadyChosen: string[] = [];
+      for (const other of weaponMasteryGrantTags) {
+        if (other.grant.key === grant.key) continue;
+        const decision = build?.choices[other.grant.key];
+        if (decision?.type === 'weapon-mastery-choice') {
+          alreadyChosen.push(...decision.weaponIds);
+        }
+      }
+      return {
+        type: 'weapon-mastery-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: eligibleWeaponIds,
+        alreadyChosen,
+      };
+    });
+  const hasWeaponMasteryChoices = weaponMasteryChoices.length > 0;
 
   // Drive the class loadout UI from the class's bundle-choice grants (not pendingChoices),
   // so options remain visible after a decision is made and the user can change their pick.
@@ -81,6 +112,31 @@ export function EquipmentStep() {
             <p className="text-muted-foreground text-sm">{tc('characterBuilder.equipment.comingSoon')}</p>
           )}
         </section>
+
+        {hasWeaponMasteryChoices && (
+          <section className="space-y-4 border-t pt-6">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-foreground">
+                {tc('characterBuilder.equipment.weaponMasteryTitle')}
+              </h2>
+              <p className="text-sm text-muted-foreground">{tc('characterBuilder.equipment.weaponMasterySubtitle')}</p>
+            </div>
+            <div className="space-y-4">
+              {weaponMasteryChoices.map((choice) => {
+                const decision = build?.choices[choice.choiceKey];
+                return (
+                  <ChoicePicker
+                    key={choice.choiceKey}
+                    choice={choice}
+                    currentDecision={decision as ChoiceDecision | undefined}
+                    onDecide={(key, d) => context.makeChoice(key, d)}
+                    onClear={(key) => context.clearChoice(key)}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <section className="space-y-2 border-t pt-6">
           <h2 className="text-base font-semibold text-foreground">{tc('characterBuilder.equipment.purchaseTitle')}</h2>
