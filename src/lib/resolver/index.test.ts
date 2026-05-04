@@ -138,6 +138,11 @@ describe('Human Fighter L1 integration', () => {
       },
       'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
       'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+      // Fighter weapon mastery choices (L1: 3 slots)
+      'weapon-mastery-choice:class:fighter:0': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword', 'shortsword', 'handaxe'],
+      },
     },
     levels: [{ classId: 'fighter', classLevel: 1, hpRoll: null }],
     feats: [],
@@ -578,6 +583,15 @@ describe('Human Fighter L5 integration', () => {
       },
       'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
       'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+      // Fighter weapon mastery choices (L1: 3 slots, L4: 1 slot)
+      'weapon-mastery-choice:class:fighter:0': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword', 'shortsword', 'handaxe'],
+      },
+      'weapon-mastery-choice:class:fighter:1': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['battleaxe'],
+      },
     },
     feats: [],
     activeItems: [],

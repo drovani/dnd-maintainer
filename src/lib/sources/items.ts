@@ -20,6 +20,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 2,
     costGp: 0.1,
     weaponProficiencyId: 'simple',
+    mastery: 'slow',
   },
   {
     type: 'weapon',
@@ -34,6 +35,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 20,
     longRange: 60,
     weaponProficiencyId: 'simple',
+    mastery: 'nick',
   },
   {
     type: 'weapon',
@@ -46,6 +48,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 10,
     costGp: 0.2,
     weaponProficiencyId: 'simple',
+    mastery: 'push',
   },
   {
     type: 'weapon',
@@ -60,6 +63,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 20,
     longRange: 60,
     weaponProficiencyId: 'simple',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -74,6 +78,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 30,
     longRange: 120,
     weaponProficiencyId: 'simple',
+    mastery: 'slow',
   },
   {
     type: 'weapon',
@@ -88,6 +93,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 20,
     longRange: 60,
     weaponProficiencyId: 'lighthammer',
+    mastery: 'nick',
   },
   {
     type: 'weapon',
@@ -100,6 +106,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 4,
     costGp: 5,
     weaponProficiencyId: 'simple',
+    mastery: 'sap',
   },
   {
     type: 'weapon',
@@ -113,6 +120,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     costGp: 0.2,
     versatileDice: '1d8',
     weaponProficiencyId: 'simple',
+    mastery: 'topple',
   },
   {
     type: 'weapon',
@@ -125,6 +133,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 2,
     costGp: 1,
     weaponProficiencyId: 'simple',
+    mastery: 'nick',
   },
   {
     type: 'weapon',
@@ -140,6 +149,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     longRange: 60,
     versatileDice: '1d8',
     weaponProficiencyId: 'simple',
+    mastery: 'sap',
   },
   // Simple ranged
   {
@@ -155,6 +165,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 80,
     longRange: 320,
     weaponProficiencyId: 'lightcrossbow',
+    mastery: 'slow',
   },
   {
     type: 'weapon',
@@ -169,6 +180,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 20,
     longRange: 60,
     weaponProficiencyId: 'simple',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -183,6 +195,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 80,
     longRange: 320,
     weaponProficiencyId: 'simple',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -197,6 +210,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 30,
     longRange: 120,
     weaponProficiencyId: 'simple',
+    mastery: 'slow',
   },
   // Martial melee
   {
@@ -211,6 +225,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     costGp: 10,
     versatileDice: '1d10',
     weaponProficiencyId: 'battleaxe',
+    mastery: 'topple',
   },
   {
     type: 'weapon',
@@ -223,6 +238,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 2,
     costGp: 10,
     weaponProficiencyId: 'martial',
+    mastery: 'sap',
   },
   {
     type: 'weapon',
@@ -235,6 +251,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 6,
     costGp: 20,
     weaponProficiencyId: 'martial',
+    mastery: 'graze',
   },
   {
     type: 'weapon',
@@ -247,6 +264,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 7,
     costGp: 30,
     weaponProficiencyId: 'martial',
+    mastery: 'cleave',
   },
   {
     type: 'weapon',
@@ -259,6 +277,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 6,
     costGp: 50,
     weaponProficiencyId: 'martial',
+    mastery: 'graze',
   },
   {
     type: 'weapon',
@@ -271,6 +290,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 6,
     costGp: 20,
     weaponProficiencyId: 'martial',
+    mastery: 'cleave',
   },
   {
     type: 'weapon',
@@ -283,6 +303,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 6,
     costGp: 10,
     weaponProficiencyId: 'martial',
+    mastery: 'topple',
   },
   {
     type: 'weapon',
@@ -296,6 +317,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     costGp: 15,
     versatileDice: '1d10',
     weaponProficiencyId: 'longsword',
+    mastery: 'sap',
   },
   {
     type: 'weapon',
@@ -308,6 +330,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 10,
     costGp: 10,
     weaponProficiencyId: 'martial',
+    mastery: 'topple',
   },
   {
     type: 'weapon',
@@ -320,6 +343,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 4,
     costGp: 15,
     weaponProficiencyId: 'martial',
+    mastery: 'sap',
   },
   {
     type: 'weapon',
@@ -332,6 +356,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 18,
     costGp: 5,
     weaponProficiencyId: 'martial',
+    mastery: 'push',
   },
   {
     type: 'weapon',
@@ -344,6 +369,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 2,
     costGp: 25,
     weaponProficiencyId: 'rapier',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -356,6 +382,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 3,
     costGp: 25,
     weaponProficiencyId: 'scimitar',
+    mastery: 'nick',
   },
   {
     type: 'weapon',
@@ -368,6 +395,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 2,
     costGp: 10,
     weaponProficiencyId: 'shortsword',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -383,6 +411,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     longRange: 60,
     versatileDice: '1d8',
     weaponProficiencyId: 'martial',
+    mastery: 'topple',
   },
   {
     type: 'weapon',
@@ -395,6 +424,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 2,
     costGp: 5,
     weaponProficiencyId: 'martial',
+    mastery: 'sap',
   },
   {
     type: 'weapon',
@@ -408,6 +438,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     costGp: 15,
     versatileDice: '1d10',
     weaponProficiencyId: 'warhammer',
+    mastery: 'push',
   },
   {
     type: 'weapon',
@@ -420,6 +451,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     weight: 3,
     costGp: 2,
     weaponProficiencyId: 'martial',
+    mastery: 'slow',
   },
   // Martial ranged
   {
@@ -435,6 +467,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 25,
     longRange: 100,
     weaponProficiencyId: 'martial',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -449,6 +482,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 30,
     longRange: 120,
     weaponProficiencyId: 'handcrossbow',
+    mastery: 'vex',
   },
   {
     type: 'weapon',
@@ -463,6 +497,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 100,
     longRange: 400,
     weaponProficiencyId: 'martial',
+    mastery: 'push',
   },
   {
     type: 'weapon',
@@ -477,6 +512,7 @@ export const WEAPON_CATALOG: readonly ({ readonly type: 'weapon' } & WeaponDef)[
     normalRange: 150,
     longRange: 600,
     weaponProficiencyId: 'longbow',
+    mastery: 'slow',
   },
   {
     type: 'weapon',

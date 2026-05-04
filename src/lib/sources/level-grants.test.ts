@@ -11,10 +11,11 @@ describe('getGrantsForLevel', () => {
     expect(preview.subclassGrants).toHaveLength(0);
   });
 
-  it('returns ASI grant for fighter level 4', () => {
+  it('returns ASI and weapon-mastery-choice grants for fighter level 4', () => {
     const preview = getGrantsForLevel('fighter', 4, null);
-    expect(preview.classGrants).toHaveLength(1);
-    expect(preview.classGrants[0].type).toBe('asi');
+    expect(preview.classGrants).toHaveLength(2);
+    expect(preview.classGrants.some((g) => g.type === 'asi')).toBe(true);
+    expect(preview.classGrants.some((g) => g.type === 'weapon-mastery-choice')).toBe(true);
   });
 
   it('returns ASI grant for fighter level 6', () => {

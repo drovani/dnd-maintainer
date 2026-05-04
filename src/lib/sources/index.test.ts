@@ -46,8 +46,8 @@ describe('getClassSource', () => {
 
   it('fighter level 1 has correct grant count', () => {
     const source = getClassSource('fighter' as Parameters<typeof getClassSource>[0]);
-    // 1 hit-die + 4 armor + 2 weapon + 2 saving-throw + 1 skill-choice + 1 armor-class + 1 fighting-style-choice + 1 feature + 4 bundle-choice = 17
-    expect(source?.levels[0].grants).toHaveLength(17);
+    // 1 hit-die + 4 armor + 2 weapon + 2 saving-throw + 1 skill-choice + 1 armor-class + 1 fighting-style-choice + 1 weapon-mastery-choice + 1 feature + 4 bundle-choice = 18
+    expect(source?.levels[0].grants).toHaveLength(18);
   });
 });
 

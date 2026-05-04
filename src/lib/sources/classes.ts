@@ -49,7 +49,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'feature', feature: { id: 'barbarian-rage' } },
           { type: 'feature', feature: { id: 'barbarian-unarmored-defense' } },
           { type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } },
-          // TODO(#9): weapon-mastery-slot
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 0),
+            count: 2,
+          },
         ],
       },
       {
@@ -61,7 +65,16 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       {
         grants: [{ type: 'subclass', classId: 'barbarian', key: createChoiceKey('subclass', 'class', 'barbarian', 0) }],
       },
-      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 0), points: 2, from: null }] },
+      {
+        grants: [
+          { type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 0), points: 2, from: null },
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 1),
+            count: 1,
+          },
+        ],
+      },
       {
         grants: [
           { type: 'feature', feature: { id: 'barbarian-extra-attack' } },
@@ -77,7 +90,15 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 1), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'barbarian-brutal-strike' } }] },
-      EMPTY_LEVEL,
+      {
+        grants: [
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 2),
+            count: 1,
+          },
+        ],
+      },
       { grants: [{ type: 'feature', feature: { id: 'barbarian-relentless-rage' } }] },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 2), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'barbarian-improved-brutal-strike' } }] },
@@ -360,6 +381,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             count: 1,
             from: FIGHTING_STYLE_IDS,
           },
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 0),
+            count: 3,
+          },
           { type: 'feature', feature: { id: 'fighter-second-wind' } },
           {
             type: 'bundle-choice',
@@ -389,19 +415,44 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       },
       { grants: [{ type: 'feature', feature: { id: 'fighter-action-surge' } }] },
       { grants: [{ type: 'subclass', classId: 'fighter', key: createChoiceKey('subclass', 'class', 'fighter', 0) }] },
-      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 0), points: 2, from: null }] },
+      {
+        grants: [
+          { type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 0), points: 2, from: null },
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 1),
+            count: 1,
+          },
+        ],
+      },
       { grants: [{ type: 'feature', feature: { id: 'fighter-extra-attack' } }] },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 1), points: 2, from: null }] },
       EMPTY_LEVEL,
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'fighter', 2), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'fighter-indomitable' } }] },
+      {
+        grants: [
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 2),
+            count: 1,
+          },
+        ],
+      },
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
+      {
+        grants: [
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 3),
+            count: 1,
+          },
+        ],
+      },
       EMPTY_LEVEL,
       EMPTY_LEVEL,
       EMPTY_LEVEL,
@@ -528,6 +579,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'feature', feature: { id: 'paladin-lay-on-hands' } },
           { type: 'feature', feature: { id: 'paladin-divine-sense' } },
           { type: 'armor-class', calculation: { mode: 'armored' } },
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'paladin', 0),
+            count: 2,
+          },
         ],
       },
       {
@@ -601,6 +657,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'feature', feature: { id: 'ranger-favored-enemy' } },
           { type: 'feature', feature: { id: 'ranger-weapon-mastery' } },
           { type: 'armor-class', calculation: { mode: 'armored' } },
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'ranger', 0),
+            count: 2,
+          },
         ],
       },
       {
@@ -690,6 +751,11 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
           { type: 'feature', feature: { id: 'rogue-sneak-attack' } },
           { type: 'feature', feature: { id: 'rogue-thieves-cant' } },
+          {
+            type: 'weapon-mastery-choice',
+            key: createChoiceKey('weapon-mastery-choice', 'class', 'rogue', 0),
+            count: 2,
+          },
           {
             type: 'bundle-choice',
             key: createChoiceKey('bundle-choice', 'class', 'rogue', 0),
