@@ -70,6 +70,7 @@ export interface Character {
   portrait_url: string | null;
   is_active: boolean;
   status: 'draft' | 'ready';
+  weapon_masteries?: { readonly weaponId: string; readonly masteryId: string }[] | null;
 }
 
 // Combat participant

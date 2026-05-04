@@ -93,6 +93,7 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             armor_class: resolved?.armorClass.effective ?? character.armor_class,
             speed: resolved?.speed.walk?.value ?? character.speed,
             proficiency_bonus: resolved?.proficiencyBonus ?? character.proficiency_bonus,
+            weapon_masteries: resolved?.weaponMasteries ?? null,
           };
 
           let savedId: string;

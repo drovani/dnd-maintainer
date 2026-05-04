@@ -223,6 +223,7 @@ export type Database = {
           status: string
           subclass: string | null
           updated_at: string
+          weapon_masteries: Json | null
           weight: string | null
         }
         Insert: {
@@ -262,6 +263,7 @@ export type Database = {
           status?: string
           subclass?: string | null
           updated_at?: string
+          weapon_masteries?: Json | null
           weight?: string | null
         }
         Update: {
@@ -301,6 +303,7 @@ export type Database = {
           status?: string
           subclass?: string | null
           updated_at?: string
+          weapon_masteries?: Json | null
           weight?: string | null
         }
         Relationships: [

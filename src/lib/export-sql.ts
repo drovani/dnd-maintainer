@@ -58,6 +58,7 @@ const TABLE_COLUMNS = {
     { name: 'portrait_url', type: 'text' },
     { name: 'is_active', type: 'boolean' },
     { name: 'status', type: 'text' },
+    { name: 'weapon_masteries', type: 'jsonb' },
     { name: 'gender', type: 'text' },
     { name: 'size', type: 'text' },
     { name: 'age', type: 'text' },
