@@ -207,24 +207,30 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     (w) => w.mastery !== undefined && (weaponProfSet.has(w.category) || weaponProfSet.has(w.weaponProficiencyId))
   ).map((w) => w.id);
 
-  // Collect all weapon IDs already chosen across all weapon-mastery-choice grants in this build
-  const allMasteryDecisions: string[] = [];
-  for (const { grant } of collectGrantsByType(bundles, 'weapon-mastery-choice')) {
-    const decision = choices[grant.key];
-    if (decision?.type === 'weapon-mastery-choice') {
-      allMasteryDecisions.push(...decision.weaponIds);
-    }
-  }
-
-  // Emit pending choices for underfilled grants; build resolved weaponMasteries
+  // Emit pending choices for underfilled grants; build resolved weaponMasteries.
+  // Iterate grants in stable order (collectGrantsByType preserves bundle/level order from collectBundles).
+  // Track claimed weaponIds across grants to detect cross-grant duplicates; also dedupe within each decision.
   const weaponMasteryGrants = collectGrantsByType(bundles, 'weapon-mastery-choice');
   const weaponMasteriesMap = new Map<string, WeaponMasteryId>();
+  const claimed = new Set<string>();
   for (const { grant, source } of weaponMasteryGrants) {
     const decision = choices[grant.key];
-    const validWeaponIds =
-      decision?.type === 'weapon-mastery-choice'
-        ? decision.weaponIds.filter((id) => eligibleMasteryWeapons.includes(id))
-        : [];
+    const rawIds = decision?.type === 'weapon-mastery-choice' ? decision.weaponIds : [];
+
+    // Dedupe within the decision, filter to eligible, exclude already claimed by earlier grants
+    const seenInDecision = new Set<string>();
+    const validWeaponIds: string[] = [];
+    for (const id of rawIds) {
+      if (seenInDecision.has(id)) continue;
+      seenInDecision.add(id);
+      if (!eligibleMasteryWeapons.includes(id)) continue;
+      if (claimed.has(id)) continue;
+      validWeaponIds.push(id);
+    }
+
+    // alreadyChosen reflects ids claimed by *other* grants only (snapshot before adding this grant's selections)
+    const alreadyChosenByOthers = Array.from(claimed);
+
     if (!decision || decision.type !== 'weapon-mastery-choice' || validWeaponIds.length < grant.count) {
       pendingChoices.push({
         type: 'weapon-mastery-choice',
@@ -232,7 +238,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         source,
         count: grant.count,
         from: eligibleMasteryWeapons,
-        alreadyChosen: allMasteryDecisions,
+        alreadyChosen: alreadyChosenByOthers,
       });
     }
     for (const weaponId of validWeaponIds) {
@@ -240,6 +246,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       if (weaponDef?.mastery !== undefined) {
         weaponMasteriesMap.set(weaponId, weaponDef.mastery);
       }
+      claimed.add(weaponId);
     }
   }
   const weaponMasteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[] = Array.from(
