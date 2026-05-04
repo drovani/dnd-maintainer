@@ -44,6 +44,9 @@ export const WEAPON_PROPERTIES = [
 ] as const;
 export type WeaponProperty = (typeof WEAPON_PROPERTIES)[number];
 
+export const WEAPON_MASTERIES = ['cleave', 'graze', 'nick', 'push', 'sap', 'slow', 'topple', 'vex'] as const;
+export type WeaponMasteryId = (typeof WEAPON_MASTERIES)[number];
+
 export type WeaponCategory = 'simple' | 'martial';
 export type WeaponRange = 'melee' | 'ranged';
 export type PhysicalDamageType = Extract<DamageTypeId, 'bludgeoning' | 'piercing' | 'slashing'>;
@@ -64,6 +67,7 @@ export interface WeaponDef {
   readonly versatileDice?: DamageDice;
   /** Explicit proficiency ID for use in proficiency checks — may differ from id when id uses hyphens */
   readonly weaponProficiencyId: WeaponProficiencyId;
+  readonly mastery?: WeaponMasteryId;
 }
 
 export interface ArmorDef {

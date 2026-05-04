@@ -15,6 +15,7 @@ import type {
   DamageDice,
   ItemDef,
   PhysicalDamageType,
+  WeaponMasteryId,
   WeaponProperty,
   WeaponRange,
   BundleCategory,
@@ -169,6 +170,14 @@ export type PendingChoice =
       readonly alreadyChosen: readonly FightingStyleId[];
     }
   | {
+      readonly type: 'weapon-mastery-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly count: number;
+      readonly from: readonly string[];
+      readonly alreadyChosen: readonly string[];
+    }
+  | {
       readonly type: 'bundle-choice';
       readonly choiceKey: ChoiceKey;
       readonly source: SourceTag;
@@ -215,4 +224,5 @@ export interface ResolvedCharacter {
   readonly attacks: readonly ResolvedAttack[];
   readonly toolExpertise: readonly ToolProficiencyId[];
   readonly pendingChoices: readonly PendingChoice[];
+  readonly weaponMasteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[];
 }

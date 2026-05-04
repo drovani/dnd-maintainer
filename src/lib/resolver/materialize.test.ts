@@ -42,6 +42,7 @@ function makeResolved(equipment: readonly ResolvedEquipmentItem[]): ResolvedChar
     attacks: [],
     toolExpertise: [],
     pendingChoices: [],
+    weaponMasteries: [],
   };
 }
 

@@ -30,6 +30,7 @@ const CHOICE_CATEGORIES = [
   'asi',
   'subclass',
   'fighting-style-choice',
+  'weapon-mastery-choice',
   'bundle-choice',
   'lineage-choice',
 ] as const;
@@ -89,6 +90,7 @@ export type ChoiceDecision =
   | { readonly type: 'asi'; readonly allocation: Partial<Record<AbilityKey, number>> }
   | { readonly type: 'subclass'; readonly subclassId: SubclassId }
   | { readonly type: 'fighting-style-choice'; readonly styles: readonly FightingStyleId[] }
+  | { readonly type: 'weapon-mastery-choice'; readonly weaponIds: readonly string[] }
   | {
       readonly type: 'bundle-choice';
       readonly bundleId: string;

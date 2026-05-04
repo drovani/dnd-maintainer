@@ -213,6 +213,12 @@ export interface FightingStyleChoiceGrant {
   readonly from: readonly FightingStyleId[];
 }
 
+export interface WeaponMasteryChoiceGrant {
+  readonly type: 'weapon-mastery-choice';
+  readonly key: ChoiceKey;
+  readonly count: number;
+}
+
 export interface BundleChoiceGrant {
   readonly type: 'bundle-choice';
   readonly key: ChoiceKey;
@@ -247,6 +253,7 @@ export type Grant =
   | SubclassGrant
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant
+  | WeaponMasteryChoiceGrant
   | EquipmentGrant
   | BundleChoiceGrant
   | LineageChoiceGrant

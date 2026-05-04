@@ -9,6 +9,7 @@ import type { GrantBundle, SourceTag } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { ResolvedCharacter, PendingChoice, ResolvedSkill } from '@/types/resolved';
 import type { HitDie, ExpertiseChoiceGrant } from '@/types/grants';
+import type { WeaponMasteryId } from '@/types/items';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies';
@@ -16,7 +17,7 @@ import { resolveFeatures } from '@/lib/resolver/features';
 import { resolveHp, resolveSpeed, resolveAc } from '@/lib/resolver/combat';
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting';
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment';
-import { getItemDef } from '@/lib/sources/items';
+import { getItemDef, WEAPON_CATALOG } from '@/lib/sources/items';
 
 export interface PersistedItem {
   readonly itemId: string;
@@ -200,6 +201,51 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Aggregate weapon mastery choices — eligible weapons are those the character is proficient with that have a mastery
+  const weaponProfSet = new Set(proficiencies.weapon.map((p) => p.value));
+  const eligibleMasteryWeapons = WEAPON_CATALOG.filter(
+    (w) => w.mastery !== undefined && (weaponProfSet.has(w.category) || weaponProfSet.has(w.weaponProficiencyId))
+  ).map((w) => w.id);
+
+  // Collect all weapon IDs already chosen across all weapon-mastery-choice grants in this build
+  const allMasteryDecisions: string[] = [];
+  for (const { grant } of collectGrantsByType(bundles, 'weapon-mastery-choice')) {
+    const decision = choices[grant.key];
+    if (decision?.type === 'weapon-mastery-choice') {
+      allMasteryDecisions.push(...decision.weaponIds);
+    }
+  }
+
+  // Emit pending choices for underfilled grants; build resolved weaponMasteries
+  const weaponMasteryGrants = collectGrantsByType(bundles, 'weapon-mastery-choice');
+  const weaponMasteriesMap = new Map<string, WeaponMasteryId>();
+  for (const { grant, source } of weaponMasteryGrants) {
+    const decision = choices[grant.key];
+    const validWeaponIds =
+      decision?.type === 'weapon-mastery-choice'
+        ? decision.weaponIds.filter((id) => eligibleMasteryWeapons.includes(id))
+        : [];
+    if (!decision || decision.type !== 'weapon-mastery-choice' || validWeaponIds.length < grant.count) {
+      pendingChoices.push({
+        type: 'weapon-mastery-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: eligibleMasteryWeapons,
+        alreadyChosen: allMasteryDecisions,
+      });
+    }
+    for (const weaponId of validWeaponIds) {
+      const weaponDef = WEAPON_CATALOG.find((w) => w.id === weaponId);
+      if (weaponDef?.mastery !== undefined) {
+        weaponMasteriesMap.set(weaponId, weaponDef.mastery);
+      }
+    }
+  }
+  const weaponMasteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[] = Array.from(
+    weaponMasteriesMap.entries()
+  ).map(([weaponId, masteryId]) => ({ weaponId, masteryId }));
+
   // Unresolved lineage-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'lineage-choice')) {
     const decision = choices[grant.key];
@@ -286,6 +332,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     attacks,
     toolExpertise,
     pendingChoices,
+    weaponMasteries,
   };
 }
 
