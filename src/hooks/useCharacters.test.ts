@@ -52,6 +52,7 @@ const baseCharacter: Character = {
   portrait_url: null,
   is_active: true,
   status: 'ready',
+  weapon_masteries: null,
 };
 
 setupMockReset();

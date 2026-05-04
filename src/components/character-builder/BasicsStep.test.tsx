@@ -140,6 +140,7 @@ function buildSeedCharacter(): Character {
     status: 'draft',
     created_at: '',
     updated_at: '',
+    weapon_masteries: null,
   };
 }
 

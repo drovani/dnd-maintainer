@@ -53,6 +53,7 @@ const basePayload: AutosavePayload = {
     portrait_url: null,
     is_active: true,
     status: 'draft' as const,
+    weapon_masteries: null,
   },
   rows: [],
   resolved: null,

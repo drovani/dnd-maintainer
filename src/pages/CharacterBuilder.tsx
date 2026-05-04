@@ -100,6 +100,7 @@ function buildSeedCharacter(campaignId: string): Character {
     status: 'draft',
     created_at: '',
     updated_at: '',
+    weapon_masteries: null,
   };
 }
 

@@ -1,5 +1,6 @@
 import type { AlignmentId, ClassId, DndGender, Proficiencies, SpeciesId, SizeId } from '@/lib/dnd-helpers';
 import type { ThemeId } from '@/lib/theme';
+import type { WeaponMasteryId } from '@/types/items';
 
 export type { Proficiencies };
 
@@ -70,7 +71,7 @@ export interface Character {
   portrait_url: string | null;
   is_active: boolean;
   status: 'draft' | 'ready';
-  weapon_masteries?: { readonly weaponId: string; readonly masteryId: string }[] | null;
+  weapon_masteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[] | null;
 }
 
 // Combat participant

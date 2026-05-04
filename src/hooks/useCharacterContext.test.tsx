@@ -123,6 +123,7 @@ function buildSeedCharacter(overrides: Partial<Character> = {}): Character {
     status: 'draft',
     created_at: '',
     updated_at: '',
+    weapon_masteries: null,
     ...overrides,
   };
 }
