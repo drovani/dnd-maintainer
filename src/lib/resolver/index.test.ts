@@ -1380,3 +1380,104 @@ describe('feat grant expansion via background', () => {
     expect(savageAttackerFeature).toBeDefined();
   });
 });
+
+describe('Weapon mastery resolver', () => {
+  const fighterL1Build: CharacterBuild = {
+    speciesId: 'human',
+    backgroundId: 'soldier',
+    baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+    abilityMethod: 'standard-array',
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
+      'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
+      'bundle-choice:class:fighter:1': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: { weapon: 'longsword', shield: 'shield' },
+      },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+    },
+    levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles: fighterBundles } = collectBundles(fighterL1Build);
+
+  it('L1 Fighter has a weapon-mastery-choice pending choice with count 3', () => {
+    const result = resolveCharacter({
+      baseAbilities: fighterL1Build.baseAbilities,
+      level: 1,
+      bundles: fighterBundles,
+      choices: fighterL1Build.choices,
+      levels: fighterL1Build.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].count).toBe(3);
+    expect(pending[0].from.length).toBeGreaterThan(0);
+  });
+
+  it('L1 Barbarian has a weapon-mastery-choice pending choice with count 2', () => {
+    const barbarianBuild: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {
+        'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+        'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      levels: [{ classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null }],
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(barbarianBuild);
+    const result = resolveCharacter({
+      baseAbilities: barbarianBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: barbarianBuild.choices,
+      levels: barbarianBuild.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].count).toBe(2);
+  });
+
+  it('resolved weaponMasteries reflects user decisions', () => {
+    const choices: Partial<Record<ChoiceKey, ChoiceDecision>> = {
+      ...fighterL1Build.choices,
+      'weapon-mastery-choice:class:fighter:0': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword', 'shortsword', 'handaxe'],
+      },
+    };
+    const result = resolveCharacter({
+      baseAbilities: fighterL1Build.baseAbilities,
+      level: 1,
+      bundles: fighterBundles,
+      choices: choices as Record<ChoiceKey, ChoiceDecision>,
+      levels: fighterL1Build.levels,
+    });
+    expect(result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice')).toHaveLength(0);
+    expect(result.weaponMasteries).toHaveLength(3);
+    const longswordMastery = result.weaponMasteries.find((m) => m.weaponId === 'longsword');
+    expect(longswordMastery?.masteryId).toBe('sap');
+    const handaxeMastery = result.weaponMasteries.find((m) => m.weaponId === 'handaxe');
+    expect(handaxeMastery?.masteryId).toBe('vex');
+  });
+});

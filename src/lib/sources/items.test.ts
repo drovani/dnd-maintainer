@@ -7,6 +7,7 @@ import {
   getItemDef,
   requireItemDef,
 } from '@/lib/sources/items';
+import { WEAPON_MASTERIES } from '@/types/items';
 
 describe('ITEM_CATALOG', () => {
   it('all item IDs are unique across the combined catalog', () => {
@@ -137,5 +138,42 @@ describe('ITEM_CATALOG', () => {
     for (const { itemId } of def.contents) {
       expect(getItemDef(itemId), `burglars-pack references unknown itemId "${itemId}"`).toBeDefined();
     }
+  });
+});
+
+describe('Weapon mastery data', () => {
+  const VALID_MASTERIES = new Set<string>(WEAPON_MASTERIES);
+
+  it('every simple/martial weapon except net has a defined mastery', () => {
+    for (const weapon of WEAPON_CATALOG) {
+      if (weapon.id === 'net') {
+        expect(weapon.mastery, `net should have no mastery`).toBeUndefined();
+      } else {
+        expect(weapon.mastery, `weapon "${weapon.id}" is missing a mastery`).toBeDefined();
+      }
+    }
+  });
+
+  it('all mastery values are valid WeaponMasteryId members', () => {
+    for (const weapon of WEAPON_CATALOG) {
+      if (weapon.mastery !== undefined) {
+        expect(
+          VALID_MASTERIES.has(weapon.mastery),
+          `weapon "${weapon.id}" has invalid mastery "${weapon.mastery}"`
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('longsword has sap mastery', () => {
+    const def = getItemDef('longsword');
+    if (!def || def.type !== 'weapon') throw new Error('longsword should be a weapon');
+    expect(def.mastery).toBe('sap');
+  });
+
+  it('greataxe has cleave mastery', () => {
+    const def = getItemDef('greataxe');
+    if (!def || def.type !== 'weapon') throw new Error('greataxe should be a weapon');
+    expect(def.mastery).toBe('cleave');
   });
 });
