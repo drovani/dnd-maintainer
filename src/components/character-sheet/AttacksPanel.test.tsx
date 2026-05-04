@@ -119,4 +119,21 @@ describe('AttacksPanel', () => {
     render(<AttacksPanel attacks={[noBonus]} />);
     expect(screen.getByText('1d8 slashing')).toBeInTheDocument();
   });
+
+  it('shows mastery badge when weaponMasteries contains an entry for the attack weapon', () => {
+    render(
+      <AttacksPanel attacks={[LONGSWORD_ATTACK]} weaponMasteries={[{ weaponId: 'longsword', masteryId: 'sap' }]} />
+    );
+    // mock returns last key segment: t('items.weapons.longsword.name') → 'name'
+    // and t('weaponMasteries.sap.name') → 'name' — two 'name' occurrences when mastery badge is present
+    const nameElements = screen.getAllByText('name');
+    expect(nameElements.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('does not show mastery badge when weaponMasteries is empty', () => {
+    render(<AttacksPanel attacks={[LONGSWORD_ATTACK]} weaponMasteries={[]} />);
+    // Without mastery, only the weapon name renders as 'name' (one occurrence)
+    const nameElements = screen.getAllByText('name');
+    expect(nameElements).toHaveLength(1);
+  });
 });

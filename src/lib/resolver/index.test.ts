@@ -1480,4 +1480,106 @@ describe('Weapon mastery resolver', () => {
     const handaxeMastery = result.weaponMasteries.find((m) => m.weaponId === 'handaxe');
     expect(handaxeMastery?.masteryId).toBe('vex');
   });
+
+  it('cross-grant dedup: longsword in both L1 and L4 grants emits pending choice for L4 and has only one longsword mastery', () => {
+    // Fighter L4 has two weapon-mastery-choice grants: L1 count=3, L4 count=1
+    const fighterL4Build: CharacterBuild = {
+      ...fighterL1Build,
+      levels: [
+        { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 4, hpRoll: null },
+      ],
+    };
+    const { bundles: l4Bundles } = collectBundles(fighterL4Build);
+
+    // Provide longsword in both grants — L1 gets longsword/shortsword/handaxe, L4 duplicates longsword
+    const choices: Partial<Record<ChoiceKey, ChoiceDecision>> = {
+      ...fighterL1Build.choices,
+      'subclass:class:fighter:0': { type: 'subclass', subclassId: 'champion' as SubclassId },
+      'weapon-mastery-choice:class:fighter:0': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword', 'shortsword', 'handaxe'],
+      },
+      // longsword already claimed by grant 0 — grant 1 (L4) should detect this as invalid
+      'weapon-mastery-choice:class:fighter:1': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword'],
+      },
+    };
+    const result = resolveCharacter({
+      baseAbilities: fighterL4Build.baseAbilities,
+      level: 4,
+      bundles: l4Bundles,
+      choices: choices as Record<ChoiceKey, ChoiceDecision>,
+      levels: fighterL4Build.levels,
+    });
+
+    // L4 grant (key :fighter:1) should emit a pending choice because longsword was already claimed
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].choiceKey).toBe(createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 1));
+
+    // weaponMasteries should contain only one longsword entry
+    const longswordEntries = result.weaponMasteries.filter((m) => m.weaponId === 'longsword');
+    expect(longswordEntries).toHaveLength(1);
+  });
+
+  it('within-grant dedup: duplicate weaponIds in one decision emits a pending choice', () => {
+    // Fighter L1 with decision containing longsword twice — effective count is 1, not 3
+    const choices: Partial<Record<ChoiceKey, ChoiceDecision>> = {
+      ...fighterL1Build.choices,
+      'weapon-mastery-choice:class:fighter:0': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword', 'longsword'],
+      },
+    };
+    const result = resolveCharacter({
+      baseAbilities: fighterL1Build.baseAbilities,
+      level: 1,
+      bundles: fighterBundles,
+      choices: choices as Record<ChoiceKey, ChoiceDecision>,
+      levels: fighterL1Build.levels,
+    });
+
+    // count=3 not satisfied by 2 raw ids that dedupe to 1 unique weapon
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].count).toBe(3);
+
+    // Only one longsword entry in resolved masteries
+    const longswordEntries = result.weaponMasteries.filter((m) => m.weaponId === 'longsword');
+    expect(longswordEntries).toHaveLength(1);
+  });
+
+  it('eligible-pool filter: ineligible weapon ids are excluded from resolved masteries', () => {
+    // Fighter L1 decision includes a non-existent weapon id, one valid weapon, one valid weapon
+    const choices: Partial<Record<ChoiceKey, ChoiceDecision>> = {
+      ...fighterL1Build.choices,
+      'weapon-mastery-choice:class:fighter:0': {
+        type: 'weapon-mastery-choice',
+        weaponIds: ['fakeweapon-id', 'longsword', 'shortsword'],
+      },
+    };
+    const result = resolveCharacter({
+      baseAbilities: fighterL1Build.baseAbilities,
+      level: 1,
+      bundles: fighterBundles,
+      choices: choices as Record<ChoiceKey, ChoiceDecision>,
+      levels: fighterL1Build.levels,
+    });
+
+    // fakeweapon-id excluded: only 2 valid weapons, count=3 not satisfied → pending choice
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+
+    // Only valid weapons appear in resolved masteries
+    const weaponIds = result.weaponMasteries.map((m) => m.weaponId);
+    expect(weaponIds).not.toContain('fakeweapon-id');
+    expect(weaponIds).toContain('longsword');
+    expect(weaponIds).toContain('shortsword');
+  });
 });
