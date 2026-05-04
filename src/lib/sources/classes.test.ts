@@ -110,6 +110,17 @@ describe('Fighter class levels 2–10 grant structures', () => {
     expect(level11?.grants).toHaveLength(0);
   });
 
+  it('level 16 grants a weapon mastery choice (index 3)', () => {
+    const level16 = source?.levels[15];
+    expect(level16?.grants).toHaveLength(1);
+    const grant = level16?.grants[0];
+    expect(grant?.type).toBe('weapon-mastery-choice');
+    if (grant?.type === 'weapon-mastery-choice') {
+      expect(grant.count).toBe(1);
+      expect(grant.key).toBe(createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 3));
+    }
+  });
+
   it('still has 20 levels total', () => {
     expect(source?.levels).toHaveLength(20);
   });
