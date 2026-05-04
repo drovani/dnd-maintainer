@@ -9,7 +9,7 @@ import { DND_LANGUAGES, DND_SKILLS, type LanguageId, type SkillId, type ToolProf
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
-import type { BundleSlot, ItemDef, SlotFilter, WeaponMasteryId } from '@/types/items';
+import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items';
 import type { PendingChoice } from '@/types/resolved';
 import { getGrantIcon } from '@/lib/class-icons';
 import type { TFunction } from 'i18next';
@@ -328,7 +328,8 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
           {choice.from.map((weaponId) => {
             const weaponDef = weaponDefMap.get(weaponId);
             if (!weaponDef) return null;
-            const mastery = weaponDef.mastery as WeaponMasteryId;
+            if (!weaponDef.mastery) return null;
+            const mastery = weaponDef.mastery;
             const isSelected = current.includes(weaponId);
             const isAlreadyChosen = choice.alreadyChosen.includes(weaponId) && !isSelected;
             const isDisabled = (atMax && !isSelected) || isAlreadyChosen;
