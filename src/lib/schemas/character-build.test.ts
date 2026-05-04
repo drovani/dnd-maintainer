@@ -185,6 +185,21 @@ describe('ChoiceDecisionSchema', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('weapon-mastery-choice', () => {
+    it('accepts valid weapon-mastery-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'weapon-mastery-choice',
+        weaponIds: ['longsword', 'greataxe', 'shortbow'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing weaponIds field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'weapon-mastery-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
 });
 
 describe('CharacterBuildSchemaStrict', () => {

@@ -421,6 +421,10 @@ describe('Human Fighter Level 1 round-trip', () => {
         choices: {
           'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'intimidation'] },
           'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
+          'weapon-mastery-choice:class:fighter:0': {
+            type: 'weapon-mastery-choice',
+            weaponIds: ['longsword', 'greataxe', 'shortbow'],
+          },
         },
         deleted_at: null,
       },
@@ -492,5 +496,12 @@ describe('Human Fighter Level 1 round-trip', () => {
     // The fighter skill choice is resolved — no pending skill choices
     const unresolvedSkillChoices = resolved.pendingChoices.filter((c) => c.type === 'skill-choice');
     expect(unresolvedSkillChoices).toHaveLength(0);
+
+    // Weapon-mastery decisions round-trip through reconstruction (regression: schema discriminator)
+    const unresolvedWeaponMastery = resolved.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(unresolvedWeaponMastery).toHaveLength(0);
+    expect(resolved.weaponMasteries.map((m) => m.weaponId).sort()).toEqual(
+      ['greataxe', 'longsword', 'shortbow'].sort()
+    );
   });
 });
