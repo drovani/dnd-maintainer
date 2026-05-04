@@ -16,9 +16,7 @@ export function EquipmentStep() {
   const allEquipment = resolved?.equipment ?? [];
 
   // Weapon mastery choices — show all grants so pickers stay visible after a decision is made
-  const weaponMasteryGrantTags = collectGrantsByType(bundles, 'weapon-mastery-choice').filter(
-    (tg) => tg.source.origin === 'class'
-  );
+  const weaponMasteryGrantTags = collectGrantsByType(bundles, 'weapon-mastery-choice');
   // Compute eligible weapons from proficiencies (mirrors resolver logic)
   const weaponProfValues = new Set(resolved?.weaponProficiencies?.map((p) => p.value) ?? []);
   const eligibleWeaponIds = WEAPON_CATALOG.filter(
