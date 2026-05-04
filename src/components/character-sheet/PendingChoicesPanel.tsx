@@ -7,6 +7,7 @@ import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
+import { WEAPON_CATALOG } from '@/lib/sources/items';
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { FightingStyleId } from '@/lib/dnd-helpers';
@@ -18,8 +19,9 @@ import { useTranslation } from 'react-i18next';
  * overall panel is rendered because other grants remain unresolved).
  */
 function useAllChoiceGrants() {
-  const { bundles, build } = useCharacterContext();
+  const { bundles, build, resolved } = useCharacterContext();
   const buildChoices = build?.choices;
+  const resolvedWeaponProficiencies = resolved?.weaponProficiencies;
 
   return useMemo(() => {
     const choices = buildChoices ?? {};
@@ -57,6 +59,40 @@ function useAllChoiceGrants() {
         from: grant.from,
         alreadyChosen: allChosenStyles,
       });
+    }
+
+    // weapon-mastery-choice grants — eligibility and dedup mirror the resolver
+    const weaponMasteryGrants = collectGrantsByType(bundles, 'weapon-mastery-choice');
+    if (weaponMasteryGrants.length > 0) {
+      const weaponProfSet = new Set<string>(resolvedWeaponProficiencies?.map((p) => p.value) ?? []);
+      const eligibleMasteryWeapons = WEAPON_CATALOG.filter(
+        (w) => w.mastery !== undefined && (weaponProfSet.has(w.category) || weaponProfSet.has(w.weaponProficiencyId))
+      ).map((w) => w.id);
+
+      const claimed = new Set<string>();
+      for (const { grant, source } of weaponMasteryGrants) {
+        const decision = choices[grant.key];
+        const rawIds = decision?.type === 'weapon-mastery-choice' ? decision.weaponIds : [];
+        const seenInDecision = new Set<string>();
+        const validWeaponIds: string[] = [];
+        for (const id of rawIds) {
+          if (seenInDecision.has(id)) continue;
+          seenInDecision.add(id);
+          if (!eligibleMasteryWeapons.includes(id)) continue;
+          if (claimed.has(id)) continue;
+          validWeaponIds.push(id);
+        }
+        const alreadyChosenByOthers = Array.from(claimed);
+        allGrants.push({
+          type: 'weapon-mastery-choice',
+          choiceKey: grant.key,
+          source,
+          count: grant.count,
+          from: eligibleMasteryWeapons,
+          alreadyChosen: alreadyChosenByOthers,
+        });
+        for (const id of validWeaponIds) claimed.add(id);
+      }
     }
 
     // subclass grants
@@ -147,7 +183,7 @@ function useAllChoiceGrants() {
     }
 
     return allGrants;
-  }, [bundles, buildChoices]);
+  }, [bundles, buildChoices, resolvedWeaponProficiencies]);
 }
 
 function PendingChoiceRow({
