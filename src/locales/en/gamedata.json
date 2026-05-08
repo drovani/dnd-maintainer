@@ -1652,5 +1652,67 @@
       "name": "Vex",
       "description": "If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn."
     }
+  },
+  "conditions": {
+    "blinded": {
+      "name": "Blinded",
+      "description": "You can't see, automatically fail any check that requires sight, and attack rolls against you have advantage while your own attack rolls have disadvantage."
+    },
+    "charmed": {
+      "name": "Charmed",
+      "description": "You can't attack the charmer or target them with harmful abilities or spells, and the charmer has advantage on social ability checks against you."
+    },
+    "deafened": {
+      "name": "Deafened",
+      "description": "You can't hear and automatically fail any ability check that requires hearing."
+    },
+    "exhaustion": {
+      "name": "Exhaustion",
+      "description": "Each level of exhaustion imposes a -2 penalty to all d20 rolls and reduces all movement speeds by 5 feet; six levels of exhaustion kills you."
+    },
+    "frightened": {
+      "name": "Frightened",
+      "description": "While the source of your fear is in line of sight you have disadvantage on ability checks and attack rolls, and you can't willingly move closer to that source."
+    },
+    "grappled": {
+      "name": "Grappled",
+      "description": "Your speed becomes 0; the condition ends if the grappler becomes incapacitated or you are moved beyond the grapple's reach."
+    },
+    "incapacitated": {
+      "name": "Incapacitated",
+      "description": "You can't take actions, bonus actions, or reactions, can speak only a few words, and any concentration is broken."
+    },
+    "invisible": {
+      "name": "Invisible",
+      "description": "You can't be seen by normal sight and are treated as heavily obscured; attack rolls against you have disadvantage and your own attack rolls have advantage."
+    },
+    "paralyzed": {
+      "name": "Paralyzed",
+      "description": "You are incapacitated and can't move or speak; you automatically fail Strength and Dexterity saves, attacks against you have advantage, and any melee hit from within 5 feet is a critical hit."
+    },
+    "petrified": {
+      "name": "Petrified",
+      "description": "You are transformed into a solid inanimate substance, incapacitated with no awareness; you automatically fail Strength and Dexterity saves, attacks have advantage against you, and you gain resistance to all damage and immunity to poison and disease while transformed."
+    },
+    "poisoned": {
+      "name": "Poisoned",
+      "description": "You have disadvantage on attack rolls and ability checks."
+    },
+    "prone": {
+      "name": "Prone",
+      "description": "Your only movement option is crawling unless you stand up; you have disadvantage on attack rolls, and attacks against you have advantage if the attacker is within 5 feet or disadvantage otherwise."
+    },
+    "restrained": {
+      "name": "Restrained",
+      "description": "Your speed becomes 0, you have disadvantage on attack rolls and Dexterity saving throws, and attacks against you have advantage."
+    },
+    "stunned": {
+      "name": "Stunned",
+      "description": "You are incapacitated and can't move; you can speak only falteringly, automatically fail Strength and Dexterity saves, and attacks against you have advantage."
+    },
+    "unconscious": {
+      "name": "Unconscious",
+      "description": "You are incapacitated, can't move or speak, are unaware of your surroundings, drop anything you're holding, fall prone, automatically fail Strength and Dexterity saves, attacks have advantage against you, and any melee hit within 5 feet is a critical hit."
+    }
   }
 }

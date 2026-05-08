@@ -19,6 +19,22 @@ export function getProficiencyBonus(level: number): number {
   return 6;
 }
 
+export type ExhaustionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface ExhaustionPenalty {
+  readonly d20Penalty: number;
+  readonly speedPenalty: number;
+  readonly dead: boolean;
+}
+
+export function exhaustionPenalty(level: ExhaustionLevel): ExhaustionPenalty {
+  return {
+    d20Penalty: level * 2,
+    speedPenalty: level * 5,
+    dead: level === 6,
+  };
+}
+
 export function getSpellSlots(className: string, level: number): number[] {
   // Returns spell slots for levels 1-9 (index 0 is level 1)
   const spellcasters: Record<string, Record<number, number[]>> = {

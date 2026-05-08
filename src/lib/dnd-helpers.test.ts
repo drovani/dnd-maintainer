@@ -14,6 +14,7 @@ import {
   EMPTY_PROFICIENCIES,
   averageDice,
   computeProficiencies,
+  exhaustionPenalty,
   generateCharacterName,
   getAbilityModifier,
   getPactMagicSlots,
@@ -33,7 +34,7 @@ import {
   toggleLanguageProficiencyChoice,
   toggleToolProficiencyChoice,
 } from '@/lib/dnd-helpers';
-import type { DndClass, DndSpecies, Proficiencies, SpeciesId } from '@/lib/dnd-helpers';
+import type { DndClass, DndSpecies, ExhaustionLevel, Proficiencies, SpeciesId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 // ---------------------------------------------------------------------------
@@ -835,6 +836,23 @@ describe('DB migration class CHECK constraint sync', () => {
 });
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// exhaustionPenalty
+// ---------------------------------------------------------------------------
+describe('exhaustionPenalty', () => {
+  it.each<[ExhaustionLevel, number, number, boolean]>([
+    [0, 0, 0, false],
+    [1, 2, 5, false],
+    [2, 4, 10, false],
+    [3, 6, 15, false],
+    [4, 8, 20, false],
+    [5, 10, 25, false],
+    [6, 12, 30, true],
+  ])('level %i → d20Penalty %i, speedPenalty %i, dead %s', (level, d20Penalty, speedPenalty, dead) => {
+    expect(exhaustionPenalty(level)).toEqual({ d20Penalty, speedPenalty, dead });
+  });
+});
+
 // DB migration sync check — background CHECK constraint must match DND_BACKGROUNDS IDs
 // ---------------------------------------------------------------------------
 describe('DB migration background CHECK constraint sync', () => {

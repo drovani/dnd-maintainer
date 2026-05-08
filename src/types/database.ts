@@ -1,5 +1,6 @@
 import type { AlignmentId, ClassId, DndGender, Proficiencies, SpeciesId, SizeId } from '@/lib/dnd-helpers';
 import type { ThemeId } from '@/lib/theme';
+import type { ConditionId } from '@/lib/sources/conditions';
 import type { WeaponMasteryId } from '@/types/items';
 
 export type { Proficiencies };
@@ -83,7 +84,7 @@ export interface Combatant {
   hit_points: number;
   armor_class: number;
   status: 'healthy' | 'injured' | 'unconscious' | 'dead';
-  conditions: string[];
+  conditions: ConditionId[];
 }
 
 export interface Encounter {
