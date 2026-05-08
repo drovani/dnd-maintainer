@@ -17,6 +17,12 @@ coverage
 supabase/.branches
 supabase/.temp
 
+# Playwright MCP session artifacts (snapshots, console dumps, screenshots)
+.playwright-mcp/
+
+# Ad-hoc screenshots from /ui-review (anchored to repo root only)
+/*.png
+
 # Environment variables
 .env.local
 .env.*.local
