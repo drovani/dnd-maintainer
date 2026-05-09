@@ -84,7 +84,7 @@ export interface Combatant {
   hit_points: number;
   armor_class: number;
   status: 'healthy' | 'injured' | 'unconscious' | 'dead';
-  conditions: ConditionId[];
+  readonly conditions: readonly ConditionId[];
 }
 
 export interface Encounter {

@@ -21,18 +21,12 @@ export function getProficiencyBonus(level: number): number {
 
 export type ExhaustionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-export interface ExhaustionPenalty {
-  readonly d20Penalty: number;
-  readonly speedPenalty: number;
-  readonly dead: boolean;
-}
-
-export function exhaustionPenalty(level: ExhaustionLevel): ExhaustionPenalty {
+export function exhaustionPenalty(level: ExhaustionLevel) {
   return {
     d20Penalty: level * 2,
     speedPenalty: level * 5,
     dead: level === 6,
-  };
+  } as const;
 }
 
 export function getSpellSlots(className: string, level: number): number[] {

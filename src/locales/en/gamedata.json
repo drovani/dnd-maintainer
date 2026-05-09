@@ -1676,15 +1676,15 @@
     },
     "grappled": {
       "name": "Grappled",
-      "description": "Your speed becomes 0; the condition ends if the grappler becomes incapacitated or you are moved beyond the grapple's reach."
+      "description": "Your speed becomes 0 and you have disadvantage on attack rolls against any target other than the grappler; the condition ends if the grappler becomes incapacitated or you are moved beyond the grapple's reach."
     },
     "incapacitated": {
       "name": "Incapacitated",
-      "description": "You can't take actions, bonus actions, or reactions, can speak only a few words, and any concentration is broken."
+      "description": "You can't take actions, bonus actions, or reactions, can't speak, and any concentration is broken."
     },
     "invisible": {
       "name": "Invisible",
-      "description": "You can't be seen by normal sight and are treated as heavily obscured; attack rolls against you have disadvantage and your own attack rolls have advantage."
+      "description": "You can't be seen, have advantage on Initiative rolls, and effects requiring you to be seen don't apply to you; attack rolls against you have disadvantage and your attack rolls have advantage."
     },
     "paralyzed": {
       "name": "Paralyzed",
@@ -1692,7 +1692,7 @@
     },
     "petrified": {
       "name": "Petrified",
-      "description": "You are transformed into a solid inanimate substance, incapacitated with no awareness; you automatically fail Strength and Dexterity saves, attacks have advantage against you, and you gain resistance to all damage and immunity to poison and disease while transformed."
+      "description": "You are transformed into a solid inanimate substance, incapacitated with no awareness; you automatically fail Strength and Dexterity saves, attacks have advantage against you, and you gain resistance to all damage and immunity to the Poisoned condition while transformed."
     },
     "poisoned": {
       "name": "Poisoned",
@@ -1708,7 +1708,7 @@
     },
     "stunned": {
       "name": "Stunned",
-      "description": "You are incapacitated and can't move; you can speak only falteringly, automatically fail Strength and Dexterity saves, and attacks against you have advantage."
+      "description": "You are Incapacitated and can't move; you automatically fail Strength and Dexterity saving throws, and attacks against you have advantage."
     },
     "unconscious": {
       "name": "Unconscious",
