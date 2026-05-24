@@ -46,9 +46,10 @@ describe('Human species source (2024 PHB)', () => {
     expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 30 });
   });
 
-  it('grants Common language', () => {
+  it('grants Common language only', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toEqual(expect.arrayContaining([{ type: 'proficiency', category: 'language', id: 'common' }]));
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
   });
 
   it('grants two language choices from any language', () => {
@@ -688,5 +689,19 @@ describe('GNOME_LINEAGE_GRANTS', () => {
 describe('LINEAGE_GRANTS_REGISTRY', () => {
   it('has exactly 5 keys', () => {
     expect(Object.keys(LINEAGE_GRANTS_REGISTRY)).toHaveLength(5);
+  });
+});
+
+describe('SPECIES_SOURCES ↔ DND_SPECIES invariants', () => {
+  it('DND_SPECIES.languageChoices matches the proficiency-choice language count in SPECIES_SOURCES', () => {
+    for (const species of DND_SPECIES) {
+      const source = getSpeciesSource(species.id);
+      const languageChoiceGrant = source?.grants.find(
+        (g) => g.type === 'proficiency-choice' && g.category === 'language'
+      );
+      const expected = species.languageChoices ?? 0;
+      const actual = languageChoiceGrant?.type === 'proficiency-choice' ? languageChoiceGrant.count : 0;
+      expect(actual).toBe(expected);
+    }
   });
 });
