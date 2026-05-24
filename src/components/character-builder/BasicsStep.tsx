@@ -364,7 +364,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
             <Select
               value={race || null}
               onValueChange={(value) => value && handleRaceChange(value as SpeciesId)}
-              items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`races.${s.id}`) }))}
+              items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`species.${s.id}`) }))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseRace')} />
@@ -372,7 +372,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
               <SelectContent>
                 {DND_SPECIES.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {t(`races.${s.id}`)}
+                    {t(`species.${s.id}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -296,7 +296,7 @@ function CharacterBuilderInner() {
             <>
               <span className="font-semibold text-foreground">{character.name}</span>
               {' · '}
-              {tg(`races.${selectedRace.id}`)}
+              {tg(`species.${selectedRace.id}`)}
               {' · '}
               {tg(`classes.${selectedClass.id}`)}
               {character.background && isBackgroundId(character.background) && (

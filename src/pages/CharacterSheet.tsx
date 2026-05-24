@@ -272,7 +272,7 @@ function CharacterSheetInner({
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.race')}</span>
               <p className="text-foreground font-semibold">
-                {character.species ? t(`races.${character.species}`, { defaultValue: character.species }) : ''}
+                {character.species ? t(`species.${character.species}`, { defaultValue: character.species }) : ''}
               </p>
             </div>
             <div>
@@ -490,7 +490,7 @@ function CharacterSheetInner({
                                 : resolvedFeature.source.origin === 'subclass'
                                   ? t(`subclasses.${resolvedFeature.source.id}.name`)
                                   : resolvedFeature.source.origin === 'species'
-                                    ? t(`races.${resolvedFeature.source.id}`)
+                                    ? t(`species.${resolvedFeature.source.id}`)
                                     : resolvedFeature.source.origin === 'background'
                                       ? t(`backgrounds.${resolvedFeature.source.id}`)
                                       : resolvedFeature.source.origin === 'loot'
