@@ -1,5 +1,6 @@
 import { getLogger } from '@/lib/logger';
 import { AutocompleteInput } from '@/components/ui/autocomplete-input';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GenderToggle } from '@/components/ui/gender-toggle';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,6 @@ import { Switch } from '@/components/ui/switch';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { usePlayerNames } from '@/hooks/useCharacters';
 import {
-  DND_BACKGROUNDS,
   DND_CLASSES,
   DND_SPECIES,
   generateCharacterName,
@@ -18,6 +18,10 @@ import {
   type DndGender,
   type SpeciesId,
 } from '@/lib/dnd-helpers';
+import { collectGrantsByType } from '@/lib/resolver/helpers';
+import { LINEAGE_GRANTS_REGISTRY, SPECIES_SOURCES } from '@/lib/sources/species';
+import type { ChoiceDecision } from '@/types/choices';
+import type { PendingChoice } from '@/types/resolved';
 import {
   generateRandomNpcBasicsDetailed,
   getQuickNpcClassIds,
@@ -26,6 +30,7 @@ import {
 import type { StepType } from '@/types/character-builder';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Dices, Wand2 } from 'lucide-react';
+import { ChoicePicker } from './ChoicePicker';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +68,6 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const name = character.name ?? '';
   const playerName = character.player_name ?? '';
   const race = (character.species ?? '') as SpeciesId | '';
-  const background = character.background ?? '';
   const alignment = character.alignment ?? '';
   const gender = character.gender ?? '';
 
@@ -116,7 +120,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     clearWatchdog();
   };
 
-  const handleRaceChange = (value: SpeciesId) => {
+  const handleSpeciesChange = (value: SpeciesId) => {
     cancelPendingAdvance();
     context.updateCharacter({ species: value });
   };
@@ -134,11 +138,6 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     // levelUp adds a row, replaceLevel swaps in-place — either way, level is at least 1
     const newLevel = levelRows.length === 0 ? 1 : levelRows.length;
     context.updateCharacter({ class: value, level: newLevel });
-  };
-
-  const handleBackgroundChange = (value: string) => {
-    cancelPendingAdvance();
-    context.updateCharacter({ background: value });
   };
 
   const toastForFailure = (failure: RandomNpcFailure | null) => {
@@ -358,12 +357,20 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>
-              {tc('characterBuilder.fields.race')}
+              {tc('characterBuilder.fields.species')}
               <span className="text-destructive">*</span>
             </Label>
+            {race && !SPECIES_SOURCES.some((s) => s.id === race) ? (
+              <div className="space-y-1">
+                <Badge variant="destructive" className="text-xs">
+                  {tc('characterBuilder.hints.legacySpecies')}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{race}</p>
+              </div>
+            ) : null}
             <Select
               value={race || null}
-              onValueChange={(value) => value && handleRaceChange(value as SpeciesId)}
+              onValueChange={(value) => value && handleSpeciesChange(value as SpeciesId)}
               items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`races.${s.id}`) }))}
             >
               <SelectTrigger className="w-full">
@@ -377,6 +384,34 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 ))}
               </SelectContent>
             </Select>
+            {race &&
+              SPECIES_SOURCES.some((s) => s.id === race) &&
+              race in LINEAGE_GRANTS_REGISTRY &&
+              (() => {
+                const lineageGrantTags = collectGrantsByType(context.bundles, 'lineage-choice').filter(
+                  (tg) => tg.source.origin === 'species'
+                );
+                const lineageTag = lineageGrantTags[0];
+                if (!lineageTag) return null;
+                const lineageChoice: PendingChoice & { type: 'lineage-choice' } = {
+                  type: 'lineage-choice',
+                  choiceKey: lineageTag.grant.key,
+                  source: lineageTag.source,
+                  speciesId: race as SpeciesId,
+                  from: lineageTag.grant.from,
+                };
+                const decision = context.build?.choices[lineageTag.grant.key];
+                return (
+                  <div className="mt-2">
+                    <ChoicePicker
+                      choice={lineageChoice}
+                      currentDecision={decision as ChoiceDecision | undefined}
+                      onDecide={(key, d) => context.makeChoice(key, d)}
+                      onClear={(key) => context.clearChoice(key)}
+                    />
+                  </div>
+                );
+              })()}
           </div>
 
           <div className="space-y-2">
@@ -396,29 +431,6 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 {DND_CLASSES.map((cls) => (
                   <SelectItem key={cls.id} value={cls.id}>
                     {t(`classes.${cls.id}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{tc('characterBuilder.fields.background')}</Label>
-            <Select
-              value={background || null}
-              onValueChange={(value) => {
-                if (!value) return;
-                handleBackgroundChange(value);
-              }}
-              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
-              </SelectTrigger>
-              <SelectContent>
-                {DND_BACKGROUNDS.map((bg) => (
-                  <SelectItem key={bg.id} value={bg.id}>
-                    {t(`backgrounds.${bg.id}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

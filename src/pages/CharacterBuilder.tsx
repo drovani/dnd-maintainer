@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AbilitiesStep,
+  BackgroundStep,
   BackstoryStep,
   BasicsStep,
   ClassFeaturesStep,
@@ -30,6 +31,7 @@ const logger = getLogger('character-builder');
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' },
+  { id: 'background' },
   { id: 'abilities' },
   { id: 'skills' },
   { id: 'classFeatures' },
@@ -42,6 +44,8 @@ function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactEleme
   switch (step) {
     case 'basics':
       return <BasicsStep onRequestAdvance={goToStep} />;
+    case 'background':
+      return <BackgroundStep />;
     case 'abilities':
       return <AbilitiesStep />;
     case 'skills':
@@ -170,7 +174,7 @@ function CharacterBuilderInner() {
   const finalizeBlockers: readonly string[] = (() => {
     const reasons: string[] = [];
     if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'));
-    if (!character.species) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'));
+    if (!character.species) reasons.push(t('characterBuilder.finalizeBlockers.missingSpecies'));
     if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'));
     if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'));
     for (const pending of resolved?.pendingChoices ?? []) {

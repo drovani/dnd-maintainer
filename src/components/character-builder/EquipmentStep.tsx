@@ -1,7 +1,8 @@
+import { Badge } from '@/components/ui/badge';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
-import { BUNDLE_CATEGORIES } from '@/types/items';
+import { BUNDLE_CATEGORIES, type WeaponMasteryId } from '@/types/items';
 import { useTranslation } from 'react-i18next';
 import { ChoicePicker } from './ChoicePicker';
 import type { ChoiceDecision } from '@/types/choices';
@@ -80,6 +81,21 @@ export function EquipmentStep() {
     return t(getItemNameKey(type, itemId), { defaultValue: '' });
   }
 
+  // Look up the committed weapon mastery for a given weapon ID.
+  // Checks build.choices for weapon-mastery-choice decisions, then resolved.weaponMasteries.
+  function getWeaponMasteryId(weaponId: string): WeaponMasteryId | null {
+    // Check build choices
+    for (const [, decision] of Object.entries(build?.choices ?? {})) {
+      if (decision?.type === 'weapon-mastery-choice' && (decision.weaponIds as string[]).includes(weaponId)) {
+        const weaponDef = WEAPON_CATALOG.find((w) => w.id === weaponId);
+        return weaponDef?.mastery ?? null;
+      }
+    }
+    // Check resolved weapon masteries
+    const fromResolved = resolved?.weaponMasteries?.find((wm) => wm.weaponId === weaponId);
+    return fromResolved?.masteryId ?? null;
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div className="space-y-8">
@@ -153,17 +169,25 @@ export function EquipmentStep() {
                     {t('weaponCategories.simple')}/{t('weaponCategories.martial')}
                   </div>
                   <ul className="space-y-0.5">
-                    {weapons.map((e) => (
-                      <li key={e.itemId} className="flex gap-2 text-foreground">
-                        <span className="text-muted-foreground">{e.quantity}×</span>
-                        <span>{renderItemName(e.itemId)}</span>
-                        {e.itemDef.type === 'weapon' && (
-                          <span className="text-muted-foreground">
-                            ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
-                          </span>
-                        )}
-                      </li>
-                    ))}
+                    {weapons.map((e) => {
+                      const masteryId = e.itemDef.type === 'weapon' ? getWeaponMasteryId(e.itemId) : null;
+                      return (
+                        <li key={e.itemId} className="flex gap-2 text-foreground items-center">
+                          <span className="text-muted-foreground">{e.quantity}×</span>
+                          <span>{renderItemName(e.itemId)}</span>
+                          {masteryId && (
+                            <Badge variant="secondary" className="text-xs">
+                              {t(`weaponMasteries.${masteryId}.name`)}
+                            </Badge>
+                          )}
+                          {e.itemDef.type === 'weapon' && (
+                            <span className="text-muted-foreground">
+                              ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}

@@ -174,37 +174,6 @@ export function AbilitiesStep() {
     updateAbility(ability, current - 1);
   };
 
-  // Background ASI — source from bundles so it stays visible even after fully allocated
-  const backgroundAsiGrant = context.bundles
-    .filter((b) => b.source.origin === 'background')
-    .flatMap((b) => b.grants)
-    .find((g): g is Extract<typeof g, { type: 'asi' }> => g.type === 'asi');
-  const backgroundAsiChoiceKey = backgroundAsiGrant?.key;
-  const backgroundAsiDecision = backgroundAsiChoiceKey ? context.build?.choices[backgroundAsiChoiceKey] : undefined;
-  const backgroundAsiAllocation: Partial<Record<AbilityKey, number>> =
-    backgroundAsiDecision?.type === 'asi' ? backgroundAsiDecision.allocation : {};
-  const backgroundAsiPointsUsed = Object.values(backgroundAsiAllocation).reduce((s, v) => s + (v ?? 0), 0);
-  const backgroundAsiPointsRemaining = (backgroundAsiGrant?.points ?? 0) - backgroundAsiPointsUsed;
-
-  const incrementBackgroundAsi = (ability: AbilityKey) => {
-    if (!backgroundAsiChoiceKey) return;
-    if (backgroundAsiPointsRemaining <= 0) return;
-    const currentTotal = context.resolved?.abilities[ability].total ?? 10;
-    const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
-    if (currentTotal + 1 > 20) return;
-    const next = { ...backgroundAsiAllocation, [ability]: currentAlloc + 1 };
-    context.makeChoice(backgroundAsiChoiceKey, { type: 'asi', allocation: next });
-  };
-
-  const decrementBackgroundAsi = (ability: AbilityKey) => {
-    if (!backgroundAsiChoiceKey) return;
-    const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
-    if (currentAlloc <= 0) return;
-    const next = { ...backgroundAsiAllocation, [ability]: currentAlloc - 1 };
-    if (next[ability] === 0) delete next[ability];
-    context.makeChoice(backgroundAsiChoiceKey, { type: 'asi', allocation: next });
-  };
-
   // Compute racial bonuses from resolved abilities
   const racialBonuses: Partial<AbilityScores> = {};
   if (context.resolved) {
@@ -218,21 +187,17 @@ export function AbilitiesStep() {
     }
   }
 
-  const backgroundId = context.build?.backgroundId;
-  const backgroundName = backgroundId ? t(`backgrounds.${backgroundId}` as `backgrounds.${typeof backgroundId}`) : null;
-
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
     const baseScore = baseAbilities[ability];
     const raceBonus = racialBonuses[ability] ?? 0;
     const resolvedTotal = context.resolved?.abilities[ability].total;
     const totalScore = resolvedTotal ?? baseScore + raceBonus;
     const modifier = getAbilityModifier(totalScore);
-    const inBgAsiPool =
-      backgroundAsiGrant != null &&
-      (backgroundAsiGrant.from == null || backgroundAsiGrant.from.includes(ability as AbilityKey));
-    const bgAlloc = inBgAsiPool ? (backgroundAsiAllocation[ability as AbilityKey] ?? 0) : 0;
-    const canInc = inBgAsiPool && backgroundAsiPointsRemaining > 0 && totalScore < 20;
-    const canDec = inBgAsiPool && bgAlloc > 0;
+    // Show locked background bonus from committed ASI decision
+    const bgBonus =
+      context.resolved?.abilities[ability as AbilityKey].bonuses
+        .filter((b) => b.source.origin === 'background')
+        .reduce((s, b) => s + b.value, 0) ?? 0;
 
     return (
       <Card key={ability}>
@@ -241,6 +206,11 @@ export function AbilitiesStep() {
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">{scoreInput}</div>
             <div className="flex items-baseline gap-2 ml-auto">
+              {bgBonus > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  +{bgBonus} {tc('characterBuilder.abilities.backgroundBonusSuffix')}
+                </Badge>
+              )}
               <span className="text-sm font-bold">{totalScore}</span>
               <span className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {modifier >= 0 ? '+' : ''}
@@ -248,34 +218,6 @@ export function AbilitiesStep() {
               </span>
             </div>
           </div>
-          {inBgAsiPool && (
-            <div className="flex items-center gap-2 pt-1 border-t border-border/50">
-              <span className="text-xs text-muted-foreground flex-1">
-                {backgroundName
-                  ? tc('characterBuilder.abilities.backgroundBonus', { background: backgroundName })
-                  : tc('characterBuilder.abilities.backgroundAsi')}
-                {bgAlloc > 0 && <span className="ml-1 font-semibold text-green-600">+{bgAlloc}</span>}
-              </span>
-              <Button
-                variant="outline"
-                size="xs"
-                disabled={!canDec}
-                onClick={() => decrementBackgroundAsi(ability as AbilityKey)}
-                aria-label={tc('characterSheet.asi.decreaseAbility', { ability: t(`abilities.${ability}`) })}
-              >
-                <ChevronDown className="size-3" />
-              </Button>
-              <Button
-                variant="outline"
-                size="xs"
-                disabled={!canInc}
-                onClick={() => incrementBackgroundAsi(ability as AbilityKey)}
-                aria-label={tc('characterSheet.asi.increaseAbility', { ability: t(`abilities.${ability}`) })}
-              >
-                <ChevronUp className="size-3" />
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     );
@@ -504,26 +446,6 @@ export function AbilitiesStep() {
           </div>
         </TabsContent>
       </Tabs>
-
-      {backgroundAsiGrant && (
-        <p className="text-sm text-muted-foreground">
-          {tc('characterBuilder.abilities.backgroundAsiHint', {
-            background: backgroundName,
-            points: backgroundAsiGrant.points,
-            abilities:
-              backgroundAsiGrant.from != null
-                ? backgroundAsiGrant.from.map((a) => t(`abilities.${a}`)).join(', ')
-                : tc('characterBuilder.abilities.anyAbility'),
-          })}
-          {backgroundAsiPointsRemaining > 0 && (
-            <span className="ml-1 font-medium text-foreground">
-              {tc('characterBuilder.abilities.backgroundAsiRemaining', {
-                count: backgroundAsiPointsRemaining,
-              })}
-            </span>
-          )}
-        </p>
-      )}
     </div>
   );
 }

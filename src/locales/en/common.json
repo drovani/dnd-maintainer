@@ -96,6 +96,7 @@
     "title": "Create New Character",
     "steps": {
       "basics": "Basics",
+      "background": "Background",
       "abilities": "Abilities",
       "skills": "Skills",
       "classFeatures": "Class Features",
@@ -106,6 +107,9 @@
     "fields": {
       "characterName": "Character Name",
       "race": "Race",
+      "species": "Species",
+      "lineage": "Lineage",
+      "originFeat": "Origin Feat",
       "class": "Class",
       "gender": "Gender",
       "playerName": "Player Name",
@@ -160,6 +164,7 @@
       "title": "Before you can finalize:",
       "missingName": "Character name is required",
       "missingRace": "Race is required",
+      "missingSpecies": "Species is required",
       "missingClass": "Class is required",
       "missingBackground": "Background is required",
       "pendingChoice": "Pending {{type}} ({{key}})"
@@ -199,6 +204,8 @@
     "hints": {
       "selectRaceAndGender": "Select race and gender first",
       "generateRandomName": "Generate random name",
+      "legacySpecies": "This character uses a legacy species ID. Select a 2024 species to update.",
+      "selectSpeciesFirst": "Select a species to see lineage options.",
       "couldNotLoadPlayerNames": "Could not load player name suggestions",
       "quickNpcDescription": "Create a random NPC of this class and jump ahead in the wizard",
       "quickNpcButton": "Random {{class}} NPC",
@@ -231,6 +238,7 @@
       "racialBonus": "{{race}} Racial Bonus: {{bonuses}}",
       "backgroundAsi": "Background bonus",
       "backgroundBonus": "{{background}} bonus",
+      "backgroundBonusSuffix": "bg",
       "anyAbility": "any ability",
       "backgroundAsiHint": "{{background}} provides {{points}} points to distribute across {{abilities}}.",
       "backgroundAsiRemaining": "({{count}} point remaining)",
@@ -274,6 +282,19 @@
       "cantrips": "Cantrips",
       "features": "Class Features",
       "noClassChoices": "This class has no level-1 choices to make."
+    },
+    "backgroundStep": {
+      "asiModeTitle": "Ability Score Increases",
+      "asiModeDescription": "Your background grants 3 points. Choose how to distribute them.",
+      "asiMode21Label": "+2 / +1 (two different abilities)",
+      "asiMode111Label": "+1 / +1 / +1 (three different abilities)",
+      "asiAbilityPlus2": "+2",
+      "asiAbilityPlus1": "+1",
+      "originFeatTitle": "Origin Feat",
+      "originFeatGranted": "Granted by {{background}}",
+      "toolProficiencyTitle": "Tool Proficiency",
+      "languageTitle": "Language",
+      "noBackground": "Select a background to see its benefits."
     },
     "equipment": {
       "equipped": "Equipped",

@@ -1,4 +1,5 @@
 export { AbilitiesStep } from './AbilitiesStep';
+export { BackgroundStep } from './BackgroundStep';
 export { BackstoryStep } from './BackstoryStep';
 export { BasicsStep } from './BasicsStep';
 export { EquipmentStep } from './EquipmentStep';
