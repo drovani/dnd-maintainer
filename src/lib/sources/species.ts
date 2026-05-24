@@ -171,7 +171,7 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
         type: 'proficiency-choice',
         category: 'language',
         key: createChoiceKey('language-choice', 'species', 'human', 0),
-        count: 1,
+        count: 2,
         from: null,
       },
       {
@@ -192,7 +192,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'dwarvish' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'dwarf', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'dwarf-darkvision' } },
       { type: 'feature', feature: { id: 'dwarf-dwarven-resilience' } },
       { type: 'resistance', damageType: 'poison' },
@@ -209,7 +215,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'elvish' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'elf', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'elf-darkvision' } },
       { type: 'feature', feature: { id: 'elf-fey-ancestry' } },
       {
@@ -236,7 +248,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'gnomish' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'gnome', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'gnome-darkvision' } },
       { type: 'feature', feature: { id: 'gnome-gnomish-cunning' } },
       {
@@ -255,6 +273,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'halfling', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'halfling-brave' } },
       { type: 'feature', feature: { id: 'halfling-halfling-nimbleness' } },
       { type: 'feature', feature: { id: 'halfling-lucky' } },
@@ -269,7 +294,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'celestial' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'aasimar', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'aasimar-darkvision' } },
       { type: 'feature', feature: { id: 'aasimar-celestial-resistance' } },
       { type: 'resistance', damageType: 'necrotic' },
@@ -287,7 +318,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'draconic' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'dragonborn', 0),
+        count: 2,
+        from: null,
+      },
       {
         type: 'lineage-choice',
         key: createChoiceKey('lineage-choice', 'species', 'dragonborn', 0),
@@ -320,7 +357,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 35 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'giant' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'goliath', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'goliath-large-form' } },
       { type: 'feature', feature: { id: 'goliath-powerful-build' } },
       { type: 'proficiency', category: 'skill', id: 'athletics' },
@@ -340,7 +383,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'orc' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'orc', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'orc-adrenaline-rush' } },
       { type: 'feature', feature: { id: 'orc-darkvision' } },
       { type: 'feature', feature: { id: 'orc-powerful-build' } },
@@ -355,7 +404,13 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
     grants: [
       { type: 'speed', mode: 'walk', value: 30 },
       { type: 'proficiency', category: 'language', id: 'common' },
-      { type: 'proficiency', category: 'language', id: 'infernal' },
+      {
+        type: 'proficiency-choice',
+        category: 'language',
+        key: createChoiceKey('language-choice', 'species', 'tiefling', 0),
+        count: 2,
+        from: null,
+      },
       { type: 'feature', feature: { id: 'tiefling-darkvision' } },
       {
         type: 'lineage-choice',

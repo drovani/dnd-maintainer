@@ -646,7 +646,7 @@ describe('computeProficiencies', () => {
     expect(result.toolChoices).toEqual([]);
     expect(result.languageChoices).toEqual([]);
     expect(result.armor).toEqual(['light', 'medium', 'heavy', 'shields']);
-    expect(result.languages).toEqual(['common', 'elvish']);
+    expect(result.languages).toEqual(['common']);
   });
 });
 
@@ -718,15 +718,15 @@ describe('toggleLanguageProficiencyChoice', () => {
     expect(result.languageChoices).toEqual([]);
   });
 
-  it('does not add beyond the max (human gets 1)', () => {
-    const prev: Proficiencies = { ...base, languageChoices: ['elvish'] };
-    const result = toggleLanguageProficiencyChoice(prev, 'human', 'dwarvish');
+  it('does not add beyond the max (human gets 2)', () => {
+    const prev: Proficiencies = { ...base, languageChoices: ['elvish', 'dwarvish'] };
+    const result = toggleLanguageProficiencyChoice(prev, 'human', 'gnomish');
     expect(result).toBe(prev);
   });
 
-  it('returns unchanged proficiencies for a race without language choices', () => {
+  it('adds a language choice for tiefling (2024: all species have language choices)', () => {
     const result = toggleLanguageProficiencyChoice(base, 'tiefling', 'elvish');
-    expect(result).toBe(base);
+    expect(result.languageChoices).toEqual(['elvish']);
   });
 
   it('returns unchanged proficiencies for empty race', () => {

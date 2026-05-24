@@ -51,13 +51,13 @@ describe('Human species source (2024 PHB)', () => {
     expect(languages).toEqual(expect.arrayContaining([{ type: 'proficiency', category: 'language', id: 'common' }]));
   });
 
-  it('grants one language choice from any language', () => {
+  it('grants two language choices from any language', () => {
     const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
     expect(langChoice).toEqual({
       type: 'proficiency-choice',
       category: 'language',
       key: createChoiceKey('language-choice', 'species', 'human', 0),
-      count: 1,
+      count: 2,
       from: null,
     });
   });
@@ -103,24 +103,32 @@ describe('Dwarf species source (2024 PHB)', () => {
     expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 30 });
   });
 
-  it('grants Common and Dwarvish languages', () => {
+  it('grants Common language only (no locked Dwarvish in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'dwarvish' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
   });
 
-  it('grants no armor, weapon, or tool proficiencies', () => {
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'dwarf', 0),
+      count: 2,
+      from: null,
+    });
+  });
+
+  it('grants no armor, weapon, or tool proficiency choices', () => {
     const nonLanguageProficiencies = source?.grants.filter(
       (g) => g.type === 'proficiency' && g.category !== 'language' && g.category !== 'skill'
     );
     expect(nonLanguageProficiencies).toHaveLength(0);
-    const proficiencyChoices = source?.grants.filter((g) => g.type === 'proficiency-choice');
-    expect(proficiencyChoices).toHaveLength(0);
+    const nonLanguageChoices = source?.grants.filter(
+      (g) => g.type === 'proficiency-choice' && g.category !== 'language'
+    );
+    expect(nonLanguageChoices).toHaveLength(0);
   });
 
   it('grants darkvision, dwarven-resilience, stonecunning, dwarven-toughness features', () => {
@@ -160,15 +168,21 @@ describe('Elf species source (2024 PHB)', () => {
     expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants Common and Elvish languages', () => {
+  it('grants Common language only (no locked Elvish in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'elvish' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'elf', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants skill choice from Insight, Perception, or Survival', () => {
@@ -212,15 +226,21 @@ describe('Gnome species source (2024 PHB)', () => {
     expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants Common and Gnomish languages', () => {
+  it('grants Common language only (no locked Gnomish in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'gnomish' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'gnome', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants darkvision and gnomish-cunning features', () => {
@@ -269,13 +289,26 @@ describe('Halfling species source (2024 PHB)', () => {
     expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
   });
 
-  it('grants no armor, weapon, or tool proficiencies', () => {
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'halfling', 0),
+      count: 2,
+      from: null,
+    });
+  });
+
+  it('grants no armor, weapon, or tool proficiency choices', () => {
     const nonLanguageProficiencies = source?.grants.filter(
       (g) => g.type === 'proficiency' && g.category !== 'language'
     );
     expect(nonLanguageProficiencies).toHaveLength(0);
-    const proficiencyChoices = source?.grants.filter((g) => g.type === 'proficiency-choice');
-    expect(proficiencyChoices).toHaveLength(0);
+    const nonLanguageChoices = source?.grants.filter(
+      (g) => g.type === 'proficiency-choice' && g.category !== 'language'
+    );
+    expect(nonLanguageChoices).toHaveLength(0);
   });
 
   it('grants brave, halfling-nimbleness, lucky, and naturally-stealthy features', () => {
@@ -310,15 +343,21 @@ describe('Aasimar species source (2024 PHB)', () => {
     expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants Common and Celestial languages', () => {
+  it('grants Common language only (no locked Celestial in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'celestial' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'aasimar', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants necrotic and radiant resistances', () => {
@@ -360,15 +399,21 @@ describe('Dragonborn species source (2024 PHB)', () => {
     expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants Common and Draconic languages', () => {
+  it('grants Common language only (no locked Draconic in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'draconic' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'dragonborn', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants lineage choice from all 15 draconic lineages', () => {
@@ -458,15 +503,21 @@ describe('Goliath species source (2024 PHB)', () => {
     expect(speed).toEqual({ type: 'speed', mode: 'walk', value: 35 });
   });
 
-  it('grants Common and Giant languages', () => {
+  it('grants Common language only (no locked Giant in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'giant' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'goliath', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants Athletics skill proficiency', () => {
@@ -508,15 +559,21 @@ describe('Orc species source (2024 PHB)', () => {
     expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants Common and Orc languages', () => {
+  it('grants Common language only (no locked Orc in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'orc' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'orc', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants adrenaline-rush, darkvision, powerful-build, relentless-endurance features', () => {
@@ -551,15 +608,21 @@ describe('Tiefling species source (2024 PHB)', () => {
     expect(source?.defaultSpeed).toBe(30);
   });
 
-  it('grants Common and Infernal languages', () => {
+  it('grants Common language only (no locked Infernal in 2024)', () => {
     const languages = source?.grants.filter((g) => g.type === 'proficiency' && g.category === 'language');
-    expect(languages).toHaveLength(2);
-    expect(languages).toEqual(
-      expect.arrayContaining([
-        { type: 'proficiency', category: 'language', id: 'common' },
-        { type: 'proficiency', category: 'language', id: 'infernal' },
-      ])
-    );
+    expect(languages).toHaveLength(1);
+    expect(languages).toEqual([{ type: 'proficiency', category: 'language', id: 'common' }]);
+  });
+
+  it('grants two language choices from any language', () => {
+    const langChoice = source?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'language');
+    expect(langChoice).toEqual({
+      type: 'proficiency-choice',
+      category: 'language',
+      key: createChoiceKey('language-choice', 'species', 'tiefling', 0),
+      count: 2,
+      from: null,
+    });
   });
 
   it('grants darkvision feature', () => {
