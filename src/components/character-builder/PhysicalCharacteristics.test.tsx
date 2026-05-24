@@ -17,9 +17,9 @@ vi.mock('react-i18next', () => ({
 }));
 
 describe('PhysicalCharacteristics', () => {
-  it('renders noRace message when speciesId is null', () => {
+  it('renders noSpecies message when speciesId is null', () => {
     render(<PhysicalCharacteristics speciesId={null} height={null} weight={null} onChange={vi.fn()} />);
-    expect(screen.getByText(/noRace/i)).toBeInTheDocument();
+    expect(screen.getByText(/noSpecies/i)).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton')).toBeNull();
   });
 

@@ -80,7 +80,7 @@ export function PhysicalCharacteristics({
   if (!physicals) {
     return (
       <div className={`rounded-md border p-4 text-sm text-muted-foreground${className ? ` ${className}` : ''}`}>
-        {t('characterBuilder.backstory.physicals.noRace')}
+        {t('characterBuilder.backstory.physicals.noSpecies')}
       </div>
     );
   }
