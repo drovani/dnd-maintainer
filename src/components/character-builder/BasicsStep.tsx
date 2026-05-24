@@ -358,7 +358,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>
-              {tc('characterBuilder.fields.race')}
+              {tc('characterBuilder.fields.species')}
               <span className="text-destructive">*</span>
             </Label>
             <Select

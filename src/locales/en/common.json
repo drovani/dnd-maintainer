@@ -105,7 +105,7 @@
     },
     "fields": {
       "characterName": "Character Name",
-      "race": "Race",
+      "species": "Species",
       "class": "Class",
       "gender": "Gender",
       "playerName": "Player Name",
@@ -159,7 +159,7 @@
     "finalizeBlockers": {
       "title": "Before you can finalize:",
       "missingName": "Character name is required",
-      "missingRace": "Race is required",
+      "missingSpecies": "Species is required",
       "missingClass": "Class is required",
       "missingBackground": "Background is required",
       "pendingChoice": "Pending {{type}} ({{key}})"
@@ -347,7 +347,7 @@
     "fields": {
       "class": "Class",
       "level": "Level",
-      "race": "Race",
+      "species": "Species",
       "background": "Background",
       "alignment": "Alignment",
       "player": "Player",
@@ -512,7 +512,7 @@
     "loading": "Loading characters...",
     "noCharactersFound": "No characters found",
     "player": "Player: {{name}}",
-    "race": "Race",
+    "species": "Species",
     "background": "Background",
     "class": "Class",
     "level": "Level",
@@ -690,7 +690,7 @@
     "restoreHint": "The exported file can be restored with:"
   },
   "provenance": {
-    "race": "Race",
+    "species": "Species",
     "class": "Class",
     "background": "Background"
   },

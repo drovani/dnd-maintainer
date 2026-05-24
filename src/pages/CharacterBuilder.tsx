@@ -170,7 +170,7 @@ function CharacterBuilderInner() {
   const finalizeBlockers: readonly string[] = (() => {
     const reasons: string[] = [];
     if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'));
-    if (!character.species) reasons.push(t('characterBuilder.finalizeBlockers.missingRace'));
+    if (!character.species) reasons.push(t('characterBuilder.finalizeBlockers.missingSpecies'));
     if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'));
     if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'));
     for (const pending of resolved?.pendingChoices ?? []) {
