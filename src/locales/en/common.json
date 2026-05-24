@@ -206,6 +206,7 @@
       "generateRandomName": "Generate random name",
       "legacySpecies": "This character uses a legacy species ID. Select a 2024 species to update.",
       "selectSpeciesFirst": "Select a species to see lineage options.",
+      "loadingLineage": "Loading lineage options...",
       "couldNotLoadPlayerNames": "Could not load player name suggestions",
       "quickNpcDescription": "Create a random NPC of this class and jump ahead in the wizard",
       "quickNpcButton": "Random {{class}} NPC",

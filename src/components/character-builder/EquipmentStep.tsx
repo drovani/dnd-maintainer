@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { getLogger } from '@/lib/logger';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { BUNDLE_CATEGORIES, type WeaponMasteryId } from '@/types/items';
@@ -7,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { ChoicePicker } from './ChoicePicker';
 import type { ChoiceDecision } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
+
+const logger = getLogger('equipment-step');
 
 export function EquipmentStep() {
   const { t } = useTranslation('gamedata');
@@ -88,11 +91,15 @@ export function EquipmentStep() {
     for (const [, decision] of Object.entries(build?.choices ?? {})) {
       if (decision?.type === 'weapon-mastery-choice' && (decision.weaponIds as string[]).includes(weaponId)) {
         const weaponDef = WEAPON_CATALOG.find((w) => w.id === weaponId);
-        return weaponDef?.mastery ?? null;
+        if (!weaponDef) {
+          logger.warn(`[EquipmentStep] weapon mastery committed for unknown weapon: ${weaponId}`);
+          return null;
+        }
+        return weaponDef.mastery ?? null;
       }
     }
     // Check resolved weapon masteries
-    const fromResolved = resolved?.weaponMasteries?.find((wm) => wm.weaponId === weaponId);
+    const fromResolved = resolved?.weaponMasteries.find((wm) => wm.weaponId === weaponId);
     return fromResolved?.masteryId ?? null;
   }
 

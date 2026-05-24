@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { BasicsStep } from '@/components/character-builder/BasicsStep';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { SPECIES_SOURCES } from '@/lib/sources/species';
+import { LINEAGE_GRANTS_REGISTRY, SPECIES_SOURCES } from '@/lib/sources/species';
 import * as randomNpcModule from '@/lib/character-builder/random-npc';
 import type { Character, AbilityScores } from '@/types/database';
 import type { BuildLevelRow, CreationRow, LevelRow } from '@/lib/build-reconstruction';
+import type { GrantBundle } from '@/types/sources';
+import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 
 // ---------------------------------------------------------------------------
 // react-i18next mock — pattern from EquipmentStep.test.tsx
@@ -48,6 +50,8 @@ vi.mock('sonner', () => ({
 
 let contextCharacter: Character;
 let contextRows: readonly BuildLevelRow[];
+let contextBundles: readonly GrantBundle[];
+let contextBuild: { choices: Record<ChoiceKey, ChoiceDecision> } | null;
 
 const mockUpdateCharacter = vi.fn((updates: Partial<Character>) => {
   contextCharacter = { ...contextCharacter, ...updates };
@@ -76,8 +80,8 @@ vi.mock('@/hooks/useCharacterContext', () => ({
   useCharacterContext: () => ({
     character: contextCharacter,
     rows: contextRows,
-    build: null,
-    bundles: [],
+    build: contextBuild,
+    bundles: contextBundles,
     resolved: null,
     buildError: null,
     buildWarnings: [],
@@ -101,7 +105,7 @@ vi.mock('@/hooks/useCharacterContext', () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-function buildSeedCharacter(): Character {
+function buildSeedCharacter(overrides?: Partial<Character>): Character {
   return {
     id: '',
     slug: '',
@@ -141,6 +145,7 @@ function buildSeedCharacter(): Character {
     created_at: '',
     updated_at: '',
     weapon_masteries: null,
+    ...overrides,
   };
 }
 
@@ -173,6 +178,8 @@ function buildLevelRow(classId: string, sequence: number = 1): LevelRow {
 function resetContext() {
   contextCharacter = buildSeedCharacter();
   contextRows = [buildCreationRow()];
+  contextBundles = [];
+  contextBuild = null;
 }
 
 // ---------------------------------------------------------------------------
@@ -487,5 +494,88 @@ describe('BasicsStep', () => {
     contextRows = [buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }), buildLevelRow('fighter')];
     rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />);
     await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('skills'));
+  });
+
+  // ---------------------------------------------------------------------------
+  // IMPORTANT #7 — lineage picker, legacy-species badge, background removal
+  // ---------------------------------------------------------------------------
+
+  it('shows lineage picker when species is in LINEAGE_GRANTS_REGISTRY and bundles have caught up', () => {
+    // elf has lineages: ['drow', 'high-elf', 'wood-elf']
+    contextCharacter = buildSeedCharacter({ species: 'elf' });
+    contextBundles = [
+      {
+        source: { origin: 'species', id: 'elf' },
+        grants: [
+          {
+            type: 'lineage-choice',
+            key: 'lineage-choice:species:elf:0' as ChoiceKey,
+            speciesId: 'elf',
+            from: ['drow', 'high-elf', 'wood-elf'],
+          },
+        ],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<BasicsStep />);
+
+    // ChoicePicker renders radio buttons for each lineage option
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    // Should have at least one radio for a lineage option
+    expect(radios.length).toBeGreaterThan(0);
+  });
+
+  it('shows loading hint when species is in LINEAGE_GRANTS_REGISTRY but bundles have not caught up', () => {
+    // elf has lineages, but bundles is empty (hasn't resolved yet)
+    contextCharacter = buildSeedCharacter({ species: 'elf' });
+    contextBundles = [];
+
+    render(<BasicsStep />);
+
+    expect(screen.getByText('loadingLineage')).toBeTruthy();
+  });
+
+  it('hides lineage picker for a species without lineages (e.g. dwarf)', () => {
+    contextCharacter = buildSeedCharacter({ species: 'dwarf' });
+    contextBundles = [
+      {
+        source: { origin: 'species', id: 'dwarf' },
+        grants: [],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<BasicsStep />);
+
+    // dwarf is NOT in LINEAGE_GRANTS_REGISTRY, so no loading hint and no lineage radios
+    expect(screen.queryByText('loadingLineage')).toBeNull();
+    // Confirm dwarf is indeed not in the registry
+    expect('dwarf' in LINEAGE_GRANTS_REGISTRY).toBe(false);
+  });
+
+  it('shows legacy-species warning badge when character.species is not in SPECIES_SOURCES', () => {
+    // 'dwarf-hill' is a legacy ID from the old data model (not in SpeciesId union — cast required)
+    contextCharacter = buildSeedCharacter({ species: 'dwarf-hill' as 'human' });
+
+    render(<BasicsStep />);
+
+    expect(screen.getByText(/legacySpecies/)).toBeTruthy();
+  });
+
+  it('does not show legacy-species badge for a current 2024 species', () => {
+    contextCharacter = buildSeedCharacter({ species: 'elf' });
+
+    render(<BasicsStep />);
+
+    expect(screen.queryByText('legacySpecies')).toBeNull();
+  });
+
+  it('does not render a Background <Select> in BasicsStep (background was moved to BackgroundStep)', () => {
+    render(<BasicsStep />);
+
+    // The comboboxes present are Species and Class — no Background combobox
+    const combos = screen.getAllByRole('combobox') as HTMLElement[];
+    // None of them should have a background-related accessible description or placeholder
+    const hasBackground = combos.some((c) => c.textContent?.toLowerCase().includes('background'));
+    expect(hasBackground).toBe(false);
   });
 });

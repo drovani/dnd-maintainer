@@ -18,6 +18,7 @@ vi.mock('react-i18next', () => ({
       if (opts && 'defaultValue' in opts && typeof opts.defaultValue === 'string') return opts.defaultValue;
       if (opts && 'background' in opts) return `${base}:${String(opts.background)}`;
       if (opts && 'count' in opts) return `${base}:${String(opts.count)}`;
+      if (opts && 'ability' in opts) return `${base}:${String(opts.ability)}`;
       return base;
     },
     i18n: { language: 'en' },
@@ -258,13 +259,9 @@ describe('BackgroundStep', () => {
 
     render(<BackgroundStep />);
 
-    // Click the increment (+) button for 'int' (first eligible ability)
-    const increaseButtons = screen.getAllByRole('button');
-    // Find the increase button for 'int' (first eligible ability in acolyte's from: ['int', 'wis', 'cha'])
-    // Each ability card has dec/inc buttons; find the inc button for the first eligible ability
-    // Buttons are in pairs (dec, inc) per ability, for 3 eligible abilities = 6 buttons
-    // Button at index 1 is the inc button for the first ability (int)
-    const intIncButton = increaseButtons[1];
+    // Find the increment button for 'int' by accessible name (from: ['int', 'wis', 'cha'])
+    // aria-label is `increaseAbility:int` (mock returns `${base}:${ability}`)
+    const intIncButton = screen.getByRole('button', { name: 'increaseAbility:int' });
     fireEvent.click(intIncButton);
 
     expect(mockMakeChoice).toHaveBeenCalledWith(
@@ -287,8 +284,7 @@ describe('BackgroundStep', () => {
     render(<BackgroundStep />);
 
     // All increment buttons should be disabled since 3/3 points used
-    const increaseButtons = screen.getAllByRole('button');
-    const incButtons = increaseButtons.filter((_, i) => i % 2 === 1);
+    const incButtons = ['int', 'wis', 'cha'].map((a) => screen.getByRole('button', { name: `increaseAbility:${a}` }));
     incButtons.forEach((btn) => {
       expect((btn as HTMLButtonElement).disabled).toBe(true);
     });
@@ -362,5 +358,134 @@ describe('BackgroundStep', () => {
     expect(screen.queryByText('originFeatTitle')).toBeNull();
     expect(screen.queryByText('toolProficiencyTitle')).toBeNull();
     expect(screen.queryByText('languageTitle')).toBeNull();
+  });
+
+  // ---------------------------------------------------------------------------
+  // CRITICAL #1 — +2/+1 shape enforcement
+  // ---------------------------------------------------------------------------
+
+  it('+2/+1 mode: disables increment for a third distinct ability when two are already allocated', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [makeAcolyteAsiBundle()];
+    // int=1, wis=1 — two distinct abilities already allocated in +2/+1 mode
+    mockBuildChoices = {
+      'asi:background:acolyte:0': {
+        type: 'asi',
+        allocation: { int: 1, wis: 1 },
+      },
+    };
+
+    render(<BackgroundStep />);
+
+    // cha is the third ability — its increment must be disabled (distinct >= 2)
+    const chaIncButton = screen.getByRole('button', { name: 'increaseAbility:cha' }) as HTMLButtonElement;
+    expect(chaIncButton.disabled).toBe(true);
+
+    // int and wis increments should still be enabled (bumping an existing ability is fine)
+    const intIncButton = screen.getByRole('button', { name: 'increaseAbility:int' }) as HTMLButtonElement;
+    expect(intIncButton.disabled).toBe(false);
+  });
+
+  it('+2/+1 mode: disables bumping a second ability to +2 when one is already at +2', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [makeAcolyteAsiBundle()];
+    // int already at +2
+    mockBuildChoices = {
+      'asi:background:acolyte:0': {
+        type: 'asi',
+        allocation: { int: 2 },
+      },
+    };
+
+    render(<BackgroundStep />);
+
+    // wis currently at +0 → would go to +1 (allowed), but that would add a new distinct ability
+    // with 1 point remaining and int already using 2, wis could get +1 — that IS allowed
+    // However wis cannot go to +2 because int is already at +2
+    // After wis gets +1 (allocation {int:2, wis:1} = 3pts used), no further increments possible
+    // Here we only have int=2 (1pt remaining) — wis increment should be enabled (adding new distinct, only 1 distinct so far)
+    const wisIncButton = screen.getByRole('button', { name: 'increaseAbility:wis' }) as HTMLButtonElement;
+    expect(wisIncButton.disabled).toBe(false);
+    // int at +2 cannot go higher (cur >= 2 cap)
+    const intIncButton = screen.getByRole('button', { name: 'increaseAbility:int' }) as HTMLButtonElement;
+    expect(intIncButton.disabled).toBe(true);
+  });
+
+  it('+1/+1/+1 mode: disables increment on an ability already at +1', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [makeAcolyteAsiBundle()];
+    // int already at +1 in +1/+1/+1 mode
+    mockBuildChoices = {
+      'asi:background:acolyte:0': {
+        type: 'asi',
+        allocation: { int: 1, wis: 1, cha: 1 },
+      },
+    };
+
+    render(<BackgroundStep />);
+
+    // Switch to +1/+1/+1 mode — the radio
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const mode111Radio = radios.find((r) => r.id === 'asi-mode-+1/+1/+1')!;
+    // The saved allocation {int:1,wis:1,cha:1} should infer +1/+1/+1 mode at mount
+    expect(mode111Radio.checked).toBe(true);
+
+    // All abilities at 3/3 points used — all increments disabled
+    ['int', 'wis', 'cha'].forEach((a) => {
+      const btn = screen.getByRole('button', { name: `increaseAbility:${a}` }) as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // CRITICAL #2 — asiMode derived from saved allocation on mount
+  // ---------------------------------------------------------------------------
+
+  it('infers +1/+1/+1 mode from saved allocation {int:1, wis:1, cha:1}', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [makeAcolyteAsiBundle()];
+    mockBuildChoices = {
+      'asi:background:acolyte:0': {
+        type: 'asi',
+        allocation: { int: 1, wis: 1, cha: 1 },
+      },
+    };
+
+    render(<BackgroundStep />);
+
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const modeRadios = radios.filter((r) => r.name === 'asi-mode');
+    const checkedMode = modeRadios.find((r) => r.checked);
+    expect(checkedMode?.id).toBe('asi-mode-+1/+1/+1');
+  });
+
+  it('infers +2/+1 mode from saved allocation {int:2, wis:1}', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [makeAcolyteAsiBundle()];
+    mockBuildChoices = {
+      'asi:background:acolyte:0': {
+        type: 'asi',
+        allocation: { int: 2, wis: 1 },
+      },
+    };
+
+    render(<BackgroundStep />);
+
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const modeRadios = radios.filter((r) => r.name === 'asi-mode');
+    const checkedMode = modeRadios.find((r) => r.checked);
+    expect(checkedMode?.id).toBe('asi-mode-+2/+1');
+  });
+
+  it('defaults to +2/+1 mode for empty allocation', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [makeAcolyteAsiBundle()];
+
+    render(<BackgroundStep />);
+
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const modeRadios = radios.filter((r) => r.name === 'asi-mode');
+    const checkedMode = modeRadios.find((r) => r.checked);
+    expect(checkedMode?.id).toBe('asi-mode-+2/+1');
   });
 });

@@ -68,8 +68,11 @@ function makeMeleeBundle(): GrantBundle {
   };
 }
 
-function makeResolved(equipment: ResolvedCharacter['equipment'] = []): Partial<ResolvedCharacter> {
-  return { pendingChoices: [], equipment };
+function makeResolved(
+  equipment: ResolvedCharacter['equipment'] = [],
+  weaponMasteries: ResolvedCharacter['weaponMasteries'] = []
+): Partial<ResolvedCharacter> {
+  return { pendingChoices: [], equipment, weaponMasteries };
 }
 
 // ---------------------------------------------------------------------------
@@ -189,5 +192,56 @@ describe('EquipmentStep — two-column layout', () => {
     expect(screen.getByText('summary')).toBeTruthy();
     // Empty-state must NOT render when there's materialized equipment
     expect(screen.queryByText('summaryEmpty')).toBeNull();
+  });
+
+  // ---------------------------------------------------------------------------
+  // IMPORTANT #7 — weapon mastery badge tests
+  // ---------------------------------------------------------------------------
+
+  it('shows weapon mastery badge when mastery comes from a build choices decision', () => {
+    // longsword has mastery 'sap' in WEAPON_CATALOG
+    mockContextValue.bundles = [];
+    mockContextValue.resolved = makeResolved([
+      {
+        itemId: 'longsword',
+        itemDef: requireItemDef('longsword'),
+        quantity: 1,
+        source: { origin: 'bundle', id: 'martial-weapon-and-shield' },
+        equipped: false,
+      },
+    ]) as ResolvedCharacter;
+    mockContextValue.build = {
+      choices: {
+        'weapon-mastery-choice:class:fighter:0': {
+          type: 'weapon-mastery-choice',
+          weaponIds: ['longsword'],
+        },
+      },
+    };
+
+    render(<EquipmentStep />);
+
+    // The mastery badge renders the last segment of t('weaponMasteries.sap.name') → 'name'
+    expect(screen.getByText('name')).toBeTruthy();
+  });
+
+  it('shows weapon mastery badge when mastery comes from resolved.weaponMasteries', () => {
+    mockContextValue.bundles = [];
+    mockContextValue.resolved = makeResolved(
+      [
+        {
+          itemId: 'longsword',
+          itemDef: requireItemDef('longsword'),
+          quantity: 1,
+          source: { origin: 'bundle', id: 'martial-weapon-and-shield' },
+          equipped: false,
+        },
+      ],
+      [{ weaponId: 'longsword', masteryId: 'sap' }]
+    ) as ResolvedCharacter;
+
+    render(<EquipmentStep />);
+
+    expect(screen.getByText('name')).toBeTruthy();
   });
 });

@@ -14,13 +14,18 @@ import { ChoicePicker } from './ChoicePicker';
 
 type AsiMode = '+2/+1' | '+1/+1/+1';
 
+function inferAsiMode(alloc: Partial<Record<AbilityKey, number>>): AsiMode {
+  const values = Object.values(alloc).filter((v): v is number => typeof v === 'number' && v > 0);
+  if (values.some((v) => v === 2)) return '+2/+1';
+  if (values.length === 3 && values.every((v) => v === 1)) return '+1/+1/+1';
+  return '+2/+1';
+}
+
 export function BackgroundStep() {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
   const context = useCharacterContext();
   const { character, bundles, build, resolved } = context;
-
-  const [asiMode, setAsiMode] = useState<AsiMode>('+2/+1');
 
   const background = character.background ?? '';
 
@@ -28,24 +33,22 @@ export function BackgroundStep() {
     context.updateCharacter({ background: value });
   };
 
+  // Extract background grants (shared filter — avoids repeating the chain)
+  const backgroundGrants = bundles.filter((b) => b.source.origin === 'background').flatMap((b) => b.grants);
+
   // Extract background ASI grant from bundles
-  const backgroundAsiGrant = bundles
-    .filter((b) => b.source.origin === 'background')
-    .flatMap((b) => b.grants)
-    .find((g): g is Extract<typeof g, { type: 'asi' }> => g.type === 'asi');
+  const backgroundAsiGrant = backgroundGrants.find((g): g is Extract<typeof g, { type: 'asi' }> => g.type === 'asi');
 
   const backgroundAsiChoiceKey = backgroundAsiGrant?.key;
   const backgroundAsiDecision = backgroundAsiChoiceKey ? build?.choices[backgroundAsiChoiceKey] : undefined;
   const backgroundAsiAllocation: Partial<Record<AbilityKey, number>> =
     backgroundAsiDecision?.type === 'asi' ? backgroundAsiDecision.allocation : {};
   const backgroundAsiPointsUsed = Object.values(backgroundAsiAllocation).reduce((s, v) => s + (v ?? 0), 0);
-  const totalAsiPoints = backgroundAsiGrant?.points ?? 3;
+
+  const [asiMode, setAsiMode] = useState<AsiMode>(() => inferAsiMode(backgroundAsiAllocation));
 
   // Extract background feat grant
-  const backgroundFeatGrant = bundles
-    .filter((b) => b.source.origin === 'background')
-    .flatMap((b) => b.grants)
-    .find((g): g is Extract<typeof g, { type: 'feat' }> => g.type === 'feat');
+  const backgroundFeatGrant = backgroundGrants.find((g): g is Extract<typeof g, { type: 'feat' }> => g.type === 'feat');
 
   // Synthesize tool-choice and language-choice PendingChoices from background grants
   const backgroundToolChoiceGrants = collectGrantsByType(bundles, 'proficiency-choice').filter(
@@ -58,7 +61,7 @@ export function BackgroundStep() {
       source,
       category: 'tool' as const,
       count: grant.count,
-      from: (grant.from as readonly ToolProficiencyId[] | null) ?? [],
+      from: grant.from as readonly ToolProficiencyId[] | null,
     })
   );
 
@@ -79,28 +82,31 @@ export function BackgroundStep() {
   const allAbilityKeys: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
   const eligibleAbilities: readonly AbilityKey[] = asiFrom ?? allAbilityKeys;
 
-  const getPointsAllowedForAbility = (ability: AbilityKey): number => {
-    if (asiMode === '+2/+1') {
-      // In +2/+1 mode, one ability can have up to 2 and another up to 1
-      const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
-      // If this ability already has 2, cap at 2
-      if (currentAlloc >= 2) return 2;
-      // If any ability already has 2, this one can only get 1
-      const hasAbilityWithTwo = eligibleAbilities.some((a) => a !== ability && (backgroundAsiAllocation[a] ?? 0) === 2);
-      return hasAbilityWithTwo ? 1 : 2;
-    }
-    // +1/+1/+1 mode: each ability can only get 1
-    return 1;
-  };
-
   const canIncrement = (ability: AbilityKey): boolean => {
-    if (!backgroundAsiChoiceKey) return false;
-    const currentAlloc = backgroundAsiAllocation[ability] ?? 0;
-    const maxForAbility = getPointsAllowedForAbility(ability);
-    if (currentAlloc >= maxForAbility) return false;
+    if (!backgroundAsiChoiceKey || !backgroundAsiGrant) return false;
+    const cur = backgroundAsiAllocation[ability] ?? 0;
+    const totalAsiPoints = backgroundAsiGrant.points;
     if (backgroundAsiPointsUsed >= totalAsiPoints) return false;
+    if (cur >= 2) return false; // per-ability hard cap (no +3)
     const currentTotal = resolved?.abilities[ability].total ?? 10;
     if (currentTotal + 1 > 20) return false;
+    if (asiMode === '+2/+1') {
+      if (cur === 0) {
+        // Adding a new ability — +2/+1 allows at most 2 distinct abilities
+        const distinct = Object.values(backgroundAsiAllocation).filter((v) => (v ?? 0) > 0).length;
+        if (distinct >= 2) return false;
+      }
+      if (cur === 1) {
+        // Bumping to +2 — only allowed if no other ability is already at +2
+        const someOtherAt2 = (Object.entries(backgroundAsiAllocation) as [AbilityKey, number][]).some(
+          ([a, v]) => a !== ability && v === 2
+        );
+        if (someOtherAt2) return false;
+      }
+    }
+    if (asiMode === '+1/+1/+1') {
+      if (cur >= 1) return false; // each ability capped at +1
+    }
     return true;
   };
 
@@ -242,13 +248,16 @@ export function BackgroundStep() {
               })}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant={backgroundAsiPointsUsed === totalAsiPoints ? 'default' : 'outline'} className="text-xs">
-                {backgroundAsiPointsUsed} / {totalAsiPoints}
+              <Badge
+                variant={backgroundAsiPointsUsed === backgroundAsiGrant.points ? 'default' : 'outline'}
+                className="text-xs"
+              >
+                {backgroundAsiPointsUsed} / {backgroundAsiGrant.points}
               </Badge>
-              {backgroundAsiPointsUsed < totalAsiPoints && (
+              {backgroundAsiPointsUsed < backgroundAsiGrant.points && (
                 <span>
                   {tc('characterBuilder.abilities.backgroundAsiRemaining', {
-                    count: totalAsiPoints - backgroundAsiPointsUsed,
+                    count: backgroundAsiGrant.points - backgroundAsiPointsUsed,
                   })}
                 </span>
               )}
