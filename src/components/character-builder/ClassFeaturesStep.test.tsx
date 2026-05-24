@@ -262,6 +262,39 @@ describe('ClassFeaturesStep', () => {
     );
   });
 
+  it('renders SubclassPicker for non-Fighter/non-Rogue classes (e.g. wizard) at L3', () => {
+    const WIZARD_SUBCLASS_CHOICE_KEY = 'subclass:class:wizard:0' as ChoiceKey;
+    const wizardSubclassChoice: Extract<PendingChoice, { type: 'subclass' }> = {
+      type: 'subclass',
+      choiceKey: WIZARD_SUBCLASS_CHOICE_KEY,
+      classId: 'wizard',
+      source: { origin: 'class', id: 'wizard', level: 3 },
+    };
+
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [wizardSubclassChoice],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassFeaturesStep />);
+
+    // SubclassPicker heading should be present
+    expect(screen.getByText('chooseSubclass')).toBeTruthy();
+
+    // SUBCLASS_SOURCES has abjurer, diviner, evoker, illusionist for wizard.
+    // The picker renders them as <button> elements — assert at least one is available.
+    const subclassButtons = screen.getAllByRole('button');
+    expect(subclassButtons.length).toBeGreaterThan(0);
+
+    // Clicking a wizard subclass button should call makeChoice with the wizard choice key
+    fireEvent.click(subclassButtons[0]);
+    expect(mockMakeChoice).toHaveBeenCalledWith(
+      WIZARD_SUBCLASS_CHOICE_KEY,
+      expect.objectContaining({ type: 'subclass', subclassId: expect.any(String) })
+    );
+  });
+
   it('hides empty-state when only L1 class features are present', () => {
     mockContextValue.resolved = {
       spellcasting: null,
