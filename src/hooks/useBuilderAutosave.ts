@@ -88,6 +88,8 @@ export function useBuilderAutosave(existingCharacterId?: string) {
             backstory: character.backstory,
             notes: character.notes,
             portrait_url: character.portrait_url,
+            heroic_inspiration: character.heroic_inspiration,
+            exhaustion_level: character.exhaustion_level,
             // Pre-calculated fields from resolved (or character if resolved unavailable)
             hit_points_max: resolved?.hitPoints.max ?? character.hit_points_max,
             armor_class: resolved?.armorClass.effective ?? character.armor_class,
