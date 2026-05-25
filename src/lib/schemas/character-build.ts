@@ -50,6 +50,7 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
     // will re-prompt the user via pendingChoices when they load the character.
     slotPicks: z.record(z.string(), z.string()).default({}),
   }),
+  z.object({ type: z.literal('lineage-choice'), lineageId: z.string().min(1) }),
 ]);
 
 export const CharacterBuildSchema = z.object({

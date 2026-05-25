@@ -200,6 +200,13 @@ describe('ChoiceDecisionSchema', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('lineage-choice', () => {
+    it('accepts a lineage-choice decision', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'lineage-choice', lineageId: 'high' });
+      expect(result.success).toBe(true);
+    });
+  });
 });
 
 describe('CharacterBuildSchemaStrict', () => {
