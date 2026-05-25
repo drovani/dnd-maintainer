@@ -1,12 +1,12 @@
 # D&D Campaign Manager
 
-A free, open-source campaign management tool for D&D 5th Edition. Run it locally as a private, self-hosted app to organize your campaigns, characters, sessions, and DM notes.
+A free, open-source campaign management tool for D&D 5.5e (2024 Player's Handbook). Run it locally as a private, self-hosted app to organize your campaigns, characters, sessions, and DM notes.
 
 ## Features
 
 - **Campaign Management** — Create and manage multiple campaigns with setting info, status tracking, and a dashboard overview
-- **Character Builder** — 7-step wizard (Basics → Abilities → Skills → Class Features → Proficiencies → Equipment → Backstory) with autosave
-- **Character Sheets** — Build and track PCs and NPCs with full 5e stats: ability scores, skills, equipment, spells, and backstory
+- **Character Builder** — 7-step wizard (Basics → Abilities → Skills → Class Features → Proficiencies → Equipment → Backstory) with autosave; implements 2024 species, backgrounds, feat catalog, weapon masteries, and subclass selection at level 3
+- **Character Sheets** — Build and track PCs and NPCs with full 5.5e stats: ability scores, skills, equipment, spells, heroic inspiration, exhaustion, and weapon mastery display
 - **Session Log** — Record session summaries, XP awards, loot tracking, and link encounters to sessions
 - **Encounter Tracker** — Plan encounters with combatant lists and status tracking
 - **DM Notes** — Organize notes by category (plot, NPC, location, loot, rules) with tagging and pinning
