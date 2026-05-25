@@ -198,11 +198,13 @@ export type Database = {
           character_type: string
           class: string | null
           created_at: string
+          exhaustion_level: number
           eye_color: string | null
           flaws: string | null
           gender: string | null
           hair_color: string | null
           height: string | null
+          heroic_inspiration: boolean
           hit_points_max: number | null
           id: string
           ideals: string | null
@@ -238,11 +240,13 @@ export type Database = {
           character_type: string
           class?: string | null
           created_at?: string
+          exhaustion_level?: number
           eye_color?: string | null
           flaws?: string | null
           gender?: string | null
           hair_color?: string | null
           height?: string | null
+          heroic_inspiration?: boolean
           hit_points_max?: number | null
           id?: string
           ideals?: string | null
@@ -278,11 +282,13 @@ export type Database = {
           character_type?: string
           class?: string | null
           created_at?: string
+          exhaustion_level?: number
           eye_color?: string | null
           flaws?: string | null
           gender?: string | null
           hair_color?: string | null
           height?: string | null
+          heroic_inspiration?: boolean
           hit_points_max?: number | null
           id?: string
           ideals?: string | null

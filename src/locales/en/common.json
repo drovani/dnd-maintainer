@@ -514,6 +514,15 @@
       "deleteConfirm": "Are you sure you want to permanently delete {{name}}? This action cannot be undone.",
       "archiveSuccess": "{{name}} has been archived.",
       "deleteSuccess": "{{name}} has been deleted."
+    },
+    "status": {
+      "heroicInspiration": "Heroic Inspiration",
+      "exhaustionLevel": "Exhaustion",
+      "exhaustionPenalty": "-{{penalty}} to d20 rolls",
+      "speedZero": "Speed: 0 ft",
+      "dead": "Dead",
+      "decrement": "Decrease exhaustion",
+      "increment": "Increase exhaustion"
     }
   },
   "characterList": {

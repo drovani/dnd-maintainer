@@ -13,6 +13,8 @@ import { LevelControls } from '@/components/character-sheet/LevelControls';
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel';
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
+import { StatusPanel } from '@/components/character-sheet/StatusPanel';
+import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
@@ -87,6 +89,7 @@ function CharacterSheetInner({
   const {
     character: ctxCharacter,
     rows,
+    build,
     resolved,
     buildError,
     buildWarnings,
@@ -205,6 +208,23 @@ function CharacterSheetInner({
   const skills = resolved?.skills;
   const savingThrows = resolved?.savingThrows;
 
+  // Lineage: find the lineage-choice decision made during character creation
+  const lineageId: string | null = (() => {
+    if (!build) return null;
+    const entry = Object.entries(build.choices).find(([key]) => key.startsWith('lineage-choice:species:'));
+    if (!entry) return null;
+    const decision = entry[1];
+    return decision.type === 'lineage-choice' ? decision.lineageId : null;
+  })();
+
+  // Origin feat: find the feat granted by the character's background source
+  const originFeatId: string | null = (() => {
+    if (!character.background || !isBackgroundId(character.background)) return null;
+    const bg = BACKGROUND_SOURCES.find((s) => s.id === character.background);
+    const featGrant = bg?.grants.find((g) => g.type === 'feat');
+    return featGrant && 'featId' in featGrant ? featGrant.featId : null;
+  })();
+
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto p-8">
@@ -274,6 +294,11 @@ function CharacterSheetInner({
               <p className="text-foreground font-semibold">
                 {character.species ? t(`species.${character.species}`, { defaultValue: character.species }) : ''}
               </p>
+              {lineageId && character.species && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {t(`lineages.${character.species}.${lineageId}`, { defaultValue: lineageId })}
+                </p>
+              )}
             </div>
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.background')}</span>
@@ -284,6 +309,11 @@ function CharacterSheetInner({
                     : character.background
                   : ''}
               </p>
+              {originFeatId && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {t(`feats.${originFeatId}.name`, { defaultValue: originFeatId })}
+                </p>
+              )}
             </div>
             <div>
               <span className="text-muted-foreground">{tc('characterSheet.fields.alignment')}</span>
@@ -309,6 +339,11 @@ function CharacterSheetInner({
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Status: Heroic Inspiration & Exhaustion */}
+          <div className="mt-4 pt-4 border-t">
+            <StatusPanel character={character} onUpdate={handleUpdate} />
           </div>
 
           {/* Level Controls */}

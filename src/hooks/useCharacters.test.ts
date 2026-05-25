@@ -53,6 +53,8 @@ const baseCharacter: Character = {
   is_active: true,
   status: 'ready',
   weapon_masteries: null,
+  heroic_inspiration: false,
+  exhaustion_level: 0 as const,
 };
 
 setupMockReset();

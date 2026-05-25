@@ -59,6 +59,8 @@ const TABLE_COLUMNS = {
     { name: 'is_active', type: 'boolean' },
     { name: 'status', type: 'text' },
     { name: 'weapon_masteries', type: 'jsonb' },
+    { name: 'heroic_inspiration', type: 'boolean' },
+    { name: 'exhaustion_level', type: 'integer' },
     { name: 'gender', type: 'text' },
     { name: 'size', type: 'text' },
     { name: 'age', type: 'text' },
