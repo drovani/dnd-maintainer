@@ -387,7 +387,7 @@ describe('resolveAbilities', () => {
       expect(result.dex.total).toBe(10); // unchanged
     });
 
-    it('background ASI that would push a score from 18 to 21 is capped at 20', () => {
+    it('background ASI +3 wis to a base of 18 caps at 20 — raw 21 clamps to 20', () => {
       const highBase = { ...BASE, wis: 18 };
       const bundles: GrantBundle[] = [
         {
@@ -403,12 +403,13 @@ describe('resolveAbilities', () => {
         },
       ];
       const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
-        'asi:background:acolyte:0': { type: 'asi', allocation: { wis: 2, cha: 1 } },
+        // +3 to wis: raw 18 + 3 = 21, must clamp to 20
+        'asi:background:acolyte:0': { type: 'asi', allocation: { wis: 3 } },
       };
       const result = resolveAbilities(highBase, bundles, choices);
-      expect(result.wis.total).toBe(20); // capped — 18 + 2 would be 20, excess dropped
+      expect(result.wis.total).toBe(20); // capped — raw 21 clamped to 20
       expect(result.wis.modifier).toBe(5);
-      expect(result.cha.total).toBe(11); // unaffected by cap
+      expect(result.cha.total).toBe(10); // unaffected
     });
   });
 });
