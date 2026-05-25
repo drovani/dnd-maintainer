@@ -228,6 +228,41 @@ describe('resolveSpellcasting', () => {
       const result = resolveSpellcasting(makeClericBundles(1), abilities, 2, 1);
       expect(result!.preparedCount).toBe(1);
     });
+
+    it('druid L1 wis+2 → 3', () => {
+      // max(1, 1 + 2) = 3
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(makeDruidBundles(1), abilities, 2, 1);
+      expect(result!.preparedCount).toBe(3);
+    });
+
+    it('druid L20 wis+4 → 24', () => {
+      // max(1, 20 + 4) = 24
+      const abilities = makeAbilities({ wis: 18 });
+      const result = resolveSpellcasting(makeDruidBundles(20), abilities, 6, 20);
+      expect(result!.preparedCount).toBe(24);
+    });
+
+    it('wizard L1 int 8 (mod -1) → 1 (floor)', () => {
+      // max(1, 1 + (-1)) = max(1, 0) = 1
+      const abilities = makeAbilities({ int: 8 });
+      const result = resolveSpellcasting(makeWizardBundles(1), abilities, 2, 1);
+      expect(result!.preparedCount).toBe(1);
+    });
+
+    it('paladin L2 cha+1 → 3', () => {
+      // max(1, 2 + 1) = 3
+      const abilities = makeAbilities({ cha: 12 });
+      const result = resolveSpellcasting(makePaladinBundles(2), abilities, 2, 2);
+      expect(result!.preparedCount).toBe(3);
+    });
+
+    it('ranger L2 wis 8 (mod -1) → 1 (floor at first ranger spellcasting level)', () => {
+      // max(1, 2 + (-1)) = max(1, 1) = 1
+      const abilities = makeAbilities({ wis: 8 });
+      const result = resolveSpellcasting(makeRangerBundles({ level: 2 }), abilities, 2, 2);
+      expect(result!.preparedCount).toBe(1);
+    });
   });
 
   describe('spell grant routing', () => {
