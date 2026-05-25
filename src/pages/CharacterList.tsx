@@ -205,9 +205,9 @@ export default function CharacterList() {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t('characterList.race')}</span>
+                    <span className="text-muted-foreground">{t('characterList.species')}</span>
                     <span className="text-foreground">
-                      {character.species ? tg(`races.${character.species}`, { defaultValue: character.species }) : ''}
+                      {character.species ? tg(`species.${character.species}`, { defaultValue: character.species }) : ''}
                     </span>
                   </div>
                   {character.background && isBackgroundId(character.background) && (

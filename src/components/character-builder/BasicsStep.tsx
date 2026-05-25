@@ -371,7 +371,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
               disabled={!race || !gender}
               title={
                 !race || !gender
-                  ? tc('characterBuilder.hints.selectRaceAndGender')
+                  ? tc('characterBuilder.hints.selectSpeciesAndGender')
                   : tc('characterBuilder.hints.generateRandomName')
               }
               onClick={() => {
@@ -420,15 +420,15 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
             <Select
               value={race || null}
               onValueChange={(value) => value && handleSpeciesChange(value as SpeciesId)}
-              items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`races.${s.id}`) }))}
+              items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`species.${s.id}`) }))}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseRace')} />
+                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseSpecies')} />
               </SelectTrigger>
               <SelectContent>
                 {DND_SPECIES.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {t(`races.${s.id}`)}
+                    {t(`species.${s.id}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

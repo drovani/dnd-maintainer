@@ -106,7 +106,6 @@
     },
     "fields": {
       "characterName": "Character Name",
-      "race": "Race",
       "species": "Species",
       "lineage": "Lineage",
       "originFeat": "Origin Feat",
@@ -144,7 +143,7 @@
         "finalWeight": "Weight",
         "formula": "{{base}} + {{dice}}",
         "weightFormula": "{{base}} lbs + (height mod × {{dice}}) lbs",
-        "noRace": "Pick a species on the Basics step to set height and weight."
+        "noSpecies": "Pick a species on the Basics step to set height and weight."
       }
     },
     "pendingChoices": {
@@ -163,7 +162,6 @@
     "finalizeBlockers": {
       "title": "Before you can finalize:",
       "missingName": "Character name is required",
-      "missingRace": "Race is required",
       "missingSpecies": "Species is required",
       "missingClass": "Class is required",
       "missingBackground": "Background is required",
@@ -182,7 +180,7 @@
     "placeholders": {
       "enterCharacterName": "Enter character name",
       "enterPlayerName": "Enter player name",
-      "chooseRace": "Choose a race",
+      "chooseSpecies": "Choose a species",
       "chooseClass": "Choose a class",
       "chooseBackground": "Choose a background",
       "describeBackground": "Describe your background briefly",
@@ -202,7 +200,7 @@
       "cantrips": "e.g., Fire Bolt, Mage Hand"
     },
     "hints": {
-      "selectRaceAndGender": "Select race and gender first",
+      "selectSpeciesAndGender": "Select species and gender first",
       "generateRandomName": "Generate random name",
       "legacySpecies": "This character uses a legacy species ID. Select a 2024 species to update.",
       "selectSpeciesFirst": "Select a species to see lineage options.",
@@ -210,7 +208,7 @@
       "couldNotLoadPlayerNames": "Could not load player name suggestions",
       "quickNpcDescription": "Create a random NPC of this class and jump ahead in the wizard",
       "quickNpcButton": "Random {{class}} NPC",
-      "quickNpcFailed": "Could not generate NPC — name data missing for selected race",
+      "quickNpcFailed": "Could not generate NPC — name data missing for selected species",
       "quickNpcUnknownClass": "Could not generate NPC — unknown class",
       "quickNpcEmptyDataSource": "Could not generate NPC — required data is missing",
       "quickNpcCommitFailed": "Could not apply NPC — please try again",
@@ -236,7 +234,7 @@
       "increaseScore_plural": "Increase score, spend {{count}} points",
       "maximumScore": "Maximum score",
       "notEnoughPoints": "Not enough points",
-      "racialBonus": "{{race}} Racial Bonus: {{bonuses}}",
+      "speciesBonus": "{{species}} Species Bonus: {{bonuses}}",
       "backgroundAsi": "Background bonus",
       "backgroundBonus": "{{background}} bonus",
       "backgroundBonusSuffix": "bg",
@@ -255,7 +253,7 @@
     },
     "proficiencies": {
       "selectClassFirst": "Please select a class in the Basics step before viewing proficiencies.",
-      "selectRaceFirst": "Please select a race in the Basics step before viewing languages.",
+      "selectSpeciesFirst": "Please select a species in the Basics step before viewing languages.",
       "armorProficiencies": "Armor Proficiencies",
       "weaponProficiencies": "Weapon Proficiencies",
       "toolProficiencies": "Tool Proficiencies",
@@ -265,7 +263,7 @@
       "languageName": "Language",
       "typicalSpeakers": "Typical Speakers",
       "script": "Script",
-      "grantedByRace": "Granted",
+      "grantedBySpecies": "Granted",
       "chooseTools": "Choose {{count}} tool proficiency from the list below.",
       "chooseTools_plural": "Choose {{count}} tool proficiencies from the list below.",
       "randomizeLanguage": "Roll random language (d12)",
@@ -274,7 +272,7 @@
       "selected": "{{count}} / {{max}} selected",
       "noProficiencies": "None",
       "fromClass": "From class",
-      "fromRace": "From race"
+      "fromSpecies": "From species"
     },
     "classFeatures": {
       "fightingStyles": "Fighting Styles",
@@ -369,7 +367,7 @@
     "fields": {
       "class": "Class",
       "level": "Level",
-      "race": "Race",
+      "species": "Species",
       "background": "Background",
       "alignment": "Alignment",
       "player": "Player",
@@ -523,7 +521,7 @@
     "subtitle": "{{count}} total",
     "pcCount": "{{count}} PCs",
     "npcCount": "{{count}} NPCs",
-    "searchPlaceholder": "Search by name, player, race, or class...",
+    "searchPlaceholder": "Search by name, player, species, or class...",
     "allCharacters": "All Characters",
     "playerCharacters": "Player Characters",
     "npcs": "NPCs",
@@ -534,7 +532,7 @@
     "loading": "Loading characters...",
     "noCharactersFound": "No characters found",
     "player": "Player: {{name}}",
-    "race": "Race",
+    "species": "Species",
     "background": "Background",
     "class": "Class",
     "level": "Level",
@@ -642,7 +640,7 @@
       "viewAllCharacters": "View all {{count}} characters →",
       "failedToLoadCharacters": "Failed to load characters",
       "playedBy": "Played by {{name}}",
-      "charSummary": "{{race}} {{class}} • Level {{level}}"
+      "charSummary": "{{species}} {{class}} • Level {{level}}"
     },
     "toolkit": {
       "title": "Campaign Toolkit"
@@ -712,7 +710,7 @@
     "restoreHint": "The exported file can be restored with:"
   },
   "provenance": {
-    "race": "Race",
+    "species": "Species",
     "class": "Class",
     "background": "Background"
   },

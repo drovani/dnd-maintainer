@@ -62,7 +62,7 @@ const BUNDLE_TO_CLASS: ReadonlyMap<string, ClassId> = (() => {
 export function getSourceDisplayName(source: SourceTag, tGamedata: TFunction<'gamedata'>): string {
   switch (source.origin) {
     case 'species':
-      return tGamedata(`races.${source.id}`, { defaultValue: source.id });
+      return tGamedata(`species.${source.id}`, { defaultValue: source.id });
     case 'class':
       return tGamedata(`classes.${source.id}`, { defaultValue: source.id });
     case 'subclass':

@@ -106,7 +106,7 @@ export function ProficienciesStep() {
     if (isGranted) {
       checkbox = (
         <BadgeCheckIcon
-          aria-label={tc('characterBuilder.proficiencies.grantedByRace')}
+          aria-label={tc('characterBuilder.proficiencies.grantedBySpecies')}
           className="flex size-4 shrink-0 text-primary"
         />
       );
@@ -362,7 +362,7 @@ export function ProficienciesStep() {
             </tbody>
           </table>
         ) : (
-          <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.selectRaceFirst')}</p>
+          <p className="text-muted-foreground text-sm">{tc('characterBuilder.proficiencies.selectSpeciesFirst')}</p>
         )}
       </div>
     </div>

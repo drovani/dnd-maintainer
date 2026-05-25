@@ -6,7 +6,7 @@ export function getChoiceSourceName(choiceKey: ChoiceKey, t: TFunction<'gamedata
   const { origin, id } = parseChoiceKey(choiceKey);
   switch (origin) {
     case 'species':
-      return t(`races.${id as SpeciesId}`);
+      return t(`species.${id as SpeciesId}`);
     case 'background':
       return t(`backgrounds.${id as BackgroundId}`);
     case 'class':
