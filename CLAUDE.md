@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-D&D 5th Edition Campaign Manager — a React SPA for managing campaigns, characters, sessions, encounters, and DM notes. No auth is implemented yet (RLS is enabled but no policies are defined).
+D&D 5.5e (2024 PHB) Campaign Manager — a React SPA for managing campaigns, characters, sessions, encounters, and DM notes. The target ruleset is the 2024 D&D Player's Handbook. No auth is implemented yet (RLS is enabled but no policies are defined).
 
 ## Commands
 
@@ -64,19 +64,21 @@ All user-facing strings must use `react-i18next` translation keys — never hard
 - **Translation files**: `src/locales/en/common.json` and `src/locales/en/gamedata.json`.
 - **Type safety**: `src/@types/i18next.d.ts` maps `resources` to the JSON files, giving compile-time key checking. Invalid `t('nonexistent.key')` calls fail typecheck.
 - **Usage pattern**: `const { t } = useTranslation('common')` for UI strings, `const { t } = useTranslation('gamedata')` for game data. When both are needed in one component, alias one: `const { t: tc } = useTranslation('common')`.
-- **Dynamic keys**: Domain ID types (`RaceId`, `ClassId`, `AlignmentId`) are narrow enough that template literals like ``t(`races.${raceId}`)`` typecheck without casts. If a variable is wider than the key union (e.g., `string` from `Object.entries()`), narrow it first rather than using `as never`.
-- **ID-based data model**: Race, class, background, alignment, and skill values are stored as lowercase IDs in the database (e.g., `dwarf-hill`, `wizard`, `folkhero`). Always translate IDs to display names via `t()` from the `gamedata` namespace — never display raw IDs to users.
+- **Dynamic keys**: Domain ID types (`SpeciesId`, `ClassId`, `AlignmentId`) are narrow enough that template literals like ``t(`species.${speciesId}`)`` typecheck without casts. If a variable is wider than the key union (e.g., `string` from `Object.entries()`), narrow it first rather than using `as never`.
+- **ID-based data model**: Species, class, background, alignment, and skill values are stored as lowercase IDs in the database (e.g., `dwarf`, `wizard`, `acolyte`). Always translate IDs to display names via `t()` from the `gamedata` namespace — never display raw IDs to users.
 
 ### D&D Game Data
 
-`src/lib/dnd-helpers.ts` contains D&D 5e reference data (races, classes, skills, backgrounds, alignments) and utility functions (ability modifier calculation, proficiency bonus, spell slot tables). Race/class/background data uses ID-based keys that correspond to translation keys in `gamedata.json`.
+`src/lib/dnd-helpers.ts` contains D&D 5.5e (2024) reference data (species, classes, skills, backgrounds, alignments, conditions) and utility functions (ability modifier calculation, proficiency bonus, spell slot tables). Species/class/background data uses ID-based keys that correspond to translation keys in `gamedata.json`. See `docs/dnd-2024.md` for the contributor data-shape reference.
 
 `src/lib/sources/` implements the **Source → Grant → Resolver pipeline**:
 
 - `classes.ts` / `subclasses.ts` / `species.ts` / `backgrounds.ts` / `feats.ts` — define `*Source` objects with per-level `Grant[]` arrays
 - `index.ts` — `collectBundles(build)` assembles `GrantBundle[]` from all active sources for a character build
 - `src/lib/resolver/` — `resolveCharacter(bundles, choices)` resolves bundles into a `ResolvedCharacter` (proficiencies, features, pending choices, etc.)
-- All 12 classes have `ClassSource` entries; Fighter and Rogue are the only classes with `SubclassSource` entries so far
+- All 12 classes have `ClassSource` entries; all 48 subclasses have `SubclassSource` registrations. Only Fighter (champion, battlemaster, eldritchknight) and Rogue (thief, assassin, arcanetrickster) have populated `features` arrays — the remaining 42 subclass entries have empty `features: []` stubs awaiting implementation
+- Subclass selection is uniformly at class level 3 for all 12 classes (array index 2 of `ClassSource.levels`), matching the 2024 PHB rule
+- Weapon masteries are defined in `src/types/items.ts` as `WEAPON_MASTERIES` and granted via `weapon-mastery-choice` grants in `ClassSource.levels`; Barbarian, Fighter, Paladin, Ranger, and Rogue receive mastery choices at various levels
 
 ### Database Schema
 
