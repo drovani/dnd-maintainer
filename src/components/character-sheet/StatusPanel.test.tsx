@@ -82,6 +82,14 @@ describe('StatusPanel', () => {
     expect(onUpdate).toHaveBeenCalledWith({ heroic_inspiration: true });
   });
 
+  it('calls onUpdate with heroic_inspiration: false when switch is toggled off', () => {
+    const onUpdate = vi.fn();
+    render(<StatusPanel character={makeCharacter({ heroic_inspiration: true })} onUpdate={onUpdate} />);
+    const switchEl = screen.getByRole('switch');
+    fireEvent.click(switchEl);
+    expect(onUpdate).toHaveBeenCalledWith({ heroic_inspiration: false });
+  });
+
   it('shows current exhaustion level', () => {
     render(<StatusPanel character={makeCharacter({ exhaustion_level: 3 as ExhaustionLevel })} onUpdate={vi.fn()} />);
     expect(screen.getByText('3')).toBeInTheDocument();

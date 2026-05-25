@@ -208,10 +208,12 @@ function CharacterSheetInner({
   const skills = resolved?.skills;
   const savingThrows = resolved?.savingThrows;
 
-  // Lineage: find the lineage-choice decision made during character creation
+  // Lineage: find the lineage-choice decision made during character creation,
+  // scoped to the current species so stale entries from a prior species are ignored.
   const lineageId: string | null = (() => {
-    if (!build) return null;
-    const entry = Object.entries(build.choices).find(([key]) => key.startsWith('lineage-choice:species:'));
+    if (!build || !character.species) return null;
+    const prefix = `lineage-choice:species:${character.species}:`;
+    const entry = Object.entries(build.choices).find(([key]) => key.startsWith(prefix));
     if (!entry) return null;
     const decision = entry[1];
     return decision.type === 'lineage-choice' ? decision.lineageId : null;
