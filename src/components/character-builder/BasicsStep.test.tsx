@@ -264,6 +264,56 @@ describe('BasicsStep', () => {
     expect(mockLevelUp).toHaveBeenCalledWith('fighter', null);
   });
 
+  it('writes a lineage-choice decision to updateCreation when the rolled species has a lineage', () => {
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
+      ok: true,
+      basics: {
+        gender: 'female',
+        species: 'tiefling',
+        alignment: 'ne',
+        name: 'Test Tiefling',
+        classId: 'fighter',
+        baseAbilities: { str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 },
+        suggestedBackground: 'soldier',
+        targetStep: 'skills',
+        lineageDecision: { key: 'lineage-choice:species:tiefling:0', lineageId: 'infernal' },
+      },
+    });
+
+    render(<BasicsStep />);
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }));
+
+    const creationCall = mockUpdateCreation.mock.calls[0][0] as { choices?: Record<string, unknown> };
+    expect(creationCall.choices).toBeDefined();
+    expect(creationCall.choices?.['lineage-choice:species:tiefling:0']).toEqual({
+      type: 'lineage-choice',
+      lineageId: 'infernal',
+    });
+  });
+
+  it('omits choices from updateCreation when neither ASI nor lineage decisions are present', () => {
+    vi.spyOn(randomNpcModule, 'generateRandomNpcBasicsDetailed').mockReturnValue({
+      ok: true,
+      basics: {
+        gender: 'male',
+        species: 'human',
+        alignment: 'lg',
+        name: 'Test Human',
+        classId: 'fighter',
+        baseAbilities: { str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 },
+        suggestedBackground: 'soldier',
+        targetStep: 'skills',
+        // No backgroundAsiDecision, no lineageDecision
+      },
+    });
+
+    render(<BasicsStep />);
+    fireEvent.click(screen.getByRole('button', { name: /fighter/i }));
+
+    const creationCall = mockUpdateCreation.mock.calls[0][0] as { choices?: unknown };
+    expect(creationCall.choices).toBeUndefined();
+  });
+
   it('omitting onRequestAdvance does not crash', () => {
     render(<BasicsStep />);
     expect(() => fireEvent.click(screen.getByRole('button', { name: /fighter/i }))).not.toThrow();

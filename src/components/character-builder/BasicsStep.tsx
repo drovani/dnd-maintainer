@@ -240,20 +240,33 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         level: 1,
         ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
       });
+      const asiDecision = basics.targetStep === 'skills' ? basics.backgroundAsiDecision : undefined;
+      const choices = {
+        ...(asiDecision
+          ? {
+              [asiDecision.key]: {
+                type: 'asi' as const,
+                allocation: asiDecision.allocation,
+              },
+            }
+          : {}),
+        ...(basics.lineageDecision
+          ? {
+              [basics.lineageDecision.key]: {
+                type: 'lineage-choice' as const,
+                lineageId: basics.lineageDecision.lineageId,
+              },
+            }
+          : {}),
+      };
+      const hasChoices = Object.keys(choices).length > 0;
       if (basics.targetStep === 'skills') {
         context.updateCreation({
           base_abilities: basics.baseAbilities,
-          ...(basics.backgroundAsiDecision
-            ? {
-                choices: {
-                  [basics.backgroundAsiDecision.key]: {
-                    type: 'asi' as const,
-                    allocation: basics.backgroundAsiDecision.allocation,
-                  },
-                },
-              }
-            : {}),
+          ...(hasChoices ? { choices } : {}),
         });
+      } else if (hasChoices) {
+        context.updateCreation({ choices });
       }
     } catch (err) {
       pendingAdvanceRef.current = null;

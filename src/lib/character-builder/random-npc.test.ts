@@ -5,8 +5,10 @@ import {
   generateRandomNpcBasics,
   generateRandomNpcBasicsDetailed,
   getQuickNpcClassIds,
+  pickRandomLineage,
   randomAsiAllocation,
 } from '@/lib/character-builder/random-npc';
+import { LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { SPECIES_SOURCES } from '@/lib/sources/species';
@@ -94,6 +96,34 @@ describe('randomAsiAllocation', () => {
     for (const val of Object.values(result)) {
       expect(val).toBeLessThanOrEqual(2);
     }
+  });
+});
+
+describe('pickRandomLineage', () => {
+  it('returns a valid lineage decision for every species with a lineage map', () => {
+    for (const speciesId of Object.keys(LINEAGE_GRANTS_REGISTRY) as Array<keyof typeof LINEAGE_GRANTS_REGISTRY>) {
+      const result = pickRandomLineage(speciesId, () => 0);
+      expect(result).not.toBeNull();
+      if (!result) continue;
+      expect(result.key).toBe(`lineage-choice:species:${speciesId}:0`);
+      expect(Object.keys(LINEAGE_GRANTS_REGISTRY[speciesId])).toContain(result.lineageId);
+    }
+  });
+
+  it('returns null for a species without a lineage map', () => {
+    expect(pickRandomLineage('human', () => 0)).toBeNull();
+    expect(pickRandomLineage('dwarf', () => 0)).toBeNull();
+    expect(pickRandomLineage('halfling', () => 0)).toBeNull();
+    expect(pickRandomLineage('orc', () => 0)).toBeNull();
+    expect(pickRandomLineage('aasimar', () => 0)).toBeNull();
+  });
+
+  it('picks different lineages for different rng values within the same species', () => {
+    const first = pickRandomLineage('dragonborn', () => 0)?.lineageId;
+    const last = pickRandomLineage('dragonborn', () => 0.999)?.lineageId;
+    expect(first).toBeDefined();
+    expect(last).toBeDefined();
+    expect(first).not.toBe(last);
   });
 });
 
@@ -207,5 +237,26 @@ describe('generateRandomNpcBasicsDetailed', () => {
     // rng=()=>0.95: eligible[floor(0.95*7)=6] → tiefling, which has name data → success.
     const result = generateRandomNpcBasicsDetailed('fighter', () => 0.95);
     expect(result.ok).toBe(true);
+  });
+
+  it('includes a lineageDecision when the picked species has a lineage map', () => {
+    // rng=()=>0.95: gender=female, species=tiefling (has lineage), alignment=ce, ...
+    // tiefling has lineage keys [abyssal, chthonic, infernal]; rng=0.95 picks index 2 → infernal
+    const result = generateRandomNpcBasicsDetailed('fighter', () => 0.95);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.basics.species).toBe('tiefling');
+    expect(result.basics.lineageDecision).toBeDefined();
+    expect(result.basics.lineageDecision?.key).toBe('lineage-choice:species:tiefling:0');
+    expect(Object.keys(LINEAGE_GRANTS_REGISTRY.tiefling)).toContain(result.basics.lineageDecision?.lineageId);
+  });
+
+  it('omits lineageDecision when the picked species has no lineage map', () => {
+    // rng=()=>0: gender=male, species=human (no lineage), alignment=lg, ...
+    const result = generateRandomNpcBasicsDetailed('fighter', () => 0);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.basics.species).toBe('human');
+    expect(result.basics.lineageDecision).toBeUndefined();
   });
 });

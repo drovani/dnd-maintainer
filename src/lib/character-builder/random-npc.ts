@@ -3,7 +3,7 @@ import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('random-npc');
-import { SPECIES_SOURCES } from '@/lib/sources/species';
+import { LINEAGE_GRANTS_REGISTRY, SPECIES_SOURCES } from '@/lib/sources/species';
 import {
   DND_ALIGNMENTS,
   DND_SPECIES_NAMES,
@@ -17,7 +17,7 @@ import {
 } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import type { ClassSource } from '@/types/sources';
-import type { ChoiceKey } from '@/types/choices';
+import { createChoiceKey, type ChoiceKey } from '@/types/choices';
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const;
 const ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
@@ -30,6 +30,10 @@ interface RandomNpcBasicsBase {
   readonly alignment: AlignmentId;
   readonly name: string;
   readonly classId: ClassId;
+  readonly lineageDecision?: {
+    readonly key: ChoiceKey;
+    readonly lineageId: string;
+  };
 }
 
 export type RandomNpcBasics =
@@ -68,6 +72,28 @@ function shuffle<T>(arr: readonly T[], rng: Rng): T[] {
 
 export function getQuickNpcClassIds(): readonly ClassId[] {
   return CLASS_SOURCES.map((c) => c.id);
+}
+
+/**
+ * If the species has lineage options (e.g. dragonborn, elf, gnome, goliath, tiefling),
+ * pick a random lineage and return a ready-to-store choice decision. Returns null
+ * for species without lineage choices (dwarf, halfling, human, orc, aasimar).
+ */
+export function pickRandomLineage(
+  speciesId: SpeciesId,
+  rng: Rng = Math.random
+): { readonly key: ChoiceKey; readonly lineageId: string } | null {
+  const lineageMap = (LINEAGE_GRANTS_REGISTRY as Partial<Record<SpeciesId, Readonly<Record<string, unknown>>>>)[
+    speciesId
+  ];
+  if (!lineageMap) return null;
+  const lineageIds = Object.keys(lineageMap);
+  const lineageId = pick(lineageIds, rng);
+  if (!lineageId) return null;
+  return {
+    key: createChoiceKey('lineage-choice', 'species', speciesId, 0),
+    lineageId,
+  };
 }
 
 /**
@@ -150,11 +176,21 @@ export function generateRandomNpcBasicsDetailed(
     return { ok: false, failure: 'name-generation' };
   }
 
+  const lineageDecision = pickRandomLineage(species, rng) ?? undefined;
+
   const qb = classSource.quickBuild;
   if (!qb) {
     return {
       ok: true,
-      basics: { gender, species, alignment, name, classId, targetStep: 'abilities' },
+      basics: {
+        gender,
+        species,
+        alignment,
+        name,
+        classId,
+        targetStep: 'abilities',
+        ...(lineageDecision !== undefined ? { lineageDecision } : {}),
+      },
     };
   }
 
@@ -187,6 +223,7 @@ export function generateRandomNpcBasicsDetailed(
       suggestedBackground: qb.suggestedBackground,
       targetStep: 'skills',
       ...(backgroundAsiDecision !== undefined ? { backgroundAsiDecision } : {}),
+      ...(lineageDecision !== undefined ? { lineageDecision } : {}),
     },
   };
 }
