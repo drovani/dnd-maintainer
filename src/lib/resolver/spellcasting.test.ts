@@ -257,9 +257,9 @@ describe('resolveSpellcasting', () => {
       expect(result!.preparedCount).toBe(3);
     });
 
-    it('ranger L2 wis 8 (mod -1) → 1 (floor at first ranger spellcasting level)', () => {
-      // max(1, 2 + (-1)) = max(1, 1) = 1
-      const abilities = makeAbilities({ wis: 8 });
+    it('ranger L2 wis 6 (mod -2) → 1 (floor — raw 0 clamped)', () => {
+      // max(1, 2 + (-2)) = max(1, 0) = 1 — floor branch actually triggers
+      const abilities = makeAbilities({ wis: 6 });
       const result = resolveSpellcasting(makeRangerBundles({ level: 2 }), abilities, 2, 2);
       expect(result!.preparedCount).toBe(1);
     });
