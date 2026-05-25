@@ -12,7 +12,7 @@ const logger = getLogger('resolved-character');
 export function useResolvedCharacter(build: CharacterBuild | null): ResolvedCharacter | null {
   return useMemo(() => {
     if (!build) return null;
-    const { bundles, warnings } = collectBundles(build);
+    const { bundles, warnings, expandedFeats } = collectBundles(build);
     if (warnings.length > 0) {
       logger.warn('collectBundles warnings:', warnings);
     }
@@ -22,6 +22,7 @@ export function useResolvedCharacter(build: CharacterBuild | null): ResolvedChar
       bundles,
       choices: build.choices,
       levels: build.levels,
+      expandedFeats,
     });
   }, [build]);
 }

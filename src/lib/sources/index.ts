@@ -80,6 +80,7 @@ export function getItemSource(id: string): ItemSource | undefined {
 export interface CollectBundlesResult {
   readonly bundles: readonly GrantBundle[];
   readonly warnings: readonly string[];
+  readonly expandedFeats: ReadonlySet<FeatId>;
 }
 
 export function collectBundles(build: CharacterBuild): CollectBundlesResult {
@@ -222,6 +223,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
 
   // Expand FeatGrant grants embedded in already-collected bundles (e.g. background origin feats).
   // Snapshot current length to avoid iterating bundles we add in this pass.
+  const expandedFeats = new Set<FeatId>();
   const preFeatExpansionLength = bundles.length;
   for (let i = 0; i < preFeatExpansionLength; i++) {
     const bundle = bundles[i];
@@ -231,6 +233,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
         if (featSource) {
           const tag: SourceTag = { origin: 'feat', id: grant.featId };
           bundles.push({ source: tag, grants: featSource.grants });
+          expandedFeats.add(grant.featId);
         } else {
           const msg = `No source data found for feat "${grant.featId}" — feat grants will be empty`;
           warnings.push(msg);
@@ -266,5 +269,5 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     }
   }
 
-  return { bundles, warnings };
+  return { bundles, warnings, expandedFeats };
 }

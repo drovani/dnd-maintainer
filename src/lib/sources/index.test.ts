@@ -1,4 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import type { FeatSource } from '@/types/sources';
+
+const mockFeatSources = vi.hoisted<{ value: readonly FeatSource[] | null }>(() => ({ value: null }));
+
+vi.mock('@/lib/sources/feats', async (importActual) => {
+  const actual = await importActual<typeof import('@/lib/sources/feats')>();
+  return {
+    get FEAT_SOURCES() {
+      return mockFeatSources.value ?? actual.FEAT_SOURCES;
+    },
+  };
+});
+
 import {
   getSpeciesSource,
   getClassSource,
@@ -245,5 +258,44 @@ describe('collectBundles', () => {
     const subclassBundles = bundles.filter((b) => b.source.origin === 'subclass');
     // only L3 feature, not L7, L10, L15, L18
     expect(subclassBundles).toHaveLength(1);
+  });
+
+  it('soldier background origin feat: expandedFeats contains savage-attacker', () => {
+    const { bundles, expandedFeats } = collectBundles(humanFighterL1Build);
+    expect(expandedFeats.has('savage-attacker')).toBe(true);
+    const featBundle = bundles.find((b) => b.source.origin === 'feat' && b.source.id === 'savage-attacker');
+    expect(featBundle).toBeDefined();
+  });
+
+  it('nested feat grant: outer feat is in expandedFeats, inner nested feat is not', () => {
+    mockFeatSources.value = [
+      {
+        id: 'savage-attacker',
+        category: 'origin',
+        prerequisites: [],
+        grants: [
+          { type: 'feature', feature: { id: 'feat-savage-attacker' } },
+          { type: 'feat', featId: 'nested-inner-feat' as FeatId },
+        ],
+      },
+    ];
+    try {
+      const { expandedFeats } = collectBundles(humanFighterL1Build);
+      expect(expandedFeats.has('savage-attacker')).toBe(true);
+      expect(expandedFeats.has('nested-inner-feat' as FeatId)).toBe(false);
+    } finally {
+      mockFeatSources.value = null;
+    }
+  });
+
+  it('missing feat source: not added to expandedFeats', () => {
+    mockFeatSources.value = [];
+    try {
+      const { expandedFeats, warnings } = collectBundles(humanFighterL1Build);
+      expect(expandedFeats.size).toBe(0);
+      expect(warnings.some((w) => w.includes('savage-attacker'))).toBe(true);
+    } finally {
+      mockFeatSources.value = null;
+    }
   });
 });

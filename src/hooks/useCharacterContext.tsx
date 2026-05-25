@@ -262,7 +262,7 @@ function tryDeriveAndResolve(
     return { status: 'build-error', build: null, bundles: [], resolved: null, error: message, warnings: [] };
   }
 
-  const { bundles, warnings } = collectBundles(build);
+  const { bundles, warnings, expandedFeats } = collectBundles(build);
   if (warnings.length > 0) {
     logger.warn('collectBundles warnings:', warnings);
   }
@@ -279,6 +279,7 @@ function tryDeriveAndResolve(
       equippedItemIds: equippedItems,
       persistedItems,
       useDBInventory,
+      expandedFeats,
     });
     return { status: 'ok', build, bundles, resolved, error: null, warnings };
   } catch (err) {

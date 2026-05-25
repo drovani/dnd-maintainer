@@ -1,5 +1,5 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers';
-import type { AbilityKey, ToolProficiencyId, SkillId } from '@/lib/dnd-helpers';
+import type { AbilityKey, ToolProficiencyId, SkillId, FeatId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
@@ -36,6 +36,7 @@ export interface ResolverInput {
   readonly equippedItemIds?: readonly string[];
   readonly persistedItems?: readonly PersistedItem[];
   readonly useDBInventory?: boolean;
+  readonly expandedFeats?: ReadonlySet<FeatId>;
 }
 
 function isValidExpertiseSkillPick(
@@ -52,6 +53,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const { baseAbilities, level, bundles, choices } = input;
   const hpRolls = input.hpRolls ?? input.levels?.map((l) => l.hpRoll) ?? [];
   const equippedItemIds = input.equippedItemIds ?? [];
+  const expandedFeats = input.expandedFeats ?? new Set<FeatId>();
 
   const proficiencyBonus = getProficiencyBonus(level);
   const abilities = resolveAbilities(baseAbilities, bundles, choices);
@@ -166,6 +168,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
 
   // Diagnostic: any feat grant that reaches the resolver was not expanded by collectBundles — this is a bug
   for (const { grant } of collectGrantsByType(bundles, 'feat')) {
+    if (expandedFeats.has(grant.featId)) continue; // expected leftover from expansion pass
     logger.warn(`BUG: unexpanded FeatGrant "${grant.featId}" reached resolver — nested feat grants are not supported`);
   }
 
