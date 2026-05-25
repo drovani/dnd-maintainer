@@ -1230,6 +1230,120 @@ describe('Dragonborn lineage-choice integration', () => {
   });
 });
 
+describe('Tiefling lineage-choice integration', () => {
+  const lineageKey = createChoiceKey('lineage-choice', 'species', 'tiefling', 0);
+
+  const tieflingBuild: CharacterBuild = {
+    speciesId: 'tiefling',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
+      'bundle-choice:class:fighter:1': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: { weapon: 'longsword', shield: 'shield' },
+      },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  it('emits a pending lineage-choice with 3 options when no lineage decision is made', () => {
+    const { bundles } = collectBundles(tieflingBuild);
+    const input: ResolverInput = {
+      baseAbilities: tieflingBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: tieflingBuild.choices,
+      levels: tieflingBuild.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(lineageKey);
+    if (pending?.type === 'lineage-choice') {
+      expect(pending.from.length).toBe(3);
+      expect(pending.speciesId).toBe('tiefling');
+    }
+  });
+
+  it('resolves fire resistance and infernal feature when infernal lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...tieflingBuild,
+      choices: {
+        ...tieflingBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'infernal' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('fire');
+    expect(result.features.map((f) => f.feature.id)).toContain('tiefling-fiendish-legacy-infernal');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+
+  it('resolves poison resistance and abyssal feature when abyssal lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...tieflingBuild,
+      choices: {
+        ...tieflingBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'abyssal' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('poison');
+    expect(result.features.map((f) => f.feature.id)).toContain('tiefling-fiendish-legacy-abyssal');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+
+  it('resolves necrotic resistance and chthonic feature when chthonic lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...tieflingBuild,
+      choices: {
+        ...tieflingBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'chthonic' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('necrotic');
+    expect(result.features.map((f) => f.feature.id)).toContain('tiefling-fiendish-legacy-chthonic');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+});
+
 describe('expertise-choice count and validity validation', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
