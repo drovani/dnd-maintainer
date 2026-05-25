@@ -1183,6 +1183,120 @@ describe('Dragonborn lineage-choice integration', () => {
   });
 });
 
+describe('Tiefling lineage-choice integration', () => {
+  const lineageKey = createChoiceKey('lineage-choice', 'species', 'tiefling', 0);
+
+  const tieflingBuild: CharacterBuild = {
+    speciesId: 'tiefling',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
+      'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
+      'bundle-choice:class:fighter:1': {
+        type: 'bundle-choice',
+        bundleId: 'martial-weapon-and-shield',
+        slotPicks: { weapon: 'longsword', shield: 'shield' },
+      },
+      'bundle-choice:class:fighter:2': { type: 'bundle-choice', bundleId: 'light-crossbow-kit', slotPicks: {} },
+      'bundle-choice:class:fighter:3': { type: 'bundle-choice', bundleId: 'dungeoneers-pack', slotPicks: {} },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  it('emits a pending lineage-choice with 3 options when no lineage decision is made', () => {
+    const { bundles } = collectBundles(tieflingBuild);
+    const input: ResolverInput = {
+      baseAbilities: tieflingBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: tieflingBuild.choices,
+      levels: tieflingBuild.levels,
+    };
+    const result = resolveCharacter(input);
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(lineageKey);
+    if (pending?.type === 'lineage-choice') {
+      expect(pending.from.length).toBe(3);
+      expect(pending.speciesId).toBe('tiefling');
+    }
+  });
+
+  it('resolves fire resistance and infernal feature when infernal lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...tieflingBuild,
+      choices: {
+        ...tieflingBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'infernal' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('fire');
+    expect(result.features.map((f) => f.feature.id)).toContain('tiefling-fiendish-legacy-infernal');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+
+  it('resolves poison resistance and abyssal feature when abyssal lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...tieflingBuild,
+      choices: {
+        ...tieflingBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'abyssal' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('poison');
+    expect(result.features.map((f) => f.feature.id)).toContain('tiefling-fiendish-legacy-abyssal');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+
+  it('resolves necrotic resistance and chthonic feature when chthonic lineage is chosen', () => {
+    const buildWithLineage: CharacterBuild = {
+      ...tieflingBuild,
+      choices: {
+        ...tieflingBuild.choices,
+        [lineageKey]: { type: 'lineage-choice', lineageId: 'chthonic' },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+    const { bundles } = collectBundles(buildWithLineage);
+    const input: ResolverInput = {
+      baseAbilities: buildWithLineage.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithLineage.choices,
+      levels: buildWithLineage.levels,
+    };
+    const result = resolveCharacter(input);
+    expect(result.resistances.map((r) => r.value)).toContain('necrotic');
+    expect(result.features.map((f) => f.feature.id)).toContain('tiefling-fiendish-legacy-chthonic');
+    const pending = result.pendingChoices.find((c) => c.type === 'lineage-choice');
+    expect(pending).toBeUndefined();
+  });
+});
+
 describe('expertise-choice count and validity validation', () => {
   const expertiseKey0 = createChoiceKey('expertise-choice', 'class', 'rogue', 0);
 
@@ -1456,6 +1570,169 @@ describe('Weapon mastery resolver', () => {
     expect(pending).toHaveLength(1);
     if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
     expect(pending[0].count).toBe(2);
+  });
+
+  it('L1 Paladin has a weapon-mastery-choice pending choice with count 2', () => {
+    const paladinBuild: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {
+        'skill-choice:class:paladin:0': { type: 'skill-choice', skills: ['athletics', 'persuasion'] },
+        'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      levels: [{ classId: 'paladin' as ClassId, classLevel: 1, hpRoll: null }],
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(paladinBuild);
+    const result = resolveCharacter({
+      baseAbilities: paladinBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: paladinBuild.choices,
+      levels: paladinBuild.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].count).toBe(2);
+  });
+
+  it('L1 Ranger has a weapon-mastery-choice pending choice with count 2', () => {
+    const rangerBuild: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {
+        'skill-choice:class:ranger:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+        'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      levels: [{ classId: 'ranger' as ClassId, classLevel: 1, hpRoll: null }],
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(rangerBuild);
+    const result = resolveCharacter({
+      baseAbilities: rangerBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: rangerBuild.choices,
+      levels: rangerBuild.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].count).toBe(2);
+  });
+
+  it('L1 Rogue has a weapon-mastery-choice pending choice with count 2', () => {
+    const rogueBuild: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {
+        'skill-choice:class:rogue:0': {
+          type: 'skill-choice',
+          skills: ['stealth', 'deception', 'perception', 'sleightofhand'],
+        },
+        'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      levels: [{ classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null }],
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(rogueBuild);
+    const result = resolveCharacter({
+      baseAbilities: rogueBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: rogueBuild.choices,
+      levels: rogueBuild.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(1);
+    if (pending[0].type !== 'weapon-mastery-choice') throw new Error('Expected weapon-mastery-choice');
+    expect(pending[0].count).toBe(2);
+  });
+
+  it('Fighter at L10 has 3 pending weapon-mastery-choice entries (L1+L4+L10) when no decisions provided', () => {
+    const fighterL10Build: CharacterBuild = {
+      ...fighterL1Build,
+      levels: [
+        { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 4, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 5, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 6, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 7, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 8, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 9, hpRoll: null },
+        { classId: 'fighter' as ClassId, classLevel: 10, hpRoll: null },
+      ],
+    };
+    const { bundles } = collectBundles(fighterL10Build);
+    const result = resolveCharacter({
+      baseAbilities: fighterL10Build.baseAbilities,
+      level: 10,
+      bundles,
+      choices: fighterL10Build.choices,
+      levels: fighterL10Build.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(3);
+  });
+
+  it('Wizard L5 has no weapon-mastery-choice in pendingChoices', () => {
+    const wizardBuild: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 8, dex: 13, con: 14, int: 16, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {
+        'skill-choice:class:wizard:0': { type: 'skill-choice', skills: ['arcana', 'history'] },
+        'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'asi:background:soldier:0': { type: 'asi', allocation: { int: 2, con: 1 } },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      },
+      levels: [
+        { classId: 'wizard' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'wizard' as ClassId, classLevel: 2, hpRoll: null },
+        { classId: 'wizard' as ClassId, classLevel: 3, hpRoll: null },
+        { classId: 'wizard' as ClassId, classLevel: 4, hpRoll: null },
+        { classId: 'wizard' as ClassId, classLevel: 5, hpRoll: null },
+      ],
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(wizardBuild);
+    const result = resolveCharacter({
+      baseAbilities: wizardBuild.baseAbilities,
+      level: 5,
+      bundles,
+      choices: wizardBuild.choices,
+      levels: wizardBuild.levels,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'weapon-mastery-choice');
+    expect(pending).toHaveLength(0);
   });
 
   it('resolved weaponMasteries reflects user decisions', () => {

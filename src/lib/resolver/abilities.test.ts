@@ -350,5 +350,65 @@ describe('resolveAbilities', () => {
       expect(result.wis.bonuses[0].source).toEqual(backgroundSource);
       expect(result.wis.bonuses[0].source.origin).toBe('background');
     });
+
+    it('background ASI and class ASI in the same call both apply — totals sum correctly', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'background', id: 'acolyte' },
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:background:acolyte:0',
+              points: 3,
+              from: ['int', 'wis', 'cha'],
+            },
+          ],
+        },
+        {
+          source: { origin: 'class', id: 'fighter', level: 4 },
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:class:fighter:0',
+              points: 2,
+              from: null,
+            },
+          ],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:background:acolyte:0': { type: 'asi', allocation: { wis: 2, cha: 1 } },
+        'asi:class:fighter:0': { type: 'asi', allocation: { str: 2 } },
+      };
+      const result = resolveAbilities(BASE, bundles, choices);
+      expect(result.str.total).toBe(12); // 10 + 2 from class ASI
+      expect(result.wis.total).toBe(12); // 10 + 2 from background ASI
+      expect(result.cha.total).toBe(11); // 10 + 1 from background ASI
+      expect(result.dex.total).toBe(10); // unchanged
+    });
+
+    it('background ASI that would push a score from 18 to 21 is capped at 20', () => {
+      const highBase = { ...BASE, wis: 18 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'background', id: 'acolyte' },
+          grants: [
+            {
+              type: 'asi',
+              key: 'asi:background:acolyte:0',
+              points: 3,
+              from: ['int', 'wis', 'cha'],
+            },
+          ],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:background:acolyte:0': { type: 'asi', allocation: { wis: 2, cha: 1 } },
+      };
+      const result = resolveAbilities(highBase, bundles, choices);
+      expect(result.wis.total).toBe(20); // capped — 18 + 2 would be 20, excess dropped
+      expect(result.wis.modifier).toBe(5);
+      expect(result.cha.total).toBe(11); // unaffected by cap
+    });
   });
 });
