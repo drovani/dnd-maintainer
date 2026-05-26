@@ -650,6 +650,216 @@ describe('getSubclassSource — War Domain', () => {
   });
 });
 
+describe('getSubclassSource — Circle of the Land', () => {
+  it('returns defined for circleland', () => {
+    expect(getSubclassSource('circleland')).toBeDefined();
+  });
+
+  it('circleland has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('circleland');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('circleland level 3 grants 3 features: lands-aid, bonus-cantrip, bonus-spells', () => {
+    const source = getSubclassSource('circleland');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'circleland-lands-aid' }) }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circleland-bonus-cantrip' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circleland-bonus-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('circleland level 6 grants natural-recovery feature', () => {
+    const source = getSubclassSource('circleland');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circleland-natural-recovery' },
+    });
+  });
+
+  it('circleland level 10 grants natures-ward feature', () => {
+    const source = getSubclassSource('circleland');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circleland-natures-ward' },
+    });
+  });
+});
+
+describe('getSubclassSource — Circle of the Moon', () => {
+  it('returns defined for circlemoon', () => {
+    expect(getSubclassSource('circlemoon')).toBeDefined();
+  });
+
+  it('circlemoon has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('circlemoon');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('circlemoon level 3 grants 2 features: circle-forms and improved-wild-shape', () => {
+    const source = getSubclassSource('circlemoon');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circlemoon-circle-forms' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circlemoon-improved-wild-shape' }),
+        }),
+      ])
+    );
+  });
+
+  it('circlemoon level 6 grants improved-circle-forms feature', () => {
+    const source = getSubclassSource('circlemoon');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circlemoon-improved-circle-forms' },
+    });
+  });
+
+  it('circlemoon level 10 grants elemental-wild-shape feature', () => {
+    const source = getSubclassSource('circlemoon');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circlemoon-elemental-wild-shape' },
+    });
+  });
+});
+
+describe('getSubclassSource — Circle of the Sea', () => {
+  it('returns defined for circlesea', () => {
+    expect(getSubclassSource('circlesea')).toBeDefined();
+  });
+
+  it('circlesea has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('circlesea');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('circlesea level 3 grants 1 feature: wrath-of-the-sea', () => {
+    const source = getSubclassSource('circlesea');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(1);
+    expect(level3?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circlesea-wrath-of-the-sea' },
+    });
+  });
+
+  it('circlesea level 6 grants 2 items: swim speed grant and aquatic-affinity feature', () => {
+    const source = getSubclassSource('circlesea');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(2);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'speed', mode: 'swim', value: 30 }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circlesea-aquatic-affinity' }),
+        }),
+      ])
+    );
+  });
+
+  it('circlesea level 10 grants stormborn feature', () => {
+    const source = getSubclassSource('circlesea');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circlesea-stormborn' },
+    });
+  });
+});
+
+describe('getSubclassSource — Circle of Stars', () => {
+  it('returns defined for circlestars', () => {
+    expect(getSubclassSource('circlestars')).toBeDefined();
+  });
+
+  it('circlestars has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('circlestars');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('circlestars level 3 grants 2 features: star-map and starry-form', () => {
+    const source = getSubclassSource('circlestars');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circlestars-star-map' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circlestars-starry-form' }),
+        }),
+      ])
+    );
+  });
+
+  it('circlestars level 6 grants cosmic-omen feature', () => {
+    const source = getSubclassSource('circlestars');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circlestars-cosmic-omen' },
+    });
+  });
+
+  it('circlestars level 10 grants twinkling-constellations feature', () => {
+    const source = getSubclassSource('circlestars');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'circlestars-twinkling-constellations' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();

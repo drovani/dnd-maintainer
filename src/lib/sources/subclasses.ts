@@ -266,10 +266,113 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Druid
-  circleland: { features: [] },
-  circlemoon: { features: [] },
-  circlesea: { features: [] },
-  circlestars: { features: [] },
+  circleland: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'feature', feature: { id: 'circleland-lands-aid' } },
+          // Bonus Cantrip: gain one additional Druid cantrip of choice; modeled as inert feature grant
+          // TODO #93: replace with a cantrip-choice spell grant when spell id system supports it
+          { type: 'feature', feature: { id: 'circleland-bonus-cantrip' } },
+          // Land's Bonus Spells: bonus prepared spells keyed to chosen Land type (Arctic/Coast/etc.)
+          // Land type is a free-form choice with no pending-choice mechanism; collapsed to inert feature grant
+          // TODO #93: model as spell grants per Land type when spell id system is available
+          { type: 'feature', feature: { id: 'circleland-bonus-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'circleland-natural-recovery' } }],
+      },
+      {
+        classLevel: 10,
+        grants: [{ type: 'feature', feature: { id: 'circleland-natures-ward' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  circlemoon: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Circle Forms: Wild Shape up to CR = floor(druid level / 3), min CR 1; swim/fly speed allowed at L3
+          // Wild Shape mechanics (CR cap, resource pools) modeled as inert feature grant
+          { type: 'feature', feature: { id: 'circlemoon-circle-forms' } },
+          // Improved Wild Shape: use Wild Shape as Bonus Action; 2 uses replenish on Short Rest
+          { type: 'feature', feature: { id: 'circlemoon-improved-wild-shape' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Expend spell slot while in Wild Shape to regain 1d8 HP per spell slot level
+          { type: 'feature', feature: { id: 'circlemoon-improved-circle-forms' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Expend 2 Wild Shape uses to transform into an Air/Earth/Fire/Water Elemental
+          { type: 'feature', feature: { id: 'circlemoon-elemental-wild-shape' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  circlesea: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Wrath of the Sea aura within 10 ft on Wild Shape entry; Bonus Action cold/lightning damage
+          { type: 'feature', feature: { id: 'circlesea-wrath-of-the-sea' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Swim speed approximated as 30 ft (equal to typical walking speed); see implementation note
+          { type: 'speed', mode: 'swim', value: 30 },
+          // Underwater breathing is a distinct feature; both grants are required for full Aquatic Affinity
+          { type: 'feature', feature: { id: 'circlesea-aquatic-affinity' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Fly speed 30 ft while in a non-enclosed space; conditional speed not supported — inert feature grant
+          { type: 'feature', feature: { id: 'circlesea-stormborn' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  circlestars: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Star Map: grants access to Archer/Chalice/Dragon constellation forms on Wild Shape activation
+          { type: 'feature', feature: { id: 'circlestars-star-map' } },
+          // Starry Form: use Wild Shape to manifest a constellation (Archer, Chalice, or Dragon)
+          { type: 'feature', feature: { id: 'circlestars-starry-form' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // After each Long Rest, roll d6: even = Weal, odd = Woe; Reaction to add/subtract d6 from rolls
+          { type: 'feature', feature: { id: 'circlestars-cosmic-omen' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Starry Form improvements: Archer d10, Chalice d8, Dragon fly speed; Bonus Action to switch form
+          { type: 'feature', feature: { id: 'circlestars-twinkling-constellations' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Fighter
   champion: {
     features: [

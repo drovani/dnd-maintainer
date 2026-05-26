@@ -1015,6 +1015,70 @@
       "name": "Archdruid",
       "description": "The vitality of nature constantly blooms within you, granting you the following benefits."
     },
+    "circleland-lands-aid": {
+      "name": "Land's Aid",
+      "description": "As a Magic action, expend a use of Channel Nature to create a 10-foot radius bloom of vegetation centered on a point within 60 feet. Creatures of your choice within the bloom regain 2d6 Hit Points; other creatures make a CON save or take 2d6 Necrotic damage (save halves). The bloom persists until the start of your next turn."
+    },
+    "circleland-bonus-cantrip": {
+      "name": "Bonus Cantrip",
+      "description": "You learn one additional Druid cantrip of your choice."
+    },
+    "circleland-bonus-spells": {
+      "name": "Land's Bonus Spells",
+      "description": "Your connection to the land grants you bonus prepared spells based on your chosen Land type: Arctic, Coast, Desert, Forest, Grassland, Mountain, Swamp, or Underdark. (Land type selection and associated spells are modeled as a descriptive feature pending spell system support.)"
+    },
+    "circleland-natural-recovery": {
+      "name": "Natural Recovery",
+      "description": "During a Short Rest, you can recover expended spell slots with a combined level equal to half your Druid level (rounded up). You can't recover a slot of 6th level or higher. You can use this feature once per Long Rest."
+    },
+    "circleland-natures-ward": {
+      "name": "Nature's Ward",
+      "description": "You are immune to the Poisoned condition and to disease. You can't be Charmed or Frightened by Elementals or Fey."
+    },
+    "circlemoon-circle-forms": {
+      "name": "Circle Forms",
+      "description": "You can use Wild Shape to transform into a Beast with a CR equal to one-third your Druid level (rounded down, minimum CR 1). Beasts with a Swim or Fly speed are available starting at level 3."
+    },
+    "circlemoon-improved-wild-shape": {
+      "name": "Improved Wild Shape",
+      "description": "You can use Wild Shape as a Bonus Action. In addition, you regain 2 expended uses of Wild Shape whenever you finish a Short Rest."
+    },
+    "circlemoon-improved-circle-forms": {
+      "name": "Improved Circle Forms",
+      "description": "While in a Wild Shape form, you can expend a spell slot as a Bonus Action to regain a number of Hit Points equal to 1d8 times the level of the spell slot expended."
+    },
+    "circlemoon-elemental-wild-shape": {
+      "name": "Elemental Wild Shape",
+      "description": "You can expend 2 uses of Wild Shape to transform into an Air Elemental, Earth Elemental, Fire Elemental, or Water Elemental using the corresponding stat block."
+    },
+    "circlesea-wrath-of-the-sea": {
+      "name": "Wrath of the Sea",
+      "description": "When you enter Wild Shape, you conjure a Wrath of the Sea aura within 10 feet of you that lasts until your Wild Shape ends. As a Bonus Action on each of your turns, you can choose Cold or Lightning damage and deal that damage to one creature within the aura (no save)."
+    },
+    "circlesea-aquatic-affinity": {
+      "name": "Aquatic Affinity",
+      "description": "You can breathe underwater, and you gain a Swim speed equal to your walking speed. (Swim speed is approximated as 30 ft in this implementation; actual value equals walking speed.)"
+    },
+    "circlesea-stormborn": {
+      "name": "Stormborn",
+      "description": "You gain a Fly speed of 30 feet while you are not in a confined space. (Conditional fly speed is modeled as a descriptive feature pending conditional speed support.)"
+    },
+    "circlestars-star-map": {
+      "name": "Star Map",
+      "description": "You have a star map that serves as a spellcasting focus and grants access to your three constellation forms — Archer, Chalice, and Dragon — usable when you activate Starry Form."
+    },
+    "circlestars-starry-form": {
+      "name": "Starry Form",
+      "description": "You can use Wild Shape to assume a starry form instead of a Beast shape. While in this form, you shed dim light in a 10-foot radius and gain benefits depending on the constellation chosen: Archer (ranged radiant attack as a Bonus Action), Chalice (heal yourself when you cast a healing spell), or Dragon (make CON saves with advantage)."
+    },
+    "circlestars-cosmic-omen": {
+      "name": "Cosmic Omen",
+      "description": "After each Long Rest, roll a d6. On an even result you have Weal; on an odd result you have Woe. Once per turn, you can use a Reaction to add a d6 to (Weal) or subtract a d6 from (Woe) an attack roll, saving throw, or ability check made by a creature you can see within 30 feet."
+    },
+    "circlestars-twinkling-constellations": {
+      "name": "Twinkling Constellations",
+      "description": "Your Starry Form benefits improve: Archer's Bonus Action attack deals 1d10 + WIS radiant damage; Chalice healing improves to 1d8 + WIS; Dragon grants a Fly speed of 20 feet. While in Starry Form, you can switch constellations as a Bonus Action."
+    },
     "monk-martial-arts": {
       "name": "Martial Arts",
       "description": "Your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons."
