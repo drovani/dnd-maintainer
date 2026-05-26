@@ -1,5 +1,6 @@
 import { useCharacters } from '@/hooks/useCharacters';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { isBackgroundId } from '@/lib/dnd-helpers';
 import { Plus, Search, User, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -18,6 +19,8 @@ export default function CharacterList() {
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('name');
   const [searchQuery, setSearchQuery] = useState('');
+
+  usePageTitle(t('characterList.title'));
 
   const { data: characters = [], isLoading, error } = useCharacters(campaignId!);
 
@@ -79,9 +82,9 @@ export default function CharacterList() {
   return (
     <div className="min-h-screen bg-card">
       <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8 gap-3">
           <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">{t('characterList.title')}</h1>
+            <h1 className="hidden md:block text-4xl font-bold text-primary mb-2">{t('characterList.title')}</h1>
             <p className="text-muted-foreground">
               {t('characterList.subtitle', { count: characters.length })} •{' '}
               <span className="text-blue-400">{t('characterList.pcCount', { count: pcCount })}</span> •{' '}
@@ -90,7 +93,7 @@ export default function CharacterList() {
           </div>
           <button
             onClick={() => navigate(`/campaign/${campaignSlug}/character/new`)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
+            className="self-start md:self-auto flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             <Plus size={20} />
             {t('buttons.addCharacter')}

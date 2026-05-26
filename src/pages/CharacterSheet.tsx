@@ -18,6 +18,7 @@ import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext';
 import type { PersistedItem } from '@/lib/resolver/index';
 import type { SourceTag } from '@/types/sources';
@@ -83,6 +84,8 @@ function CharacterSheetInner({
   const navigate = useNavigate();
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
+
+  usePageTitle(character.name);
 
   const { update: updateMutation, remove: removeMutation } = useCharacterMutations();
   const {
@@ -245,7 +248,7 @@ function CharacterSheetInner({
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">{tc('characterSheet.title')}</div>
-              <h1 className="text-3xl font-bold text-foreground">{character.name}</h1>
+              <h1 className="hidden md:block text-3xl font-bold text-foreground">{character.name}</h1>
             </div>
             <div className="flex items-center gap-1">
               <Button

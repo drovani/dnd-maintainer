@@ -22,6 +22,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -48,6 +49,8 @@ export default function NotesPage() {
   const { campaignId } = useCampaignContext();
   const queryClient = useQueryClient();
   const { t } = useTranslation('common');
+
+  usePageTitle(t('notes.title'));
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<NoteCategory | 'all'>('all');
@@ -322,17 +325,17 @@ export default function NotesPage() {
       {/* Header */}
       <div className="bg-muted/50 border-b border-border sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
             <div>
-              <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <h1 className="hidden md:flex text-4xl font-bold text-foreground items-center gap-3">
                 <Scroll className="size-10 text-primary" />
                 {t('notes.title')}
               </h1>
-              <p className="text-muted-foreground mt-2">{t('notes.noteCount', { count: notes.length })}</p>
+              <p className="text-muted-foreground md:mt-2">{t('notes.noteCount', { count: notes.length })}</p>
             </div>
             <button
               onClick={handleOpenNewNote}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
+              className="self-start md:self-auto flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
               <Plus className="size-5" />
               {t('buttons.newNote')}

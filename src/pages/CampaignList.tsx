@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/lib/supabase';
 import { CampaignSummary } from '@/types/database';
 import { useCampaigns, useCampaignMutations } from '@/hooks/useCampaigns';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/react-query';
 import { Archive, BookOpen, Plus, Search, Swords, Users, Zap } from 'lucide-react';
 import { useState } from 'react';
@@ -35,6 +36,8 @@ export default function CampaignList() {
   const [nameError, setNameError] = useState<string>('');
 
   const { t } = useTranslation('common');
+
+  usePageTitle(t('campaign.campaigns'));
 
   const { data: campaigns = [], isLoading } = useCampaigns();
   const { create: createCampaignMutation, archive: archiveCampaignMutation } = useCampaignMutations();
@@ -131,15 +134,18 @@ export default function CampaignList() {
       {/* Header */}
       <div className="bg-muted/50 border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
             <div>
-              <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <h1 className="hidden md:flex text-4xl font-bold text-foreground items-center gap-3">
                 <Swords className="size-10 text-muted-foreground" />
                 {t('campaign.campaigns')}
               </h1>
-              <p className="text-muted-foreground mt-2">{t('campaign.campaignCount', { count: campaigns.length })}</p>
+              <p className="text-muted-foreground md:mt-2">
+                {t('campaign.campaignCount', { count: campaigns.length })}
+              </p>
             </div>
             <Button
+              className="self-start md:self-auto"
               onClick={() => {
                 setShowNewCampaignForm(true);
                 setNameError('');

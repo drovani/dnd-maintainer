@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Menu, RefreshCw } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useTheme } from '@/components/ThemeProvider';
 import { Skeleton } from './ui/skeleton';
@@ -14,6 +14,10 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [pageTitle, setPageTitleState] = useState<string>('');
+
+  // Stable setter — pages call this via outlet context inside useEffect
+  const setPageTitle = useCallback((title: string) => setPageTitleState(title), []);
 
   const { t } = useTranslation('common');
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
@@ -69,8 +73,22 @@ export function Layout() {
         onToggleCollapse={setIsCollapsed}
       />
 
-      <main className="flex-1 overflow-auto">
-        <div className="w-full h-full">
+      <main className="flex-1 overflow-auto flex flex-col">
+        {/* Mobile-only top bar: hamburger + page title */}
+        <header className="md:hidden sticky top-0 z-30 flex items-center gap-2 h-14 px-3 bg-background/95 backdrop-blur border-b border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCollapsed(false)}
+            className="p-2 shrink-0"
+            aria-label={t('nav.openMenu')}
+          >
+            <Menu className="size-6" />
+          </Button>
+          <h1 className="text-xl font-bold text-primary truncate min-w-0">{pageTitle}</h1>
+        </header>
+
+        <div className="w-full flex-1">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full gap-4">
               <div className="space-y-3 w-64">
@@ -118,6 +136,7 @@ export function Layout() {
                 {
                   campaignSlug,
                   campaignId: currentCampaign?.id,
+                  setPageTitle,
                 } as import('@/hooks/useCampaignContext').CampaignContext
               }
             />

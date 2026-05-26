@@ -1,4 +1,5 @@
 import { useCampaigns } from '@/hooks/useCampaigns';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import type { ExportData as ExportDataType } from '@/lib/export-sql';
 import { downloadFile, generateSeedSql } from '@/lib/export-sql';
 import { supabase } from '@/lib/supabase';
@@ -17,6 +18,8 @@ export default function ExportData() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  usePageTitle(t('export.title'));
 
   const toggleCampaign = (id: string): void => {
     setSelectedIds((prev) => {
@@ -165,11 +168,11 @@ export default function ExportData() {
       {/* Header */}
       <div className="bg-muted/50 border-b border-border">
         <div className="max-w-3xl mx-auto px-8 py-8">
-          <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+          <h1 className="hidden md:flex text-4xl font-bold text-foreground items-center gap-3">
             <Download className="size-10 text-primary" />
             {t('export.title')}
           </h1>
-          <p className="text-muted-foreground mt-2">{t('export.description')}</p>
+          <p className="text-muted-foreground md:mt-2">{t('export.description')}</p>
         </div>
       </div>
 

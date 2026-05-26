@@ -6,6 +6,7 @@ import { ThemePicker } from '@/components/ThemePicker';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCampaigns } from '@/hooks/useCampaigns';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { supabase } from '@/lib/supabase';
 import type { ThemeId } from '@/lib/theme';
 import type { CampaignSummary } from '@/types/database';
@@ -53,10 +54,12 @@ export default function SettingsTheme(): React.JSX.Element {
   const { theme, setTheme, colorMode, setColorMode } = useTheme();
   const { data: campaigns = [], isLoading, isError, error, refetch } = useCampaigns();
 
+  usePageTitle(t('settings.themeSettings'));
+
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title">{t('settings.themeSettings')}</h1>
+        <h1 className="page-title hidden md:block">{t('settings.themeSettings')}</h1>
       </div>
 
       <div className="space-y-8">

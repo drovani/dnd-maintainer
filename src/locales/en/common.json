@@ -62,7 +62,8 @@
     "settings": "Settings",
     "selectCampaign": "Select Campaign",
     "noCampaigns": "No campaigns",
-    "campaign": "Campaign"
+    "campaign": "Campaign",
+    "openMenu": "Open menu"
   },
   "app": {
     "title": "D&D Keeper",

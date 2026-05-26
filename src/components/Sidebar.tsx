@@ -4,7 +4,6 @@ import {
   ChevronDown,
   Download,
   ExternalLink,
-  Menu,
   ScrollText,
   Settings,
   Shield,
@@ -59,12 +58,14 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile menu toggle */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Button variant="ghost" size="sm" onClick={() => onToggleCollapse(!isCollapsed)} className="p-2">
-          {isCollapsed ? <Menu className="size-6" /> : <X className="size-6" />}
-        </Button>
-      </div>
+      {/* Mobile close button — only visible when sidebar is open (opens via Layout header) */}
+      {!isCollapsed && (
+        <div className="md:hidden fixed top-3 left-52 z-50">
+          <Button variant="ghost" size="sm" onClick={() => onToggleCollapse(true)} className="p-2">
+            <X className="size-6" />
+          </Button>
+        </div>
+      )}
 
       {/* Overlay on mobile when sidebar is open */}
       {!isCollapsed && (

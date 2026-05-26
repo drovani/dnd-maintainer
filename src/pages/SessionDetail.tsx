@@ -4,6 +4,7 @@ import { Session } from '@/types/database';
 import type { Json, TablesUpdate } from '@/types/supabase';
 import { useSession } from '@/hooks/useSessions';
 import { useSessionEncounters } from '@/hooks/useEncounters';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -78,6 +79,8 @@ export default function SessionDetail() {
   const lootItems = ((session as unknown as Record<string, unknown>)?.loot as LootEntry[] | null) ?? [];
 
   const { data: encounters = [] } = useSessionEncounters(session?.id);
+
+  usePageTitle(session?.name ?? t('nav.sessions'));
 
   // Update session mutation
   const updateSessionMutation = useMutation({
@@ -289,7 +292,7 @@ export default function SessionDetail() {
             <ArrowLeft className="size-5" />
             {t('buttons.backToSessions')}
           </button>
-          <h1 className="text-4xl font-bold text-foreground">
+          <h1 className="hidden md:block text-4xl font-bold text-foreground">
             {t('sessionDetail.sessionHeading', { number: formData.session_number, title: formData.name })}
           </h1>
           <p className="text-muted-foreground mt-2">{formatDate(formData.date || '')}</p>

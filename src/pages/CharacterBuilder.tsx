@@ -17,6 +17,7 @@ import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
 import { useCharacter } from '@/hooks/useCharacters';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import type { Character } from '@/types/database';
 import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
@@ -125,6 +126,8 @@ function CharacterBuilderInner() {
 
   const context = useCharacterContext();
   const { character, rows, resolved, buildError, isDirty, markSaved } = context;
+
+  usePageTitle(t('characterBuilder.title'));
 
   useEffect(() => {
     if (saveStatus !== 'saved') return;
@@ -257,7 +260,7 @@ function CharacterBuilderInner() {
   return (
     <div className="min-h-screen bg-background">
       <div className="page-container">
-        <h1 className="page-title mb-8">{t('characterBuilder.title')}</h1>
+        <h1 className="page-title mb-8 hidden md:block">{t('characterBuilder.title')}</h1>
 
         {/* Step Indicator */}
         <div className="mb-8">

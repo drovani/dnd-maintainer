@@ -2,6 +2,7 @@ import { parseIntOrDefault } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useSessions } from '@/hooks/useSessions';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, BookOpen, Calendar, ChevronRight, Plus, Search, Zap } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -25,6 +26,8 @@ export default function SessionList() {
     date: new Date().toISOString().split('T')[0],
   });
   const [titleError, setTitleError] = useState<string>('');
+
+  usePageTitle(t('sessions.title'));
 
   // Fetch sessions
   const { data: sessions = [], isLoading, error } = useSessions(campaignId!);
@@ -127,13 +130,13 @@ export default function SessionList() {
       {/* Header */}
       <div className="bg-muted/50 border-b border-border sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
             <div>
-              <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <h1 className="hidden md:flex text-4xl font-bold text-foreground items-center gap-3">
                 <Calendar className="size-10 text-primary" />
                 {t('sessions.title')}
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-muted-foreground md:mt-2">
                 {t('sessions.subtitle', { count: sessions.length, xp: totalXp })}
               </p>
             </div>
@@ -142,7 +145,7 @@ export default function SessionList() {
                 setShowNewSessionForm(true);
                 setTitleError('');
               }}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
+              className="self-start md:self-auto flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-md"
             >
               <Plus className="size-5" />
               {t('sessions.logNewSession')}

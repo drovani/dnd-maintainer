@@ -5,6 +5,7 @@ import { ValidationError } from '@/components/ui/validation-error';
 import { ThemePicker } from '@/components/ThemePicker';
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useCharacters } from '@/hooks/useCharacters';
 import { useSessions } from '@/hooks/useSessions';
 import {
@@ -50,6 +51,8 @@ export default function CampaignDashboard() {
   );
 
   const { data: sessions = [], error: sessionsError } = useSessions(campaignId!);
+
+  usePageTitle(campaign?.name ?? t('nav.dashboard'));
 
   if (!campaignSlug || !campaignId) {
     return (
@@ -171,7 +174,7 @@ export default function CampaignDashboard() {
                 </div>
               ) : (
                 <div className="flex items-center gap-4 group">
-                  <h1 className="text-3xl font-bold text-foreground">{campaign.name}</h1>
+                  <h1 className="hidden md:block text-3xl font-bold text-foreground">{campaign.name}</h1>
                   <button
                     onClick={() => {
                       setEditedName(campaign.name);
