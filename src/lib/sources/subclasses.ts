@@ -1018,10 +1018,123 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Wizard
-  abjurer: { features: [] },
-  diviner: { features: [] },
-  evoker: { features: [] },
-  illusionist: { features: [] },
+  abjurer: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Abjuration Savant: copy/inscribe Abjuration spells into spellbook at half the usual cost
+          { type: 'feature', feature: { id: 'abjurer-abjuration-savant' } },
+          // Arcane Ward: casting a L1+ Abjuration spell creates or repairs a ward with HP = 2× Wizard level + INT mod;
+          // ward absorbs damage; casting more Abjuration spells (L1+) repairs the ward
+          { type: 'feature', feature: { id: 'abjurer-arcane-ward' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Projected Ward: Reaction — when a creature within 30 ft takes damage, your Arcane Ward absorbs that damage instead
+          { type: 'feature', feature: { id: 'abjurer-projected-ward' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Improved Abjuration: when you cast Counterspell or Dispel Magic, add your PB to the ability check
+          { type: 'feature', feature: { id: 'abjurer-improved-abjuration' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  diviner: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Divination Savant: copy/inscribe Divination spells into spellbook at half the usual cost
+          { type: 'feature', feature: { id: 'diviner-divination-savant' } },
+          // Portent: after each long rest, roll 2 d20s; replace any attack roll, ability check, or saving throw
+          // you can see with one of these rolls; each pre-rolled die can be used once
+          { type: 'feature', feature: { id: 'diviner-portent' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Expert Divination: when you cast a Divination spell of L2+, regain one expended spell slot of a
+          // level lower than the spell cast (max L5)
+          { type: 'feature', feature: { id: 'diviner-expert-divination' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // The Third Eye: Bonus Action — gain one of: Darkvision 120 ft, Ethereal Sight,
+          // Greater Comprehension, or See Invisibility; lasts until incapacitated or until used again
+          { type: 'feature', feature: { id: 'diviner-the-third-eye' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  evoker: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Evocation Savant: copy/inscribe Evocation spells into spellbook at half the usual cost
+          { type: 'feature', feature: { id: 'evoker-evocation-savant' } },
+          // Sculpt Spells: when you cast an Evocation spell that affects other creatures you can see,
+          // choose up to 1 + spell level allies; chosen creatures automatically succeed their saves and take no damage
+          { type: 'feature', feature: { id: 'evoker-sculpt-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Potent Cantrip: when a creature succeeds on a saving throw against a cantrip you cast,
+          // it takes half damage and any non-damage effects only partially apply
+          { type: 'feature', feature: { id: 'evoker-potent-cantrip' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Empowered Evocation: add your INT modifier to one damage roll of any Wizard Evocation spell you cast
+          { type: 'feature', feature: { id: 'evoker-empowered-evocation' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  illusionist: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Illusion Savant: copy/inscribe Illusion spells into spellbook at half the usual cost
+          { type: 'feature', feature: { id: 'illusionist-illusion-savant' } },
+          // Improved Illusions: when you cast an Illusion spell of L1+, you can alter one feature of the
+          // illusion as a Bonus Action
+          { type: 'feature', feature: { id: 'illusionist-improved-illusions' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Phantasmal Creatures: Phantasmal Force and Phantasmal Killer are always prepared and can be cast
+          // at their minimum slot levels without expending a spell slot; uses = PB per long rest
+          { type: 'feature', feature: { id: 'illusionist-phantasmal-creatures' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Illusory Self: Reaction — when a creature makes an attack roll against you, interpose an illusion
+          // that causes the attack to automatically miss; 1 use per short rest
+          { type: 'feature', feature: { id: 'illusionist-illusory-self' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
 };
 
 export const isSubclassId = (id: string): id is SubclassId =>

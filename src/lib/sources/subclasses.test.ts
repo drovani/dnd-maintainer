@@ -1902,6 +1902,218 @@ describe('getSubclassSource — Great Old One Patron', () => {
   });
 });
 
+describe('getSubclassSource — Abjurer', () => {
+  it('returns defined for abjurer', () => {
+    expect(getSubclassSource('abjurer')).toBeDefined();
+  });
+
+  it('abjurer has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('abjurer');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('abjurer level 3 grants 2 features: abjuration-savant and arcane-ward', () => {
+    const source = getSubclassSource('abjurer');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'abjurer-abjuration-savant' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'abjurer-arcane-ward' }),
+        }),
+      ])
+    );
+  });
+
+  it('abjurer level 6 grants 1 feature: projected-ward', () => {
+    const source = getSubclassSource('abjurer');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'abjurer-projected-ward' },
+    });
+  });
+
+  it('abjurer level 10 grants 1 feature: improved-abjuration', () => {
+    const source = getSubclassSource('abjurer');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'abjurer-improved-abjuration' },
+    });
+  });
+});
+
+describe('getSubclassSource — Diviner', () => {
+  it('returns defined for diviner', () => {
+    expect(getSubclassSource('diviner')).toBeDefined();
+  });
+
+  it('diviner has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('diviner');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('diviner level 3 grants 2 features: divination-savant and portent', () => {
+    const source = getSubclassSource('diviner');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'diviner-divination-savant' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'diviner-portent' }),
+        }),
+      ])
+    );
+  });
+
+  it('diviner level 6 grants 1 feature: expert-divination', () => {
+    const source = getSubclassSource('diviner');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'diviner-expert-divination' },
+    });
+  });
+
+  it('diviner level 10 grants 1 feature: the-third-eye', () => {
+    const source = getSubclassSource('diviner');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'diviner-the-third-eye' },
+    });
+  });
+});
+
+describe('getSubclassSource — Evoker', () => {
+  it('returns defined for evoker', () => {
+    expect(getSubclassSource('evoker')).toBeDefined();
+  });
+
+  it('evoker has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('evoker');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('evoker level 3 grants 2 features: evocation-savant and sculpt-spells', () => {
+    const source = getSubclassSource('evoker');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'evoker-evocation-savant' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'evoker-sculpt-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('evoker level 6 grants 1 feature: potent-cantrip', () => {
+    const source = getSubclassSource('evoker');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'evoker-potent-cantrip' },
+    });
+  });
+
+  it('evoker level 10 grants 1 feature: empowered-evocation', () => {
+    const source = getSubclassSource('evoker');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'evoker-empowered-evocation' },
+    });
+  });
+});
+
+describe('getSubclassSource — Illusionist', () => {
+  it('returns defined for illusionist', () => {
+    expect(getSubclassSource('illusionist')).toBeDefined();
+  });
+
+  it('illusionist has 3 feature levels (L3, L6, L10)', () => {
+    const source = getSubclassSource('illusionist');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+  });
+
+  it('illusionist level 3 grants 2 features: illusion-savant and improved-illusions', () => {
+    const source = getSubclassSource('illusionist');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'illusionist-illusion-savant' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'illusionist-improved-illusions' }),
+        }),
+      ])
+    );
+  });
+
+  it('illusionist level 6 grants 1 feature: phantasmal-creatures', () => {
+    const source = getSubclassSource('illusionist');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'illusionist-phantasmal-creatures' },
+    });
+  });
+
+  it('illusionist level 10 grants 1 feature: illusory-self', () => {
+    const source = getSubclassSource('illusionist');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(1);
+    expect(level10?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'illusionist-illusory-self' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();
