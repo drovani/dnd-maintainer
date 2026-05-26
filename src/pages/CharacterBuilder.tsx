@@ -140,7 +140,8 @@ function CharacterBuilderInner() {
   latestPayloadRef.current = { character, rows, resolved };
 
   // Required fields before any draft can be saved
-  const hasRequiredFields = !!character.name && !!character.species && !!character.class && !!character.alignment;
+  const hasRequiredFields =
+    !!character.name && !!character.species && !!character.class && !!character.background && !!character.alignment;
 
   // Autosave when isDirty changes to true — debounced 500ms, only if required fields present
   useEffect(() => {
