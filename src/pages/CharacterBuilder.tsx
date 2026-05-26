@@ -368,34 +368,36 @@ function CharacterBuilderInner() {
             </ul>
           </div>
         )}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0}>
-              <ChevronLeft size={16} />
-              {t('buttons.previous')}
+        {/*
+          Tab order is Previous → Next → Finalize → Abandon (DOM order).
+          Flex `order-*` keeps the visual layout: Previous and Abandon on the left,
+          status + Next + Finalize on the right (pushed by the order-3 spacer).
+        */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Button variant="outline" onClick={goPrevStep} disabled={currentStepIndex === 0} className="order-1">
+            <ChevronLeft size={16} />
+            {t('buttons.previous')}
+          </Button>
+          <div className="order-3 flex-1" />
+          {saveStatus === 'saving' && (
+            <span className="order-4 text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>
+          )}
+          {saveStatus === 'saved' && (
+            <span className="order-4 text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>
+          )}
+          {currentStepIndex < STEPS.length - 1 && (
+            <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeaveBasics} className="order-5">
+              {t('buttons.next')} <ChevronRight size={16} />
             </Button>
-            <Button variant="destructive" onClick={() => setConfirmAbandon(true)}>
-              <Trash2 className="size-4" />
-              {t('buttons.abandonCharacter')}
-            </Button>
-          </div>
-          <div className="flex items-center gap-3">
-            {saveStatus === 'saving' && (
-              <span className="text-sm text-muted-foreground">{t('characterBuilder.status.saving')}</span>
-            )}
-            {saveStatus === 'saved' && (
-              <span className="text-sm text-muted-foreground">{t('characterBuilder.status.draftSaved')}</span>
-            )}
-            {currentStepIndex < STEPS.length - 1 && (
-              <Button onClick={goNextStep} disabled={currentStepIndex === 0 && !canLeaveBasics}>
-                {t('buttons.next')} <ChevronRight size={16} />
-              </Button>
-            )}
-            <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing}>
-              <Save className="size-4" />
-              {isFinalizing ? t('buttons.finalizing') : t('buttons.finalizeCharacter')}
-            </Button>
-          </div>
+          )}
+          <Button onClick={handleFinalize} disabled={!isReadyToFinalize} pending={isFinalizing} className="order-6">
+            <Save className="size-4" />
+            {isFinalizing ? t('buttons.finalizing') : t('buttons.finalizeCharacter')}
+          </Button>
+          <Button variant="destructive" onClick={() => setConfirmAbandon(true)} className="order-2">
+            <Trash2 className="size-4" />
+            {t('buttons.abandonCharacter')}
+          </Button>
         </div>
 
         {confirmAbandon && (
