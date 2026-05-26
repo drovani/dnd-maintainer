@@ -895,10 +895,128 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Warlock
-  archfeypatron: { features: [] },
-  celestialpatron: { features: [] },
-  fiendpatron: { features: [] },
-  greatoldonepatron: { features: [] },
+  archfeypatron: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Steps of the Fey: Misty Step is always prepared; Bonus Action teleport with rider effects (Refreshing Step or Taunting Step)
+          { type: 'feature', feature: { id: 'archfeypatron-steps-of-the-fey' } },
+          // TODO #93: model Archfey patron spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'archfeypatron-patron-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Misty Escape: Reaction when you take damage — Misty Step and become Invisible until end of next turn; uses = PB/long rest
+          { type: 'feature', feature: { id: 'archfeypatron-misty-escape' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Beguiling Defenses: immunity to Charmed; when a creature tries to Charm you, target makes WIS save or is Charmed by you for 1 minute
+          { type: 'feature', feature: { id: 'archfeypatron-beguiling-defenses' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  celestialpatron: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Bonus Proficiency: Religion skill
+          { type: 'proficiency', category: 'skill', id: 'religion' },
+          // Bonus Cantrip: Light and Sacred Flame always known
+          // TODO #93: model as spell grants when spell id system supports cantrips
+          { type: 'feature', feature: { id: 'celestialpatron-bonus-cantrip' } },
+          // Healing Light: pool of d6s = 1 + Warlock level; spend as Bonus Action to heal creature within 60 ft
+          { type: 'feature', feature: { id: 'celestialpatron-healing-light' } },
+          // TODO #93: model Celestial patron spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'celestialpatron-patron-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Radiant Soul: resistance to Radiant damage + add CHA mod to one radiant/fire spell damage roll per turn
+          { type: 'resistance', damageType: 'radiant' },
+          { type: 'feature', feature: { id: 'celestialpatron-radiant-soul' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Celestial Resilience: gain temp HP = Warlock level + CHA mod on short/long rest; allies gain half Warlock level
+          { type: 'feature', feature: { id: 'celestialpatron-celestial-resilience' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  fiendpatron: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Dark One's Blessing: when you reduce a hostile to 0 HP, gain temp HP = CHA mod + Warlock level
+          { type: 'feature', feature: { id: 'fiendpatron-dark-ones-blessing' } },
+          // TODO #93: model Fiend patron spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'fiendpatron-patron-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Dark One's Own Luck: add d10 to an ability check or save; uses = PB per long rest; replenishes on short/long rest
+          { type: 'feature', feature: { id: 'fiendpatron-dark-ones-own-luck' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Fiendish Resilience: after short/long rest, choose one damage type to gain resistance to (runtime choice — no static resistance grant)
+          { type: 'feature', feature: { id: 'fiendpatron-fiendish-resilience' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  greatoldonepatron: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Bonus Proficiency (choice): Arcana, History, Intimidation, Nature, Religion, or Survival
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: createChoiceKey('skill-choice', 'class', 'greatoldonepatron', 1),
+            count: 1,
+            from: ['arcana', 'history', 'intimidation', 'nature', 'religion', 'survival'],
+          },
+          // Awakened Mind: telepathic communication with creatures within 30 ft sharing a language
+          { type: 'feature', feature: { id: 'greatoldonepatron-awakened-mind' } },
+          // TODO #93: model Great Old One patron spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'greatoldonepatron-psychic-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Clairvoyant Combatant: creature within 60 ft must make WIS save or you have Advantage against it and are invisible to it for 1 min; uses = PB/long rest
+          { type: 'feature', feature: { id: 'greatoldonepatron-clairvoyant-combatant' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Eldritch Hex: one creature you can see becomes Hexed; if it damages you, it takes psychic damage = PB; 1/day
+          { type: 'feature', feature: { id: 'greatoldonepatron-eldritch-hex' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Wizard
   abjurer: { features: [] },
   diviner: { features: [] },

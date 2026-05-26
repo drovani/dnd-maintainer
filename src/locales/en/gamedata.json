@@ -527,6 +527,74 @@
       "name": "Bend Luck",
       "description": "You have the ability to twist fate using your Wild Magic. As a Reaction when another creature you can see within 60 feet makes an attack roll, ability check, or saving throw, you can spend 2 Sorcery Points and roll 1d4. You can add or subtract the number rolled from the creature's roll (your choice)."
     },
+    "archfeypatron-steps-of-the-fey": {
+      "name": "Steps of the Fey",
+      "description": "Misty Step is always prepared for you. When you cast it, you can also choose one of two rider effects: Refreshing Step (you or an ally within 30 feet regains hit points equal to a roll of your Warlock spell slot die) or Taunting Step (one creature of your choice within 5 feet of the space you left must succeed on a Wisdom saving throw or have Disadvantage on attack rolls against creatures other than you until the start of your next turn). You can cast Misty Step a number of times equal to your Proficiency Bonus per Long Rest without expending a spell slot."
+    },
+    "archfeypatron-patron-spells": {
+      "name": "Archfey Patron Spells",
+      "description": "Your Archfey patron grants you access to additional spells that are always prepared and don't count against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
+    },
+    "archfeypatron-misty-escape": {
+      "name": "Misty Escape",
+      "description": "When you take damage, you can use your Reaction to cast Misty Step without expending a spell slot. You then have the Invisible condition until the end of your next turn. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest."
+    },
+    "archfeypatron-beguiling-defenses": {
+      "name": "Beguiling Defenses",
+      "description": "Your patron teaches you how to guard your mind and turn another's charms back on them. You are immune to the Charmed condition. If a creature attempts to Charm you, you can use your Reaction to force the creature to make a Wisdom saving throw against your spell save DC. On a failed save, the creature has the Charmed condition for 1 minute or until it takes any damage."
+    },
+    "celestialpatron-bonus-cantrip": {
+      "name": "Bonus Cantrips",
+      "description": "You know the Light and Sacred Flame cantrips. They count as Warlock cantrips for you, but they don't count against the number of cantrips you know."
+    },
+    "celestialpatron-healing-light": {
+      "name": "Healing Light",
+      "description": "You gain the ability to channel celestial energy to heal wounds. You have a pool of d6s that you spend to fuel this healing. The number of dice in the pool equals 1 + your Warlock level. As a Bonus Action, you can heal one creature you can see within 60 feet by spending dice from the pool. The maximum number of dice you can spend at once equals your Charisma modifier (minimum 1). Roll the spent dice and restore a number of hit points equal to the total. Your pool regains all expended dice when you finish a Long Rest."
+    },
+    "celestialpatron-patron-spells": {
+      "name": "Celestial Patron Spells",
+      "description": "Your Celestial patron grants you access to additional spells that are always prepared and don't count against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
+    },
+    "celestialpatron-radiant-soul": {
+      "name": "Radiant Soul",
+      "description": "Your link to the Celestial allows you to serve as a conduit for radiant energy. You have Resistance to Radiant damage. In addition, when you cast a spell that deals Radiant or Fire damage, you can add your Charisma modifier to one radiant or fire damage roll of that spell against one of its targets."
+    },
+    "celestialpatron-celestial-resilience": {
+      "name": "Celestial Resilience",
+      "description": "You gain the ability to infuse yourself and your allies with the energy of the Upper Planes. When you finish a Short or Long Rest, you gain Temporary Hit Points equal to your Warlock level plus your Charisma modifier. Additionally, choose up to five creatures you can see at the end of the rest. Those creatures each gain Temporary Hit Points equal to half your Warlock level."
+    },
+    "fiendpatron-dark-ones-blessing": {
+      "name": "Dark One's Blessing",
+      "description": "When you reduce a hostile creature to 0 hit points, you gain Temporary Hit Points equal to your Charisma modifier plus your Warlock level (minimum 1)."
+    },
+    "fiendpatron-patron-spells": {
+      "name": "Fiend Patron Spells",
+      "description": "Your Fiend patron grants you access to additional spells that are always prepared and don't count against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
+    },
+    "fiendpatron-dark-ones-own-luck": {
+      "name": "Dark One's Own Luck",
+      "description": "You can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. It also replenishes when you finish a Short Rest."
+    },
+    "fiendpatron-fiendish-resilience": {
+      "name": "Fiendish Resilience",
+      "description": "You can choose one damage type when you finish a Short or Long Rest. You gain Resistance to that damage type until you choose a different one with this feature. Damage from magical weapons and silver weapons ignores this resistance."
+    },
+    "greatoldonepatron-awakened-mind": {
+      "name": "Awakened Mind",
+      "description": "Your patron's knowledge invades your very being. You can communicate telepathically with any creature you can see within 30 feet of you. You don't need to share a language with the creature for it to understand your telepathic communications, but the creature must be able to understand at least one language."
+    },
+    "greatoldonepatron-psychic-spells": {
+      "name": "Psychic Spells",
+      "description": "Your Great Old One patron grants you access to additional spells that deal Psychic damage and are always prepared, not counting against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
+    },
+    "greatoldonepatron-clairvoyant-combatant": {
+      "name": "Clairvoyant Combatant",
+      "description": "Your alien patron grants you the ability to read your opponents' minds. When you force a creature within 60 feet of you to make a Wisdom saving throw, you can choose to peer into its mind. On a failed save, for 1 minute your attack rolls against that creature have Advantage and it can't see you. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest."
+    },
+    "greatoldonepatron-eldritch-hex": {
+      "name": "Eldritch Hex",
+      "description": "Your patron grants you a powerful hex. As a Bonus Action, you can magically hex one creature you can see within 60 feet. Until the hex ends, whenever that creature deals damage to you, you deal Psychic damage to it equal to your Proficiency Bonus. The hex ends early if you die, or after 24 hours. Once you use this feature, you can't do so again until you finish a Long Rest."
+    },
     "soulknife-psionic-power": {
       "name": "Psionic Power",
       "description": "You have a pool of Psionic Energy dice that fuel your psionic abilities. The die size scales with your proficiency bonus: d6 (PB +2), d8 (PB +3), d10 (PB +4), d12 (PB +5 or +6). You start each Long Rest with 4 dice; a Short Rest replenishes 1. Two options enabled at L3: Psi-Bolstered Knack — when you fail an ability check using a skill or tool you are proficient in, you can roll one Psionic Energy die and add it to the check; if this causes the check to succeed, the die is not expended; Psychic Whispers — as an Action, choose a number of creatures equal to your Proficiency Bonus that you can see within 1 mile; those creatures can communicate telepathically with you in a language you both know for up to 1 hour; this uses 1 Psionic Energy die."
