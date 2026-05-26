@@ -47,18 +47,15 @@ export function OriginStep() {
 
   return (
     <div className="space-y-6">
-      {/* Species lineage sub-choice */}
+      {/* Species lineage sub-choice (LineagePicker renders null for species without lineages) */}
       {hasResolvedSpecies && (
-        <div className="space-y-2">
-          <Label>{tc('characterBuilder.fields.species')}</Label>
-          <LineagePicker
-            race={species}
-            bundles={context.bundles}
-            build={context.build}
-            makeChoice={context.makeChoice}
-            clearChoice={context.clearChoice}
-          />
-        </div>
+        <LineagePicker
+          race={species}
+          bundles={context.bundles}
+          build={context.build}
+          makeChoice={context.makeChoice}
+          clearChoice={context.clearChoice}
+        />
       )}
 
       {!background && (
