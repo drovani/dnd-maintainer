@@ -1,9 +1,9 @@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
-import { type LanguageId, type SpeciesId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+import { type SpeciesId, type ToolProficiencyId } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
-import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
+import type { ChoiceDecision } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
 import { useTranslation } from 'react-i18next';
 import { ChoicePicker } from './ChoicePicker';
@@ -40,18 +40,6 @@ export function OriginStep() {
       from: grant.from as readonly ToolProficiencyId[] | null,
     })
   );
-
-  const backgroundLanguageChoiceGrants = collectGrantsByType(bundles, 'proficiency-choice').filter(
-    (tg) => tg.source.origin === 'background' && tg.grant.category === 'language'
-  );
-  const backgroundLanguageChoices: readonly (PendingChoice & { type: 'language-choice' })[] =
-    backgroundLanguageChoiceGrants.map(({ grant, source }) => ({
-      type: 'language-choice' as const,
-      choiceKey: grant.key,
-      source,
-      count: grant.count,
-      from: grant.from as readonly LanguageId[] | null,
-    }));
 
   const backgroundName = background
     ? t(`backgrounds.${background}` as `backgrounds.${string}`, { defaultValue: background })
@@ -107,27 +95,6 @@ export function OriginStep() {
           <div className="space-y-4">
             {backgroundToolChoices.map((choice) => {
               const decision = build?.choices[choice.choiceKey];
-              return (
-                <ChoicePicker
-                  key={choice.choiceKey}
-                  choice={choice}
-                  currentDecision={decision as ChoiceDecision | undefined}
-                  onDecide={(key, d) => context.makeChoice(key, d)}
-                  onClear={(key) => context.clearChoice(key)}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Language choices */}
-      {background && backgroundLanguageChoices.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-base font-semibold">{tc('characterBuilder.backgroundStep.languageTitle')}</Label>
-          <div className="space-y-4">
-            {backgroundLanguageChoices.map((choice) => {
-              const decision = build?.choices[choice.choiceKey as ChoiceKey];
               return (
                 <ChoicePicker
                   key={choice.choiceKey}

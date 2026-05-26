@@ -244,15 +244,13 @@ describe('OriginStep', () => {
     expect(checkboxes.length).toBeGreaterThan(0);
   });
 
-  it('renders ChoicePicker for language-choice when background grants a language choice', () => {
+  it('does not render a language-choice picker (language picks are unified in DetailsStep)', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle(), makeAcolyteLanguageChoiceBundle()];
 
     render(<OriginStep />);
 
-    expect(screen.getByText('languageTitle')).toBeTruthy();
-    // ChoicePicker renders the language count badge (0 / 1)
-    expect(screen.getByText('languageChoice:1')).toBeTruthy();
+    expect(screen.queryByText('languageTitle')).toBeNull();
   });
 
   it('shows only the missing-background hint when no background is selected', () => {
