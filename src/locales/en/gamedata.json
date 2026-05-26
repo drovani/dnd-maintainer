@@ -2142,18 +2142,54 @@
     "gargantuan": "Gargantuan"
   },
   "feats": {
-    "alert": { "name": "Alert" },
-    "crafter": { "name": "Crafter" },
-    "healer": { "name": "Healer" },
-    "lucky": { "name": "Lucky" },
-    "magic-initiate-cleric": { "name": "Magic Initiate (Cleric)" },
-    "magic-initiate-druid": { "name": "Magic Initiate (Druid)" },
-    "magic-initiate-wizard": { "name": "Magic Initiate (Wizard)" },
-    "musician": { "name": "Musician" },
-    "savage-attacker": { "name": "Savage Attacker" },
-    "skilled": { "name": "Skilled" },
-    "tavern-brawler": { "name": "Tavern Brawler" },
-    "tough": { "name": "Tough" },
+    "alert": {
+      "name": "Alert",
+      "description": "Gain a bonus to Initiative rolls equal to your Proficiency Bonus. You can also swap Initiative with a willing ally if neither of you has the Incapacitated condition."
+    },
+    "crafter": {
+      "name": "Crafter",
+      "description": "Gain proficiency with three Artisan's Tools of your choice. When you buy nonmagical equipment, you get a 20 percent discount. You can craft mundane items faster during Long Rests with these tools."
+    },
+    "healer": {
+      "name": "Healer",
+      "description": "Gain proficiency with the Healer's Kit. As a Utilize action, you can expend one use of a Healer's Kit to restore Hit Points to a creature equal to 1d6 + 4 + its character level. A creature can benefit only once per Short Rest."
+    },
+    "lucky": {
+      "name": "Lucky",
+      "description": "You have a number of Luck Points equal to your Proficiency Bonus, regained on a Long Rest. Spend a Luck Point to roll a d20 and replace your attack roll, ability check, or saving throw — or to force an attacker to reroll an attack against you."
+    },
+    "magic-initiate-cleric": {
+      "name": "Magic Initiate (Cleric)",
+      "description": "Learn two Cleric cantrips and one 1st-level Cleric spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Wisdom is your spellcasting ability for these spells."
+    },
+    "magic-initiate-druid": {
+      "name": "Magic Initiate (Druid)",
+      "description": "Learn two Druid cantrips and one 1st-level Druid spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Wisdom is your spellcasting ability for these spells."
+    },
+    "magic-initiate-wizard": {
+      "name": "Magic Initiate (Wizard)",
+      "description": "Learn two Wizard cantrips and one 1st-level Wizard spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Intelligence is your spellcasting ability for these spells."
+    },
+    "musician": {
+      "name": "Musician",
+      "description": "Gain proficiency with three Musical Instruments of your choice. As part of a Short or Long Rest, you can play one of these instruments and give Heroic Inspiration to allies (up to your Proficiency Bonus) who hear you."
+    },
+    "savage-attacker": {
+      "name": "Savage Attacker",
+      "description": "Once per turn when you hit a target with a weapon, you can roll the weapon's damage dice twice and use either roll against the target."
+    },
+    "skilled": {
+      "name": "Skilled",
+      "description": "Gain proficiency in any combination of three skills or tools of your choice."
+    },
+    "tavern-brawler": {
+      "name": "Tavern Brawler",
+      "description": "Your Unarmed Strike's damage die becomes 1d4. Once per turn, when you hit with an Unarmed Strike or an Improvised Weapon, you can reroll the damage die and use either result. You also gain proficiency with Improvised Weapons."
+    },
+    "tough": {
+      "name": "Tough",
+      "description": "Your Hit Point maximum increases by an amount equal to twice your character level when you take this feat, and it increases by 2 again whenever you gain a level."
+    },
     "archery": { "name": "Archery" },
     "defense": { "name": "Defense" },
     "dueling": { "name": "Dueling" },

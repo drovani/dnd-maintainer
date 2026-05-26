@@ -68,17 +68,24 @@ export function OriginStep() {
       {background && backgroundFeatGrant && (
         <div className="space-y-2">
           <Label className="text-base font-semibold">{tc('characterBuilder.backgroundStep.originFeatTitle')}</Label>
-          <div className="flex items-center gap-3 p-3 rounded-md border border-border bg-muted/30">
-            <Badge variant="secondary" className="text-sm">
-              {t(`feats.${backgroundFeatGrant.featId}.name` as `feats.${string}.name`, {
-                defaultValue: backgroundFeatGrant.featId,
+          <div className="space-y-2 p-3 rounded-md border border-border bg-muted/30">
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-sm">
+                {t(`feats.${backgroundFeatGrant.featId}.name` as `feats.${string}.name`, {
+                  defaultValue: backgroundFeatGrant.featId,
+                })}
+              </Badge>
+              {backgroundName && (
+                <span className="text-xs text-muted-foreground">
+                  {tc('characterBuilder.backgroundStep.originFeatGranted', { background: backgroundName })}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-foreground">
+              {t(`feats.${backgroundFeatGrant.featId}.description` as `feats.${string}.description`, {
+                defaultValue: '',
               })}
-            </Badge>
-            {backgroundName && (
-              <span className="text-xs text-muted-foreground">
-                {tc('characterBuilder.backgroundStep.originFeatGranted', { background: backgroundName })}
-              </span>
-            )}
+            </p>
           </div>
         </div>
       )}
