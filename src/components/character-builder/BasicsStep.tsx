@@ -151,8 +151,8 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
     if (!target) return;
     const basicsReady = !!character.name && !!character.species && !!character.class && !!character.alignment;
     if (!basicsReady) return;
-    // If targeting 'skills', also wait until base_abilities have committed.
-    if (target === 'skills') {
+    // If targeting 'class' (Quick NPC with quickBuild data), also wait until base_abilities have committed.
+    if (target === 'class') {
       const creation = rows.find((r) => r.sequence === 0);
       const hasAbilities =
         !!creation?.base_abilities &&
@@ -238,9 +238,9 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         name: basics.name,
         class: classId,
         level: 1,
-        ...(basics.targetStep === 'skills' ? { background: basics.suggestedBackground } : {}),
+        ...(basics.targetStep === 'class' ? { background: basics.suggestedBackground } : {}),
       });
-      const asiDecision = basics.targetStep === 'skills' ? basics.backgroundAsiDecision : undefined;
+      const asiDecision = basics.targetStep === 'class' ? basics.backgroundAsiDecision : undefined;
       const choices = {
         ...(asiDecision
           ? {
@@ -260,7 +260,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
           : {}),
       };
       const hasChoices = Object.keys(choices).length > 0;
-      if (basics.targetStep === 'skills') {
+      if (basics.targetStep === 'class') {
         context.updateCreation({
           base_abilities: basics.baseAbilities,
           ...(hasChoices ? { choices } : {}),

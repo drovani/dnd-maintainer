@@ -134,10 +134,10 @@ describe('generateRandomNpcBasics', () => {
     expect(result).toBeNull();
   });
 
-  it('with rng=()=>0 returns fighter basics with targetStep=skills and str=15, con=14', () => {
+  it('with rng=()=>0 returns fighter basics with targetStep=class and str=15, con=14', () => {
     const result = generateRandomNpcBasics('fighter', () => 0);
     expect(result).not.toBeNull();
-    if (!result || result.targetStep !== 'skills') return;
+    if (!result || result.targetStep !== 'class') return;
     // highestAbility is ['str','dex']; rng=0 picks index 0 → str
     expect(result.baseAbilities.str).toBe(15);
     expect(result.baseAbilities.con).toBe(14);
@@ -159,7 +159,7 @@ describe('generateRandomNpcBasics', () => {
     // alignment=cn (idx 5), name picks from gnome data, highestAbility=dex (idx 1 of 2)
     const result = generateRandomNpcBasics('fighter', () => 0.65);
     expect(result).not.toBeNull();
-    if (!result || result.targetStep !== 'skills') return;
+    if (!result || result.targetStep !== 'class') return;
     expect(result.baseAbilities.dex).toBe(15);
   });
 
@@ -175,15 +175,15 @@ describe('generateRandomNpcBasics', () => {
     expect(DND_ALIGNMENTS.map((a) => a.id)).toContain(result.alignment);
     expect(result.name).toContain(' ');
     // baseAbilities values should be a permutation of STANDARD_ARRAY
-    if (result.targetStep !== 'skills') return;
+    if (result.targetStep !== 'class') return;
     const values = Object.values(result.baseAbilities).sort((a, b) => b - a);
     expect(values).toEqual([...STANDARD_ARRAY]);
   });
 
   it('targetStep is skills and baseAbilities/suggestedBackground/backgroundAsiDecision are present for fighter', () => {
     const fighterResult = generateRandomNpcBasics('fighter', () => 0);
-    expect(fighterResult?.targetStep).toBe('skills');
-    if (!fighterResult || fighterResult.targetStep !== 'skills') return;
+    expect(fighterResult?.targetStep).toBe('class');
+    if (!fighterResult || fighterResult.targetStep !== 'class') return;
     expect(fighterResult.baseAbilities).toBeDefined();
     expect(fighterResult.suggestedBackground).toBeDefined();
     // Every BACKGROUND_SOURCES entry has a non-null from pool, so backgroundAsiDecision is always set
@@ -225,11 +225,11 @@ describe('generateRandomNpcBasicsDetailed', () => {
     expect(result.failure).toBe('unknown-class');
   });
 
-  it('returns ok=true with targetStep=skills on fighter success', () => {
+  it('returns ok=true with targetStep=class on fighter success', () => {
     const result = generateRandomNpcBasicsDetailed('fighter', () => 0);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.basics.targetStep).toBe('skills');
+    expect(result.basics.targetStep).toBe('class');
   });
 
   it('returns ok=true for rng=()=>0.95 now that stub species are filtered out', () => {

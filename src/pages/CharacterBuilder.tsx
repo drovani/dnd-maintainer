@@ -7,10 +7,9 @@ import {
   BackstoryStep,
   BasicsStep,
   ClassStep,
+  DetailsStep,
   EquipmentStep,
   OriginStep,
-  ProficienciesStep,
-  SkillsStep,
 } from '@/components/character-builder';
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext';
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave';
@@ -31,11 +30,10 @@ const logger = getLogger('character-builder');
 
 const STEPS: { id: StepType }[] = [
   { id: 'basics' },
-  { id: 'background' },
+  { id: 'class' },
+  { id: 'origin' },
   { id: 'abilities' },
-  { id: 'skills' },
-  { id: 'classFeatures' },
-  { id: 'proficiencies' },
+  { id: 'details' },
   { id: 'equipment' },
   { id: 'backstory' },
 ];
@@ -44,16 +42,14 @@ function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactEleme
   switch (step) {
     case 'basics':
       return <BasicsStep onRequestAdvance={goToStep} />;
-    case 'background':
+    case 'class':
+      return <ClassStep />;
+    case 'origin':
       return <OriginStep />;
     case 'abilities':
       return <AbilitiesStep />;
-    case 'skills':
-      return <SkillsStep />;
-    case 'classFeatures':
-      return <ClassStep />;
-    case 'proficiencies':
-      return <ProficienciesStep />;
+    case 'details':
+      return <DetailsStep />;
     case 'equipment':
       return <EquipmentStep />;
     case 'backstory':

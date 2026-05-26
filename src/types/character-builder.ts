@@ -1,9 +1,1 @@
-export type StepType =
-  | 'basics'
-  | 'background'
-  | 'abilities'
-  | 'skills'
-  | 'classFeatures'
-  | 'proficiencies'
-  | 'equipment'
-  | 'backstory';
+export type StepType = 'basics' | 'class' | 'origin' | 'abilities' | 'details' | 'equipment' | 'backstory';

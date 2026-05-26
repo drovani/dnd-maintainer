@@ -38,7 +38,7 @@ interface RandomNpcBasicsBase {
 
 export type RandomNpcBasics =
   | (RandomNpcBasicsBase & {
-      readonly targetStep: 'skills';
+      readonly targetStep: 'class';
       readonly baseAbilities: AbilityScores;
       readonly suggestedBackground: BackgroundId;
       readonly backgroundAsiDecision?: {
@@ -221,7 +221,7 @@ export function generateRandomNpcBasicsDetailed(
       classId,
       baseAbilities,
       suggestedBackground: qb.suggestedBackground,
-      targetStep: 'skills',
+      targetStep: 'class',
       ...(backgroundAsiDecision !== undefined ? { backgroundAsiDecision } : {}),
       ...(lineageDecision !== undefined ? { lineageDecision } : {}),
     },

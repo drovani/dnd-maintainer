@@ -225,7 +225,7 @@ describe('BasicsStep', () => {
 
     rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />);
 
-    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('skills'));
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('class'));
     expect(onRequestAdvance).toHaveBeenCalledTimes(1);
   });
 
@@ -275,7 +275,7 @@ describe('BasicsStep', () => {
         classId: 'fighter',
         baseAbilities: { str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 },
         suggestedBackground: 'soldier',
-        targetStep: 'skills',
+        targetStep: 'class',
         lineageDecision: { key: 'lineage-choice:species:tiefling:0', lineageId: 'infernal' },
       },
     });
@@ -302,7 +302,7 @@ describe('BasicsStep', () => {
         classId: 'fighter',
         baseAbilities: { str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 },
         suggestedBackground: 'soldier',
-        targetStep: 'skills',
+        targetStep: 'class',
         // No backgroundAsiDecision, no lineageDecision
       },
     });
@@ -391,7 +391,7 @@ describe('BasicsStep', () => {
     const onRequestAdvance = vi.fn();
     const { rerender } = render(<BasicsStep onRequestAdvance={onRequestAdvance} />);
 
-    // First click → Fighter (quickBuild → targetStep='skills')
+    // First click → Fighter (quickBuild → targetStep='class')
     fireEvent.click(screen.getByRole('button', { name: /fighter/i }));
 
     // Before any state lands, second click with a no-quickBuild class (targetStep='abilities')
@@ -426,7 +426,7 @@ describe('BasicsStep', () => {
 
     await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('abilities'));
     expect(onRequestAdvance).toHaveBeenCalledTimes(1);
-    expect(onRequestAdvance).not.toHaveBeenCalledWith('skills');
+    expect(onRequestAdvance).not.toHaveBeenCalledWith('class');
   });
 
   it('surfaces a distinct toast for unknown-class failures', () => {
@@ -506,7 +506,7 @@ describe('BasicsStep', () => {
     contextRows = [buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }), buildLevelRow('fighter')];
     rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />);
 
-    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('skills'));
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('class'));
     expect(onRequestAdvance).toHaveBeenCalledTimes(1);
   });
 
@@ -545,7 +545,7 @@ describe('BasicsStep', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /fighter/i }));
     contextRows = [buildCreationRow({ str: 15, dex: 13, con: 14, int: 12, wis: 10, cha: 8 }), buildLevelRow('fighter')];
     rerender(<BasicsStep onRequestAdvance={onRequestAdvance} />);
-    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('skills'));
+    await waitFor(() => expect(onRequestAdvance).toHaveBeenCalledWith('class'));
   });
 
   // ---------------------------------------------------------------------------

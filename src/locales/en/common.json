@@ -96,10 +96,11 @@
     "title": "Create New Character",
     "steps": {
       "basics": "Basics",
-      "background": "Background",
+      "class": "Class",
+      "origin": "Origin",
       "abilities": "Abilities",
+      "details": "Details",
       "skills": "Skills",
-      "classFeatures": "Class Features",
       "proficiencies": "Proficiencies",
       "equipment": "Equipment",
       "backstory": "Backstory"
