@@ -13,7 +13,6 @@ import { LevelControls } from '@/components/character-sheet/LevelControls';
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel';
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
-import { StatusPanel } from '@/components/character-sheet/StatusPanel';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
@@ -341,11 +340,6 @@ function CharacterSheetInner({
                 </p>
               </div>
             )}
-          </div>
-
-          {/* Status: Heroic Inspiration & Exhaustion */}
-          <div className="mt-4 pt-4 border-t">
-            <StatusPanel character={character} onUpdate={handleUpdate} />
           </div>
 
           {/* Level Controls */}
