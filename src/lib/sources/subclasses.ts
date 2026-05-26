@@ -774,7 +774,29 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       { classLevel: 9, grants: [{ type: 'feature', feature: { id: 'arcanetrickster-magical-ambush' } }] },
     ],
   },
-  soulknife: { features: [] },
+  soulknife: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Single umbrella feature for Psionic Power pool (Psi-Bolstered Knack, Psychic Whispers).
+          // Die size scales with PB (d6 at PB+2 → d12 at PB+6); shared resource pool with psiwarrior.
+          { type: 'feature', feature: { id: 'soulknife-psionic-power' } },
+          // Psychic Blades: Bonus Action to produce glowing psychic blades as Unarmed Strike alternatives;
+          // 1d6 psychic damage (1d8 for the off-hand blade in a two-weapon attack); counts as Finesse for Sneak Attack.
+          // No weapon-grant infrastructure exists — described entirely in feature text.
+          { type: 'feature', feature: { id: 'soulknife-psychic-blades' } },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          // Umbrella feature for Soul Blades options (Homing Strikes, Psychic Teleportation).
+          { type: 'feature', feature: { id: 'soulknife-soul-blades' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Sorcerer
   aberrantsorcery: { features: [] },
   clockworksorcery: { features: [] },

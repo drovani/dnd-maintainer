@@ -1431,6 +1431,48 @@ describe('getSubclassSource — Hunter', () => {
   });
 });
 
+describe('getSubclassSource — Soulknife', () => {
+  it('returns defined for soulknife', () => {
+    expect(getSubclassSource('soulknife')).toBeDefined();
+  });
+
+  it('soulknife has 2 feature levels (L3, L9)', () => {
+    const source = getSubclassSource('soulknife');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 9]);
+  });
+
+  it('soulknife level 3 grants 2 features: psionic-power and psychic-blades', () => {
+    const source = getSubclassSource('soulknife');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'soulknife-psionic-power' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'soulknife-psychic-blades' }),
+        }),
+      ])
+    );
+  });
+
+  it('soulknife level 9 grants 1 feature: soul-blades', () => {
+    const source = getSubclassSource('soulknife');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(1);
+    expect(level9?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'soulknife-soul-blades' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();

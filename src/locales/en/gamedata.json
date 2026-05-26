@@ -467,6 +467,18 @@
       "name": "Magical Ambush",
       "description": "If hidden when you cast a spell, the target has disadvantage on saving throws against it this turn."
     },
+    "soulknife-psionic-power": {
+      "name": "Psionic Power",
+      "description": "You have a pool of Psionic Energy dice that fuel your psionic abilities. The die size scales with your proficiency bonus: d6 (PB +2), d8 (PB +3), d10 (PB +4), d12 (PB +5 or +6). You start each Long Rest with 4 dice; a Short Rest replenishes 1. Two options enabled at L3: Psi-Bolstered Knack — when you fail an ability check using a skill or tool you are proficient in, you can roll one Psionic Energy die and add it to the check; if this causes the check to succeed, the die is not expended; Psychic Whispers — as an Action, choose a number of creatures equal to your Proficiency Bonus that you can see within 1 mile; those creatures can communicate telepathically with you in a language you both know for up to 1 hour; this uses 1 Psionic Energy die."
+    },
+    "soulknife-psychic-blades": {
+      "name": "Psychic Blades",
+      "description": "As part of the Attack action or as a Bonus Action, you can manifest a glowing psychic blade from your hand to make a melee attack against a creature within reach. The blade deals 1d6 Psychic damage on a hit, using your Dexterity modifier for the attack and damage rolls. If you make this attack as a Bonus Action as part of a two-weapon fighting sequence, the off-hand blade deals 1d8 Psychic damage instead. The blades vanish immediately after an attack and have the Finesse property for the purpose of qualifying for Sneak Attack. No weapon proficiency or material components are required."
+    },
+    "soulknife-soul-blades": {
+      "name": "Soul Blades",
+      "description": "Your Psychic Blades gain two additional options powered by Psionic Energy dice: Homing Strikes — when you make an attack roll with your Psychic Blades and miss, you can roll one Psionic Energy die and add the result to the attack roll; if this causes the attack to hit, the die is not expended; Psychic Teleportation — as a Bonus Action, you manifest a Psychic Blade and throw it up to 30 feet to an unoccupied space you can see, then teleport to a space adjacent to where the blade landed, expending 1 Psionic Energy die."
+    },
     "berserker-frenzy": {
       "name": "Frenzy",
       "description": "While raging, you can use a Bonus Action on each of your turns to make one melee attack with a weapon or an Unarmed Strike. When your Rage ends, you have 1 Exhaustion level."
