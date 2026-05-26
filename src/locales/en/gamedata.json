@@ -327,6 +327,46 @@
       "name": "Guarded Mind",
       "description": "You have Resistance to Psychic damage. In addition, if you start your turn with the Charmed or Frightened condition, you can spend one Psionic Energy die (no action required) to end one of those conditions on yourself."
     },
+    "warriorofmercy-hand-of-healing": {
+      "name": "Hand of Healing",
+      "description": "Focus Point: when you use Flurry of Blows, you can replace one of the strikes with a healing touch — the target regains Hit Points equal to a roll of your Martial Arts die + your Wisdom modifier."
+    },
+    "warriorofmercy-hand-of-harm": {
+      "name": "Hand of Harm",
+      "description": "Focus Point (1): when you hit a creature with an Unarmed Strike, you can spend 1 Focus Point to deal extra Necrotic damage equal to a roll of your Martial Arts die."
+    },
+    "warriorofmercy-physicians-touch": {
+      "name": "Physician's Touch",
+      "description": "Your Hand of Healing is enhanced: when you use it, you can also end one of the following conditions on the target — Diseased, Poisoned, Charmed, Frightened, Paralyzed, or Stunned. Your Hand of Harm is enhanced: the target must succeed on a CON saving throw (DC = 8 + your proficiency bonus + your WIS modifier) or have the Poisoned condition until the end of your next turn."
+    },
+    "warriorofshadow-shadow-arts": {
+      "name": "Shadow Arts",
+      "description": "You gain the Minor Illusion cantrip (WIS is your spellcasting ability). You can also spend Focus Points to cast the following spells without material components, using your Monk level as the spellcaster level and WIS as your spellcasting ability: Darkness (1 Focus Point), Darkvision (1 Focus Point), Pass without Trace (2 Focus Points), Silence (2 Focus Points)."
+    },
+    "warriorofshadow-shadow-step": {
+      "name": "Shadow Step",
+      "description": "Bonus Action: while in dim light or darkness, teleport up to 60 feet to an unoccupied space you can see that is also in dim light or darkness. The first melee attack you make before the end of the current turn has Advantage."
+    },
+    "warriorofelements-elemental-attunement": {
+      "name": "Elemental Attunement",
+      "description": "Focus Point: as a Bonus Action, infuse your Unarmed Strikes with elemental energy, choosing Acid, Cold, Fire, Lightning, or Thunder. This lasts 10 minutes. While active, your Unarmed Strikes deal extra damage of the chosen type equal to a roll of your Martial Arts die, and you can push the target up to 10 feet away from you on a hit."
+    },
+    "warriorofelements-elemental-burst": {
+      "name": "Elemental Burst",
+      "description": "Focus Point: as an Action, choose a point within 60 feet of you. All creatures within 20 feet of that point must make a DEX saving throw (DC = 8 + your proficiency bonus + your WIS modifier). On a failed save, a creature takes 2d8 + your Monk level damage of your attunement element; it takes half as much on a successful save."
+    },
+    "warriorofelements-elemental-epitome": {
+      "name": "Elemental Epitome",
+      "description": "While your Elemental Attunement is active, your mastery of elemental power grows: the push distance from Elemental Attunement increases to 15 feet, and you can choose to pull targets toward you instead of pushing them. You also gain resistance to the damage type you chose for your Elemental Attunement."
+    },
+    "warrioropenhand-open-hand-technique": {
+      "name": "Open Hand Technique",
+      "description": "When you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target: it must succeed on a STR saving throw or be knocked Prone; it must succeed on a STR saving throw or be pushed up to 15 feet away from you; or it can't take Reactions until the end of your next turn (no saving throw)."
+    },
+    "warrioropenhand-wholeness-of-body": {
+      "name": "Wholeness of Body",
+      "description": "Bonus Action: you can heal yourself. Roll your Martial Arts die and regain Hit Points equal to 3 times the result. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest."
+    },
     "fighting-style-archery": {
       "name": "Fighting Style: Archery",
       "description": "You gain a +2 bonus to attack rolls you make with ranged weapons."

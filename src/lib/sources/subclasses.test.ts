@@ -910,6 +910,158 @@ describe('getSubclassSource — Psi Warrior', () => {
   });
 });
 
+describe('getSubclassSource — Warrior of Mercy', () => {
+  it('returns defined for warriorofmercy', () => {
+    expect(getSubclassSource('warriorofmercy')).toBeDefined();
+  });
+
+  it('warriorofmercy has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('warriorofmercy');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('warriorofmercy level 3 grants 2 features: hand-of-healing and hand-of-harm', () => {
+    const source = getSubclassSource('warriorofmercy');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'warriorofmercy-hand-of-healing' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'warriorofmercy-hand-of-harm' }),
+        }),
+      ])
+    );
+  });
+
+  it('warriorofmercy level 6 grants physicians-touch feature', () => {
+    const source = getSubclassSource('warriorofmercy');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'warriorofmercy-physicians-touch' },
+    });
+  });
+});
+
+describe('getSubclassSource — Warrior of Shadow', () => {
+  it('returns defined for warriorofshadow', () => {
+    expect(getSubclassSource('warriorofshadow')).toBeDefined();
+  });
+
+  it('warriorofshadow has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('warriorofshadow');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('warriorofshadow level 3 grants 1 feature: shadow-arts', () => {
+    const source = getSubclassSource('warriorofshadow');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(1);
+    expect(level3?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'warriorofshadow-shadow-arts' },
+    });
+  });
+
+  it('warriorofshadow level 6 grants shadow-step feature', () => {
+    const source = getSubclassSource('warriorofshadow');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'warriorofshadow-shadow-step' },
+    });
+  });
+});
+
+describe('getSubclassSource — Warrior of the Elements', () => {
+  it('returns defined for warriorofelements', () => {
+    expect(getSubclassSource('warriorofelements')).toBeDefined();
+  });
+
+  it('warriorofelements has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('warriorofelements');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('warriorofelements level 3 grants 2 features: elemental-attunement and elemental-burst', () => {
+    const source = getSubclassSource('warriorofelements');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'warriorofelements-elemental-attunement' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'warriorofelements-elemental-burst' }),
+        }),
+      ])
+    );
+  });
+
+  it('warriorofelements level 6 grants elemental-epitome feature', () => {
+    const source = getSubclassSource('warriorofelements');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'warriorofelements-elemental-epitome' },
+    });
+  });
+});
+
+describe('getSubclassSource — Warrior of the Open Hand', () => {
+  it('returns defined for warrioropenhand', () => {
+    expect(getSubclassSource('warrioropenhand')).toBeDefined();
+  });
+
+  it('warrioropenhand has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('warrioropenhand');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('warrioropenhand level 3 grants 1 feature: open-hand-technique', () => {
+    const source = getSubclassSource('warrioropenhand');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(1);
+    expect(level3?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'warrioropenhand-open-hand-technique' },
+    });
+  });
+
+  it('warrioropenhand level 6 grants wholeness-of-body feature', () => {
+    const source = getSubclassSource('warrioropenhand');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'warrioropenhand-wholeness-of-body' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();

@@ -452,10 +452,88 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Monk
-  warriorofmercy: { features: [] },
-  warriorofshadow: { features: [] },
-  warriorofelements: { features: [] },
-  warrioropenhand: { features: [] },
+  warriorofmercy: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Focus Point cost: as part of Flurry of Blows, replace a strike with healing equal to Martial Arts die + WIS mod
+          { type: 'feature', feature: { id: 'warriorofmercy-hand-of-healing' } },
+          // Focus Point cost: when you hit with an unarmed strike, deal extra necrotic damage equal to Martial Arts die
+          { type: 'feature', feature: { id: 'warriorofmercy-hand-of-harm' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Enhances Hand of Healing (end a condition) and Hand of Harm (Poisoned on failed CON save)
+          { type: 'feature', feature: { id: 'warriorofmercy-physicians-touch' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  warriorofshadow: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Minor Illusion cantrip; Focus Point cost to cast Darkness, Darkvision, Pass without Trace, or Silence
+          // TODO #93: replace spell-cost casts with spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'warriorofshadow-shadow-arts' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Bonus Action: in dim light or darkness, teleport up to 60 ft to another dim/dark space you can see;
+          // next melee attack before end of turn has Advantage
+          { type: 'feature', feature: { id: 'warriorofshadow-shadow-step' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  warriorofelements: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Focus Point cost: Bonus Action — infuse unarmed strikes with chosen element (Acid/Cold/Fire/Lightning/Thunder)
+          // for 10 min; deal Martial Arts die extra damage on hit; push target 10 ft
+          { type: 'feature', feature: { id: 'warriorofelements-elemental-attunement' } },
+          // Focus Point cost: Action — choose a point within 60 ft; all creatures within 20 ft make DEX save or
+          // take 2d8 + Monk level damage of attunement element, half on success
+          { type: 'feature', feature: { id: 'warriorofelements-elemental-burst' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Canonical 2024 PHB L6 feature name unconfirmed; modeled as elemental-epitome per implementation notes.
+          // When Elemental Attunement is active, enhances push/pull distance and adds elemental aura effects.
+          { type: 'feature', feature: { id: 'warriorofelements-elemental-epitome' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  warrioropenhand: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // When you hit with Flurry of Blows, impose one of: knock Prone (STR save), push 15 ft (STR save),
+          // or prevent Reactions until end of your next turn (no save)
+          { type: 'feature', feature: { id: 'warrioropenhand-open-hand-technique' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Bonus Action: regain HP equal to 3× Martial Arts die roll; usable PB times per long rest
+          { type: 'feature', feature: { id: 'warrioropenhand-wholeness-of-body' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Paladin
   oathofdevotion: { features: [] },
   oathofglory: { features: [] },
