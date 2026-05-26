@@ -860,6 +860,56 @@ describe('getSubclassSource — Circle of Stars', () => {
   });
 });
 
+describe('getSubclassSource — Psi Warrior', () => {
+  it('returns defined for psiwarrior', () => {
+    expect(getSubclassSource('psiwarrior')).toBeDefined();
+  });
+
+  it('psiwarrior has 3 feature levels (L3, L7, L10)', () => {
+    const source = getSubclassSource('psiwarrior');
+    expect(source?.features).toHaveLength(3);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7, 10]);
+  });
+
+  it('psiwarrior level 3 grants 1 feature: psionic-power', () => {
+    const source = getSubclassSource('psiwarrior');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(1);
+    expect(level3?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'psiwarrior-psionic-power' },
+    });
+  });
+
+  it('psiwarrior level 7 grants 1 feature: telekinetic-adept', () => {
+    const source = getSubclassSource('psiwarrior');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'psiwarrior-telekinetic-adept' },
+    });
+  });
+
+  it('psiwarrior level 10 grants 2 items: psychic resistance and guarded-mind feature', () => {
+    const source = getSubclassSource('psiwarrior');
+    const level10 = source?.features.find((f) => f.classLevel === 10);
+    expect(level10).toBeDefined();
+    expect(level10?.grants).toHaveLength(2);
+    expect(level10?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'resistance', damageType: 'psychic' }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'psiwarrior-guarded-mind' }),
+        }),
+      ])
+    );
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();

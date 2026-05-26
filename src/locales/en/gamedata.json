@@ -315,6 +315,18 @@
       "name": "Improved War Magic",
       "description": "When you cast a spell (not just a cantrip), you can make one weapon attack as a bonus action."
     },
+    "psiwarrior-psionic-power": {
+      "name": "Psionic Power",
+      "description": "You have a pool of Psionic Energy dice that fuel your psionic abilities. The die size scales with your proficiency bonus: d6 (PB +2), d8 (PB +3), d10 (PB +4), d12 (PB +5 or +6). You start each Long Rest with 4 dice; a Short Rest replenishes 1. Three options: Protective Field — Reaction to reduce damage to you or a creature within 30 ft by rolling one die + INT mod; Psionic Strike — after hitting with a weapon attack, roll a die and deal extra Force damage equal to the roll + INT mod (once per turn); Telekinetic Movement — as an Action, move a willing creature or object within 30 ft up to 30 ft (usable once per Short Rest without expending a die)."
+    },
+    "psiwarrior-telekinetic-adept": {
+      "name": "Telekinetic Adept",
+      "description": "You gain two psionic abilities: Psi-Powered Leap — as a Bonus Action, you gain a fly speed equal to twice your walking speed until the end of the current turn (usable once per Short Rest without expending a die); Telekinetic Thrust — when you damage a creature with Psionic Strike, you can force the target to make a STR saving throw (DC = 8 + proficiency bonus + INT mod) or be knocked Prone or pushed up to 10 ft away from you."
+    },
+    "psiwarrior-guarded-mind": {
+      "name": "Guarded Mind",
+      "description": "You have Resistance to Psychic damage. In addition, if you start your turn with the Charmed or Frightened condition, you can spend one Psionic Energy die (no action required) to end one of those conditions on yourself."
+    },
     "fighting-style-archery": {
       "name": "Fighting Style: Archery",
       "description": "You gain a +2 bonus to attack rolls you make with ranged weapons."

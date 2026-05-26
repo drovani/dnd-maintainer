@@ -423,7 +423,34 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       { classLevel: 18, grants: [{ type: 'feature', feature: { id: 'eldritchknight-improved-war-magic' } }] },
     ],
   },
-  psiwarrior: { features: [] },
+  psiwarrior: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Single umbrella feature for Psionic Power pool (Protective Field, Psionic Strike,
+          // Telekinetic Movement). Die size scales with PB (d6 at PB+2 → d12 at PB+6); encoded in description.
+          { type: 'feature', feature: { id: 'psiwarrior-psionic-power' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Umbrella feature for Psi-Powered Leap and Telekinetic Thrust
+          { type: 'feature', feature: { id: 'psiwarrior-telekinetic-adept' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // Resistance to psychic damage (structural grant)
+          { type: 'resistance', damageType: 'psychic' },
+          // Charmed/Frightened cleansing mechanic (descriptive feature grant)
+          { type: 'feature', feature: { id: 'psiwarrior-guarded-mind' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Monk
   warriorofmercy: { features: [] },
   warriorofshadow: { features: [] },
