@@ -1246,6 +1246,191 @@ describe('getSubclassSource — Oath of Vengeance', () => {
   });
 });
 
+describe('getSubclassSource — Beast Master', () => {
+  it('returns defined for beastmaster', () => {
+    expect(getSubclassSource('beastmaster')).toBeDefined();
+  });
+
+  it('beastmaster has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('beastmaster');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('beastmaster level 3 grants 1 feature: primal-companion', () => {
+    const source = getSubclassSource('beastmaster');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(1);
+    expect(level3?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'beastmaster-primal-companion' },
+    });
+  });
+
+  it('beastmaster level 7 grants 1 feature: exceptional-training', () => {
+    const source = getSubclassSource('beastmaster');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'beastmaster-exceptional-training' },
+    });
+  });
+});
+
+describe('getSubclassSource — Fey Wanderer', () => {
+  it('returns defined for feywanderer', () => {
+    expect(getSubclassSource('feywanderer')).toBeDefined();
+  });
+
+  it('feywanderer has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('feywanderer');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('feywanderer level 3 grants 4 items: dreadful-strikes, skill proficiency-choice, otherworldly-glamour, subclass-spells', () => {
+    const source = getSubclassSource('feywanderer');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(4);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'feywanderer-dreadful-strikes' }),
+        }),
+        expect.objectContaining({
+          type: 'proficiency-choice',
+          category: 'skill',
+          count: 1,
+          from: expect.arrayContaining(['deception', 'performance', 'persuasion']),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'feywanderer-otherworldly-glamour' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'feywanderer-subclass-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('feywanderer level 3 proficiency-choice from list contains exactly deception, performance, persuasion', () => {
+    const source = getSubclassSource('feywanderer');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const choiceGrant = level3?.grants.find((g) => g.type === 'proficiency-choice');
+    expect(choiceGrant).toBeDefined();
+    if (choiceGrant?.type === 'proficiency-choice' && choiceGrant.category === 'skill') {
+      expect(choiceGrant.from).toEqual(expect.arrayContaining(['deception', 'performance', 'persuasion']));
+      expect(choiceGrant.from).toHaveLength(3);
+    }
+  });
+
+  it('feywanderer level 7 grants 1 feature: beguiling-twist', () => {
+    const source = getSubclassSource('feywanderer');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'feywanderer-beguiling-twist' },
+    });
+  });
+});
+
+describe('getSubclassSource — Gloom Stalker', () => {
+  it('returns defined for gloomstalker', () => {
+    expect(getSubclassSource('gloomstalker')).toBeDefined();
+  });
+
+  it('gloomstalker has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('gloomstalker');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('gloomstalker level 3 grants 3 features: dread-ambusher, umbral-sight, subclass-spells', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'gloomstalker-dread-ambusher' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'gloomstalker-umbral-sight' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'gloomstalker-subclass-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('gloomstalker level 7 grants 1 feature: iron-mind', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'gloomstalker-iron-mind' },
+    });
+  });
+});
+
+describe('getSubclassSource — Hunter', () => {
+  it('returns defined for hunter', () => {
+    expect(getSubclassSource('hunter')).toBeDefined();
+  });
+
+  it('hunter has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('hunter');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('hunter level 3 grants 2 features: hunters-lore and hunters-prey', () => {
+    const source = getSubclassSource('hunter');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'hunter-hunters-lore' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'hunter-hunters-prey' }),
+        }),
+      ])
+    );
+  });
+
+  it('hunter level 7 grants 1 feature: defensive-tactics', () => {
+    const source = getSubclassSource('hunter');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'hunter-defensive-tactics' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();

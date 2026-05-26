@@ -1331,6 +1331,58 @@
       "name": "Relentless Avenger",
       "description": "Your supernatural focus helps you close off a foe's retreat. When you hit a creature with an opportunity attack, you can move up to half your speed immediately after the attack as part of the same Reaction. This movement doesn't provoke opportunity attacks."
     },
+    "beastmaster-primal-companion": {
+      "name": "Primal Companion",
+      "description": "You magically summon a primal beast — a Beast of the Land, Sea, or Sky — by expending one spell slot. The beast obeys your commands and uses your Proficiency Bonus in place of its own. Its stat block scales with your Ranger level. On each of your turns, you can command the beast to take an action as a Bonus Action. If the beast is slain, you can resummon it by expending a spell slot."
+    },
+    "beastmaster-exceptional-training": {
+      "name": "Exceptional Training",
+      "description": "Your primal companion's capabilities improve. When you use Hunter's Mark on a creature, your companion can also mark the same creature without expending a use of Hunter's Mark. In addition, when you command your companion to take an action, it can also take any combat action as a Bonus Action on the same turn."
+    },
+    "feywanderer-dreadful-strikes": {
+      "name": "Dreadful Strikes",
+      "description": "You can augment your weapon strikes with mind-scarring magic drawn from the murky Feywild. When you hit a creature with a weapon, you can deal an extra 1d4 Psychic damage to the target, which can take this extra damage only once per turn."
+    },
+    "feywanderer-otherworldly-glamour": {
+      "name": "Otherworldly Glamour",
+      "description": "Whenever you make a Charisma check, you can add your Wisdom modifier to the roll. (Skill proficiency choice — Deception, Performance, or Persuasion — is tracked separately.)"
+    },
+    "feywanderer-subclass-spells": {
+      "name": "Fey Wanderer Spells",
+      "description": "You always have certain spells prepared based on your Fey Wanderer subclass. (Spell grant system pending — see TODO #93.)"
+    },
+    "feywanderer-beguiling-twist": {
+      "name": "Beguiling Twist",
+      "description": "The magic of the Feywild guards your mind. You and each creature within 30 feet of you have Advantage on saving throws against being Charmed or Frightened. In addition, whenever a creature within 30 feet of you that you can see succeeds on a saving throw against being Charmed or Frightened, you can use your Reaction to force a different creature you can see within 30 feet to make a WIS saving throw (DC = 8 + your Proficiency Bonus + your WIS modifier). If that creature fails the save, it has the Charmed or Frightened condition (your choice) for 1 minute. The condition ends if the target takes any damage."
+    },
+    "gloomstalker-dread-ambusher": {
+      "name": "Dread Ambusher",
+      "description": "On the first turn of each combat, you gain two benefits: your walking speed increases by 10 feet, and if you make an attack with a weapon as part of the Attack action, you can make one additional attack as part of that action. That extra attack deals 1d8 extra damage of the weapon's type on a hit. You also add your Wisdom modifier to your initiative rolls."
+    },
+    "gloomstalker-umbral-sight": {
+      "name": "Umbral Sight",
+      "description": "You gain Darkvision to a range of 60 feet. If you already have Darkvision, its range increases by 30 feet. You are also naturally adept at hiding from creatures that rely on Darkvision — you are invisible to creatures with Darkvision when they try to detect you using that sense."
+    },
+    "gloomstalker-subclass-spells": {
+      "name": "Gloom Stalker Spells",
+      "description": "You always have certain spells prepared based on your Gloom Stalker subclass. (Spell grant system pending — see TODO #93.)"
+    },
+    "gloomstalker-iron-mind": {
+      "name": "Iron Mind",
+      "description": "You have honed your ability to resist the mind-altering powers of your prey. You gain proficiency in Wisdom, Intelligence, or Charisma saving throws (your choice). (One-time choice at level 7; no pending-choice mechanism — modeled as inert feature grant.)"
+    },
+    "hunter-hunters-lore": {
+      "name": "Hunter's Lore",
+      "description": "When you use Hunter's Mark on a creature, you immediately learn whether the creature has any damage Immunities or Resistances and what they are."
+    },
+    "hunter-hunters-prey": {
+      "name": "Hunter's Prey",
+      "description": "You gain one of the following features of your choice. Colossus Slayer: once per turn, your weapon attack deals an extra 1d8 damage if the target has fewer Hit Points than its Hit Point maximum. Horde Breaker: once on each of your turns when you make an attack with a weapon as part of the Attack action, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within your weapon's range."
+    },
+    "hunter-defensive-tactics": {
+      "name": "Defensive Tactics",
+      "description": "You gain one of the following features of your choice. Escape the Horde: Opportunity Attacks against you are made with Disadvantage. Multiattack Defense: when a creature hits you with an attack roll, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the current turn. Steel Will: you have Advantage on saving throws against the Frightened condition."
+    },
     "ranger-favored-enemy": {
       "name": "Favored Enemy",
       "description": "You have advantage on Wisdom (Survival) checks to track your favored enemies, as well as on Intelligence checks to recall information about them."

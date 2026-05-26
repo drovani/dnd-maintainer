@@ -625,10 +625,105 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Ranger
-  beastmaster: { features: [] },
-  feywanderer: { features: [] },
-  gloomstalker: { features: [] },
-  hunter: { features: [] },
+  beastmaster: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Primal Companion: expend 1 spell slot (or Hunter's Mark slot) to summon a Beast of the Land/Sea/Sky
+          // Stat block scales with PB and Ranger level; no companion grant exists — modeled as inert feature grant
+          { type: 'feature', feature: { id: 'beastmaster-primal-companion' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Exceptional Training: companion gains Hunter's Mark on your Hunter's Mark, and can take any
+          // combat action as a Bonus Action when commanded
+          { type: 'feature', feature: { id: 'beastmaster-exceptional-training' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  feywanderer: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Dreadful Strikes: when you hit a creature with a weapon, it takes extra 1d4 psychic damage
+          // (once per turn per target)
+          { type: 'feature', feature: { id: 'feywanderer-dreadful-strikes' } },
+          // Otherworldly Glamour (skill proficiency): choose 1 of Deception, Performance, or Persuasion
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: createChoiceKey('skill-choice', 'class', 'feywanderer', 0),
+            count: 1,
+            from: ['deception', 'performance', 'persuasion'],
+          },
+          // Otherworldly Glamour (WIS-to-CHA bonus): inert feature grant; no modifier-substitution grant exists
+          { type: 'feature', feature: { id: 'feywanderer-otherworldly-glamour' } },
+          // TODO #93: model Fey Wanderer subclass spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'feywanderer-subclass-spells' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Beguiling Twist: you and allies within 30 ft have Advantage on Charmed/Frightened saves;
+          // Reaction to redirect a failed Charmed/Frightened save to another creature within range
+          { type: 'feature', feature: { id: 'feywanderer-beguiling-twist' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  gloomstalker: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Dread Ambusher: first turn of combat — +WIS mod to initiative, walk speed +10,
+          // extra attack on Attack action that deals 1d8 extra damage
+          { type: 'feature', feature: { id: 'gloomstalker-dread-ambusher' } },
+          // Umbral Sight: Darkvision 60 ft (or +30 to existing); invisible to creatures relying on Darkvision
+          { type: 'feature', feature: { id: 'gloomstalker-umbral-sight' } },
+          // TODO #93: model Gloom Stalker subclass spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'gloomstalker-subclass-spells' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Iron Mind: gain proficiency in WIS, INT, or CHA saving throw of your choice
+          // ProficiencyChoiceGrant does not support category: 'saving-throw'; modeled as inert feature grant
+          // (same pattern as wildheart-rage-of-the-wilds, zealot-divine-fury, etc.)
+          { type: 'feature', feature: { id: 'gloomstalker-iron-mind' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  hunter: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Hunter's Lore: when you mark a creature with Hunter's Mark, you learn its damage resistances/immunities
+          { type: 'feature', feature: { id: 'hunter-hunters-lore' } },
+          // Hunter's Prey: one-time choice of Colossus Slayer or Horde Breaker
+          // No pending-choice mechanism for free-form options; collapsed to inert feature grant
+          { type: 'feature', feature: { id: 'hunter-hunters-prey' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Defensive Tactics: one-time choice of Escape the Horde, Multiattack Defense, or Steel Will
+          // No pending-choice mechanism for free-form options; collapsed to inert feature grant
+          { type: 'feature', feature: { id: 'hunter-defensive-tactics' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Rogue
   thief: {
     features: [
