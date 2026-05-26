@@ -14,6 +14,7 @@ import type { GrantBundle, SubclassId } from '@/types/sources';
 import { reconstructBuild } from '@/lib/build-reconstruction';
 import { collectBundles, getSpeciesSource } from '@/lib/sources/index';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { SUBCLASS_IDS_BY_CLASS } from '@/lib/sources/subclasses';
 import { resolveCharacter, type PersistedItem } from '@/lib/resolver/index';
 import { toast } from 'sonner';
 import i18next from 'i18next';
@@ -61,12 +62,20 @@ const CharacterContext = createContext<CharacterContextValue | null>(null);
 // Helpers
 // ---------------------------------------------------------------------------
 
+function resolveSubclassToClassId(subclassId: string): string {
+  for (const [classId, subclassIds] of Object.entries(SUBCLASS_IDS_BY_CLASS)) {
+    if ((subclassIds as readonly string[]).includes(subclassId)) return classId;
+  }
+  throw new Error(`Unknown subclass "${subclassId}" — cannot resolve parent class`);
+}
+
 /**
  * Determine which row sequence a choice key belongs to.
  *
  * Key format: `category:origin:id:index`
  * Keys with `:species:` or `:background:` go to sequence-0.
  * Keys with `:class:` go to the matching level row (by class_id embedded in the key).
+ * Keys with `:subclass:` resolve the parent class then go to its first active level row.
  * Unknown origins cause `parseChoiceKey` to throw.
  * Also throws if origin is 'class' but no active level row exists for the specified class.
  */
@@ -75,6 +84,17 @@ export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLev
 
   if (origin === 'species' || origin === 'background') {
     return 0;
+  }
+
+  if (origin === 'subclass') {
+    const parentClassId = resolveSubclassToClassId(classId);
+    const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === parentClassId && r.deleted_at == null);
+    if (!levelRow) {
+      throw new Error(
+        `No active level row found for parent class "${parentClassId}" of subclass "${classId}" — cannot store choice "${choiceKey}"`
+      );
+    }
+    return levelRow.sequence;
   }
 
   // origin === 'class' — find the first active level row for this class
@@ -167,6 +187,11 @@ function applyDecisionToRows(rows: BuildLevelRow[], choiceKey: ChoiceKey, decisi
   let targetSeq: number;
   if (origin === 'species' || origin === 'background') {
     targetSeq = 0;
+  } else if (origin === 'subclass') {
+    const parentClassId = resolveSubclassToClassId(classId);
+    const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === parentClassId && r.deleted_at == null);
+    if (!levelRow) return `No active level row found for parent class "${parentClassId}" of subclass "${classId}"`;
+    targetSeq = levelRow.sequence;
   } else {
     const levelRow = rows.find((r) => r.sequence !== 0 && r.class_id === classId && r.deleted_at == null);
     if (!levelRow) return `No active level row found for class "${classId}"`;

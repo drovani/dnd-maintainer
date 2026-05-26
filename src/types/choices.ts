@@ -15,11 +15,11 @@ import type { DamageTypeId } from '@/types/grants';
 
 /**
  * Choice key format: `category:origin:id:index`
- * - origin: 'species' | 'background' | 'class'
+ * - origin: 'species' | 'background' | 'class' | 'subclass'
  * - Determines which build row (sequence) stores the decision
  * - e.g. "skill-choice:class:fighter:0", "language-choice:species:human:0"
  */
-const CHOICE_ORIGINS = ['species', 'background', 'class'] as const;
+const CHOICE_ORIGINS = ['species', 'background', 'class', 'subclass'] as const;
 export type ChoiceOrigin = (typeof CHOICE_ORIGINS)[number];
 
 const CHOICE_CATEGORIES = [

@@ -34,6 +34,7 @@ function buildMinimalResolved(overrides: Partial<ResolvedCharacter> = {}): Resol
     equipment: [],
     attacks: [],
     toolExpertise: [],
+    bardicInspiration: null,
     pendingChoices: [],
     weaponMasteries: [],
     ...overrides,

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { getSubclassSource } from '@/lib/sources';
 import type { SubclassId } from '@/lib/sources/subclasses';
+import { createChoiceKey } from '@/types/choices';
 
 describe('assassin skill-expertise grant', () => {
   it('assassin level 9 has exactly 2 grants: feature and skill-expertise: deception', () => {
@@ -302,13 +303,17 @@ describe('getSubclassSource — College of Dance', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
   });
 
-  it('collegedance level 3 grants 3 features: inspirational-dance, unarmored-defense, frolicking-steps', () => {
+  it('collegedance level 3 grants 4 items: armor-class + 3 features (inspirational-dance, unarmored-defense, frolicking-steps)', () => {
     const source = getSubclassSource('collegedance');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toHaveLength(4);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          type: 'armor-class',
+          calculation: { mode: 'unarmored', formula: 'dance' },
+        }),
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'collegedance-inspirational-dance' }),
@@ -323,6 +328,14 @@ describe('getSubclassSource — College of Dance', () => {
         }),
       ])
     );
+  });
+
+  it('collegedance level 3 armor-class grant has dance unarmored formula', () => {
+    const source = getSubclassSource('collegedance');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const acGrant = level3?.grants.find((g) => g.type === 'armor-class');
+    expect(acGrant).toBeDefined();
+    expect(acGrant).toMatchObject({ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'dance' } });
   });
 
   it('collegedance level 6 grants dance-of-victory feature', () => {
@@ -409,6 +422,14 @@ describe('getSubclassSource — College of Lore', () => {
         }),
       ])
     );
+  });
+
+  it('collegelore level 3 proficiency-choice key has subclass origin', () => {
+    const source = getSubclassSource('collegelore');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const profChoice = level3?.grants.find((g) => g.type === 'proficiency-choice');
+    expect(profChoice).toBeDefined();
+    expect((profChoice as { key: string }).key).toBe(createChoiceKey('skill-choice', 'subclass', 'collegelore', 0));
   });
 
   it('collegelore level 6 grants magical-secrets feature', () => {

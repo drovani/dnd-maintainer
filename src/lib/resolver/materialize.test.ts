@@ -41,6 +41,7 @@ function makeResolved(equipment: readonly ResolvedEquipmentItem[]): ResolvedChar
     spellcasting: null,
     attacks: [],
     toolExpertise: [],
+    bardicInspiration: null,
     pendingChoices: [],
     weaponMasteries: [],
   };

@@ -15,7 +15,7 @@ import type { BundleCategory } from '@/types/items';
 
 // Supporting types
 
-export type UnarmoredFormula = 'barbarian' | 'monk';
+export type UnarmoredFormula = 'barbarian' | 'monk' | 'dance';
 
 export type AcCalculation =
   | { readonly mode: 'armored' }

@@ -14,7 +14,7 @@ import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies';
 import { resolveFeatures } from '@/lib/resolver/features';
-import { resolveHp, resolveSpeed, resolveAc } from '@/lib/resolver/combat';
+import { resolveHp, resolveSpeed, resolveAc, resolveBardicInspiration } from '@/lib/resolver/combat';
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting';
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment';
 import { getItemDef, WEAPON_CATALOG } from '@/lib/sources/items';
@@ -74,7 +74,11 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       ? resolveEquipmentFromPersisted(input.persistedItems)
       : resolveEquipment(bundles, choices, equippedItemIds);
   const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier);
-  const armorClass = resolveAc(bundles, dexModifier, equippedArmorAc);
+  const bardLevel = bundles.filter((b) => b.source.origin === 'class' && b.source.id === 'bard').length;
+  const chaModifier = abilities.cha.modifier;
+  const bardicInspiration = resolveBardicInspiration(bundles, bardLevel, chaModifier);
+  const bardicDieSize = bardicInspiration?.dieSize ?? null;
+  const armorClass = resolveAc(bundles, dexModifier, equippedArmorAc, bardicDieSize);
 
   // Extract chosen fighting style IDs for attack resolver, validating against each grant's from list.
   // Stale persisted decisions containing removed style IDs are filtered out and re-prompted.
@@ -358,6 +362,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     equipment: equipmentResult.items,
     attacks,
     toolExpertise,
+    bardicInspiration,
     pendingChoices,
     weaponMasteries,
   };

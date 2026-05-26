@@ -45,4 +45,15 @@ describe('parseChoiceKey', () => {
     const result = parseChoiceKey('language-choice:species:human:0');
     expect(result).toEqual({ category: 'language-choice', origin: 'species', id: 'human', index: 0 });
   });
+
+  it('parses a subclass-origin choice key', () => {
+    const result = parseChoiceKey('skill-choice:subclass:collegelore:0');
+    expect(result).toEqual({ category: 'skill-choice', origin: 'subclass', id: 'collegelore', index: 0 });
+  });
+
+  it('roundtrips with createChoiceKey for subclass origin', () => {
+    const key = createChoiceKey('skill-choice', 'subclass', 'collegelore', 0);
+    const parsed = parseChoiceKey(key);
+    expect(parsed).toEqual({ category: 'skill-choice', origin: 'subclass', id: 'collegelore', index: 0 });
+  });
 });

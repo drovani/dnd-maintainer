@@ -1,5 +1,6 @@
 import { parseChoiceKey, type ChoiceKey } from '@/types/choices';
 import type { BackgroundId, ClassId, SpeciesId } from '@/lib/dnd-helpers';
+import type { SubclassId } from '@/lib/sources/subclasses';
 import type { TFunction } from 'i18next';
 
 export function getChoiceSourceName(choiceKey: ChoiceKey, t: TFunction<'gamedata'>): string {
@@ -11,5 +12,7 @@ export function getChoiceSourceName(choiceKey: ChoiceKey, t: TFunction<'gamedata
       return t(`backgrounds.${id as BackgroundId}`);
     case 'class':
       return t(`classes.${id as ClassId}`);
+    case 'subclass':
+      return t(`subclasses.${id as SubclassId}.name`);
   }
 }

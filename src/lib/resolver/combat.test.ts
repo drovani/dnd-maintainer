@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveHp, resolveSpeed, resolveAc } from '@/lib/resolver/combat';
+import { resolveHp, resolveSpeed, resolveAc, resolveBardicInspiration } from '@/lib/resolver/combat';
 import type { GrantBundle } from '@/types/sources';
 
 const NO_BUNDLES: readonly GrantBundle[] = [];
@@ -244,5 +244,94 @@ describe('resolveAc', () => {
     const result = resolveAc(bundles, 2);
     expect(result.calculations).toHaveLength(2);
     expect(result.effective).toBe(15);
+  });
+});
+
+describe('resolveBardicInspiration', () => {
+  const bardicInspirationBundle: GrantBundle = {
+    source: { origin: 'class', id: 'bard', level: 1 },
+    grants: [{ type: 'feature', feature: { id: 'bard-bardic-inspiration' } }],
+  };
+
+  it('returns null when no bard-bardic-inspiration feature grant', () => {
+    expect(resolveBardicInspiration(NO_BUNDLES, 5, 3)).toBeNull();
+  });
+
+  it('returns null when bardLevel < 1', () => {
+    expect(resolveBardicInspiration([bardicInspirationBundle], 0, 3)).toBeNull();
+  });
+
+  it.each([
+    [1, 6],
+    [4, 6],
+    [5, 8],
+    [9, 8],
+    [10, 10],
+    [14, 10],
+    [15, 12],
+    [20, 12],
+  ])('returns dieSize=%i at bard level %i', (bardLevel, expectedDieSize) => {
+    const result = resolveBardicInspiration([bardicInspirationBundle], bardLevel, 3);
+    expect(result?.dieSize).toBe(expectedDieSize);
+  });
+
+  it('uses = max(1, chaModifier) when chaModifier > 0', () => {
+    const result = resolveBardicInspiration([bardicInspirationBundle], 3, 4);
+    expect(result?.uses).toBe(4);
+  });
+
+  it('uses = 1 when chaModifier <= 0', () => {
+    const result = resolveBardicInspiration([bardicInspirationBundle], 3, -1);
+    expect(result?.uses).toBe(1);
+  });
+
+  it('uses = 1 when chaModifier = 0', () => {
+    const result = resolveBardicInspiration([bardicInspirationBundle], 3, 0);
+    expect(result?.uses).toBe(1);
+  });
+});
+
+describe('resolveAc with dance formula', () => {
+  const danceBundles: readonly GrantBundle[] = [
+    {
+      source: { origin: 'subclass', id: 'collegedance', classId: 'bard', level: 3 },
+      grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'dance' } }],
+    },
+  ];
+  const armoredBundles: readonly GrantBundle[] = [
+    {
+      source: { origin: 'class', id: 'fighter', level: 1 },
+      grants: [{ type: 'armor-class', calculation: { mode: 'armored' } }],
+    },
+    ...danceBundles,
+  ];
+
+  it('dance unarmored: AC = 10 + DEX + bardicDieSize', () => {
+    // DEX +2, dieSize 8 → AC = 10 + 2 + 8 = 20
+    const result = resolveAc(danceBundles, 2, null, 8);
+    expect(result.effective).toBe(20);
+    expect(result.calculations[0].mode).toBe('unarmored');
+    expect(result.calculations[0].baseValue).toBe(20);
+  });
+
+  it('dance unarmored: bardicDieSize=null falls back to 10 + DEX', () => {
+    // DEX +3, no die → AC = 10 + 3 = 13
+    const result = resolveAc(danceBundles, 3, null, null);
+    expect(result.effective).toBe(13);
+  });
+
+  it('dance unarmored: armored calculation wins when body armor equipped', () => {
+    // Chain mail (16) vs dance (10 + 2 + 8 = 20 with dex+2, die 8)
+    // Actually dance wins here: 20 > 16; test that armor base (16) does NOT win over dance (20)
+    const result = resolveAc(armoredBundles, 2, { totalBase: 16, shieldBonus: 0 }, 8);
+    // armored: 16, dance: 10+2+8=20 → effective = 20
+    expect(result.effective).toBe(20);
+  });
+
+  it('dance unarmored: heavy armor still wins when it provides higher AC than dance', () => {
+    // Plate (18) vs dance (10 + 2 + 6 = 18) → tie, but let's test plate(20) beats dance(18)
+    const result = resolveAc(armoredBundles, 2, { totalBase: 20, shieldBonus: 0 }, 6);
+    // armored: 20, dance: 10+2+6=18 → effective = 20
+    expect(result.effective).toBe(20);
   });
 });

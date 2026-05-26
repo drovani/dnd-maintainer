@@ -231,6 +231,10 @@ export interface ResolvedCharacter {
   readonly equipment: readonly ResolvedEquipmentItem[];
   readonly attacks: readonly ResolvedAttack[];
   readonly toolExpertise: readonly ToolProficiencyId[];
+  readonly bardicInspiration: {
+    readonly dieSize: 6 | 8 | 10 | 12;
+    readonly uses: number;
+  } | null;
   readonly pendingChoices: readonly PendingChoice[];
   readonly weaponMasteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[];
 }
