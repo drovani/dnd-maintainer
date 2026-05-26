@@ -91,8 +91,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // Damage type (radiant vs necrotic) chosen at L3 selection; collapsed to inert feature grant
-          { type: 'feature', feature: { id: 'zealot-divine-fury' } },
+          {
+            type: 'damage-choice',
+            key: createChoiceKey('damage-choice', 'class', 'barbarian', 0),
+            count: 1,
+            from: ['radiant', 'necrotic'],
+            featureIdPrefix: 'zealot-divine-fury',
+          },
           { type: 'feature', feature: { id: 'zealot-warrior-of-the-gods' } },
         ],
       },

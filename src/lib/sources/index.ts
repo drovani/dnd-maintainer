@@ -13,7 +13,12 @@ import type {
   SourceTag,
 } from '@/types/sources';
 import type { SubclassId } from '@/lib/sources/subclasses';
-import type { SubclassGrant, FightingStyleChoiceGrant, LineageChoiceGrant } from '@/types/grants';
+import type {
+  SubclassGrant,
+  FightingStyleChoiceGrant,
+  LineageChoiceGrant,
+  DamageTypeChoiceGrant,
+} from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
@@ -182,6 +187,30 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           warnings.push(msg);
           logger.warn(msg);
         }
+      }
+    }
+  }
+
+  // Damage-type choices — expand chosen damage type into a feature grant whose id
+  // is `${featureIdPrefix}-${chosenDamageType}` (e.g. zealot-divine-fury-radiant).
+  const allDamageChoiceGrants: { grant: DamageTypeChoiceGrant; source: SourceTag }[] = [];
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'damage-choice') {
+        allDamageChoiceGrants.push({ grant: grant as DamageTypeChoiceGrant, source: bundle.source });
+      }
+    }
+  }
+
+  for (const { grant, source } of allDamageChoiceGrants) {
+    const decision = build.choices[grant.key];
+    if (decision?.type === 'damage-choice') {
+      for (const damageType of decision.damageTypes) {
+        if (!grant.from.includes(damageType)) continue;
+        bundles.push({
+          source,
+          grants: [{ type: 'feature', feature: { id: `${grant.featureIdPrefix}-${damageType}` } }],
+        });
       }
     }
   }

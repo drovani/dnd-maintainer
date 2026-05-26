@@ -178,6 +178,14 @@ export type PendingChoice =
       readonly alreadyChosen: readonly string[];
     }
   | {
+      readonly type: 'damage-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly count: number;
+      readonly from: readonly DamageTypeId[];
+      readonly featureIdPrefix: string;
+    }
+  | {
       readonly type: 'bundle-choice';
       readonly choiceKey: ChoiceKey;
       readonly source: SourceTag;

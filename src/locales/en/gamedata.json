@@ -651,9 +651,13 @@
       "name": "Battering Roots",
       "description": "Your reach increases by 10 feet for melee weapon attacks. When you hit a creature with a melee weapon attack while raging, you can knock the target Prone, push it up to 15 feet away from you, or grapple it."
     },
-    "zealot-divine-fury": {
-      "name": "Divine Fury",
-      "description": "While raging, the first creature you hit on each of your turns takes an extra 1d6 + half your Barbarian level (rounded down) radiant or necrotic damage (your choice when you first gain this feature)."
+    "zealot-divine-fury-radiant": {
+      "name": "Divine Fury (Radiant)",
+      "description": "While raging, the first creature you hit on each of your turns takes an extra 1d6 + half your Barbarian level (rounded down) radiant damage."
+    },
+    "zealot-divine-fury-necrotic": {
+      "name": "Divine Fury (Necrotic)",
+      "description": "While raging, the first creature you hit on each of your turns takes an extra 1d6 + half your Barbarian level (rounded down) necrotic damage."
     },
     "zealot-warrior-of-the-gods": {
       "name": "Warrior of the Gods",

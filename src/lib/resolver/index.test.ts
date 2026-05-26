@@ -1907,3 +1907,49 @@ describe('Weapon mastery resolver', () => {
     expect(weaponIds).toContain('shortsword');
   });
 });
+
+describe('Damage-type choice resolver', () => {
+  const damageKey = createChoiceKey('damage-choice', 'class', 'barbarian', 0);
+  const bundles: readonly GrantBundle[] = [
+    {
+      source: { origin: 'subclass', id: 'zealot' as SubclassId, classId: 'barbarian' as ClassId, level: 3 },
+      grants: [
+        {
+          type: 'damage-choice',
+          key: damageKey,
+          count: 1,
+          from: ['radiant', 'necrotic'],
+          featureIdPrefix: 'zealot-divine-fury',
+        },
+      ],
+    },
+  ];
+
+  it('emits a pending damage-choice when no decision is recorded', () => {
+    const result = resolveCharacter({ ...baseInput, bundles });
+    const pending = result.pendingChoices.filter((c) => c.type === 'damage-choice');
+    expect(pending).toHaveLength(1);
+    expect(pending[0]).toMatchObject({
+      choiceKey: damageKey,
+      count: 1,
+      from: ['radiant', 'necrotic'],
+      featureIdPrefix: 'zealot-divine-fury',
+    });
+  });
+
+  it('clears the pending damage-choice when a valid decision is recorded', () => {
+    const decision: ChoiceDecision = { type: 'damage-choice', damageTypes: ['radiant'] };
+    const choices: Record<ChoiceKey, ChoiceDecision> = { [damageKey]: decision };
+    const result = resolveCharacter({ ...baseInput, bundles, choices });
+    const pending = result.pendingChoices.filter((c) => c.type === 'damage-choice');
+    expect(pending).toHaveLength(0);
+  });
+
+  it('re-emits the pending damage-choice when the recorded decision is outside grant.from', () => {
+    const decision: ChoiceDecision = { type: 'damage-choice', damageTypes: ['fire'] };
+    const choices: Record<ChoiceKey, ChoiceDecision> = { [damageKey]: decision };
+    const result = resolveCharacter({ ...baseInput, bundles, choices });
+    const pending = result.pendingChoices.filter((c) => c.type === 'damage-choice');
+    expect(pending).toHaveLength(1);
+  });
+});

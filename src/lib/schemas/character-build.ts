@@ -43,6 +43,7 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
     type: z.literal('weapon-mastery-choice'),
     weaponIds: z.array(z.string()).readonly(),
   }),
+  z.object({ type: z.literal('damage-choice'), damageTypes: z.array(z.string()).readonly() }),
   z.object({
     type: z.literal('bundle-choice'),
     bundleId: z.string().min(1),

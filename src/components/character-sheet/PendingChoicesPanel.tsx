@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
 import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
+import { DamageTypePicker } from '@/components/character-sheet/DamageTypePicker';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
@@ -93,6 +94,18 @@ function useAllChoiceGrants() {
         });
         for (const id of validWeaponIds) claimed.add(id);
       }
+    }
+
+    // damage-choice grants
+    for (const { grant, source } of collectGrantsByType(bundles, 'damage-choice')) {
+      allGrants.push({
+        type: 'damage-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: grant.from,
+        featureIdPrefix: grant.featureIdPrefix,
+      });
     }
 
     // subclass grants
@@ -215,6 +228,10 @@ function PendingChoiceRow({
     return (
       <FightingStylePicker choice={choice} currentDecision={currentDecision} onDecide={onDecide} onClear={onClear} />
     );
+  }
+
+  if (choice.type === 'damage-choice') {
+    return <DamageTypePicker choice={choice} currentDecision={currentDecision} onDecide={onDecide} onClear={onClear} />;
   }
 
   if (choice.type === 'asi') {

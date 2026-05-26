@@ -204,6 +204,23 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved or invalid damage-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'damage-choice')) {
+    const decision = choices[grant.key];
+    const validTypes =
+      decision?.type === 'damage-choice' ? decision.damageTypes.filter((t) => grant.from.includes(t)) : [];
+    if (!decision || decision.type !== 'damage-choice' || validTypes.length < grant.count) {
+      pendingChoices.push({
+        type: 'damage-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        from: grant.from,
+        featureIdPrefix: grant.featureIdPrefix,
+      });
+    }
+  }
+
   // Aggregate weapon mastery choices — eligible weapons are those the character is proficient with that have a mastery
   const weaponProfSet = new Set(proficiencies.weapon.map((p) => p.value));
   const eligibleMasteryWeapons = WEAPON_CATALOG.filter(

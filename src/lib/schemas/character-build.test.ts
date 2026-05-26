@@ -201,6 +201,21 @@ describe('ChoiceDecisionSchema', () => {
     });
   });
 
+  describe('damage-choice', () => {
+    it('accepts valid damage-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'damage-choice',
+        damageTypes: ['radiant'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing damageTypes field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'damage-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('lineage-choice', () => {
     it('accepts a lineage-choice decision', () => {
       const result = ChoiceDecisionSchema.safeParse({ type: 'lineage-choice', lineageId: 'high' });

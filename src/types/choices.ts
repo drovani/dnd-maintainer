@@ -11,6 +11,7 @@ import type {
 } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/types/sources';
 import type { AbilityScores } from '@/types/database';
+import type { DamageTypeId } from '@/types/grants';
 
 /**
  * Choice key format: `category:origin:id:index`
@@ -31,6 +32,7 @@ const CHOICE_CATEGORIES = [
   'subclass',
   'fighting-style-choice',
   'weapon-mastery-choice',
+  'damage-choice',
   'bundle-choice',
   'lineage-choice',
 ] as const;
@@ -91,6 +93,7 @@ export type ChoiceDecision =
   | { readonly type: 'subclass'; readonly subclassId: SubclassId }
   | { readonly type: 'fighting-style-choice'; readonly styles: readonly FightingStyleId[] }
   | { readonly type: 'weapon-mastery-choice'; readonly weaponIds: readonly string[] }
+  | { readonly type: 'damage-choice'; readonly damageTypes: readonly DamageTypeId[] }
   | {
       readonly type: 'bundle-choice';
       readonly bundleId: string;

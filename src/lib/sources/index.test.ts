@@ -298,4 +298,87 @@ describe('collectBundles', () => {
       mockFeatSources.value = null;
     }
   });
+
+  it('damage-choice: expands chosen damage type into a feature grant with id `${prefix}-${type}`', () => {
+    const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+    const damageKey = createChoiceKey('damage-choice', 'class', 'barbarian', 0);
+    const zealotL3Build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'soldier' as BackgroundId,
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: [
+        { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 7 },
+        { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'zealot' as SubclassId },
+        [damageKey]: { type: 'damage-choice' as const, damageTypes: ['radiant'] as const },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(zealotL3Build);
+    const expandedFeature = bundles
+      .flatMap((b) => b.grants)
+      .find((g) => g.type === 'feature' && g.feature.id === 'zealot-divine-fury-radiant');
+    expect(expandedFeature).toBeDefined();
+  });
+
+  it('damage-choice: emits no expansion when the decision is missing', () => {
+    const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+    const zealotL3BuildNoDecision: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'soldier' as BackgroundId,
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: [
+        { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 7 },
+        { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'zealot' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(zealotL3BuildNoDecision);
+    const radiantFeature = bundles
+      .flatMap((b) => b.grants)
+      .find((g) => g.type === 'feature' && g.feature.id === 'zealot-divine-fury-radiant');
+    const necroticFeature = bundles
+      .flatMap((b) => b.grants)
+      .find((g) => g.type === 'feature' && g.feature.id === 'zealot-divine-fury-necrotic');
+    expect(radiantFeature).toBeUndefined();
+    expect(necroticFeature).toBeUndefined();
+  });
+
+  it('damage-choice: ignores decisions for damage types outside the grant.from list', () => {
+    const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+    const damageKey = createChoiceKey('damage-choice', 'class', 'barbarian', 0);
+    const zealotL3BuildInvalid: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'soldier' as BackgroundId,
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: [
+        { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: 7 },
+        { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: 7 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'zealot' as SubclassId },
+        [damageKey]: { type: 'damage-choice' as const, damageTypes: ['fire'] as const },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(zealotL3BuildInvalid);
+    const fireFeature = bundles
+      .flatMap((b) => b.grants)
+      .find((g) => g.type === 'feature' && g.feature.id === 'zealot-divine-fury-fire');
+    expect(fireFeature).toBeUndefined();
+  });
 });

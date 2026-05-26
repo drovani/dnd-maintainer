@@ -247,7 +247,7 @@ describe('getSubclassSource — Zealot', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
   });
 
-  it('zealot level 3 grants 2 features: divine-fury and warrior-of-the-gods', () => {
+  it('zealot level 3 grants a damage-choice for Divine Fury and the Warrior of the Gods feature', () => {
     const source = getSubclassSource('zealot');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
@@ -255,8 +255,10 @@ describe('getSubclassSource — Zealot', () => {
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'zealot-divine-fury' }),
+          type: 'damage-choice',
+          count: 1,
+          from: ['radiant', 'necrotic'],
+          featureIdPrefix: 'zealot-divine-fury',
         }),
         expect.objectContaining({
           type: 'feature',

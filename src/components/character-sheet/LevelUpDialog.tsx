@@ -1,5 +1,6 @@
 import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
 import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
+import { DamageTypePicker } from '@/components/character-sheet/DamageTypePicker';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,7 +8,13 @@ import { RollingNumber } from '@/components/ui/rolling-number';
 import type { ClassId } from '@/lib/dnd-helpers';
 import { getGrantsForLevel } from '@/lib/sources/level-grants';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
-import type { AsiGrant, FeatureGrant, FightingStyleChoiceGrant, SubclassGrant } from '@/types/grants';
+import type {
+  AsiGrant,
+  DamageTypeChoiceGrant,
+  FeatureGrant,
+  FightingStyleChoiceGrant,
+  SubclassGrant,
+} from '@/types/grants';
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved';
 import type { SubclassId } from '@/types/sources';
 import type { FightingStyleId } from '@/lib/dnd-helpers';
@@ -89,6 +96,11 @@ export function LevelUpDialog({
     return allGrants.filter((g): g is FightingStyleChoiceGrant => g.type === 'fighting-style-choice');
   }, [preview]);
 
+  const damageChoiceGrants = useMemo(() => {
+    const allGrants = [...preview.classGrants, ...preview.subclassGrants];
+    return allGrants.filter((g): g is DamageTypeChoiceGrant => g.type === 'damage-choice');
+  }, [preview]);
+
   // Check if all required choices are made
   const allChoicesMade = useMemo(() => {
     for (const grant of asiGrants) {
@@ -105,8 +117,12 @@ export function LevelUpDialog({
       const decision = decisions.get(grant.key);
       if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) return false;
     }
+    for (const grant of damageChoiceGrants) {
+      const decision = decisions.get(grant.key);
+      if (!decision || decision.type !== 'damage-choice' || decision.damageTypes.length < grant.count) return false;
+    }
     return true;
-  }, [asiGrants, subclassGrants, fightingStyleGrants, decisions]);
+  }, [asiGrants, subclassGrants, fightingStyleGrants, damageChoiceGrants, decisions]);
 
   const canConfirm = hpSelection !== null && allChoicesMade;
 
@@ -288,6 +304,30 @@ export function LevelUpDialog({
                 from: grant.from,
                 alreadyChosen: alreadyChosenStyles,
               } satisfies Extract<PendingChoice, { type: 'fighting-style-choice' }>
+            }
+            onDecide={(choiceKey, decision) => {
+              setDecisions((prev) => {
+                const next = new Map(prev);
+                next.set(choiceKey, decision);
+                return next;
+              });
+            }}
+          />
+        ))}
+
+        {/* Damage-type choice */}
+        {damageChoiceGrants.map((grant) => (
+          <DamageTypePicker
+            key={grant.key}
+            choice={
+              {
+                type: 'damage-choice',
+                choiceKey: grant.key,
+                source: { origin: 'class', id: classId, level: targetLevel },
+                count: grant.count,
+                from: grant.from,
+                featureIdPrefix: grant.featureIdPrefix,
+              } satisfies Extract<PendingChoice, { type: 'damage-choice' }>
             }
             onDecide={(choiceKey, decision) => {
               setDecisions((prev) => {

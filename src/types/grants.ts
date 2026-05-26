@@ -219,6 +219,19 @@ export interface WeaponMasteryChoiceGrant {
   readonly count: number;
 }
 
+export interface DamageTypeChoiceGrant {
+  readonly type: 'damage-choice';
+  readonly key: ChoiceKey;
+  readonly count: number;
+  readonly from: readonly DamageTypeId[];
+  /**
+   * When a decision is recorded, the chosen damage type expands into a feature grant
+   * with id `${featureIdPrefix}-${chosenDamageType}`. One i18n entry must exist per
+   * variant (e.g. `zealot-divine-fury-radiant`, `zealot-divine-fury-necrotic`).
+   */
+  readonly featureIdPrefix: string;
+}
+
 export interface BundleChoiceGrant {
   readonly type: 'bundle-choice';
   readonly key: ChoiceKey;
@@ -254,6 +267,7 @@ export type Grant =
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant
   | WeaponMasteryChoiceGrant
+  | DamageTypeChoiceGrant
   | EquipmentGrant
   | BundleChoiceGrant
   | LineageChoiceGrant

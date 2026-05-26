@@ -154,6 +154,7 @@
       "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "weaponMasteryChoice": "Choose {{count}} weapon mastery",
+      "damageChoice": "Choose {{count}} damage type(s)",
       "lineageChoice": "Choose your lineage",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining",
@@ -496,6 +497,10 @@
     "fightingStylePicker": {
       "title": "Choose a Fighting Style",
       "description": "Select a fighting style to specialize in."
+    },
+    "damageTypePicker": {
+      "title": "Choose a Damage Type",
+      "description": "This choice is permanent for the character."
     },
     "warnings": {
       "buildIncomplete": "Some source data is missing — character may be incomplete: {{message}}"
