@@ -23,10 +23,89 @@ export const SUBCLASS_IDS: readonly SubclassId[] = Object.values(SUBCLASS_IDS_BY
 
 export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
   // Barbarian
-  berserker: { features: [] },
-  wildheart: { features: [] },
-  worldtree: { features: [] },
-  zealot: { features: [] },
+  berserker: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'feature', feature: { id: 'berserker-frenzy' } },
+          { type: 'feature', feature: { id: 'berserker-mindless-rage' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'berserker-retaliation' } }],
+      },
+      {
+        classLevel: 10,
+        grants: [{ type: 'feature', feature: { id: 'berserker-intimidating-presence' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  wildheart: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // TODO #93: model as spell grant when spell id system supports 'speak-with-animals'
+          { type: 'feature', feature: { id: 'wildheart-animal-speaker' } },
+          // Beast Spirit (Bear/Eagle/Elk/Tiger/Wolf) is a free-form choice; no pending-choice
+          // mechanism exists for arbitrary string options — modeled as inert feature grant for now
+          { type: 'feature', feature: { id: 'wildheart-rage-of-the-wilds' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Aspect benefit depends on the L3 Beast Spirit choice; collapsed to inert feature grant
+          { type: 'feature', feature: { id: 'wildheart-aspect-of-the-wilds' } },
+        ],
+      },
+      {
+        classLevel: 10,
+        grants: [
+          // TODO #93: model as spell grant when spell id system supports 'commune-with-nature'
+          { type: 'feature', feature: { id: 'wildheart-nature-speaker' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  worldtree: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [{ type: 'feature', feature: { id: 'worldtree-vitality-of-the-tree' } }],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'worldtree-branches-of-the-tree' } }],
+      },
+      {
+        classLevel: 10,
+        grants: [{ type: 'feature', feature: { id: 'worldtree-battering-roots' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  zealot: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Damage type (radiant vs necrotic) chosen at L3 selection; collapsed to inert feature grant
+          { type: 'feature', feature: { id: 'zealot-divine-fury' } },
+          { type: 'feature', feature: { id: 'zealot-warrior-of-the-gods' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'zealot-fanatical-focus' } }],
+      },
+      {
+        classLevel: 10,
+        grants: [{ type: 'feature', feature: { id: 'zealot-zealous-presence' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Bard
   collegedance: { features: [] },
   collegeglamour: { features: [] },

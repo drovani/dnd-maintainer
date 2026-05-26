@@ -415,6 +415,66 @@
       "name": "Magical Ambush",
       "description": "If hidden when you cast a spell, the target has disadvantage on saving throws against it this turn."
     },
+    "berserker-frenzy": {
+      "name": "Frenzy",
+      "description": "While raging, you can use a Bonus Action on each of your turns to make one melee attack with a weapon or an Unarmed Strike. When your Rage ends, you have 1 Exhaustion level."
+    },
+    "berserker-mindless-rage": {
+      "name": "Mindless Rage",
+      "description": "While raging, you can't have the Charmed or Frightened condition, and if you do when you enter your Rage, the condition ends on you."
+    },
+    "berserker-retaliation": {
+      "name": "Retaliation",
+      "description": "When you take damage from a creature that is within 5 feet of you, you can use your Reaction to make one melee attack with a weapon or an Unarmed Strike against that creature."
+    },
+    "berserker-intimidating-presence": {
+      "name": "Intimidating Presence",
+      "description": "As an Action, you can cause one creature you can see within 30 feet of you to make a WIS save (DC = 8 + your proficiency bonus + your STR or CHA modifier). On a failed save, the creature has the Frightened condition until the start of your next turn."
+    },
+    "wildheart-animal-speaker": {
+      "name": "Animal Speaker",
+      "description": "You can cast Speak with Animals as a Ritual. Wisdom is your spellcasting ability for this spell."
+    },
+    "wildheart-rage-of-the-wilds": {
+      "name": "Rage of the Wilds",
+      "description": "When you activate your Rage, you choose a Beast Spirit (Bear, Eagle, Elk, Tiger, or Wolf) and gain its associated benefit for the duration of your Rage."
+    },
+    "wildheart-aspect-of-the-wilds": {
+      "name": "Aspect of the Wilds",
+      "description": "You gain an ongoing benefit based on the Beast Spirit you chose at level 3; this benefit can be changed on a Long Rest. Bear: resistance to one damage type. Eagle: you don't need to sleep and can't be forced to sleep. Elk: your Speed increases by 15 feet. Tiger: add d6 to one damage roll per turn. Wolf: knock a creature prone when you hit it with an opportunity attack."
+    },
+    "wildheart-nature-speaker": {
+      "name": "Nature Speaker",
+      "description": "You can cast Commune with Nature as a Ritual. Wisdom is your spellcasting ability for this spell."
+    },
+    "worldtree-vitality-of-the-tree": {
+      "name": "Vitality of the Tree",
+      "description": "When you activate your Rage, you gain Temporary Hit Points equal to your Barbarian level plus your CON modifier. As a Bonus Action while raging, you can grant 1d6 Temporary Hit Points to one creature within 60 feet of you."
+    },
+    "worldtree-branches-of-the-tree": {
+      "name": "Branches of the Tree",
+      "description": "When a creature hits you with an attack roll, you can use your Reaction to teleport that creature to an unoccupied space you can see within 10 feet of you."
+    },
+    "worldtree-battering-roots": {
+      "name": "Battering Roots",
+      "description": "Your reach increases by 10 feet for melee weapon attacks. When you hit a creature with a melee weapon attack while raging, you can knock the target Prone, push it up to 15 feet away from you, or grapple it."
+    },
+    "zealot-divine-fury": {
+      "name": "Divine Fury",
+      "description": "While raging, the first creature you hit on each of your turns takes an extra 1d6 + half your Barbarian level (rounded down) radiant or necrotic damage (your choice when you first gain this feature)."
+    },
+    "zealot-warrior-of-the-gods": {
+      "name": "Warrior of the Gods",
+      "description": "Revival spells cast on you require no Material components. In addition, if such a spell would normally have you return with 1 Hit Point, you return with hit points equal to half your Hit Point maximum."
+    },
+    "zealot-fanatical-focus": {
+      "name": "Fanatical Focus",
+      "description": "While raging, if you fail a saving throw, you can reroll it with a bonus equal to your Rage Damage bonus. You must use the new roll, and you can use this feature only once per Rage."
+    },
+    "zealot-zealous-presence": {
+      "name": "Zealous Presence",
+      "description": "As a Bonus Action, you unleash a battle cry infused with divine energy. Up to 10 creatures of your choice within 60 feet of you gain Advantage on attack rolls and saving throws until the start of your next turn. Once you use this feature, you can't use it again until you finish a Long Rest."
+    },
     "human-resourceful": {
       "name": "Resourceful",
       "description": "You gain Heroic Inspiration whenever you finish a Long Rest."
