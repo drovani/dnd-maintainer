@@ -243,7 +243,9 @@
       "anyAbility": "any ability",
       "backgroundAsiHint": "{{background}} provides {{points}} points to distribute across {{abilities}}.",
       "backgroundAsiRemaining": "({{count}} point remaining)",
-      "backgroundAsiRemaining_plural": "({{count}} points remaining)"
+      "backgroundAsiRemaining_plural": "({{count}} points remaining)",
+      "backgroundAsiLabel": "Background ASI",
+      "backgroundAsiHelp": "Distribute 3 points across your eligible abilities (maximum +2 per ability)."
     },
     "skills": {
       "selectClassFirst": "Please select a class in the Basics step before choosing skills.",

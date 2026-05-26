@@ -34,6 +34,10 @@ const DEFAULT_ASSIGNMENTS: Record<keyof AbilityScores, number | null> = {
 const VALID_METHODS = ['standard-array', 'point-buy', 'rolling'] as const;
 type AbilityMethod = (typeof VALID_METHODS)[number];
 
+// Background ASI constraints (2024 PHB): 3 total points, max 2 per ability.
+// Those bounds naturally permit both +2/+1 and +1/+1/+1 shapes without a separate mode toggle.
+const BACKGROUND_ASI_PER_ABILITY_MAX = 2;
+
 export function AbilitiesStep() {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
@@ -187,6 +191,54 @@ export function AbilitiesStep() {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // Background ASI — allocated alongside the base scores so the user sees the
+  // restricted +2/+1 (or +1/+1/+1) bonus next to the ability it modifies.
+  // -------------------------------------------------------------------------
+  const backgroundGrants = context.bundles.filter((b) => b.source.origin === 'background').flatMap((b) => b.grants);
+  const backgroundAsiGrant = backgroundGrants.find((g): g is Extract<typeof g, { type: 'asi' }> => g.type === 'asi');
+  const backgroundAsiChoiceKey = backgroundAsiGrant?.key;
+  const backgroundAsiDecision = backgroundAsiChoiceKey ? context.build?.choices[backgroundAsiChoiceKey] : undefined;
+  const backgroundAsiAllocation: Partial<Record<AbilityKey, number>> =
+    backgroundAsiDecision?.type === 'asi' ? backgroundAsiDecision.allocation : {};
+  const backgroundAsiPointsUsed = Object.values(backgroundAsiAllocation).reduce((s, v) => s + (v ?? 0), 0);
+
+  const canIncrementAsi = (ability: AbilityKey): boolean => {
+    if (!backgroundAsiChoiceKey || !backgroundAsiGrant) return false;
+    const cur = backgroundAsiAllocation[ability] ?? 0;
+    if (backgroundAsiPointsUsed >= backgroundAsiGrant.points) return false;
+    if (cur >= BACKGROUND_ASI_PER_ABILITY_MAX) return false;
+    const currentTotal = context.resolved?.abilities[ability].total ?? 10;
+    if (currentTotal + 1 > 20) return false;
+    return true;
+  };
+
+  const canDecrementAsi = (ability: AbilityKey): boolean => {
+    if (!backgroundAsiChoiceKey) return false;
+    return (backgroundAsiAllocation[ability] ?? 0) > 0;
+  };
+
+  const incrementAsi = (ability: AbilityKey) => {
+    if (!backgroundAsiChoiceKey || !canIncrementAsi(ability)) return;
+    const cur = backgroundAsiAllocation[ability] ?? 0;
+    context.makeChoice(backgroundAsiChoiceKey, {
+      type: 'asi',
+      allocation: { ...backgroundAsiAllocation, [ability]: cur + 1 },
+    });
+  };
+
+  const decrementAsi = (ability: AbilityKey) => {
+    if (!backgroundAsiChoiceKey || !canDecrementAsi(ability)) return;
+    const cur = backgroundAsiAllocation[ability] ?? 0;
+    const next: Partial<Record<AbilityKey, number>> = { ...backgroundAsiAllocation, [ability]: cur - 1 };
+    if (next[ability] === 0) delete next[ability];
+    context.makeChoice(backgroundAsiChoiceKey, { type: 'asi', allocation: next });
+  };
+
+  const asiEligibleAbilities: ReadonlySet<AbilityKey> = new Set(
+    backgroundAsiGrant?.from ?? (['str', 'dex', 'con', 'int', 'wis', 'cha'] as const)
+  );
+
   const renderAbilityCard = (ability: keyof AbilityScores, scoreInput: React.ReactNode) => {
     const baseScore = baseAbilities[ability];
     const raceBonus = racialBonuses[ability] ?? 0;
@@ -199,14 +251,47 @@ export function AbilitiesStep() {
         .filter((b) => b.source.origin === 'background')
         .reduce((s, b) => s + b.value, 0) ?? 0;
 
+    const asiAlloc = backgroundAsiAllocation[ability] ?? 0;
+    const isAsiEligible = !!backgroundAsiGrant && asiEligibleAbilities.has(ability);
+    const canDec = canDecrementAsi(ability);
+    const canInc = canIncrementAsi(ability);
+
     return (
       <Card key={ability}>
         <CardContent className="px-3 py-2 space-y-1">
           <Label className="text-xs font-semibold text-muted-foreground">{t(`abilities.${ability}`)}</Label>
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">{scoreInput}</div>
-            <div className="flex items-baseline gap-2 ml-auto">
-              {bgBonus > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              {isAsiEligible && (
+                <div className="flex items-center gap-0.5">
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    disabled={!canDec}
+                    onClick={() => decrementAsi(ability)}
+                    aria-label={tc('characterSheet.asi.decreaseAbility', { ability: t(`abilities.${ability}`) })}
+                  >
+                    <ChevronDown className="size-3" />
+                  </Button>
+                  <Badge
+                    variant={asiAlloc > 0 ? 'secondary' : 'outline'}
+                    className="text-xs min-w-7 justify-center tabular-nums"
+                  >
+                    +{asiAlloc}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    disabled={!canInc}
+                    onClick={() => incrementAsi(ability)}
+                    aria-label={tc('characterSheet.asi.increaseAbility', { ability: t(`abilities.${ability}`) })}
+                  >
+                    <ChevronUp className="size-3" />
+                  </Button>
+                </div>
+              )}
+              {!isAsiEligible && bgBonus > 0 && (
                 <Badge variant="secondary" className="text-xs">
                   +{bgBonus} {tc('characterBuilder.abilities.backgroundBonusSuffix')}
                 </Badge>
@@ -272,6 +357,20 @@ export function AbilitiesStep() {
 
   return (
     <div className="space-y-4">
+      {backgroundAsiGrant && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2">
+          <div className="flex flex-col gap-0.5">
+            <Label className="text-sm font-semibold">{tc('characterBuilder.abilities.backgroundAsiLabel')}</Label>
+            <p className="text-xs text-muted-foreground">{tc('characterBuilder.abilities.backgroundAsiHelp')}</p>
+          </div>
+          <Badge
+            variant={backgroundAsiPointsUsed === backgroundAsiGrant.points ? 'default' : 'outline'}
+            className="text-xs"
+          >
+            {backgroundAsiPointsUsed} / {backgroundAsiGrant.points}
+          </Badge>
+        </div>
+      )}
       <Tabs value={abilityMethod} onValueChange={handleMethodChange}>
         <TabsList className="w-full">
           <TabsTrigger value="standard-array" className="flex-1">
