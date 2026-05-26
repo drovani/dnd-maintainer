@@ -107,10 +107,85 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Bard
-  collegedance: { features: [] },
-  collegeglamour: { features: [] },
-  collegelore: { features: [] },
-  collegevalor: { features: [] },
+  collegedance: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Inspirational Dance: use Bardic Inspiration die for unarmed strike damage
+          { type: 'feature', feature: { id: 'collegedance-inspirational-dance' } },
+          // Unarmored Defense: AC = 10 + DEX mod + Bardic Inspiration die (dynamic; no static ac-bonus)
+          { type: 'feature', feature: { id: 'collegedance-unarmored-defense' } },
+          // Frolicking Steps: Dash lets you move through hostile creature spaces
+          { type: 'feature', feature: { id: 'collegedance-frolicking-steps' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Dance of Victory: additional Bardic die damage at start of next turn
+          { type: 'feature', feature: { id: 'collegedance-dance-of-victory' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  collegeglamour: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'feature', feature: { id: 'collegeglamour-mantle-of-inspiration' } },
+          { type: 'feature', feature: { id: 'collegeglamour-enthralling-performance' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'collegeglamour-mantle-of-majesty' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  collegelore: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: createChoiceKey('skill-choice', 'class', 'collegelore', 0),
+            count: 3,
+            from: null,
+          },
+          // Cutting Words: reaction to subtract Bardic die from a creature's roll
+          { type: 'feature', feature: { id: 'collegelore-cutting-words' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // TODO #93: model as spell grants when spell id system supports arbitrary class spell lists
+          { type: 'feature', feature: { id: 'collegelore-magical-secrets' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  collegevalor: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'proficiency', category: 'armor', id: 'medium' },
+          { type: 'proficiency', category: 'armor', id: 'shields' },
+          { type: 'proficiency', category: 'weapon', id: 'martial' },
+          { type: 'feature', feature: { id: 'collegevalor-combat-inspiration' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'collegevalor-extra-attack' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Cleric
   lifedomain: { features: [] },
   lightdomain: { features: [] },

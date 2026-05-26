@@ -289,6 +289,179 @@ describe('getSubclassSource — Zealot', () => {
   });
 });
 
+describe('getSubclassSource — College of Dance', () => {
+  it('returns defined for collegedance', () => {
+    expect(getSubclassSource('collegedance')).toBeDefined();
+  });
+
+  it('collegedance has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('collegedance');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('collegedance level 3 grants 3 features: inspirational-dance, unarmored-defense, frolicking-steps', () => {
+    const source = getSubclassSource('collegedance');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegedance-inspirational-dance' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegedance-unarmored-defense' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegedance-frolicking-steps' }),
+        }),
+      ])
+    );
+  });
+
+  it('collegedance level 6 grants dance-of-victory feature', () => {
+    const source = getSubclassSource('collegedance');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'collegedance-dance-of-victory' },
+    });
+  });
+});
+
+describe('getSubclassSource — College of Glamour', () => {
+  it('returns defined for collegeglamour', () => {
+    expect(getSubclassSource('collegeglamour')).toBeDefined();
+  });
+
+  it('collegeglamour has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('collegeglamour');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('collegeglamour level 3 grants 2 features: mantle-of-inspiration and enthralling-performance', () => {
+    const source = getSubclassSource('collegeglamour');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegeglamour-mantle-of-inspiration' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegeglamour-enthralling-performance' }),
+        }),
+      ])
+    );
+  });
+
+  it('collegeglamour level 6 grants mantle-of-majesty feature', () => {
+    const source = getSubclassSource('collegeglamour');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'collegeglamour-mantle-of-majesty' },
+    });
+  });
+});
+
+describe('getSubclassSource — College of Lore', () => {
+  it('returns defined for collegelore', () => {
+    expect(getSubclassSource('collegelore')).toBeDefined();
+  });
+
+  it('collegelore has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('collegelore');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('collegelore level 3 grants 2 items: skill proficiency-choice and cutting-words feature', () => {
+    const source = getSubclassSource('collegelore');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'proficiency-choice',
+          category: 'skill',
+          count: 3,
+          from: null,
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegelore-cutting-words' }),
+        }),
+      ])
+    );
+  });
+
+  it('collegelore level 6 grants magical-secrets feature', () => {
+    const source = getSubclassSource('collegelore');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'collegelore-magical-secrets' },
+    });
+  });
+});
+
+describe('getSubclassSource — College of Valor', () => {
+  it('returns defined for collegevalor', () => {
+    expect(getSubclassSource('collegevalor')).toBeDefined();
+  });
+
+  it('collegevalor has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('collegevalor');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('collegevalor level 3 grants 4 items: medium armor, shields, martial weapons proficiencies and combat-inspiration', () => {
+    const source = getSubclassSource('collegevalor');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(4);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'proficiency', category: 'armor', id: 'medium' }),
+        expect.objectContaining({ type: 'proficiency', category: 'armor', id: 'shields' }),
+        expect.objectContaining({ type: 'proficiency', category: 'weapon', id: 'martial' }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'collegevalor-combat-inspiration' }),
+        }),
+      ])
+    );
+  });
+
+  it('collegevalor level 6 grants extra-attack feature', () => {
+    const source = getSubclassSource('collegevalor');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'collegevalor-extra-attack' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();
