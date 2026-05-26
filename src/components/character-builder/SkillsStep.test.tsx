@@ -198,3 +198,105 @@ describe('SkillsStep expertise-choice', () => {
     expect(perceptionL6?.disabled).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Skill-choice multi-source routing (Elf + Barbarian regression)
+// ---------------------------------------------------------------------------
+
+const ELF_SKILL_KEY = 'skill-choice:species:elf:0' as ChoiceKey;
+const BARBARIAN_SKILL_KEY = 'skill-choice:class:barbarian:0' as ChoiceKey;
+
+function elfBarbarianSkillBundles(): readonly GrantBundle[] {
+  return [
+    {
+      source: { origin: 'species', id: 'elf' },
+      grants: [
+        {
+          type: 'proficiency-choice',
+          category: 'skill',
+          key: ELF_SKILL_KEY,
+          count: 1,
+          from: ['insight', 'perception', 'survival'],
+        },
+      ],
+    },
+    {
+      source: { origin: 'class', id: 'barbarian', level: 1 },
+      grants: [
+        {
+          type: 'proficiency-choice',
+          category: 'skill',
+          key: BARBARIAN_SKILL_KEY,
+          count: 2,
+          from: ['athletics', 'animalhandling', 'intimidation', 'nature', 'perception', 'survival'],
+        },
+      ],
+    },
+  ];
+}
+
+describe('SkillsStep skill-choice multi-source routing', () => {
+  beforeEach(() => {
+    mockMakeChoice.mockReset();
+    mockClearChoice.mockReset();
+    mockContextValue = {
+      bundles: elfBarbarianSkillBundles(),
+      resolved: { skills: skillsWithProficient([]) } as Partial<ResolvedCharacter>,
+      build: { choices: {} },
+      makeChoice: mockMakeChoice,
+      clearChoice: mockClearChoice,
+    };
+  });
+
+  it('renders one header per skill-choice grant with a source label', () => {
+    render(<SkillsStep />);
+    // Two skillChoice headers — one per grant — both with their own count
+    const headers = screen.getAllByText(/^skillChoice:/);
+    expect(headers).toHaveLength(2);
+    // Source label uses getChoiceSourceName (mocked to return the key)
+    expect(screen.getByText(/^fromSource:.*elf/)).toBeInTheDocument();
+    expect(screen.getByText(/^fromSource:.*barbarian/)).toBeInTheDocument();
+  });
+
+  it('routes a new check on a skill in multiple pools to the first pool with room', () => {
+    render(<SkillsStep />);
+    const perception = document.querySelector('#skill-perception') as HTMLInputElement;
+    fireEvent.click(perception);
+    // Perception is in BOTH Elf and Barbarian. Elf comes first in bundles, so it gets the first check.
+    expect(mockMakeChoice).toHaveBeenCalledWith(ELF_SKILL_KEY, {
+      type: 'skill-choice',
+      skills: ['perception'],
+    });
+  });
+
+  it('falls back to the next pool when the first eligible pool is full', () => {
+    // Elf already filled with insight (1/1). Perception is in both pools but Elf has no room.
+    mockContextValue.build = {
+      choices: { [ELF_SKILL_KEY]: { type: 'skill-choice', skills: ['insight'] } } as Record<ChoiceKey, ChoiceDecision>,
+    };
+    render(<SkillsStep />);
+    const perception = document.querySelector('#skill-perception') as HTMLInputElement;
+    fireEvent.click(perception);
+    // Routing should fall through to Barbarian since Elf is full
+    expect(mockMakeChoice).toHaveBeenCalledWith(BARBARIAN_SKILL_KEY, {
+      type: 'skill-choice',
+      skills: ['perception'],
+    });
+  });
+
+  it('disables a skill checkbox only when every eligible pool is full', () => {
+    // Barbarian filled with two skills (athletics + animalhandling). Elf still empty.
+    mockContextValue.build = {
+      choices: {
+        [BARBARIAN_SKILL_KEY]: { type: 'skill-choice', skills: ['athletics', 'animalhandling'] },
+      } as Record<ChoiceKey, ChoiceDecision>,
+    };
+    render(<SkillsStep />);
+    // Perception (Elf+Barbarian) — Elf still has room, so still enabled
+    const perception = document.querySelector('#skill-perception') as HTMLInputElement;
+    expect(perception.disabled).toBe(false);
+    // Nature (Barbarian-only) — Barbarian full, no other pool → disabled
+    const nature = document.querySelector('#skill-nature') as HTMLInputElement;
+    expect(nature.disabled).toBe(true);
+  });
+});

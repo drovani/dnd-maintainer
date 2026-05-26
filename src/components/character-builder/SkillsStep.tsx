@@ -2,6 +2,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
 import type { ChoiceKey } from '@/types/choices';
 import type { SourceTag } from '@/types/sources';
 import { ABILITY_ABBREVIATIONS, DND_SKILLS, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
@@ -10,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 interface SkillChoiceInfo {
   readonly choiceKey: ChoiceKey;
+  readonly source: SourceTag;
   readonly count: number;
   readonly from: readonly SkillId[];
 }
@@ -37,6 +39,7 @@ export function SkillsStep() {
         if (grant.type === 'proficiency-choice' && grant.category === 'skill') {
           choices.push({
             choiceKey: grant.key,
+            source: bundle.source,
             count: grant.count,
             from: (grant.from ?? DND_SKILLS.map((s) => s.id)) as readonly SkillId[],
           });
@@ -88,7 +91,10 @@ export function SkillsStep() {
         return (
           <div key={sc.choiceKey} className="flex items-center gap-2">
             <p className="text-sm text-muted-foreground">
-              {tc('characterBuilder.pendingChoices.skillChoice', { count: sc.count })}
+              {tc('characterBuilder.pendingChoices.skillChoice', { count: sc.count })}{' '}
+              <span className="text-xs">
+                {tc('characterBuilder.pendingChoices.fromSource', { source: getChoiceSourceName(sc.choiceKey, t) })}
+              </span>
             </p>
             <Badge variant={remaining === 0 ? 'default' : 'outline'} className="text-xs">
               {selected.length} / {sc.count}
@@ -112,24 +118,36 @@ export function SkillsStep() {
           const abilityKey = resolvedSkill.ability;
           const abbrev = t(`abilityAbbreviations.${abilityKey}`, { defaultValue: ABILITY_ABBREVIATIONS[abilityKey] });
 
-          // Find if this skill is in any choice grant's pool
-          const choiceForSkill = skillChoices.find((sc) => sc.from.includes(skill.id));
+          // Every choice this skill is eligible for (could be multiple sources, e.g. Elf + Barbarian)
+          const eligibleChoices = skillChoices.filter((sc) => sc.from.includes(skill.id));
+          const choiceHoldingSkill = eligibleChoices.find((sc) => getSelectedSkills(sc.choiceKey).includes(skill.id));
+          const choiceWithRoom = eligibleChoices.find((sc) => getSelectedSkills(sc.choiceKey).length < sc.count);
 
-          // Show checkbox if eligible for a choice
           let checkbox: React.ReactNode = null;
-          if (choiceForSkill) {
-            const selected = getSelectedSkills(choiceForSkill.choiceKey);
-            const isSelected = selected.includes(skill.id);
-            const atMax = selected.length >= choiceForSkill.count;
-            const isDisabled = atMax && !isSelected;
+          if (eligibleChoices.length > 0) {
+            const isSelected = choiceHoldingSkill !== undefined;
+            // Disabled when nothing's checked and no eligible choice still has room
+            const isDisabled = !isSelected && choiceWithRoom === undefined;
 
             const handleChange = (checked: boolean | 'indeterminate') => {
               if (checked === 'indeterminate') return;
-              const next = checked ? [...selected, skill.id] : selected.filter((s) => s !== skill.id);
-              if (next.length === 0) {
-                context.clearChoice(choiceForSkill.choiceKey);
+              if (checked) {
+                // Route a new check to the first eligible choice with room
+                const target = choiceWithRoom;
+                if (!target) return;
+                const current = getSelectedSkills(target.choiceKey);
+                context.makeChoice(target.choiceKey, { type: 'skill-choice', skills: [...current, skill.id] });
               } else {
-                context.makeChoice(choiceForSkill.choiceKey, { type: 'skill-choice', skills: next });
+                // Remove from whichever choice currently holds the skill
+                const target = choiceHoldingSkill;
+                if (!target) return;
+                const current = getSelectedSkills(target.choiceKey);
+                const next = current.filter((s) => s !== skill.id);
+                if (next.length === 0) {
+                  context.clearChoice(target.choiceKey);
+                } else {
+                  context.makeChoice(target.choiceKey, { type: 'skill-choice', skills: next });
+                }
               }
             };
 
@@ -158,8 +176,8 @@ export function SkillsStep() {
                 {bonus}
               </span>
               <label
-                htmlFor={choiceForSkill ? `skill-${skill.id}` : undefined}
-                className={`flex-1 text-sm ${choiceForSkill ? 'cursor-pointer' : ''}`}
+                htmlFor={eligibleChoices.length > 0 ? `skill-${skill.id}` : undefined}
+                className={`flex-1 text-sm ${eligibleChoices.length > 0 ? 'cursor-pointer' : ''}`}
               >
                 {t(`skills.${skill.id}`)}
                 <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
