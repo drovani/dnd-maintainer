@@ -798,10 +798,102 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Sorcerer
-  aberrantsorcery: { features: [] },
-  clockworksorcery: { features: [] },
-  draconicsorcery: { features: [] },
-  wildmagicsorcery: { features: [] },
+  aberrantsorcery: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Telepathic Speech: speak telepathically to one willing creature within 30 ft for 10 min (Intelligence-focused)
+          { type: 'feature', feature: { id: 'aberrantsorcery-telepathic-speech' } },
+          // Psionic Sorcery: cast subclass spells without V/M components by spending additional Sorcery Points
+          { type: 'feature', feature: { id: 'aberrantsorcery-psionic-sorcery' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'aberrantsorcery-subclass-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Resistance to psychic damage (structural grant)
+          { type: 'resistance', damageType: 'psychic' },
+          // Psychic Defenses: advantage on saving throws vs Charmed and Frightened conditions
+          { type: 'feature', feature: { id: 'aberrantsorcery-psychic-defenses' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  clockworksorcery: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Restore Balance: Reaction within 60 ft — cancel Advantage or Disadvantage on a roll (PB/long rest)
+          { type: 'feature', feature: { id: 'clockworksorcery-restore-balance' } },
+          // Trance of Order: 1 min — no crits against you; treat 9-or-lower d20 as 10 once per turn
+          { type: 'feature', feature: { id: 'clockworksorcery-trance-of-order' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'clockworksorcery-subclass-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Bastion of Law: spend 1–5 Sorcery Points to create d8-per-SP ward on a creature within 30 ft
+          { type: 'feature', feature: { id: 'clockworksorcery-bastion-of-law' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  draconicsorcery: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Draconic Resilience: +1 HP per Sorcerer level (structural grant)
+          { type: 'hp-bonus', perLevel: 1 },
+          // Draconic Resilience: AC 13 + DEX mod when not wearing armor (natural armor; structural grant)
+          { type: 'armor-class', calculation: { mode: 'natural', baseAc: 13 } },
+          // Dragon Ancestor: gain proficiency in Draconic language
+          { type: 'proficiency', category: 'language', id: 'draconic' },
+          // Dragon Ancestor: free-form 1-of-10 ancestry choice (Black/Blue/Brass/Bronze/Copper/Gold/Green/Red/Silver/White);
+          // no pending-choice mechanism for arbitrary dragon type options — modeled as inert feature grant
+          { type: 'feature', feature: { id: 'draconicsorcery-dragon-ancestor' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'draconicsorcery-subclass-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Elemental Affinity: add CHA mod to one damage roll of ancestor's element; spend 1 SP for 1hr resistance
+          { type: 'feature', feature: { id: 'draconicsorcery-elemental-affinity' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  wildmagicsorcery: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Wild Magic Surge: after casting a L1+ Sorcerer spell, DM may have you roll d20; on 1, roll Wild Magic Surge table
+          { type: 'feature', feature: { id: 'wildmagicsorcery-wild-magic-surge' } },
+          // Tides of Chaos: gain Advantage on one attack roll, ability check, or saving throw per long rest;
+          // automatically replenishes when you experience a Wild Magic Surge
+          { type: 'feature', feature: { id: 'wildmagicsorcery-tides-of-chaos' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'wildmagicsorcery-subclass-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [
+          // Bend Luck: Reaction — spend 2 Sorcery Points to add or subtract 1d4 from a creature's roll within 60 ft
+          { type: 'feature', feature: { id: 'wildmagicsorcery-bend-luck' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Warlock
   archfeypatron: { features: [] },
   celestialpatron: { features: [] },

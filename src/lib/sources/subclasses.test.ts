@@ -1473,6 +1473,194 @@ describe('getSubclassSource — Soulknife', () => {
   });
 });
 
+describe('getSubclassSource — Aberrant Sorcery', () => {
+  it('returns defined for aberrantsorcery', () => {
+    expect(getSubclassSource('aberrantsorcery')).toBeDefined();
+  });
+
+  it('aberrantsorcery has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('aberrantsorcery');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('aberrantsorcery level 3 grants 3 features: telepathic-speech, psionic-sorcery, subclass-spells', () => {
+    const source = getSubclassSource('aberrantsorcery');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'aberrantsorcery-telepathic-speech' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'aberrantsorcery-psionic-sorcery' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'aberrantsorcery-subclass-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('aberrantsorcery level 6 grants 2 items: psychic resistance and psychic-defenses feature', () => {
+    const source = getSubclassSource('aberrantsorcery');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(2);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'resistance', damageType: 'psychic' }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'aberrantsorcery-psychic-defenses' }),
+        }),
+      ])
+    );
+  });
+});
+
+describe('getSubclassSource — Clockwork Sorcery', () => {
+  it('returns defined for clockworksorcery', () => {
+    expect(getSubclassSource('clockworksorcery')).toBeDefined();
+  });
+
+  it('clockworksorcery has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('clockworksorcery');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('clockworksorcery level 3 grants 3 features: restore-balance, trance-of-order, subclass-spells', () => {
+    const source = getSubclassSource('clockworksorcery');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'clockworksorcery-restore-balance' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'clockworksorcery-trance-of-order' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'clockworksorcery-subclass-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('clockworksorcery level 6 grants 1 feature: bastion-of-law', () => {
+    const source = getSubclassSource('clockworksorcery');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'clockworksorcery-bastion-of-law' },
+    });
+  });
+});
+
+describe('getSubclassSource — Draconic Sorcery', () => {
+  it('returns defined for draconicsorcery', () => {
+    expect(getSubclassSource('draconicsorcery')).toBeDefined();
+  });
+
+  it('draconicsorcery has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('draconicsorcery');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('draconicsorcery level 3 grants 5 items: hp-bonus, armor-class, draconic language, dragon-ancestor feature, subclass-spells feature', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(5);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'hp-bonus', perLevel: 1 }),
+        expect.objectContaining({ type: 'armor-class', calculation: { mode: 'natural', baseAc: 13 } }),
+        expect.objectContaining({ type: 'proficiency', category: 'language', id: 'draconic' }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'draconicsorcery-dragon-ancestor' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'draconicsorcery-subclass-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('draconicsorcery level 6 grants 1 feature: elemental-affinity', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'draconicsorcery-elemental-affinity' },
+    });
+  });
+});
+
+describe('getSubclassSource — Wild Magic Sorcery', () => {
+  it('returns defined for wildmagicsorcery', () => {
+    expect(getSubclassSource('wildmagicsorcery')).toBeDefined();
+  });
+
+  it('wildmagicsorcery has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('wildmagicsorcery');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('wildmagicsorcery level 3 grants 3 features: wild-magic-surge, tides-of-chaos, subclass-spells', () => {
+    const source = getSubclassSource('wildmagicsorcery');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'wildmagicsorcery-wild-magic-surge' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'wildmagicsorcery-tides-of-chaos' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'wildmagicsorcery-subclass-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('wildmagicsorcery level 6 grants 1 feature: bend-luck', () => {
+    const source = getSubclassSource('wildmagicsorcery');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'wildmagicsorcery-bend-luck' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();
