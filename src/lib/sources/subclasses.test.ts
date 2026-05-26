@@ -1062,6 +1062,190 @@ describe('getSubclassSource — Warrior of the Open Hand', () => {
   });
 });
 
+describe('getSubclassSource — Oath of Devotion', () => {
+  it('returns defined for oathofdevotion', () => {
+    expect(getSubclassSource('oathofdevotion')).toBeDefined();
+  });
+
+  it('oathofdevotion has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('oathofdevotion');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('oathofdevotion level 3 grants 3 items: sacred-weapon, holy-rebuke, and oath-spells', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofdevotion-sacred-weapon' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofdevotion-holy-rebuke' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofdevotion-oath-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('oathofdevotion level 7 grants aura-of-devotion feature', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofdevotion-aura-of-devotion' },
+    });
+  });
+});
+
+describe('getSubclassSource — Oath of Glory', () => {
+  it('returns defined for oathofglory', () => {
+    expect(getSubclassSource('oathofglory')).toBeDefined();
+  });
+
+  it('oathofglory has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('oathofglory');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('oathofglory level 3 grants 3 items: peerless-athlete, inspiring-smite, and oath-spells', () => {
+    const source = getSubclassSource('oathofglory');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofglory-peerless-athlete' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofglory-inspiring-smite' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofglory-oath-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('oathofglory level 7 grants aura-of-alacrity feature', () => {
+    const source = getSubclassSource('oathofglory');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofglory-aura-of-alacrity' },
+    });
+  });
+});
+
+describe('getSubclassSource — Oath of the Ancients', () => {
+  it('returns defined for oathofancients', () => {
+    expect(getSubclassSource('oathofancients')).toBeDefined();
+  });
+
+  it('oathofancients has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('oathofancients');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('oathofancients level 3 grants 3 items: natures-wrath, turn-the-faithless, and oath-spells', () => {
+    const source = getSubclassSource('oathofancients');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofancients-natures-wrath' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofancients-turn-the-faithless' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofancients-oath-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('oathofancients level 7 grants aura-of-warding feature', () => {
+    const source = getSubclassSource('oathofancients');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofancients-aura-of-warding' },
+    });
+  });
+});
+
+describe('getSubclassSource — Oath of Vengeance', () => {
+  it('returns defined for oathofvengeance', () => {
+    expect(getSubclassSource('oathofvengeance')).toBeDefined();
+  });
+
+  it('oathofvengeance has 2 feature levels (L3, L7)', () => {
+    const source = getSubclassSource('oathofvengeance');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+  });
+
+  it('oathofvengeance level 3 grants 3 items: vow-of-enmity, abjure-enemy, and oath-spells', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofvengeance-vow-of-enmity' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofvengeance-abjure-enemy' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofvengeance-oath-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('oathofvengeance level 7 grants relentless-avenger feature', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(1);
+    expect(level7?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofvengeance-relentless-avenger' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();

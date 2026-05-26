@@ -535,10 +535,95 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Paladin
-  oathofdevotion: { features: [] },
-  oathofglory: { features: [] },
-  oathofancients: { features: [] },
-  oathofvengeance: { features: [] },
+  oathofdevotion: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Sacred Weapon: 1 minute — weapon glows, +CHA mod to attack rolls (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofdevotion-sacred-weapon' } },
+          // Holy Rebuke: Reaction within 30 ft when ally is attacked — target takes radiant damage (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofdevotion-holy-rebuke' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'oathofdevotion-oath-spells' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Aura of Devotion: you and allies within 10 ft can't be Charmed; expands to 30 ft at L18
+          { type: 'feature', feature: { id: 'oathofdevotion-aura-of-devotion' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  oathofglory: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Peerless Athlete: 1 minute — Advantage on STR/DEX checks, carry capacity doubles, jump distance doubles (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofglory-peerless-athlete' } },
+          // Inspiring Smite: after Divine Smite, distribute 2d8 + Paladin level temp HP to creatures within 30 ft (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofglory-inspiring-smite' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'oathofglory-oath-spells' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Aura of Alacrity: you and allies within 10 ft gain +10 ft to walking speed; expands at L18
+          { type: 'feature', feature: { id: 'oathofglory-aura-of-alacrity' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  oathofancients: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Nature's Wrath: DEX or STR save vs Restrained by spectral vines (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofancients-natures-wrath' } },
+          // Turn the Faithless: Fey and Fiend WIS save vs Turned for 1 minute (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofancients-turn-the-faithless' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'oathofancients-oath-spells' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Aura of Warding: you and allies within 10 ft have resistance to damage from spells; expands at L18
+          // Modeled as feature grant — source-conditional resistance (spells only) doesn't map to existing resistance grant
+          { type: 'feature', feature: { id: 'oathofancients-aura-of-warding' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  oathofvengeance: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Vow of Enmity: Bonus Action, single target within 10 ft for 1 min — Advantage on attack rolls against it (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofvengeance-vow-of-enmity' } },
+          // Abjure Enemy: 60 ft creature WIS save or Frightened and half speed for 1 minute (Channel Divinity option)
+          { type: 'feature', feature: { id: 'oathofvengeance-abjure-enemy' } },
+          // TODO #93: model as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'oathofvengeance-oath-spells' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          // Relentless Avenger: when you hit with an opportunity attack, move up to half your speed (no OA provocation)
+          { type: 'feature', feature: { id: 'oathofvengeance-relentless-avenger' } },
+        ],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Ranger
   beastmaster: { features: [] },
   feywanderer: { features: [] },
