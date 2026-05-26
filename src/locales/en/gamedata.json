@@ -907,6 +907,74 @@
       "name": "Greater Divine Intervention",
       "description": "Your Divine Intervention now always succeeds. Once you use it, you can't use it again until 2d4 days have passed."
     },
+    "lifedomain-domain-spells": {
+      "name": "Life Domain Spells",
+      "description": "Your domain connection lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day: Bless, Cure Wounds (L1); Aid, Lesser Restoration (L3); Mass Healing Word, Revivify (L5); Death Ward, Guardian of Faith (L7); Mass Cure Wounds, Raise Dead (L9)."
+    },
+    "lifedomain-disciple-of-life": {
+      "name": "Disciple of Life",
+      "description": "When you cast a spell of 1st level or higher that restores Hit Points to a creature, that creature regains additional Hit Points equal to 2 + the spell's level."
+    },
+    "lifedomain-preserve-life": {
+      "name": "Preserve Life",
+      "description": "As a Magic action, you present your holy symbol and evoke healing energy that can restore a number of Hit Points equal to five times your Cleric level. Choose any creatures within 30 feet of you, and divide those Hit Points among them. This feature can restore a creature to no more than half its Hit Point maximum. You can use this feature a number of times equal to your Wisdom modifier (minimum once), and you regain all expended uses when you finish a Long Rest."
+    },
+    "lifedomain-blessed-strikes": {
+      "name": "Blessed Strikes (Life Domain)",
+      "description": "Divine power infuses you in battle. Once on each of your turns when you hit a creature with a weapon attack or deal damage to a creature with a Cleric cantrip, you can deal extra 1d8 Necrotic or Radiant damage (your choice) to that creature."
+    },
+    "lightdomain-domain-spells": {
+      "name": "Light Domain Spells",
+      "description": "Your domain connection lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day: Burning Hands, Faerie Fire (L1); Flaming Sphere, See Invisibility (L3); Daylight, Fireball (L5); Guardian of Faith, Wall of Fire (L7); Flame Strike, Scrying (L9)."
+    },
+    "lightdomain-bonus-cantrip": {
+      "name": "Bonus Cantrip (Light)",
+      "description": "You know the Light cantrip. It doesn't count against the number of Cleric cantrips you know."
+    },
+    "lightdomain-warding-flare": {
+      "name": "Warding Flare",
+      "description": "When a creature you can see within 30 feet of you makes an attack roll, you can use your Reaction to impose Disadvantage on the attack roll, causing light to flare before the attacker before it hits or misses. You can use this feature a number of times equal to your Wisdom modifier (minimum once), and you regain all expended uses when you finish a Long Rest."
+    },
+    "lightdomain-radiance-of-the-dawn": {
+      "name": "Radiance of the Dawn",
+      "description": "As a Magic action, you present your holy symbol and any magical darkness within 30 feet of you is dispelled. Additionally, each hostile creature within 30 feet of you must make a Constitution saving throw. A creature takes 2d10 + your Cleric level Radiant damage on a failed save, or half as much damage on a successful one. A creature that has total cover from you is not affected."
+    },
+    "lightdomain-improved-warding-flare": {
+      "name": "Improved Warding Flare",
+      "description": "You can also use your Warding Flare when a creature that you can see within 30 feet of you attacks a target other than you."
+    },
+    "trickerydomain-domain-spells": {
+      "name": "Trickery Domain Spells",
+      "description": "Your domain connection lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day: Charm Person, Disguise Self (L1); Mirror Image, Pass Without Trace (L3); Blink, Dispel Magic (L5); Dimension Door, Polymorph (L7); Dominate Person, Modify Memory (L9)."
+    },
+    "trickerydomain-blessing-of-the-trickster": {
+      "name": "Blessing of the Trickster",
+      "description": "As a Magic action, you can choose yourself or a willing creature within 30 feet of you to gain Advantage on Dexterity (Stealth) checks. This blessing lasts until you use this feature again or until you finish a Long Rest."
+    },
+    "trickerydomain-invoke-duplicity": {
+      "name": "Invoke Duplicity",
+      "description": "As a Bonus Action, you create a perfect illusory duplicate of yourself in an unoccupied space you can see within 30 feet of you. The duplicate lasts for 1 minute, until you are Incapacitated, or until you end it as a Bonus Action. While the duplicate persists, you can cast spells as though you were in its space, and you and the duplicate can flank the same target."
+    },
+    "trickerydomain-tricksters-transposition": {
+      "name": "Trickster's Transposition",
+      "description": "Whenever you create your illusory duplicate, you can swap places with it once on each of your turns as a Bonus Action."
+    },
+    "wardomain-domain-spells": {
+      "name": "War Domain Spells",
+      "description": "Your domain connection lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day: Divine Favor, Shield of Faith (L1); Magic Weapon, Spiritual Weapon (L3); Crusader's Mantle, Spirit Guardians (L5); Fire Shield, Freedom of Movement (L7); Destructive Wave, Hold Monster (L9)."
+    },
+    "wardomain-war-priest": {
+      "name": "War Priest",
+      "description": "Your deity empowers your assaults. Whenever you use the Attack action, you can make one extra weapon attack as a Bonus Action. You can use this feature a number of times equal to your Wisdom modifier (minimum once), and you regain all expended uses when you finish a Short or Long Rest."
+    },
+    "wardomain-guided-strike": {
+      "name": "Guided Strike",
+      "description": "When you or a creature within 30 feet of you misses with an attack roll, you can expend one use of your Channel Divinity and give that roll a +10 bonus, potentially turning the miss into a hit. You can use this feature before or after the d20 is rolled."
+    },
+    "wardomain-war-gods-blessing": {
+      "name": "War God's Blessing",
+      "description": "You can use your Reaction to expend one use of your Channel Divinity and give an attack roll made by a creature within 30 feet of you a +10 bonus. You make this choice after you see the roll but before the DM says whether it hits or misses."
+    },
     "druid-primal-order": {
       "name": "Primal Order",
       "description": "You have dedicated yourself to one of the following sacred roles of your choice: Magician or Warden."

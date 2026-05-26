@@ -187,10 +187,84 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
     ] satisfies readonly SubclassFeature[],
   },
   // Cleric
-  lifedomain: { features: [] },
-  lightdomain: { features: [] },
-  trickerydomain: { features: [] },
-  wardomain: { features: [] },
+  lifedomain: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'proficiency', category: 'armor', id: 'heavy' },
+          { type: 'feature', feature: { id: 'lifedomain-disciple-of-life' } },
+          { type: 'feature', feature: { id: 'lifedomain-preserve-life' } },
+          // TODO #93: model domain spells (Bless, Cure Wounds, etc.) as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'lifedomain-domain-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        // Blessed Strikes: once per turn, a weapon or cantrip hit deals +1d8 necrotic or radiant damage
+        // Per 2024 PHB, Blessed Strikes is the canonical Life Domain L6 feature.
+        // NOTE: The 2024 PHB class table also lists Blessed Strikes as a class-wide Cleric feature at L7
+        // in some printings; this implementation treats the domain entry as authoritative for Life Domain.
+        grants: [{ type: 'feature', feature: { id: 'lifedomain-blessed-strikes' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  lightdomain: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          // Light cantrip always known — modeled as inert feature grant; no SpellGrant caller exists yet
+          // TODO #93: replace with a spell grant when the spell id system supports cantrips
+          { type: 'feature', feature: { id: 'lightdomain-bonus-cantrip' } },
+          { type: 'feature', feature: { id: 'lightdomain-warding-flare' } },
+          { type: 'feature', feature: { id: 'lightdomain-radiance-of-the-dawn' } },
+          // TODO #93: model domain spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'lightdomain-domain-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'lightdomain-improved-warding-flare' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  trickerydomain: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'feature', feature: { id: 'trickerydomain-blessing-of-the-trickster' } },
+          { type: 'feature', feature: { id: 'trickerydomain-invoke-duplicity' } },
+          // TODO #93: model domain spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'trickerydomain-domain-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'trickerydomain-tricksters-transposition' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
+  wardomain: {
+    features: [
+      {
+        classLevel: 3,
+        grants: [
+          { type: 'proficiency', category: 'armor', id: 'heavy' },
+          { type: 'proficiency', category: 'weapon', id: 'martial' },
+          { type: 'feature', feature: { id: 'wardomain-war-priest' } },
+          { type: 'feature', feature: { id: 'wardomain-guided-strike' } },
+          // TODO #93: model domain spells as spell grants when spell id system is available
+          { type: 'feature', feature: { id: 'wardomain-domain-spells' } },
+        ],
+      },
+      {
+        classLevel: 6,
+        grants: [{ type: 'feature', feature: { id: 'wardomain-war-gods-blessing' } }],
+      },
+    ] satisfies readonly SubclassFeature[],
+  },
   // Druid
   circleland: { features: [] },
   circlemoon: { features: [] },

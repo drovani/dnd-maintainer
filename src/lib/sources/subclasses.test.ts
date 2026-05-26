@@ -462,6 +462,194 @@ describe('getSubclassSource — College of Valor', () => {
   });
 });
 
+describe('getSubclassSource — Life Domain', () => {
+  it('returns defined for lifedomain', () => {
+    expect(getSubclassSource('lifedomain')).toBeDefined();
+  });
+
+  it('lifedomain has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('lifedomain');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('lifedomain level 3 grants heavy armor proficiency, disciple-of-life, preserve-life, and domain-spells', () => {
+    const source = getSubclassSource('lifedomain');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(4);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'proficiency', category: 'armor', id: 'heavy' }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lifedomain-disciple-of-life' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lifedomain-preserve-life' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lifedomain-domain-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('lifedomain level 6 grants blessed-strikes feature', () => {
+    const source = getSubclassSource('lifedomain');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'lifedomain-blessed-strikes' },
+    });
+  });
+});
+
+describe('getSubclassSource — Light Domain', () => {
+  it('returns defined for lightdomain', () => {
+    expect(getSubclassSource('lightdomain')).toBeDefined();
+  });
+
+  it('lightdomain has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('lightdomain');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('lightdomain level 3 grants bonus-cantrip, warding-flare, radiance-of-the-dawn, and domain-spells', () => {
+    const source = getSubclassSource('lightdomain');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(4);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lightdomain-bonus-cantrip' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lightdomain-warding-flare' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lightdomain-radiance-of-the-dawn' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'lightdomain-domain-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('lightdomain level 6 grants improved-warding-flare feature', () => {
+    const source = getSubclassSource('lightdomain');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'lightdomain-improved-warding-flare' },
+    });
+  });
+});
+
+describe('getSubclassSource — Trickery Domain', () => {
+  it('returns defined for trickerydomain', () => {
+    expect(getSubclassSource('trickerydomain')).toBeDefined();
+  });
+
+  it('trickerydomain has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('trickerydomain');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('trickerydomain level 3 grants blessing-of-the-trickster, invoke-duplicity, and domain-spells', () => {
+    const source = getSubclassSource('trickerydomain');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'trickerydomain-blessing-of-the-trickster' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'trickerydomain-invoke-duplicity' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'trickerydomain-domain-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('trickerydomain level 6 grants tricksters-transposition feature', () => {
+    const source = getSubclassSource('trickerydomain');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'trickerydomain-tricksters-transposition' },
+    });
+  });
+});
+
+describe('getSubclassSource — War Domain', () => {
+  it('returns defined for wardomain', () => {
+    expect(getSubclassSource('wardomain')).toBeDefined();
+  });
+
+  it('wardomain has 2 feature levels (L3, L6)', () => {
+    const source = getSubclassSource('wardomain');
+    expect(source?.features).toHaveLength(2);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+  });
+
+  it('wardomain level 3 grants heavy armor, martial weapons proficiencies, war-priest, guided-strike, and domain-spells', () => {
+    const source = getSubclassSource('wardomain');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3?.grants).toHaveLength(5);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'proficiency', category: 'armor', id: 'heavy' }),
+        expect.objectContaining({ type: 'proficiency', category: 'weapon', id: 'martial' }),
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'wardomain-war-priest' }) }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'wardomain-guided-strike' }),
+        }),
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'wardomain-domain-spells' }),
+        }),
+      ])
+    );
+  });
+
+  it('wardomain level 6 grants war-gods-blessing feature', () => {
+    const source = getSubclassSource('wardomain');
+    const level6 = source?.features.find((f) => f.classLevel === 6);
+    expect(level6).toBeDefined();
+    expect(level6?.grants).toHaveLength(1);
+    expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'wardomain-war-gods-blessing' },
+    });
+  });
+});
+
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();
