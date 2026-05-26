@@ -27,7 +27,8 @@ import {
 } from '@/lib/character-builder/random-npc';
 import type { StepType } from '@/types/character-builder';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Dices, MoreHorizontal, Wand2 } from 'lucide-react';
+import { MoreHorizontal, Wand2 } from 'lucide-react';
+import { CLASS_ICONS } from '@/lib/class-icons';
 import type { BackgroundId } from '@/lib/dnd-helpers';
 import {
   backgroundHasLaterChoices,
@@ -269,12 +270,23 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
         <Label>{tc('characterBuilder.fields.quickNpcLabel')}</Label>
         <p className="text-xs text-muted-foreground">{tc('characterBuilder.hints.quickNpcDescription')}</p>
         <div className="flex flex-wrap gap-2">
-          {getQuickNpcClassIds().map((classId) => (
-            <Button key={classId} type="button" variant="outline" size="sm" onClick={() => handleQuickNpc(classId)}>
-              <Dices className="size-4" />
-              {tc('characterBuilder.hints.quickNpcButton', { class: t(`classes.${classId}`) })}
-            </Button>
-          ))}
+          {getQuickNpcClassIds().map((classId) => {
+            const Icon = CLASS_ICONS[classId];
+            const label = tc('characterBuilder.hints.quickNpcButton', { class: t(`classes.${classId}`) });
+            return (
+              <Button
+                key={classId}
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => handleQuickNpc(classId)}
+                title={label}
+                aria-label={label}
+              >
+                <Icon className="size-4" />
+              </Button>
+            );
+          })}
         </div>
       </div>
 
@@ -518,7 +530,11 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 {tc('buttons.cancel')}
               </Button>
               <Button variant="destructive" onClick={handleOverwriteConfirm}>
-                <Dices className="size-4" />
+                {pendingOverwriteClassId &&
+                  (() => {
+                    const Icon = CLASS_ICONS[pendingOverwriteClassId];
+                    return <Icon className="size-4" />;
+                  })()}
                 {tc('characterBuilder.hints.quickNpcButton', { class: t(`classes.${pendingOverwriteClassId}`) })}
               </Button>
             </DialogFooter>
