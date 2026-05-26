@@ -108,3 +108,19 @@ export function getGrantIcon(source: SourceTag, bundleCategory?: BundleCategory)
       return null;
   }
 }
+
+interface SourceIconProps {
+  readonly source: SourceTag;
+  readonly bundleCategory?: BundleCategory;
+  readonly className?: string;
+}
+
+/**
+ * Thin JSX wrapper around getGrantIcon — renders the icon for a grant source,
+ * or null when no icon is defined. The lookup table is the source of truth;
+ * this component just saves consumers from repeating the same null-check.
+ */
+export function SourceIcon({ source, bundleCategory, className }: SourceIconProps): React.JSX.Element | null {
+  const Icon = getGrantIcon(source, bundleCategory);
+  return Icon ? <Icon className={className} /> : null;
+}

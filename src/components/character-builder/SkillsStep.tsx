@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
+import { SourceIcon, getSourceDisplayName } from '@/lib/class-icons';
 import type { ChoiceKey } from '@/types/choices';
 import type { SourceTag } from '@/types/sources';
 import { ABILITY_ABBREVIATIONS, DND_SKILLS, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
@@ -182,6 +183,19 @@ export function SkillsStep() {
                 {t(`skills.${skill.id}`)}
                 <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
               </label>
+              {/* Source icons — one per eligible grant, hover to see the source name */}
+              {eligibleChoices.length > 0 && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {eligibleChoices.map((sc) => {
+                    const sourceName = getSourceDisplayName(sc.source, t);
+                    return (
+                      <span key={sc.choiceKey} title={sourceName} aria-label={sourceName} className="inline-flex">
+                        <SourceIcon source={sc.source} className="size-3.5 text-muted-foreground" />
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
