@@ -27,7 +27,13 @@ import {
 } from '@/lib/character-builder/random-npc';
 import type { StepType } from '@/types/character-builder';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Dices, Wand2 } from 'lucide-react';
+import { Dices, MoreHorizontal, Wand2 } from 'lucide-react';
+import type { BackgroundId } from '@/lib/dnd-helpers';
+import {
+  backgroundHasLaterChoices,
+  classHasLaterChoices,
+  speciesHasLaterChoices,
+} from '@/lib/character-builder/has-later-choices';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +41,10 @@ import { useTranslation } from 'react-i18next';
 const logger = getLogger('basics-step');
 
 const PENDING_ADVANCE_TIMEOUT_MS = 3000;
+
+function HasLaterChoicesIcon({ tooltip }: { tooltip: string }) {
+  return <MoreHorizontal className="ml-2 inline size-3.5 text-muted-foreground" aria-label={tooltip} />;
+}
 
 // Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
 const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
@@ -391,6 +401,9 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 {DND_SPECIES.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {t(`species.${s.id}`)}
+                    {speciesHasLaterChoices(s.id) && (
+                      <HasLaterChoicesIcon tooltip={tc('characterBuilder.hints.hasLaterChoices')} />
+                    )}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -414,6 +427,9 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 {DND_CLASSES.map((cls) => (
                   <SelectItem key={cls.id} value={cls.id}>
                     {t(`classes.${cls.id}`)}
+                    {classHasLaterChoices(cls.id) && (
+                      <HasLaterChoicesIcon tooltip={tc('characterBuilder.hints.hasLaterChoices')} />
+                    )}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -434,6 +450,9 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 {DND_BACKGROUNDS.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
                     {t(`backgrounds.${b.id}`)}
+                    {backgroundHasLaterChoices(b.id as BackgroundId) && (
+                      <HasLaterChoicesIcon tooltip={tc('characterBuilder.hints.hasLaterChoices')} />
+                    )}
                   </SelectItem>
                 ))}
               </SelectContent>

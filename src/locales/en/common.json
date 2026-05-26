@@ -204,6 +204,7 @@
       "selectSpeciesAndGender": "Select species and gender first",
       "generateRandomName": "Generate random name",
       "legacySpecies": "This character uses a legacy species ID. Select a 2024 species to update.",
+      "hasLaterChoices": "This option requires additional choices in a later step.",
       "selectSpeciesFirst": "Select a species to see lineage options.",
       "loadingLineage": "Loading lineage options...",
       "couldNotLoadPlayerNames": "Could not load player name suggestions",
