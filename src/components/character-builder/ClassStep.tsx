@@ -16,7 +16,7 @@ interface FightingStyleChoiceInfo {
   readonly from: readonly FightingStyleId[];
 }
 
-export function ClassFeaturesStep() {
+export function ClassStep() {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
   const context = useCharacterContext();

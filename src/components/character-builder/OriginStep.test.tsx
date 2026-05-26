@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BackgroundStep } from '@/components/character-builder/BackgroundStep';
+import { OriginStep } from '@/components/character-builder/OriginStep';
 import type { Character } from '@/types/database';
 import type { GrantBundle } from '@/types/sources';
 import type { ChoiceKey } from '@/types/choices';
@@ -183,14 +183,14 @@ function resetContext() {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('BackgroundStep', () => {
+describe('OriginStep', () => {
   beforeEach(() => {
     resetContext();
     vi.clearAllMocks();
   });
 
   it('renders the background selector dropdown', () => {
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const trigger = screen.getByRole('combobox');
     expect(trigger).toBeTruthy();
@@ -200,7 +200,7 @@ describe('BackgroundStep', () => {
 
   it('selecting a background calls updateCharacter with the background ID', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     // Component already has background set; trigger a change via the Select
     // The Select will call onValueChange with the new value.
@@ -220,13 +220,13 @@ describe('BackgroundStep', () => {
   });
 
   it('shows noBackground message when no background is selected', () => {
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.getByText('noBackground')).toBeTruthy();
   });
 
   it('does not show ASI section when no background is selected', () => {
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.queryByText('asiModeTitle')).toBeNull();
   });
@@ -235,7 +235,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     // First two radios are the mode selectors
@@ -247,7 +247,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     const modeRadios = radios.filter((r) => r.name === 'asi-mode');
@@ -259,7 +259,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     // Find the increment button for 'int' by accessible name (from: ['int', 'wis', 'cha'])
     // aria-label is `increaseAbility:int` (mock returns `${base}:${ability}`)
@@ -283,7 +283,7 @@ describe('BackgroundStep', () => {
       },
     };
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     // All increment buttons should be disabled since 3/3 points used
     const incButtons = ['int', 'wis', 'cha'].map((a) => screen.getByRole('button', { name: `increaseAbility:${a}` }));
@@ -296,7 +296,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     const modeRadios = radios.filter((r) => r.name === 'asi-mode');
@@ -313,7 +313,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle(), makeAcolyteFeatBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.getByText('originFeatTitle')).toBeTruthy();
     // The feat name: t('feats.alert.name', { defaultValue: 'alert' }) → 'alert' via mock (defaultValue wins)
@@ -324,7 +324,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle()]; // no feat grant
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.queryByText('originFeatTitle')).toBeNull();
   });
@@ -333,7 +333,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle(), makeAcolyteToolChoiceBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.getByText('toolProficiencyTitle')).toBeTruthy();
     // ChoicePicker renders checkboxes for each tool
@@ -345,7 +345,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle(), makeAcolyteLanguageChoiceBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.getByText('languageTitle')).toBeTruthy();
     // ChoicePicker renders the language count badge (0 / 1)
@@ -353,7 +353,7 @@ describe('BackgroundStep', () => {
   });
 
   it('shows nothing but the background picker when no background is selected', () => {
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     expect(screen.getByText('noBackground')).toBeTruthy();
     expect(screen.queryByText('asiModeTitle')).toBeNull();
@@ -377,7 +377,7 @@ describe('BackgroundStep', () => {
       },
     };
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     // cha is the third ability — its increment must be disabled (distinct >= 2)
     const chaIncButton = screen.getByRole('button', { name: 'increaseAbility:cha' }) as HTMLButtonElement;
@@ -399,7 +399,7 @@ describe('BackgroundStep', () => {
       },
     };
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     // wis currently at +0 → would go to +1 (allowed), but that would add a new distinct ability
     // with 1 point remaining and int already using 2, wis could get +1 — that IS allowed
@@ -424,7 +424,7 @@ describe('BackgroundStep', () => {
       },
     };
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     // Switch to +1/+1/+1 mode — the radio
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
@@ -453,7 +453,7 @@ describe('BackgroundStep', () => {
       },
     };
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     const modeRadios = radios.filter((r) => r.name === 'asi-mode');
@@ -471,7 +471,7 @@ describe('BackgroundStep', () => {
       },
     };
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     const modeRadios = radios.filter((r) => r.name === 'asi-mode');
@@ -483,7 +483,7 @@ describe('BackgroundStep', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle()];
 
-    render(<BackgroundStep />);
+    render(<OriginStep />);
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     const modeRadios = radios.filter((r) => r.name === 'asi-mode');

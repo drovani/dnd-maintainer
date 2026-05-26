@@ -21,7 +21,7 @@ function inferAsiMode(alloc: Partial<Record<AbilityKey, number>>): AsiMode {
   return '+2/+1';
 }
 
-export function BackgroundStep() {
+export function OriginStep() {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
   const context = useCharacterContext();

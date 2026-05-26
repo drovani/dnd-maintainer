@@ -4,11 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AbilitiesStep,
-  BackgroundStep,
   BackstoryStep,
   BasicsStep,
-  ClassFeaturesStep,
+  ClassStep,
   EquipmentStep,
+  OriginStep,
   ProficienciesStep,
   SkillsStep,
 } from '@/components/character-builder';
@@ -45,13 +45,13 @@ function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactEleme
     case 'basics':
       return <BasicsStep onRequestAdvance={goToStep} />;
     case 'background':
-      return <BackgroundStep />;
+      return <OriginStep />;
     case 'abilities':
       return <AbilitiesStep />;
     case 'skills':
       return <SkillsStep />;
     case 'classFeatures':
-      return <ClassFeaturesStep />;
+      return <ClassStep />;
     case 'proficiencies':
       return <ProficienciesStep />;
     case 'equipment':

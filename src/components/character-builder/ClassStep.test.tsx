@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ClassFeaturesStep } from '@/components/character-builder/ClassFeaturesStep';
+import { ClassStep } from '@/components/character-builder/ClassStep';
 import type { ResolvedCharacter, ResolvedSpellcasting, ResolvedFeature, PendingChoice } from '@/types/resolved';
 import type { CharacterBuild, ChoiceKey } from '@/types/choices';
 import type { GrantBundle } from '@/types/sources';
@@ -111,7 +111,7 @@ function rogueSubclassChoice(): Extract<PendingChoice, { type: 'subclass' }> {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('ClassFeaturesStep', () => {
+describe('ClassStep', () => {
   beforeEach(() => {
     mockContextValue = {
       bundles: [],
@@ -125,7 +125,7 @@ describe('ClassFeaturesStep', () => {
   it('renders fighting-style radios from the bundle grant for a Fighter', () => {
     mockContextValue.bundles = [fighterFightingStyleBundle()];
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     expect(screen.getByText('fightingStyles')).toBeTruthy();
     expect(screen.getByText('archery:name')).toBeTruthy();
@@ -136,7 +136,7 @@ describe('ClassFeaturesStep', () => {
   it('calls makeChoice with fighting-style-choice decision when a style is selected', () => {
     mockContextValue.bundles = [fighterFightingStyleBundle()];
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     const defenseRadio = document.getElementById(`fighting-style-${FIGHTER_CHOICE_KEY}-defense`) as HTMLInputElement;
     expect(defenseRadio).toBeTruthy();
@@ -154,7 +154,7 @@ describe('ClassFeaturesStep', () => {
       spellcasting: wizardSpellcasting(),
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     expect(screen.getByText('spellcasting')).toBeTruthy();
     expect(screen.getByText(/Fire Bolt, Mage Hand, Prestidigitation/)).toBeTruthy();
@@ -162,7 +162,7 @@ describe('ClassFeaturesStep', () => {
 
   it('renders fallback when class has no fighting styles and no spellcasting', () => {
     // default context: no bundles, no spellcasting
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     expect(screen.getByText('noClassChoices')).toBeTruthy();
     expect(screen.queryByText('fightingStyles')).toBeNull();
@@ -175,7 +175,7 @@ describe('ClassFeaturesStep', () => {
       spellcasting: wizardSpellcasting(),
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     expect(screen.getByText('fightingStyles')).toBeTruthy();
     expect(screen.getByText('spellcasting')).toBeTruthy();
@@ -189,7 +189,7 @@ describe('ClassFeaturesStep', () => {
       pendingChoices: [],
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     // The i18n mock returns the last segment: features.<id>.name -> "name"
     // Both features share the same last segment, so we use getAllByText
@@ -221,7 +221,7 @@ describe('ClassFeaturesStep', () => {
       pendingChoices: [],
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     // Only one feature list item should appear
     const listItems = document.querySelectorAll('li');
@@ -235,7 +235,7 @@ describe('ClassFeaturesStep', () => {
       pendingChoices: [rogueSubclassChoice()],
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     // The SubclassPicker heading: last segment of characterSheet.subclassPicker.chooseSubclass -> "chooseSubclass"
     expect(screen.getByText('chooseSubclass')).toBeTruthy();
@@ -248,7 +248,7 @@ describe('ClassFeaturesStep', () => {
       pendingChoices: [rogueSubclassChoice()],
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     // SUBCLASS_SOURCES contains thief, assassin, arcanetrickster for rogue.
     // The SubclassPicker renders them as <button> elements. Click the first one.
@@ -277,7 +277,7 @@ describe('ClassFeaturesStep', () => {
       pendingChoices: [wizardSubclassChoice],
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     // SubclassPicker heading should be present
     expect(screen.getByText('chooseSubclass')).toBeTruthy();
@@ -302,7 +302,7 @@ describe('ClassFeaturesStep', () => {
       pendingChoices: [],
     } as Partial<ResolvedCharacter>;
 
-    render(<ClassFeaturesStep />);
+    render(<ClassStep />);
 
     expect(screen.queryByText('noClassChoices')).toBeNull();
   });
