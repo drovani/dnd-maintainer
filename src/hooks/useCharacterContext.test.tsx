@@ -78,6 +78,55 @@ describe('resolveChoiceSequence', () => {
   it('throws for unknown origins', () => {
     expect(() => resolveChoiceSequence('skill-choice:unknown:foo:0', rows)).toThrow('Invalid choice key origin');
   });
+
+  it('returns the parent class level row sequence for a subclass-origin key', () => {
+    // collegelore is a bard subclass; rows has no bard row so we need a bard row
+    const bardLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'bard',
+      class_level: 3,
+      subclass_id: 'collegelore',
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    };
+    const rowsWithBard = [...rows, bardLevel3] as const;
+    expect(resolveChoiceSequence('skill-choice:subclass:collegelore:0', rowsWithBard)).toBe(3);
+  });
+
+  it('throws when no active level row exists for the parent class of the subclass', () => {
+    // feywanderer is a ranger subclass; rows has no ranger row
+    expect(() => resolveChoiceSequence('skill-choice:subclass:feywanderer:0', rows)).toThrow(
+      'No active level row found for parent class "ranger"'
+    );
+  });
+
+  it('resolves a known subclass id to its parent class via subclass-origin key', () => {
+    // greatoldonepatron is a warlock subclass
+    const warlockLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'warlock',
+      class_level: 3,
+      subclass_id: 'greatoldonepatron',
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    };
+    const rowsWithWarlock = [...rows, warlockLevel3] as const;
+    expect(resolveChoiceSequence('skill-choice:subclass:greatoldonepatron:1', rowsWithWarlock)).toBe(3);
+  });
+
+  it('throws "Unknown subclass" for an unrecognized subclass id', () => {
+    expect(() => resolveChoiceSequence('skill-choice:subclass:notasubclass:0', rows)).toThrow('Unknown subclass');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -1081,6 +1130,72 @@ describe('CharacterProvider', () => {
     expect(() => {
       renderHook(() => useCharacterContext());
     }).toThrow('useCharacterContext must be used within a CharacterProvider');
+  });
+
+  it('makeChoice with subclass-origin skill choice stores decision on parent class level row', () => {
+    const character = buildSeedCharacter();
+    const bardLevel1: BuildLevelRow = {
+      sequence: 1,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'bard',
+      class_level: 1,
+      subclass_id: null,
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    };
+    const bardLevel3: BuildLevelRow = {
+      sequence: 3,
+      base_abilities: null,
+      ability_method: null,
+      class_id: 'bard',
+      class_level: 3,
+      subclass_id: 'collegelore',
+      asi_allocation: null,
+      feat_id: null,
+      hp_roll: null,
+      choices: null,
+      deleted_at: null,
+    };
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, bardLevel1, bardLevel3]),
+    });
+
+    act(() => {
+      result.current.makeChoice('skill-choice:subclass:collegelore:0' as ChoiceKey, {
+        type: 'skill-choice',
+        skills: ['history'],
+      });
+    });
+
+    // Decision should land on the bard level row (sequence 1 — the first active bard row)
+    const bardRow = result.current.rows.find((r) => r.sequence === 1);
+    expect(bardRow?.choices?.['skill-choice:subclass:collegelore:0']).toEqual({
+      type: 'skill-choice',
+      skills: ['history'],
+    });
+  });
+
+  it('makeChoice with subclass-origin choice fails gracefully when parent class has no active row', () => {
+    const character = buildSeedCharacter();
+    const { result } = renderHook(() => useCharacterContext(), {
+      wrapper: createWrapper(character, [creationRow, fighterLevel1]),
+    });
+
+    const rowsBefore = result.current.rows;
+
+    // feywanderer is a ranger subclass; no ranger row exists — should be a no-op
+    act(() => {
+      result.current.makeChoice('skill-choice:subclass:feywanderer:0' as ChoiceKey, {
+        type: 'skill-choice',
+        skills: ['deception'],
+      });
+    });
+
+    expect(result.current.rows).toEqual(rowsBefore);
   });
 
   it('initialEquippedItems wiring: chain-mail + longsword produce AC 16 and a longsword attack', () => {

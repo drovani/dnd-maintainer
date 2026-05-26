@@ -1,5 +1,5 @@
 import { getProficiencyBonus } from '@/lib/dnd-helpers';
-import type { AbilityKey, ToolProficiencyId, SkillId, FeatId } from '@/lib/dnd-helpers';
+import type { AbilityKey, ToolProficiencyId, SkillId, FeatId, ClassId } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
@@ -74,7 +74,8 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       ? resolveEquipmentFromPersisted(input.persistedItems)
       : resolveEquipment(bundles, choices, equippedItemIds);
   const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier);
-  const bardLevel = bundles.filter((b) => b.source.origin === 'class' && b.source.id === 'bard').length;
+  const BARD_CLASS_ID = 'bard' satisfies ClassId;
+  const bardLevel = bundles.filter((b) => b.source.origin === 'class' && b.source.id === BARD_CLASS_ID).length;
   const chaModifier = abilities.cha.modifier;
   const bardicInspiration = resolveBardicInspiration(bundles, bardLevel, chaModifier);
   const bardicDieSize = bardicInspiration?.dieSize ?? null;

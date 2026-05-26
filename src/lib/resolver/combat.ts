@@ -61,7 +61,7 @@ export function resolveAc(
   bundles: readonly GrantBundle[],
   dexModifier: number,
   equippedArmor?: { readonly totalBase: number | null; readonly shieldBonus: number } | null,
-  bardicDieSize?: number | null
+  bardicDieSize?: 6 | 8 | 10 | 12 | null
 ): ResolvedArmorClass {
   const acGrants = collectGrantsByType(bundles, 'armor-class');
   const acBonusGrants = collectGrantsByType(bundles, 'ac-bonus');
@@ -86,10 +86,21 @@ export function resolveAc(
         break;
       case 'unarmored': {
         let baseValue = 10 + dexModifier;
-        if (calc.formula === 'dance' && bardicDieSize != null) {
-          baseValue += bardicDieSize;
+        switch (calc.formula) {
+          case 'dance':
+            if (bardicDieSize != null) baseValue += bardicDieSize;
+            break;
+          case 'barbarian':
+            // TODO: add CON modifier when ability scores are threaded through here
+            break;
+          case 'monk':
+            // TODO: add WIS modifier when ability scores are threaded through here
+            break;
+          default: {
+            const _exhaustive: never = calc.formula;
+            throw new Error(`Unhandled unarmored formula: ${JSON.stringify(_exhaustive)}`);
+          }
         }
-        // TODO: barbarian formula should add CON modifier, monk should add WIS modifier.
         calculations.push({ mode: 'unarmored', baseValue, source });
         break;
       }
@@ -156,7 +167,10 @@ export function resolveBardicInspiration(
   if (!hasBardicInspiration) return null;
   if (bardLevel < 1) return null;
   const clampedLevel = Math.min(20, bardLevel);
-  const dieSize = BARDIC_DIE_BY_LEVEL[clampedLevel - 1] ?? 6;
+  const dieSize = BARDIC_DIE_BY_LEVEL[clampedLevel - 1];
+  // clampedLevel is guaranteed to be in [1, 20] and BARDIC_DIE_BY_LEVEL has 20 entries,
+  // so dieSize is structurally always defined — if this throws, the invariant was broken.
+  if (dieSize === undefined) throw new Error(`Bardic die lookup failed at level ${bardLevel}`);
   const uses = Math.max(1, chaModifier);
   return { dieSize, uses };
 }

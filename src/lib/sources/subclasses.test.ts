@@ -1354,6 +1354,14 @@ describe('getSubclassSource — Fey Wanderer', () => {
     }
   });
 
+  it('feywanderer level 3 proficiency-choice key has subclass origin', () => {
+    const source = getSubclassSource('feywanderer');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const profChoice = level3?.grants.find((g) => g.type === 'proficiency-choice');
+    expect(profChoice).toBeDefined();
+    expect((profChoice as { key: string }).key).toBe(createChoiceKey('skill-choice', 'subclass', 'feywanderer', 0));
+  });
+
   it('feywanderer level 7 grants 1 feature: beguiling-twist', () => {
     const source = getSubclassSource('feywanderer');
     const level7 = source?.features.find((f) => f.classLevel === 7);
@@ -1900,6 +1908,16 @@ describe('getSubclassSource — Great Old One Patron', () => {
       );
       expect(choiceGrant.from).toHaveLength(6);
     }
+  });
+
+  it('greatoldonepatron level 3 proficiency-choice key has subclass origin', () => {
+    const source = getSubclassSource('greatoldonepatron');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const profChoice = level3?.grants.find((g) => g.type === 'proficiency-choice');
+    expect(profChoice).toBeDefined();
+    expect((profChoice as { key: string }).key).toBe(
+      createChoiceKey('skill-choice', 'subclass', 'greatoldonepatron', 1)
+    );
   });
 
   it('greatoldonepatron level 6 grants 1 feature: clairvoyant-combatant', () => {

@@ -663,7 +663,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           {
             type: 'proficiency-choice',
             category: 'skill',
-            key: createChoiceKey('skill-choice', 'class', 'feywanderer', 0),
+            key: createChoiceKey('skill-choice', 'subclass', 'feywanderer', 0),
             count: 1,
             from: ['deception', 'performance', 'persuasion'],
           },
@@ -997,7 +997,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           {
             type: 'proficiency-choice',
             category: 'skill',
-            key: createChoiceKey('skill-choice', 'class', 'greatoldonepatron', 1),
+            key: createChoiceKey('skill-choice', 'subclass', 'greatoldonepatron', 1),
             count: 1,
             from: ['arcana', 'history', 'intimidation', 'nature', 'religion', 'survival'],
           },
