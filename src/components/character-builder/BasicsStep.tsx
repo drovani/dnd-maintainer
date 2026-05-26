@@ -18,11 +18,7 @@ import {
   type DndGender,
   type SpeciesId,
 } from '@/lib/dnd-helpers';
-import { collectGrantsByType } from '@/lib/resolver/helpers';
-import { LINEAGE_GRANTS_REGISTRY, SPECIES_SOURCES } from '@/lib/sources/species';
-import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
-import type { GrantBundle } from '@/types/sources';
-import type { PendingChoice } from '@/types/resolved';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import {
   generateRandomNpcBasicsDetailed,
   getQuickNpcClassIds,
@@ -31,7 +27,6 @@ import {
 import type { StepType } from '@/types/character-builder';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Dices, Wand2 } from 'lucide-react';
-import { ChoicePicker } from './ChoicePicker';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -39,54 +34,6 @@ import { useTranslation } from 'react-i18next';
 const logger = getLogger('basics-step');
 
 const PENDING_ADVANCE_TIMEOUT_MS = 3000;
-
-// ---------------------------------------------------------------------------
-// File-local LineagePicker helper
-// ---------------------------------------------------------------------------
-
-interface LineagePickerProps {
-  readonly race: SpeciesId;
-  readonly bundles: readonly GrantBundle[];
-  readonly build: { choices: Record<ChoiceKey, ChoiceDecision> } | null;
-  readonly makeChoice: (key: ChoiceKey, decision: ChoiceDecision) => void;
-  readonly clearChoice: (key: ChoiceKey) => void;
-}
-
-function LineagePicker({ race, bundles, build, makeChoice, clearChoice }: LineagePickerProps) {
-  const { t: tc } = useTranslation('common');
-
-  if (!(race in LINEAGE_GRANTS_REGISTRY)) return null;
-
-  const lineageGrantTags = collectGrantsByType(bundles, 'lineage-choice').filter(
-    (tg) => tg.source.origin === 'species'
-  );
-  const lineageTag = lineageGrantTags[0];
-
-  if (!lineageTag) {
-    // Species has lineages but bundles haven't caught up yet
-    return <p className="text-sm text-muted-foreground">{tc('characterBuilder.hints.loadingLineage')}</p>;
-  }
-
-  const lineageChoice: PendingChoice & { type: 'lineage-choice' } = {
-    type: 'lineage-choice',
-    choiceKey: lineageTag.grant.key,
-    source: lineageTag.source,
-    speciesId: race,
-    from: lineageTag.grant.from,
-  };
-  const decision = build?.choices[lineageTag.grant.key];
-
-  return (
-    <div className="mt-2">
-      <ChoicePicker
-        choice={lineageChoice}
-        currentDecision={decision as ChoiceDecision | undefined}
-        onDecide={(key, d) => makeChoice(key, d)}
-        onClear={(key) => clearChoice(key)}
-      />
-    </div>
-  );
-}
 
 // Map [ethic moral] to alignment ID — avoids looking up by .name on D&D data objects
 const ALIGNMENT_GRID: Readonly<Record<string, AlignmentId>> = {
@@ -446,15 +393,6 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 ))}
               </SelectContent>
             </Select>
-            {race && SPECIES_SOURCES.some((s) => s.id === race) && (
-              <LineagePicker
-                race={race as SpeciesId}
-                bundles={context.bundles}
-                build={context.build}
-                makeChoice={context.makeChoice}
-                clearChoice={context.clearChoice}
-              />
-            )}
           </div>
 
           <div className="space-y-2">

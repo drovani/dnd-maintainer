@@ -3,7 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
-import { DND_BACKGROUNDS, type AbilityKey, type LanguageId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+import {
+  DND_BACKGROUNDS,
+  type AbilityKey,
+  type LanguageId,
+  type SpeciesId,
+  type ToolProficiencyId,
+} from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
@@ -11,6 +17,8 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChoicePicker } from './ChoicePicker';
+import { LineagePicker } from './LineagePicker';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 
 type AsiMode = '+2/+1' | '+1/+1/+1';
 
@@ -28,6 +36,8 @@ export function OriginStep() {
   const { character, bundles, build, resolved } = context;
 
   const background = character.background ?? '';
+  const species = character.species as SpeciesId | undefined;
+  const hasResolvedSpecies = !!species && SPECIES_SOURCES.some((s) => s.id === species);
 
   const handleBackgroundChange = (value: string) => {
     context.updateCharacter({ background: value });
@@ -145,6 +155,20 @@ export function OriginStep() {
 
   return (
     <div className="space-y-6">
+      {/* Species lineage sub-choice */}
+      {hasResolvedSpecies && (
+        <div className="space-y-2">
+          <Label>{tc('characterBuilder.fields.species')}</Label>
+          <LineagePicker
+            race={species}
+            bundles={context.bundles}
+            build={context.build}
+            makeChoice={context.makeChoice}
+            clearChoice={context.clearChoice}
+          />
+        </div>
+      )}
+
       {/* Background picker */}
       <div className="space-y-2">
         <Label>

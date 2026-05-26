@@ -490,4 +490,54 @@ describe('OriginStep', () => {
     const checkedMode = modeRadios.find((r) => r.checked);
     expect(checkedMode?.id).toBe('asi-mode-+2/+1');
   });
+
+  // ---------------------------------------------------------------------------
+  // Lineage picker (moved here from BasicsStep)
+  // ---------------------------------------------------------------------------
+
+  it('shows lineage picker when species has lineages and bundles have caught up', () => {
+    mockCharacter = buildSeedCharacter({ species: 'elf' });
+    mockBundles = [
+      {
+        source: { origin: 'species', id: 'elf' },
+        grants: [
+          {
+            type: 'lineage-choice',
+            key: 'lineage-choice:species:elf:0' as ChoiceKey,
+            speciesId: 'elf',
+            from: ['drow', 'high-elf', 'wood-elf'],
+          },
+        ],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<OriginStep />);
+
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const lineageRadios = radios.filter((r) => r.name?.startsWith('choice-lineage'));
+    expect(lineageRadios.length).toBeGreaterThan(0);
+  });
+
+  it('shows loading hint when species has lineages but bundles have not caught up', () => {
+    mockCharacter = buildSeedCharacter({ species: 'elf' });
+    mockBundles = [];
+
+    render(<OriginStep />);
+
+    expect(screen.getByText('loadingLineage')).toBeTruthy();
+  });
+
+  it('hides lineage picker for a species without lineages (e.g. dwarf)', () => {
+    mockCharacter = buildSeedCharacter({ species: 'dwarf' });
+    mockBundles = [
+      {
+        source: { origin: 'species', id: 'dwarf' },
+        grants: [],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<OriginStep />);
+
+    expect(screen.queryByText('loadingLineage')).toBeNull();
+  });
 });

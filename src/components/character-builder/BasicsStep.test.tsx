@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { BasicsStep } from '@/components/character-builder/BasicsStep';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { LINEAGE_GRANTS_REGISTRY, SPECIES_SOURCES } from '@/lib/sources/species';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import * as randomNpcModule from '@/lib/character-builder/random-npc';
 import type { Character, AbilityScores } from '@/types/database';
 import type { BuildLevelRow, CreationRow, LevelRow } from '@/lib/build-reconstruction';
@@ -549,11 +549,11 @@ describe('BasicsStep', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // IMPORTANT #7 — lineage picker, legacy-species badge, background removal
+  // IMPORTANT #7 — legacy-species badge, background removal, lineage non-rendering
+  // (lineage picker moved to OriginStep — see OriginStep.test.tsx)
   // ---------------------------------------------------------------------------
 
-  it('shows lineage picker when species is in LINEAGE_GRANTS_REGISTRY and bundles have caught up', () => {
-    // elf has lineages: ['drow', 'high-elf', 'wood-elf']
+  it('does not render a lineage picker in BasicsStep (moved to OriginStep)', () => {
     contextCharacter = buildSeedCharacter({ species: 'elf' });
     contextBundles = [
       {
@@ -571,37 +571,9 @@ describe('BasicsStep', () => {
 
     render(<BasicsStep />);
 
-    // ChoicePicker renders radio buttons for each lineage option
-    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
-    // Should have at least one radio for a lineage option
-    expect(radios.length).toBeGreaterThan(0);
-  });
-
-  it('shows loading hint when species is in LINEAGE_GRANTS_REGISTRY but bundles have not caught up', () => {
-    // elf has lineages, but bundles is empty (hasn't resolved yet)
-    contextCharacter = buildSeedCharacter({ species: 'elf' });
-    contextBundles = [];
-
-    render(<BasicsStep />);
-
-    expect(screen.getByText('loadingLineage')).toBeTruthy();
-  });
-
-  it('hides lineage picker for a species without lineages (e.g. dwarf)', () => {
-    contextCharacter = buildSeedCharacter({ species: 'dwarf' });
-    contextBundles = [
-      {
-        source: { origin: 'species', id: 'dwarf' },
-        grants: [],
-      },
-    ] as readonly GrantBundle[];
-
-    render(<BasicsStep />);
-
-    // dwarf is NOT in LINEAGE_GRANTS_REGISTRY, so no loading hint and no lineage radios
+    // No lineage radios, no loading hint
     expect(screen.queryByText('loadingLineage')).toBeNull();
-    // Confirm dwarf is indeed not in the registry
-    expect('dwarf' in LINEAGE_GRANTS_REGISTRY).toBe(false);
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
   });
 
   it('shows legacy-species warning badge when character.species is not in SPECIES_SOURCES', () => {
