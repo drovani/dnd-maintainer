@@ -294,7 +294,8 @@
       "originFeatGranted": "Granted by {{background}}",
       "toolProficiencyTitle": "Tool Proficiency",
       "languageTitle": "Language",
-      "noBackground": "Select a background to see its benefits."
+      "noBackground": "Select a background to see its benefits.",
+      "selectBackgroundInBasics": "Pick a background in the Basics step to see its sub-choices."
     },
     "equipment": {
       "equipped": "Equipped",

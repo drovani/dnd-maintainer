@@ -1,15 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
-import {
-  DND_BACKGROUNDS,
-  type AbilityKey,
-  type LanguageId,
-  type SpeciesId,
-  type ToolProficiencyId,
-} from '@/lib/dnd-helpers';
+import { type AbilityKey, type LanguageId, type SpeciesId, type ToolProficiencyId } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
@@ -38,10 +31,6 @@ export function OriginStep() {
   const background = character.background ?? '';
   const species = character.species as SpeciesId | undefined;
   const hasResolvedSpecies = !!species && SPECIES_SOURCES.some((s) => s.id === species);
-
-  const handleBackgroundChange = (value: string) => {
-    context.updateCharacter({ background: value });
-  };
 
   // Extract background grants (shared filter — avoids repeating the chain)
   const backgroundGrants = bundles.filter((b) => b.source.origin === 'background').flatMap((b) => b.grants);
@@ -169,35 +158,10 @@ export function OriginStep() {
         </div>
       )}
 
-      {/* Background picker */}
-      <div className="space-y-2">
-        <Label>
-          {tc('characterBuilder.fields.background')}
-          <span className="text-destructive">*</span>
-        </Label>
-        <Select
-          value={background || null}
-          onValueChange={(value) => {
-            if (!value) return;
-            handleBackgroundChange(value);
-          }}
-          items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
-          </SelectTrigger>
-          <SelectContent>
-            {DND_BACKGROUNDS.map((bg) => (
-              <SelectItem key={bg.id} value={bg.id}>
-                {t(`backgrounds.${bg.id}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {!background && (
-        <p className="text-sm text-muted-foreground">{tc('characterBuilder.backgroundStep.noBackground')}</p>
+        <p className="text-sm text-muted-foreground">
+          {tc('characterBuilder.backgroundStep.selectBackgroundInBasics')}
+        </p>
       )}
 
       {background && backgroundAsiGrant && (

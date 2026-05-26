@@ -593,13 +593,9 @@ describe('BasicsStep', () => {
     expect(screen.queryByText('legacySpecies')).toBeNull();
   });
 
-  it('does not render a Background <Select> in BasicsStep (background was moved to BackgroundStep)', () => {
+  it('renders a Background <Select> in BasicsStep (top-level ID pick — sub-choices live in OriginStep)', () => {
     render(<BasicsStep />);
 
-    // The comboboxes present are Species and Class — no Background combobox
-    const combos = screen.getAllByRole('combobox') as HTMLElement[];
-    // None of them should have a background-related accessible description or placeholder
-    const hasBackground = combos.some((c) => c.textContent?.toLowerCase().includes('background'));
-    expect(hasBackground).toBe(false);
+    expect(screen.getByText('chooseBackground')).toBeTruthy();
   });
 });

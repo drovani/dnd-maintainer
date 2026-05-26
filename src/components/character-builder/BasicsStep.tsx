@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { usePlayerNames } from '@/hooks/useCharacters';
 import {
+  DND_BACKGROUNDS,
   DND_CLASSES,
   DND_SPECIES,
   generateCharacterName,
@@ -66,6 +67,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const race = (character.species ?? '') as SpeciesId | '';
   const alignment = character.alignment ?? '';
   const gender = character.gender ?? '';
+  const background = character.background ?? '';
 
   // Derive class from level rows (first non-creation row)
   const levelRows = rows.filter((r) => r.sequence !== 0);
@@ -412,6 +414,26 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 {DND_CLASSES.map((cls) => (
                   <SelectItem key={cls.id} value={cls.id}>
                     {t(`classes.${cls.id}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{tc('characterBuilder.fields.background')}</Label>
+            <Select
+              value={background || null}
+              onValueChange={(value) => value && context.updateCharacter({ background: value })}
+              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
+              </SelectTrigger>
+              <SelectContent>
+                {DND_BACKGROUNDS.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {t(`backgrounds.${b.id}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

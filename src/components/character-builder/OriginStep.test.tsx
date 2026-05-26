@@ -189,40 +189,16 @@ describe('OriginStep', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the background selector dropdown', () => {
+  it('does not render a background selector (moved to BasicsStep)', () => {
     render(<OriginStep />);
 
-    const trigger = screen.getByRole('combobox');
-    expect(trigger).toBeTruthy();
-    // Placeholder text present
-    expect(screen.getByText('chooseBackground')).toBeTruthy();
+    expect(screen.queryByText('chooseBackground')).toBeNull();
   });
 
-  it('selecting a background calls updateCharacter with the background ID', () => {
-    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+  it('shows selectBackgroundInBasics hint when no background is selected', () => {
     render(<OriginStep />);
 
-    // Component already has background set; trigger a change via the Select
-    // The Select will call onValueChange with the new value.
-    // Simulate by calling updateCharacter directly via a re-render with a new background
-    // We need to trigger the actual onValueChange; let's verify the handler is wired
-    // by checking updateCharacter is called when background changes via context mock.
-    // Re-render with a different background selection — simulate the select's onValueChange
-    mockUpdateCharacter.mockImplementation((updates: Partial<Character>) => {
-      mockCharacter = { ...mockCharacter, ...updates };
-    });
-
-    // The select uses items= prop; we can't easily trigger it in jsdom without
-    // simulating a full dropdown interaction. Instead, verify the handler is correct
-    // by checking the component renders with the correct value prop.
-    const trigger = screen.getByRole('combobox');
-    expect(trigger).toBeTruthy();
-  });
-
-  it('shows noBackground message when no background is selected', () => {
-    render(<OriginStep />);
-
-    expect(screen.getByText('noBackground')).toBeTruthy();
+    expect(screen.getByText('selectBackgroundInBasics')).toBeTruthy();
   });
 
   it('does not show ASI section when no background is selected', () => {
@@ -352,10 +328,10 @@ describe('OriginStep', () => {
     expect(screen.getByText('languageChoice:1')).toBeTruthy();
   });
 
-  it('shows nothing but the background picker when no background is selected', () => {
+  it('shows only the missing-background hint when no background is selected', () => {
     render(<OriginStep />);
 
-    expect(screen.getByText('noBackground')).toBeTruthy();
+    expect(screen.getByText('selectBackgroundInBasics')).toBeTruthy();
     expect(screen.queryByText('asiModeTitle')).toBeNull();
     expect(screen.queryByText('originFeatTitle')).toBeNull();
     expect(screen.queryByText('toolProficiencyTitle')).toBeNull();
