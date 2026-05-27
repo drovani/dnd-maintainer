@@ -1071,25 +1071,29 @@
       "name": "Epic Boon",
       "description": "You gain an Epic Boon feat or another feat of your choice."
     },
-    "cleric-divine-order": {
-      "name": "Divine Order",
-      "description": "You have dedicated yourself to one of two divine orders: Protector or Thaumaturge."
+    "cleric-divine-order-protector": {
+      "name": "Divine Order: Protector",
+      "description": "Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor."
+    },
+    "cleric-divine-order-thaumaturge": {
+      "name": "Divine Order: Thaumaturge",
+      "description": "You know one extra Cleric cantrip of your choice, and your mystical connection grants you a bonus to Intelligence (Arcana) and Intelligence (Religion) checks equal to your Wisdom modifier (minimum +1)."
     },
     "cleric-channel-divinity": {
       "name": "Channel Divinity",
       "description": "You gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects."
     },
-    "cleric-holy-order": {
-      "name": "Holy Order",
-      "description": "You gain one of the following options of your choice: Protector, Thaumaturge, or War Priest."
-    },
     "cleric-smite-undead": {
       "name": "Smite Undead",
       "description": "You can cause your Turn Undead feature to smite the undead. When you use Turn Undead, you can expend a spell slot to deal Radiant damage to undead that fail their saving throws."
     },
-    "cleric-blessed-strikes": {
-      "name": "Blessed Strikes",
-      "description": "Divine power infuses you in battle. When you deal damage to a creature, you can also deal 1d8 Radiant damage to that creature."
+    "cleric-blessed-strikes-divine-strike": {
+      "name": "Blessed Strikes: Divine Strike",
+      "description": "Once on each of your turns when you hit a creature with an attack roll using a weapon, you can cause the target to take an extra 1d8 Necrotic or Radiant damage (your choice)."
+    },
+    "cleric-blessed-strikes-potent-spellcasting": {
+      "name": "Blessed Strikes: Potent Spellcasting",
+      "description": "Add your Wisdom modifier to the damage you deal with any Cleric cantrip."
     },
     "cleric-divine-intervention": {
       "name": "Divine Intervention",

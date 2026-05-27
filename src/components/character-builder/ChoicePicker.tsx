@@ -231,6 +231,51 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
     );
   }
 
+  if (choice.type === 'feature-choice') {
+    const currentOptionId = currentDecision?.type === 'feature-choice' ? currentDecision.optionId : undefined;
+
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{tc('characterBuilder.pendingChoices.featureChoice')}</p>
+        <div className="space-y-1">
+          {choice.options.map((option) => {
+            const radioId = `choice-feature-${choice.choiceKey}-${option.id}`;
+            const labelKey = `features.${option.featureId}.name` as `features.${string}.name`;
+            const descKey = `features.${option.featureId}.description` as `features.${string}.description`;
+            const label = t(labelKey, { defaultValue: option.featureId });
+            const description = t(descKey, { defaultValue: '' });
+            return (
+              <div
+                key={option.id}
+                className="flex items-start gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <input
+                  type="radio"
+                  id={radioId}
+                  name={`choice-feature-${choice.choiceKey}`}
+                  checked={currentOptionId === option.id}
+                  onChange={() => onDecide(choice.choiceKey, { type: 'feature-choice', optionId: option.id })}
+                  className="mt-1 size-4 text-primary"
+                />
+                <Label htmlFor={radioId} className="flex-1 cursor-pointer">
+                  <span className="font-medium">{label}</span>
+                  {description ? (
+                    <span className="block text-xs text-muted-foreground mt-0.5">{description}</span>
+                  ) : null}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+        {currentOptionId !== undefined && (
+          <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+            {tc('characterBuilder.equipment.clearSelection')}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   if (choice.type === 'bundle-choice') {
     const currentBundleId = currentDecision?.type === 'bundle-choice' ? currentDecision.bundleId : undefined;
     const currentSlotPicks = currentDecision?.type === 'bundle-choice' ? currentDecision.slotPicks : {};

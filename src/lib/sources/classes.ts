@@ -228,21 +228,60 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
           },
           { type: 'spellcasting', ability: 'wis', source: 'class' },
-          { type: 'feature', feature: { id: 'cleric-divine-order' } },
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'class', 'cleric', 0),
+            options: [
+              {
+                id: 'protector',
+                featureId: 'cleric-divine-order-protector',
+                grants: [
+                  { type: 'proficiency', category: 'weapon', id: 'martial' },
+                  { type: 'proficiency', category: 'armor', id: 'heavy' },
+                ],
+              },
+              {
+                id: 'thaumaturge',
+                featureId: 'cleric-divine-order-thaumaturge',
+                // Mechanical effects (extra cantrip; Wis-mod bonus to Arcana/Religion checks) are
+                // inert pending a cantrip-grant system and an ability-check-bonus value beyond
+                // 'half-proficiency'.
+                grants: [],
+              },
+            ],
+          },
           { type: 'armor-class', calculation: { mode: 'armored' } },
         ],
       },
       {
-        grants: [
-          { type: 'feature', feature: { id: 'cleric-channel-divinity' } },
-          { type: 'feature', feature: { id: 'cleric-holy-order' } },
-        ],
+        grants: [{ type: 'feature', feature: { id: 'cleric-channel-divinity' } }],
       },
       { grants: [{ type: 'subclass', classId: 'cleric', key: createChoiceKey('subclass', 'class', 'cleric', 0) }] },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'cleric', 0), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'cleric-smite-undead' } }] },
       EMPTY_LEVEL,
-      { grants: [{ type: 'feature', feature: { id: 'cleric-blessed-strikes' } }] },
+      {
+        grants: [
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'class', 'cleric', 1),
+            options: [
+              {
+                id: 'divine-strike',
+                featureId: 'cleric-blessed-strikes-divine-strike',
+                // On-hit damage rider (+1d8 necrotic/radiant on weapon hits) has no grant model yet.
+                grants: [],
+              },
+              {
+                id: 'potent-spellcasting',
+                featureId: 'cleric-blessed-strikes-potent-spellcasting',
+                // Cantrip-damage modifier (+Wis mod) has no grant model yet.
+                grants: [],
+              },
+            ],
+          },
+        ],
+      },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'cleric', 1), points: 2, from: null }] },
       EMPTY_LEVEL,
       { grants: [{ type: 'feature', feature: { id: 'cleric-divine-intervention' } }] },

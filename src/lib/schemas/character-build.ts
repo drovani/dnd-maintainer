@@ -52,6 +52,7 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
     slotPicks: z.record(z.string(), z.string()).default({}),
   }),
   z.object({ type: z.literal('lineage-choice'), lineageId: z.string().min(1) }),
+  z.object({ type: z.literal('feature-choice'), optionId: z.string().min(1) }),
 ]);
 
 export const CharacterBuildSchema = z.object({

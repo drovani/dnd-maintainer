@@ -278,6 +278,23 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     weaponMasteriesMap.entries()
   ).map(([weaponId, masteryId]) => ({ weaponId, masteryId }));
 
+  // Unresolved or invalid feature-choice grants. Emits the option list so the UI
+  // can render labels (via `features.${featureId}.name`) without re-traversing
+  // the grant.
+  for (const { grant, source } of collectGrantsByType(bundles, 'feature-choice')) {
+    const decision = choices[grant.key];
+    const validOption =
+      decision?.type === 'feature-choice' ? grant.options.find((o) => o.id === decision.optionId) : undefined;
+    if (!validOption) {
+      pendingChoices.push({
+        type: 'feature-choice',
+        choiceKey: grant.key,
+        source,
+        options: grant.options.map((o) => ({ id: o.id, featureId: o.featureId })),
+      });
+    }
+  }
+
   // Unresolved lineage-choice grants
   for (const { grant, source } of collectGrantsByType(bundles, 'lineage-choice')) {
     const decision = choices[grant.key];

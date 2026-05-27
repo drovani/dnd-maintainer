@@ -195,6 +195,16 @@ function useAllChoiceGrants() {
       });
     }
 
+    // feature-choice grants
+    for (const { grant, source } of collectGrantsByType(bundles, 'feature-choice')) {
+      allGrants.push({
+        type: 'feature-choice',
+        choiceKey: grant.key,
+        source,
+        options: grant.options.map((o) => ({ id: o.id, featureId: o.featureId })),
+      });
+    }
+
     return allGrants;
   }, [bundles, buildChoices, resolvedWeaponProficiencies]);
 }

@@ -18,6 +18,7 @@ import type {
   FightingStyleChoiceGrant,
   LineageChoiceGrant,
   DamageTypeChoiceGrant,
+  FeatureChoiceGrant,
 } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
@@ -211,6 +212,35 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           source,
           grants: [{ type: 'feature', feature: { id: `${grant.featureIdPrefix}-${damageType}` } }],
         });
+      }
+    }
+  }
+
+  // Feature-choice grants — expand the chosen option's grants (plus a feature grant
+  // for the variant id) into the source bundle. Unresolved grants surface in the
+  // resolver as a `feature-choice` pending choice.
+  const allFeatureChoiceGrants: { grant: FeatureChoiceGrant; source: SourceTag }[] = [];
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'feature-choice') {
+        allFeatureChoiceGrants.push({ grant: grant as FeatureChoiceGrant, source: bundle.source });
+      }
+    }
+  }
+
+  for (const { grant, source } of allFeatureChoiceGrants) {
+    const decision = build.choices[grant.key];
+    if (decision?.type === 'feature-choice') {
+      const option = grant.options.find((o) => o.id === decision.optionId);
+      if (option) {
+        bundles.push({
+          source,
+          grants: [{ type: 'feature', feature: { id: option.featureId } }, ...option.grants],
+        });
+      } else {
+        const msg = `feature-choice "${grant.key}" decision references unknown option "${decision.optionId}"`;
+        warnings.push(msg);
+        logger.warn(msg);
       }
     }
   }

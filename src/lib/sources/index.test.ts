@@ -355,6 +355,104 @@ describe('collectBundles', () => {
     expect(necroticFeature).toBeUndefined();
   });
 
+  it('feature-choice: cleric L1 Protector inlines the option grants (martial weapons + heavy armor)', () => {
+    const featureKey = createChoiceKey('feature-choice', 'class', 'cleric', 0);
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'cleric' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {
+        [featureKey]: { type: 'feature-choice' as const, optionId: 'protector' },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(build);
+    const allGrants = bundles.flatMap((b) => b.grants);
+    const protectorFeature = allGrants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'cleric-divine-order-protector'
+    );
+    expect(protectorFeature).toBeDefined();
+    const martialWeapon = allGrants.find(
+      (g) => g.type === 'proficiency' && g.category === 'weapon' && g.id === 'martial'
+    );
+    expect(martialWeapon).toBeDefined();
+    const heavyArmor = allGrants.find((g) => g.type === 'proficiency' && g.category === 'armor' && g.id === 'heavy');
+    expect(heavyArmor).toBeDefined();
+  });
+
+  it('feature-choice: cleric L1 Thaumaturge inlines only the variant feature (no extra grants today)', () => {
+    const featureKey = createChoiceKey('feature-choice', 'class', 'cleric', 0);
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'cleric' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {
+        [featureKey]: { type: 'feature-choice' as const, optionId: 'thaumaturge' },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(build);
+    const allGrants = bundles.flatMap((b) => b.grants);
+    const thaumaturgeFeature = allGrants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'cleric-divine-order-thaumaturge'
+    );
+    expect(thaumaturgeFeature).toBeDefined();
+    const protectorFeature = allGrants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'cleric-divine-order-protector'
+    );
+    expect(protectorFeature).toBeUndefined();
+  });
+
+  it('feature-choice: emits no expansion when the decision is missing', () => {
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'cleric' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {},
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles, warnings } = collectBundles(build);
+    const allGrants = bundles.flatMap((b) => b.grants);
+    expect(
+      allGrants.find((g) => g.type === 'feature' && g.feature.id === 'cleric-divine-order-protector')
+    ).toBeUndefined();
+    expect(
+      allGrants.find((g) => g.type === 'feature' && g.feature.id === 'cleric-divine-order-thaumaturge')
+    ).toBeUndefined();
+    expect(warnings).toHaveLength(0);
+  });
+
+  it('feature-choice: warns when the decision references an unknown option id', () => {
+    const featureKey = createChoiceKey('feature-choice', 'class', 'cleric', 0);
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'cleric' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {
+        [featureKey]: { type: 'feature-choice' as const, optionId: 'unknown-option' },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles, warnings } = collectBundles(build);
+    const allGrants = bundles.flatMap((b) => b.grants);
+    expect(
+      allGrants.find((g) => g.type === 'feature' && g.feature.id === 'cleric-divine-order-protector')
+    ).toBeUndefined();
+    expect(warnings.some((w) => w.includes('unknown-option'))).toBe(true);
+  });
+
   it('damage-choice: ignores decisions for damage types outside the grant.from list', () => {
     const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
     const damageKey = createChoiceKey('damage-choice', 'class', 'barbarian', 0);

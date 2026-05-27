@@ -233,3 +233,77 @@ describe('ChoicePicker bundle-choice', () => {
     expect(container.querySelectorAll('[data-slot="select-trigger"]').length).toBe(2);
   });
 });
+
+// ---------------------------------------------------------------------------
+// ChoicePicker — feature-choice branch
+// ---------------------------------------------------------------------------
+
+const CLERIC_SOURCE = { origin: 'class' as const, id: 'cleric' as const, level: 1 };
+
+const FEATURE_CHOICE: PendingChoice & { type: 'feature-choice' } = {
+  type: 'feature-choice',
+  choiceKey: 'feature-choice:class:cleric:0' as ChoiceKey,
+  source: CLERIC_SOURCE,
+  options: [
+    { id: 'protector', featureId: 'cleric-divine-order-protector' },
+    { id: 'thaumaturge', featureId: 'cleric-divine-order-thaumaturge' },
+  ],
+};
+
+describe('ChoicePicker feature-choice', () => {
+  it('renders one radio per option', () => {
+    render(<ChoicePicker choice={FEATURE_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(2);
+  });
+
+  it('no radio is checked when currentDecision is undefined', () => {
+    render(<ChoicePicker choice={FEATURE_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios.every((r) => !r.checked)).toBe(true);
+  });
+
+  it('clicking an option calls onDecide with the optionId', () => {
+    const onDecide = vi.fn();
+    render(<ChoicePicker choice={FEATURE_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio');
+    fireEvent.click(radios[0]);
+    expect(onDecide).toHaveBeenCalledWith(FEATURE_CHOICE.choiceKey, {
+      type: 'feature-choice',
+      optionId: 'protector',
+    });
+  });
+
+  it('selected radio reflects currentDecision.optionId', () => {
+    const currentDecision: ChoiceDecision = { type: 'feature-choice', optionId: 'thaumaturge' };
+    render(
+      <ChoicePicker choice={FEATURE_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios[0].checked).toBe(false);
+    expect(radios[1].checked).toBe(true);
+  });
+
+  it('Clear button appears only when an option is selected', () => {
+    const { rerender } = render(
+      <ChoicePicker choice={FEATURE_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    expect(screen.queryByRole('button', { name: /clear/i })).toBeNull();
+
+    const currentDecision: ChoiceDecision = { type: 'feature-choice', optionId: 'protector' };
+    rerender(
+      <ChoicePicker choice={FEATURE_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    expect(screen.getByRole('button', { name: /clear/i })).toBeTruthy();
+  });
+
+  it('clicking Clear calls onClear with the correct choiceKey', () => {
+    const onClear = vi.fn();
+    const currentDecision: ChoiceDecision = { type: 'feature-choice', optionId: 'protector' };
+    render(
+      <ChoicePicker choice={FEATURE_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={onClear} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(onClear).toHaveBeenCalledWith(FEATURE_CHOICE.choiceKey);
+  });
+});

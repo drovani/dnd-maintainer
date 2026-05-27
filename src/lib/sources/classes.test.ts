@@ -529,11 +529,35 @@ describe('Cleric class grant structures', () => {
     }
   });
 
-  it('level 1 has divine-order feature', () => {
-    const featureIds = source?.levels[0].grants
+  it('level 1 has a divine-order feature-choice between Protector and Thaumaturge', () => {
+    const grant = source?.levels[0].grants.find((g) => g.type === 'feature-choice');
+    expect(grant?.type).toBe('feature-choice');
+    if (grant?.type === 'feature-choice') {
+      expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'cleric', 0));
+      const optionIds = grant.options.map((o) => o.id);
+      expect(optionIds).toEqual(['protector', 'thaumaturge']);
+      const protector = grant.options.find((o) => o.id === 'protector');
+      expect(protector?.featureId).toBe('cleric-divine-order-protector');
+      const protectorProfs = protector?.grants.filter((g) => g.type === 'proficiency') ?? [];
+      expect(protectorProfs).toHaveLength(2);
+    }
+  });
+
+  it('level 7 has a blessed-strikes feature-choice between Divine Strike and Potent Spellcasting', () => {
+    const grant = source?.levels[6].grants.find((g) => g.type === 'feature-choice');
+    expect(grant?.type).toBe('feature-choice');
+    if (grant?.type === 'feature-choice') {
+      expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'cleric', 1));
+      const optionIds = grant.options.map((o) => o.id);
+      expect(optionIds).toEqual(['divine-strike', 'potent-spellcasting']);
+    }
+  });
+
+  it('level 2 does not include the legacy holy-order feature (removed; not in 2024 PHB)', () => {
+    const featureIds = source?.levels[1].grants
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
-    expect(featureIds).toContain('cleric-divine-order');
+    expect(featureIds).not.toContain('cleric-holy-order');
   });
 
   it('level 3 has subclass grant for cleric', () => {

@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
+import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { type ChoiceKey } from '@/types/choices';
 import { type FightingStyleId } from '@/lib/dnd-helpers';
@@ -55,13 +56,24 @@ export function ClassStep() {
   }, [resolved]);
   const hasSubclassChoices = subclassChoices.length > 0;
 
+  // Pending class-feature variant choices (e.g. Cleric L1 Divine Order, L7 Blessed Strikes).
+  // Filter to class-origin so we don't render species/background feature-choices here.
+  const featureChoices = useMemo<readonly Extract<PendingChoice, { type: 'feature-choice' }>[]>(() => {
+    return (resolved?.pendingChoices ?? []).filter(
+      (c): c is Extract<PendingChoice, { type: 'feature-choice' }> =>
+        c.type === 'feature-choice' && c.source.origin === 'class'
+    );
+  }, [resolved]);
+  const hasFeatureChoices = featureChoices.length > 0;
+
   const levelOneClassFeatures = useMemo(() => {
     if (!resolved?.features) return [];
     return resolved.features.filter((f) => f.source.origin === 'class' && f.source.level === 1);
   }, [resolved]);
   const hasLevelOneFeatures = levelOneClassFeatures.length > 0;
 
-  const hasAnyContent = hasFightingStyles || hasSpellcasting || hasLevelOneFeatures || hasSubclassChoices;
+  const hasAnyContent =
+    hasFightingStyles || hasSpellcasting || hasLevelOneFeatures || hasSubclassChoices || hasFeatureChoices;
 
   return (
     <div className="space-y-6">
@@ -172,6 +184,26 @@ export function ClassStep() {
               onClear={(choiceKey) => context.clearChoice(choiceKey)}
               autoCommit
             />
+          ))}
+        </div>
+      )}
+
+      {hasFeatureChoices && (
+        <div className="space-y-4">
+          {featureChoices.map((choice) => (
+            <div key={choice.choiceKey}>
+              <p className="text-xs text-muted-foreground mb-1">
+                {tc('characterBuilder.pendingChoices.fromSource', {
+                  source: getChoiceSourceName(choice.choiceKey, t),
+                })}
+              </p>
+              <ChoicePicker
+                choice={choice}
+                currentDecision={build?.choices[choice.choiceKey]}
+                onDecide={(choiceKey, decision) => context.makeChoice(choiceKey, decision)}
+                onClear={(choiceKey) => context.clearChoice(choiceKey)}
+              />
+            </div>
           ))}
         </div>
       )}
