@@ -531,6 +531,12 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       {
         grants: [
           { type: 'feature', feature: { id: 'monk-focus-points' } },
+          {
+            type: 'resource-pool',
+            poolId: 'focus-points',
+            max: { mode: 'class-level', classId: 'monk' },
+            regen: 'short-rest',
+          },
           { type: 'feature', feature: { id: 'monk-unarmored-movement' } },
           { type: 'feature', feature: { id: 'monk-uncanny-metabolism' } },
         ],

@@ -460,17 +460,26 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // Focus Point cost: as part of Flurry of Blows, replace a strike with healing equal to Martial Arts die + WIS mod
+          // Implements of Mercy: skill proficiencies in Insight, Medicine, plus Herbalism Kit tool proficiency
+          { type: 'feature', feature: { id: 'warriorofmercy-implements-of-mercy' } },
+          { type: 'proficiency', category: 'skill', id: 'insight' },
+          { type: 'proficiency', category: 'skill', id: 'medicine' },
+          { type: 'proficiency', category: 'tool', id: 'herbalismkit' },
+          // Hand of Healing: Magic action, 1 Focus Point — heal Martial Arts die + WIS mod;
+          // free during Flurry of Blows (replaces one Unarmed Strike)
           { type: 'feature', feature: { id: 'warriorofmercy-hand-of-healing' } },
-          // Focus Point cost: when you hit with an unarmed strike, deal extra necrotic damage equal to Martial Arts die
+          // Hand of Harm: 1 Focus Point on a hit with an unarmed strike — extra necrotic damage equal to Martial Arts die + WIS mod
           { type: 'feature', feature: { id: 'warriorofmercy-hand-of-harm' } },
         ],
       },
       {
         classLevel: 6,
         grants: [
-          // Enhances Hand of Healing (end a condition) and Hand of Harm (Poisoned on failed CON save)
-          { type: 'feature', feature: { id: 'warriorofmercy-physicians-touch' } },
+          // Enhances Hand of Healing (end a condition) and Hand of Harm (Poisoned on failed CON save vs Monk DC)
+          {
+            type: 'feature',
+            feature: { id: 'warriorofmercy-physicians-touch', saveDC: { dcAbility: 'wis' } },
+          },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -501,19 +510,21 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 3,
         grants: [
           // Focus Point cost: Bonus Action — infuse unarmed strikes with chosen element (Acid/Cold/Fire/Lightning/Thunder)
-          // for 10 min; deal Martial Arts die extra damage on hit; push target 10 ft
+          // for 10 min; reach extends to 10 ft; deal Martial Arts die extra damage on hit
           { type: 'feature', feature: { id: 'warriorofelements-elemental-attunement' } },
-          // Focus Point cost: Action — choose a point within 60 ft; all creatures within 20 ft make DEX save or
-          // take 2d8 + Monk level damage of attunement element, half on success
-          { type: 'feature', feature: { id: 'warriorofelements-elemental-burst' } },
+          // Free Elementalism cantrip (WIS); modeled as inert feature grant pending #93 cantrip catalog
+          { type: 'feature', feature: { id: 'warriorofelements-manipulate-elements' } },
         ],
       },
       {
         classLevel: 6,
         grants: [
-          // Canonical 2024 PHB L6 feature name unconfirmed; modeled as elemental-epitome per implementation notes.
-          // When Elemental Attunement is active, enhances push/pull distance and adds elemental aura effects.
-          { type: 'feature', feature: { id: 'warriorofelements-elemental-epitome' } },
+          // Focus Point cost: Magic action — choose a point within 120 ft; all creatures in 20-ft sphere
+          // make DEX save vs Monk DC or take 3× Martial Arts die damage of attunement element, half on success
+          {
+            type: 'feature',
+            feature: { id: 'warriorofelements-elemental-burst', saveDC: { dcAbility: 'wis' } },
+          },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -523,9 +534,12 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // When you hit with Flurry of Blows, impose one of: knock Prone (STR save), push 15 ft (STR save),
-          // or prevent Reactions until end of your next turn (no save)
-          { type: 'feature', feature: { id: 'warrioropenhand-open-hand-technique' } },
+          // Per-hit choice on Flurry of Blows: Addle (no Opportunity Attacks, no save), Push (STR save vs Monk DC, 15 ft),
+          // or Topple (DEX save vs Monk DC, Prone). Sub-option choice is a runtime/gameplay decision (out of scope).
+          {
+            type: 'feature',
+            feature: { id: 'warrioropenhand-open-hand-technique', saveDC: { dcAbility: 'wis' } },
+          },
         ],
       },
       {

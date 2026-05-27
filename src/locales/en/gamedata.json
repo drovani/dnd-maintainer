@@ -327,6 +327,10 @@
       "name": "Guarded Mind",
       "description": "You have Resistance to Psychic damage. In addition, if you start your turn with the Charmed or Frightened condition, you can spend one Psionic Energy die (no action required) to end one of those conditions on yourself."
     },
+    "warriorofmercy-implements-of-mercy": {
+      "name": "Implements of Mercy",
+      "description": "You gain proficiency in the Insight and Medicine skills, and proficiency with the Herbalism Kit."
+    },
     "warriorofmercy-hand-of-healing": {
       "name": "Hand of Healing",
       "description": "Focus Point: when you use Flurry of Blows, you can replace one of the strikes with a healing touch — the target regains Hit Points equal to a roll of your Martial Arts die + your Wisdom modifier."
@@ -351,13 +355,13 @@
       "name": "Elemental Attunement",
       "description": "Focus Point: as a Bonus Action, infuse your Unarmed Strikes with elemental energy, choosing Acid, Cold, Fire, Lightning, or Thunder. This lasts 10 minutes. While active, your Unarmed Strikes deal extra damage of the chosen type equal to a roll of your Martial Arts die, and you can push the target up to 10 feet away from you on a hit."
     },
+    "warriorofelements-manipulate-elements": {
+      "name": "Manipulate Elements",
+      "description": "You know the Elementalism cantrip. Wisdom is your spellcasting ability for it."
+    },
     "warriorofelements-elemental-burst": {
       "name": "Elemental Burst",
       "description": "Focus Point: as an Action, choose a point within 60 feet of you. All creatures within 20 feet of that point must make a DEX saving throw (DC = 8 + your proficiency bonus + your WIS modifier). On a failed save, a creature takes 2d8 + your Monk level damage of your attunement element; it takes half as much on a successful save."
-    },
-    "warriorofelements-elemental-epitome": {
-      "name": "Elemental Epitome",
-      "description": "While your Elemental Attunement is active, your mastery of elemental power grows: the push distance from Elemental Attunement increases to 15 feet, and you can choose to pull targets toward you instead of pushing them. You also gain resistance to the damage type you chose for your Elemental Attunement."
     },
     "warrioropenhand-open-hand-technique": {
       "name": "Open Hand Technique",

@@ -959,13 +959,20 @@ describe('getSubclassSource — Warrior of Mercy', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
   });
 
-  it('warriorofmercy level 3 grants 2 features: hand-of-healing and hand-of-harm', () => {
+  it('warriorofmercy level 3 grants Implements of Mercy proficiencies plus hand-of-healing and hand-of-harm', () => {
     const source = getSubclassSource('warriorofmercy');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toHaveLength(6);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'warriorofmercy-implements-of-mercy' }),
+        }),
+        { type: 'proficiency', category: 'skill', id: 'insight' },
+        { type: 'proficiency', category: 'skill', id: 'medicine' },
+        { type: 'proficiency', category: 'tool', id: 'herbalismkit' },
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'warriorofmercy-hand-of-healing' }),
@@ -1035,7 +1042,7 @@ describe('getSubclassSource — Warrior of the Elements', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
   });
 
-  it('warriorofelements level 3 grants 2 features: elemental-attunement and elemental-burst', () => {
+  it('warriorofelements level 3 grants 2 features: elemental-attunement and manipulate-elements', () => {
     const source = getSubclassSource('warriorofelements');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
@@ -1048,20 +1055,20 @@ describe('getSubclassSource — Warrior of the Elements', () => {
         }),
         expect.objectContaining({
           type: 'feature',
-          feature: expect.objectContaining({ id: 'warriorofelements-elemental-burst' }),
+          feature: expect.objectContaining({ id: 'warriorofelements-manipulate-elements' }),
         }),
       ])
     );
   });
 
-  it('warriorofelements level 6 grants elemental-epitome feature', () => {
+  it('warriorofelements level 6 grants elemental-burst feature', () => {
     const source = getSubclassSource('warriorofelements');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
     expect(level6?.grants).toHaveLength(1);
     expect(level6?.grants[0]).toMatchObject({
       type: 'feature',
-      feature: { id: 'warriorofelements-elemental-epitome' },
+      feature: { id: 'warriorofelements-elemental-burst' },
     });
   });
 });
