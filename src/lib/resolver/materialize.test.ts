@@ -44,6 +44,7 @@ function makeResolved(equipment: readonly ResolvedEquipmentItem[]): ResolvedChar
     bardicInspiration: null,
     pendingChoices: [],
     weaponMasteries: [],
+    resourcePools: [],
   };
 }
 

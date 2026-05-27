@@ -37,6 +37,7 @@ function buildMinimalResolved(overrides: Partial<ResolvedCharacter> = {}): Resol
     bardicInspiration: null,
     pendingChoices: [],
     weaponMasteries: [],
+    resourcePools: [],
     ...overrides,
   };
 }

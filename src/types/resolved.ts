@@ -8,7 +8,7 @@ import type {
   LanguageId,
   ClassId,
 } from '@/lib/dnd-helpers';
-import type { FeatureDef, DamageTypeId, HitDie, SpeedMode } from '@/types/grants';
+import type { FeatureDef, DamageTypeId, HitDie, SpeedMode, ResourcePoolRegen } from '@/types/grants';
 import type { SourceTag } from '@/types/sources';
 import type { ChoiceKey } from '@/types/choices';
 import type {
@@ -78,6 +78,14 @@ export interface ResolvedAttack {
 
 export interface ResolvedFeature {
   readonly feature: FeatureDef;
+  readonly source: SourceTag;
+  readonly saveDC?: number;
+}
+
+export interface ResolvedResourcePool {
+  readonly poolId: string;
+  readonly max: number;
+  readonly regen: ResourcePoolRegen;
   readonly source: SourceTag;
 }
 
@@ -246,4 +254,5 @@ export interface ResolvedCharacter {
   } | null;
   readonly pendingChoices: readonly PendingChoice[];
   readonly weaponMasteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[];
+  readonly resourcePools: readonly ResolvedResourcePool[];
 }

@@ -18,6 +18,7 @@ import { resolveFeatures } from '@/lib/resolver/features';
 import { resolveHp, resolveSpeed, resolveAc, resolveBardicInspiration } from '@/lib/resolver/combat';
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting';
 import { resolveEquipment, resolveAttacks, resolveEquippedArmorAc } from '@/lib/resolver/equipment';
+import { resolveResourcePools } from '@/lib/resolver/resource-pools';
 import { getItemDef, WEAPON_CATALOG } from '@/lib/sources/items';
 
 export interface PersistedItem {
@@ -64,7 +65,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const savingThrows = resolveSavingThrows(abilities, bundles, proficiencyBonus);
   const skills = resolveSkills(abilities, bundles, proficiencyBonus, choices);
   const proficiencies = resolveProficiencies(bundles, choices);
-  const features = resolveFeatures(bundles);
+  const features = resolveFeatures(bundles, abilities, proficiencyBonus);
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level);
   const speed = resolveSpeed(bundles);
   const spellcasting = resolveSpellcasting(bundles, abilities, proficiencyBonus, level);
@@ -382,6 +383,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     bardicInspiration,
     pendingChoices,
     weaponMasteries,
+    resourcePools: resolveResourcePools(bundles),
   };
 }
 

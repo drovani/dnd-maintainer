@@ -46,6 +46,11 @@ export interface FeatureDef {
   readonly description?: string;
   readonly usesPerRest?: 'short' | 'long';
   readonly usesCount?: number;
+  /**
+   * When present, the resolver computes a save DC as 8 + proficiencyBonus + abilities[dcAbility].modifier
+   * and exposes it on `ResolvedFeature.saveDC`. Used for features that force targets to make saves.
+   */
+  readonly saveDC?: { readonly dcAbility: AbilityKey };
 }
 
 // Grant variants
@@ -261,6 +266,19 @@ export interface LineageChoiceGrant {
   readonly from: readonly string[];
 }
 
+export type ResourcePoolMax =
+  | { readonly mode: 'class-level'; readonly classId: ClassId }
+  | { readonly mode: 'fixed'; readonly value: number };
+
+export type ResourcePoolRegen = 'short-rest' | 'long-rest';
+
+export interface ResourcePoolGrant {
+  readonly type: 'resource-pool';
+  readonly poolId: string;
+  readonly max: ResourcePoolMax;
+  readonly regen: ResourcePoolRegen;
+}
+
 export type Grant =
   | AbilityBonusGrant
   | AbilityChoiceGrant
@@ -287,4 +305,5 @@ export type Grant =
   | BundleChoiceGrant
   | LineageChoiceGrant
   | FeatureChoiceGrant
-  | FeatGrant;
+  | FeatGrant
+  | ResourcePoolGrant;
