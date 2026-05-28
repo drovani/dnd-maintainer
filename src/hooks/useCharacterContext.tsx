@@ -275,11 +275,13 @@ function tryDeriveAndResolve(
   }
 
   let build: CharacterBuild;
+  const reconstructionWarnings: string[] = [];
   try {
     build = reconstructBuild(
       { species: character.species, background: character.background },
       activeRows,
-      equippedItems
+      equippedItems,
+      (message) => reconstructionWarnings.push(message)
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown build error';
@@ -287,10 +289,11 @@ function tryDeriveAndResolve(
     return { status: 'build-error', build: null, bundles: [], resolved: null, error: message, warnings: [] };
   }
 
-  const { bundles, warnings, expandedFeats } = collectBundles(build);
-  if (warnings.length > 0) {
-    logger.warn('collectBundles warnings:', warnings);
+  const { bundles, warnings: bundleWarnings, expandedFeats } = collectBundles(build);
+  if (bundleWarnings.length > 0) {
+    logger.warn('collectBundles warnings:', bundleWarnings);
   }
+  const warnings: readonly string[] = [...reconstructionWarnings, ...bundleWarnings];
 
   try {
     const levelRows = activeRows.filter((r) => r.sequence !== 0);

@@ -311,6 +311,19 @@ describe('reconstructBuild', () => {
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('bad'), expect.any(Error));
   });
 
+  it('forwards skipped-choice messages to the onWarning callback for UI surfacing', () => {
+    const creationWithBadChoices: BuildLevelRow = {
+      ...creationRow,
+      choices: { bad: { type: 'unknown' } } as unknown as BuildLevelRow['choices'],
+    };
+    const buildReconstructionLogger = getLogger('build-reconstruction');
+    vi.spyOn(buildReconstructionLogger, 'warn').mockImplementation(() => {});
+    const surfaced: string[] = [];
+    reconstructBuild(identity, [creationWithBadChoices], [], (msg) => surfaced.push(msg));
+    expect(surfaced).toHaveLength(1);
+    expect(surfaced[0]).toContain('bad');
+  });
+
   it('throws when level row is missing class_id', () => {
     const levelMissingClassId = {
       sequence: 1,

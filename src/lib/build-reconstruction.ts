@@ -74,8 +74,14 @@ type AbilityMethod = (typeof VALID_ABILITY_METHODS)[number];
 export function reconstructBuild(
   character: CharacterIdentity,
   rows: readonly BuildLevelRow[],
-  equippedItems: readonly string[]
+  equippedItems: readonly string[],
+  onWarning?: (message: string) => void
 ): CharacterBuild {
+  const warn = (message: string, cause?: unknown): void => {
+    logger.warn(message, cause);
+    onWarning?.(message);
+  };
+
   if (!character.species) throw new Error('Character is missing required species');
   if (!isSpeciesId(character.species)) throw new Error(`Character has invalid species ID: "${character.species}"`);
 
@@ -150,7 +156,7 @@ export function reconstructBuild(
       try {
         mergeChoiceEntry(validateChoiceKey(key), value);
       } catch (err) {
-        logger.warn(`Skipping malformed choice key "${key}" in creation row:`, err);
+        warn(`Skipping malformed choice key "${key}" in creation row`, err);
       }
     }
   }
@@ -159,7 +165,7 @@ export function reconstructBuild(
   for (const row of levelRows) {
     if (row.subclass_id !== null) {
       if (!isSubclassId(row.subclass_id)) {
-        logger.warn(`Skipping unknown subclass_id "${row.subclass_id}" in build level row sequence ${row.sequence}`);
+        warn(`Skipping unknown subclass_id "${row.subclass_id}" in build level row sequence ${row.sequence}`);
       } else {
         const key = createChoiceKey('subclass', 'class', row.class_id, 0);
         choices[key] = { type: 'subclass', subclassId: row.subclass_id };
@@ -191,7 +197,7 @@ export function reconstructBuild(
         try {
           mergeChoiceEntry(validateChoiceKey(key), value);
         } catch (err) {
-          logger.warn(`Skipping malformed choice key "${key}" in level row sequence ${row.sequence}:`, err);
+          warn(`Skipping malformed choice key "${key}" in level row sequence ${row.sequence}`, err);
         }
       }
     }
