@@ -2185,3 +2185,57 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
     expect(featureIds).not.toContain('cleric-divine-order-thaumaturge');
   });
 });
+
+describe('Monk L6 + Warrior of Mercy integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'monk', 0);
+  const asiKey = createChoiceKey('asi', 'class', 'monk', 0);
+
+  // WIS 16 → mod +3; PB at L6 = 3; physicians-touch DC = 8 + 3 + 3 = 14
+  const monkL6Build: CharacterBuild = {
+    speciesId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 16, con: 12, int: 10, wis: 16, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'monk' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'monk' as ClassId, classLevel: 2, hpRoll: 5 },
+      { classId: 'monk' as ClassId, classLevel: 3, hpRoll: 5 },
+      { classId: 'monk' as ClassId, classLevel: 4, hpRoll: 5 },
+      { classId: 'monk' as ClassId, classLevel: 5, hpRoll: 5 },
+      { classId: 'monk' as ClassId, classLevel: 6, hpRoll: 5 },
+    ],
+    choices: {
+      'skill-choice:class:monk:0': { type: 'skill-choice', skills: ['acrobatics', 'history'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'warriorofmercy' as SubclassId },
+      [asiKey]: { type: 'asi' as const, allocation: { dex: 2 } },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles } = collectBundles(monkL6Build);
+  const input: ResolverInput = {
+    baseAbilities: monkL6Build.baseAbilities,
+    level: 6,
+    bundles,
+    choices: monkL6Build.choices,
+    levels: monkL6Build.levels,
+  };
+
+  it('resourcePools contains exactly one focus-points entry with max=6 and regen=short-rest', () => {
+    const result = resolveCharacter(input);
+    const focusPool = result.resourcePools.filter((p) => p.poolId === 'focus-points');
+    expect(focusPool).toHaveLength(1);
+    expect(focusPool[0].max).toBe(6);
+    expect(focusPool[0].regen).toBe('short-rest');
+  });
+
+  it('features contains warriorofmercy-physicians-touch with saveDC = 8 + PB(3) + wisMod(3) = 14', () => {
+    const result = resolveCharacter(input);
+    const physicians = result.features.find((f) => f.feature.id === 'warriorofmercy-physicians-touch');
+    expect(physicians).toBeDefined();
+    // WIS 16 → mod +3; PB at L6 = 3; DC = 8 + 3 + 3 = 14
+    expect(physicians!.saveDC).toBe(14);
+  });
+});

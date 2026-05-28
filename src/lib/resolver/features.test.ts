@@ -39,6 +39,29 @@ describe('resolveFeatures saveDC', () => {
     expect(features[0].saveDC).toBe(8 + 3 + 4);
   });
 
+  it('uses the declared dcAbility (cha) — not a hard-coded wis lookup', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'warriorofmercy', classId: 'monk', level: 6 },
+        grants: [
+          {
+            type: 'feature',
+            feature: { id: 'some-cha-feature', saveDC: { dcAbility: 'cha' } },
+          },
+        ],
+      },
+    ];
+    // CHA mod = +3, PB = 2 → DC = 8 + 2 + 3 = 13
+    const features = resolveFeatures(bundles, abilityMap({ cha: 3 }), 2);
+    expect(features[0].saveDC).toBe(13);
+  });
+
+  it('computes saveDC correctly with a negative ability modifier', () => {
+    // WIS mod = -1, PB = 2 → DC = 8 + 2 + (-1) = 9
+    const features = resolveFeatures(monkLevel5, abilityMap({ wis: -1 }), 2);
+    expect(features[0].saveDC).toBe(9);
+  });
+
   it('omits saveDC for features that do not declare one', () => {
     const bundles: GrantBundle[] = [
       {

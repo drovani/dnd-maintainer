@@ -315,6 +315,42 @@ describe('resolveSkills', () => {
     });
   });
 
+  it('insight is proficient via Implements of Mercy alone when player picks two non-insight skills at L1', () => {
+    // Same bundle setup as the de-dupe test, but choices pick acrobatics + history (not insight)
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'monk', level: 1 },
+        grants: [
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: 'skill-choice:class:monk:0',
+            count: 2,
+            from: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
+          },
+        ],
+      },
+      {
+        source: { origin: 'subclass', id: 'warriorofmercy', classId: 'monk', level: 3 },
+        grants: [
+          { type: 'proficiency', category: 'skill', id: 'insight' },
+          { type: 'proficiency', category: 'skill', id: 'medicine' },
+        ],
+      },
+    ];
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'skill-choice:class:monk:0': { type: 'skill-choice', skills: ['acrobatics', 'history'] },
+    };
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
+
+    // insight comes solely from Implements of Mercy
+    expect(result.insight.proficient).toBe(true);
+    // ZERO_ABILITIES: modifier 0, so bonus === proficiencyBonus (2)
+    expect(result.insight.bonus).toBe(2);
+    // exactly one proficiency component in the breakdown
+    expect(result.insight.breakdown.filter((c) => c.type === 'proficiency')).toHaveLength(1);
+  });
+
   it('de-dupes insight when granted by both Monk L1 skill-choice and Warrior of Mercy L3 direct proficiency', () => {
     // Monk L1: skill-choice that can include insight
     // Warrior of Mercy L3: direct proficiency grant for insight (Implements of Mercy)
