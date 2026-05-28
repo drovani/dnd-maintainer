@@ -1,4 +1,4 @@
-import { setWorldConstructor, World, type IWorldOptions } from '@cucumber/cucumber';
+import { setWorldConstructor, World, type IWorldOptions, After } from '@cucumber/cucumber';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
 import { JSDOM } from 'jsdom';
@@ -16,6 +16,7 @@ class DndWorldImpl extends World implements DndWorld {
   supabase: ReturnType<typeof createSupabaseMock>['supabase'];
   mockQueryResult: ReturnType<typeof createSupabaseMock>['mockQueryResult'];
   queryClient: QueryClient;
+  private dom: JSDOM;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -30,15 +31,15 @@ class DndWorldImpl extends World implements DndWorld {
     });
 
     // Bootstrap jsdom for React Testing Library
-    const dom = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>', {
+    this.dom = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>', {
       url: 'http://localhost',
     });
     // @ts-expect-error - globalThis assignment for jsdom
-    globalThis.document = dom.window.document;
+    globalThis.document = this.dom.window.document;
     // @ts-expect-error - globalThis assignment for jsdom
-    globalThis.window = dom.window;
+    globalThis.window = this.dom.window;
     Object.defineProperty(globalThis, 'navigator', {
-      value: dom.window.navigator,
+      value: this.dom.window.navigator,
       writable: true,
       configurable: true,
     });
@@ -58,3 +59,12 @@ class DndWorldImpl extends World implements DndWorld {
 }
 
 setWorldConstructor(DndWorldImpl);
+
+After(function (this: DndWorld) {
+  this.queryClient.clear();
+  this.queryClient.unmount();
+  (globalThis.window as Window & typeof globalThis)?.close?.();
+  delete (globalThis as Record<string, unknown>).document;
+  delete (globalThis as Record<string, unknown>).window;
+  delete (globalThis as Record<string, unknown>).navigator;
+});
