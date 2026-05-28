@@ -1221,7 +1221,7 @@
     },
     "circleland-bonus-spells": {
       "name": "Land's Bonus Spells",
-      "description": "Your connection to the land grants you bonus prepared spells based on your chosen Land type: Arctic, Coast, Desert, Forest, Grassland, Mountain, Swamp, or Underdark. (Land type selection and associated spells are modeled as a descriptive feature pending spell system support.)"
+      "description": "Whenever you finish a Long Rest, choose one type of land — Arid, Polar, Temperate, or Tropical — and gain that land's prepared spells in addition to your usual prepared spells. The list expands at Druid levels 3, 5, 7, and 9. (Per-rest Land selection and associated spells are modeled as a descriptive feature pending gameplay-state tracking and spell-id catalog support.)"
     },
     "circleland-natural-recovery": {
       "name": "Natural Recovery",
@@ -1253,7 +1253,7 @@
     },
     "circlesea-aquatic-affinity": {
       "name": "Aquatic Affinity",
-      "description": "You can breathe underwater, and you gain a Swim speed equal to your walking speed. (Swim speed is approximated as 30 ft in this implementation; actual value equals walking speed.)"
+      "description": "You can breathe underwater, and you gain a Swim speed equal to your walking speed."
     },
     "circlesea-stormborn": {
       "name": "Stormborn",

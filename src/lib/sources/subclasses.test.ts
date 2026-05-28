@@ -802,14 +802,14 @@ describe('getSubclassSource — Circle of the Sea', () => {
     });
   });
 
-  it('circlesea level 6 grants 2 items: swim speed grant and aquatic-affinity feature', () => {
+  it('circlesea level 6 grants 2 items: walk-equivalent swim speed grant and aquatic-affinity feature', () => {
     const source = getSubclassSource('circlesea');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
     expect(level6?.grants).toHaveLength(2);
     expect(level6?.grants).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: 'speed', mode: 'swim', value: 30 }),
+        expect.objectContaining({ type: 'speed', mode: 'swim', value: 'walk-equivalent' }),
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'circlesea-aquatic-affinity' }),

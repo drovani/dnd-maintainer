@@ -36,10 +36,22 @@ export function resolveHp(
 export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<Record<SpeedMode, Sourced<number>>>> {
   const speedGrants = collectGrantsByType(bundles, 'speed');
 
-  // Group by mode, taking highest value per mode
+  // First pass: resolve all fixed-value grants, taking the highest per mode.
+  // 'walk-equivalent' grants are deferred to a second pass once the walk
+  // speed is known.
   const bestPerMode = new Map<SpeedMode, { value: number; sources: SourceTag[] }>();
+  const walkEquivalent = new Map<SpeedMode, SourceTag[]>();
 
   for (const { grant, source } of speedGrants) {
+    if (grant.value === 'walk-equivalent') {
+      const existing = walkEquivalent.get(grant.mode);
+      if (existing) {
+        existing.push(source);
+      } else {
+        walkEquivalent.set(grant.mode, [source]);
+      }
+      continue;
+    }
     const existing = bestPerMode.get(grant.mode);
     if (!existing) {
       bestPerMode.set(grant.mode, { value: grant.value, sources: [source] });
@@ -47,6 +59,24 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
       bestPerMode.set(grant.mode, { value: grant.value, sources: [source] });
     } else if (grant.value === existing.value) {
       existing.sources.push(source);
+    }
+  }
+
+  // Second pass: resolve walk-equivalent grants against the resolved walk speed.
+  // If no walk speed exists, the walk-equivalent grant is silently dropped —
+  // a character with no walk speed can't have a walk-derived speed anyway.
+  const walkSpeed = bestPerMode.get('walk');
+  if (walkSpeed) {
+    for (const [mode, sources] of walkEquivalent) {
+      if (mode === 'walk') continue;
+      const existing = bestPerMode.get(mode);
+      if (!existing) {
+        bestPerMode.set(mode, { value: walkSpeed.value, sources });
+      } else if (walkSpeed.value > existing.value) {
+        bestPerMode.set(mode, { value: walkSpeed.value, sources });
+      } else if (walkSpeed.value === existing.value) {
+        existing.sources.push(...sources);
+      }
     }
   }
 

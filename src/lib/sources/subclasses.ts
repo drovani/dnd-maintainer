@@ -281,9 +281,10 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Bonus Cantrip: gain one additional Druid cantrip of choice; modeled as inert feature grant
           // TODO #93: replace with a cantrip-choice spell grant when spell id system supports it
           { type: 'feature', feature: { id: 'circleland-bonus-cantrip' } },
-          // Land's Bonus Spells: bonus prepared spells keyed to chosen Land type (Arctic/Coast/etc.)
-          // Land type is a free-form choice with no pending-choice mechanism; collapsed to inert feature grant
-          // TODO #93: model as spell grants per Land type when spell id system is available
+          // Land's Bonus Spells (2024 PHB): per Long Rest, choose one of Arid/Polar/Temperate/Tropical and
+          // gain that land's prepared spells; list scales at Druid 3/5/7/9. Blocked on two things: (a) per-rest
+          // gameplay-state tracking is not modeled (same shape as #138 Gaps 1-2), and (b) spell-id catalog.
+          // See #144 close-out for full deferral reasoning.
           { type: 'feature', feature: { id: 'circleland-bonus-spells' } },
         ],
       },
@@ -337,8 +338,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 6,
         grants: [
-          // Swim speed approximated as 30 ft (equal to typical walking speed); see implementation note
-          { type: 'speed', mode: 'swim', value: 30 },
+          // Aquatic Affinity: swim speed equals the Druid's walking speed (resolved from species walk).
+          { type: 'speed', mode: 'swim', value: 'walk-equivalent' },
           // Underwater breathing is a distinct feature; both grants are required for full Aquatic Affinity
           { type: 'feature', feature: { id: 'circlesea-aquatic-affinity' } },
         ],

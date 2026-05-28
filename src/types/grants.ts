@@ -132,7 +132,9 @@ export type SpeedMode = 'walk' | 'fly' | 'swim' | 'climb' | 'burrow';
 export interface SpeedGrant {
   readonly type: 'speed';
   readonly mode: SpeedMode;
-  readonly value: number;
+  // `'walk-equivalent'` resolves to the character's resolved walking speed
+  // (e.g. Circle of the Sea L6 Aquatic Affinity). Only meaningful on non-walk modes.
+  readonly value: number | 'walk-equivalent';
 }
 
 export type HitDie = 4 | 6 | 8 | 10 | 12;

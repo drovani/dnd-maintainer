@@ -120,6 +120,81 @@ describe('resolveSpeed', () => {
     expect(result.walk!.value).toBe(30);
     expect(result.swim!.value).toBe(30);
   });
+
+  it('resolves walk-equivalent swim to the walk speed (human druid, 30 ft)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'speed', mode: 'walk', value: 30 }],
+      },
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 },
+        grants: [{ type: 'speed', mode: 'swim', value: 'walk-equivalent' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.swim!.value).toBe(30);
+  });
+
+  it('resolves walk-equivalent swim to a faster walk speed (wood elf druid, 35 ft)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'species', id: 'elf' },
+        grants: [{ type: 'speed', mode: 'walk', value: 35 }],
+      },
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 },
+        grants: [{ type: 'speed', mode: 'swim', value: 'walk-equivalent' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.swim!.value).toBe(35);
+  });
+
+  it('walk-equivalent never lowers an existing higher fixed swim speed', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'speed', mode: 'walk', value: 30 }],
+      },
+      {
+        source: { origin: 'item', id: 'cap-of-water-breathing' },
+        grants: [{ type: 'speed', mode: 'swim', value: 40 }],
+      },
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 },
+        grants: [{ type: 'speed', mode: 'swim', value: 'walk-equivalent' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.swim!.value).toBe(40);
+  });
+
+  it('walk-equivalent is dropped silently when no walk grant exists', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 },
+        grants: [{ type: 'speed', mode: 'swim', value: 'walk-equivalent' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.swim).toBeUndefined();
+  });
+
+  it('records the walk-equivalent grant source on the resolved swim speed', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'speed', mode: 'walk', value: 30 }],
+      },
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 },
+        grants: [{ type: 'speed', mode: 'swim', value: 'walk-equivalent' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.swim!.sources).toEqual([{ origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 }]);
+  });
 });
 
 describe('resolveAc', () => {
