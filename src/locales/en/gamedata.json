@@ -1119,9 +1119,9 @@
       "name": "Preserve Life",
       "description": "As a Magic action, you present your holy symbol and evoke healing energy that can restore a number of Hit Points equal to five times your Cleric level. Choose any creatures within 30 feet of you, and divide those Hit Points among them. This feature can restore a creature to no more than half its Hit Point maximum. You can use this feature a number of times equal to your Wisdom modifier (minimum once), and you regain all expended uses when you finish a Long Rest."
     },
-    "lifedomain-blessed-strikes": {
-      "name": "Blessed Strikes (Life Domain)",
-      "description": "Divine power infuses you in battle. Once on each of your turns when you hit a creature with a weapon attack or deal damage to a creature with a Cleric cantrip, you can deal extra 1d8 Necrotic or Radiant damage (your choice) to that creature."
+    "lifedomain-blessed-healer": {
+      "name": "Blessed Healer",
+      "description": "The healing spells you cast on others heal you as well. When you cast a spell with a spell slot of 1st level or higher that restores Hit Points to a creature other than you, you regain Hit Points equal to 2 + the spell's level."
     },
     "lightdomain-domain-spells": {
       "name": "Light Domain Spells",

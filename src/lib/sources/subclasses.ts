@@ -207,11 +207,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       },
       {
         classLevel: 6,
-        // Blessed Strikes: once per turn, a weapon or cantrip hit deals +1d8 necrotic or radiant damage
-        // Per 2024 PHB, Blessed Strikes is the canonical Life Domain L6 feature.
-        // NOTE: The 2024 PHB class table also lists Blessed Strikes as a class-wide Cleric feature at L7
-        // in some printings; this implementation treats the domain entry as authoritative for Life Domain.
-        grants: [{ type: 'feature', feature: { id: 'lifedomain-blessed-strikes' } }],
+        grants: [{ type: 'feature', feature: { id: 'lifedomain-blessed-healer' } }],
       },
     ] satisfies readonly SubclassFeature[],
   },

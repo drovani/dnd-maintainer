@@ -520,14 +520,14 @@ describe('getSubclassSource — Life Domain', () => {
     );
   });
 
-  it('lifedomain level 6 grants blessed-strikes feature', () => {
+  it('lifedomain level 6 grants the Blessed Healer feature (not Blessed Strikes; 2024 PHB)', () => {
     const source = getSubclassSource('lifedomain');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
     expect(level6?.grants).toHaveLength(1);
     expect(level6?.grants[0]).toMatchObject({
       type: 'feature',
-      feature: { id: 'lifedomain-blessed-strikes' },
+      feature: { id: 'lifedomain-blessed-healer' },
     });
   });
 });
