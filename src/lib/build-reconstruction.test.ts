@@ -284,6 +284,21 @@ describe('reconstructBuild', () => {
     });
   });
 
+  it('round-trips a feature-choice decision from creation-row JSONB', () => {
+    const featureChoiceKey = createChoiceKey('feature-choice', 'class', 'cleric', 0);
+    const creationWithFeatureChoice: BuildLevelRow = {
+      ...creationRow,
+      choices: {
+        [featureChoiceKey]: { type: 'feature-choice', optionId: 'protector' },
+      } as BuildLevelRow['choices'],
+    };
+    const buildReconstructionLogger = getLogger('build-reconstruction');
+    const warnSpy = vi.spyOn(buildReconstructionLogger, 'warn').mockImplementation(() => {});
+    const result = reconstructBuild(identity, [creationWithFeatureChoice], []);
+    expect(result.choices[featureChoiceKey]).toEqual({ type: 'feature-choice', optionId: 'protector' });
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
   it('skips malformed choice keys in JSONB without crashing', () => {
     const creationWithBadChoices: BuildLevelRow = {
       ...creationRow,

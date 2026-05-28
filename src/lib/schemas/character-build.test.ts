@@ -222,6 +222,26 @@ describe('ChoiceDecisionSchema', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  describe('feature-choice', () => {
+    it('accepts a feature-choice decision with a valid optionId', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'feature-choice', optionId: 'protector' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({ type: 'feature-choice', optionId: 'protector' });
+      }
+    });
+
+    it('rejects feature-choice with empty optionId', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'feature-choice', optionId: '' });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects feature-choice missing optionId', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'feature-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
 });
 
 describe('CharacterBuildSchemaStrict', () => {

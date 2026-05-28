@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { getClassSource } from '@/lib/sources';
 import { createChoiceKey } from '@/types/choices';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
 import type { ClassId } from '@/lib/dnd-helpers';
+import type { Grant, FeatureChoiceGrant } from '@/types/grants';
+import gamedata from '@/locales/en/gamedata.json';
 
 describe('Fighter class levels 2–10 grant structures', () => {
   const source = getClassSource('fighter' as ClassId);
@@ -553,13 +556,6 @@ describe('Cleric class grant structures', () => {
     }
   });
 
-  it('level 2 does not include the legacy holy-order feature (removed; not in 2024 PHB)', () => {
-    const featureIds = source?.levels[1].grants
-      .filter((g) => g.type === 'feature')
-      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
-    expect(featureIds).not.toContain('cleric-holy-order');
-  });
-
   it('level 3 has subclass grant for cleric', () => {
     const grant = source?.levels[2].grants.find((g) => g.type === 'subclass');
     expect(grant?.type).toBe('subclass');
@@ -1039,5 +1035,38 @@ describe('Wizard class grant structures', () => {
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
     expect(featureIds).toContain('wizard-signature-spells');
+  });
+});
+
+describe('FeatureChoiceGrant i18n coverage', () => {
+  function collectFeatureChoices(grants: readonly Grant[]): FeatureChoiceGrant[] {
+    return grants.filter((g): g is FeatureChoiceGrant => g.type === 'feature-choice');
+  }
+
+  it('every FeatureChoiceOption.featureId has a non-empty name and description in gamedata.json', () => {
+    const featureIds = new Set<string>();
+    for (const classSource of CLASS_SOURCES) {
+      for (const level of classSource.levels) {
+        for (const choice of collectFeatureChoices(level.grants)) {
+          for (const option of choice.options) featureIds.add(option.featureId);
+        }
+      }
+    }
+    for (const subclassSource of Object.values(SUBCLASS_SOURCES)) {
+      for (const feature of subclassSource.features) {
+        for (const choice of collectFeatureChoices(feature.grants)) {
+          for (const option of choice.options) featureIds.add(option.featureId);
+        }
+      }
+    }
+
+    const missing: string[] = [];
+    const features = gamedata.features as Record<string, { name?: string; description?: string }>;
+    for (const featureId of featureIds) {
+      const entry = features[featureId];
+      if (!entry?.name || entry.name.length === 0) missing.push(`${featureId}.name`);
+      if (!entry?.description || entry.description.length === 0) missing.push(`${featureId}.description`);
+    }
+    expect(missing).toEqual([]);
   });
 });

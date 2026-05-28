@@ -306,4 +306,83 @@ describe('ClassStep', () => {
 
     expect(screen.queryByText('noClassChoices')).toBeNull();
   });
+
+  it('renders a feature-choice picker for class-origin pending choices', () => {
+    const CLERIC_FEATURE_CHOICE_KEY = 'feature-choice:class:cleric:0' as ChoiceKey;
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [
+        {
+          type: 'feature-choice',
+          choiceKey: CLERIC_FEATURE_CHOICE_KEY,
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          options: [
+            { optionId: 'protector', featureId: 'cleric-divine-order-protector' },
+            { optionId: 'thaumaturge', featureId: 'cleric-divine-order-thaumaturge' },
+          ],
+        },
+      ],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassStep />);
+
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(2);
+  });
+
+  it('does NOT render feature-choice pickers from non-class origins (regression guard)', () => {
+    const SPECIES_FEATURE_CHOICE_KEY = 'feature-choice:species:human:0' as ChoiceKey;
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [
+        {
+          type: 'feature-choice',
+          choiceKey: SPECIES_FEATURE_CHOICE_KEY,
+          source: { origin: 'species', id: 'human' },
+          options: [
+            { optionId: 'a', featureId: 'human-foo' },
+            { optionId: 'b', featureId: 'human-bar' },
+          ],
+        },
+      ],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassStep />);
+
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
+  });
+
+  it('dispatches makeChoice with the optionId when a feature-choice radio is clicked', () => {
+    const CLERIC_FEATURE_CHOICE_KEY = 'feature-choice:class:cleric:0' as ChoiceKey;
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [
+        {
+          type: 'feature-choice',
+          choiceKey: CLERIC_FEATURE_CHOICE_KEY,
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          options: [
+            { optionId: 'protector', featureId: 'cleric-divine-order-protector' },
+            { optionId: 'thaumaturge', featureId: 'cleric-divine-order-thaumaturge' },
+          ],
+        },
+      ],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassStep />);
+
+    const protectorRadio = document.getElementById(
+      `choice-feature-${CLERIC_FEATURE_CHOICE_KEY}-protector`
+    ) as HTMLInputElement;
+    expect(protectorRadio).toBeTruthy();
+    fireEvent.click(protectorRadio);
+
+    expect(mockMakeChoice).toHaveBeenCalledWith(CLERIC_FEATURE_CHOICE_KEY, {
+      type: 'feature-choice',
+      optionId: 'protector',
+    });
+  });
 });

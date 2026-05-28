@@ -2141,4 +2141,47 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
     const featureIds = result.features.map((f) => f.feature.id);
     expect(featureIds).toContain('cleric-divine-order-protector');
   });
+
+  it('re-emits a pending feature-choice when the decision references an unknown optionId', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: { [divineOrderKey]: { type: 'feature-choice' as const, optionId: 'unknown' } },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice');
+    expect(pending).toBeDefined();
+    if (pending?.type === 'feature-choice') {
+      expect(pending.choiceKey).toBe(divineOrderKey);
+      const optionIds = pending.options.map((o) => o.optionId);
+      expect(optionIds).toEqual(['protector', 'thaumaturge']);
+    }
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).not.toContain('cleric-divine-order-protector');
+    expect(featureIds).not.toContain('cleric-divine-order-thaumaturge');
+  });
+
+  it('re-emits pending when the decision under the feature-choice key has a wrong type', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: { [divineOrderKey]: { type: 'skill-choice' as const, skills: [] } },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice');
+    expect(pending).toBeDefined();
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).not.toContain('cleric-divine-order-protector');
+    expect(featureIds).not.toContain('cleric-divine-order-thaumaturge');
+  });
 });
