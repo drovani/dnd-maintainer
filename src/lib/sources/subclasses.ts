@@ -468,7 +468,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Hand of Healing: Magic action, 1 Focus Point — heal Martial Arts die + WIS mod;
           // free during Flurry of Blows (replaces one Unarmed Strike)
           { type: 'feature', feature: { id: 'warriorofmercy-hand-of-healing' } },
-          // Hand of Harm: 1 Focus Point on a hit with an unarmed strike — extra necrotic damage equal to Martial Arts die + WIS mod
+          // Hand of Harm: 1 Focus Point on a hit with an unarmed strike — extra necrotic damage equal to Martial Arts die
           { type: 'feature', feature: { id: 'warriorofmercy-hand-of-harm' } },
         ],
       },
@@ -512,7 +512,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Focus Point cost: Bonus Action — infuse unarmed strikes with chosen element (Acid/Cold/Fire/Lightning/Thunder)
           // for 10 min; reach extends to 10 ft; deal Martial Arts die extra damage on hit
           { type: 'feature', feature: { id: 'warriorofelements-elemental-attunement' } },
-          // Free Elementalism cantrip (WIS); modeled as inert feature grant pending #93 cantrip catalog
+          // Free Elementalism cantrip (WIS); modeled as inert feature grant pending spell-id catalog
           { type: 'feature', feature: { id: 'warriorofelements-manipulate-elements' } },
         ],
       },

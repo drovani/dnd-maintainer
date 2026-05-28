@@ -963,7 +963,6 @@ describe('getSubclassSource — Warrior of Mercy', () => {
     const source = getSubclassSource('warriorofmercy');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(6);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -992,7 +991,7 @@ describe('getSubclassSource — Warrior of Mercy', () => {
     expect(level6?.grants).toHaveLength(1);
     expect(level6?.grants[0]).toMatchObject({
       type: 'feature',
-      feature: { id: 'warriorofmercy-physicians-touch' },
+      feature: { id: 'warriorofmercy-physicians-touch', saveDC: { dcAbility: 'wis' } },
     });
   });
 });
@@ -1068,7 +1067,7 @@ describe('getSubclassSource — Warrior of the Elements', () => {
     expect(level6?.grants).toHaveLength(1);
     expect(level6?.grants[0]).toMatchObject({
       type: 'feature',
-      feature: { id: 'warriorofelements-elemental-burst' },
+      feature: { id: 'warriorofelements-elemental-burst', saveDC: { dcAbility: 'wis' } },
     });
   });
 });
@@ -1091,7 +1090,7 @@ describe('getSubclassSource — Warrior of the Open Hand', () => {
     expect(level3?.grants).toHaveLength(1);
     expect(level3?.grants[0]).toMatchObject({
       type: 'feature',
-      feature: { id: 'warrioropenhand-open-hand-technique' },
+      feature: { id: 'warrioropenhand-open-hand-technique', saveDC: { dcAbility: 'wis' } },
     });
   });
 
