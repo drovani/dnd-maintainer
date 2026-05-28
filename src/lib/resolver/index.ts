@@ -9,6 +9,7 @@ import type { GrantBundle, SourceTag } from '@/types/sources';
 import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { ResolvedCharacter, PendingChoice, ResolvedSkill } from '@/types/resolved';
 import type { HitDie, ExpertiseChoiceGrant } from '@/types/grants';
+import { mapNonEmpty } from '@/lib/non-empty';
 import type { WeaponMasteryId } from '@/types/items';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
@@ -288,10 +289,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
         type: 'feature-choice',
         choiceKey: grant.key,
         source,
-        options: grant.options.map((o) => ({ optionId: o.optionId, featureId: o.featureId })) as unknown as readonly [
-          { readonly optionId: string; readonly featureId: string },
-          ...{ readonly optionId: string; readonly featureId: string }[],
-        ],
+        options: mapNonEmpty(grant.options, (o) => ({ optionId: o.optionId, featureId: o.featureId })),
       });
     }
   }
