@@ -14,6 +14,7 @@ dist-ssr
 .tmp
 
 coverage
+cucumber-report.html
 supabase/.branches
 supabase/.temp
 
