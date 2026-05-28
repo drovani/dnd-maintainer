@@ -8,5 +8,6 @@ export default {
     './features/steps/**/*.ts',
   ],
   format: ['progress', 'html:cucumber-report.html'],
+  tags: 'not @draft',
   worldParameters: {},
 };
