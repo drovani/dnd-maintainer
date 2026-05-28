@@ -227,6 +227,15 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   }
 
   for (const { grant, source } of allFeatureChoiceGrants) {
+    // Today only ClassStep dispatches feature-choice pending choices through the builder UI.
+    // A non-class origin would silently strand the user on an undisplayable pending choice;
+    // surface as a warning so the CharacterBuilder amber banner shows it instead of failing silently.
+    if (source.origin !== 'class') {
+      const msg = `feature-choice "${grant.key}" has non-class origin "${source.origin}" — no builder UI exists for this origin, choice will be invisible`;
+      warnings.push(msg);
+      logger.warn(msg);
+    }
+
     const decision = build.choices[grant.key];
     if (decision?.type === 'feature-choice') {
       const option = grant.options.find((o) => o.optionId === decision.optionId);
