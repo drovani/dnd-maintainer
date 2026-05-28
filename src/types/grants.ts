@@ -239,31 +239,17 @@ export interface BundleChoiceGrant {
   readonly bundleIds: readonly string[];
 }
 
-/**
- * One branch of a {@link FeatureChoiceGrant}. When the player selects this option,
- * a `feature` grant for `featureId` is added (so it appears on the character sheet)
- * plus every grant in `grants` is inlined into the same source bundle.
- *
- * `id` is the persisted decision discriminator and must be unique within its parent
- * grant. `featureId` doubles as the i18n key (`features.${featureId}.name` /
- * `.description`), so each option needs an entry in `gamedata.json`.
- */
+/** `featureId` must have matching `features.${featureId}.name`/`.description` keys in gamedata.json. */
 export interface FeatureChoiceOption {
-  readonly id: string;
+  readonly optionId: string;
   readonly featureId: string;
   readonly grants: readonly Grant[];
 }
 
-/**
- * Player picks exactly one of several class-feature variants (e.g. Cleric L1
- * Divine Order → Protector / Thaumaturge). The chosen option's `grants` are
- * inlined into the source bundle by `collectBundles`; unresolved grants surface
- * as a `feature-choice` pending choice.
- */
 export interface FeatureChoiceGrant {
   readonly type: 'feature-choice';
   readonly key: ChoiceKey;
-  readonly options: readonly FeatureChoiceOption[];
+  readonly options: readonly [FeatureChoiceOption, ...FeatureChoiceOption[]];
 }
 
 export interface LineageChoiceGrant {

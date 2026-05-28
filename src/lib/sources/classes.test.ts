@@ -534,9 +534,9 @@ describe('Cleric class grant structures', () => {
     expect(grant?.type).toBe('feature-choice');
     if (grant?.type === 'feature-choice') {
       expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'cleric', 0));
-      const optionIds = grant.options.map((o) => o.id);
+      const optionIds = grant.options.map((o) => o.optionId);
       expect(optionIds).toEqual(['protector', 'thaumaturge']);
-      const protector = grant.options.find((o) => o.id === 'protector');
+      const protector = grant.options.find((o) => o.optionId === 'protector');
       expect(protector?.featureId).toBe('cleric-divine-order-protector');
       const protectorProfs = protector?.grants.filter((g) => g.type === 'proficiency') ?? [];
       expect(protectorProfs).toHaveLength(2);
@@ -548,7 +548,7 @@ describe('Cleric class grant structures', () => {
     expect(grant?.type).toBe('feature-choice');
     if (grant?.type === 'feature-choice') {
       expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'cleric', 1));
-      const optionIds = grant.options.map((o) => o.id);
+      const optionIds = grant.options.map((o) => o.optionId);
       expect(optionIds).toEqual(['divine-strike', 'potent-spellcasting']);
     }
   });

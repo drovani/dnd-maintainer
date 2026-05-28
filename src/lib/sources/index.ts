@@ -216,9 +216,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     }
   }
 
-  // Feature-choice grants — expand the chosen option's grants (plus a feature grant
-  // for the variant id) into the source bundle. Unresolved grants surface in the
-  // resolver as a `feature-choice` pending choice.
+  // Feature-choice grants
   const allFeatureChoiceGrants: { grant: FeatureChoiceGrant; source: SourceTag }[] = [];
   for (const bundle of bundles) {
     for (const grant of bundle.grants) {
@@ -231,7 +229,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   for (const { grant, source } of allFeatureChoiceGrants) {
     const decision = build.choices[grant.key];
     if (decision?.type === 'feature-choice') {
-      const option = grant.options.find((o) => o.id === decision.optionId);
+      const option = grant.options.find((o) => o.optionId === decision.optionId);
       if (option) {
         bundles.push({
           source,

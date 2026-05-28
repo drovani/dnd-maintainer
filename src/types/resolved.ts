@@ -203,7 +203,10 @@ export type PendingChoice =
       readonly type: 'feature-choice';
       readonly choiceKey: ChoiceKey;
       readonly source: SourceTag;
-      readonly options: readonly { readonly id: string; readonly featureId: string }[];
+      readonly options: readonly [
+        { readonly optionId: string; readonly featureId: string },
+        ...{ readonly optionId: string; readonly featureId: string }[],
+      ];
     };
 
 export interface ResolvedCharacter {

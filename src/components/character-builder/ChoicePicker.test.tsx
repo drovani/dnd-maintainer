@@ -245,8 +245,8 @@ const FEATURE_CHOICE: PendingChoice & { type: 'feature-choice' } = {
   choiceKey: 'feature-choice:class:cleric:0' as ChoiceKey,
   source: CLERIC_SOURCE,
   options: [
-    { id: 'protector', featureId: 'cleric-divine-order-protector' },
-    { id: 'thaumaturge', featureId: 'cleric-divine-order-thaumaturge' },
+    { optionId: 'protector', featureId: 'cleric-divine-order-protector' },
+    { optionId: 'thaumaturge', featureId: 'cleric-divine-order-thaumaturge' },
   ],
 };
 

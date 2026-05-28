@@ -239,22 +239,22 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
         <p className="text-sm text-muted-foreground">{tc('characterBuilder.pendingChoices.featureChoice')}</p>
         <div className="space-y-1">
           {choice.options.map((option) => {
-            const radioId = `choice-feature-${choice.choiceKey}-${option.id}`;
+            const radioId = `choice-feature-${choice.choiceKey}-${option.optionId}`;
             const labelKey = `features.${option.featureId}.name` as `features.${string}.name`;
             const descKey = `features.${option.featureId}.description` as `features.${string}.description`;
             const label = t(labelKey, { defaultValue: option.featureId });
             const description = t(descKey, { defaultValue: '' });
             return (
               <div
-                key={option.id}
+                key={option.optionId}
                 className="flex items-start gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
               >
                 <input
                   type="radio"
                   id={radioId}
                   name={`choice-feature-${choice.choiceKey}`}
-                  checked={currentOptionId === option.id}
-                  onChange={() => onDecide(choice.choiceKey, { type: 'feature-choice', optionId: option.id })}
+                  checked={currentOptionId === option.optionId}
+                  onChange={() => onDecide(choice.choiceKey, { type: 'feature-choice', optionId: option.optionId })}
                   className="mt-1 size-4 text-primary"
                 />
                 <Label htmlFor={radioId} className="flex-1 cursor-pointer">

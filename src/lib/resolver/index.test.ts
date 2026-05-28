@@ -2069,9 +2069,9 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
     expect(pending).toBeDefined();
     if (pending?.type === 'feature-choice') {
       expect(pending.choiceKey).toBe(divineOrderKey);
-      const optionIds = pending.options.map((o) => o.id);
+      const optionIds = pending.options.map((o) => o.optionId);
       expect(optionIds).toEqual(['protector', 'thaumaturge']);
-      const protectorOption = pending.options.find((o) => o.id === 'protector');
+      const protectorOption = pending.options.find((o) => o.optionId === 'protector');
       expect(protectorOption?.featureId).toBe('cleric-divine-order-protector');
     }
   });

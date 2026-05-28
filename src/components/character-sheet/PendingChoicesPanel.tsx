@@ -201,7 +201,13 @@ function useAllChoiceGrants() {
         type: 'feature-choice',
         choiceKey: grant.key,
         source,
-        options: grant.options.map((o) => ({ id: o.id, featureId: o.featureId })),
+        options: grant.options.map((o) => ({
+          optionId: o.optionId,
+          featureId: o.featureId,
+        })) as unknown as readonly [
+          { readonly optionId: string; readonly featureId: string },
+          ...{ readonly optionId: string; readonly featureId: string }[],
+        ],
       });
     }
 

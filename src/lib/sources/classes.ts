@@ -233,7 +233,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             key: createChoiceKey('feature-choice', 'class', 'cleric', 0),
             options: [
               {
-                id: 'protector',
+                optionId: 'protector',
                 featureId: 'cleric-divine-order-protector',
                 grants: [
                   { type: 'proficiency', category: 'weapon', id: 'martial' },
@@ -241,7 +241,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
                 ],
               },
               {
-                id: 'thaumaturge',
+                optionId: 'thaumaturge',
                 featureId: 'cleric-divine-order-thaumaturge',
                 // Mechanical effects (extra cantrip; Wis-mod bonus to Arcana/Religion checks) are
                 // inert pending a cantrip-grant system and an ability-check-bonus value beyond
@@ -267,13 +267,13 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             key: createChoiceKey('feature-choice', 'class', 'cleric', 1),
             options: [
               {
-                id: 'divine-strike',
+                optionId: 'divine-strike',
                 featureId: 'cleric-blessed-strikes-divine-strike',
                 // On-hit damage rider (+1d8 necrotic/radiant on weapon hits) has no grant model yet.
                 grants: [],
               },
               {
-                id: 'potent-spellcasting',
+                optionId: 'potent-spellcasting',
                 featureId: 'cleric-blessed-strikes-potent-spellcasting',
                 // Cantrip-damage modifier (+Wis mod) has no grant model yet.
                 grants: [],
