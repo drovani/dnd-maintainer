@@ -739,6 +739,9 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           { type: 'feature', feature: { id: 'thief-fast-hands' } },
           { type: 'feature', feature: { id: 'thief-second-story-work' } },
+          // Second-Story Work (2024 PHB): Climb Speed equals walking speed; jump
+          // bonus stays in feature text.
+          { type: 'speed', mode: 'climb', value: 'walk-equivalent' },
         ],
       },
       {

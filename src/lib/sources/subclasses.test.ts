@@ -34,6 +34,21 @@ describe('thief skill-expertise grant', () => {
       ])
     );
   });
+
+  it('thief level 3 has Second-Story Work walk-equivalent climb grant (2024 PHB)', () => {
+    const source = getSubclassSource('thief');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    expect(level3).toBeDefined();
+    expect(level3!.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'thief-second-story-work' }),
+        }),
+        expect.objectContaining({ type: 'speed', mode: 'climb', value: 'walk-equivalent' }),
+      ])
+    );
+  });
 });
 
 describe('getSubclassSource — Champion', () => {

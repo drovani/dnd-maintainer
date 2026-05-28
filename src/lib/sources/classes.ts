@@ -677,10 +677,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
         ],
       },
       {
-        grants: [
-          { type: 'subclass', classId: 'ranger', key: createChoiceKey('subclass', 'class', 'ranger', 0) },
-          { type: 'feature', feature: { id: 'ranger-roving' } },
-        ],
+        grants: [{ type: 'subclass', classId: 'ranger', key: createChoiceKey('subclass', 'class', 'ranger', 0) }],
       },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'ranger', 0), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'ranger-extra-attack' } }] },
@@ -693,6 +690,15 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: null,
             fromTools: [],
           },
+          // Roving (L6, 2024 PHB): climb + swim equal to walking speed. The +10
+          // walking-speed bump (and its heavy-armor restriction) stays in feature
+          // text — needs additive-speed and conditional-grant infrastructure
+          // that don't exist yet. The co-located expertise-choice is itself
+          // misplaced in 2024 (PHB has Expertise at L9, not L6) — see issue
+          // tracker for the full Ranger feature-placement audit.
+          { type: 'feature', feature: { id: 'ranger-roving' } },
+          { type: 'speed', mode: 'climb', value: 'walk-equivalent' },
+          { type: 'speed', mode: 'swim', value: 'walk-equivalent' },
         ],
       },
       EMPTY_LEVEL,

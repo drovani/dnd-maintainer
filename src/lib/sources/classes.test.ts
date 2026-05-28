@@ -807,13 +807,16 @@ describe('Ranger class grant structures', () => {
     }
   });
 
-  it('level 3 has subclass grant and roving feature', () => {
+  it('level 3 has subclass grant', () => {
     const grants = source?.levels[2].grants ?? [];
     expect(grants.find((g) => g.type === 'subclass')).toBeDefined();
-    const featureIds = grants
+  });
+
+  it('level 3 does not contain ranger-roving (2024 PHB places Roving at L6)', () => {
+    const featureIds = (source?.levels[2].grants ?? [])
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
-    expect(featureIds).toContain('ranger-roving');
+    expect(featureIds).not.toContain('ranger-roving');
   });
 
   it('level 4 has ASI (index 0)', () => {
@@ -831,6 +834,20 @@ describe('Ranger class grant structures', () => {
     if (grant?.type === 'expertise-choice') {
       expect(grant.key).toBe(createChoiceKey('expertise-choice', 'class', 'ranger', 0));
     }
+  });
+
+  it('level 6 has ranger-roving feature + walk-equivalent climb + swim grants', () => {
+    const grants = source?.levels[5].grants ?? [];
+    const featureIds = grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('ranger-roving');
+    expect(grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'speed', mode: 'climb', value: 'walk-equivalent' }),
+        expect.objectContaining({ type: 'speed', mode: 'swim', value: 'walk-equivalent' }),
+      ])
+    );
   });
 });
 

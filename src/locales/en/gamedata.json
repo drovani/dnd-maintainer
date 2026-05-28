@@ -445,7 +445,7 @@
     },
     "thief-second-story-work": {
       "name": "Second-Story Work",
-      "description": "Climbing no longer costs extra movement. When you make a running jump, the distance increases by a number of feet equal to your DEX modifier."
+      "description": "You gain a Climb Speed equal to your Speed. In addition, when you make a running jump, the distance you cover increases by a number of feet equal to your DEX modifier."
     },
     "thief-supreme-sneak": {
       "name": "Supreme Sneak",
