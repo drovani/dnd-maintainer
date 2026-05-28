@@ -314,6 +314,43 @@ describe('resolveSkills', () => {
       label: 'champion-remarkable-athlete',
     });
   });
+
+  it('de-dupes insight when granted by both Monk L1 skill-choice and Warrior of Mercy L3 direct proficiency', () => {
+    // Monk L1: skill-choice that can include insight
+    // Warrior of Mercy L3: direct proficiency grant for insight (Implements of Mercy)
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'monk', level: 1 },
+        grants: [
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: 'skill-choice:class:monk:0',
+            count: 2,
+            from: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
+          },
+        ],
+      },
+      {
+        source: { origin: 'subclass', id: 'warriorofmercy', classId: 'monk', level: 3 },
+        grants: [
+          { type: 'proficiency', category: 'skill', id: 'insight' },
+          { type: 'proficiency', category: 'skill', id: 'medicine' },
+        ],
+      },
+    ];
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'skill-choice:class:monk:0': { type: 'skill-choice', skills: ['insight', 'history'] },
+    };
+    const result = resolveSkills(ZERO_ABILITIES, bundles, 2, choices);
+
+    // insight must be proficient
+    expect(result.insight.proficient).toBe(true);
+    // proficiency bonus applied exactly once (ZERO_ABILITIES → modifier 0, so bonus === proficiencyBonus)
+    expect(result.insight.bonus).toBe(2);
+    // breakdown has exactly one proficiency component — proves no double-counting
+    expect(result.insight.breakdown.filter((c) => c.type === 'proficiency')).toHaveLength(1);
+  });
 });
 
 describe('resolveProficiencies', () => {

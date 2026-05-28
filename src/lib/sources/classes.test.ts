@@ -680,6 +680,19 @@ describe('Monk class grant structures', () => {
     expect(featureIds).toContain('monk-focus-points');
   });
 
+  it('level 2 has resource-pool grant for focus-points', () => {
+    const grant = source?.levels[1].grants.find((g) => g.type === 'resource-pool');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'resource-pool') {
+      expect(grant.poolId).toBe('focus-points');
+      expect(grant.max.mode).toBe('class-level');
+      if (grant.max.mode === 'class-level') {
+        expect(grant.max.classId).toBe('monk');
+      }
+      expect(grant.regen).toBe('short-rest');
+    }
+  });
+
   it('level 3 has subclass grant and deflect-attacks feature', () => {
     const grants = source?.levels[2].grants ?? [];
     expect(grants.find((g) => g.type === 'subclass')).toBeDefined();
