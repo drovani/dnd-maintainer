@@ -3,13 +3,9 @@ import type { DndWorld } from '../../steps/support/world.js';
 import { collectBundles } from '@/lib/sources';
 import { resolveCharacter } from '@/lib/resolver';
 import { createChoiceKey } from '@/types/choices';
-import type { CharacterBuild, BuildLevel } from '@/types/choices';
-import type { ResolvedCharacter } from '@/types/resolved';
+import type { BuildLevel } from '@/types/choices';
 
-let build: CharacterBuild;
-let resolvedAtLevel: ResolvedCharacter;
-
-function makeFighterBuild(level: number): CharacterBuild {
+function makeFighterBuild(level: number) {
   const levels: BuildLevel[] = Array.from({ length: level }, (_, i) => ({
     classId: 'fighter' as const,
     classLevel: i + 1,
@@ -17,10 +13,10 @@ function makeFighterBuild(level: number): CharacterBuild {
   }));
 
   return {
-    speciesId: 'human',
-    backgroundId: 'soldier',
+    speciesId: 'human' as const,
+    backgroundId: 'soldier' as const,
     baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
-    abilityMethod: 'standard-array',
+    abilityMethod: 'standard-array' as const,
     choices: {},
     levels,
     feats: [],
@@ -29,17 +25,17 @@ function makeFighterBuild(level: number): CharacterBuild {
 }
 
 Given('a Fighter character build at level 3', function (this: DndWorld) {
-  build = makeFighterBuild(3);
+  this.build = makeFighterBuild(3);
 });
 
 When('the character levels up to level 4', function (this: DndWorld) {
-  build = makeFighterBuild(4);
-  const { bundles, expandedFeats } = collectBundles(build);
-  resolvedAtLevel = resolveCharacter({
-    baseAbilities: build.baseAbilities,
+  this.build = makeFighterBuild(4);
+  const { bundles, expandedFeats } = collectBundles(this.build);
+  this.resolvedAtLevel = resolveCharacter({
+    baseAbilities: this.build.baseAbilities,
     level: 4,
     bundles,
-    choices: build.choices,
+    choices: this.build.choices,
     hpRolls: Array(4).fill(null) as (number | null)[],
     expandedFeats,
   });
@@ -47,17 +43,15 @@ When('the character levels up to level 4', function (this: DndWorld) {
 
 Then('the resolved character has a pending ASI choice from the Fighter class', function (this: DndWorld) {
   const asiKey = createChoiceKey('asi', 'class', 'fighter', 0);
-  const hasPendingAsi = resolvedAtLevel.pendingChoices.some(
-    (c) => c.type === 'asi' && c.choiceKey === asiKey,
-  );
+  const hasPendingAsi = this.resolvedAtLevel!.pendingChoices.some((c) => c.type === 'asi' && c.choiceKey === asiKey);
   if (!hasPendingAsi) {
-    const keys = resolvedAtLevel.pendingChoices.map((c) => c.choiceKey);
+    const keys = this.resolvedAtLevel!.pendingChoices.map((c) => c.choiceKey);
     throw new Error(`Expected pending ASI ${asiKey}, got: ${JSON.stringify(keys)}`);
   }
 });
 
 Then('the resolved character has proficiency bonus {int}', function (this: DndWorld, expected: number) {
-  if (resolvedAtLevel.proficiencyBonus !== expected) {
-    throw new Error(`Expected proficiency bonus ${expected}, got ${resolvedAtLevel.proficiencyBonus}`);
+  if (this.resolvedAtLevel!.proficiencyBonus !== expected) {
+    throw new Error(`Expected proficiency bonus ${expected}, got ${this.resolvedAtLevel!.proficiencyBonus}`);
   }
 });

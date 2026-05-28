@@ -1,12 +1,13 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repoRoot = path.resolve(fileURLToPath(new URL('.', import.meta.url)), '../../');
 
 export function resolve(specifier, context, nextResolve) {
   if (specifier.startsWith('@/')) {
     const resolved = specifier.replace('@/', repoRoot + '/src/');
-    return nextResolve(resolved, context);
+    const resolvedUrl = pathToFileURL(resolved).href;
+    return nextResolve(resolvedUrl, context);
   }
   return nextResolve(specifier, context);
 }
