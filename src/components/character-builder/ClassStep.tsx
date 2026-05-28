@@ -6,10 +6,13 @@ import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { type ChoiceKey } from '@/types/choices';
 import { type FightingStyleId } from '@/lib/dnd-helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
+import { getLogger } from '@/lib/logger';
 import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles';
 import type { PendingChoice } from '@/types/resolved';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+const logger = getLogger('class-step');
 
 interface FightingStyleChoiceInfo {
   readonly choiceKey: ChoiceKey;
@@ -59,10 +62,17 @@ export function ClassStep() {
   // Pending class-feature variant choices (e.g. Cleric L1 Divine Order, L7 Blessed Strikes).
   // Filter to class-origin so we don't render species/background feature-choices here.
   const featureChoices = useMemo<readonly Extract<PendingChoice, { type: 'feature-choice' }>[]>(() => {
-    return (resolved?.pendingChoices ?? []).filter(
-      (c): c is Extract<PendingChoice, { type: 'feature-choice' }> =>
-        c.type === 'feature-choice' && c.source.origin === 'class'
+    const all = (resolved?.pendingChoices ?? []).filter(
+      (c): c is Extract<PendingChoice, { type: 'feature-choice' }> => c.type === 'feature-choice'
     );
+    for (const choice of all) {
+      if (choice.source.origin !== 'class') {
+        logger.error(
+          `feature-choice grant with non-class origin reached ClassStep — UI dispatch missing for origin "${choice.source.origin}", choice "${choice.choiceKey}" will be invisible`
+        );
+      }
+    }
+    return all.filter((c) => c.source.origin === 'class');
   }, [resolved]);
   const hasFeatureChoices = featureChoices.length > 0;
 

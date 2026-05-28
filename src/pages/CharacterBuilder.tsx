@@ -125,7 +125,7 @@ function CharacterBuilderInner() {
   const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } = useBuilderAutosave();
 
   const context = useCharacterContext();
-  const { character, rows, resolved, buildError, isDirty, markSaved } = context;
+  const { character, rows, resolved, buildError, buildWarnings, isDirty, markSaved } = context;
 
   usePageTitle(t('characterBuilder.title'));
 
@@ -323,6 +323,12 @@ function CharacterBuilderInner() {
         {buildError && (
           <div className="mb-4 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
             {t('characterSheet.errors.buildFailed', { message: buildError })}
+          </div>
+        )}
+
+        {buildWarnings.length > 0 && (
+          <div className="mb-4 p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/40 rounded-lg text-amber-700 dark:text-amber-400 text-sm">
+            {t('characterSheet.warnings.buildIncomplete', { message: buildWarnings.join('; ') })}
           </div>
         )}
 
