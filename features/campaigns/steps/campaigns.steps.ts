@@ -3,11 +3,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { DndWorld } from '../../steps/support/world.js';
 import { buildCampaign } from '../../steps/support/fixtures.js';
 
-Given('the Supabase mock returns one campaign named {string}', function (this: DndWorld, name: string) {
+Given('a campaign named {string} exists', function (this: DndWorld, name: string) {
   this.mockQueryResult.data = [buildCampaign({ name })];
 });
 
-When('I invoke the useCampaigns hook', async function (this: DndWorld) {
+When('the Dungeon Master views their campaigns', async function (this: DndWorld) {
   const mod = (await this.importWithSupabase('@/hooks/useCampaigns')) as {
     useCampaigns: () => { isSuccess: boolean; isError: boolean; data?: unknown[] };
   };
@@ -25,7 +25,7 @@ When('I invoke the useCampaigns hook', async function (this: DndWorld) {
   });
 });
 
-Then('the hook result contains one campaign named {string}', function (this: DndWorld, name: string) {
+Then('{string} appears in the list', function (this: DndWorld, name: string) {
   const r = this.hookResult!.result.current as { data?: { name: string }[] };
   if (!r.data || r.data.length !== 1) {
     throw new Error(`Expected 1 campaign, got ${r.data?.length ?? 0}`);

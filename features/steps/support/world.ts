@@ -22,6 +22,7 @@ export interface DndWorld extends World {
   importWithSupabase: (modulePath: string) => Promise<Record<string, unknown>>;
   createWrapper: () => (props: { children: React.ReactNode }) => React.ReactElement;
   // Per-scenario state — step files write/read via this.* instead of module-level lets
+  abilityScore?: number;
   build?: CharacterBuild;
   resolvedAtLevel?: ResolvedCharacter;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,6 +33,7 @@ class DndWorldImpl extends World implements DndWorld {
   supabase: ReturnType<typeof createSupabaseMock>['supabase'];
   mockQueryResult: ReturnType<typeof createSupabaseMock>['mockQueryResult'];
   queryClient: QueryClient;
+  abilityScore?: number;
   build?: CharacterBuild;
   resolvedAtLevel?: ResolvedCharacter;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

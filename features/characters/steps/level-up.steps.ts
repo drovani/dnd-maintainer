@@ -24,11 +24,11 @@ function makeFighterBuild(level: number) {
   };
 }
 
-Given('a Fighter character build at level 3', function (this: DndWorld) {
+Given('a Fighter at level 3', function (this: DndWorld) {
   this.build = makeFighterBuild(3);
 });
 
-When('the character levels up to level 4', function (this: DndWorld) {
+When('the Fighter advances to level 4', function (this: DndWorld) {
   this.build = makeFighterBuild(4);
   const { bundles, expandedFeats } = collectBundles(this.build);
   this.resolvedAtLevel = resolveCharacter({
@@ -41,7 +41,7 @@ When('the character levels up to level 4', function (this: DndWorld) {
   });
 });
 
-Then('the resolved character has a pending ASI choice from the Fighter class', function (this: DndWorld) {
+Then('they must choose an ability score increase', function (this: DndWorld) {
   const asiKey = createChoiceKey('asi', 'class', 'fighter', 0);
   const hasPendingAsi = this.resolvedAtLevel!.pendingChoices.some((c) => c.type === 'asi' && c.choiceKey === asiKey);
   if (!hasPendingAsi) {
@@ -50,7 +50,7 @@ Then('the resolved character has a pending ASI choice from the Fighter class', f
   }
 });
 
-Then('the resolved character has proficiency bonus {int}', function (this: DndWorld, expected: number) {
+Then('their proficiency bonus is {int}', function (this: DndWorld, expected: number) {
   if (this.resolvedAtLevel!.proficiencyBonus !== expected) {
     throw new Error(`Expected proficiency bonus ${expected}, got ${this.resolvedAtLevel!.proficiencyBonus}`);
   }
