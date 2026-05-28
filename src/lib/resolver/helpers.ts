@@ -1,10 +1,16 @@
 import type { Grant } from '@/types/grants';
 import type { GrantBundle, SourceTag } from '@/types/sources';
+import type { ClassId } from '@/lib/dnd-helpers';
 
 export type TaggedGrant<G extends Grant> = {
   readonly grant: G;
   readonly source: SourceTag;
 };
+
+// Counts class-origin bundles; relies on collectBundles emitting one per class level.
+export function getClassLevel(bundles: readonly GrantBundle[], classId: ClassId): number {
+  return bundles.filter((b) => b.source.origin === 'class' && b.source.id === classId).length;
+}
 
 type GrantByType = { [G in Grant as G['type']]: G };
 

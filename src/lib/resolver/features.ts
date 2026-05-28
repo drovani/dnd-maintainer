@@ -5,12 +5,12 @@ import { collectGrantsByType } from '@/lib/resolver/helpers';
 
 export function resolveFeatures(
   bundles: readonly GrantBundle[],
-  abilities?: Readonly<Record<AbilityKey, ResolvedAbility>>,
-  proficiencyBonus?: number
+  abilities: Readonly<Record<AbilityKey, ResolvedAbility>>,
+  proficiencyBonus: number
 ): readonly ResolvedFeature[] {
   return collectGrantsByType(bundles, 'feature').map(({ grant, source }) => {
     const { feature } = grant;
-    if (feature.saveDC && abilities && proficiencyBonus !== undefined) {
+    if (feature.saveDC) {
       return {
         feature,
         source,

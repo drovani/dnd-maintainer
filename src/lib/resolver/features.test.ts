@@ -49,9 +49,4 @@ describe('resolveFeatures saveDC', () => {
     const features = resolveFeatures(bundles, abilityMap({ wis: 4 }), 3);
     expect(features[0].saveDC).toBeUndefined();
   });
-
-  it('omits saveDC when ability data is not provided', () => {
-    const features = resolveFeatures(monkLevel5);
-    expect(features[0].saveDC).toBeUndefined();
-  });
 });

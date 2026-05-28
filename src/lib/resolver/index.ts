@@ -11,7 +11,7 @@ import type { ResolvedCharacter, PendingChoice, ResolvedSkill } from '@/types/re
 import type { HitDie, ExpertiseChoiceGrant } from '@/types/grants';
 import { mapNonEmpty } from '@/lib/non-empty';
 import type { WeaponMasteryId } from '@/types/items';
-import { collectGrantsByType } from '@/lib/resolver/helpers';
+import { collectGrantsByType, getClassLevel } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies';
 import { resolveFeatures } from '@/lib/resolver/features';
@@ -76,8 +76,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       ? resolveEquipmentFromPersisted(input.persistedItems)
       : resolveEquipment(bundles, choices, equippedItemIds);
   const equippedArmorAc = resolveEquippedArmorAc(equipmentResult.items, dexModifier);
-  const BARD_CLASS_ID = 'bard' satisfies ClassId;
-  const bardLevel = bundles.filter((b) => b.source.origin === 'class' && b.source.id === BARD_CLASS_ID).length;
+  const bardLevel = getClassLevel(bundles, 'bard' satisfies ClassId);
   const chaModifier = abilities.cha.modifier;
   const bardicInspiration = resolveBardicInspiration(bundles, bardLevel, chaModifier);
   const bardicDieSize = bardicInspiration?.dieSize ?? null;
