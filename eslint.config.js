@@ -10,6 +10,15 @@ export default defineConfig(
     ignores: ['dist/', 'node_modules/', '.claude/'],
   },
   {
+    files: ['features/**/*.{js,mjs,ts,tsx}'],
+    languageOptions: {
+      globals: {
+        URL: 'readonly',
+        TextDecoder: 'readonly',
+      },
+    },
+  },
+  {
     linterOptions: {
       reportUnusedDisableDirectives: 'error',
     },

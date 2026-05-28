@@ -1,3 +1,4 @@
+import React from 'react';
 import type { ClassId } from '@/lib/dnd-helpers';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { getBundleNameKey } from '@/lib/sources/bundles';
@@ -122,5 +123,6 @@ interface SourceIconProps {
  */
 export function SourceIcon({ source, bundleCategory, className }: SourceIconProps): React.JSX.Element | null {
   const Icon = getGrantIcon(source, bundleCategory);
-  return Icon ? <Icon className={className} /> : null;
+  if (!Icon) return null;
+  return React.createElement(Icon, { className });
 }
