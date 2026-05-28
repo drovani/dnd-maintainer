@@ -8,6 +8,7 @@ import type { renderHook } from '@testing-library/react';
 import { createSupabaseMock } from '@/test/mocks/supabase-factory';
 import type { CharacterBuild } from '@/types/choices';
 import type { ResolvedCharacter } from '@/types/resolved';
+import type { Campaign } from '@/types/database';
 
 // Resolve @/ alias to absolute path — esmock requires absolute paths for module IDs
 const srcDir = path.resolve(fileURLToPath(new URL('.', import.meta.url)), '../../../src');
@@ -18,6 +19,8 @@ function resolveAlias(modulePath: string): string {
 export interface DndWorld extends World {
   supabase: ReturnType<typeof createSupabaseMock>['supabase'];
   mockQueryResult: ReturnType<typeof createSupabaseMock>['mockQueryResult'];
+  /** Recorded call args per method name — populated by the spy wrapper installed in the constructor */
+  supabaseCalls: Record<string, unknown[][]>;
   queryClient: QueryClient;
   importWithSupabase: (modulePath: string) => Promise<Record<string, unknown>>;
   createWrapper: () => (props: { children: React.ReactNode }) => React.ReactElement;
@@ -27,17 +30,32 @@ export interface DndWorld extends World {
   resolvedAtLevel?: ResolvedCharacter;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hookResult?: ReturnType<typeof renderHook<any, any>>;
+  // Campaign-specific scenario state
+  createdCampaign?: Campaign;
+  mutationError?: unknown;
+  mutationResult?: Campaign;
+  globalThemeId?: string;
+  openedCampaignName?: string;
+  /** Full campaign store (includes archived) — steps seed this; view steps filter it per query semantics */
+  campaignStore: Campaign[];
 }
 
 class DndWorldImpl extends World implements DndWorld {
   supabase: ReturnType<typeof createSupabaseMock>['supabase'];
   mockQueryResult: ReturnType<typeof createSupabaseMock>['mockQueryResult'];
+  supabaseCalls: Record<string, unknown[][]> = {};
   queryClient: QueryClient;
   abilityScore?: number;
   build?: CharacterBuild;
   resolvedAtLevel?: ResolvedCharacter;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hookResult?: ReturnType<typeof renderHook<any, any>>;
+  createdCampaign?: Campaign;
+  mutationError?: unknown;
+  mutationResult?: Campaign;
+  globalThemeId?: string;
+  openedCampaignName?: string;
+  campaignStore: Campaign[] = [];
   private dom: JSDOM;
 
   constructor(options: IWorldOptions) {
@@ -45,6 +63,19 @@ class DndWorldImpl extends World implements DndWorld {
     const mock = createSupabaseMock();
     this.supabase = mock.supabase;
     this.mockQueryResult = mock.mockQueryResult;
+
+    // Wrap every supabase method with a call recorder so steps can assert args
+    const calls = this.supabaseCalls;
+    for (const name of Object.keys(this.supabase) as Array<keyof typeof this.supabase>) {
+      if (name === 'then') continue;
+      const orig = this.supabase[name] as (...args: unknown[]) => unknown;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.supabase as any)[name] = (...args: unknown[]) => {
+        (calls[name] ??= []).push(args);
+        return orig(...args);
+      };
+    }
+
     this.queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false, gcTime: 0 },
@@ -64,6 +95,28 @@ class DndWorldImpl extends World implements DndWorld {
       value: this.dom.window.navigator,
       writable: true,
       configurable: true,
+    });
+
+    // Expose jsdom localStorage on globalThis so readStoredTheme/writeStoredTheme work
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: this.dom.window.localStorage,
+      writable: true,
+      configurable: true,
+    });
+
+    // jsdom doesn't implement matchMedia — stub it so ThemeProvider can render
+    Object.defineProperty(this.dom.window, 'matchMedia', {
+      writable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        dispatchEvent: () => false,
+      }),
     });
   }
 

@@ -1,4 +1,3 @@
-@draft
 Feature: Edit campaign details
   As a Dungeon Master,
   I want to revise the details of an existing campaign,
@@ -19,7 +18,11 @@ Feature: Edit campaign details
     When the Dungeon Master renames it to "Storm King's Thunder"
     Then the campaign is named "Storm King's Thunder"
 
+  @draft
   Scenario: A rename cannot collide with an existing campaign name
+    # NOTE: The hook surfaces a DB uniqueness error (23505) if the campaigns_name_key
+    # unique constraint exists. See also create-campaign.feature — the same production
+    # gap applies: verify the constraint exists in supabase/migrations/ before removing @draft.
     Given a campaign named "Lost Mines" exists
     And another campaign named "Untitled" exists
     When the Dungeon Master tries to rename "Untitled" to "Lost Mines"

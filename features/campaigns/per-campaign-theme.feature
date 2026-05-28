@@ -1,4 +1,3 @@
-@draft
 Feature: Per-campaign color theme
   As a Dungeon Master,
   I want to specify a color theme for a campaign,
