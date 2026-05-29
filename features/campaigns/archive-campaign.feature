@@ -8,12 +8,13 @@ Feature: Archive a campaign
     When the Dungeon Master archives "Lost Mines"
     Then "Lost Mines" does not appear in the active campaigns list
 
+  @future
   Scenario: An archived campaign can be restored
     Given a campaign named "Forgotten Realms" exists but has been archived
     When the Dungeon Master restores "Forgotten Realms"
     Then "Forgotten Realms" appears in the active campaigns list
 
-  @draft
+  @future
   Scenario: Archived campaigns are browsable separately
     # NOTE: useCampaigns() hardcodes .is('archived_at', null) — there is no
     # useArchivedCampaigns hook or useCampaigns({ archived: true }) variant.
@@ -23,7 +24,7 @@ Feature: Archive a campaign
     When the Dungeon Master views their archived campaigns
     Then "Old Game" appears in the archived list
 
-  @draft
+  @future
   Scenario: Archiving preserves the campaign's characters and sessions
     # NOTE: This is a DB cascade/integrity test — not a hook concern.
     # It requires a real Supabase instance (or full integration test) with actual

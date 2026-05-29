@@ -1,4 +1,3 @@
-@draft
 Feature: Choose a class during character creation
   As a player,
   I want my chosen class to grant the right proficiencies, features, and choices,

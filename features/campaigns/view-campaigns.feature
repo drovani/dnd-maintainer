@@ -8,7 +8,6 @@ Feature: View existing campaigns
     When the Dungeon Master views their campaigns
     Then "Dragon's Lair" appears in the list
 
-  @draft
   Scenario: A first-time DM sees an empty campaign list
     # NOTE: The hook-level "list is empty" step is implementable, but
     # "the Dungeon Master is prompted to create their first campaign" requires

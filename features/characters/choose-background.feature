@@ -1,4 +1,3 @@
-@draft
 Feature: Choose a background during character creation
   As a player,
   I want my chosen background to grant skills, ability boosts, an origin feat, and tools,

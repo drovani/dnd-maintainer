@@ -1,4 +1,3 @@
-@draft
 Feature: Choose a species during character creation
   As a player,
   I want my chosen species to grant its traits and any lineage choice,

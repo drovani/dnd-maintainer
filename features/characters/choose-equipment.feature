@@ -1,4 +1,3 @@
-@draft
 Feature: Choose starting equipment during character creation
   As a player,
   I want to pick my class's starting equipment option,
@@ -20,6 +19,7 @@ Feature: Choose starting equipment during character creation
       When the character chooses the first starting equipment option
       Then the chosen items appear in the character's inventory
 
+    @future
     Scenario: A character can take starting gold instead of an equipment package
       Given a new character with the fighter class at level 1
       When the character chooses to start with gold instead of equipment

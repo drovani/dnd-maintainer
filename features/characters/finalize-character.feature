@@ -1,4 +1,3 @@
-@draft
 Feature: Finalize a character draft into a playable character
   As a player,
   I want to finalize my completed build into an active character,
@@ -17,6 +16,7 @@ Feature: Finalize a character draft into a playable character
       When the player finalizes the build
       Then the character is created as an active character
 
+    @future
     Scenario: An incomplete build cannot be finalized
       Given a character build that is missing a class
       When the player attempts to finalize the build

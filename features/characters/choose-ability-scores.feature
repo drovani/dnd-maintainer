@@ -1,4 +1,3 @@
-@draft
 Feature: Choose ability scores during character creation
   As a player,
   I want to set my ability scores by a supported method and have background increases applied,

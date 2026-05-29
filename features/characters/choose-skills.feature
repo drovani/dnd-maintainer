@@ -1,4 +1,3 @@
-@draft
 Feature: Choose skills during character creation
   As a player,
   I want my skill proficiencies to combine my class and background without double-counting,
