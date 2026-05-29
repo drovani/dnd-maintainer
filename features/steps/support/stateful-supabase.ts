@@ -11,10 +11,12 @@
  * src/hooks/useCampaigns.ts (and close cousins):
  *   from(table).select(cols)
  *   .insert(row|rows).select().single()        // generates id / slug / timestamps
+ *   .upsert(row|rows, { onConflict })          // update-on-key-match, else insert
  *   .update(patch).eq('id', x).select().single()
  *   .update(patch).eq('id', x)                 // awaited without select (archive)
  *   .delete().eq('id', x)
  *   .is(col, null) / .eq(col, val) / .order(col, {ascending})
+ *   .not('sequence', 'in', '(0,1)') / .not('archived_at', 'is', null)
  *   .or('slug.eq.<v>,previous_slugs.cs.{"<v>"}') // slug-or-previous-slug lookup
  *   .single() / .maybeSingle()
  * Anything outside this set is a no-op filter and is marked with an UNSUPPORTED comment.
@@ -48,8 +50,10 @@ export interface StatefulDb {
 
 interface QueryState {
   table: string;
-  op: 'select' | 'insert' | 'update' | 'delete';
+  op: 'select' | 'insert' | 'update' | 'delete' | 'upsert';
   payload: Row | Row[] | null;
+  /** Conflict-target columns for upsert; empty = always insert. */
+  onConflict: string[];
   predicates: Predicate[];
   orderBy: { col: string; ascending: boolean } | null;
   wantSingle: boolean;
@@ -95,6 +99,7 @@ export function createStatefulSupabase(): { supabase: unknown; db: StatefulDb } 
         table,
         op: 'select',
         payload: null,
+        onConflict: [],
         predicates: [],
         orderBy: null,
         wantSingle: false,
@@ -112,6 +117,12 @@ export function createStatefulSupabase(): { supabase: unknown; db: StatefulDb } 
     update(payload: Row): this {
       this.s.op = 'update';
       this.s.payload = payload;
+      return this;
+    }
+    upsert(payload: Row | Row[], opts?: { onConflict?: string }): this {
+      this.s.op = 'upsert';
+      this.s.payload = payload;
+      this.s.onConflict = opts?.onConflict ? opts.onConflict.split(',').map((c) => c.trim()) : [];
       return this;
     }
     delete(): this {
@@ -133,6 +144,23 @@ export function createStatefulSupabase(): { supabase: unknown; db: StatefulDb } 
     }
     or(expr: string): this {
       this.s.predicates.push(parseOr(expr));
+      return this;
+    }
+    not(col: string, op: string, val: unknown): this {
+      if (op === 'in') {
+        // val is a Postgres list literal like "(0,1)" → keep rows whose col is NOT in it.
+        const set = new Set(
+          String(val)
+            .replace(/^\(|\)$/g, '')
+            .split(',')
+            .map((v) => v.trim())
+            .filter((v) => v.length > 0)
+        );
+        this.s.predicates.push((r) => !set.has(String(r[col])));
+      } else if (op === 'is' && val === null) {
+        this.s.predicates.push((r) => r[col] != null);
+      }
+      // UNSUPPORTED not() operator — ignored.
       return this;
     }
     order(col: string, opts?: { ascending?: boolean }): this {
@@ -171,6 +199,23 @@ export function createStatefulSupabase(): { supabase: unknown; db: StatefulDb } 
           });
           rows.push(...inserted);
           return this.shape(inserted);
+        }
+
+        if (this.s.op === 'upsert') {
+          const incoming = Array.isArray(this.s.payload) ? this.s.payload : [this.s.payload as Row];
+          const now = '2024-01-01T00:00:00Z';
+          const keys = this.s.onConflict;
+          const upserted = incoming.map((row) => {
+            const existing = keys.length > 0 ? rows.find((r) => keys.every((k) => r[k] === row[k])) : undefined;
+            if (existing) {
+              Object.assign(existing, row, { updated_at: now });
+              return existing;
+            }
+            const created = { id: nextId(), created_at: now, updated_at: now, ...row } as Row;
+            rows.push(created);
+            return created;
+          });
+          return this.shape(upserted);
         }
 
         const matched = rows.filter((r) => this.s.predicates.every((p) => p(r)));

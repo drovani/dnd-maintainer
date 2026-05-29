@@ -53,7 +53,7 @@ Prettier + `eslint --fix` run automatically on every file Claude writes or edits
 
 ### Routing
 
-All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope. The character builder lives at `/campaign/:id/character/new` with a 7-step wizard (Basics → Abilities → Skills → Class Features → Proficiencies → Equipment → Backstory), autosave via `useBuilderAutosave()`, and dedicated step components in `src/components/character-builder/`. There is no dedicated Spells step — spellcasting is a stub (`src/lib/resolver/spellcasting.ts` returns `null`).
+All routes are defined in `src/App.tsx`. Layout wraps all routes and provides a sidebar with campaign selection. Routes follow `/campaign/:id/<section>` pattern. Global routes (`/settings/theme`, `/export`) exist outside the campaign scope. The character builder lives at `/campaign/:id/character/new` with a 7-step wizard (Basics → Abilities → Skills → Class Features → Proficiencies → Equipment → Backstory), autosave via `useBuilderAutosave()`, and dedicated step components in `src/components/character-builder/`. There is no dedicated Spells step in the wizard, but spellcasting is resolved: `src/lib/resolver/spellcasting.ts` (`resolveSpellcasting()`) builds a spellcasting profile from `spellcasting` grants, returning `null` only when the build has none.
 
 ### Internationalization (i18n)
 

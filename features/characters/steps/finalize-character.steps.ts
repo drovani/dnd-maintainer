@@ -4,31 +4,30 @@ import type { DndWorld } from '../../steps/support/world.js';
 import { makeBuild, resolveBuild, STANDARD_ARRAY } from '../../steps/support/character-builder.js';
 import type { CharacterBuild } from '@/types/choices';
 import type { Character } from '@/types/database';
-import type { ResolvedCharacter } from '@/types/resolved';
+import type { BuildLevelRow, CreationRow, LevelRow } from '@/lib/build-reconstruction';
+import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
 
 /**
  * Finalize-character seam: render-app / data seam (persistence) + resolver.
  *
- * The real `useBuilderAutosave.finalize`/`saveDraft` cannot be driven against the
- * stateful supabase double — it calls `.upsert(...)` (unsupported) and the orphan
- * cleanup calls `.not('sequence','in',...)` (unsupported), so both throw before any
- * row is written. The app functionality exists; only this particular hook is
- * undriveable in-harness. The character create/finalize path that IS supported is
- * `useCharacterMutations().create`, whose `insert().select().single()` the stateful
- * db honors fully. We finalize a complete build into a `characters` row through it,
- * deriving HP / proficiency-bonus from the real resolver (resolveBuild), then assert
- * on `this.db.rows('characters')`.
+ * The build is finalized through the REAL `useBuilderAutosave().finalize` — the
+ * production entry point the wizard uses. The stateful supabase double now honors
+ * the calls it makes (`.upsert` for build-level rows, `.not('sequence','in',...)`
+ * for orphan cleanup, `character_items` insert, and the `status` promotion update),
+ * so the draft→ready promotion and the resolver-derived stat mapping are exercised
+ * by production code rather than assembled by the step. Assertions then read
+ * `this.db.rows('characters')` — the `status: 'ready'`, proficiency bonus, and max
+ * HP they check are written by the hook, not by the test.
  *
  * Feature-unique steps only — shared build vocabulary lives in character-common.steps.ts.
  */
 
-interface CreateMutation {
-  create: { mutateAsync: (c: Omit<Character, 'id' | 'created_at' | 'updated_at' | 'is_active'>) => Promise<Character> };
+interface AutosaveHook {
+  useBuilderAutosave: (existingCharacterId?: string) => { finalize: (payload: AutosavePayload) => Promise<string> };
 }
 
 interface CharactersQuery {
   useCharacters: (campaignId: string) => { isSuccess: boolean; isError: boolean; data?: { name: string }[] };
-  useCharacterMutations: () => CreateMutation;
 }
 
 const CAMPAIGN_ID = 'camp-1';
@@ -38,15 +37,19 @@ const CAMPAIGN_ID = 'camp-1';
  *  Scenarios run sequentially and the When always runs before the Then. */
 let lastBasicsStepText = '';
 
-/** Assemble the finalized `characters` insert payload from a build + its resolved stats. */
-function finalizedPayload(
-  build: CharacterBuild,
-  resolved: ResolvedCharacter,
-  overrides: Partial<Character> = {}
-): Omit<Character, 'id' | 'created_at' | 'updated_at' | 'is_active'> {
+/**
+ * A draft `Character` for the builder to finalize. Resolver-derived stats
+ * (hit_points_max, proficiency_bonus, ...) are left null on purpose — `finalize`
+ * fills them from the `resolved` it is handed, so the hook (not the test) owns
+ * that mapping. `status` is 'draft'; finalize is what promotes it to 'ready'.
+ */
+function draftCharacter(build: CharacterBuild): Character {
   return {
+    id: '',
     slug: '',
     previous_slugs: [],
+    created_at: '',
+    updated_at: '',
     campaign_id: CAMPAIGN_ID,
     name: 'Aria Brightwood',
     player_name: 'Test Player',
@@ -65,10 +68,10 @@ function finalizedPayload(
     eye_color: null,
     hair_color: null,
     skin_color: null,
-    hit_points_max: resolved.hitPoints.max,
-    armor_class: resolved.armorClass.effective,
-    speed: resolved.speed.walk?.value ?? null,
-    proficiency_bonus: resolved.proficiencyBonus,
+    hit_points_max: null,
+    armor_class: null,
+    speed: null,
+    proficiency_bonus: null,
     personality_traits: null,
     ideals: null,
     bonds: null,
@@ -77,26 +80,45 @@ function finalizedPayload(
     backstory: null,
     notes: null,
     portrait_url: null,
-    // The end-state of finalize: status promoted from 'draft' to 'ready'.
-    status: 'ready',
+    is_active: true,
+    status: 'draft',
     weapon_masteries: null,
     heroic_inspiration: false,
     exhaustion_level: 0,
-    ...overrides,
   };
+}
+
+/** Build the `character_build_levels` rows finalize persists: one creation row + one per class level. */
+function buildLevelRows(build: CharacterBuild): BuildLevelRow[] {
+  const creation: CreationRow = {
+    sequence: 0,
+    base_abilities: build.baseAbilities,
+    ability_method: build.abilityMethod,
+    choices: {},
+    deleted_at: null,
+  };
+  const levels: LevelRow[] = build.levels.map((lv, i) => ({
+    sequence: i + 1,
+    class_id: lv.classId,
+    class_level: lv.classLevel,
+    subclass_id: null,
+    asi_allocation: null,
+    hp_roll: lv.hpRoll,
+    feat_id: null,
+    choices: {},
+    deleted_at: null,
+  }));
+  return [creation, ...levels];
 }
 
 async function persistFinalized(world: DndWorld): Promise<void> {
   const build = world.build!;
   const resolved = resolveBuild(build);
-  const mod = (await world.esmockWithSupabase('@/hooks/useCharacters')) as unknown as CharactersQuery;
-  const { result } = renderHook(() => mod.useCharacterMutations(), { wrapper: world.createWrapper() });
+  const mod = (await world.esmockWithSupabase('@/hooks/useBuilderAutosave')) as unknown as AutosaveHook;
+  const { result } = renderHook(() => mod.useBuilderAutosave(), { wrapper: world.createWrapper() });
+  const payload: AutosavePayload = { character: draftCharacter(build), rows: buildLevelRows(build), resolved };
   await act(async () => {
-    try {
-      await result.current.create.mutateAsync(finalizedPayload(build, resolved));
-    } catch (err) {
-      world.mutationError = err;
-    }
+    await result.current.finalize(payload);
   });
 }
 

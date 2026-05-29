@@ -379,7 +379,12 @@ When(
       const form = (document.querySelector('#campaign-name') as HTMLInputElement).closest('form') as HTMLFormElement;
       r.rtl.fireEvent.submit(form);
     });
-    await r.rtl.waitFor(() => true);
+    // The app has no duplicate guard, so the submit silently persists a second campaign.
+    // Settle on that real outcome; the Then asserts the intended rejection (and fails → @future).
+    await r.rtl.waitFor(() => {
+      const dupes = (this.db.rows('campaigns') as unknown as Campaign[]).filter((c) => c.name === name);
+      if (dupes.length < 2) throw new Error('second campaign not persisted yet');
+    });
   }
 );
 
@@ -505,7 +510,13 @@ When(
       r.rtl.fireEvent.keyDown(input, { key: 'Enter' });
     });
 
-    await r.rtl.waitFor(() => true);
+    // The app has no unique-name guard, so the rename actually persists. Settle on that
+    // real outcome; the Then asserts the intended rejection (and fails → @future).
+    await r.rtl.waitFor(() => {
+      if (!(this.db.rows('campaigns') as unknown as Campaign[]).some((c) => c.name === to)) {
+        throw new Error('rename not persisted yet');
+      }
+    });
     renameState = { from, to };
   }
 );
@@ -565,14 +576,17 @@ Then('{string} does not appear in the active campaigns list', function (this: Dn
   }
 });
 
-When('the Dungeon Master restores {string}', async function (this: DndWorld, name: string) {
+When('the Dungeon Master restores {string}', async function (this: DndWorld, _name: string) {
   // INTENDED behavior: the DM restores an archived campaign back into the active list.
   // There is NO restore/unarchive UI anywhere in the app (CampaignList, CampaignDashboard,
   // Sidebar) — so this action cannot be driven through the rendered UI. Render the list
   // (archived campaigns are hidden), record the target; the Then step asserts the intended
   // outcome and fails → @future.
   const r = await renderCampaignList(this);
-  await r.rtl.waitFor(() => true);
+  // No restore UI exists, so nothing is clicked — just let the list finish loading.
+  await r.rtl.waitFor(() => {
+    if ((document.body.textContent ?? '').includes('Loading')) throw new Error('still loading');
+  });
 });
 
 Then('{string} appears in the active campaigns list', function (this: DndWorld, name: string) {

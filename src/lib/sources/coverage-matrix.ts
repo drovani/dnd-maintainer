@@ -22,7 +22,6 @@
 import { CLASS_SOURCES, SPECIES_SOURCES, BACKGROUND_SOURCES, SUBCLASS_SOURCES } from '@/lib/sources';
 import { SUBCLASS_IDS_BY_CLASS } from '@/lib/sources/subclasses';
 import { DND_CLASSES, DND_SPECIES, DND_BACKGROUNDS } from '@/lib/dnd-helpers';
-import type { Grant } from '@/types/grants';
 
 export type EntryStatus = 'missing' | 'stub' | 'partial' | 'complete';
 
@@ -90,10 +89,6 @@ export const EXPECTED_ASI_LEVELS: readonly number[] = [4, 8, 12, 16, 19] as cons
  * is the real path to stakeholder acceptance.
  */
 export const GOLDEN_VERIFIED: ReadonlySet<string> = new Set<string>();
-
-function grantsOf(grants: readonly Grant[]): readonly Grant[] {
-  return grants;
-}
 
 function countStatuses(entries: readonly CoverageEntry[]): Readonly<Record<EntryStatus, number>> {
   const counts: Record<EntryStatus, number> = { missing: 0, stub: 0, partial: 0, complete: 0 };
@@ -182,7 +177,7 @@ export function computeSpeciesCoverage(): ForkCoverage {
   const entries: CoverageEntry[] = DND_SPECIES.map((s) => {
     const src = sourceById.get(s.id);
     if (!src) return { id: s.id, status: 'missing', detail: 'no SpeciesSource entry', goldenVerified: false };
-    const grants = grantsOf(src.grants);
+    const grants = src.grants;
     if (grants.length === 0) return { id: s.id, status: 'stub', detail: 'grants: []', goldenVerified: false };
 
     const problems: string[] = [];
@@ -209,7 +204,7 @@ export function computeBackgroundCoverage(): ForkCoverage {
   const entries: CoverageEntry[] = DND_BACKGROUNDS.map((b) => {
     const src = sourceById.get(b.id);
     if (!src) return { id: b.id, status: 'missing', detail: 'no BackgroundSource entry', goldenVerified: false };
-    const grants = grantsOf(src.grants);
+    const grants = src.grants;
     if (grants.length === 0) return { id: b.id, status: 'stub', detail: 'grants: []', goldenVerified: false };
 
     // 2024 background formula: 2 skill proficiencies, +3 ability points, an origin

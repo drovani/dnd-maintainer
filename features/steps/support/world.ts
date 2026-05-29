@@ -40,8 +40,6 @@ export interface RenderRouteResult {
 export interface DndWorld extends World {
   supabase: ReturnType<typeof createSupabaseMock>['supabase'];
   mockQueryResult: ReturnType<typeof createSupabaseMock>['mockQueryResult'];
-  /** Recorded call args per method name — populated by the spy wrapper installed in the constructor */
-  supabaseCalls: Record<string, unknown[][]>;
   queryClient: QueryClient;
   importWithSupabase: (modulePath: string) => Promise<Record<string, unknown>>;
   createWrapper: () => (props: { children: React.ReactNode }) => React.ReactElement;
@@ -70,7 +68,6 @@ export interface DndWorld extends World {
   hookResult?: ReturnType<typeof renderHook<any, any>>;
   // Campaign-specific scenario state
   createdCampaign?: Campaign;
-  mutationError?: unknown;
   mutationResult?: Campaign;
   globalThemeId?: string;
   openedCampaignName?: string;
@@ -81,7 +78,6 @@ export interface DndWorld extends World {
 class DndWorldImpl extends World implements DndWorld {
   supabase: ReturnType<typeof createSupabaseMock>['supabase'];
   mockQueryResult: ReturnType<typeof createSupabaseMock>['mockQueryResult'];
-  supabaseCalls: Record<string, unknown[][]> = {};
   queryClient: QueryClient;
   db: StatefulDb;
   statefulSupabase: unknown;
@@ -96,7 +92,6 @@ class DndWorldImpl extends World implements DndWorld {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hookResult?: ReturnType<typeof renderHook<any, any>>;
   createdCampaign?: Campaign;
-  mutationError?: unknown;
   mutationResult?: Campaign;
   globalThemeId?: string;
   openedCampaignName?: string;
@@ -112,18 +107,6 @@ class DndWorldImpl extends World implements DndWorld {
     const stateful = createStatefulSupabase();
     this.statefulSupabase = stateful.supabase;
     this.db = stateful.db;
-
-    // Wrap every supabase method with a call recorder so steps can assert args
-    const calls = this.supabaseCalls;
-    for (const name of Object.keys(this.supabase) as Array<keyof typeof this.supabase>) {
-      if (name === 'then') continue;
-      const orig = this.supabase[name] as (...args: unknown[]) => unknown;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.supabase as any)[name] = (...args: unknown[]) => {
-        (calls[name] ??= []).push(args);
-        return orig(...args);
-      };
-    }
 
     this.queryClient = new QueryClient({
       defaultOptions: {
