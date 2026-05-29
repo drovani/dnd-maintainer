@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "coverage:matrix": "COVERAGE_WRITE=1 vitest run src/lib/sources/coverage-matrix.test.ts",
     "supabase:types": "npx supabase gen types typescript --local > src/types/supabase.ts",
     "supabase:reset": "npx supabase stop --no-backup && npx supabase start && npm run supabase:types",
     "format": "prettier --write .",
