@@ -3,6 +3,16 @@
 User stories for Campaigns, Characters, Settings, and Export areas.
 Sessions and Notes are out of scope for this Tier 1 backlog.
 
+**Scope note — class completeness is NOT BDD.** Asserting that every class's
+level 1–20 choices are accounted for (the exhaustive 12×20 matrix) is a
+unit-test job, not a Gherkin one — it has one right answer per (class × level)
+and no documentation value as prose. That lives in `src/lib/sources/*.test.ts`
+(see `docs/class-completeness-testing.md`, Layers 1 & 2). BDD here is reserved
+for **marquee, documentation-worthy behaviors** (Layer 3): ASI raises a
+modifier, fighting-style AC bonus, Extra Attack, subclass selection at L3.
+Level-up stories below (US-010, US-014) are behavior examples — keep them
+representative, do not expand them into a per-level matrix.
+
 Each entry follows the template:
 
 ```
