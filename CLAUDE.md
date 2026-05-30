@@ -100,6 +100,7 @@ Three color themes (Default/gold, Sylvan/green, Arcane/purple) with light and da
 - **Shared CRUD helpers** (`src/test/hook-test-helpers.ts`): `describeListQuery`, `describeSingleQuery`, `describeCreateMutation`, `describeUpdateMutation`, `describeDeleteMutation` — cover standard success/error/disabled cases. Write inline tests for behavior unique to a hook.
 - **Lib function tests**: Co-locate test file; use `it.each` for pure input/output functions; mock `Math.random` via `vi.spyOn` for random-dependent functions.
 - **Coverage**: v8 provider; includes `src/lib/**` and `src/hooks/**`; excludes `query-client.ts`, `i18n.ts`.
+- **Class completeness**: asserting every class's L1–20 choices are accounted for is a 3-layer strategy — cross-class invariants → per-class PHB oracle → BDD for marquee behaviors only. See `docs/class-completeness-testing.md`. Layer 1 lives in `src/lib/sources/classes.test.ts` (data-shape) + `class-completeness.test.ts` (resolver round-trip + subclass-stub ratchet). The exhaustive class×level matrix is a unit-test job, **not** BDD.
 
 ## Environment Variables
 
