@@ -26,6 +26,19 @@ export interface BuildOpts {
  * resolution does not depend on which scores sit where. */
 export const STANDARD_ARRAY: AbilityScores = { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 };
 
+/**
+ * Build a typed `choices` map from `[key, decision]` entries. A bare object
+ * literal with computed `ChoiceKey` keys (e.g. `{ [createChoiceKey(...)]: ... }`)
+ * widens to a `string` index signature, which is not assignable to the
+ * pattern-template `Record<ChoiceKey, ChoiceDecision>`. Routing entries through
+ * this helper keeps both keys and decision shapes fully type-checked.
+ */
+export function makeChoices(
+  ...entries: readonly (readonly [ChoiceKey, ChoiceDecision])[]
+): Readonly<Record<ChoiceKey, ChoiceDecision>> {
+  return Object.fromEntries(entries) as Record<ChoiceKey, ChoiceDecision>;
+}
+
 export function makeBuild(opts: BuildOpts = {}): CharacterBuild {
   const level = opts.level ?? 1;
   const classId: ClassId = opts.classId ?? 'fighter';

@@ -2,6 +2,7 @@ import { Before, Given, When, Then } from '@cucumber/cucumber';
 import { createElement } from 'react';
 import type { DndWorld } from '../../steps/support/world.js';
 import type { Campaign } from '../../../src/types/database.js';
+import type { Row } from '../../steps/support/stateful-supabase.js';
 
 // ---------------------------------------------------------------------------
 // Campaigns — render-app + stateful-mock seam.
@@ -54,7 +55,6 @@ function makeCampaignRow(overrides: Partial<Campaign> & { name: string }): Campa
     id: `c${_idSeq}`,
     slug: slug || `campaign-${_idSeq}`,
     previous_slugs: [],
-    name: overrides.name,
     description: null,
     setting: null,
     status: 'active',
@@ -67,7 +67,7 @@ function makeCampaignRow(overrides: Partial<Campaign> & { name: string }): Campa
 }
 
 function seedRow(world: DndWorld, row: Campaign): void {
-  world.db.seed('campaigns', [...(world.db.rows('campaigns') as unknown as Campaign[]), row]);
+  world.db.seed('campaigns', [...world.db.rows('campaigns'), row as unknown as Row]);
 }
 
 function findRow(world: DndWorld, name: string): Campaign {

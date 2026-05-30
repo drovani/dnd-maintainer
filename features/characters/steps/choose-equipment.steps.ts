@@ -1,6 +1,6 @@
 import { When, Then } from '@cucumber/cucumber';
 import type { DndWorld } from '../../steps/support/world.js';
-import { makeBuild, resolveBuild } from '../../steps/support/character-builder.js';
+import { makeBuild, makeChoices, resolveBuild } from '../../steps/support/character-builder.js';
 import { createChoiceKey } from '@/types/choices';
 
 /**
@@ -44,9 +44,7 @@ When('the character chooses the first starting equipment option', function (this
   this.build = makeBuild({
     classId: 'fighter',
     level: 1,
-    choices: {
-      [FIGHTER_LOADOUT_KEY]: { type: 'bundle-choice', bundleId: firstBundleId, slotPicks: {} },
-    },
+    choices: makeChoices([FIGHTER_LOADOUT_KEY, { type: 'bundle-choice', bundleId: firstBundleId, slotPicks: {} }]),
   });
   this.resolved = resolveBuild(this.build);
 });

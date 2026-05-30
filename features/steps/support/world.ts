@@ -119,7 +119,6 @@ class DndWorldImpl extends World implements DndWorld {
     this.dom = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>', {
       url: 'http://localhost',
     });
-    // @ts-expect-error - globalThis assignment for jsdom
     globalThis.document = this.dom.window.document;
     // @ts-expect-error - globalThis assignment for jsdom
     globalThis.window = this.dom.window;

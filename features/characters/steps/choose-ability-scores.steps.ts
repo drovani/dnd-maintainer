@@ -1,6 +1,6 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import type { DndWorld } from '../../steps/support/world.js';
-import { makeBuild, resolveBuild } from '../../steps/support/character-builder.js';
+import { makeBuild, makeChoices, resolveBuild } from '../../steps/support/character-builder.js';
 import {
   STANDARD_ARRAY as STANDARD_ARRAY_VALUES,
   POINT_BUY_TOTAL,
@@ -121,9 +121,7 @@ When(
     this.build = makeBuild({
       backgroundId: 'soldier',
       baseAbilities: baseScores,
-      choices: {
-        [asiKey]: { type: 'asi', allocation: { [first]: 2, [second]: 1 } },
-      },
+      choices: makeChoices([asiKey, { type: 'asi', allocation: { [first]: 2, [second]: 1 } }]),
     });
     this.resolved = resolveBuild(this.build);
   }

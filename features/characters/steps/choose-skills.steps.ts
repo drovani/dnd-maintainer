@@ -1,6 +1,6 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import type { DndWorld } from '../../steps/support/world.js';
-import { makeBuild, resolveBuild } from '../../steps/support/character-builder.js';
+import { makeBuild, makeChoices, resolveBuild } from '../../steps/support/character-builder.js';
 import { createChoiceKey } from '@/types/choices';
 import type { SkillId } from '@/lib/dnd-helpers';
 
@@ -66,7 +66,7 @@ Given(
       classId: 'fighter',
       backgroundId: 'soldier',
       level: 1,
-      choices: { [fighterSkillKey]: { type: 'skill-choice', skills: [id] } },
+      choices: makeChoices([fighterSkillKey, { type: 'skill-choice', skills: [id] }]),
     });
     this.resolved = resolveBuild(this.build);
   }
@@ -107,10 +107,10 @@ When('the character chooses Expertise in the {word} skill', function (this: DndW
   this.build = makeBuild({
     classId: 'rogue',
     level: 1,
-    choices: {
-      [skillKey]: { type: 'skill-choice', skills: [id, 'acrobatics', 'perception', 'investigation'] },
-      [expertiseKey]: { type: 'expertise-choice', skills: [id, 'acrobatics'], tools: [] },
-    },
+    choices: makeChoices(
+      [skillKey, { type: 'skill-choice', skills: [id, 'acrobatics', 'perception', 'investigation'] }],
+      [expertiseKey, { type: 'expertise-choice', skills: [id, 'acrobatics'], tools: [] }]
+    ),
   });
   this.resolved = resolveBuild(this.build);
 });
