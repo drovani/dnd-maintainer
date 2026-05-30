@@ -8,3 +8,7 @@ Feature: Level up a character
     When the Fighter advances to level 4
     Then they must choose an ability score increase
     And their proficiency bonus is 2
+
+  Scenario: Reaching level 3 prompts a subclass choice
+    Given a new character with the fighter class at level 3
+    Then the character must choose a subclass

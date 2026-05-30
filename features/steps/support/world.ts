@@ -274,23 +274,15 @@ After(function (this: DndWorld) {
   } catch {
     /* ignore */
   }
+  // NB: do NOT delete globalThis.window/document/navigator here. React's scheduler
+  // flushes deferred work on a setImmediate AFTER this hook returns; if the globals
+  // were deleted it throws "window is not defined" (an unhandled rejection that
+  // flips the process exit code even though every scenario passed). Each scenario's
+  // World constructor reassigns these globals to a fresh jsdom, so leaving the
+  // previous window in place until then preserves isolation. We still close the old
+  // window to release its resources.
   try {
     (globalThis.window as { close?: () => void } | undefined)?.close?.();
-  } catch {
-    /* ignore */
-  }
-  try {
-    delete (globalThis as { document?: Document }).document;
-  } catch {
-    /* ignore */
-  }
-  try {
-    delete (globalThis as { window?: Window }).window;
-  } catch {
-    /* ignore */
-  }
-  try {
-    delete (globalThis as { navigator?: Navigator }).navigator;
   } catch {
     /* ignore */
   }

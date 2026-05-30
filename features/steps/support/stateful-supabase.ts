@@ -15,7 +15,7 @@
  *   .update(patch).eq('id', x).select().single()
  *   .update(patch).eq('id', x)                 // awaited without select (archive)
  *   .delete().eq('id', x)
- *   .is(col, null) / .eq(col, val) / .order(col, {ascending})
+ *   .is(col, null) / .eq(col, val) / .in(col, [...]) / .order(col, {ascending})
  *   .not('sequence', 'in', '(0,1)') / .not('archived_at', 'is', null)
  *   .or('slug.eq.<v>,previous_slugs.cs.{"<v>"}') // slug-or-previous-slug lookup
  *   .single() / .maybeSingle()
@@ -161,6 +161,12 @@ export function createStatefulSupabase(): { supabase: unknown; db: StatefulDb } 
         this.s.predicates.push((r) => r[col] != null);
       }
       // UNSUPPORTED not() operator — ignored.
+      return this;
+    }
+    in(col: string, vals: readonly unknown[]): this {
+      // .in('id', [...]) → keep rows whose col matches any of the listed values.
+      const set = new Set(vals);
+      this.s.predicates.push((r) => set.has(r[col]));
       return this;
     }
     order(col: string, opts?: { ascending?: boolean }): this {
