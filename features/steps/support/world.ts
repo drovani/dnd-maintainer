@@ -1,7 +1,7 @@
 import { setWorldConstructor, World, type IWorldOptions, After } from '@cucumber/cucumber';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
-import { JSDOM } from 'jsdom';
+import { JSDOM, VirtualConsole } from 'jsdom';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import type { renderHook } from '@testing-library/react';
@@ -115,9 +115,14 @@ class DndWorldImpl extends World implements DndWorld {
       },
     });
 
-    // Bootstrap jsdom for React Testing Library
+    // Bootstrap jsdom for React Testing Library. Forward real page console.* calls
+    // but omit jsdom's own "Not implemented" notices (e.g. navigation) so a passing
+    // run stays nothing but green dots.
+    const virtualConsole = new VirtualConsole();
+    virtualConsole.forwardTo(console, { jsdomErrors: 'none' });
     this.dom = new JSDOM('<!DOCTYPE html><html><body><div id="root"></div></body></html>', {
       url: 'http://localhost',
+      virtualConsole,
     });
     globalThis.document = this.dom.window.document;
     // @ts-expect-error - globalThis assignment for jsdom

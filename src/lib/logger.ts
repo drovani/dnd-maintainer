@@ -1,6 +1,10 @@
 import log, { type Logger, type LogLevelDesc } from 'loglevel';
 
-const DEFAULT_LEVEL: LogLevelDesc = import.meta.env.DEV ? 'DEBUG' : 'WARN';
+// VITE_LOG_LEVEL overrides the default when set (e.g. 'silent' to mute output);
+// otherwise dev builds are verbose and prod builds warn-and-above. The BDD
+// harness sets this to 'silent' so a passing run is nothing but green dots.
+const DEFAULT_LEVEL: LogLevelDesc =
+  (import.meta.env.VITE_LOG_LEVEL as LogLevelDesc | undefined) ?? (import.meta.env.DEV ? 'DEBUG' : 'WARN');
 
 // setDefaultLevel is a no-op when the user has a level saved in localStorage under 'loglevel' or 'loglevel:<name>'; clear that key to reset.
 log.setDefaultLevel(DEFAULT_LEVEL);

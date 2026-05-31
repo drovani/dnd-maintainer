@@ -37,6 +37,8 @@ export async function load(url, context, nextLoad) {
     // Provide placeholder values for Vite env vars so modules load without throwing
     .replace(/import\.meta\.env\.VITE_SUPABASE_URL/g, '"http://localhost:54321"')
     .replace(/import\.meta\.env\.VITE_SUPABASE_ANON_KEY/g, '"test-anon-key"')
+    // Mute loggers during BDD so a passing run is nothing but green dots.
+    .replace(/import\.meta\.env\.VITE_LOG_LEVEL/g, '"silent"')
     .replace(/import\.meta\.env\.VITE_\w+/g, 'undefined')
     .replace(/import\.meta\.env/g, '({DEV:false,PROD:true,MODE:"test",SSR:false})');
 

@@ -15,6 +15,7 @@ export default defineConfig(
       globals: {
         URL: 'readonly',
         TextDecoder: 'readonly',
+        console: 'readonly',
       },
     },
   },
@@ -58,6 +59,13 @@ export default defineConfig(
   },
   {
     files: ['src/lib/logger.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
+    // BDD entrypoint must filter Cucumber's startup banner on the real console.
+    files: ['features/support/register.mjs'],
     rules: {
       'no-console': 'off',
     },
