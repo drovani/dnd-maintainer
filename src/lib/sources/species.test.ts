@@ -251,13 +251,13 @@ describe('Gnome species source (2024 PHB)', () => {
     expect(featureIds).toEqual(expect.arrayContaining(['gnome-darkvision', 'gnome-gnomish-cunning']));
   });
 
-  it('grants lineage choice from Forest, Rock, Deep', () => {
+  it('grants lineage choice from Forest and Rock', () => {
     const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
     expect(lineageGrant).toEqual({
       type: 'lineage-choice',
       key: createChoiceKey('lineage-choice', 'species', 'gnome', 0),
       speciesId: 'gnome',
-      from: ['forest', 'rock', 'deep'],
+      from: ['forest', 'rock'],
     });
   });
 });
@@ -417,12 +417,12 @@ describe('Dragonborn species source (2024 PHB)', () => {
     });
   });
 
-  it('grants lineage choice from all 15 draconic lineages', () => {
+  it('grants lineage choice from all 10 draconic lineages', () => {
     const lineageGrant = source?.grants.find((g) => g.type === 'lineage-choice');
     expect(lineageGrant).toBeDefined();
     if (lineageGrant?.type !== 'lineage-choice') return;
     expect(lineageGrant.speciesId).toBe('dragonborn');
-    expect(lineageGrant.from).toHaveLength(15);
+    expect(lineageGrant.from).toHaveLength(10);
     expect(lineageGrant.from).toEqual(
       expect.arrayContaining([
         'chromatic-black',
@@ -435,17 +435,12 @@ describe('Dragonborn species source (2024 PHB)', () => {
         'metallic-copper',
         'metallic-gold',
         'metallic-silver',
-        'gem-amethyst',
-        'gem-emerald',
-        'gem-sapphire',
-        'gem-topaz',
-        'gem-crystal',
       ])
     );
   });
 
-  it('DRAGONBORN_LINEAGE_GRANTS has exactly 15 entries', () => {
-    expect(Object.keys(DRAGONBORN_LINEAGE_GRANTS)).toHaveLength(15);
+  it('DRAGONBORN_LINEAGE_GRANTS has exactly 10 entries', () => {
+    expect(Object.keys(DRAGONBORN_LINEAGE_GRANTS)).toHaveLength(10);
   });
 
   it('each dragonborn lineage grant includes a resistance and two features', () => {
@@ -460,14 +455,8 @@ describe('Dragonborn species source (2024 PHB)', () => {
     }
   });
 
-  it('gem lineages have 120 ft darkvision; chromatic and metallic have 60 ft', () => {
-    const gemLineages = ['gem-amethyst', 'gem-emerald', 'gem-sapphire', 'gem-topaz', 'gem-crystal'];
-    for (const lineageId of gemLineages) {
-      const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId]!;
-      const featureIds = grants.filter((g) => g.type === 'feature').map((g) => g.type === 'feature' && g.feature.id);
-      expect(featureIds).toContain('dragonborn-darkvision-120');
-    }
-    const nonGemLineages = [
+  it('all dragonborn lineages have 60 ft darkvision', () => {
+    const lineages = [
       'chromatic-black',
       'chromatic-blue',
       'chromatic-green',
@@ -479,7 +468,7 @@ describe('Dragonborn species source (2024 PHB)', () => {
       'metallic-gold',
       'metallic-silver',
     ];
-    for (const lineageId of nonGemLineages) {
+    for (const lineageId of lineages) {
       const grants = DRAGONBORN_LINEAGE_GRANTS[lineageId]!;
       const featureIds = grants.filter((g) => g.type === 'feature').map((g) => g.type === 'feature' && g.feature.id);
       expect(featureIds).toContain('dragonborn-darkvision');
@@ -681,8 +670,8 @@ describe('ELF_LINEAGE_GRANTS', () => {
 });
 
 describe('GNOME_LINEAGE_GRANTS', () => {
-  it('has exactly 3 keys', () => {
-    expect(Object.keys(GNOME_LINEAGE_GRANTS)).toHaveLength(3);
+  it('has exactly 2 keys', () => {
+    expect(Object.keys(GNOME_LINEAGE_GRANTS)).toHaveLength(2);
   });
 });
 

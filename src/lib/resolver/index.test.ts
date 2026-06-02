@@ -1187,7 +1187,7 @@ describe('Dragonborn lineage-choice integration', () => {
     activeItems: [],
   };
 
-  it('emits a pending lineage-choice with 15 options when no lineage decision is made', () => {
+  it('emits a pending lineage-choice with 10 options when no lineage decision is made', () => {
     const { bundles } = collectBundles(dragonbornBuild);
     const input: ResolverInput = {
       baseAbilities: dragonbornBuild.baseAbilities,
@@ -1201,7 +1201,7 @@ describe('Dragonborn lineage-choice integration', () => {
     expect(pending).toBeDefined();
     expect(pending?.choiceKey).toBe(lineageKey);
     if (pending?.type === 'lineage-choice') {
-      expect(pending.from.length).toBe(15);
+      expect(pending.from.length).toBe(10);
       expect(pending.speciesId).toBe('dragonborn');
     }
   });

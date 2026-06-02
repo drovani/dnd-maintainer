@@ -34,6 +34,22 @@ export const FIGHTING_STYLE_SOURCES: readonly FightingStyleSource[] = [
     id: 'two-weapon-fighting',
     grants: [{ type: 'feature', feature: { id: 'fighting-style-two-weapon-fighting' } }],
   },
+  {
+    id: 'blind-fighting',
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-blind-fighting' } }],
+  },
+  {
+    id: 'interception',
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-interception' } }],
+  },
+  {
+    id: 'thrown-weapon-fighting',
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-thrown-weapon-fighting' } }],
+  },
+  {
+    id: 'unarmed-fighting',
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-unarmed-fighting' } }],
+  },
 ];
 
 export function getFightingStyleSource(id: FightingStyleId): FightingStyleSource | undefined {

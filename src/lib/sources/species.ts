@@ -4,7 +4,7 @@ import type { SpeciesId } from '@/lib/dnd-helpers';
 import { createChoiceKey } from '@/types/choices';
 
 // Per-lineage sub-grants for Dragonborn. Keyed by lineage ID.
-// Chromatic/metallic get 60 ft darkvision; gem get 120 ft darkvision.
+// Chromatic/metallic get 60 ft darkvision. (2024 PHB: 10 lineages only)
 export const DRAGONBORN_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {
   'chromatic-black': [
     { type: 'resistance', damageType: 'acid' },
@@ -55,31 +55,6 @@ export const DRAGONBORN_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly
     { type: 'resistance', damageType: 'cold' },
     { type: 'feature', feature: { id: 'dragonborn-darkvision' } },
     { type: 'feature', feature: { id: 'dragonborn-breath-metallic-silver' } },
-  ],
-  'gem-amethyst': [
-    { type: 'resistance', damageType: 'force' },
-    { type: 'feature', feature: { id: 'dragonborn-darkvision-120' } },
-    { type: 'feature', feature: { id: 'dragonborn-breath-gem-amethyst' } },
-  ],
-  'gem-emerald': [
-    { type: 'resistance', damageType: 'psychic' },
-    { type: 'feature', feature: { id: 'dragonborn-darkvision-120' } },
-    { type: 'feature', feature: { id: 'dragonborn-breath-gem-emerald' } },
-  ],
-  'gem-sapphire': [
-    { type: 'resistance', damageType: 'thunder' },
-    { type: 'feature', feature: { id: 'dragonborn-darkvision-120' } },
-    { type: 'feature', feature: { id: 'dragonborn-breath-gem-sapphire' } },
-  ],
-  'gem-topaz': [
-    { type: 'resistance', damageType: 'necrotic' },
-    { type: 'feature', feature: { id: 'dragonborn-darkvision-120' } },
-    { type: 'feature', feature: { id: 'dragonborn-breath-gem-topaz' } },
-  ],
-  'gem-crystal': [
-    { type: 'resistance', damageType: 'radiant' },
-    { type: 'feature', feature: { id: 'dragonborn-darkvision-120' } },
-    { type: 'feature', feature: { id: 'dragonborn-breath-gem-crystal' } },
   ],
 } as const;
 
@@ -141,11 +116,6 @@ export const GNOME_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly Gran
     { type: 'feature', feature: { id: 'gnome-rock-mending' } },
     { type: 'feature', feature: { id: 'gnome-rock-prestidigitation' } },
     { type: 'feature', feature: { id: 'gnome-rock-animate-objects' } },
-  ],
-  deep: [
-    { type: 'feature', feature: { id: 'gnome-deep-darkvision' } },
-    { type: 'feature', feature: { id: 'gnome-deep-disguise-self' } },
-    { type: 'feature', feature: { id: 'gnome-deep-nondetection' } },
   ],
 } as const;
 
@@ -261,7 +231,7 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
         type: 'lineage-choice',
         key: createChoiceKey('lineage-choice', 'species', 'gnome', 0),
         speciesId: 'gnome',
-        from: ['forest', 'rock', 'deep'],
+        from: ['forest', 'rock'],
       },
     ],
   },
@@ -310,7 +280,7 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
       { type: 'feature', feature: { id: 'aasimar-celestial-revelation' } },
     ],
   },
-  // Dragonborn (2024 PHB) — lineage choice from 15 options (5 chromatic, 5 metallic, 5 gem)
+  // Dragonborn (2024 PHB) — lineage choice from 10 options (5 chromatic, 5 metallic)
   {
     id: 'dragonborn',
     defaultSize: 'medium',
@@ -340,11 +310,6 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
           'metallic-copper',
           'metallic-gold',
           'metallic-silver',
-          'gem-amethyst',
-          'gem-emerald',
-          'gem-sapphire',
-          'gem-topaz',
-          'gem-crystal',
         ],
       },
     ],

@@ -76,8 +76,8 @@ describe('FEAT_SOURCES', () => {
     expect(unique.size).toBe(ids.length);
   });
 
-  it('has exactly 84 entries', () => {
-    expect(FEAT_SOURCES).toHaveLength(84);
+  it('has exactly 87 entries', () => {
+    expect(FEAT_SOURCES).toHaveLength(87);
   });
 
   it('all fightingStyle feats have no prerequisites', () => {

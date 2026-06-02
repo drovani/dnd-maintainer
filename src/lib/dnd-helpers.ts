@@ -691,11 +691,15 @@ export type ClassId = (typeof DND_CLASSES)[number]['id'];
 
 export const FIGHTING_STYLE_IDS = [
   'archery',
+  'blind-fighting',
   'defense',
   'dueling',
   'great-weapon-fighting',
+  'interception',
   'protection',
+  'thrown-weapon-fighting',
   'two-weapon-fighting',
+  'unarmed-fighting',
 ] as const;
 
 export type FightingStyleId = (typeof FIGHTING_STYLE_IDS)[number];
@@ -716,11 +720,15 @@ export const FEAT_IDS = [
   'tough',
   // Fighting Style feats
   'archery',
+  'blind-fighting',
   'defense',
   'dueling',
   'great-weapon-fighting',
+  'interception',
   'protection',
+  'thrown-weapon-fighting',
   'two-weapon-fighting',
+  'unarmed-fighting',
   // General feats (level 4+ prerequisite)
   'actor',
   'athlete',
@@ -730,7 +738,6 @@ export const FEAT_IDS = [
   'crusher',
   'defensive-duelist',
   'dual-wielder',
-  'dungeon-delver',
   'durable',
   'elemental-adept-acid',
   'elemental-adept-cold',
@@ -775,6 +782,7 @@ export const FEAT_IDS = [
   'telepathic',
   'war-caster',
   'weapon-master',
+  'martial-weapon-training',
   // Epic Boon feats (level 19+ prerequisite)
   'boon-of-combat-prowess',
   'boon-of-dimensional-travel',
@@ -782,7 +790,6 @@ export const FEAT_IDS = [
   'boon-of-fate',
   'boon-of-fortitude',
   'boon-of-irresistible-offense',
-  'boon-of-luck',
   'boon-of-night-spirit',
   'boon-of-recovery',
   'boon-of-skill',

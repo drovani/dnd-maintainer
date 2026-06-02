@@ -115,6 +115,30 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     prerequisites: [],
     grants: [{ type: 'feature', feature: { id: 'fighting-style-two-weapon-fighting' } }],
   },
+  {
+    id: 'blind-fighting',
+    category: 'fightingStyle',
+    prerequisites: [],
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-blind-fighting' } }],
+  },
+  {
+    id: 'interception',
+    category: 'fightingStyle',
+    prerequisites: [],
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-interception' } }],
+  },
+  {
+    id: 'thrown-weapon-fighting',
+    category: 'fightingStyle',
+    prerequisites: [],
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-thrown-weapon-fighting' } }],
+  },
+  {
+    id: 'unarmed-fighting',
+    category: 'fightingStyle',
+    prerequisites: [],
+    grants: [{ type: 'feature', feature: { id: 'fighting-style-unarmed-fighting' } }],
+  },
 
   // General feats — level 4+ prerequisite
   {
@@ -164,12 +188,6 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     category: 'general',
     prerequisites: [{ type: 'level-minimum', level: 4 }],
     grants: [{ type: 'feature', feature: { id: 'feat-dual-wielder' } }],
-  },
-  {
-    id: 'dungeon-delver',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-dungeon-delver' } }],
   },
   {
     id: 'durable',
@@ -435,6 +453,12 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     prerequisites: [{ type: 'level-minimum', level: 4 }],
     grants: [{ type: 'feature', feature: { id: 'feat-weapon-master' } }],
   },
+  {
+    id: 'martial-weapon-training',
+    category: 'general',
+    prerequisites: [{ type: 'level-minimum', level: 4 }],
+    grants: [{ type: 'feature', feature: { id: 'feat-martial-weapon-training' } }],
+  },
 
   // Epic Boon feats — level 19+ prerequisite
   {
@@ -472,12 +496,6 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     category: 'epicBoon',
     prerequisites: [{ type: 'level-minimum', level: 19 }],
     grants: [{ type: 'feature', feature: { id: 'feat-boon-of-irresistible-offense' } }],
-  },
-  {
-    id: 'boon-of-luck',
-    category: 'epicBoon',
-    prerequisites: [{ type: 'level-minimum', level: 19 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-boon-of-luck' } }],
   },
   {
     id: 'boon-of-night-spirit',

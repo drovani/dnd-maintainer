@@ -395,6 +395,26 @@
       "name": "Fighting Style: Two-Weapon Fighting",
       "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
     },
+    "fighting-style-blind-fighting": {
+      "name": "Fighting Style: Blind Fighting",
+      "description": "You have Blindsight with a range of 10 feet. Within that range, you can effectively see anything that isn't behind total cover, even if you have the Blinded condition or are in Darkness. Moreover, if a creature is Invisible to you, you can still see it."
+    },
+    "fighting-style-interception": {
+      "name": "Fighting Style: Interception",
+      "description": "When a creature you can see hits a target, other than you, within 5 feet of you with an attack, you can use your Reaction to reduce the damage the target takes by 1d10 plus your Proficiency Bonus (to a minimum of 0 damage). You must be wielding a Shield or a Simple or Martial weapon to use this Reaction."
+    },
+    "fighting-style-thrown-weapon-fighting": {
+      "name": "Fighting Style: Thrown Weapon Fighting",
+      "description": "You can draw a weapon that has the Thrown property as part of the attack you make with the weapon. In addition, when you hit with a ranged attack using a thrown weapon, you gain a +2 bonus to the damage roll."
+    },
+    "fighting-style-unarmed-fighting": {
+      "name": "Fighting Style: Unarmed Fighting",
+      "description": "Your unarmed strikes can deal bludgeoning damage equal to 1d6 plus your Strength modifier on a hit. If you aren't wielding any weapons or a Shield when you make the attack roll, the d6 becomes a d8. At the start of each of your turns, you can deal 1d4 bludgeoning damage to one creature Grappled by you."
+    },
+    "feat-martial-weapon-training": {
+      "name": "Martial Weapon Training",
+      "description": "You gain proficiency with all Martial weapons."
+    },
     "dwarf-darkvision": {
       "name": "Darkvision (120 ft.)",
       "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
@@ -819,26 +839,6 @@
       "name": "Breath Weapon (Cold)",
       "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
     },
-    "dragonborn-breath-gem-amethyst": {
-      "name": "Breath Weapon (Force)",
-      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
-    },
-    "dragonborn-breath-gem-emerald": {
-      "name": "Breath Weapon (Psychic)",
-      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
-    },
-    "dragonborn-breath-gem-sapphire": {
-      "name": "Breath Weapon (Thunder)",
-      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
-    },
-    "dragonborn-breath-gem-topaz": {
-      "name": "Breath Weapon (Necrotic)",
-      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
-    },
-    "dragonborn-breath-gem-crystal": {
-      "name": "Breath Weapon (Radiant)",
-      "description": "You exhale destructive energy. When you use your Breath Weapon, each creature in the area must make a saving throw. The type of saving throw and the damage type are determined by your Draconic Lineage."
-    },
     "goliath-large-form": {
       "name": "Large Form",
       "description": "Starting at character level 5, you can change your size to Large as a Bonus Action if you're in a big enough space. This transformation lasts until you end it as a Bonus Action or until you die."
@@ -966,18 +966,6 @@
     "gnome-rock-animate-objects": {
       "name": "Animate Objects",
       "description": "Starting at 5th level, you can cast Animate Objects using this trait. Intelligence is your spellcasting ability for it."
-    },
-    "gnome-deep-darkvision": {
-      "name": "Deep Gnome Darkvision (120 ft.)",
-      "description": "You can see in dim light within 120 feet of you as if it were bright light, and in darkness as if it were dim light."
-    },
-    "gnome-deep-disguise-self": {
-      "name": "Disguise Self",
-      "description": "Starting at 3rd level, you can cast Disguise Self using this trait. Intelligence is your spellcasting ability for it."
-    },
-    "gnome-deep-nondetection": {
-      "name": "Nondetection",
-      "description": "Starting at 5th level, you can cast Nondetection using this trait. Intelligence is your spellcasting ability for it."
     },
     "barbarian-rage": {
       "name": "Rage",
@@ -1950,6 +1938,22 @@
     "two-weapon-fighting": {
       "name": "Two-Weapon Fighting",
       "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
+    },
+    "blind-fighting": {
+      "name": "Blind Fighting",
+      "description": "You have Blindsight with a range of 10 feet. Within that range, you can effectively see anything that isn't behind total cover, even if you have the Blinded condition or are in Darkness. Moreover, if a creature is Invisible to you, you can still see it."
+    },
+    "interception": {
+      "name": "Interception",
+      "description": "When a creature you can see hits a target, other than you, within 5 feet of you with an attack, you can use your Reaction to reduce the damage the target takes by 1d10 plus your Proficiency Bonus (to a minimum of 0 damage). You must be wielding a Shield or a Simple or Martial weapon to use this Reaction."
+    },
+    "thrown-weapon-fighting": {
+      "name": "Thrown Weapon Fighting",
+      "description": "You can draw a weapon that has the Thrown property as part of the attack you make with the weapon. In addition, when you hit with a ranged attack using a thrown weapon, you gain a +2 bonus to the damage roll."
+    },
+    "unarmed-fighting": {
+      "name": "Unarmed Fighting",
+      "description": "Your unarmed strikes can deal bludgeoning damage equal to 1d6 plus your Strength modifier on a hit. If you aren't wielding any weapons or a Shield when you make the attack roll, the d6 becomes a d8. At the start of each of your turns, you can deal 1d4 bludgeoning damage to one creature Grappled by you."
     }
   },
   "weaponProperties": {
@@ -2109,12 +2113,7 @@
       "metallic-bronze": "Metallic (Bronze)",
       "metallic-copper": "Metallic (Copper)",
       "metallic-gold": "Metallic (Gold)",
-      "metallic-silver": "Metallic (Silver)",
-      "gem-amethyst": "Gem (Amethyst)",
-      "gem-emerald": "Gem (Emerald)",
-      "gem-sapphire": "Gem (Sapphire)",
-      "gem-topaz": "Gem (Topaz)",
-      "gem-crystal": "Gem (Crystal)"
+      "metallic-silver": "Metallic (Silver)"
     },
     "tiefling": {
       "abyssal": "Abyssal",
@@ -2128,8 +2127,7 @@
     },
     "gnome": {
       "forest": "Forest Gnome",
-      "rock": "Rock Gnome",
-      "deep": "Deep Gnome (Svirfneblin)"
+      "rock": "Rock Gnome"
     },
     "goliath": {
       "cloud": "Cloud Giant",
@@ -2208,6 +2206,10 @@
     "great-weapon-fighting": { "name": "Great Weapon Fighting" },
     "protection": { "name": "Protection" },
     "two-weapon-fighting": { "name": "Two-Weapon Fighting" },
+    "blind-fighting": { "name": "Blind Fighting" },
+    "interception": { "name": "Interception" },
+    "thrown-weapon-fighting": { "name": "Thrown Weapon Fighting" },
+    "unarmed-fighting": { "name": "Unarmed Fighting" },
     "actor": { "name": "Actor" },
     "athlete": { "name": "Athlete" },
     "charger": { "name": "Charger" },
@@ -2216,7 +2218,6 @@
     "crusher": { "name": "Crusher" },
     "defensive-duelist": { "name": "Defensive Duelist" },
     "dual-wielder": { "name": "Dual Wielder" },
-    "dungeon-delver": { "name": "Dungeon Delver" },
     "durable": { "name": "Durable" },
     "elemental-adept-acid": { "name": "Elemental Adept (Acid)" },
     "elemental-adept-cold": { "name": "Elemental Adept (Cold)" },
@@ -2261,13 +2262,13 @@
     "telepathic": { "name": "Telepathic" },
     "war-caster": { "name": "War Caster" },
     "weapon-master": { "name": "Weapon Master" },
+    "martial-weapon-training": { "name": "Martial Weapon Training" },
     "boon-of-combat-prowess": { "name": "Boon of Combat Prowess" },
     "boon-of-dimensional-travel": { "name": "Boon of Dimensional Travel" },
     "boon-of-energy-resistance": { "name": "Boon of Energy Resistance" },
     "boon-of-fate": { "name": "Boon of Fate" },
     "boon-of-fortitude": { "name": "Boon of Fortitude" },
     "boon-of-irresistible-offense": { "name": "Boon of Irresistible Offense" },
-    "boon-of-luck": { "name": "Boon of Luck" },
     "boon-of-night-spirit": { "name": "Boon of Night Spirit" },
     "boon-of-recovery": { "name": "Boon of Recovery" },
     "boon-of-skill": { "name": "Boon of Skill" },
