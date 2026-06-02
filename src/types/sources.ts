@@ -101,6 +101,7 @@ export interface FeatSource {
   readonly category: FeatCategory;
   readonly prerequisites: readonly FeatPrerequisite[];
   readonly grants: readonly Grant[];
+  readonly repeatable?: boolean;
 }
 
 export interface ItemSource {

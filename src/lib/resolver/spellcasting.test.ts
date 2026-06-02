@@ -296,7 +296,7 @@ describe('resolveSpellcasting', () => {
   it('non-class spellcasting source (feat) returns empty slots, null pactMagic, 0 preparedCount', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'feat', id: 'magic-initiate-wizard' },
+        source: { origin: 'feat', id: 'magic-initiate' },
         grants: [{ type: 'spellcasting', ability: 'int', source: 'feat' }],
       },
     ];
@@ -353,7 +353,7 @@ describe('resolveSpellcasting', () => {
 
   describe('class vs feat spellcasting grant precedence', () => {
     it('class grant takes priority over feat grant: ability and slots follow cleric, not feat', () => {
-      // Both a class spellcasting grant (cleric, wis) and a feat grant (magic-initiate, int)
+      // Both a class spellcasting grant (cleric, wis) and a feat grant (magic-initiate wizard option, int)
       // are present. The resolver must select the class grant.
       const bundles: GrantBundle[] = [
         {
@@ -361,7 +361,7 @@ describe('resolveSpellcasting', () => {
           grants: [{ type: 'spellcasting', ability: 'wis', source: 'class' }],
         },
         {
-          source: { origin: 'feat', id: 'magic-initiate-wizard' },
+          source: { origin: 'feat', id: 'magic-initiate' },
           grants: [{ type: 'spellcasting', ability: 'int', source: 'feat' }],
         },
       ];

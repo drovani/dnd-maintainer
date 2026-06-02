@@ -1,3 +1,4 @@
+import { createChoiceKey } from '@/types/choices';
 import type { FeatSource } from '@/types/sources';
 
 export const FEAT_SOURCES: readonly FeatSource[] = [
@@ -27,22 +28,48 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     grants: [{ type: 'feature', feature: { id: 'feat-lucky' } }],
   },
   {
-    id: 'magic-initiate-cleric',
+    id: 'magic-initiate',
     category: 'origin',
     prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-cleric' } }],
-  },
-  {
-    id: 'magic-initiate-druid',
-    category: 'origin',
-    prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-druid' } }],
-  },
-  {
-    id: 'magic-initiate-wizard',
-    category: 'origin',
-    prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-wizard' } }],
+    repeatable: true,
+    grants: [
+      {
+        type: 'feature-choice',
+        key: createChoiceKey('feature-choice', 'feat', 'magic-initiate', 0),
+        options: [
+          {
+            optionId: 'bard',
+            featureId: 'feat-magic-initiate-bard',
+            grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-bard' } }],
+          },
+          {
+            optionId: 'cleric',
+            featureId: 'feat-magic-initiate-cleric',
+            grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-cleric' } }],
+          },
+          {
+            optionId: 'druid',
+            featureId: 'feat-magic-initiate-druid',
+            grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-druid' } }],
+          },
+          {
+            optionId: 'sorcerer',
+            featureId: 'feat-magic-initiate-sorcerer',
+            grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-sorcerer' } }],
+          },
+          {
+            optionId: 'warlock',
+            featureId: 'feat-magic-initiate-warlock',
+            grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-warlock' } }],
+          },
+          {
+            optionId: 'wizard',
+            featureId: 'feat-magic-initiate-wizard',
+            grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-wizard' } }],
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'musician',
@@ -196,34 +223,43 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     grants: [{ type: 'feature', feature: { id: 'feat-durable' } }],
   },
   {
-    id: 'elemental-adept-acid',
+    id: 'elemental-adept',
     category: 'general',
     prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-acid' } }],
-  },
-  {
-    id: 'elemental-adept-cold',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-cold' } }],
-  },
-  {
-    id: 'elemental-adept-fire',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-fire' } }],
-  },
-  {
-    id: 'elemental-adept-lightning',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-lightning' } }],
-  },
-  {
-    id: 'elemental-adept-thunder',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-thunder' } }],
+    repeatable: true,
+    grants: [
+      {
+        type: 'feature-choice',
+        key: createChoiceKey('feature-choice', 'feat', 'elemental-adept', 0),
+        options: [
+          {
+            optionId: 'acid',
+            featureId: 'feat-elemental-adept-acid',
+            grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-acid' } }],
+          },
+          {
+            optionId: 'cold',
+            featureId: 'feat-elemental-adept-cold',
+            grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-cold' } }],
+          },
+          {
+            optionId: 'fire',
+            featureId: 'feat-elemental-adept-fire',
+            grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-fire' } }],
+          },
+          {
+            optionId: 'lightning',
+            featureId: 'feat-elemental-adept-lightning',
+            grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-lightning' } }],
+          },
+          {
+            optionId: 'thunder',
+            featureId: 'feat-elemental-adept-thunder',
+            grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-thunder' } }],
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'fey-touched',
@@ -280,24 +316,6 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     grants: [{ type: 'feature', feature: { id: 'feat-mage-slayer' } }],
   },
   {
-    id: 'magic-initiate-bard',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-bard' } }],
-  },
-  {
-    id: 'magic-initiate-sorcerer',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-sorcerer' } }],
-  },
-  {
-    id: 'magic-initiate-warlock',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-warlock' } }],
-  },
-  {
     id: 'medium-armor-master',
     category: 'general',
     prerequisites: [{ type: 'level-minimum', level: 4 }],
@@ -340,34 +358,48 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     grants: [{ type: 'feature', feature: { id: 'feat-polearm-master' } }],
   },
   {
-    id: 'resilient-constitution',
+    id: 'resilient',
     category: 'general',
     prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-resilient-constitution' } }],
-  },
-  {
-    id: 'resilient-dexterity',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-resilient-dexterity' } }],
-  },
-  {
-    id: 'resilient-intelligence',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-resilient-intelligence' } }],
-  },
-  {
-    id: 'resilient-strength',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-resilient-strength' } }],
-  },
-  {
-    id: 'resilient-wisdom',
-    category: 'general',
-    prerequisites: [{ type: 'level-minimum', level: 4 }],
-    grants: [{ type: 'feature', feature: { id: 'feat-resilient-wisdom' } }],
+    repeatable: true,
+    grants: [
+      {
+        type: 'feature-choice',
+        key: createChoiceKey('feature-choice', 'feat', 'resilient', 0),
+        options: [
+          {
+            optionId: 'strength',
+            featureId: 'feat-resilient-strength',
+            grants: [{ type: 'feature', feature: { id: 'feat-resilient-strength' } }],
+          },
+          {
+            optionId: 'dexterity',
+            featureId: 'feat-resilient-dexterity',
+            grants: [{ type: 'feature', feature: { id: 'feat-resilient-dexterity' } }],
+          },
+          {
+            optionId: 'constitution',
+            featureId: 'feat-resilient-constitution',
+            grants: [{ type: 'feature', feature: { id: 'feat-resilient-constitution' } }],
+          },
+          {
+            optionId: 'intelligence',
+            featureId: 'feat-resilient-intelligence',
+            grants: [{ type: 'feature', feature: { id: 'feat-resilient-intelligence' } }],
+          },
+          {
+            optionId: 'wisdom',
+            featureId: 'feat-resilient-wisdom',
+            grants: [{ type: 'feature', feature: { id: 'feat-resilient-wisdom' } }],
+          },
+          {
+            optionId: 'charisma',
+            featureId: 'feat-resilient-charisma',
+            grants: [{ type: 'feature', feature: { id: 'feat-resilient-charisma' } }],
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'ritual-caster',

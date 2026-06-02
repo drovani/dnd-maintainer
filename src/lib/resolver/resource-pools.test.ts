@@ -39,7 +39,7 @@ describe('resolveResourcePools', () => {
   it('uses fixed value when max mode is fixed', () => {
     const bundles: GrantBundle[] = [
       {
-        source: { origin: 'feat', id: 'magic-initiate-wizard' },
+        source: { origin: 'feat', id: 'magic-initiate' },
         grants: [{ type: 'resource-pool', poolId: 'example', max: { mode: 'fixed', value: 3 }, regen: 'long-rest' }],
       },
     ];

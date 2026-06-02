@@ -1,5 +1,5 @@
 import { parseChoiceKey, type ChoiceKey } from '@/types/choices';
-import type { BackgroundId, ClassId, SpeciesId } from '@/lib/dnd-helpers';
+import type { BackgroundId, ClassId, FeatId, SpeciesId } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/lib/sources/subclasses';
 import type { TFunction } from 'i18next';
 
@@ -14,5 +14,7 @@ export function getChoiceSourceName(choiceKey: ChoiceKey, t: TFunction<'gamedata
       return t(`classes.${id as ClassId}`);
     case 'subclass':
       return t(`subclasses.${id as SubclassId}.name`);
+    case 'feat':
+      return t(`feats.${id as FeatId}.name`, { defaultValue: id });
   }
 }

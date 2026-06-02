@@ -8,9 +8,7 @@ const BACKGROUND_ORIGIN_FEAT_IDS = [
   'crafter',
   'healer',
   'lucky',
-  'magic-initiate-cleric',
-  'magic-initiate-druid',
-  'magic-initiate-wizard',
+  'magic-initiate',
   'musician',
   'savage-attacker',
   'skilled',
@@ -76,8 +74,8 @@ describe('FEAT_SOURCES', () => {
     expect(unique.size).toBe(ids.length);
   });
 
-  it('has exactly 87 entries', () => {
-    expect(FEAT_SOURCES).toHaveLength(87);
+  it('has exactly 74 entries', () => {
+    expect(FEAT_SOURCES).toHaveLength(74);
   });
 
   it('all fightingStyle feats have no prerequisites', () => {
@@ -93,5 +91,54 @@ describe('FEAT_SOURCES', () => {
     expect(defense?.grants).toHaveLength(2);
     expect(defense?.grants.some((g) => g.type === 'feature')).toBe(true);
     expect(defense?.grants.some((g) => g.type === 'ac-bonus' && g.bonus === 1)).toBe(true);
+  });
+
+  describe('collapsed repeatable feats', () => {
+    it('magic-initiate is marked repeatable: true', () => {
+      const feat = FEAT_SOURCES.find((f) => f.id === 'magic-initiate');
+      expect(feat?.repeatable).toBe(true);
+    });
+
+    it('elemental-adept is marked repeatable: true', () => {
+      const feat = FEAT_SOURCES.find((f) => f.id === 'elemental-adept');
+      expect(feat?.repeatable).toBe(true);
+    });
+
+    it('resilient is marked repeatable: true', () => {
+      const feat = FEAT_SOURCES.find((f) => f.id === 'resilient');
+      expect(feat?.repeatable).toBe(true);
+    });
+
+    it('magic-initiate has 6 feature-choice options (bard/cleric/druid/sorcerer/warlock/wizard)', () => {
+      const feat = FEAT_SOURCES.find((f) => f.id === 'magic-initiate');
+      const choiceGrant = feat?.grants.find((g) => g.type === 'feature-choice');
+      expect(choiceGrant).toBeDefined();
+      if (choiceGrant?.type === 'feature-choice') {
+        const optionIds = choiceGrant.options.map((o) => o.optionId);
+        expect(optionIds).toEqual(['bard', 'cleric', 'druid', 'sorcerer', 'warlock', 'wizard']);
+      }
+    });
+
+    it('elemental-adept has 5 feature-choice options (acid/cold/fire/lightning/thunder)', () => {
+      const feat = FEAT_SOURCES.find((f) => f.id === 'elemental-adept');
+      const choiceGrant = feat?.grants.find((g) => g.type === 'feature-choice');
+      expect(choiceGrant).toBeDefined();
+      if (choiceGrant?.type === 'feature-choice') {
+        const optionIds = choiceGrant.options.map((o) => o.optionId);
+        expect(optionIds).toEqual(['acid', 'cold', 'fire', 'lightning', 'thunder']);
+      }
+    });
+
+    it('resilient has 6 feature-choice options including charisma', () => {
+      const feat = FEAT_SOURCES.find((f) => f.id === 'resilient');
+      const choiceGrant = feat?.grants.find((g) => g.type === 'feature-choice');
+      expect(choiceGrant).toBeDefined();
+      if (choiceGrant?.type === 'feature-choice') {
+        const optionIds = choiceGrant.options.map((o) => o.optionId);
+        expect(optionIds).toContain('charisma');
+        expect(optionIds).toHaveLength(6);
+        expect(optionIds).toEqual(['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']);
+      }
+    });
   });
 });

@@ -2076,7 +2076,7 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
     }
   });
 
-  it('does not emit a pending choice once a valid option is selected', () => {
+  it('does not emit a pending choice for divine-order once a valid option is selected', () => {
     const build: CharacterBuild = {
       ...baseBuild,
       choices: { [divineOrderKey]: { type: 'feature-choice' as const, optionId: 'protector' } },
@@ -2088,7 +2088,11 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
       bundles,
       choices: build.choices,
     });
-    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice');
+    // Look specifically for the divine-order choice (acolyte background also contributes a
+    // magic-initiate feature-choice that remains pending unless a spell-list sub-choice is made)
+    const pending = result.pendingChoices.find(
+      (c) => c.type === 'feature-choice' && c.choiceKey === divineOrderKey
+    );
     expect(pending).toBeUndefined();
   });
 
@@ -2239,3 +2243,166 @@ describe('Monk L6 + Warrior of Mercy integration', () => {
     expect(physicians!.saveDC).toBe(14);
   });
 });
+describe('collapsed repeatable feat resolver integration', () => {
+  // Note: collectBundles processes feature-choice grants before adding explicit build.feats,
+  // so feat-origin feature-choice grants are not resolved via collectBundles. Tests drive
+  // the resolver directly with hand-built bundles — matching the pattern of spellcasting.test.ts.
+
+  describe('magic-initiate', () => {
+    const magicInitiateKey = createChoiceKey('feature-choice', 'feat', 'magic-initiate', 0);
+
+    it('emits a PendingChoice for magic-initiate when no spell-list option is chosen', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'magic-initiate' },
+          grants: [
+            {
+              type: 'feature-choice',
+              key: magicInitiateKey,
+              options: [
+                { optionId: 'bard', featureId: 'feat-magic-initiate-bard', grants: [] },
+                { optionId: 'cleric', featureId: 'feat-magic-initiate-cleric', grants: [] },
+                { optionId: 'druid', featureId: 'feat-magic-initiate-druid', grants: [] },
+                { optionId: 'sorcerer', featureId: 'feat-magic-initiate-sorcerer', grants: [] },
+                { optionId: 'warlock', featureId: 'feat-magic-initiate-warlock', grants: [] },
+                { optionId: 'wizard', featureId: 'feat-magic-initiate-wizard', grants: [] },
+              ],
+            },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const pending = result.pendingChoices.find(
+        (c) => c.type === 'feature-choice' && c.choiceKey === magicInitiateKey
+      );
+      expect(pending).toBeDefined();
+      if (pending?.type === 'feature-choice') {
+        const optionIds = pending.options.map((o) => o.optionId);
+        expect(optionIds).toContain('wizard');
+        expect(optionIds).toContain('cleric');
+        expect(optionIds).toHaveLength(6);
+      }
+    });
+
+    it('resolves feat-magic-initiate-wizard feature when wizard option grant is present', () => {
+      // Feature-choice resolution happens in collectBundles before explicit build.feats are added.
+      // Test the resolver's feature-resolution step directly: a bundle already containing the
+      // resolved feature grant (as collectBundles would produce after processing the choice).
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'magic-initiate' },
+          grants: [
+            { type: 'feature', feature: { id: 'feat-magic-initiate-wizard' } },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const featureIds = result.features.map((f) => f.feature.id);
+      expect(featureIds).toContain('feat-magic-initiate-wizard');
+    });
+  });
+
+  describe('elemental-adept', () => {
+    const elementalAdeptKey = createChoiceKey('feature-choice', 'feat', 'elemental-adept', 0);
+
+    it('emits a PendingChoice when no damage-type option is chosen', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'elemental-adept' },
+          grants: [
+            {
+              type: 'feature-choice',
+              key: elementalAdeptKey,
+              options: [
+                { optionId: 'acid', featureId: 'feat-elemental-adept-acid', grants: [] },
+                { optionId: 'cold', featureId: 'feat-elemental-adept-cold', grants: [] },
+                { optionId: 'fire', featureId: 'feat-elemental-adept-fire', grants: [] },
+                { optionId: 'lightning', featureId: 'feat-elemental-adept-lightning', grants: [] },
+                { optionId: 'thunder', featureId: 'feat-elemental-adept-thunder', grants: [] },
+              ],
+            },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const pending = result.pendingChoices.find(
+        (c) => c.type === 'feature-choice' && c.choiceKey === elementalAdeptKey
+      );
+      expect(pending).toBeDefined();
+    });
+
+    it('resolves feat-elemental-adept-fire feature when fire option is chosen', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'elemental-adept' },
+          grants: [
+            { type: 'feature', feature: { id: 'feat-elemental-adept-fire' } },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const featureIds = result.features.map((f) => f.feature.id);
+      expect(featureIds).toContain('feat-elemental-adept-fire');
+    });
+  });
+
+  describe('resilient', () => {
+    const resilientKey = createChoiceKey('feature-choice', 'feat', 'resilient', 0);
+
+    it('emits a PendingChoice when no ability option is chosen', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'resilient' },
+          grants: [
+            {
+              type: 'feature-choice',
+              key: resilientKey,
+              options: [
+                { optionId: 'strength', featureId: 'feat-resilient-strength', grants: [] },
+                { optionId: 'dexterity', featureId: 'feat-resilient-dexterity', grants: [] },
+                { optionId: 'constitution', featureId: 'feat-resilient-constitution', grants: [] },
+                { optionId: 'intelligence', featureId: 'feat-resilient-intelligence', grants: [] },
+                { optionId: 'wisdom', featureId: 'feat-resilient-wisdom', grants: [] },
+                { optionId: 'charisma', featureId: 'feat-resilient-charisma', grants: [] },
+              ],
+            },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const pending = result.pendingChoices.find(
+        (c) => c.type === 'feature-choice' && c.choiceKey === resilientKey
+      );
+      expect(pending).toBeDefined();
+    });
+
+    it('resolves feat-resilient-constitution feature when constitution bundle is present', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'resilient' },
+          grants: [
+            { type: 'feature', feature: { id: 'feat-resilient-constitution' } },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const featureIds = result.features.map((f) => f.feature.id);
+      expect(featureIds).toContain('feat-resilient-constitution');
+    });
+
+    it('resolves feat-resilient-charisma feature when charisma bundle is present', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'resilient' },
+          grants: [
+            { type: 'feature', feature: { id: 'feat-resilient-charisma' } },
+          ],
+        },
+      ];
+      const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
+      const featureIds = result.features.map((f) => f.feature.id);
+      expect(featureIds).toContain('feat-resilient-charisma');
+    });
+  });
+});
+
