@@ -559,7 +559,7 @@
     "level": "Level",
     "hp": "HP",
     "ac": "AC",
-    "errorLoading": "Error loading characters: {{error}}"
+    "errorLoading": "Error loading characters. Please try again."
   },
   "sessions": {
     "title": "Sessions",
@@ -725,6 +725,7 @@
     "loadingCampaigns": "Loading campaigns...",
     "failedToLoadCampaigns": "Failed to load campaigns",
     "exportFailed": "Export failed",
+    "fetchFailed": "Failed to fetch campaign data. Please try again — see the browser console for details.",
     "noCampaigns": "No Campaigns",
     "noCampaignsDescription": "Create a campaign first before exporting data.",
     "selectCampaigns": "Select campaigns to export ({{selected}} of {{total}} selected)",

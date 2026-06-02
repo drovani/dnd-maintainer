@@ -1,4 +1,5 @@
 import { parseIntOrDefault } from '@/lib/utils';
+import { getLogger } from '@/lib/logger';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@/types/database';
 import type { Json, TablesUpdate } from '@/types/supabase';
@@ -21,6 +22,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ValidationError } from '@/components/ui/validation-error';
+
+const logger = getLogger('SessionDetail');
 
 interface LootEntry {
   id: string;
@@ -81,6 +84,12 @@ export default function SessionDetail() {
   const { data: encounters = [] } = useSessionEncounters(session?.id);
 
   usePageTitle(session?.name ?? t('nav.sessions'));
+
+  useEffect(() => {
+    if (error) {
+      logger.error('Failed to load session:', error);
+    }
+  }, [error]);
 
   // Update session mutation
   const updateSessionMutation = useMutation({
@@ -257,7 +266,7 @@ export default function SessionDetail() {
             <AlertCircle className="size-5 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">{t('sessionDetail.errorLoadingSession')}</p>
-              <p className="text-sm">{String(error)}</p>
+              <p className="text-sm">{t('errors.unexpectedError')}</p>
             </div>
           </div>
         </div>

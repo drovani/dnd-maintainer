@@ -2,10 +2,13 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import type { ExportData as ExportDataType } from '@/lib/export-sql';
 import { downloadFile, generateSeedSql } from '@/lib/export-sql';
+import { getLogger } from '@/lib/logger';
 import { supabase } from '@/lib/supabase';
 import { AlertCircle, CheckSquare, Download, Loader2, Square } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+const logger = getLogger('ExportData');
 
 export default function ExportData() {
   const { t } = useTranslation('common');
@@ -20,6 +23,12 @@ export default function ExportData() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   usePageTitle(t('export.title'));
+
+  useEffect(() => {
+    if (isCampaignsError) {
+      logger.error('Failed to load campaigns:', campaignsError);
+    }
+  }, [isCampaignsError, campaignsError]);
 
   const toggleCampaign = (id: string): void => {
     setSelectedIds((prev) => {
@@ -74,7 +83,8 @@ export default function ExportData() {
         .map((r) => `${r.table}: ${r.error?.message ?? 'unknown error'}`);
 
       if (failures.length > 0) {
-        throw new Error(`Failed to fetch data:\n${failures.join('\n')}`);
+        logger.error('Export fetch failed:', failures);
+        throw new Error(t('export.fetchFailed'));
       }
 
       if (!campaignsRes.data || campaignsRes.data.length === 0) {
@@ -101,10 +111,12 @@ export default function ExportData() {
         ]);
 
         if (buildLevelsRes.error) {
-          throw new Error(`Failed to fetch data:\ncharacter_build_levels: ${buildLevelsRes.error.message}`);
+          logger.error('Export fetch failed (character_build_levels):', buildLevelsRes.error);
+          throw new Error(t('export.fetchFailed'));
         }
         if (itemsRes.error) {
-          throw new Error(`Failed to fetch data:\ncharacter_items: ${itemsRes.error.message}`);
+          logger.error('Export fetch failed (character_items):', itemsRes.error);
+          throw new Error(t('export.fetchFailed'));
         }
 
         buildLevelsData = (buildLevelsRes.data ?? []) as Record<string, unknown>[];
@@ -155,9 +167,7 @@ export default function ExportData() {
         <div className="max-w-3xl mx-auto text-center py-12">
           <AlertCircle className="size-8 text-destructive mx-auto" />
           <p className="text-destructive font-semibold mt-4">{t('export.failedToLoadCampaigns')}</p>
-          <p className="text-destructive text-sm mt-2">
-            {campaignsError instanceof Error ? campaignsError.message : t('errors.unexpectedError')}
-          </p>
+          <p className="text-destructive text-sm mt-2">{t('errors.unexpectedError')}</p>
         </div>
       </div>
     );

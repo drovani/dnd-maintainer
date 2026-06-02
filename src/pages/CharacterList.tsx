@@ -2,10 +2,13 @@ import { useCharacters } from '@/hooks/useCharacters';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { isBackgroundId } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
 import { Plus, Search, User, Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+
+const logger = getLogger('CharacterList');
 
 type FilterType = 'all' | 'pc' | 'npc';
 type SortType = 'name' | 'level' | 'class' | 'updated';
@@ -69,11 +72,17 @@ export default function CharacterList() {
   const pcCount = characters.filter((c) => c.character_type === 'pc').length;
   const npcCount = characters.filter((c) => c.character_type === 'npc').length;
 
+  useEffect(() => {
+    if (error) {
+      logger.error('Failed to load characters:', error);
+    }
+  }, [error]);
+
   if (error) {
     return (
       <div className="p-8">
         <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-4 text-destructive">
-          {t('characterList.errorLoading', { error: String(error) })}
+          {t('characterList.errorLoading')}
         </div>
       </div>
     );

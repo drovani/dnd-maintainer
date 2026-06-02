@@ -49,7 +49,19 @@ export default defineConfig(
           selector: 'TSAsExpression > TSNeverKeyword',
           message: "Do not use 'as never'. Narrow the type instead — see CLAUDE.md i18n guidance.",
         },
+        {
+          selector: 'JSXAttribute[name.name="dangerouslySetInnerHTML"]',
+          message:
+            'Do not use dangerouslySetInnerHTML — it is an XSS sink. Render text via JSX (auto-escaped). See docs/security-review-2026-06-01.md (M2).',
+        },
+        {
+          selector: 'AssignmentExpression[left.property.name="innerHTML"]',
+          message:
+            'Do not assign to innerHTML — it is an XSS sink. Use textContent or JSX. See docs/security-review-2026-06-01.md (M2).',
+        },
       ],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
     },
   },
   {
