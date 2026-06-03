@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { ValidationError } from '@/components/ui/validation-error';
 import { ThemePicker } from '@/components/ThemePicker';
 import { useCampaign, useCampaignMutations } from '@/hooks/useCampaigns';
+import { SOURCE_BOOKS, type SourceBookId } from '@/lib/source-books';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useCharacters } from '@/hooks/useCharacters';
@@ -561,6 +564,52 @@ export default function CampaignDashboard() {
                 {updateMutation.isError && updateMutation.variables && 'theme' in updateMutation.variables && (
                   <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
                 )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-4">
+            <Card className="hover-lift">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <BookOpen className="size-5 text-muted-foreground" />
+                  <h3 className="font-semibold">{t('campaign.sourceBooks.title')}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">{t('campaign.sourceBooks.description')}</p>
+                <div className="space-y-2">
+                  {SOURCE_BOOKS.map((book) => {
+                    const allowed = campaign.allowed_source_books;
+                    const isChecked = allowed.includes(book.id);
+                    const isLastChecked = isChecked && allowed.length === 1;
+                    const bookId = `source-book-${book.id}`;
+                    return (
+                      <div key={book.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={bookId}
+                          checked={isChecked}
+                          disabled={isLastChecked || updateMutation.isPending}
+                          onCheckedChange={(checked) => {
+                            const nextList: SourceBookId[] = checked
+                              ? [...allowed, book.id]
+                              : allowed.filter((id) => id !== book.id);
+                            updateMutation.mutate({ id: campaign.id, allowed_source_books: nextList });
+                          }}
+                        />
+                        <Label htmlFor={bookId} className="cursor-pointer">
+                          {tg(`sourceBooks.${book.id}`)}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+                {campaign.allowed_source_books.length === 1 && (
+                  <p className="text-xs text-muted-foreground mt-2">{t('campaign.sourceBooks.lastBookWarning')}</p>
+                )}
+                {updateMutation.isError &&
+                  updateMutation.variables &&
+                  'allowed_source_books' in updateMutation.variables && (
+                    <p className="text-sm text-destructive mt-1">{t('errors.saveFailed')}</p>
+                  )}
               </CardContent>
             </Card>
           </div>

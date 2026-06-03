@@ -724,7 +724,12 @@
       "title": "Campaign Toolkit"
     },
     "theme": "Campaign Theme",
-    "themeDescription": "Customize the color theme for this campaign"
+    "themeDescription": "Customize the color theme for this campaign",
+    "sourceBooks": {
+      "title": "Source Books",
+      "description": "Choose which rulebooks are available for character creation in this campaign.",
+      "lastBookWarning": "At least one source book must be enabled."
+    }
   },
   "characterType": {
     "pc": "PC",
