@@ -1295,6 +1295,22 @@
       "name": "Nature's Ward",
       "description": "You are immune to the Poisoned condition and to disease. You can't be Charmed or Frightened by Elementals or Fey."
     },
+    "circleland-land-arid": {
+      "name": "Land: Arid",
+      "description": "You attune to arid desert terrain. You have the following spells always prepared: Fire Bolt (cantrip), Burning Hands, Blur, Fireball, Blight, and Wall of Stone. Note: level-gating (L3/5/7/9 tiers) is a known simplification; all spells are granted at Druid level 3 pending per-tier implementation."
+    },
+    "circleland-land-polar": {
+      "name": "Land: Polar",
+      "description": "You attune to polar arctic terrain. You have the following spells always prepared: Ray of Frost (cantrip), Fog Cloud, Hold Person, Sleet Storm, Ice Storm, and Cone of Cold. Note: level-gating (L3/5/7/9 tiers) is a known simplification; all spells are granted at Druid level 3 pending per-tier implementation."
+    },
+    "circleland-land-temperate": {
+      "name": "Land: Temperate",
+      "description": "You attune to temperate forest and grassland terrain. You have the following spells always prepared: Shocking Grasp (cantrip), Sleep, Misty Step, Lightning Bolt, Freedom of Movement, and Tree Stride. Note: level-gating (L3/5/7/9 tiers) is a known simplification; all spells are granted at Druid level 3 pending per-tier implementation."
+    },
+    "circleland-land-tropical": {
+      "name": "Land: Tropical",
+      "description": "You attune to tropical jungle terrain. You have the following spells always prepared: Acid Splash (cantrip), Ray of Sickness, Web, Stinking Cloud, Polymorph, and Insect Plague. Note: level-gating (L3/5/7/9 tiers) is a known simplification; all spells are granted at Druid level 3 pending per-tier implementation."
+    },
     "circlemoon-circle-forms": {
       "name": "Circle Forms",
       "description": "You can use Wild Shape to transform into a Beast with a CR equal to one-third your Druid level (rounded down, minimum CR 1). Beasts with a Swim or Fly speed are available starting at level 3."
