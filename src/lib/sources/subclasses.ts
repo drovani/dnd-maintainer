@@ -828,8 +828,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 3,
         grants: [
           // Nature's Wrath: STR or DEX save vs Restrained by spectral vines (Channel Divinity option)
-          // Phase 3 will add saveDC: { dcAbility: 'cha' }
-          { type: 'feature', feature: { id: 'oathofancients-natures-wrath' } },
+          // saveDC uses CHA per 2024 PHB (Paladin uses CHA for spellcasting/CD DCs)
+          { type: 'feature', feature: { id: 'oathofancients-natures-wrath', saveDC: { dcAbility: 'cha' } } },
           // REMOVED: oathofancients-turn-the-faithless — 2024 PHB Ancients CD has only Nature's Wrath (confirmed removal)
           // Ancients L3 oath spells (2024 PHB)
           { type: 'spell', spellId: 'ensnaring-strike', alwaysPrepared: true },
