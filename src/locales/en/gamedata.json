@@ -643,10 +643,6 @@
       "name": "Steps of the Fey",
       "description": "Misty Step is always prepared for you. When you cast it, you can also choose one of two rider effects: Refreshing Step (you or an ally within 30 feet regains hit points equal to a roll of your Warlock spell slot die) or Taunting Step (one creature of your choice within 5 feet of the space you left must succeed on a Wisdom saving throw or have Disadvantage on attack rolls against creatures other than you until the start of your next turn). You can cast Misty Step a number of times equal to your Proficiency Bonus per Long Rest without expending a spell slot."
     },
-    "archfeypatron-patron-spells": {
-      "name": "Archfey Patron Spells",
-      "description": "Your Archfey patron grants you access to additional spells that are always prepared and don't count against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
-    },
     "archfeypatron-misty-escape": {
       "name": "Misty Escape",
       "description": "When you take damage, you can use your Reaction to cast Misty Step without expending a spell slot. You then have the Invisible condition until the end of your next turn. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest."
@@ -655,17 +651,9 @@
       "name": "Beguiling Defenses",
       "description": "Your patron teaches you how to guard your mind and turn another's charms back on them. You are immune to the Charmed condition. If a creature attempts to Charm you, you can use your Reaction to force the creature to make a Wisdom saving throw against your spell save DC. On a failed save, the creature has the Charmed condition for 1 minute or until it takes any damage."
     },
-    "celestialpatron-bonus-cantrip": {
-      "name": "Bonus Cantrips",
-      "description": "You know the Light and Sacred Flame cantrips. They count as Warlock cantrips for you, but they don't count against the number of cantrips you know."
-    },
     "celestialpatron-healing-light": {
       "name": "Healing Light",
       "description": "You gain the ability to channel celestial energy to heal wounds. You have a pool of d6s that you spend to fuel this healing. The number of dice in the pool equals 1 + your Warlock level. As a Bonus Action, you can heal one creature you can see within 60 feet by spending dice from the pool. The maximum number of dice you can spend at once equals your Charisma modifier (minimum 1). Roll the spent dice and restore a number of hit points equal to the total. Your pool regains all expended dice when you finish a Long Rest."
-    },
-    "celestialpatron-patron-spells": {
-      "name": "Celestial Patron Spells",
-      "description": "Your Celestial patron grants you access to additional spells that are always prepared and don't count against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
     },
     "celestialpatron-radiant-soul": {
       "name": "Radiant Soul",
@@ -679,10 +667,6 @@
       "name": "Dark One's Blessing",
       "description": "When you reduce a hostile creature to 0 hit points, you gain Temporary Hit Points equal to your Charisma modifier plus your Warlock level (minimum 1)."
     },
-    "fiendpatron-patron-spells": {
-      "name": "Fiend Patron Spells",
-      "description": "Your Fiend patron grants you access to additional spells that are always prepared and don't count against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
-    },
     "fiendpatron-dark-ones-own-luck": {
       "name": "Dark One's Own Luck",
       "description": "You can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. It also replenishes when you finish a Short Rest."
@@ -694,10 +678,6 @@
     "greatoldonepatron-awakened-mind": {
       "name": "Awakened Mind",
       "description": "Your patron's knowledge invades your very being. You can communicate telepathically with any creature you can see within 30 feet of you. You don't need to share a language with the creature for it to understand your telepathic communications, but the creature must be able to understand at least one language."
-    },
-    "greatoldonepatron-psychic-spells": {
-      "name": "Psychic Spells",
-      "description": "Your Great Old One patron grants you access to additional spells that deal Psychic damage and are always prepared, not counting against your Spells Prepared total. (Spell grants modeled as a feature stub — see issue #93.)"
     },
     "greatoldonepatron-clairvoyant-combatant": {
       "name": "Clairvoyant Combatant",
@@ -2924,6 +2904,42 @@
     "summon-dragon": {
       "name": "Summon Dragon",
       "description": "You call forth a draconic spirit. Choose Chromatic, Metallic, or Gem. The creature obeys your commands and acts on your initiative for the duration."
+    },
+    "sacred-flame": {
+      "name": "Sacred Flame",
+      "description": "Flame-like radiance descends on a creature you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from cover for this saving throw."
+    },
+    "phantasmal-force": {
+      "name": "Phantasmal Force",
+      "description": "You craft an illusion that takes root in the mind of one creature you can see within range. The target must succeed on an Intelligence saving throw or believe the illusion is real for the duration, taking 1d6 Psychic damage at the start of each of its turns."
+    },
+    "suggestion": {
+      "name": "Suggestion",
+      "description": "You suggest a course of activity (limited to a sentence or two) and magically influence a creature you can see within range that can hear and understand you. The target must succeed on a Wisdom saving throw or pursue the course of action for the duration."
+    },
+    "hideous-laughter": {
+      "name": "Hideous Laughter",
+      "description": "A creature of your choice that you can see within range perceives everything as hilariously funny and falls into fits of laughter. The target must succeed on a Wisdom saving throw or fall Prone, becoming Incapacitated and unable to stand up for the duration."
+    },
+    "blink": {
+      "name": "Blink",
+      "description": "Roll a d20 at the end of each of your turns for the duration. On a 11 or higher, you vanish from your current plane of existence and appear in the Ethereal Plane. At the start of your next turn, you return to an unoccupied space within 10 feet of where you left."
+    },
+    "clairvoyance": {
+      "name": "Clairvoyance",
+      "description": "You create an invisible sensor within range in a location familiar to you or in an obvious location. The sensor remains for the duration. Through it you can either see or hear (your choice) as if you were there."
+    },
+    "dominate-beast": {
+      "name": "Dominate Beast",
+      "description": "You attempt to beguile a Beast you can see within range. The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration. While Charmed, you have a telepathic link with it and can issue commands."
+    },
+    "geas": {
+      "name": "Geas",
+      "description": "You place a magical command on a creature you can see within range, forcing it to carry out some service or refrain from some action. The creature must succeed on a Wisdom saving throw or be compelled to follow the command for the duration, taking 5d10 Psychic damage each day it acts against the geas."
+    },
+    "summon-celestial": {
+      "name": "Summon Celestial",
+      "description": "You call forth a celestial spirit. It manifests in an angelic form in an unoccupied space within range. The creature is friendly to you and obeys your commands for the duration."
     }
   }
 }

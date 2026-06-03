@@ -2913,3 +2913,123 @@ describe('Hunter Ranger feature-choice integration', () => {
     }
   });
 });
+
+describe('Warlock patron spells — resolver integration', () => {
+  const warlockSubclassKey = createChoiceKey('subclass', 'class', 'warlock', 0);
+
+  function buildWarlock(subclassId: SubclassId, level: number): CharacterBuild {
+    const levels = Array.from({ length: level }, (_, i) => ({
+      classId: 'warlock' as ClassId,
+      classLevel: i + 1,
+      hpRoll: null,
+    }));
+    return {
+      speciesId: 'human' as const,
+      backgroundId: 'acolyte',
+      baseAbilities: { str: 10, dex: 10, con: 14, int: 10, wis: 10, cha: 16 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [warlockSubclassKey]: { type: 'subclass' as const, subclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Fiend Warlock L5: alwaysPreparedSpells contains L3 and L5 spells, not L7', () => {
+    const build = buildWarlock('fiendpatron' as SubclassId, 5);
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const prepared = result.spellcasting!.alwaysPreparedSpells;
+    // L3 spells
+    expect(prepared).toContain('burning-hands');
+    expect(prepared).toContain('command');
+    expect(prepared).toContain('scorching-ray');
+    expect(prepared).toContain('suggestion');
+    // L5 spells
+    expect(prepared).toContain('fireball');
+    expect(prepared).toContain('stinking-cloud');
+    // L7 spells must NOT be present at level 5
+    expect(prepared).not.toContain('fire-shield');
+    expect(prepared).not.toContain('wall-of-fire');
+  });
+
+  it('Celestial Warlock L3: light and sacred-flame in cantrips[], NOT in alwaysPreparedSpells', () => {
+    const build = buildWarlock('celestialpatron' as SubclassId, 3);
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const cantrips = result.spellcasting!.cantrips;
+    const prepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(cantrips).toContain('light');
+    expect(cantrips).toContain('sacred-flame');
+    expect(prepared).not.toContain('light');
+    expect(prepared).not.toContain('sacred-flame');
+    // L3 leveled spells ARE in alwaysPreparedSpells
+    expect(prepared).toContain('aid');
+    expect(prepared).toContain('cure-wounds');
+    expect(prepared).toContain('guiding-bolt');
+    expect(prepared).toContain('lesser-restoration');
+  });
+
+  it('Archfey Warlock L5: alwaysPreparedSpells contains L3 and L5 spells, not L7', () => {
+    const build = buildWarlock('archfeypatron' as SubclassId, 5);
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const prepared = result.spellcasting!.alwaysPreparedSpells;
+    // L3 spells
+    expect(prepared).toContain('calm-emotions');
+    expect(prepared).toContain('faerie-fire');
+    expect(prepared).toContain('misty-step');
+    expect(prepared).toContain('phantasmal-force');
+    expect(prepared).toContain('sleep');
+    // L5 spells
+    expect(prepared).toContain('blink');
+    expect(prepared).toContain('plant-growth');
+    // L7 spells must NOT be present
+    expect(prepared).not.toContain('dominate-beast');
+    expect(prepared).not.toContain('greater-invisibility');
+  });
+
+  it('Great Old One Warlock L5: alwaysPreparedSpells contains L3 and L5 spells, not L7', () => {
+    const build = buildWarlock('greatoldonepatron' as SubclassId, 5);
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const prepared = result.spellcasting!.alwaysPreparedSpells;
+    // L3 spells
+    expect(prepared).toContain('detect-thoughts');
+    expect(prepared).toContain('dissonant-whispers');
+    expect(prepared).toContain('hideous-laughter');
+    expect(prepared).toContain('phantasmal-force');
+    // L5 spells
+    expect(prepared).toContain('clairvoyance');
+    expect(prepared).toContain('hunger-of-hadar');
+    // L7 spells must NOT be present
+    expect(prepared).not.toContain('confusion');
+    expect(prepared).not.toContain('summon-aberration');
+  });
+});

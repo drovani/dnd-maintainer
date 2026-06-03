@@ -2404,27 +2404,45 @@ describe('getSubclassSource — Archfey Patron', () => {
     expect(getSubclassSource('archfeypatron')).toBeDefined();
   });
 
-  it('archfeypatron has 3 feature levels (L3, L6, L10)', () => {
+  it('archfeypatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
     const source = getSubclassSource('archfeypatron');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
   });
 
-  it('archfeypatron level 3 grants 2 features: steps-of-the-fey and patron-spells', () => {
+  it('archfeypatron level 3 has steps-of-the-fey feature and 5 always-prepared spell grants; no patron-spells stub', () => {
     const source = getSubclassSource('archfeypatron');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toHaveLength(6);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'archfeypatron-steps-of-the-fey' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'archfeypatron-patron-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'calm-emotions', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'faerie-fire', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'misty-step', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'phantasmal-force', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'sleep', alwaysPrepared: true }),
+      ])
+    );
+    const stubGrant = level3?.grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'archfeypatron-patron-spells'
+    );
+    expect(stubGrant).toBeUndefined();
+  });
+
+  it('archfeypatron level 5 grants blink and plant-growth (always prepared)', () => {
+    const source = getSubclassSource('archfeypatron');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'blink', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'plant-growth', alwaysPrepared: true }),
       ])
     );
   });
@@ -2438,6 +2456,32 @@ describe('getSubclassSource — Archfey Patron', () => {
       type: 'feature',
       feature: { id: 'archfeypatron-misty-escape' },
     });
+  });
+
+  it('archfeypatron level 7 grants dominate-beast and greater-invisibility (always prepared)', () => {
+    const source = getSubclassSource('archfeypatron');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'dominate-beast', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'greater-invisibility', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('archfeypatron level 9 grants dominate-person and seeming (always prepared)', () => {
+    const source = getSubclassSource('archfeypatron');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'dominate-person', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'seeming', alwaysPrepared: true }),
+      ])
+    );
   });
 
   it('archfeypatron level 10 grants 1 feature: beguiling-defenses', () => {
@@ -2457,32 +2501,55 @@ describe('getSubclassSource — Celestial Patron', () => {
     expect(getSubclassSource('celestialpatron')).toBeDefined();
   });
 
-  it('celestialpatron has 3 feature levels (L3, L6, L10)', () => {
+  it('celestialpatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
     const source = getSubclassSource('celestialpatron');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
   });
 
-  it('celestialpatron level 3 grants 4 items: religion proficiency, bonus-cantrip, healing-light, patron-spells', () => {
+  it('celestialpatron level 3 has religion proficiency, healing-light, 2 cantrip grants (alwaysPrepared:false), 4 always-prepared spells; no bonus-cantrip or patron-spells stubs', () => {
     const source = getSubclassSource('celestialpatron');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(4);
+    expect(level3?.grants).toHaveLength(8);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: 'proficiency', category: 'skill', id: 'religion' }),
         expect.objectContaining({
           type: 'feature',
-          feature: expect.objectContaining({ id: 'celestialpatron-bonus-cantrip' }),
-        }),
-        expect.objectContaining({
-          type: 'feature',
           feature: expect.objectContaining({ id: 'celestialpatron-healing-light' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'celestialpatron-patron-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'light', alwaysPrepared: false }),
+        expect.objectContaining({ type: 'spell', spellId: 'sacred-flame', alwaysPrepared: false }),
+        expect.objectContaining({ type: 'spell', spellId: 'aid', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'cure-wounds', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'lesser-restoration', alwaysPrepared: true }),
+      ])
+    );
+    // Exactly 2 alwaysPrepared:false grants (the cantrips)
+    const cantripsGrants = level3?.grants.filter((g) => g.type === 'spell' && !g.alwaysPrepared);
+    expect(cantripsGrants).toHaveLength(2);
+    // Stubs must be absent
+    const bonusCantrip = level3?.grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'celestialpatron-bonus-cantrip'
+    );
+    expect(bonusCantrip).toBeUndefined();
+    const patronSpells = level3?.grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'celestialpatron-patron-spells'
+    );
+    expect(patronSpells).toBeUndefined();
+  });
+
+  it('celestialpatron level 5 grants daylight and revivify (always prepared)', () => {
+    const source = getSubclassSource('celestialpatron');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'daylight', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'revivify', alwaysPrepared: true }),
       ])
     );
   });
@@ -2499,6 +2566,32 @@ describe('getSubclassSource — Celestial Patron', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'celestialpatron-radiant-soul' }),
         }),
+      ])
+    );
+  });
+
+  it('celestialpatron level 7 grants guardian-of-faith and wall-of-fire (always prepared)', () => {
+    const source = getSubclassSource('celestialpatron');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'guardian-of-faith', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'wall-of-fire', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('celestialpatron level 9 grants greater-restoration and summon-celestial (always prepared)', () => {
+    const source = getSubclassSource('celestialpatron');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'greater-restoration', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'summon-celestial', alwaysPrepared: true }),
       ])
     );
   });
@@ -2520,27 +2613,42 @@ describe('getSubclassSource — Fiend Patron', () => {
     expect(getSubclassSource('fiendpatron')).toBeDefined();
   });
 
-  it('fiendpatron has 3 feature levels (L3, L6, L10)', () => {
+  it('fiendpatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
     const source = getSubclassSource('fiendpatron');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
   });
 
-  it('fiendpatron level 3 grants 2 features: dark-ones-blessing and patron-spells', () => {
+  it('fiendpatron level 3 has dark-ones-blessing and 4 always-prepared spells; no patron-spells stub', () => {
     const source = getSubclassSource('fiendpatron');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toHaveLength(5);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'fiendpatron-dark-ones-blessing' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'fiendpatron-patron-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'burning-hands', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'command', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'scorching-ray', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'suggestion', alwaysPrepared: true }),
+      ])
+    );
+    const stubGrant = level3?.grants.find((g) => g.type === 'feature' && g.feature.id === 'fiendpatron-patron-spells');
+    expect(stubGrant).toBeUndefined();
+  });
+
+  it('fiendpatron level 5 grants fireball and stinking-cloud (always prepared)', () => {
+    const source = getSubclassSource('fiendpatron');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'fireball', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'stinking-cloud', alwaysPrepared: true }),
       ])
     );
   });
@@ -2554,6 +2662,32 @@ describe('getSubclassSource — Fiend Patron', () => {
       type: 'feature',
       feature: { id: 'fiendpatron-dark-ones-own-luck' },
     });
+  });
+
+  it('fiendpatron level 7 grants fire-shield and wall-of-fire (always prepared)', () => {
+    const source = getSubclassSource('fiendpatron');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'fire-shield', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'wall-of-fire', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('fiendpatron level 9 grants geas and insect-plague (always prepared)', () => {
+    const source = getSubclassSource('fiendpatron');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'geas', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'insect-plague', alwaysPrepared: true }),
+      ])
+    );
   });
 
   it('fiendpatron level 10 grants 1 feature: fiendish-resilience', () => {
@@ -2573,17 +2707,17 @@ describe('getSubclassSource — Great Old One Patron', () => {
     expect(getSubclassSource('greatoldonepatron')).toBeDefined();
   });
 
-  it('greatoldonepatron has 3 feature levels (L3, L6, L10)', () => {
+  it('greatoldonepatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
     const source = getSubclassSource('greatoldonepatron');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
   });
 
-  it('greatoldonepatron level 3 grants 3 items: skill proficiency-choice, awakened-mind, and psychic-spells', () => {
+  it('greatoldonepatron level 3 has skill proficiency-choice, awakened-mind, and 4 always-prepared spells; no psychic-spells stub', () => {
     const source = getSubclassSource('greatoldonepatron');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(3);
+    expect(level3?.grants).toHaveLength(6);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -2596,12 +2730,16 @@ describe('getSubclassSource — Great Old One Patron', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'greatoldonepatron-awakened-mind' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'greatoldonepatron-psychic-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'detect-thoughts', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'dissonant-whispers', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'hideous-laughter', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'phantasmal-force', alwaysPrepared: true }),
       ])
     );
+    const stubGrant = level3?.grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'greatoldonepatron-psychic-spells'
+    );
+    expect(stubGrant).toBeUndefined();
   });
 
   it('greatoldonepatron level 3 proficiency-choice from list contains exactly the 6 allowed skills', () => {
@@ -2617,13 +2755,26 @@ describe('getSubclassSource — Great Old One Patron', () => {
     }
   });
 
-  it('greatoldonepatron level 3 proficiency-choice key has subclass origin', () => {
+  it('greatoldonepatron level 3 proficiency-choice key uses skill-choice category with subclass origin', () => {
     const source = getSubclassSource('greatoldonepatron');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     const profChoice = level3?.grants.find((g) => g.type === 'proficiency-choice');
     expect(profChoice).toBeDefined();
     expect((profChoice as { key: string }).key).toBe(
       createChoiceKey('skill-choice', 'subclass', 'greatoldonepatron', 1)
+    );
+  });
+
+  it('greatoldonepatron level 5 grants clairvoyance and hunger-of-hadar (always prepared)', () => {
+    const source = getSubclassSource('greatoldonepatron');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'clairvoyance', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'hunger-of-hadar', alwaysPrepared: true }),
+      ])
     );
   });
 
@@ -2636,6 +2787,32 @@ describe('getSubclassSource — Great Old One Patron', () => {
       type: 'feature',
       feature: { id: 'greatoldonepatron-clairvoyant-combatant' },
     });
+  });
+
+  it('greatoldonepatron level 7 grants confusion and summon-aberration (always prepared)', () => {
+    const source = getSubclassSource('greatoldonepatron');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'confusion', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'summon-aberration', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('greatoldonepatron level 9 grants modify-memory and telekinesis (always prepared)', () => {
+    const source = getSubclassSource('greatoldonepatron');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'modify-memory', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'telekinesis', alwaysPrepared: true }),
+      ])
+    );
   });
 
   it('greatoldonepatron level 10 grants 1 feature: eldritch-hex', () => {

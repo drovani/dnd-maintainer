@@ -1384,8 +1384,19 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Steps of the Fey: Misty Step is always prepared; Bonus Action teleport with rider effects (Refreshing Step or Taunting Step)
           { type: 'feature', feature: { id: 'archfeypatron-steps-of-the-fey' } },
-          // TODO #93: model Archfey patron spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'archfeypatron-patron-spells' } },
+          // Archfey patron spells (always prepared)
+          { type: 'spell', spellId: 'calm-emotions', alwaysPrepared: true },
+          { type: 'spell', spellId: 'faerie-fire', alwaysPrepared: true },
+          { type: 'spell', spellId: 'misty-step', alwaysPrepared: true },
+          { type: 'spell', spellId: 'phantasmal-force', alwaysPrepared: true },
+          { type: 'spell', spellId: 'sleep', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'blink', alwaysPrepared: true },
+          { type: 'spell', spellId: 'plant-growth', alwaysPrepared: true },
         ],
       },
       {
@@ -1393,6 +1404,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Misty Escape: Reaction when you take damage — Misty Step and become Invisible until end of next turn; uses = PB/long rest
           { type: 'feature', feature: { id: 'archfeypatron-misty-escape' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'dominate-beast', alwaysPrepared: true },
+          { type: 'spell', spellId: 'greater-invisibility', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'dominate-person', alwaysPrepared: true },
+          { type: 'spell', spellId: 'seeming', alwaysPrepared: true },
         ],
       },
       {
@@ -1411,13 +1436,23 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Bonus Proficiency: Religion skill
           { type: 'proficiency', category: 'skill', id: 'religion' },
-          // Bonus Cantrip: Light and Sacred Flame always known
-          // TODO #93: model as spell grants when spell id system supports cantrips
-          { type: 'feature', feature: { id: 'celestialpatron-bonus-cantrip' } },
+          // Bonus Cantrips: Light and Sacred Flame (alwaysPrepared:false → routes to cantrips[] via level-0 resolver logic)
+          { type: 'spell', spellId: 'light', alwaysPrepared: false },
+          { type: 'spell', spellId: 'sacred-flame', alwaysPrepared: false },
           // Healing Light: pool of d6s = 1 + Warlock level; spend as Bonus Action to heal creature within 60 ft
           { type: 'feature', feature: { id: 'celestialpatron-healing-light' } },
-          // TODO #93: model Celestial patron spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'celestialpatron-patron-spells' } },
+          // Celestial patron spells (always prepared)
+          { type: 'spell', spellId: 'aid', alwaysPrepared: true },
+          { type: 'spell', spellId: 'cure-wounds', alwaysPrepared: true },
+          { type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: true },
+          { type: 'spell', spellId: 'lesser-restoration', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'daylight', alwaysPrepared: true },
+          { type: 'spell', spellId: 'revivify', alwaysPrepared: true },
         ],
       },
       {
@@ -1426,6 +1461,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Radiant Soul: resistance to Radiant damage + add CHA mod to one radiant/fire spell damage roll per turn
           { type: 'resistance', damageType: 'radiant' },
           { type: 'feature', feature: { id: 'celestialpatron-radiant-soul' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'guardian-of-faith', alwaysPrepared: true },
+          { type: 'spell', spellId: 'wall-of-fire', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'greater-restoration', alwaysPrepared: true },
+          { type: 'spell', spellId: 'summon-celestial', alwaysPrepared: true },
         ],
       },
       {
@@ -1444,8 +1493,18 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Dark One's Blessing: when you reduce a hostile to 0 HP, gain temp HP = CHA mod + Warlock level
           { type: 'feature', feature: { id: 'fiendpatron-dark-ones-blessing' } },
-          // TODO #93: model Fiend patron spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'fiendpatron-patron-spells' } },
+          // Fiend patron spells (always prepared)
+          { type: 'spell', spellId: 'burning-hands', alwaysPrepared: true },
+          { type: 'spell', spellId: 'command', alwaysPrepared: true },
+          { type: 'spell', spellId: 'scorching-ray', alwaysPrepared: true },
+          { type: 'spell', spellId: 'suggestion', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'fireball', alwaysPrepared: true },
+          { type: 'spell', spellId: 'stinking-cloud', alwaysPrepared: true },
         ],
       },
       {
@@ -1453,6 +1512,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Dark One's Own Luck: add d10 to an ability check or save; uses = PB per long rest; replenishes on short/long rest
           { type: 'feature', feature: { id: 'fiendpatron-dark-ones-own-luck' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'fire-shield', alwaysPrepared: true },
+          { type: 'spell', spellId: 'wall-of-fire', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'geas', alwaysPrepared: true },
+          { type: 'spell', spellId: 'insect-plague', alwaysPrepared: true },
         ],
       },
       {
@@ -1479,8 +1552,18 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           },
           // Awakened Mind: telepathic communication with creatures within 30 ft sharing a language
           { type: 'feature', feature: { id: 'greatoldonepatron-awakened-mind' } },
-          // TODO #93: model Great Old One patron spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'greatoldonepatron-psychic-spells' } },
+          // Great Old One patron spells (always prepared)
+          { type: 'spell', spellId: 'detect-thoughts', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dissonant-whispers', alwaysPrepared: true },
+          { type: 'spell', spellId: 'hideous-laughter', alwaysPrepared: true },
+          { type: 'spell', spellId: 'phantasmal-force', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'clairvoyance', alwaysPrepared: true },
+          { type: 'spell', spellId: 'hunger-of-hadar', alwaysPrepared: true },
         ],
       },
       {
@@ -1488,6 +1571,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Clairvoyant Combatant: creature within 60 ft must make WIS save or you have Advantage against it and are invisible to it for 1 min; uses = PB/long rest
           { type: 'feature', feature: { id: 'greatoldonepatron-clairvoyant-combatant' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'confusion', alwaysPrepared: true },
+          { type: 'spell', spellId: 'summon-aberration', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'modify-memory', alwaysPrepared: true },
+          { type: 'spell', spellId: 'telekinesis', alwaysPrepared: true },
         ],
       },
       {

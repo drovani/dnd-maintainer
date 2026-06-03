@@ -78,10 +78,10 @@ missing: 0 · stub: 0 · partial: 45 · complete: 3 · golden-verified: 0/48
 | clockworksorcery | partial | has 3/5/6/7/9/14; missing 18 (sorcerer expects 3/6/14/18) | — |
 | draconicsorcery | partial | has 3/5/6/7/9; missing 14/18 (sorcerer expects 3/6/14/18) | — |
 | wildmagicsorcery | partial | has 3/6; missing 14/18 (sorcerer expects 3/6/14/18) | — |
-| archfeypatron | partial | has 3/6/10; missing 14 (warlock expects 3/6/10/14) | — |
-| celestialpatron | partial | has 3/6/10; missing 14 (warlock expects 3/6/10/14) | — |
-| fiendpatron | partial | has 3/6/10; missing 14 (warlock expects 3/6/10/14) | — |
-| greatoldonepatron | partial | has 3/6/10; missing 14 (warlock expects 3/6/10/14) | — |
+| archfeypatron | partial | has 3/5/6/7/9/10; missing 14 (warlock expects 3/6/10/14) | — |
+| celestialpatron | partial | has 3/5/6/7/9/10; missing 14 (warlock expects 3/6/10/14) | — |
+| fiendpatron | partial | has 3/5/6/7/9/10; missing 14 (warlock expects 3/6/10/14) | — |
+| greatoldonepatron | partial | has 3/5/6/7/9/10; missing 14 (warlock expects 3/6/10/14) | — |
 | abjurer | partial | has 3/6/10; missing 14 (wizard expects 3/6/10/14) | — |
 | diviner | partial | has 3/6/10; missing 14 (wizard expects 3/6/10/14) | — |
 | evoker | partial | has 3/6/10; missing 14 (wizard expects 3/6/10/14) | — |

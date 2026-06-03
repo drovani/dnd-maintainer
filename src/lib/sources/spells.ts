@@ -1634,6 +1634,144 @@ export const SPELL_CATALOG = [
     // 2024 PHB: native to wizard
     nativeClasses: ['wizard'],
   },
+  // Warlock patron spells
+  {
+    id: 'sacred-flame',
+    level: 0,
+    school: 'evocation',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to cleric
+    nativeClasses: ['cleric'],
+  },
+  {
+    id: 'phantasmal-force',
+    level: 2,
+    school: 'illusion',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'a bit of fleece',
+    },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to bard, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'sorcerer', 'warlock', 'wizard'],
+  },
+  {
+    id: 'suggestion',
+    level: 2,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: {
+      verbal: true,
+      somatic: false,
+      material: "a snake's tongue and either a bit of honeycomb or a drop of sweet oil",
+    },
+    duration: 'Up to 8 hours',
+    // 2024 PHB: native to bard, sorcerer, warlock
+    nativeClasses: ['bard', 'sorcerer', 'warlock'],
+  },
+  {
+    id: 'hideous-laughter',
+    level: 1,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'tiny tarts and a feather waved in the air',
+    },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: renamed from "Tasha's Hideous Laughter"; native to bard, warlock, wizard
+    nativeClasses: ['bard', 'warlock', 'wizard'],
+  },
+  {
+    id: 'blink',
+    level: 3,
+    school: 'transmutation',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '1 minute',
+    // 2024 PHB: native to sorcerer, warlock, wizard
+    nativeClasses: ['sorcerer', 'warlock', 'wizard'],
+  },
+  {
+    id: 'clairvoyance',
+    level: 3,
+    school: 'divination',
+    ritual: false,
+    concentration: true,
+    castingTime: '10 minutes',
+    range: '1 mile',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'a focus worth 100+ GP, either a jeweled horn for hearing or a glass eye for seeing',
+    },
+    duration: 'Up to 10 minutes',
+    // 2024 PHB: native to bard, cleric, sorcerer, wizard
+    nativeClasses: ['bard', 'cleric', 'sorcerer', 'wizard'],
+  },
+  {
+    id: 'dominate-beast',
+    level: 4,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to druid, ranger
+    nativeClasses: ['druid', 'ranger'],
+  },
+  {
+    id: 'geas',
+    level: 5,
+    school: 'enchantment',
+    ritual: false,
+    concentration: false,
+    castingTime: '1 minute',
+    range: '60 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: '30 days',
+    // 2024 PHB: native to bard, cleric, druid, paladin, wizard
+    nativeClasses: ['bard', 'cleric', 'druid', 'paladin', 'wizard'],
+  },
+  {
+    id: 'summon-celestial',
+    level: 5,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'a golden reliquary worth 500+ GP',
+    },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to cleric, paladin
+    nativeClasses: ['cleric', 'paladin'],
+  },
 ] as const satisfies readonly SpellDef[];
 
 export type SpellId = (typeof SPELL_CATALOG)[number]['id'];
