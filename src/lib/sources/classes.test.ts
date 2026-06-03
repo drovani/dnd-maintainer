@@ -649,6 +649,8 @@ describe('Druid class grant structures', () => {
       expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'druid', 0));
       const optionIds = grant.options.map((o) => o.optionId);
       expect(optionIds).toEqual(['magician', 'warden']);
+      const magician = grant.options.find((o) => o.optionId === 'magician');
+      expect(magician?.featureId).toBe('druid-primal-order-magician');
       const warden = grant.options.find((o) => o.optionId === 'warden');
       expect(warden?.featureId).toBe('druid-primal-order-warden');
       const wardenProfs = warden?.grants.filter((g) => g.type === 'proficiency') ?? [];
@@ -656,6 +658,7 @@ describe('Druid class grant structures', () => {
     }
   });
 
+  // TODO(#180): Elemental Fury belongs at L7 (levels[6]); currently misplaced at L11.
   it('level 11 has an elemental-fury feature-choice between Potent Spellcasting and Primal Strike', () => {
     const grant = source?.levels[10].grants.find((g) => g.type === 'feature-choice');
     expect(grant?.type).toBe('feature-choice');
@@ -663,6 +666,10 @@ describe('Druid class grant structures', () => {
       expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'druid', 1));
       const optionIds = grant.options.map((o) => o.optionId);
       expect(optionIds).toEqual(['potent-spellcasting', 'primal-strike']);
+      const potentSpellcasting = grant.options.find((o) => o.optionId === 'potent-spellcasting');
+      expect(potentSpellcasting?.featureId).toBe('druid-elemental-fury-potent-spellcasting');
+      const primalStrike = grant.options.find((o) => o.optionId === 'primal-strike');
+      expect(primalStrike?.featureId).toBe('druid-elemental-fury-primal-strike');
     }
   });
 

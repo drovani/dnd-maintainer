@@ -2090,9 +2090,7 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
     });
     // Look specifically for the divine-order choice (acolyte background also contributes a
     // magic-initiate feature-choice that remains pending unless a spell-list sub-choice is made)
-    const pending = result.pendingChoices.find(
-      (c) => c.type === 'feature-choice' && c.choiceKey === divineOrderKey
-    );
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice' && c.choiceKey === divineOrderKey);
     expect(pending).toBeUndefined();
   });
 
@@ -2187,6 +2185,89 @@ describe('Cleric feature-choice integration (Divine Order)', () => {
     const featureIds = result.features.map((f) => f.feature.id);
     expect(featureIds).not.toContain('cleric-divine-order-protector');
     expect(featureIds).not.toContain('cleric-divine-order-thaumaturge');
+  });
+});
+
+describe('Druid feature-choice integration (Primal Order)', () => {
+  const druidL1Key = createChoiceKey('feature-choice', 'class', 'druid', 0);
+
+  const baseBuild: CharacterBuild = {
+    speciesId: 'human' as const,
+    backgroundId: 'acolyte',
+    baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('emits a pending feature-choice with both options when no decision is recorded', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 1,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice' && c.choiceKey === druidL1Key);
+    expect(pending).toBeDefined();
+    if (pending?.type === 'feature-choice') {
+      const optionIds = pending.options.map((o) => o.optionId);
+      expect(optionIds).toEqual(['magician', 'warden']);
+      const magicianOption = pending.options.find((o) => o.optionId === 'magician');
+      expect(magicianOption?.featureId).toBe('druid-primal-order-magician');
+    }
+  });
+
+  it('Warden grants martial weapon + medium armor on the resolved character', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: { [druidL1Key]: { type: 'feature-choice' as const, optionId: 'warden' } },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+    });
+    const weaponProfValues = result.weaponProficiencies.map((p) => p.value);
+    expect(weaponProfValues).toContain('martial');
+    const armorProfValues = result.armorProficiencies.map((p) => p.value);
+    expect(armorProfValues).toContain('medium');
+  });
+
+  it('Magician does NOT grant Warden martial weapon proficiency', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: { [druidL1Key]: { type: 'feature-choice' as const, optionId: 'magician' } },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+    });
+    const weaponProfValues = result.weaponProficiencies.map((p) => p.value);
+    expect(weaponProfValues).not.toContain('martial');
+  });
+
+  it('chosen variant feature appears in resolved features', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: { [druidL1Key]: { type: 'feature-choice' as const, optionId: 'warden' } },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: build.choices,
+    });
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('druid-primal-order-warden');
   });
 });
 
@@ -2291,9 +2372,7 @@ describe('collapsed repeatable feat resolver integration', () => {
       const bundles: GrantBundle[] = [
         {
           source: { origin: 'feat', id: 'magic-initiate' },
-          grants: [
-            { type: 'feature', feature: { id: 'feat-magic-initiate-wizard' } },
-          ],
+          grants: [{ type: 'feature', feature: { id: 'feat-magic-initiate-wizard' } }],
         },
       ];
       const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
@@ -2335,9 +2414,7 @@ describe('collapsed repeatable feat resolver integration', () => {
       const bundles: GrantBundle[] = [
         {
           source: { origin: 'feat', id: 'elemental-adept' },
-          grants: [
-            { type: 'feature', feature: { id: 'feat-elemental-adept-fire' } },
-          ],
+          grants: [{ type: 'feature', feature: { id: 'feat-elemental-adept-fire' } }],
         },
       ];
       const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
@@ -2370,9 +2447,7 @@ describe('collapsed repeatable feat resolver integration', () => {
         },
       ];
       const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
-      const pending = result.pendingChoices.find(
-        (c) => c.type === 'feature-choice' && c.choiceKey === resilientKey
-      );
+      const pending = result.pendingChoices.find((c) => c.type === 'feature-choice' && c.choiceKey === resilientKey);
       expect(pending).toBeDefined();
     });
 
@@ -2380,9 +2455,7 @@ describe('collapsed repeatable feat resolver integration', () => {
       const bundles: GrantBundle[] = [
         {
           source: { origin: 'feat', id: 'resilient' },
-          grants: [
-            { type: 'feature', feature: { id: 'feat-resilient-constitution' } },
-          ],
+          grants: [{ type: 'feature', feature: { id: 'feat-resilient-constitution' } }],
         },
       ];
       const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
@@ -2394,9 +2467,7 @@ describe('collapsed repeatable feat resolver integration', () => {
       const bundles: GrantBundle[] = [
         {
           source: { origin: 'feat', id: 'resilient' },
-          grants: [
-            { type: 'feature', feature: { id: 'feat-resilient-charisma' } },
-          ],
+          grants: [{ type: 'feature', feature: { id: 'feat-resilient-charisma' } }],
         },
       ];
       const result = resolveCharacter({ ...baseInput, bundles, choices: {} });
@@ -2405,4 +2476,3 @@ describe('collapsed repeatable feat resolver integration', () => {
     });
   });
 });
-

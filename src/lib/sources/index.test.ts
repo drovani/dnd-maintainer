@@ -146,11 +146,14 @@ describe('all 2024 backgrounds have correct structure', () => {
   it.each(EXPECTED_BACKGROUNDS)('$id has exactly 1 origin grant (feat or direct feature)', ({ id }) => {
     const source = getBackgroundSource(id as BackgroundId);
     // acolyte/guide/sage grant Magic Initiate as a direct feature (not a feat grant)
-    const directMagicInitiateIds = new Set(['feat-magic-initiate-cleric', 'feat-magic-initiate-druid', 'feat-magic-initiate-wizard']);
+    const directMagicInitiateIds = new Set([
+      'feat-magic-initiate-cleric',
+      'feat-magic-initiate-druid',
+      'feat-magic-initiate-wizard',
+    ]);
     const hasFeatGrant = source?.grants.some((g) => g.type === 'feat') ?? false;
-    const hasDirectMagicInitiateFeature = source?.grants.some(
-      (g) => g.type === 'feature' && directMagicInitiateIds.has(g.feature.id)
-    ) ?? false;
+    const hasDirectMagicInitiateFeature =
+      source?.grants.some((g) => g.type === 'feature' && directMagicInitiateIds.has(g.feature.id)) ?? false;
     expect(hasFeatGrant || hasDirectMagicInitiateFeature).toBe(true);
   });
 });
@@ -485,6 +488,62 @@ describe('collectBundles', () => {
       .find((g) => g.type === 'feature' && g.feature.id === 'zealot-divine-fury-fire');
     expect(fireFeature).toBeUndefined();
   });
+
+  it('feature-choice: druid L1 Warden inlines the option grants (martial weapons + medium armor)', () => {
+    const druidL1Key = createChoiceKey('feature-choice', 'class', 'druid', 0);
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {
+        [druidL1Key]: { type: 'feature-choice' as const, optionId: 'warden' },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(build);
+    const allGrants = bundles.flatMap((b) => b.grants);
+    const wardenFeature = allGrants.find((g) => g.type === 'feature' && g.feature.id === 'druid-primal-order-warden');
+    expect(wardenFeature).toBeDefined();
+    const martialWeapon = allGrants.find(
+      (g) => g.type === 'proficiency' && g.category === 'weapon' && g.id === 'martial'
+    );
+    expect(martialWeapon).toBeDefined();
+    const mediumArmor = allGrants.find((g) => g.type === 'proficiency' && g.category === 'armor' && g.id === 'medium');
+    expect(mediumArmor).toBeDefined();
+  });
+
+  it('feature-choice: druid L1 Magician inlines only the variant feature (no extra grants today)', () => {
+    const druidL1Key = createChoiceKey('feature-choice', 'class', 'druid', 0);
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 15, cha: 12 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {
+        [druidL1Key]: { type: 'feature-choice' as const, optionId: 'magician' },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(build);
+    const allGrants = bundles.flatMap((b) => b.grants);
+    const magicianFeature = allGrants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'druid-primal-order-magician'
+    );
+    expect(magicianFeature).toBeDefined();
+    const martialWeapon = allGrants.find(
+      (g) => g.type === 'proficiency' && g.category === 'weapon' && g.id === 'martial'
+    );
+    expect(martialWeapon).toBeUndefined();
+    const mediumArmor = allGrants.find((g) => g.type === 'proficiency' && g.category === 'armor' && g.id === 'medium');
+    expect(mediumArmor).toBeUndefined();
+    const wardenFeature = allGrants.find((g) => g.type === 'feature' && g.feature.id === 'druid-primal-order-warden');
+    expect(wardenFeature).toBeUndefined();
+  });
 });
 
 describe('Magic Initiate pipeline integration (acolyte → cleric spells)', () => {
@@ -509,9 +568,7 @@ describe('Magic Initiate pipeline integration (acolyte → cleric spells)', () =
       levels: acolyte1Build.levels,
       expandedFeats,
     });
-    const clericInitiateFeatures = result.features.filter(
-      (f) => f.feature.id === 'feat-magic-initiate-cleric'
-    );
+    const clericInitiateFeatures = result.features.filter((f) => f.feature.id === 'feat-magic-initiate-cleric');
     expect(
       clericInitiateFeatures,
       'feat-magic-initiate-cleric should resolve exactly once (no double-grant)'

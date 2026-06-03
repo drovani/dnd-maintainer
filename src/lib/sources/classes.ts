@@ -350,7 +350,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
                 featureId: 'druid-primal-order-warden',
                 grants: [
                   { type: 'proficiency', category: 'weapon', id: 'martial' },
-                  { type: 'proficiency', category: 'armor', id: 'medium-nonmetal' },
+                  { type: 'proficiency', category: 'armor', id: 'medium' },
                 ],
               },
             ],
