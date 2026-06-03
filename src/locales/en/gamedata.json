@@ -2429,7 +2429,7 @@
     },
     "psionic-energy": {
       "name": "Psionic Energy Dice",
-      "description": "Fuel Psi Warrior abilities. You have 4 dice, regained on a Long Rest (the +1-per-Short-Rest regain and the PB-scaled die size d6–d12 are not yet modeled)."
+      "description": "Fuel Psi Warrior abilities. You have 4 dice at level 3 (the count scales as 2×PB up to 12 at level 17, which is not yet modeled), regained on a Long Rest (the +1-per-Short-Rest regain and the PB-scaled die size d6–d12 are also not yet modeled)."
     }
   },
   "spells": {

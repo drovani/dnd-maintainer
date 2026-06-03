@@ -2329,6 +2329,66 @@ describe('Monk L6 + Warrior of Mercy integration', () => {
     expect(physicians!.saveDC).toBe(14);
   });
 });
+describe('Psi Warrior Fighter L7 integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'fighter', 0);
+  const asiKey = createChoiceKey('asi', 'class', 'fighter', 0);
+
+  // INT 18 → mod +4; PB at L7 = 3; telekinetic-adept saveDC = 8 + 3 + 4 = 15
+  const psiWarriorL7Build: CharacterBuild = {
+    speciesId: 'human',
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 14, int: 18, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'fighter' as ClassId, classLevel: 2, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 3, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 4, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 5, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 6, hpRoll: 6 },
+      { classId: 'fighter' as ClassId, classLevel: 7, hpRoll: 6 },
+    ],
+    choices: {
+      'skill-choice:class:fighter:0': { type: 'skill-choice', skills: ['arcana', 'history'] },
+      'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+      'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['defense'] },
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'psiwarrior' as SubclassId },
+      [asiKey]: { type: 'asi' as const, allocation: { con: 2 } },
+    } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    feats: [],
+    activeItems: [],
+  };
+
+  const { bundles, warnings } = collectBundles(psiWarriorL7Build);
+  const input: ResolverInput = {
+    baseAbilities: psiWarriorL7Build.baseAbilities,
+    level: 7,
+    bundles,
+    choices: psiWarriorL7Build.choices,
+    levels: psiWarriorL7Build.levels,
+  };
+
+  it('collectBundles produces no warnings for a complete psiwarrior build', () => {
+    expect(warnings).toEqual([]);
+  });
+
+  it('resourcePools contains psionic-energy with max=4 and regen=long-rest', () => {
+    const result = resolveCharacter(input);
+    const psionicPool = result.resourcePools.filter((p) => p.poolId === 'psionic-energy');
+    expect(psionicPool).toHaveLength(1);
+    expect(psionicPool[0].max).toBe(4);
+    expect(psionicPool[0].regen).toBe('long-rest');
+  });
+
+  it('psiwarrior-telekinetic-adept saveDC = 8 + PB(3 at L7) + INT mod(4) = 15', () => {
+    const result = resolveCharacter(input);
+    const telekineticAdept = result.features.find((f) => f.feature.id === 'psiwarrior-telekinetic-adept');
+    expect(telekineticAdept).toBeDefined();
+    // INT 18 base, no INT ASI (L4 ASI goes to CON) → mod +4; PB 3 at L7; DC = 8+3+4 = 15
+    expect(telekineticAdept!.saveDC).toBe(15);
+  });
+});
+
 describe('collapsed repeatable feat resolver integration', () => {
   // Note: collectBundles processes feature-choice grants before adding explicit build.feats,
   // so feat-origin feature-choice grants are not resolved via collectBundles. Tests drive
