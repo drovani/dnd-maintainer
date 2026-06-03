@@ -176,6 +176,7 @@ export type CharacterSummary = Pick<
   | 'level'
   | 'hit_points_max'
   | 'armor_class'
+  | 'portrait_url'
   | 'updated_at'
 >;
 export type SessionSummary = Pick<

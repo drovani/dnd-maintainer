@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { resizeImage } from '@/lib/resize-image';
 import { useCharacterMutations } from '@/hooks/useCharacters';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('portrait');
 
 const BUCKET = 'character-portraits';
 
@@ -59,8 +62,8 @@ export function usePortraitUpload(): UsePortraitUploadResult {
       const path = portraitPath(characterId);
       const { error: storageError } = await supabase.storage.from(BUCKET).remove([path]);
       if (storageError) {
-        console.error('Failed to remove portrait from storage:', storageError);
         // Log but don't throw — the DB update (portrait_url → null) should still proceed
+        logger.warn('Failed to remove portrait from storage:', storageError);
       }
 
       await update.mutateAsync({ id: characterId, portrait_url: null });

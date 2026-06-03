@@ -198,13 +198,26 @@ export default function CharacterList() {
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground mb-1">{character.name}</h3>
-                    {character.player_name && (
-                      <p className="text-sm text-muted-foreground">
-                        {t('characterList.player', { name: character.player_name })}
-                      </p>
+                  <div className="flex items-center gap-3">
+                    {character.portrait_url ? (
+                      <img
+                        src={character.portrait_url}
+                        alt={character.name}
+                        className="size-12 rounded-full object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="size-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold text-muted-foreground shrink-0">
+                        {character.name.charAt(0).toUpperCase()}
+                      </div>
                     )}
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground mb-1">{character.name}</h3>
+                      {character.player_name && (
+                        <p className="text-sm text-muted-foreground">
+                          {t('characterList.player', { name: character.player_name })}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${

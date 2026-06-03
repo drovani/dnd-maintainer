@@ -4,7 +4,7 @@ export const CAMPAIGN_DETAIL_COLS =
   'id, slug, previous_slugs, name, description, setting, status, image_url, dm_notes, theme, created_at, updated_at, archived_at, allowed_source_books' as const;
 
 export const CHARACTER_SUMMARY_COLS =
-  'id, slug, previous_slugs, campaign_id, name, player_name, character_type, species, class, subclass, level, hit_points_max, armor_class, updated_at' as const;
+  'id, slug, previous_slugs, campaign_id, name, player_name, character_type, species, class, subclass, level, hit_points_max, armor_class, portrait_url, updated_at' as const;
 export const CHARACTER_DETAIL_COLS =
   'id, slug, previous_slugs, campaign_id, name, player_name, character_type, species, class, subclass, background, alignment, gender, size, age, height, weight, eye_color, hair_color, skin_color, level, hit_points_max, armor_class, speed, proficiency_bonus, heroic_inspiration, exhaustion_level, conditions, hit_dice_used, spell_slots_used, personality_traits, ideals, bonds, flaws, appearance, backstory, notes, portrait_url, is_active, status, created_at, updated_at' as const;
 

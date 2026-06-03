@@ -17,6 +17,7 @@ import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoices
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
 import { ResourcePoolsPanel } from '@/components/character-sheet/ResourcePoolsPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
+import { PortraitUpload } from '@/components/character-sheet/PortraitUpload';
 import { buildRestUpdate } from '@/lib/rest';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
@@ -281,9 +282,16 @@ function CharacterSheetInner({
         {/* Header */}
         <div className="bg-card border rounded-lg p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">{tc('characterSheet.title')}</div>
-              <h1 className="hidden md:block text-3xl font-bold text-foreground">{character.name}</h1>
+            <div className="flex items-start gap-4">
+              <PortraitUpload
+                characterId={character.id}
+                portraitUrl={character.portrait_url}
+                characterName={character.name}
+              />
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">{tc('characterSheet.title')}</div>
+                <h1 className="hidden md:block text-3xl font-bold text-foreground">{character.name}</h1>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <Button
