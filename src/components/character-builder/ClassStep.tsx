@@ -166,6 +166,12 @@ export function ClassStep() {
               <span className="text-sm">{spellcasting.cantrips.join(', ')}</span>
             </div>
           )}
+          {spellcasting.alwaysPreparedSpells.length > 0 && (
+            <div>
+              <span className="text-sm font-semibold">{tc('characterSheet.sections.alwaysPrepared')}: </span>
+              <span className="text-sm">{spellcasting.alwaysPreparedSpells.join(', ')}</span>
+            </div>
+          )}
         </div>
       )}
 

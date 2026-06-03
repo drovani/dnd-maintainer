@@ -372,6 +372,7 @@
       "backstory": "Backstory",
       "appearance": "Appearance",
       "cantrips": "CANTRIPS",
+      "alwaysPrepared": "ALWAYS PREPARED",
       "physicalTraits": "Physical Traits",
       "proficiencies": "Proficiencies",
       "attacks": "Attacks",

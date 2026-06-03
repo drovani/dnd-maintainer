@@ -18,6 +18,7 @@ import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
+import { getSpellDef, isSpellId } from '@/lib/sources/spells';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -629,25 +630,50 @@ function CharacterSheetInner({
             )}
 
             {/* Spells */}
-            {resolved?.spellcasting && resolved.spellcasting.cantrips.length > 0 && (
-              <div className="bg-card border border-purple-200 rounded-lg p-6">
-                <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.spells')}</h2>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-xs font-bold text-muted-foreground mb-2">
-                      {tc('characterSheet.sections.cantrips')}
-                    </div>
-                    <div className="space-y-1">
-                      {resolved.spellcasting.cantrips.map((cantrip, i) => (
-                        <div key={i} className="text-sm text-foreground">
-                          &bull; {cantrip}
+            {resolved?.spellcasting &&
+              (resolved.spellcasting.cantrips.length > 0 || resolved.spellcasting.alwaysPreparedSpells.length > 0) && (
+                <div className="bg-card border border-purple-200 rounded-lg p-6">
+                  <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.spells')}</h2>
+                  <div className="space-y-3">
+                    {resolved.spellcasting.cantrips.length > 0 && (
+                      <div>
+                        <div className="text-xs font-bold text-muted-foreground mb-2">
+                          {tc('characterSheet.sections.cantrips')}
                         </div>
-                      ))}
-                    </div>
+                        <div className="space-y-1">
+                          {resolved.spellcasting.cantrips.map((cantrip, i) => (
+                            <div key={i} className="text-sm text-foreground">
+                              &bull; {cantrip}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {resolved.spellcasting.alwaysPreparedSpells.length > 0 && (
+                      <div>
+                        <div className="text-xs font-bold text-muted-foreground mb-2">
+                          {tc('characterSheet.sections.alwaysPrepared')}
+                        </div>
+                        <div className="space-y-1">
+                          {resolved.spellcasting.alwaysPreparedSpells.map((id, i) => {
+                            const def = isSpellId(id) ? getSpellDef(id) : undefined;
+                            return (
+                              <div key={i} className="text-sm text-foreground">
+                                &bull; {isSpellId(id) ? t(`spells.${id}.name`) : id}
+                                {def && (
+                                  <span className="text-xs text-muted-foreground ml-2">
+                                    {`(lvl ${def.level} ${def.school})`}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Personality */}
             {(character.personality_traits || character.ideals || character.bonds || character.flaws) && (
