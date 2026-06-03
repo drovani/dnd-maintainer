@@ -105,5 +105,100 @@ export function useCharacterMutations() {
     },
   });
 
-  return { create, update, remove };
+  // Duplicate a character (row + its character_build_levels and character_items child rows)
+  // into a fresh record. The DB regenerates id/slug (slug via trigger from name+id) and
+  // timestamps. Supabase JS has no client-side transaction, so on any child-insert failure
+  // we compensate by deleting the new character (ON DELETE CASCADE removes partial children).
+  const clone = useMutation({
+    mutationFn: async ({
+      sourceCharacterId,
+      newName,
+    }: {
+      sourceCharacterId: string;
+      newName: string;
+      campaignId: string;
+    }) => {
+      const { data: source, error: sourceError } = await supabase
+        .from('characters')
+        .select('*')
+        .eq('id', sourceCharacterId)
+        .single();
+      if (sourceError) throw sourceError;
+      if (!source) throw new Error('Source character not found');
+
+      const { data: levels, error: levelsError } = await supabase
+        .from('character_build_levels')
+        .select('*')
+        .eq('character_id', sourceCharacterId)
+        .is('deleted_at', null);
+      if (levelsError) throw levelsError;
+
+      const { data: items, error: itemsError } = await supabase
+        .from('character_items')
+        .select('*')
+        .eq('character_id', sourceCharacterId);
+      if (itemsError) throw itemsError;
+
+      // Copy every column, then drop DB-managed ones and override identity fields.
+      const characterPayload: Record<string, unknown> = { ...source };
+      delete characterPayload.id;
+      delete characterPayload.created_at;
+      delete characterPayload.updated_at;
+      characterPayload.name = newName;
+      characterPayload.slug = '';
+      characterPayload.previous_slugs = [];
+
+      const { data: newChar, error: insertError } = await supabase
+        .from('characters')
+        .insert(characterPayload as unknown as TablesInsert<'characters'>)
+        .select()
+        .single();
+      if (insertError) throw insertError;
+      const newCharacter = newChar as unknown as Character;
+
+      try {
+        if (levels && levels.length > 0) {
+          const levelRows = (levels as Record<string, unknown>[]).map((row) => {
+            const copy: Record<string, unknown> = { ...row };
+            delete copy.id;
+            delete copy.created_at;
+            copy.character_id = newCharacter.id;
+            return copy;
+          });
+          const { error } = await supabase
+            .from('character_build_levels')
+            .insert(levelRows as unknown as TablesInsert<'character_build_levels'>[]);
+          if (error) throw error;
+        }
+
+        if (items && items.length > 0) {
+          const itemRows = (items as Record<string, unknown>[]).map((row) => {
+            const copy: Record<string, unknown> = { ...row };
+            delete copy.id;
+            delete copy.created_at;
+            delete copy.updated_at;
+            copy.character_id = newCharacter.id;
+            return copy;
+          });
+          const { error } = await supabase
+            .from('character_items')
+            .insert(itemRows as unknown as TablesInsert<'character_items'>[]);
+          if (error) throw error;
+        }
+      } catch (childError) {
+        // Roll back the orphaned new character (cascade clears any partial children).
+        await supabase.from('characters').delete().eq('id', newCharacter.id);
+        throw childError;
+      }
+
+      return newCharacter;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['characters', data.campaign_id] });
+      queryClient.invalidateQueries({ queryKey: ['character-build-levels', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['character-items', data.id] });
+    },
+  });
+
+  return { create, update, remove, clone };
 }

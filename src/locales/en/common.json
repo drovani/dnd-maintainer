@@ -8,6 +8,7 @@
     "creating": "Creating...",
     "edit": "Edit",
     "delete": "Delete",
+    "clone": "Clone",
     "add": "Add",
     "remove": "Remove",
     "next": "Next",
@@ -533,7 +534,8 @@
       "buildFailed": "Failed to compute character build: {{message}}",
       "updateFailed": "Failed to save changes. Please try again.",
       "archiveFailed": "Failed to archive character. Please try again.",
-      "deleteFailed": "Failed to delete character. Please try again."
+      "deleteFailed": "Failed to delete character. Please try again.",
+      "cloneFailed": "Failed to clone character. Please try again."
     },
     "actions": {
       "archiveTitle": "Archive Character",
@@ -541,7 +543,11 @@
       "deleteTitle": "Delete Character",
       "deleteConfirm": "Are you sure you want to permanently delete {{name}}? This action cannot be undone.",
       "archiveSuccess": "{{name}} has been archived.",
-      "deleteSuccess": "{{name}} has been deleted."
+      "deleteSuccess": "{{name}} has been deleted.",
+      "cloneTitle": "Clone Character",
+      "cloneNameLabel": "New character name",
+      "copyOfName": "Copy of {{name}}",
+      "cloneSuccess": "Character cloned: {{name}}"
     },
     "status": {
       "heroicInspiration": "Heroic Inspiration",

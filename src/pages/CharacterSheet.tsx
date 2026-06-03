@@ -28,7 +28,7 @@ import type { PersistedItem } from '@/lib/resolver/index';
 import type { SourceTag } from '@/types/sources';
 import { DND_CLASSES, getProficiencyBonus, isBackgroundId, type ClassId, type DndGender } from '@/lib/dnd-helpers';
 import type { Character } from '@/types/database';
-import { Archive, Check, Edit2, Save, Trash2 } from 'lucide-react';
+import { Archive, Check, Copy, Edit2, Save, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -87,11 +87,12 @@ function CharacterSheetInner({
 
   const navigate = useNavigate();
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
-  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'archive' | 'delete' | 'clone' | null>(null);
+  const [cloneName, setCloneName] = useState('');
 
   usePageTitle(character.name);
 
-  const { update: updateMutation, remove: removeMutation } = useCharacterMutations();
+  const { update: updateMutation, remove: removeMutation, clone: cloneMutation } = useCharacterMutations();
   const {
     character: ctxCharacter,
     rows,
@@ -184,6 +185,21 @@ function CharacterSheetInner({
     );
   };
 
+  const handleClone = () => {
+    const name = cloneName.trim() || tc('characterSheet.actions.copyOfName', { name: character.name });
+    cloneMutation.mutate(
+      { sourceCharacterId: characterId, newName: name, campaignId: character.campaign_id },
+      {
+        onSuccess: (cloned) => {
+          setConfirmAction(null);
+          toast.success(tc('characterSheet.actions.cloneSuccess', { name: cloned.name }));
+          navigate(`/campaign/${campaignSlug}/character/${cloned.slug}`);
+        },
+        onError: () => toast.error(tc('characterSheet.errors.cloneFailed')),
+      }
+    );
+  };
+
   const buildErrorBanner = buildError ? (
     <div className="mb-6 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-destructive text-sm">
       {tc('characterSheet.errors.buildFailed', { message: buildError })}
@@ -263,6 +279,17 @@ function CharacterSheetInner({
                 title={tc('characterSheet.dialogs.editCharacterInfo')}
               >
                 <Edit2 size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => {
+                  setCloneName(tc('characterSheet.actions.copyOfName', { name: character.name }));
+                  setConfirmAction('clone');
+                }}
+                title={tc('buttons.clone')}
+              >
+                <Copy size={16} />
               </Button>
               <Button
                 variant="ghost"
@@ -798,24 +825,49 @@ function CharacterSheetInner({
               <DialogTitle>
                 {confirmAction === 'archive'
                   ? tc('characterSheet.actions.archiveTitle')
-                  : tc('characterSheet.actions.deleteTitle')}
+                  : confirmAction === 'clone'
+                    ? tc('characterSheet.actions.cloneTitle')
+                    : tc('characterSheet.actions.deleteTitle')}
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-muted-foreground">
-              {confirmAction === 'archive'
-                ? tc('characterSheet.actions.archiveConfirm', { name: character.name })
-                : tc('characterSheet.actions.deleteConfirm', { name: character.name })}
-            </p>
+            {confirmAction === 'clone' ? (
+              <div className="space-y-2">
+                <label htmlFor="clone-name" className="text-sm text-muted-foreground">
+                  {tc('characterSheet.actions.cloneNameLabel')}
+                </label>
+                <Input
+                  id="clone-name"
+                  value={cloneName}
+                  onChange={(e) => setCloneName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && cloneName.trim()) handleClone();
+                  }}
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {confirmAction === 'archive'
+                  ? tc('characterSheet.actions.archiveConfirm', { name: character.name })
+                  : tc('characterSheet.actions.deleteConfirm', { name: character.name })}
+              </p>
+            )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setConfirmAction(null)}>
                 {tc('buttons.cancel')}
               </Button>
               <Button
                 variant={confirmAction === 'delete' ? 'destructive' : 'default'}
-                onClick={confirmAction === 'archive' ? handleArchive : handleDelete}
-                pending={updateMutation.isPending || removeMutation.isPending}
+                onClick={
+                  confirmAction === 'archive' ? handleArchive : confirmAction === 'clone' ? handleClone : handleDelete
+                }
+                disabled={confirmAction === 'clone' && !cloneName.trim()}
+                pending={updateMutation.isPending || removeMutation.isPending || cloneMutation.isPending}
               >
-                {confirmAction === 'archive' ? tc('buttons.archive') : tc('buttons.delete')}
+                {confirmAction === 'archive'
+                  ? tc('buttons.archive')
+                  : confirmAction === 'clone'
+                    ? tc('buttons.clone')
+                    : tc('buttons.delete')}
               </Button>
             </DialogFooter>
           </DialogContent>

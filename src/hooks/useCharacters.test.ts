@@ -169,4 +169,69 @@ describe('useCharacterMutations', () => {
     await waitFor(() => expect(result.current.remove.isSuccess).toBe(true));
     expect(supabase.eq).toHaveBeenCalledWith('id', 'char-1');
   });
+
+  describe('clone', () => {
+    it('inserts a new character with the new name, blank slug, and reset previous_slugs', async () => {
+      // Object data => the child fetches return an object whose .length is undefined,
+      // so child inserts are skipped and only the character is inserted.
+      mockQueryResult.data = baseCharacter;
+
+      const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
+      result.current.clone.mutate({
+        sourceCharacterId: 'char-1',
+        newName: 'Copy of Aria Silverwind',
+        campaignId: 'camp-1',
+      });
+
+      await waitFor(() => expect(result.current.clone.isSuccess).toBe(true));
+
+      const payload = vi.mocked(supabase.insert).mock.calls[0][0] as Record<string, unknown>;
+      expect(payload.name).toBe('Copy of Aria Silverwind');
+      expect(payload.slug).toBe('');
+      expect(payload.previous_slugs).toEqual([]);
+      // DB-managed columns are dropped so the database regenerates them.
+      expect(payload).not.toHaveProperty('id');
+      expect(payload).not.toHaveProperty('created_at');
+      expect(payload).not.toHaveProperty('updated_at');
+      // Duplicate semantics: type/status/campaign carried over verbatim.
+      expect(payload.character_type).toBe('pc');
+      expect(payload.status).toBe('ready');
+      expect(payload.campaign_id).toBe('camp-1');
+    });
+
+    it('skips child inserts when the source has no build levels or items', async () => {
+      mockQueryResult.data = baseCharacter;
+
+      const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
+      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy', campaignId: 'camp-1' });
+
+      await waitFor(() => expect(result.current.clone.isSuccess).toBe(true));
+      // Only the character row is inserted (no child-table inserts).
+      expect(supabase.insert).toHaveBeenCalledTimes(1);
+    });
+
+    it('inserts child build levels and items when the source has them', async () => {
+      // Array data => the child fetches report length > 0, exercising both child-insert branches.
+      mockQueryResult.data = [{ id: 'row-1', character_id: 'char-1', sequence: 0, choices: {} }];
+
+      const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
+      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy', campaignId: 'camp-1' });
+
+      await waitFor(() => expect(result.current.clone.isSuccess).toBe(true));
+      // character + character_build_levels + character_items.
+      expect(supabase.insert).toHaveBeenCalledTimes(3);
+      expect(supabase.from).toHaveBeenCalledWith('character_build_levels');
+      expect(supabase.from).toHaveBeenCalledWith('character_items');
+    });
+
+    it('sets error state when the character insert fails', async () => {
+      mockQueryResult.data = baseCharacter;
+      mockQueryResult.error = { message: 'Clone failed' };
+
+      const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
+      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy', campaignId: 'camp-1' });
+
+      await waitFor(() => expect(result.current.clone.isError).toBe(true));
+    });
+  });
 });
