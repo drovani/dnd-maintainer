@@ -43,7 +43,7 @@ describe('filterBySourceBooks', () => {
   it('returns only the allowed items from a mixed list, preserving order', () => {
     const a = { id: 'a', sourceBook: 'phb-2024' as SourceBookId };
     const b = { id: 'b', sourceBook: 'dmg-2024' as SourceBookId };
-    const c = { id: 'c' }; // untagged -> defaults to phb-2024
+    const c: { id: string; sourceBook?: SourceBookId } = { id: 'c' }; // untagged -> defaults to phb-2024
     // Identity (not just length): the right subset survives, in original order.
     expect(filterBySourceBooks([a, b, c], ['phb-2024'])).toEqual([a, c]);
   });
