@@ -1662,8 +1662,8 @@ export const SPELL_CATALOG = [
       material: 'a bit of fleece',
     },
     duration: 'Up to 1 minute',
-    // 2024 PHB: native to bard, sorcerer, warlock, wizard
-    nativeClasses: ['bard', 'sorcerer', 'warlock', 'wizard'],
+    // 2024 PHB: native to bard, sorcerer, wizard (NOT warlock — warlock gets this via Archfey patron grant)
+    nativeClasses: ['bard', 'sorcerer', 'wizard'],
   },
   {
     id: 'suggestion',
@@ -1679,8 +1679,8 @@ export const SPELL_CATALOG = [
       material: "a snake's tongue and either a bit of honeycomb or a drop of sweet oil",
     },
     duration: 'Up to 8 hours',
-    // 2024 PHB: native to bard, sorcerer, warlock
-    nativeClasses: ['bard', 'sorcerer', 'warlock'],
+    // 2024 PHB: native to bard, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'sorcerer', 'warlock', 'wizard'],
   },
   {
     id: 'hideous-laughter',
@@ -1696,7 +1696,7 @@ export const SPELL_CATALOG = [
       material: 'tiny tarts and a feather waved in the air',
     },
     duration: 'Up to 1 minute',
-    // 2024 PHB: renamed from "Tasha's Hideous Laughter"; native to bard, warlock, wizard
+    // 2024 PHB: still named "Tasha's Hideous Laughter"; native to bard, warlock, wizard
     nativeClasses: ['bard', 'warlock', 'wizard'],
   },
   {
@@ -1709,8 +1709,8 @@ export const SPELL_CATALOG = [
     range: 'Self',
     components: { verbal: true, somatic: true, material: false },
     duration: '1 minute',
-    // 2024 PHB: native to sorcerer, warlock, wizard
-    nativeClasses: ['sorcerer', 'warlock', 'wizard'],
+    // 2024 PHB: native to sorcerer, wizard (NOT warlock — warlock gets this via Archfey patron grant)
+    nativeClasses: ['sorcerer', 'wizard'],
   },
   {
     id: 'clairvoyance',

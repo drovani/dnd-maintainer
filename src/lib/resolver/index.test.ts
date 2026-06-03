@@ -2961,6 +2961,25 @@ describe('Warlock patron spells — resolver integration', () => {
     expect(prepared).not.toContain('wall-of-fire');
   });
 
+  it('Fiend Warlock L9: alwaysPreparedSpells contains L7 and L9 spells', () => {
+    const build = buildWarlock('fiendpatron' as SubclassId, 9);
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const prepared = result.spellcasting!.alwaysPreparedSpells;
+    // L7 spells
+    expect(prepared).toContain('fire-shield');
+    expect(prepared).toContain('wall-of-fire');
+    // L9 spells
+    expect(prepared).toContain('geas');
+    expect(prepared).toContain('insect-plague');
+  });
+
   it('Celestial Warlock L3: light and sacred-flame in cantrips[], NOT in alwaysPreparedSpells', () => {
     const build = buildWarlock('celestialpatron' as SubclassId, 3);
     const { bundles } = collectBundles(build);
@@ -2982,6 +3001,33 @@ describe('Warlock patron spells — resolver integration', () => {
     expect(prepared).toContain('cure-wounds');
     expect(prepared).toContain('guiding-bolt');
     expect(prepared).toContain('lesser-restoration');
+    // Patron cantrips must NOT appear in knownSpells either
+    expect(result.spellcasting!.knownSpells).not.toContain('light');
+    expect(result.spellcasting!.knownSpells).not.toContain('sacred-flame');
+  });
+
+  it('Celestial Warlock L5: alwaysPreparedSpells contains L3 and L5 spells, not L7', () => {
+    const build = buildWarlock('celestialpatron' as SubclassId, 5);
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const prepared = result.spellcasting!.alwaysPreparedSpells;
+    // L3 spells
+    expect(prepared).toContain('aid');
+    expect(prepared).toContain('cure-wounds');
+    expect(prepared).toContain('guiding-bolt');
+    expect(prepared).toContain('lesser-restoration');
+    // L5 spells
+    expect(prepared).toContain('daylight');
+    expect(prepared).toContain('revivify');
+    // L7 spells must NOT be present at level 5
+    expect(prepared).not.toContain('guardian-of-faith');
+    expect(prepared).not.toContain('wall-of-fire');
   });
 
   it('Archfey Warlock L5: alwaysPreparedSpells contains L3 and L5 spells, not L7', () => {

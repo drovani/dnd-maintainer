@@ -2918,7 +2918,7 @@
       "description": "You suggest a course of activity (limited to a sentence or two) and magically influence a creature you can see within range that can hear and understand you. The target must succeed on a Wisdom saving throw or pursue the course of action for the duration."
     },
     "hideous-laughter": {
-      "name": "Hideous Laughter",
+      "name": "Tasha's Hideous Laughter",
       "description": "A creature of your choice that you can see within range perceives everything as hilariously funny and falls into fits of laughter. The target must succeed on a Wisdom saving throw or fall Prone, becoming Incapacitated and unable to stand up for the duration."
     },
     "blink": {
