@@ -370,7 +370,9 @@
       "cantrips": "CANTRIPS",
       "physicalTraits": "Physical Traits",
       "proficiencies": "Proficiencies",
-      "attacks": "Attacks"
+      "attacks": "Attacks",
+      "resourcePools": "Resource Pools",
+      "saveDC": "Save DC"
     },
     "fields": {
       "class": "Class",
@@ -395,7 +397,8 @@
       "weight": "Wt: {{weight}}",
       "speedFt": "{{value}} ft",
       "qtyAndWeight": "Qty: {{qty}} | Wt: {{weight}}",
-      "size": "Size"
+      "size": "Size",
+      "saveDC": "DC {{dc}} ({{ability}})"
     },
     "personality": {
       "traits": "Traits",
@@ -428,6 +431,14 @@
       "tools": "Tools",
       "languages": "Languages",
       "expertise": "Expertise"
+    },
+    "resourcePools": {
+      "max": "Max: {{max}}",
+      "source": "Granted by {{source}}",
+      "regen": {
+        "short-rest": "Short Rest",
+        "long-rest": "Long Rest"
+      }
     },
     "attacks": {
       "name": "Name",

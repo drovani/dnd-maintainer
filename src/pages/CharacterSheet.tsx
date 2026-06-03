@@ -12,6 +12,7 @@ import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown';
 import { LevelControls } from '@/components/character-sheet/LevelControls';
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel';
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
+import { ResourcePoolsPanel } from '@/components/character-sheet/ResourcePoolsPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
@@ -496,6 +497,9 @@ function CharacterSheetInner({
             {/* Proficiencies */}
             {resolved && <ProficienciesPanel resolved={resolved} />}
 
+            {/* Resource Pools */}
+            {resolved && <ResourcePoolsPanel resolved={resolved} />}
+
             {/* Features */}
             {resolved?.features && resolved.features.length > 0 && (
               <div className="bg-card border rounded-lg p-6">
@@ -530,6 +534,14 @@ function CharacterSheetInner({
                                       : resolvedFeature.source.origin === 'loot'
                                         ? resolvedFeature.source.description
                                         : resolvedFeature.source.id,
+                          })}
+                        </div>
+                      )}
+                      {resolvedFeature.saveDC !== undefined && resolvedFeature.feature.saveDC && (
+                        <div className="text-xs font-semibold text-foreground mt-1">
+                          {tc('characterSheet.fields.saveDC', {
+                            dc: resolvedFeature.saveDC,
+                            ability: t(`abilities.${resolvedFeature.feature.saveDC.dcAbility}`),
                           })}
                         </div>
                       )}

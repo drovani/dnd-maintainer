@@ -2429,5 +2429,11 @@
       "name": "Unconscious",
       "description": "You are incapacitated, can't move or speak, are unaware of your surroundings, drop anything you're holding, fall prone, automatically fail Strength and Dexterity saves, attacks have advantage against you, and any melee hit within 5 feet is a critical hit."
     }
+  },
+  "resourcePools": {
+    "focus-points": {
+      "name": "Focus Points",
+      "description": "Fuel Monk techniques. Regain on a Short Rest."
+    }
   }
 }
