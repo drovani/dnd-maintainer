@@ -311,4 +311,91 @@ describe('OriginStep', () => {
 
     expect(screen.queryByText('loadingLineage')).toBeNull();
   });
+
+  // ---------------------------------------------------------------------------
+  // Part 2: feat-origin feature-choice picker
+  // ---------------------------------------------------------------------------
+
+  it('renders a ChoicePicker with radios when a feat-origin feature-choice is pending', () => {
+    // Simulate magic-initiate in build.feats and no decision yet → pending choice arrives via resolved.
+    // The OriginStep renders regardless of background state — we omit background here to show
+    // the picker section is driven by resolved.pendingChoices, not by background presence.
+    mockResolved = {
+      ...makeDefaultResolved(),
+      pendingChoices: [
+        {
+          type: 'feature-choice' as const,
+          choiceKey: 'feature-choice:feat:magic-initiate:0' as ChoiceKey,
+          source: { origin: 'feat', id: 'magic-initiate' } as const,
+          options: [
+            { optionId: 'cleric', featureId: 'feat-magic-initiate-cleric' },
+            { optionId: 'druid', featureId: 'feat-magic-initiate-druid' },
+            { optionId: 'wizard', featureId: 'feat-magic-initiate-wizard' },
+          ],
+        },
+      ],
+    };
+
+    render(<OriginStep />);
+
+    // ChoicePicker renders radio inputs for each option (name = choice-feature-<key>)
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const featureRadios = radios.filter((r) => r.name?.startsWith('choice-feature-'));
+    expect(featureRadios.length).toBe(3);
+  });
+
+  it('does not render a feat-origin feature-choice picker when no such pending choice exists', () => {
+    mockResolved = {
+      ...makeDefaultResolved(),
+      pendingChoices: [],
+    };
+
+    render(<OriginStep />);
+
+    const radios = screen.queryAllByRole('radio') as HTMLInputElement[];
+    const featureRadios = radios.filter((r) => r.name?.startsWith('choice-feature-'));
+    expect(featureRadios).toHaveLength(0);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Part 4: badge shows for a direct feat-magic-initiate-* feature grant (acolyte)
+  // ---------------------------------------------------------------------------
+
+  it('shows the Origin Feat badge for a direct feat-magic-initiate-cleric feature grant (acolyte style)', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    // Acolyte grants feat-magic-initiate-cleric as a direct feature, not a feat grant (post-#177)
+    mockBundles = [
+      {
+        source: { origin: 'background', id: 'acolyte' as const },
+        grants: [
+          {
+            type: 'feature' as const,
+            feature: { id: 'feat-magic-initiate-cleric' },
+          },
+        ],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<OriginStep />);
+
+    // originFeatTitle label renders
+    expect(screen.getByText('originFeatTitle')).toBeTruthy();
+    // t('features.feat-magic-initiate-cleric.name', { defaultValue: 'feat-magic-initiate-cleric' })
+    // Mock: defaultValue wins → 'feat-magic-initiate-cleric'
+    expect(screen.getByText('feat-magic-initiate-cleric')).toBeTruthy();
+  });
+
+  it('does not show Origin Feat section when background has neither feat nor direct feature grant', () => {
+    mockCharacter = buildSeedCharacter({ background: 'acolyte' });
+    mockBundles = [
+      {
+        source: { origin: 'background', id: 'acolyte' as const },
+        grants: [],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<OriginStep />);
+
+    expect(screen.queryByText('originFeatTitle')).toBeNull();
+  });
 });

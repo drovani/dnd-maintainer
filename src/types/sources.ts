@@ -101,6 +101,12 @@ export interface FeatSource {
   readonly category: FeatCategory;
   readonly prerequisites: readonly FeatPrerequisite[];
   readonly grants: readonly Grant[];
+  /**
+   * When true, this feat may be taken more than once (e.g. magic-initiate, elemental-adept).
+   * NOT YET ENFORCED: CharacterBuild.feats is a set-like FeatId[]; the feature-choice ChoiceKey
+   * hardcodes index 0, so a second instance would collide with the first. Full support requires
+   * per-instance indexing. Tracked in #178.
+   */
   readonly repeatable?: boolean;
 }
 

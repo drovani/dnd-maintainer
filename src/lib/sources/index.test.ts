@@ -582,3 +582,69 @@ describe('Magic Initiate pipeline integration (acolyte → cleric spells)', () =
     expect(warnings.some((w) => w.includes('magic-initiate'))).toBe(false);
   });
 });
+
+describe('feat-origin feature-choice pipeline (build.feats: magic-initiate)', () => {
+  // Use soldier background (grants savage-attacker feat) — no magic-initiate collision.
+  // Acolyte/guide/sage grant feat-magic-initiate-cleric/druid/wizard as a *direct feature* (PR #177),
+  // so using them here would create a second feat-magic-initiate-cleric from two sources.
+  const magicInitiateKey = createChoiceKey('feature-choice', 'feat', 'magic-initiate', 0);
+
+  const buildWithDecision: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: 'soldier' as BackgroundId,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {
+      [magicInitiateKey]: { type: 'feature-choice' as const, optionId: 'cleric' },
+    },
+    feats: ['magic-initiate' as FeatId],
+    activeItems: [],
+  };
+
+  const buildWithoutDecision: CharacterBuild = {
+    ...buildWithDecision,
+    choices: {},
+  };
+
+  it('with decision: feat-magic-initiate-cleric appears exactly once in resolved features', () => {
+    const { bundles, expandedFeats } = collectBundles(buildWithDecision);
+    const result = resolveCharacter({
+      baseAbilities: buildWithDecision.baseAbilities,
+      level: buildWithDecision.levels.length,
+      bundles,
+      choices: buildWithDecision.choices,
+      levels: buildWithDecision.levels,
+      expandedFeats,
+    });
+    const clericFeatures = result.features.filter((f) => f.feature.id === 'feat-magic-initiate-cleric');
+    expect(clericFeatures, 'feat-magic-initiate-cleric should appear exactly once').toHaveLength(1);
+    const pendingMagicInitiate = result.pendingChoices.find(
+      (c) => 'choiceKey' in c && String(c.choiceKey).includes('magic-initiate')
+    );
+    expect(pendingMagicInitiate, 'no pending magic-initiate choice after resolution').toBeUndefined();
+  });
+
+  it('without decision: a pending feature-choice for magic-initiate is emitted', () => {
+    const { bundles, expandedFeats } = collectBundles(buildWithoutDecision);
+    const result = resolveCharacter({
+      baseAbilities: buildWithoutDecision.baseAbilities,
+      level: buildWithoutDecision.levels.length,
+      bundles,
+      choices: buildWithoutDecision.choices,
+      levels: buildWithoutDecision.levels,
+      expandedFeats,
+    });
+    const pendingMagicInitiate = result.pendingChoices.find(
+      (c) => c.type === 'feature-choice' && String(c.choiceKey).includes('magic-initiate')
+    );
+    expect(pendingMagicInitiate, 'pending feature-choice for magic-initiate should be emitted').toBeDefined();
+    expect(pendingMagicInitiate?.type).toBe('feature-choice');
+  });
+
+  it('with decision: no origin-mismatch warning fires for a resolved feat-origin choice', () => {
+    const { warnings } = collectBundles(buildWithDecision);
+    const originMismatch = warnings.find((w) => w.includes('non-class origin') && w.includes('feat'));
+    expect(originMismatch, 'no origin-mismatch warning for resolved feat-origin feature-choice').toBeUndefined();
+  });
+});

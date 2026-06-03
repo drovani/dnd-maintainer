@@ -31,7 +31,7 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     id: 'magic-initiate',
     category: 'origin',
     prerequisites: [],
-    repeatable: true,
+    repeatable: true, // TODO(#178): repeatable not yet enforced — per-instance ChoiceKey indexing needed
     grants: [
       {
         type: 'feature-choice',
