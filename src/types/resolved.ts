@@ -111,9 +111,9 @@ export interface ResolvedPactMagic {
  * casters (bard, sorcerer, warlock) and non-class spellcasting sources.
  */
 export interface ResolvedSpellcasting {
-  readonly ability: AbilityKey;
-  readonly spellSaveDC: number;
-  readonly spellAttackBonus: number;
+  readonly ability: AbilityKey | null;
+  readonly spellSaveDC: number | null;
+  readonly spellAttackBonus: number | null;
   readonly cantrips: readonly string[];
   readonly knownSpells: readonly string[];
   readonly alwaysPreparedSpells: readonly string[];

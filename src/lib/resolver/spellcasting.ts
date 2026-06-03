@@ -1,5 +1,5 @@
 import type { GrantBundle } from '@/types/sources';
-import type { AbilityKey } from '@/lib/dnd-helpers';
+import type { AbilityKey, ClassId } from '@/lib/dnd-helpers';
 import type { ResolvedAbility, ResolvedSpellcasting } from '@/types/resolved';
 import { getPactMagicSlots, getPreparedSpellCount, getSpellSlots } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
@@ -15,21 +15,33 @@ export function resolveSpellcasting(
   level: number
 ): ResolvedSpellcasting | null {
   const spellcastingGrants = collectGrantsByType(bundles, 'spellcasting');
-  if (spellcastingGrants.length === 0) return null;
+  const spellGrants = collectGrantsByType(bundles, 'spell');
 
-  const primary = spellcastingGrants.find((g) => g.grant.source === 'class') ?? spellcastingGrants[0];
-  const ability = primary.grant.ability;
-  const abilityMod = abilities[ability].modifier;
-  const spellSaveDC = 8 + proficiencyBonus + abilityMod;
-  const spellAttackBonus = proficiencyBonus + abilityMod;
+  if (spellcastingGrants.length === 0 && spellGrants.length === 0) return null;
 
-  const classId = primary.source.origin === 'class' ? primary.source.id : null;
+  let ability: AbilityKey | null = null;
+  let spellSaveDC: number | null = null;
+  let spellAttackBonus: number | null = null;
+  let classId: ClassId | null = null;
+  let abilityMod = 0;
+
+  if (spellcastingGrants.length > 0) {
+    const primary = spellcastingGrants.find((g) => g.grant.source === 'class') ?? spellcastingGrants[0];
+    ability = primary.grant.ability;
+    abilityMod = abilities[ability].modifier;
+    spellSaveDC = 8 + proficiencyBonus + abilityMod;
+    spellAttackBonus = proficiencyBonus + abilityMod;
+    classId = primary.source.origin === 'class' ? primary.source.id : null;
+  }
 
   const cantrips: string[] = [];
   const knownSpells: string[] = [];
   const alwaysPreparedSpells: string[] = [];
-  for (const { grant } of collectGrantsByType(bundles, 'spell')) {
+  for (const { grant } of spellGrants) {
     if (grant.alwaysPrepared) {
+      if (!getSpellDef(grant.spellId)) {
+        logger.warn(`always-prepared spell grant references uncatalogued spell "${grant.spellId}"`);
+      }
       alwaysPreparedSpells.push(grant.spellId);
     } else {
       const def = getSpellDef(grant.spellId);
