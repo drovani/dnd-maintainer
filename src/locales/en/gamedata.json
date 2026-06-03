@@ -2476,6 +2476,170 @@
     "commune-with-nature": {
       "name": "Commune with Nature",
       "description": "You briefly become one with nature and gain knowledge of the surrounding territory (3 miles outdoors, 300 feet underground): learn up to three facts about terrain, creatures, water, plants, minerals, or magical effects nearby."
+    },
+    "light": {
+      "name": "Light",
+      "description": "You touch one Large or smaller object that isn't being worn or carried by a hostile creature. Until the spell ends, the object sheds bright light in a 20-foot radius and dim light for an additional 20 feet. The light can be colored as you like. Covering the object with something opaque blocks the light. The spell ends if you cast it again."
+    },
+    "aid": {
+      "name": "Aid",
+      "description": "You bolster your allies with toughness and resolve. Choose up to three creatures within range. Each target's Hit Point maximum and current Hit Points increase by 5 for the duration. When the spell ends, these extra Hit Points are lost."
+    },
+    "bless": {
+      "name": "Bless",
+      "description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw."
+    },
+    "cure-wounds": {
+      "name": "Cure Wounds",
+      "description": "A creature you touch regains a number of Hit Points equal to 2d8 plus your spellcasting ability modifier. This spell has no effect on constructs or undead."
+    },
+    "lesser-restoration": {
+      "name": "Lesser Restoration",
+      "description": "You touch a creature and end either one disease or one of the following conditions: Blinded, Deafened, Paralyzed, or Poisoned."
+    },
+    "mass-healing-word": {
+      "name": "Mass Healing Word",
+      "description": "As you call out words of restoration, up to six creatures of your choice that you can see within range regain Hit Points equal to 2d4 plus your spellcasting ability modifier. This spell has no effect on constructs or undead."
+    },
+    "revivify": {
+      "name": "Revivify",
+      "description": "You touch a creature that has died within the last minute. That creature returns to life with 1 Hit Point. This spell can't return to life a creature that has died of old age, nor can it restore any missing body parts."
+    },
+    "aura-of-life": {
+      "name": "Aura of Life",
+      "description": "Life-preserving energy radiates from you in a 30-foot emanation. Until the spell ends, the aura reduces the maximum HP reduction from necrotic damage to 0 for creatures inside it, and any creature that starts its turn in the aura with 0 Hit Points regains 1 Hit Point."
+    },
+    "death-ward": {
+      "name": "Death Ward",
+      "description": "You touch a creature and grant it a measure of protection from death. The first time the target would drop to 0 Hit Points as a result of taking damage, the target instead drops to 1 Hit Point, and the spell ends."
+    },
+    "greater-restoration": {
+      "name": "Greater Restoration",
+      "description": "You imbue a creature you touch with positive energy to undo a debilitating effect. You can reduce the target's Exhaustion level by one, or end one of the following effects on the target: one effect that Charmed or Petrified the target, one curse including the target's attunement to a cursed magic item, any reduction to an ability score, or one effect reducing the target's Hit Point maximum."
+    },
+    "mass-cure-wounds": {
+      "name": "Mass Cure Wounds",
+      "description": "A wave of healing energy washes out from a point of your choice within range. Choose up to six creatures in a 30-foot-radius sphere centered on that point. Each target regains Hit Points equal to 5d8 plus your spellcasting ability modifier. This spell has no effect on constructs or undead."
+    },
+    "burning-hands": {
+      "name": "Burning Hands",
+      "description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 Fire damage on a failed save, or half as much on a successful one."
+    },
+    "faerie-fire": {
+      "name": "Faerie Fire",
+      "description": "Each object in a 20-foot Cube within range is outlined in blue, green, or violet light (your choice). Any creature in the area when the spell is cast is also outlined in light if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed dim light in a 10-foot radius and attacks against them have Advantage."
+    },
+    "scorching-ray": {
+      "name": "Scorching Ray",
+      "description": "You hurl three rays of fire at targets within range. You can hurl them at one target or several. Make a ranged spell attack for each ray. On a hit, the target takes 2d6 Fire damage."
+    },
+    "see-invisibility": {
+      "name": "See Invisibility",
+      "description": "For the duration, you see invisible creatures and objects as if they were visible, and you can see into the Ethereal Plane, out to a range of 60 feet."
+    },
+    "daylight": {
+      "name": "Daylight",
+      "description": "A 60-foot-radius sphere of light spreads out from a point you choose within range. The sphere is bright light and sheds dim light for an additional 60 feet. If the point you choose is on an object you are holding or one that isn't being worn or carried, the light shines from the object and moves with it."
+    },
+    "fireball": {
+      "name": "Fireball",
+      "description": "A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame. Each creature in a 20-foot-radius Sphere centered on that point must make a Dexterity saving throw. A target takes 8d6 Fire damage on a failed save, or half as much on a successful one."
+    },
+    "arcane-eye": {
+      "name": "Arcane Eye",
+      "description": "You create an invisible, magical eye within range that hovers in the air for the duration. You mentally receive visual information from the eye, which has normal vision and Darkvision with a range of 30 feet. The eye can look in every direction. As a Bonus Action, you can move the eye up to 30 feet in any direction."
+    },
+    "wall-of-fire": {
+      "name": "Wall of Fire",
+      "description": "You create a wall of fire on a solid surface within range. The wall can be up to 60 feet long, 20 feet high, and 1 foot thick, or a ringed wall up to 20 feet in diameter, 20 feet high, and 1 foot thick. The wall is opaque and lasts for the duration. When the wall appears, each creature in its area must make a Dexterity saving throw, taking 5d8 Fire damage on a failed save, or half as much on a successful one."
+    },
+    "flame-strike": {
+      "name": "Flame Strike",
+      "description": "A vertical column of divine fire roars down from the heavens in a location you specify. Each creature in a 10-foot-radius, 40-foot-high Cylinder centered on a point within range must make a Dexterity saving throw. A creature takes 4d6 Fire damage and 4d6 Radiant damage on a failed save, or half as much on a successful one."
+    },
+    "scrying": {
+      "name": "Scrying",
+      "description": "You can see and hear a particular creature you choose that is on the same plane of existence as you. The target must make a Wisdom saving throw, which is modified by how well you know the target and the sort of physical connection you have to it."
+    },
+    "charm-person": {
+      "name": "Charm Person",
+      "description": "You attempt to charm a Humanoid you can see within range. The target must make a Wisdom saving throw. On a failed save, the creature has the Charmed condition until the spell ends or until you or your companions do anything harmful to it. The Charmed creature is friendly to you."
+    },
+    "disguise-self": {
+      "name": "Disguise Self",
+      "description": "You make yourself — including your clothing, armor, weapons, and other belongings on your person — look different until the spell ends or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between."
+    },
+    "invisibility": {
+      "name": "Invisibility",
+      "description": "A creature you touch has the Invisible condition until the spell ends. The spell ends early if the target attacks or casts a spell."
+    },
+    "pass-without-trace": {
+      "name": "Pass Without Trace",
+      "description": "A veil of shadows and silence radiates from you, masking you and your companions from detection. For the duration, each creature you choose within 30 feet of you (including you) has a +10 bonus to Dexterity (Stealth) checks and can't be tracked except by magical means."
+    },
+    "hypnotic-pattern": {
+      "name": "Hypnotic Pattern",
+      "description": "You create a twisting pattern of colors that weaves through the air inside a 30-foot Cube within range. The pattern appears for a moment and vanishes. Each creature in the area that can see the pattern must make a Wisdom saving throw. On a failed save, a creature has the Charmed condition for the duration."
+    },
+    "nondetection": {
+      "name": "Nondetection",
+      "description": "For the duration, you hide a target that you touch from divination magic. The target can be a willing creature, a place, or an object no larger than 10 feet in any dimension. The target can't be targeted by any divination magic or perceived through magical scrying sensors."
+    },
+    "confusion": {
+      "name": "Confusion",
+      "description": "This spell assaults and distorts the mind, spawning delusions and provoking uncontrolled actions. Each creature in a 10-foot-radius Sphere centered on a point you choose within range must succeed on a Wisdom saving throw when you cast this spell or have the Confused condition until the spell ends."
+    },
+    "dimension-door": {
+      "name": "Dimension Door",
+      "description": "You teleport yourself from your current location to any other spot within range. You arrive at exactly the spot desired. You can bring along objects as long as their weight doesn't exceed what you can carry. You can also bring one willing creature of your size or smaller who is carrying gear up to its carrying capacity."
+    },
+    "dominate-person": {
+      "name": "Dominate Person",
+      "description": "You attempt to beguile a Humanoid that you can see within range. The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration. While Charmed, the target has the Incapacitated condition and loses control of itself — you can choose what action it takes."
+    },
+    "modify-memory": {
+      "name": "Modify Memory",
+      "description": "You attempt to reshape another creature's memories. One creature that you can see must make a Wisdom saving throw. If you are fighting the creature, it has Advantage on the saving throw. On a failed save, the target has the Charmed condition for the duration."
+    },
+    "guiding-bolt": {
+      "name": "Guiding Bolt",
+      "description": "You hurl a bolt of divine energy that streaks toward a creature of your choice within range. Make a ranged spell attack against the target. On a hit, the target takes 4d6 Radiant damage, and the next attack roll against the target before the end of your next turn has Advantage."
+    },
+    "magic-weapon": {
+      "name": "Magic Weapon",
+      "description": "You touch a nonmagical weapon. Until the spell ends, that weapon becomes a magic weapon with a +1 bonus to attack rolls and damage rolls. (2024: no longer requires concentration; lasts 1 hour.)"
+    },
+    "shield-of-faith": {
+      "name": "Shield of Faith",
+      "description": "A shimmering field appears and surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration."
+    },
+    "spiritual-weapon": {
+      "name": "Spiritual Weapon",
+      "description": "You create a floating, spectral weapon within range that lasts for the duration or until you cast this spell again. When you cast the spell, you can make one melee spell attack against a creature within 5 feet of the weapon. (2024: no longer requires concentration; duration 1 minute.)"
+    },
+    "crusaders-mantle": {
+      "name": "Crusader's Mantle",
+      "description": "Holy power radiates from you in a 30-foot emanation, awakening boldness in friendly creatures. Until the spell ends, the aura moves with you, centered on you. While in the aura, each nonhostile creature in the aura (including you) deals an extra 1d4 Radiant damage when it hits with a weapon or an unarmed strike."
+    },
+    "spirit-guardians": {
+      "name": "Spirit Guardians",
+      "description": "You call forth spirits to protect you. They flit around you to a distance of 15 feet for the duration. Choose Necrotic or Radiant damage. Whenever the spirits appear, each creature of your choice that is within 15 feet of you must make a Wisdom saving throw, taking 3d8 damage of the chosen type on a failed save, or half as much on a successful one."
+    },
+    "fire-shield": {
+      "name": "Fire Shield",
+      "description": "Thin and wispy flames wreathe your body for the duration, shedding bright light in a 10-foot radius and dim light for an additional 10 feet. The flames provide you with a warm shield or a chill shield, as you choose. The warm shield grants you Resistance to Cold damage, and the chill shield grants you Resistance to Fire damage."
+    },
+    "freedom-of-movement": {
+      "name": "Freedom of Movement",
+      "description": "You touch a willing creature. For the duration, the target's movement is unaffected by difficult terrain, and spells and other magical effects can neither reduce the target's speed nor cause the target to have the Paralyzed or Restrained condition."
+    },
+    "hold-monster": {
+      "name": "Hold Monster",
+      "description": "Choose a creature that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the effect on itself on a success."
+    },
+    "steel-wind-strike": {
+      "name": "Steel Wind Strike",
+      "description": "You flourish the weapon used in the casting and then vanish to strike like the wind. Choose up to five creatures you can see within range. Make a melee spell attack against each target. On a hit, a target takes 6d10 Force damage. You can then teleport to an unoccupied space you can see within 5 feet of one of the targets you hit or missed."
     }
   }
 }
