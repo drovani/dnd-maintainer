@@ -69,6 +69,35 @@ describe('usePortraitUpload', () => {
       expect(result.current.error).toBeInstanceOf(Error);
       expect(supabase.update).not.toHaveBeenCalled();
     });
+
+    it('surfaces error and leaves the uploaded file when the DB update fails after a successful storage upload', async () => {
+      mockStorageResult.error = null;
+      mockStorageResult.publicUrl = publicUrl;
+      mockQueryResult.error = { message: 'DB update failed' };
+
+      const { result } = renderHook(() => usePortraitUpload(), { wrapper: createWrapper() });
+
+      const bucketRef = supabase.storage.from('character-portraits');
+
+      await act(async () => {
+        try {
+          await result.current.upload(makeImageFile(), characterId);
+        } catch {
+          // expected — DB update throws, hook re-throws
+        }
+      });
+
+      // Storage upload was called (storage succeeded)
+      expect(bucketRef.upload).toHaveBeenCalled();
+      // DB update was also called (distinguishes this from storage-failure case)
+      expect(supabase.update).toHaveBeenCalledWith({ portrait_url: publicUrl });
+      // Hook surfaces the error
+      expect(result.current.error).toBeInstanceOf(Error);
+      // Storage remove was NOT called — orphan file is a deliberate trade-off
+      expect(bucketRef.remove).not.toHaveBeenCalled();
+      // isUploading resets to false after failure
+      expect(result.current.isUploading).toBe(false);
+    });
   });
 
   describe('remove', () => {
@@ -100,6 +129,22 @@ describe('usePortraitUpload', () => {
       const bucketRef = supabase.storage.from('character-portraits');
       expect(bucketRef.remove).not.toHaveBeenCalled();
       expect(supabase.update).not.toHaveBeenCalled();
+    });
+
+    it('still nulls portrait_url in the DB when storage.remove fails', async () => {
+      mockStorageResult.error = { message: 'remove failed' };
+      mockQueryResult.data = { id: characterId, portrait_url: null };
+
+      const { result } = renderHook(() => usePortraitUpload(), { wrapper: createWrapper() });
+
+      await act(async () => {
+        // Should NOT reject — storage errors are swallowed, DB update still proceeds
+        await result.current.remove(characterId, 'https://example.com/portrait.jpg');
+      });
+
+      // DB update is still called with portrait_url: null despite storage failure
+      expect(supabase.update).toHaveBeenCalledWith({ portrait_url: null });
+      expect(supabase.eq).toHaveBeenCalledWith('id', characterId);
     });
   });
 });

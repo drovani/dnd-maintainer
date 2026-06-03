@@ -841,7 +841,8 @@
     "uploading": "Uploading...",
     "errors": {
       "notAnImage": "Please select an image file (JPEG, PNG, or WebP)",
-      "uploadFailed": "Portrait upload failed — please try again"
+      "uploadFailed": "Portrait upload failed — please try again",
+      "removeFailed": "Failed to remove portrait — please try again"
     }
   },
   "validation": {

@@ -14,6 +14,10 @@ describe('CHARACTER_SUMMARY_COLS', () => {
   it('does not contain race (word boundary match)', () => {
     expect(CHARACTER_SUMMARY_COLS).not.toMatch(/\brace\b/);
   });
+
+  it('contains portrait_url for list thumbnails (word boundary match)', () => {
+    expect(CHARACTER_SUMMARY_COLS).toMatch(/\bportrait_url\b/);
+  });
 });
 
 describe('CHARACTER_DETAIL_COLS', () => {

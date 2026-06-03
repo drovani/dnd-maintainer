@@ -49,7 +49,7 @@ export function PortraitUpload({ characterId, portraitUrl, characterName }: Port
     try {
       await remove(characterId, portraitUrl);
     } catch {
-      setLocalError(t('portrait.errors.uploadFailed'));
+      setLocalError(t('portrait.errors.removeFailed'));
     }
   };
 

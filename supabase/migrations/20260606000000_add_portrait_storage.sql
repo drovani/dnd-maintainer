@@ -17,21 +17,25 @@ on conflict (id) do nothing;
 -- current no-auth development state, but MUST be tightened when authentication lands:
 -- replace the permissive policies with user-scoped ones (e.g. auth.uid() = owner).
 
+drop policy if exists "character-portraits: public select" on storage.objects;
 create policy "character-portraits: public select"
   on storage.objects
   for select
   using (bucket_id = 'character-portraits');
 
+drop policy if exists "character-portraits: public insert" on storage.objects;
 create policy "character-portraits: public insert"
   on storage.objects
   for insert
   with check (bucket_id = 'character-portraits');
 
+drop policy if exists "character-portraits: public update" on storage.objects;
 create policy "character-portraits: public update"
   on storage.objects
   for update
   using (bucket_id = 'character-portraits');
 
+drop policy if exists "character-portraits: public delete" on storage.objects;
 create policy "character-portraits: public delete"
   on storage.objects
   for delete
