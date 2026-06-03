@@ -1197,19 +1197,45 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Telepathic Speech: speak telepathically to one willing creature within 30 ft for 10 min (Intelligence-focused)
           { type: 'feature', feature: { id: 'aberrantsorcery-telepathic-speech' } },
-          // Psionic Sorcery: cast subclass spells without V/M components by spending additional Sorcery Points
-          { type: 'feature', feature: { id: 'aberrantsorcery-psionic-sorcery' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'aberrantsorcery-subclass-spells' } },
+          // Expanded spells (always prepared); mind-sliver is a cantrip (alwaysPrepared:false routes it to cantrips)
+          { type: 'spell', spellId: 'arms-of-hadar', alwaysPrepared: true },
+          { type: 'spell', spellId: 'calm-emotions', alwaysPrepared: true },
+          { type: 'spell', spellId: 'detect-thoughts', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dissonant-whispers', alwaysPrepared: true },
+          { type: 'spell', spellId: 'mind-sliver', alwaysPrepared: false },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'hunger-of-hadar', alwaysPrepared: true },
+          { type: 'spell', spellId: 'sending', alwaysPrepared: true },
         ],
       },
       {
         classLevel: 6,
         grants: [
+          // Psionic Sorcery: cast subclass spells without V/M components by spending additional Sorcery Points
+          // (2024 PHB places this at L6, not L3)
+          { type: 'feature', feature: { id: 'aberrantsorcery-psionic-sorcery' } },
           // Resistance to psychic damage (structural grant)
           { type: 'resistance', damageType: 'psychic' },
           // Psychic Defenses: advantage on saving throws vs Charmed and Frightened conditions
           { type: 'feature', feature: { id: 'aberrantsorcery-psychic-defenses' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'evards-black-tentacles', alwaysPrepared: true },
+          { type: 'spell', spellId: 'summon-aberration', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'rarys-telepathic-bond', alwaysPrepared: true },
+          { type: 'spell', spellId: 'telekinesis', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1221,10 +1247,18 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Restore Balance: Reaction within 60 ft — cancel Advantage or Disadvantage on a roll (PB/long rest)
           { type: 'feature', feature: { id: 'clockworksorcery-restore-balance' } },
-          // Trance of Order: 1 min — no crits against you; treat 9-or-lower d20 as 10 once per turn
-          { type: 'feature', feature: { id: 'clockworksorcery-trance-of-order' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'clockworksorcery-subclass-spells' } },
+          // Expanded spells (always prepared)
+          { type: 'spell', spellId: 'aid', alwaysPrepared: true },
+          { type: 'spell', spellId: 'alarm', alwaysPrepared: true },
+          { type: 'spell', spellId: 'lesser-restoration', alwaysPrepared: true },
+          { type: 'spell', spellId: 'protection-from-evil-and-good', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true },
+          { type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true },
         ],
       },
       {
@@ -1233,6 +1267,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Bastion of Law: spend 1–5 Sorcery Points to create d8-per-SP ward on a creature within 30 ft
           { type: 'feature', feature: { id: 'clockworksorcery-bastion-of-law' } },
         ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true },
+          { type: 'spell', spellId: 'summon-construct', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'greater-restoration', alwaysPrepared: true },
+          { type: 'spell', spellId: 'wall-of-force', alwaysPrepared: true },
+        ],
+      },
+      {
+        // Trance of Order: 2024 PHB places this at L14 (not L3)
+        classLevel: 14,
+        grants: [{ type: 'feature', feature: { id: 'clockworksorcery-trance-of-order' } }],
       },
     ] satisfies readonly SubclassFeature[],
   },
@@ -1247,11 +1300,35 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'armor-class', calculation: { mode: 'natural', baseAc: 13 } },
           // Dragon Ancestor: gain proficiency in Draconic language
           { type: 'proficiency', category: 'language', id: 'draconic' },
-          // Dragon Ancestor: free-form 1-of-10 ancestry choice (Black/Blue/Brass/Bronze/Copper/Gold/Green/Red/Silver/White);
-          // no pending-choice mechanism for arbitrary dragon type options — modeled as inert feature grant
-          { type: 'feature', feature: { id: 'draconicsorcery-dragon-ancestor' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'draconicsorcery-subclass-spells' } },
+          // Dragon Ancestor: 1-of-10 ancestry choice (Black/Blue/Brass/Bronze/Copper/Gold/Green/Red/Silver/White)
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'subclass', 'draconicsorcery', 0),
+            options: [
+              { optionId: 'black', featureId: 'draconicsorcery-dragon-ancestor-black', grants: [] },
+              { optionId: 'blue', featureId: 'draconicsorcery-dragon-ancestor-blue', grants: [] },
+              { optionId: 'brass', featureId: 'draconicsorcery-dragon-ancestor-brass', grants: [] },
+              { optionId: 'bronze', featureId: 'draconicsorcery-dragon-ancestor-bronze', grants: [] },
+              { optionId: 'copper', featureId: 'draconicsorcery-dragon-ancestor-copper', grants: [] },
+              { optionId: 'gold', featureId: 'draconicsorcery-dragon-ancestor-gold', grants: [] },
+              { optionId: 'green', featureId: 'draconicsorcery-dragon-ancestor-green', grants: [] },
+              { optionId: 'red', featureId: 'draconicsorcery-dragon-ancestor-red', grants: [] },
+              { optionId: 'silver', featureId: 'draconicsorcery-dragon-ancestor-silver', grants: [] },
+              { optionId: 'white', featureId: 'draconicsorcery-dragon-ancestor-white', grants: [] },
+            ],
+          },
+          // Expanded spells (always prepared)
+          { type: 'spell', spellId: 'alter-self', alwaysPrepared: true },
+          { type: 'spell', spellId: 'chromatic-orb', alwaysPrepared: true },
+          { type: 'spell', spellId: 'command', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dragons-breath', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'fear', alwaysPrepared: true },
+          { type: 'spell', spellId: 'fly', alwaysPrepared: true },
         ],
       },
       {
@@ -1259,6 +1336,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Elemental Affinity: add CHA mod to one damage roll of ancestor's element; spend 1 SP for 1hr resistance
           { type: 'feature', feature: { id: 'draconicsorcery-elemental-affinity' } },
+        ],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'arcane-eye', alwaysPrepared: true },
+          { type: 'spell', spellId: 'charm-monster', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'legend-lore', alwaysPrepared: true },
+          { type: 'spell', spellId: 'summon-dragon', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1273,8 +1364,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Tides of Chaos: gain Advantage on one attack roll, ability check, or saving throw per long rest;
           // automatically replenishes when you experience a Wild Magic Surge
           { type: 'feature', feature: { id: 'wildmagicsorcery-tides-of-chaos' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'wildmagicsorcery-subclass-spells' } },
+          // 2024 Wild Magic has no subclass spell list
         ],
       },
       {

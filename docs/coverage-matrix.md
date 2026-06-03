@@ -74,9 +74,9 @@ missing: 0 · stub: 0 · partial: 45 · complete: 3 · golden-verified: 0/48
 | assassin | partial | has 3/9; missing 13/17 (rogue expects 3/9/13/17) | — |
 | arcanetrickster | partial | has 3/9; missing 13/17 (rogue expects 3/9/13/17) | — |
 | soulknife | partial | has 3/9; missing 13/17 (rogue expects 3/9/13/17) | — |
-| aberrantsorcery | partial | has 3/6; missing 14/18 (sorcerer expects 3/6/14/18) | — |
-| clockworksorcery | partial | has 3/6; missing 14/18 (sorcerer expects 3/6/14/18) | — |
-| draconicsorcery | partial | has 3/6; missing 14/18 (sorcerer expects 3/6/14/18) | — |
+| aberrantsorcery | partial | has 3/5/6/7/9; missing 14/18 (sorcerer expects 3/6/14/18) | — |
+| clockworksorcery | partial | has 3/5/6/7/9/14; missing 18 (sorcerer expects 3/6/14/18) | — |
+| draconicsorcery | partial | has 3/5/6/7/9; missing 14/18 (sorcerer expects 3/6/14/18) | — |
 | wildmagicsorcery | partial | has 3/6; missing 14/18 (sorcerer expects 3/6/14/18) | — |
 | archfeypatron | partial | has 3/6/10; missing 14 (warlock expects 3/6/10/14) | — |
 | celestialpatron | partial | has 3/6/10; missing 14 (warlock expects 3/6/10/14) | — |

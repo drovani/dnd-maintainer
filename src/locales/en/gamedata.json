@@ -567,10 +567,6 @@
       "name": "Psionic Sorcery",
       "description": "When you cast a spell from your Aberrant Sorcery expanded spell list, you can expend Sorcery Points equal to the spell's level to cast it without any Verbal or Material components, provided you have no Concentration on a spell."
     },
-    "aberrantsorcery-subclass-spells": {
-      "name": "Aberrant Sorcery Spells",
-      "description": "You have access to additional spells from your aberrant connection. These spells are always prepared and don't count against your Spells Prepared total."
-    },
     "aberrantsorcery-psychic-defenses": {
       "name": "Psychic Defenses",
       "description": "You gain Resistance to Psychic damage, and you have Advantage on saving throws to avoid or end the Charmed or Frightened condition."
@@ -583,25 +579,53 @@
       "name": "Trance of Order",
       "description": "As a Bonus Action, you enter a state of clockwork consciousness for 1 minute. While in this trance, attack rolls against you can't benefit from Advantage, and whenever you make an attack roll, ability check, or saving throw and roll a 9 or lower on the d20, you can treat the d20 as a 10. This feature ends early if you are incapacitated. Once you use it, you can't use it again until you finish a Long Rest, unless you spend 5 Sorcery Points to use it again."
     },
-    "clockworksorcery-subclass-spells": {
-      "name": "Clockwork Sorcery Spells",
-      "description": "You have access to additional spells from your clockwork connection. These spells are always prepared and don't count against your Spells Prepared total."
-    },
     "clockworksorcery-bastion-of-law": {
       "name": "Bastion of Law",
       "description": "As a Magic action, you can expend 1–5 Sorcery Points to create a shimmering ward on a creature you can see within 30 feet of you, including yourself. The ward is represented by a number of d8s equal to the Sorcery Points spent. When the warded creature takes damage, it can expend any number of those dice, rolling them and reducing the damage taken by the total rolled. The ward lasts until you finish a Long Rest or until all dice are expended."
     },
-    "draconicsorcery-dragon-ancestor": {
-      "name": "Dragon Ancestor",
-      "description": "Choose one type of dragon as your ancestor: Black (Acid), Blue (Lightning), Brass (Fire), Bronze (Lightning), Copper (Acid), Gold (Fire), Green (Poison), Red (Fire), Silver (Cold), or White (Cold). Your choice determines the damage type for several of your other features. You also gain the ability to speak, read, and write Draconic, and you have Advantage on Charisma checks made to interact with dragons."
-    },
-    "draconicsorcery-subclass-spells": {
-      "name": "Draconic Sorcery Spells",
-      "description": "You have access to additional spells from your draconic bloodline. These spells are always prepared and don't count against your Spells Prepared total."
-    },
     "draconicsorcery-elemental-affinity": {
       "name": "Elemental Affinity",
       "description": "When you cast a spell that deals damage of the type associated with your Dragon Ancestor, you can add your Charisma modifier to one damage roll of that spell. In addition, you can spend 1 Sorcery Point to gain Resistance to that damage type for 1 hour."
+    },
+    "draconicsorcery-dragon-ancestor-black": {
+      "name": "Dragon Ancestor: Black",
+      "description": "Your draconic ancestor is a Black dragon. Your damage type is Acid."
+    },
+    "draconicsorcery-dragon-ancestor-blue": {
+      "name": "Dragon Ancestor: Blue",
+      "description": "Your draconic ancestor is a Blue dragon. Your damage type is Lightning."
+    },
+    "draconicsorcery-dragon-ancestor-brass": {
+      "name": "Dragon Ancestor: Brass",
+      "description": "Your draconic ancestor is a Brass dragon. Your damage type is Fire."
+    },
+    "draconicsorcery-dragon-ancestor-bronze": {
+      "name": "Dragon Ancestor: Bronze",
+      "description": "Your draconic ancestor is a Bronze dragon. Your damage type is Lightning."
+    },
+    "draconicsorcery-dragon-ancestor-copper": {
+      "name": "Dragon Ancestor: Copper",
+      "description": "Your draconic ancestor is a Copper dragon. Your damage type is Acid."
+    },
+    "draconicsorcery-dragon-ancestor-gold": {
+      "name": "Dragon Ancestor: Gold",
+      "description": "Your draconic ancestor is a Gold dragon. Your damage type is Fire."
+    },
+    "draconicsorcery-dragon-ancestor-green": {
+      "name": "Dragon Ancestor: Green",
+      "description": "Your draconic ancestor is a Green dragon. Your damage type is Poison."
+    },
+    "draconicsorcery-dragon-ancestor-red": {
+      "name": "Dragon Ancestor: Red",
+      "description": "Your draconic ancestor is a Red dragon. Your damage type is Fire."
+    },
+    "draconicsorcery-dragon-ancestor-silver": {
+      "name": "Dragon Ancestor: Silver",
+      "description": "Your draconic ancestor is a Silver dragon. Your damage type is Cold."
+    },
+    "draconicsorcery-dragon-ancestor-white": {
+      "name": "Dragon Ancestor: White",
+      "description": "Your draconic ancestor is a White dragon. Your damage type is Cold."
     },
     "wildmagicsorcery-wild-magic-surge": {
       "name": "Wild Magic Surge",
@@ -610,10 +634,6 @@
     "wildmagicsorcery-tides-of-chaos": {
       "name": "Tides of Chaos",
       "description": "You can manipulate the forces of chance to gain Advantage on one attack roll, ability check, or saving throw. Once you do so, you must finish a Long Rest before you can use this feature again. If you use Wild Magic Surge before you regain use of this feature, you immediately regain use of it."
-    },
-    "wildmagicsorcery-subclass-spells": {
-      "name": "Wild Magic Sorcery Spells",
-      "description": "You have access to additional spells tied to the wild, unpredictable magic that flows through you. These spells are always prepared and don't count against your Spells Prepared total."
     },
     "wildmagicsorcery-bend-luck": {
       "name": "Bend Luck",
