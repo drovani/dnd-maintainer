@@ -223,6 +223,14 @@ export type PendingChoice =
         { readonly optionId: string; readonly featureId: string },
         ...{ readonly optionId: string; readonly featureId: string }[],
       ];
+    }
+  | {
+      readonly type: 'spell-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly count: number;
+      readonly spellList: ClassId;
+      readonly spellLevel: number;
     };
 
 export interface ResolvedCharacter {

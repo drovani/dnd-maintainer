@@ -12,6 +12,7 @@ import type {
 import type { SubclassId } from '@/types/sources';
 import type { AbilityScores } from '@/types/database';
 import type { DamageTypeId } from '@/types/grants';
+import type { SpellId } from '@/types/spells';
 
 /**
  * Choice key format: `category:origin:id:index`
@@ -37,6 +38,7 @@ const CHOICE_CATEGORIES = [
   'lineage-choice',
   'feat-choice',
   'feature-choice',
+  'spell-choice',
 ] as const;
 export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number];
 
@@ -104,7 +106,8 @@ export type ChoiceDecision =
     }
   | { readonly type: 'lineage-choice'; readonly lineageId: string }
   | { readonly type: 'feat-choice'; readonly featId: FeatId }
-  | { readonly type: 'feature-choice'; readonly optionId: string };
+  | { readonly type: 'feature-choice'; readonly optionId: string }
+  | { readonly type: 'spell-choice'; readonly spellIds: readonly SpellId[] };
 
 export interface BuildLevel {
   readonly classId: ClassId;

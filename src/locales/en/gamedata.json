@@ -2435,5 +2435,47 @@
       "name": "Focus Points",
       "description": "Fuel Monk techniques. Regain on a Short Rest."
     }
+  },
+  "spells": {
+    "druidcraft": {
+      "name": "Druidcraft",
+      "description": "Whispering to the spirits of nature, you create one of the following effects: a tiny weather prediction, a harmless sensory effect, instant plant bloom or seed pod opening, or a lit or snuffed torch or campfire."
+    },
+    "guidance": {
+      "name": "Guidance",
+      "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice, potentially turning a failure into a success."
+    },
+    "mending": {
+      "name": "Mending",
+      "description": "This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no longer than 1 foot in any dimension, you mend it."
+    },
+    "message": {
+      "name": "Message",
+      "description": "You point your finger toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear."
+    },
+    "poison-spray": {
+      "name": "Poison Spray",
+      "description": "You extend your hand toward a creature you can see within range and project a puff of noxious gas. The creature must succeed on a Constitution saving throw or take 1d12 Poison damage."
+    },
+    "produce-flame": {
+      "name": "Produce Flame",
+      "description": "A flickering flame appears in your hand and remains there for the duration, shedding bright light in a 20-foot radius and dim light for an additional 20 feet. The flame harms neither you nor your equipment. On subsequent turns you can use a Magic action to hurl the fire at a creature or object within 60 feet."
+    },
+    "resistance": {
+      "name": "Resistance",
+      "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one saving throw of its choice, potentially turning a failure into a success."
+    },
+    "shillelagh": {
+      "name": "Shillelagh",
+      "description": "A Club or Quarterstaff you are holding is imbued with nature's power. For the duration, you can use your Spellcasting ability for the weapon's attack rolls and damage rolls, and the weapon's damage die becomes a d8."
+    },
+    "spare-the-dying": {
+      "name": "Spare the Dying",
+      "description": "Choose a creature within range that has 0 Hit Points and isn't dead. The creature becomes Stable."
+    },
+    "thorn-whip": {
+      "name": "Thorn Whip",
+      "description": "You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack against the target. On a hit, the target takes 1d6 Piercing damage, and if it is Large or smaller, you pull the creature up to 10 feet closer to you."
+    }
   }
 }

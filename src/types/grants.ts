@@ -287,6 +287,14 @@ export interface ResourcePoolGrant {
   readonly regen: ResourcePoolRegen;
 }
 
+export interface SpellChoiceGrant {
+  readonly type: 'spell-choice';
+  readonly key: ChoiceKey;
+  readonly count: number;
+  readonly spellList: ClassId;
+  readonly spellLevel: number;
+}
+
 export type Grant =
   | AbilityBonusGrant
   | AbilityChoiceGrant
@@ -315,4 +323,5 @@ export type Grant =
   | FeatChoiceGrant
   | FeatureChoiceGrant
   | FeatGrant
-  | ResourcePoolGrant;
+  | ResourcePoolGrant
+  | SpellChoiceGrant;
