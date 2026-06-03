@@ -47,7 +47,9 @@ describe('usePortraitUpload', () => {
         expect.objectContaining({ contentType: 'image/jpeg', upsert: true })
       );
       expect(bucketRef.getPublicUrl).toHaveBeenCalledWith(`${characterId}/portrait.jpg`);
-      expect(supabase.update).toHaveBeenCalled();
+      // The update mutation destructures { id, ...updates } — id goes to .eq(), updates go to .update()
+      expect(supabase.update).toHaveBeenCalledWith({ portrait_url: publicUrl });
+      expect(supabase.eq).toHaveBeenCalledWith('id', characterId);
       expect(result.current.error).toBeNull();
     });
 
@@ -84,7 +86,8 @@ describe('usePortraitUpload', () => {
 
       const bucketRef = supabase.storage.from('character-portraits');
       expect(bucketRef.remove).toHaveBeenCalledWith([`${characterId}/portrait.jpg`]);
-      expect(supabase.update).toHaveBeenCalled();
+      expect(supabase.update).toHaveBeenCalledWith({ portrait_url: null });
+      expect(supabase.eq).toHaveBeenCalledWith('id', characterId);
     });
 
     it('returns early without calling anything when currentPortraitUrl is null', async () => {
