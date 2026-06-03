@@ -2807,4 +2807,18 @@ describe('Paladin oath spells integration — L9 Oath of the Ancients', () => {
     expect(alwaysPrepared).not.toContain('ice-storm');
     expect(alwaysPrepared).not.toContain('stoneskin');
   });
+
+  it('oathofancients-natures-wrath saveDC = 8 + PB(4 at L9) + CHA mod(+3 for CHA 16) = 15', () => {
+    // baseBuild has CHA 16 (mod +3), no ASI choices that change it; PB at L9 = 4
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 9,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    const naturesWrath = result.features.find((f) => f.feature.id === 'oathofancients-natures-wrath');
+    expect(naturesWrath).toBeDefined();
+    expect(naturesWrath!.saveDC).toBe(15);
+  });
 });

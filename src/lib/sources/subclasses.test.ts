@@ -1322,26 +1322,26 @@ describe('getSubclassSource — Oath of Devotion', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('oathofdevotion level 3 grants sacred-weapon, holy-rebuke, and L3 spell grants', () => {
+  it('oathofdevotion level 3 grants sacred-weapon and L3 spell grants (holy-rebuke removed: not a 2024 PHB option)', () => {
     const source = getSubclassSource('oathofdevotion');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    // 2 feature grants + 2 spell grants
-    expect(level3?.grants).toHaveLength(4);
+    // 1 feature grant + 2 spell grants (holy-rebuke removed in 2024)
+    expect(level3?.grants).toHaveLength(3);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'oathofdevotion-sacred-weapon' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofdevotion-holy-rebuke' }),
-        }),
         expect.objectContaining({ type: 'spell', spellId: 'protection-from-evil-and-good', alwaysPrepared: true }),
         expect.objectContaining({ type: 'spell', spellId: 'shield-of-faith', alwaysPrepared: true }),
       ])
     );
+    const featureIds = level3!.grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g as { type: 'feature'; feature: { id: string } }).feature.id);
+    expect(featureIds).not.toContain('oathofdevotion-holy-rebuke');
   });
 
   it('oathofdevotion level 5 grants 2 spell grants with alwaysPrepared:true', () => {

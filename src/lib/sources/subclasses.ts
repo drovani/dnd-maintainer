@@ -716,11 +716,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 3,
         grants: [
           // Sacred Weapon: 1 minute — weapon glows, +CHA mod to attack rolls (Channel Divinity option)
+          // REMOVED: oathofdevotion-holy-rebuke — not a 2024 PHB option; 2024 Devotion has only Sacred Weapon
           { type: 'feature', feature: { id: 'oathofdevotion-sacred-weapon' } },
-          // KEEP+FLAG: Holy Rebuke — "oathofdevotion-holy-rebuke" is not a recognizable 2024 PHB option name.
-          // 2014 Devotion had Sacred Weapon + Turn the Unholy; 2024 Devotion has only Sacred Weapon.
-          // Cannot confirm "holy-rebuke" is a valid 2014 option being removed — keeping until human review.
-          { type: 'feature', feature: { id: 'oathofdevotion-holy-rebuke' } },
           // Devotion L3 oath spells (2024 PHB)
           { type: 'spell', spellId: 'protection-from-evil-and-good', alwaysPrepared: true },
           { type: 'spell', spellId: 'shield-of-faith', alwaysPrepared: true },

@@ -1032,8 +1032,8 @@ export const SPELL_CATALOG = [
     range: '30 feet',
     components: { verbal: true, somatic: false, material: false },
     duration: '8 hours',
-    // 2024 PHB: native to cleric, paladin
-    nativeClasses: ['cleric', 'paladin'],
+    // 2024 PHB: native to cleric only (oath-granted to Devotion Paladins but not on the native Paladin list)
+    nativeClasses: ['cleric'],
   },
   // Devotion/Ancients L17
   {
@@ -1046,8 +1046,8 @@ export const SPELL_CATALOG = [
     range: 'Self',
     components: { verbal: true, somatic: true, material: 'incense and a vial of holy or unholy water' },
     duration: '1 minute',
-    // 2024 PHB: native to cleric, paladin
-    nativeClasses: ['cleric', 'paladin'],
+    // 2024 PHB: native to cleric only (oath-granted to Devotion Paladins but not on the native Paladin list)
+    nativeClasses: ['cleric'],
   },
   // Glory L3
   {
@@ -1138,10 +1138,9 @@ export const SPELL_CATALOG = [
     nativeClasses: ['bard', 'cleric', 'wizard'],
   },
   {
-    // FLAG: "Yolande's Regal Presence" — 2024-NEW spell (not in 2014 PHB).
+    // "Yolande's Regal Presence" — 2024-NEW spell (not in 2014 PHB).
     // Slug follows repo convention (apostrophes dropped, lowercase, hyphens).
-    // nativeClasses: bard and paladin per 2024 PHB.
-    // Verify slug against final 2024 PHB printing — using 'yolandes-regal-presence' per brief.
+    // 2024 PHB: native to bard and wizard (oath-granted to Glory Paladins but not on the native Paladin list).
     id: 'yolandes-regal-presence',
     level: 5,
     school: 'enchantment',
@@ -1149,9 +1148,9 @@ export const SPELL_CATALOG = [
     concentration: true,
     castingTime: 'Action',
     range: 'Self',
-    components: { verbal: true, somatic: true, material: false },
+    components: { verbal: true, somatic: true, material: 'a miniature tiara' },
     duration: 'Up to 1 minute',
-    nativeClasses: ['bard', 'paladin'],
+    nativeClasses: ['bard', 'wizard'],
   },
   // Ancients L3
   {
@@ -1228,7 +1227,8 @@ export const SPELL_CATALOG = [
       material: 'a drop of blood',
     },
     duration: 'Up to 1 minute',
-    nativeClasses: ['cleric'],
+    // 2024 PHB: native to bard, cleric, warlock
+    nativeClasses: ['bard', 'cleric', 'warlock'],
   },
   {
     id: 'hunters-mark',

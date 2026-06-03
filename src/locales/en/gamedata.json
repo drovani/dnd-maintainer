@@ -1487,10 +1487,6 @@
       "name": "Sacred Weapon",
       "description": "Channel Divinity: for 1 minute, your weapon glows with divine light and you add your Charisma modifier to attack rolls made with it."
     },
-    "oathofdevotion-holy-rebuke": {
-      "name": "Holy Rebuke",
-      "description": "Channel Divinity: when a creature within 30 feet attacks an ally, you can use your Reaction to rebuke it — the creature takes radiant damage and is rebuked."
-    },
     "oathofdevotion-aura-of-devotion": {
       "name": "Aura of Devotion",
       "description": "You and friendly creatures within 10 feet of you can't be Charmed while you are conscious. At level 18, the range of this aura increases to 30 feet."
