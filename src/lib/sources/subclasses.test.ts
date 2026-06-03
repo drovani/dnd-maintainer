@@ -1752,13 +1752,13 @@ describe('getSubclassSource — Fey Wanderer', () => {
     expect(getSubclassSource('feywanderer')).toBeDefined();
   });
 
-  it('feywanderer has 2 feature levels (L3, L7)', () => {
+  it('feywanderer has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
     const source = getSubclassSource('feywanderer');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('feywanderer level 3 grants 4 items: dreadful-strikes, skill proficiency-choice, otherworldly-glamour, subclass-spells', () => {
+  it('feywanderer level 3 grants 4 items: dreadful-strikes, skill proficiency-choice, otherworldly-glamour, charm-person', () => {
     const source = getSubclassSource('feywanderer');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
@@ -1779,12 +1779,18 @@ describe('getSubclassSource — Fey Wanderer', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'feywanderer-otherworldly-glamour' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'feywanderer-subclass-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'charm-person', alwaysPrepared: true }),
       ])
     );
+  });
+
+  it('feywanderer level 3 has no inert subclass-spells feature grant', () => {
+    const source = getSubclassSource('feywanderer');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const inertGrant = level3?.grants.find(
+      (g) => g.type === 'feature' && 'feature' in g && g.feature.id === 'feywanderer-subclass-spells'
+    );
+    expect(inertGrant).toBeUndefined();
   });
 
   it('feywanderer level 3 proficiency-choice from list contains exactly deception, performance, persuasion', () => {
@@ -1806,6 +1812,14 @@ describe('getSubclassSource — Fey Wanderer', () => {
     expect((profChoice as { key: string }).key).toBe(createChoiceKey('skill-choice', 'subclass', 'feywanderer', 0));
   });
 
+  it('feywanderer level 5 grants misty-step (alwaysPrepared)', () => {
+    const source = getSubclassSource('feywanderer');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(1);
+    expect(level5?.grants[0]).toMatchObject({ type: 'spell', spellId: 'misty-step', alwaysPrepared: true });
+  });
+
   it('feywanderer level 7 grants 1 feature: beguiling-twist', () => {
     const source = getSubclassSource('feywanderer');
     const level7 = source?.features.find((f) => f.classLevel === 7);
@@ -1815,6 +1829,30 @@ describe('getSubclassSource — Fey Wanderer', () => {
       type: 'feature',
       feature: { id: 'feywanderer-beguiling-twist' },
     });
+  });
+
+  it('feywanderer level 9 grants summon-fey (alwaysPrepared)', () => {
+    const source = getSubclassSource('feywanderer');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(1);
+    expect(level9?.grants[0]).toMatchObject({ type: 'spell', spellId: 'summon-fey', alwaysPrepared: true });
+  });
+
+  it('feywanderer level 13 grants dimension-door (alwaysPrepared)', () => {
+    const source = getSubclassSource('feywanderer');
+    const level13 = source?.features.find((f) => f.classLevel === 13);
+    expect(level13).toBeDefined();
+    expect(level13?.grants).toHaveLength(1);
+    expect(level13?.grants[0]).toMatchObject({ type: 'spell', spellId: 'dimension-door', alwaysPrepared: true });
+  });
+
+  it('feywanderer level 17 grants mislead (alwaysPrepared)', () => {
+    const source = getSubclassSource('feywanderer');
+    const level17 = source?.features.find((f) => f.classLevel === 17);
+    expect(level17).toBeDefined();
+    expect(level17?.grants).toHaveLength(1);
+    expect(level17?.grants[0]).toMatchObject({ type: 'spell', spellId: 'mislead', alwaysPrepared: true });
   });
 });
 

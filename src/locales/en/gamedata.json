@@ -1535,10 +1535,6 @@
       "name": "Otherworldly Glamour",
       "description": "Whenever you make a Charisma check, you can add your Wisdom modifier to the roll. (Skill proficiency choice — Deception, Performance, or Persuasion — is tracked separately.)"
     },
-    "feywanderer-subclass-spells": {
-      "name": "Fey Wanderer Spells",
-      "description": "You always have certain spells prepared based on your Fey Wanderer subclass. (Spell grant system pending — see TODO #93.)"
-    },
     "feywanderer-beguiling-twist": {
       "name": "Beguiling Twist",
       "description": "The magic of the Feywild guards your mind. You and each creature within 30 feet of you have Advantage on saving throws against being Charmed or Frightened. In addition, whenever a creature within 30 feet of you that you can see succeeds on a saving throw against being Charmed or Frightened, you can use your Reaction to force a different creature you can see within 30 feet to make a WIS saving throw (DC = 8 + your Proficiency Bonus + your WIS modifier). If that creature fails the save, it has the Charmed or Frightened condition (your choice) for 1 minute. The condition ends if the target takes any damage."

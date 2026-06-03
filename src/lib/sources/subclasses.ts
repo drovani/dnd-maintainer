@@ -968,8 +968,15 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           },
           // Otherworldly Glamour (WIS-to-CHA bonus): inert feature grant; no modifier-substitution grant exists
           { type: 'feature', feature: { id: 'feywanderer-otherworldly-glamour' } },
-          // TODO #93: model Fey Wanderer subclass spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'feywanderer-subclass-spells' } },
+          // Fey Wanderer Spells — L3 tier (2024 PHB)
+          { type: 'spell', spellId: 'charm-person', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          // Fey Wanderer Spells — L5 tier
+          { type: 'spell', spellId: 'misty-step', alwaysPrepared: true },
         ],
       },
       {
@@ -978,6 +985,27 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Beguiling Twist: you and allies within 30 ft have Advantage on Charmed/Frightened saves;
           // Reaction to redirect a failed Charmed/Frightened save to another creature within range
           { type: 'feature', feature: { id: 'feywanderer-beguiling-twist' } },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          // Fey Wanderer Spells — L9 tier
+          { type: 'spell', spellId: 'summon-fey', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 13,
+        grants: [
+          // Fey Wanderer Spells — L13 tier
+          { type: 'spell', spellId: 'dimension-door', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 17,
+        grants: [
+          // Fey Wanderer Spells — L17 tier
+          { type: 'spell', spellId: 'mislead', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
