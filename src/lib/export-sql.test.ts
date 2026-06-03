@@ -271,6 +271,15 @@ describe('generateSeedSql', () => {
     expect(campaignPos).toBeLessThan(characterPos);
   });
 
+  it('character INSERT includes conditions as a text[] array', () => {
+    const data: ExportData = {
+      ...emptyData,
+      characters: [{ id: 'ch1', campaign_id: 'c1', name: 'Hero', conditions: ['blinded', 'charmed'] }],
+    };
+    const sql = generateSeedSql(data);
+    expect(sql).toContain("ARRAY['blinded', 'charmed']::text[]");
+  });
+
   it('character INSERT uses species column not race', () => {
     const data: ExportData = {
       ...emptyData,

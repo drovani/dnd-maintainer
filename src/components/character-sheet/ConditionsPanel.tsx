@@ -8,6 +8,10 @@ interface ConditionsPanelProps {
   readonly onUpdate: (updates: Partial<Character>) => void;
 }
 
+// Exhaustion is modeled separately as a graded `exhaustion_level` (0-6) with its own control,
+// so it is excluded here to avoid a second, boolean source of truth for the same condition.
+const PANEL_CONDITION_IDS = CONDITION_IDS.filter((id) => id !== 'exhaustion');
+
 export function ConditionsPanel({ character, onUpdate }: ConditionsPanelProps) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
@@ -24,7 +28,7 @@ export function ConditionsPanel({ character, onUpdate }: ConditionsPanelProps) {
     <div className="bg-card border rounded-lg p-6">
       <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.conditions')}</h2>
       <div className="flex flex-wrap gap-1">
-        {CONDITION_IDS.map((id) => {
+        {PANEL_CONDITION_IDS.map((id) => {
           const isActive = activeConditions.includes(id);
           return (
             <button

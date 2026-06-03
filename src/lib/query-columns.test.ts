@@ -18,4 +18,8 @@ describe('CHARACTER_DETAIL_COLS', () => {
   it('does not contain race (word boundary match)', () => {
     expect(CHARACTER_DETAIL_COLS).not.toMatch(/\brace\b/);
   });
+
+  it('contains conditions so the sheet loads persisted conditions (word boundary match)', () => {
+    expect(CHARACTER_DETAIL_COLS).toMatch(/\bconditions\b/);
+  });
 });

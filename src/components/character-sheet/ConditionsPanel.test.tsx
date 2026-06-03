@@ -73,11 +73,12 @@ describe('ConditionsPanel', () => {
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('conditions');
   });
 
-  it('renders all 15 condition buttons', () => {
+  it('renders a button per catalog condition except the separately-modeled exhaustion', () => {
     render(<ConditionsPanel character={buildMinimalCharacter()} onUpdate={vi.fn()} />);
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(CONDITION_IDS.length);
-    expect(buttons).toHaveLength(15);
+    // Exhaustion is excluded (it has its own graded exhaustion_level control).
+    expect(buttons).toHaveLength(CONDITION_IDS.filter((id) => id !== 'exhaustion').length);
+    expect(screen.queryByText('exhaustion.name')).not.toBeInTheDocument();
   });
 
   it('all conditions have aria-pressed=false when conditions is empty', () => {
