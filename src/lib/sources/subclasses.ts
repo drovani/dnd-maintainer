@@ -365,11 +365,84 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Bonus Cantrip: gain one additional Druid cantrip of choice; modeled as inert feature grant
           // TODO #93: replace with a cantrip-choice spell grant when spell id system supports it
           { type: 'feature', feature: { id: 'circleland-bonus-cantrip' } },
-          // Land's Bonus Spells (2024 PHB): per Long Rest, choose one of Arid/Polar/Temperate/Tropical and
-          // gain that land's prepared spells; list scales at Druid 3/5/7/9. Blocked on two things: (a) per-rest
-          // gameplay-state tracking is not modeled (same shape as #138 Gaps 1-2), and (b) spell-id catalog.
-          // See #144 close-out for full deferral reasoning.
-          { type: 'feature', feature: { id: 'circleland-bonus-spells' } },
+          // Land type choice: Arid/Polar/Temperate/Tropical, each granting its circle spells as
+          // always-prepared (leveled) plus a terrain cantrip (alwaysPrepared:false → routes to cantrips[]).
+          // Level-gating (L3/5/7/9 tiers) is a known simplification: all spells applied at L3.
+          // A follow-up issue tracks proper per-tier gating.
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'subclass', 'circleland', 0),
+            options: [
+              {
+                optionId: 'arid',
+                featureId: 'circleland-land-arid',
+                grants: [
+                  // cantrip — alwaysPrepared:false routes to cantrips[]
+                  { type: 'spell', spellId: 'fire-bolt', alwaysPrepared: false },
+                  // L3: spell levels 1–2
+                  { type: 'spell', spellId: 'burning-hands', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'blur', alwaysPrepared: true },
+                  // L5: spell level 3
+                  { type: 'spell', spellId: 'fireball', alwaysPrepared: true },
+                  // L7: spell level 4
+                  { type: 'spell', spellId: 'blight', alwaysPrepared: true },
+                  // L9: spell level 5
+                  { type: 'spell', spellId: 'wall-of-stone', alwaysPrepared: true },
+                ],
+              },
+              {
+                optionId: 'polar',
+                featureId: 'circleland-land-polar',
+                grants: [
+                  // cantrip — alwaysPrepared:false routes to cantrips[]
+                  { type: 'spell', spellId: 'ray-of-frost', alwaysPrepared: false },
+                  // L3: spell levels 1–2
+                  { type: 'spell', spellId: 'fog-cloud', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'hold-person', alwaysPrepared: true },
+                  // L5: spell level 3
+                  { type: 'spell', spellId: 'sleet-storm', alwaysPrepared: true },
+                  // L7: spell level 4
+                  { type: 'spell', spellId: 'ice-storm', alwaysPrepared: true },
+                  // L9: spell level 5
+                  { type: 'spell', spellId: 'cone-of-cold', alwaysPrepared: true },
+                ],
+              },
+              {
+                optionId: 'temperate',
+                featureId: 'circleland-land-temperate',
+                grants: [
+                  // cantrip — alwaysPrepared:false routes to cantrips[]
+                  { type: 'spell', spellId: 'shocking-grasp', alwaysPrepared: false },
+                  // L3: spell levels 1–2
+                  { type: 'spell', spellId: 'sleep', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'misty-step', alwaysPrepared: true },
+                  // L5: spell level 3
+                  { type: 'spell', spellId: 'lightning-bolt', alwaysPrepared: true },
+                  // L7: spell level 4
+                  { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true },
+                  // L9: spell level 5
+                  { type: 'spell', spellId: 'tree-stride', alwaysPrepared: true },
+                ],
+              },
+              {
+                optionId: 'tropical',
+                featureId: 'circleland-land-tropical',
+                grants: [
+                  // cantrip — alwaysPrepared:false routes to cantrips[]
+                  { type: 'spell', spellId: 'acid-splash', alwaysPrepared: false },
+                  // L3: spell levels 1–2
+                  { type: 'spell', spellId: 'ray-of-sickness', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'web', alwaysPrepared: true },
+                  // L5: spell level 3
+                  { type: 'spell', spellId: 'stinking-cloud', alwaysPrepared: true },
+                  // L7: spell level 4
+                  { type: 'spell', spellId: 'polymorph', alwaysPrepared: true },
+                  // L9: spell level 5
+                  { type: 'spell', spellId: 'insect-plague', alwaysPrepared: true },
+                ],
+              },
+            ],
+          },
         ],
       },
       {

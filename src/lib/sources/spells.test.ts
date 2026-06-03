@@ -123,6 +123,18 @@ describe('spell-grant catalog invariant', () => {
           if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
             missing.push(`subclass:${subclassId}:classLevel${feature.classLevel} → "${grant.spellId}"`);
           }
+          // Also walk spell grants nested inside feature-choice option arrays
+          if (grant.type === 'feature-choice') {
+            for (const option of grant.options) {
+              for (const optGrant of option.grants) {
+                if (optGrant.type === 'spell' && !getSpellDef(optGrant.spellId)) {
+                  missing.push(
+                    `subclass:${subclassId}:classLevel${feature.classLevel}:option:${option.optionId} → "${optGrant.spellId}"`
+                  );
+                }
+              }
+            }
+          }
         }
       }
     }
