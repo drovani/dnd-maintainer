@@ -57,13 +57,14 @@ export function ClassStep() {
   }, [resolved]);
   const hasSubclassChoices = subclassChoices.length > 0;
 
-  // Pending class-feature variant choices (e.g. Cleric L1 Divine Order, L7 Blessed Strikes).
-  // Non-class-origin feature-choices are surfaced via buildWarnings at the collectBundles layer
-  // (src/lib/sources/index.ts), so the filter here is purely a UI dispatch concern.
+  // Pending class-feature or subclass-feature variant choices (e.g. Cleric L1 Divine Order,
+  // L7 Blessed Strikes, Circle of the Land terrain selection).
+  // Origins other than 'class'/'subclass' are surfaced via buildWarnings at the collectBundles
+  // layer (src/lib/sources/index.ts), so the filter here is purely a UI dispatch concern.
   const featureChoices = useMemo<readonly Extract<PendingChoice, { type: 'feature-choice' }>[]>(() => {
     return (resolved?.pendingChoices ?? []).filter(
       (c): c is Extract<PendingChoice, { type: 'feature-choice' }> =>
-        c.type === 'feature-choice' && c.source.origin === 'class'
+        c.type === 'feature-choice' && (c.source.origin === 'class' || c.source.origin === 'subclass')
     );
   }, [resolved]);
   const hasFeatureChoices = featureChoices.length > 0;

@@ -384,10 +384,10 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   }
 
   for (const { grant, source } of allFeatureChoiceGrants) {
-    // ClassStep and OriginStep handle their respective origins in the builder UI.
-    // Any other origin (e.g. 'item', 'subclass') would produce an invisible pending choice;
+    // ClassStep handles 'class' and 'subclass' origins; OriginStep handles 'feat'.
+    // Any other origin (e.g. 'item') would produce an invisible pending choice;
     // surface as a warning so the CharacterBuilder amber banner shows it instead of failing silently.
-    if (source.origin !== 'class' && source.origin !== 'feat') {
+    if (source.origin !== 'class' && source.origin !== 'feat' && source.origin !== 'subclass') {
       const msg = `feature-choice "${grant.key}" has non-class origin "${source.origin}" — no builder UI exists for this origin, choice will be invisible`;
       warnings.push(msg);
       logger.warn(msg);
