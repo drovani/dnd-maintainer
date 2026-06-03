@@ -1340,6 +1340,300 @@ export const SPELL_CATALOG = [
     // 2024 PHB: native to bard, sorcerer, wizard
     nativeClasses: ['bard', 'sorcerer', 'wizard'],
   },
+  // ─── Sorcerer subclass spells ─────────────────────────────────────────────
+  // Aberrant Sorcery L3
+  {
+    id: 'arms-of-hadar',
+    level: 1,
+    school: 'conjuration',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to warlock
+    nativeClasses: ['warlock'],
+  },
+  {
+    id: 'calm-emotions',
+    level: 2,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to bard, cleric
+    nativeClasses: ['bard', 'cleric'],
+  },
+  {
+    id: 'detect-thoughts',
+    level: 2,
+    school: 'divination',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: 'a copper piece' },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to bard, sorcerer, wizard
+    nativeClasses: ['bard', 'sorcerer', 'wizard'],
+  },
+  {
+    id: 'dissonant-whispers',
+    level: 1,
+    school: 'enchantment',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to bard, warlock, wizard
+    nativeClasses: ['bard', 'warlock', 'wizard'],
+  },
+  {
+    id: 'mind-sliver',
+    level: 0,
+    school: 'enchantment',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to sorcerer, warlock, wizard
+    nativeClasses: ['sorcerer', 'warlock', 'wizard'],
+  },
+  // Aberrant Sorcery L5
+  {
+    id: 'hunger-of-hadar',
+    level: 3,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '150 feet',
+    components: { verbal: true, somatic: true, material: 'a pickled octopus tentacle' },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to warlock
+    nativeClasses: ['warlock'],
+  },
+  {
+    id: 'sending',
+    level: 3,
+    school: 'divination',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: 'Unlimited',
+    components: { verbal: true, somatic: true, material: 'a short piece of fine copper wire' },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to bard, cleric, wizard
+    nativeClasses: ['bard', 'cleric', 'wizard'],
+  },
+  // Aberrant Sorcery L7
+  {
+    id: 'evards-black-tentacles',
+    level: 4,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: 'a piece of tentacle from a giant octopus or giant squid' },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to wizard
+    nativeClasses: ['wizard'],
+  },
+  {
+    id: 'summon-aberration',
+    level: 4,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'a pickled tentacle and an eyeball in a platinum-inlaid vial worth 400+ GP',
+    },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to warlock, wizard
+    nativeClasses: ['warlock', 'wizard'],
+  },
+  // Aberrant Sorcery L9
+  {
+    id: 'rarys-telepathic-bond',
+    level: 5,
+    school: 'divination',
+    ritual: true,
+    concentration: false,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: 'two eggs' },
+    duration: '1 hour',
+    // 2024 PHB: native to wizard
+    nativeClasses: ['wizard'],
+  },
+  {
+    id: 'telekinesis',
+    level: 5,
+    school: 'transmutation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 10 minutes',
+    // 2024 PHB: native to sorcerer, wizard
+    nativeClasses: ['sorcerer', 'wizard'],
+  },
+  // Clockwork Sorcery L3
+  {
+    id: 'alarm',
+    level: 1,
+    school: 'abjuration',
+    ritual: true,
+    concentration: false,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: 'a tiny bell and a piece of fine silver wire' },
+    duration: '8 hours',
+    // 2024 PHB: native to ranger, wizard
+    nativeClasses: ['ranger', 'wizard'],
+  },
+  // Clockwork Sorcery L7
+  {
+    id: 'summon-construct',
+    level: 4,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: 'an ornate stone and metal lockbox worth 400+ GP' },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to artificer, wizard
+    // Note: artificer is not a ClassId in this codebase; omitted; wizard confirmed native
+    nativeClasses: ['wizard'],
+  },
+  // Clockwork Sorcery L9
+  {
+    id: 'wall-of-force',
+    level: 5,
+    school: 'evocation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '120 feet',
+    components: { verbal: true, somatic: true, material: 'a pinch of powder made by crushing a clear gemstone' },
+    duration: 'Up to 10 minutes',
+    // 2024 PHB: native to wizard
+    nativeClasses: ['wizard'],
+  },
+  // Draconic Sorcery L3
+  {
+    id: 'alter-self',
+    level: 2,
+    school: 'transmutation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to sorcerer, wizard
+    nativeClasses: ['sorcerer', 'wizard'],
+  },
+  {
+    id: 'chromatic-orb',
+    level: 1,
+    school: 'evocation',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: 'a diamond worth 50+ GP' },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to sorcerer, wizard
+    nativeClasses: ['sorcerer', 'wizard'],
+  },
+  {
+    id: 'command',
+    level: 1,
+    school: 'enchantment',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to bard, cleric, paladin
+    nativeClasses: ['bard', 'cleric', 'paladin'],
+  },
+  {
+    id: 'dragons-breath',
+    level: 2,
+    school: 'transmutation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Bonus Action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: 'a hot pepper' },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to sorcerer, wizard
+    nativeClasses: ['sorcerer', 'wizard'],
+  },
+  // Draconic Sorcery L5
+  {
+    id: 'fly',
+    level: 3,
+    school: 'transmutation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: 'a wing feather from any bird' },
+    duration: 'Up to 10 minutes',
+    // 2024 PHB: native to sorcerer, warlock, wizard
+    nativeClasses: ['sorcerer', 'warlock', 'wizard'],
+  },
+  // Draconic Sorcery L7
+  {
+    id: 'charm-monster',
+    level: 4,
+    school: 'enchantment',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '1 hour',
+    // 2024 PHB: native to bard, druid, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'druid', 'sorcerer', 'warlock', 'wizard'],
+  },
+  // Draconic Sorcery L9
+  {
+    id: 'summon-dragon',
+    level: 5,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'an object with the image of a dragon engraved on it worth 500+ GP',
+    },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to wizard
+    nativeClasses: ['wizard'],
+  },
 ] as const satisfies readonly SpellDef[];
 
 export type SpellId = (typeof SPELL_CATALOG)[number]['id'];

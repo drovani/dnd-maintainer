@@ -2816,6 +2816,90 @@
     "seeming": {
       "name": "Seeming",
       "description": "You change the appearance of any number of creatures that you can see within range. Each target receives an illusory disguise for the duration. A creature can make an Investigation check against your Spell Save DC to discern the illusion."
+    },
+    "arms-of-hadar": {
+      "name": "Arms of Hadar",
+      "description": "Tendrils of dark energy erupt from you in a 10-foot-radius sphere. Each creature in the area must succeed on a Strength save or take 2d6 Necrotic damage and lose its Reaction until its next turn."
+    },
+    "calm-emotions": {
+      "name": "Calm Emotions",
+      "description": "Each Humanoid in a 20-foot-radius sphere centered on a point you choose must succeed on a Charisma save or have its Charmed or Frightened condition suppressed, or become indifferent about creatures it is hostile to, for the duration."
+    },
+    "detect-thoughts": {
+      "name": "Detect Thoughts",
+      "description": "You can read the surface thoughts of creatures within 30 feet. As an action you can probe deeper, requiring a Wisdom save, or you can search for a particular creature's thoughts."
+    },
+    "dissonant-whispers": {
+      "name": "Dissonant Whispers",
+      "description": "A creature you choose within 60 feet must succeed on a Wisdom save or take 3d6 Psychic damage and move away from you using its Reaction, provoking opportunity attacks."
+    },
+    "mind-sliver": {
+      "name": "Mind Sliver",
+      "description": "You drive a disorienting spike of psychic energy into the mind of one creature you can see within 60 feet. The target must succeed on an Intelligence save or take 1d6 Psychic damage and subtract 1d4 from its next saving throw."
+    },
+    "hunger-of-hadar": {
+      "name": "Hunger of Hadar",
+      "description": "A 20-foot-radius sphere of blackness and bitter cold appears centered on a point within range. Creatures inside are Blinded and take cold or acid damage at the start and end of each turn for the duration."
+    },
+    "sending": {
+      "name": "Sending",
+      "description": "You send a short message of twenty-five words or fewer to a creature you are familiar with. The target can reply with a message of twenty-five words or fewer."
+    },
+    "evards-black-tentacles": {
+      "name": "Evard's Black Tentacles",
+      "description": "Squirming tentacles fill a 20-foot square within range. Creatures in the area must succeed on a Dexterity save or take 3d6 Bludgeoning damage and have the Restrained condition while in the area."
+    },
+    "summon-aberration": {
+      "name": "Summon Aberration",
+      "description": "You call forth an aberrant spirit. Choose Beholderkin, Slaad, or Star Spawn. The creature obeys your commands and acts on your initiative for the duration."
+    },
+    "rarys-telepathic-bond": {
+      "name": "Rary's Telepathic Bond",
+      "description": "You forge a telepathic link among up to eight willing creatures you can see within range. While linked, they can communicate telepathically with each other regardless of language."
+    },
+    "telekinesis": {
+      "name": "Telekinesis",
+      "description": "You gain the ability to move or manipulate creatures or objects by thought. Each turn you can move one Large-or-smaller creature or object up to 30 feet."
+    },
+    "alarm": {
+      "name": "Alarm",
+      "description": "You set an alarm against unwanted intrusion. When a creature of Tiny or larger size enters the warded area, the alarm sounds — either mentally or audibly."
+    },
+    "summon-construct": {
+      "name": "Summon Construct",
+      "description": "You call forth a construct spirit. Choose Clay, Metal, or Stone. The creature obeys your commands and acts on your initiative for the duration."
+    },
+    "wall-of-force": {
+      "name": "Wall of Force",
+      "description": "An invisible wall of force springs into existence at a point you choose within range. The wall is immune to all damage and can't be dispelled by Dispel Magic."
+    },
+    "alter-self": {
+      "name": "Alter Self",
+      "description": "You alter your appearance. Choose Aquatic Adaptation, Change Appearance, or Natural Weapons. You can change which option you have as a Magic action."
+    },
+    "chromatic-orb": {
+      "name": "Chromatic Orb",
+      "description": "You hurl a 4-inch-diameter sphere of energy at a creature. Choose acid, cold, fire, lightning, poison, or thunder. The target must succeed on a Dexterity save or take 3d8 damage of the chosen type."
+    },
+    "command": {
+      "name": "Command",
+      "description": "You speak a one-word command to a creature within 60 feet. It must succeed on a Wisdom save or follow that command on its next turn. Commands include Approach, Drop, Flee, Grovel, and Halt."
+    },
+    "dragons-breath": {
+      "name": "Dragon's Breath",
+      "description": "You imbue a willing creature's mouth with the destructive power of a dragon. Until the spell ends, the creature can exhale a 15-foot cone dealing 3d6 damage of a chosen type (acid, cold, fire, lightning, or poison)."
+    },
+    "fly": {
+      "name": "Fly",
+      "description": "You touch a willing creature. The target gains a Fly Speed of 60 feet for the duration. When the spell ends, the target falls if it is still aloft."
+    },
+    "charm-monster": {
+      "name": "Charm Monster",
+      "description": "You attempt to charm a creature you can see within 30 feet. It must succeed on a Wisdom save or have the Charmed condition for 1 hour or until you or your companions harm it."
+    },
+    "summon-dragon": {
+      "name": "Summon Dragon",
+      "description": "You call forth a draconic spirit. Choose Chromatic, Metallic, or Gem. The creature obeys your commands and acts on your initiative for the duration."
     }
   }
 }
