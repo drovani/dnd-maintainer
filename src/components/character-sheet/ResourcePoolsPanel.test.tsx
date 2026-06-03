@@ -4,10 +4,29 @@ import type { ResolvedCharacter } from '@/types/resolved';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, opts?: { defaultValue?: string }) => {
-      // Return last segment as a simple label for testing
+    t: (key: string, opts?: Record<string, unknown>) => {
+      // Resolve base string: prefer defaultValue, otherwise use last key segment
       const segments = key.split('.');
-      return opts?.defaultValue ?? segments[segments.length - 1];
+      let result: string = (opts?.defaultValue as string | undefined) ?? segments[segments.length - 1];
+      // Substitute any {{param}} placeholders so interpolation values appear in the output
+      if (opts) {
+        for (const [param, value] of Object.entries(opts)) {
+          if (param === 'defaultValue') continue;
+          result = result.replace(new RegExp(`\\{\\{${param}\\}\\}`, 'g'), String(value));
+        }
+        // If no placeholders were substituted but there are extra params, append them
+        // so numeric values like `max` are always visible in the rendered text.
+        const extraValues = Object.entries(opts)
+          .filter(([k]) => k !== 'defaultValue')
+          .map(([, v]) => String(v));
+        if (
+          extraValues.length > 0 &&
+          result === ((opts.defaultValue as string | undefined) ?? segments[segments.length - 1])
+        ) {
+          result = `${result} ${extraValues.join(' ')}`;
+        }
+      }
+      return result;
     },
   }),
 }));
@@ -47,6 +66,10 @@ function buildMinimalResolved(overrides: Partial<ResolvedCharacter> = {}): Resol
 }
 
 describe('ResourcePoolsPanel', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders nothing when resourcePools is empty', () => {
     const { container } = render(<ResourcePoolsPanel resolved={buildMinimalResolved()} />);
     expect(container.firstChild).toBeNull();
@@ -97,10 +120,9 @@ describe('ResourcePoolsPanel', () => {
       ],
     });
     render(<ResourcePoolsPanel resolved={resolved} />);
-    // tc('characterSheet.resourcePools.max', { max: 5 }) → mock returns last segment = 'max'
-    // The max value number itself (5) is passed as an interpolation param, not rendered directly.
-    // Verify the 'max' label is present (the mock key output).
-    expect(screen.getByText(/max/)).toBeInTheDocument();
+    // tc('characterSheet.resourcePools.max', { max: 5 }) → mock appends interpolation value
+    // → "max 5", so the actual number must appear in the DOM.
+    expect(screen.getByText(/\b5\b/)).toBeInTheDocument();
   });
 
   it('renders short-rest regen label', () => {
@@ -151,7 +173,34 @@ describe('ResourcePoolsPanel', () => {
     render(<ResourcePoolsPanel resolved={resolved} />);
     // getSourceDisplayName is called with the pool source and the gamedata t function
     expect(getSourceDisplayName).toHaveBeenCalledWith(source, expect.any(Function));
-    // tc('characterSheet.resourcePools.source', { source: 'MockSource' }) → mock returns last segment = 'source'
-    expect(screen.getByText('source')).toBeInTheDocument();
+    // tc('characterSheet.resourcePools.source', { source: 'MockSource' }) → mock appends interpolation value
+    // → "source MockSource"
+    expect(screen.getByText(/MockSource/)).toBeInTheDocument();
+  });
+
+  it('renders all pools when multiple are present', async () => {
+    const { getSourceDisplayName } = await import('@/lib/class-icons');
+    const resolved = buildMinimalResolved({
+      resourcePools: [
+        {
+          poolId: 'focus-points',
+          max: 4,
+          regen: 'short-rest',
+          source: { origin: 'class', id: 'monk', level: 1 },
+        },
+        {
+          poolId: 'rage',
+          max: 2,
+          regen: 'long-rest',
+          source: { origin: 'class', id: 'barbarian', level: 1 },
+        },
+      ],
+    });
+    render(<ResourcePoolsPanel resolved={resolved} />);
+    // Both pool names appear via defaultValue fallback
+    expect(screen.getByText('focus-points')).toBeInTheDocument();
+    expect(screen.getByText('rage')).toBeInTheDocument();
+    // getSourceDisplayName called once per pool
+    expect(getSourceDisplayName).toHaveBeenCalledTimes(2);
   });
 });
