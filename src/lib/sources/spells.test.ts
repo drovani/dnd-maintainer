@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { SPELL_CATALOG, getSpellDef, requireSpellDef, getSpellsForList } from '@/lib/sources/spells';
+import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
+import { SPECIES_SOURCES } from '@/lib/sources/species';
 import gamedata from '@/locales/en/gamedata.json';
 
 describe('SPELL_CATALOG', () => {
@@ -14,6 +17,14 @@ describe('SPELL_CATALOG', () => {
       const entry = (gamedata.spells as Record<string, { name: string; description: string } | undefined>)[spell.id];
       expect(entry, `Missing gamedata entry for spell "${spell.id}"`).toBeDefined();
       expect(entry!.name.length, `Empty name for spell "${spell.id}"`).toBeGreaterThan(0);
+    }
+  });
+
+  it('every catalog spell has a non-empty spells.<id>.description in gamedata', () => {
+    for (const spell of SPELL_CATALOG) {
+      const entry = (gamedata.spells as Record<string, { name: string; description: string } | undefined>)[spell.id];
+      expect(entry, `Missing gamedata entry for spell "${spell.id}"`).toBeDefined();
+      expect(entry!.description.length, `Empty description for spell "${spell.id}"`).toBeGreaterThan(0);
     }
   });
 
@@ -79,5 +90,41 @@ describe('requireSpellDef', () => {
 
   it('throws for an unknown id', () => {
     expect(() => requireSpellDef('not-a-spell')).toThrowError(/Unknown spell id/);
+  });
+});
+
+describe('spell-grant catalog invariant', () => {
+  it('every type:spell grant across all source registries references a catalogued spellId', () => {
+    const missing: string[] = [];
+
+    for (const source of SPECIES_SOURCES) {
+      for (const grant of source.grants) {
+        if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
+          missing.push(`species:${source.id} → "${grant.spellId}"`);
+        }
+      }
+    }
+
+    for (const classSource of CLASS_SOURCES) {
+      for (const [i, level] of classSource.levels.entries()) {
+        for (const grant of level.grants) {
+          if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
+            missing.push(`class:${classSource.id}:level${i + 1} → "${grant.spellId}"`);
+          }
+        }
+      }
+    }
+
+    for (const [subclassId, subclassSource] of Object.entries(SUBCLASS_SOURCES)) {
+      for (const feature of subclassSource.features) {
+        for (const grant of feature.grants) {
+          if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
+            missing.push(`subclass:${subclassId}:classLevel${feature.classLevel} → "${grant.spellId}"`);
+          }
+        }
+      }
+    }
+
+    expect(missing, 'spell grants referencing uncatalogued spellIds').toEqual([]);
   });
 });

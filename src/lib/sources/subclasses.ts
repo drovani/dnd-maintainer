@@ -235,8 +235,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // Light cantrip granted as an always-prepared spell grant (cantrip level 0)
-          { type: 'spell', spellId: 'light', alwaysPrepared: true },
+          // Light domain bonus cantrip — routed to cantrips via level-0 (alwaysPrepared:false so resolver checks def.level)
+          { type: 'spell', spellId: 'light', alwaysPrepared: false },
           { type: 'feature', feature: { id: 'lightdomain-warding-flare' } },
           { type: 'feature', feature: { id: 'lightdomain-radiance-of-the-dawn' } },
           { type: 'spell', spellId: 'burning-hands', alwaysPrepared: true },

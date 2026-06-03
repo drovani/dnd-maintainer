@@ -618,7 +618,7 @@ describe('getSubclassSource — Light Domain', () => {
     expect(level3?.grants).toHaveLength(7);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: 'spell', spellId: 'light', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'light', alwaysPrepared: false }),
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'lightdomain-warding-flare' }),
@@ -2481,5 +2481,61 @@ describe('Cleric Life Domain resolver integration', () => {
     });
     expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('greater-restoration');
     expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('mass-cure-wounds');
+  });
+});
+
+describe('Cleric Light Domain resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'cleric', 0);
+
+  function makeLightDomainBuild(classLevels: number): CharacterBuild {
+    const levels = Array.from({ length: classLevels }, (_, i) => ({
+      classId: 'cleric' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 6,
+    }));
+    return {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 16, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'lightdomain' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Cleric L3 Light Domain: light is in spellcasting.cantrips (not alwaysPreparedSpells)', () => {
+    const build = makeLightDomainBuild(3);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting).not.toBeNull();
+    expect(resolved.spellcasting!.cantrips).toContain('light');
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('light');
+  });
+
+  it('Cleric L3 Light Domain: L3 leveled domain spells are in alwaysPreparedSpells', () => {
+    const build = makeLightDomainBuild(3);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const prepared = resolved.spellcasting!.alwaysPreparedSpells;
+    expect(prepared).toContain('burning-hands');
+    expect(prepared).toContain('faerie-fire');
+    expect(prepared).toContain('scorching-ray');
+    expect(prepared).toContain('see-invisibility');
   });
 });
