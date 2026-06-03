@@ -336,6 +336,13 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
           { type: 'spellcasting', ability: 'wis', source: 'class' },
           {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'druid', 0),
+            count: 2,
+            spellList: 'druid',
+            spellLevel: 0,
+          },
+          {
             type: 'feature-choice',
             key: createChoiceKey('feature-choice', 'class', 'druid', 0),
             options: [

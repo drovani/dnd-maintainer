@@ -27,10 +27,11 @@ import {
   FEAT_SOURCES,
 } from '@/lib/sources';
 import { resolveCharacter } from '@/lib/resolver';
-import type { CharacterBuild } from '@/types/choices';
+import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
 import type { SpeciesId, BackgroundId, ClassId, FeatId } from '@/lib/dnd-helpers';
 import type { SubclassId } from '@/types/sources';
+import type { SpellId } from '@/types/spells';
 
 const humanFighterL1Build: CharacterBuild = {
   speciesId: 'human' as SpeciesId,
@@ -963,5 +964,89 @@ describe('feature-choice single-pass safety invariant', () => {
         'collectBundles expands options in a single pass and would silently drop these. ' +
         'Promote to a fixpoint loop before adding such an option.'
     ).toHaveLength(0);
+  });
+});
+
+describe('Druid L1 cantrip spell-choice (end-to-end)', () => {
+  const druidL1Build: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 14, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('no decision → pendingChoices includes a spell-choice with count=2, spellList=druid, spellLevel=0', () => {
+    const { bundles, expandedFeats } = collectBundles(druidL1Build);
+    const resolved = resolveCharacter({
+      baseAbilities: druidL1Build.baseAbilities,
+      level: 1,
+      bundles,
+      choices: {},
+      expandedFeats,
+    });
+    const spellChoicePending = resolved.pendingChoices.filter((c) => c.type === 'spell-choice');
+    expect(spellChoicePending.length).toBe(1);
+    const pending = spellChoicePending[0];
+    if (pending.type === 'spell-choice') {
+      expect(pending.count).toBe(2);
+      expect(pending.spellList).toBe('druid');
+      expect(pending.spellLevel).toBe(0);
+    }
+  });
+
+  it('with 2 cantrip decisions → resolved.spellcasting.cantrips contains those 2, no spell-choice pending', () => {
+    const choiceKey = createChoiceKey('spell-choice', 'class', 'druid', 0);
+    const spellDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['druidcraft', 'thorn-whip'] as readonly SpellId[],
+    };
+    const buildWithDecision: CharacterBuild = {
+      ...druidL1Build,
+      choices: { [choiceKey]: spellDecision } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+
+    const { bundles, expandedFeats } = collectBundles(buildWithDecision);
+    const resolved = resolveCharacter({
+      baseAbilities: buildWithDecision.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithDecision.choices,
+      expandedFeats,
+    });
+
+    expect(resolved.spellcasting).not.toBeNull();
+    expect(resolved.spellcasting!.cantrips).toContain('druidcraft');
+    expect(resolved.spellcasting!.cantrips).toContain('thorn-whip');
+
+    const spellChoicePending = resolved.pendingChoices.filter((c) => c.type === 'spell-choice');
+    expect(spellChoicePending.length).toBe(0);
+  });
+
+  it('with only 1 cantrip decision → still has spell-choice pending (underfilled)', () => {
+    const choiceKey = createChoiceKey('spell-choice', 'class', 'druid', 0);
+    const partialDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['guidance'] as readonly SpellId[],
+    };
+    const buildWithPartialDecision: CharacterBuild = {
+      ...druidL1Build,
+      choices: { [choiceKey]: partialDecision } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+
+    const { bundles, expandedFeats } = collectBundles(buildWithPartialDecision);
+    const resolved = resolveCharacter({
+      baseAbilities: buildWithPartialDecision.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithPartialDecision.choices,
+      expandedFeats,
+    });
+
+    const spellChoicePending = resolved.pendingChoices.filter((c) => c.type === 'spell-choice');
+    expect(spellChoicePending.length).toBe(1);
   });
 });
