@@ -1021,6 +1021,19 @@ export const SPELL_CATALOG = [
     // 2024 PHB: native to bard, cleric, druid, paladin, sorcerer, warlock, wizard
     nativeClasses: ['bard', 'cleric', 'druid', 'paladin', 'sorcerer', 'warlock', 'wizard'],
   },
+  {
+    id: 'counterspell',
+    level: 3,
+    school: 'abjuration',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Reaction',
+    range: '60 feet',
+    components: { verbal: false, somatic: true, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to bard, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'sorcerer', 'warlock', 'wizard'],
+  },
   // Devotion L13
   {
     id: 'guardian-of-faith',

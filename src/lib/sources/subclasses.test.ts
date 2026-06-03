@@ -2868,15 +2868,27 @@ describe('getSubclassSource — Abjurer', () => {
     });
   });
 
-  it('abjurer level 10 grants 1 feature: improved-abjuration', () => {
+  it('abjurer level 10 grants spellbreaker feature + counterspell + dispel-magic always-prepared (NOT improved-abjuration)', () => {
     const source = getSubclassSource('abjurer');
     const level10 = source?.features.find((f) => f.classLevel === 10);
     expect(level10).toBeDefined();
-    expect(level10?.grants).toHaveLength(1);
-    expect(level10?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'abjurer-improved-abjuration' },
-    });
+    expect(level10?.grants).toHaveLength(3);
+    expect(level10?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'abjurer-spellbreaker' }) }),
+        expect.objectContaining({ type: 'spell', spellId: 'counterspell', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true }),
+      ])
+    );
+    // Regression guard: improved-abjuration (2014) must NOT appear
+    expect(level10?.grants).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'abjurer-improved-abjuration' }),
+        }),
+      ])
+    );
   });
 });
 
@@ -2891,11 +2903,11 @@ describe('getSubclassSource — Diviner', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
   });
 
-  it('diviner level 3 grants 2 features: divination-savant and portent', () => {
+  it('diviner level 3 grants 3 grants: divination-savant, portent, and portent resource pool', () => {
     const source = getSubclassSource('diviner');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toHaveLength(3);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -2905,6 +2917,12 @@ describe('getSubclassSource — Diviner', () => {
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'diviner-portent' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'portent',
+          max: { mode: 'fixed', value: 2 },
+          regen: 'long-rest',
         }),
       ])
     );
@@ -2944,7 +2962,7 @@ describe('getSubclassSource — Evoker', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
   });
 
-  it('evoker level 3 grants 2 features: evocation-savant and sculpt-spells', () => {
+  it('evoker level 3 grants 2 features: evocation-savant and potent-cantrip (2024 PHB — NOT sculpt-spells)', () => {
     const source = getSubclassSource('evoker');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
@@ -2957,18 +2975,29 @@ describe('getSubclassSource — Evoker', () => {
         }),
         expect.objectContaining({
           type: 'feature',
-          feature: expect.objectContaining({ id: 'evoker-sculpt-spells' }),
+          feature: expect.objectContaining({ id: 'evoker-potent-cantrip' }),
         }),
+      ])
+    );
+    // Regression guard: sculpt-spells must NOT be at L3 (2014 holdover)
+    expect(level3?.grants).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'evoker-sculpt-spells' }) }),
       ])
     );
   });
 
-  it('evoker level 6 grants 1 feature: potent-cantrip', () => {
+  it('evoker level 6 grants 1 feature: sculpt-spells (2024 PHB — NOT potent-cantrip)', () => {
     const source = getSubclassSource('evoker');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
     expect(level6?.grants).toHaveLength(1);
     expect(level6?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'evoker-sculpt-spells' },
+    });
+    // Regression guard: potent-cantrip must NOT be at L6 (2014 holdover)
+    expect(level6?.grants[0]).not.toMatchObject({
       type: 'feature',
       feature: { id: 'evoker-potent-cantrip' },
     });
@@ -3027,21 +3056,101 @@ describe('getSubclassSource — Illusionist', () => {
     });
   });
 
-  it('illusionist level 10 grants 1 feature: illusory-self', () => {
+  it('illusionist level 10 grants 2 grants: illusory-self feature and illusory-self resource pool', () => {
     const source = getSubclassSource('illusionist');
     const level10 = source?.features.find((f) => f.classLevel === 10);
     expect(level10).toBeDefined();
-    expect(level10?.grants).toHaveLength(1);
-    expect(level10?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'illusionist-illusory-self' },
-    });
+    expect(level10?.grants).toHaveLength(2);
+    expect(level10?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'illusionist-illusory-self' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'illusory-self',
+          max: { mode: 'fixed', value: 1 },
+          regen: 'short-rest',
+        }),
+      ])
+    );
   });
 });
 
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();
+  });
+});
+
+// ── Resolver integration: Wizard school correctness ──────────────────────────
+
+describe('Diviner Portent resource pool resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'wizard', 0);
+
+  it('Diviner L3: resourcePools includes portent with max=2 and long-rest regen', () => {
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: [
+        { classId: 'wizard' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'wizard' as ClassId, classLevel: 2, hpRoll: 4 },
+        { classId: 'wizard' as ClassId, classLevel: 3, hpRoll: 4 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'diviner' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const pool = resolved.resourcePools.find((p) => p.poolId === 'portent');
+    expect(pool).toBeDefined();
+    expect(pool?.max).toBe(2);
+    expect(pool?.regen).toBe('long-rest');
+  });
+});
+
+describe('Abjurer Spellbreaker resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'wizard', 0);
+
+  it('Abjurer L10: alwaysPreparedSpells includes counterspell and dispel-magic', () => {
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: Array.from({ length: 10 }, (_, i) => ({
+        classId: 'wizard' as ClassId,
+        classLevel: i + 1,
+        hpRoll: i === 0 ? null : 4,
+      })),
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'abjurer' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 10,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting?.alwaysPreparedSpells).toContain('counterspell');
+    expect(resolved.spellcasting?.alwaysPreparedSpells).toContain('dispel-magic');
   });
 });
 

@@ -1619,8 +1619,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 10,
         grants: [
-          // Improved Abjuration: when you cast Counterspell or Dispel Magic, add your PB to the ability check
-          { type: 'feature', feature: { id: 'abjurer-improved-abjuration' } },
+          // Spellbreaker: Counterspell and Dispel Magic are always prepared; Dispel Magic can be cast as a
+          // Bonus Action; add PB to the check; a failed Counterspell or Dispel Magic cast doesn't expend the slot
+          { type: 'feature', feature: { id: 'abjurer-spellbreaker' } },
+          { type: 'spell', spellId: 'counterspell', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1635,6 +1638,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Portent: after each long rest, roll 2 d20s; replace any attack roll, ability check, or saving throw
           // you can see with one of these rolls; each pre-rolled die can be used once
           { type: 'feature', feature: { id: 'diviner-portent' } },
+          // Portent resource pool: tracks the 2 Portent dice (regain on Long Rest)
+          { type: 'resource-pool', poolId: 'portent', max: { mode: 'fixed', value: 2 }, regen: 'long-rest' },
         ],
       },
       {
@@ -1662,17 +1667,18 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Evocation Savant: copy/inscribe Evocation spells into spellbook at half the usual cost
           { type: 'feature', feature: { id: 'evoker-evocation-savant' } },
-          // Sculpt Spells: when you cast an Evocation spell that affects other creatures you can see,
-          // choose up to 1 + spell level allies; chosen creatures automatically succeed their saves and take no damage
-          { type: 'feature', feature: { id: 'evoker-sculpt-spells' } },
+          // Potent Cantrip: when a creature succeeds on a saving throw against a cantrip you cast,
+          // it takes half damage (2024 PHB: moved from L6 to L3)
+          { type: 'feature', feature: { id: 'evoker-potent-cantrip' } },
         ],
       },
       {
         classLevel: 6,
         grants: [
-          // Potent Cantrip: when a creature succeeds on a saving throw against a cantrip you cast,
-          // it takes half damage and any non-damage effects only partially apply
-          { type: 'feature', feature: { id: 'evoker-potent-cantrip' } },
+          // Sculpt Spells: when you cast an Evocation spell that affects other creatures you can see,
+          // choose up to 1 + spell level allies; chosen creatures automatically succeed their saves and take no damage
+          // (2024 PHB: moved from L3 to L6)
+          { type: 'feature', feature: { id: 'evoker-sculpt-spells' } },
         ],
       },
       {
@@ -1699,8 +1705,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 6,
         grants: [
-          // Phantasmal Creatures: Phantasmal Force and Phantasmal Killer are always prepared and can be cast
-          // at their minimum slot levels without expending a spell slot; uses = PB per long rest
+          // Phantasmal Creatures: 2024 PHB grants Summon Beast + Summon Fey with free casts (PB uses per long rest)
+          // TODO(#159-followup): wire summon-beast/summon-fey always-prepared once catalogued
           { type: 'feature', feature: { id: 'illusionist-phantasmal-creatures' } },
         ],
       },
@@ -1710,6 +1716,8 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Illusory Self: Reaction — when a creature makes an attack roll against you, interpose an illusion
           // that causes the attack to automatically miss; 1 use per short rest
           { type: 'feature', feature: { id: 'illusionist-illusory-self' } },
+          // Illusory Self resource pool: 1 use, recharges on Short or Long Rest
+          { type: 'resource-pool', poolId: 'illusory-self', max: { mode: 'fixed', value: 1 }, regen: 'short-rest' },
         ],
       },
     ] satisfies readonly SubclassFeature[],
