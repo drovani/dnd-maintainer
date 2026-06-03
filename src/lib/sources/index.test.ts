@@ -967,6 +967,109 @@ describe('feature-choice single-pass safety invariant', () => {
   });
 });
 
+describe('spell-choice validation in collectBundles', () => {
+  const druidL1Build: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 14, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('invalid spellId emits a warning and is absent from resolved cantrips', () => {
+    const choiceKey = createChoiceKey('spell-choice', 'class', 'druid', 0);
+    const buildWithInvalid: CharacterBuild = {
+      ...druidL1Build,
+      choices: {
+        [choiceKey]: {
+          type: 'spell-choice',
+          spellIds: ['druidcraft', 'fireball'] as readonly SpellId[],
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+
+    const { bundles, warnings, expandedFeats } = collectBundles(buildWithInvalid);
+    expect(warnings.some((w) => w.includes('fireball'))).toBe(true);
+
+    const resolved = resolveCharacter({
+      baseAbilities: buildWithInvalid.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithInvalid.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting?.cantrips).toContain('druidcraft');
+    expect(resolved.spellcasting?.cantrips).not.toContain('fireball');
+  });
+
+  it('valid spellIds still resolve normally when mixed with an invalid id', () => {
+    const choiceKey = createChoiceKey('spell-choice', 'class', 'druid', 0);
+    const buildWithMixed: CharacterBuild = {
+      ...druidL1Build,
+      choices: {
+        [choiceKey]: {
+          type: 'spell-choice',
+          spellIds: ['guidance', 'fireball'] as readonly SpellId[],
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+
+    const { bundles, warnings, expandedFeats } = collectBundles(buildWithMixed);
+    expect(warnings.some((w) => w.includes('fireball'))).toBe(true);
+
+    const resolved = resolveCharacter({
+      baseAbilities: buildWithMixed.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithMixed.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting?.cantrips).toContain('guidance');
+    expect(resolved.spellcasting?.cantrips).not.toContain('fireball');
+  });
+});
+
+describe('spell-choice duplicate-id gate (resolver)', () => {
+  const druidL1Build: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 14, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'druid' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('two duplicate spellIds with count=2 still emits spell-choice pending', () => {
+    const choiceKey = createChoiceKey('spell-choice', 'class', 'druid', 0);
+    const buildWithDupes: CharacterBuild = {
+      ...druidL1Build,
+      choices: {
+        [choiceKey]: {
+          type: 'spell-choice',
+          spellIds: ['guidance', 'guidance'] as readonly SpellId[],
+        },
+      } as Readonly<Record<ChoiceKey, ChoiceDecision>>,
+    };
+
+    const { bundles, expandedFeats } = collectBundles(buildWithDupes);
+    const resolved = resolveCharacter({
+      baseAbilities: buildWithDupes.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithDupes.choices,
+      expandedFeats,
+    });
+
+    const spellChoicePending = resolved.pendingChoices.filter((c) => c.type === 'spell-choice');
+    expect(spellChoicePending.length).toBe(1);
+  });
+});
+
 describe('Druid L1 cantrip spell-choice (end-to-end)', () => {
   const druidL1Build: CharacterBuild = {
     speciesId: 'human' as SpeciesId,

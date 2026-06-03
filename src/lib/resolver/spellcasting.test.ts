@@ -425,6 +425,20 @@ describe('resolveSpellcasting', () => {
       expect(result!.cantrips).not.toContain('guiding-bolt');
     });
 
+    it('uncatalogued spell with alwaysPrepared=false routes to knownSpells (not cantrips)', () => {
+      const bundles: GrantBundle[] = [
+        ...makeClericBundles(1),
+        {
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          grants: [{ type: 'spell', spellId: 'totally-unknown-spell', alwaysPrepared: false }],
+        },
+      ];
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(bundles, abilities, 2, 1);
+      expect(result!.knownSpells).toContain('totally-unknown-spell');
+      expect(result!.cantrips).not.toContain('totally-unknown-spell');
+    });
+
     it('multiple druid cantrips all route to cantrips array', () => {
       const bundles: GrantBundle[] = [
         ...makeDruidBundles(1),

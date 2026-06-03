@@ -4,6 +4,9 @@ import type { ResolvedAbility, ResolvedSpellcasting } from '@/types/resolved';
 import { getPactMagicSlots, getPreparedSpellCount, getSpellSlots } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getSpellDef } from '@/lib/sources/spells';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('resolver');
 
 export function resolveSpellcasting(
   bundles: readonly GrantBundle[],
@@ -28,10 +31,16 @@ export function resolveSpellcasting(
   for (const { grant } of collectGrantsByType(bundles, 'spell')) {
     if (grant.alwaysPrepared) {
       alwaysPreparedSpells.push(grant.spellId);
-    } else if (getSpellDef(grant.spellId)?.level === 0) {
-      cantrips.push(grant.spellId);
     } else {
-      knownSpells.push(grant.spellId);
+      const def = getSpellDef(grant.spellId);
+      if (!def) {
+        logger.warn(`spell grant references uncatalogued spell "${grant.spellId}"`);
+        knownSpells.push(grant.spellId);
+      } else if (def.level === 0) {
+        cantrips.push(grant.spellId);
+      } else {
+        knownSpells.push(grant.spellId);
+      }
     }
   }
 

@@ -7,6 +7,7 @@ import {
   type SkillId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers';
+import { isSpellId } from '@/lib/sources/spells';
 import type { ChoiceDecision } from '@/types/choices';
 
 const SKILL_IDS = DND_SKILLS.map((s) => s.id) as [SkillId, ...SkillId[]];
@@ -55,7 +56,10 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('lineage-choice'), lineageId: z.string().min(1) }),
   z.object({ type: z.literal('feature-choice'), optionId: z.string().min(1) }),
   z.object({ type: z.literal('feat-choice'), featId: z.string().refine(isFeatId, { message: 'Unknown feat ID' }) }),
-  z.object({ type: z.literal('spell-choice'), spellIds: z.array(z.string()).readonly() }),
+  z.object({
+    type: z.literal('spell-choice'),
+    spellIds: z.array(z.string().refine(isSpellId, { message: 'Unknown spell ID' })).readonly(),
+  }),
 ]);
 
 // Compile-time parity: every ChoiceDecision discriminant must have a schema arm.

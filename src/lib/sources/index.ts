@@ -30,6 +30,7 @@ import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { FEAT_SOURCES } from '@/lib/sources/feats';
 import { ITEM_SOURCES } from '@/lib/sources/items';
 import { FIGHTING_STYLE_SOURCES, getFightingStyleSource } from '@/lib/sources/fighting-styles';
+import { getSpellsForList } from '@/lib/sources/spells';
 import type { FightingStyleId } from '@/lib/dnd-helpers';
 
 export type {
@@ -208,7 +209,14 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   for (const { grant, source } of allSpellChoiceGrants) {
     const decision = build.choices[grant.key];
     if (decision?.type === 'spell-choice') {
+      const pool = getSpellsForList(grant.spellList, grant.spellLevel);
       for (const spellId of decision.spellIds) {
+        if (!pool.some((s) => s.id === spellId)) {
+          const msg = `spell-choice "${grant.key}" decision references spell "${spellId}" not in ${grant.spellList} list at level ${grant.spellLevel}`;
+          warnings.push(msg);
+          logger.warn(msg);
+          continue;
+        }
         bundles.push({
           source,
           grants: [{ type: 'spell', spellId, alwaysPrepared: false }],

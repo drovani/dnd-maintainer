@@ -262,6 +262,45 @@ describe('ChoiceDecisionSchema', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('spell-choice', () => {
+    it('accepts a spell-choice decision with known spell IDs and round-trips correctly', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'spell-choice',
+        spellIds: ['druidcraft', 'thorn-whip'],
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({ type: 'spell-choice', spellIds: ['druidcraft', 'thorn-whip'] });
+      }
+    });
+
+    it('rejects spell-choice with an unknown spell ID', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'spell-choice',
+        spellIds: ['fireball'],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects spell-choice with an empty string spell ID', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'spell-choice',
+        spellIds: [''],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects spell-choice missing spellIds field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'spell-choice' });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts spell-choice with an empty array', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'spell-choice', spellIds: [] });
+      expect(result.success).toBe(true);
+    });
+  });
 });
 
 describe('CharacterBuildSchemaStrict', () => {
