@@ -301,9 +301,15 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
 
   // Feature-choice expansion — runs AFTER all sources (species, class, subclass, background, feat, item)
   // are pushed into bundles so feat-origin feature-choices (e.g. magic-initiate, elemental-adept,
-  // resilient) are visible here. Expansion runs once (not to a fixpoint) — this is safe because
-  // feat-origin feature-choice options expand only to terminal grants (no option nests another
-  // feature-choice); revisit with a fixpoint if that ever changes.
+  // resilient) are visible here.
+  //
+  // SINGLE-PASS SAFETY ASSUMPTION: expansion runs exactly once (not to a fixpoint) AND runs after
+  // the feat and lineage expansion passes, so a chosen option whose own grants contain a grant of
+  // type 'feat', 'lineage-choice', or 'feature-choice' would be silently dropped. This is safe ONLY
+  // because all current feature-choice options expand to terminal grants (proficiency, feature, etc.)
+  // — none nests another feat, lineage-choice, or feature-choice. The invariant is enforced by a
+  // companion test in index.test.ts; if that test goes red, promote this to a fixpoint loop before
+  // adding the new option.
   const allFeatureChoiceGrants: { grant: FeatureChoiceGrant; source: SourceTag }[] = [];
   for (const bundle of bundles) {
     for (const grant of bundle.grants) {

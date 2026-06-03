@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { OriginStep } from '@/components/character-builder/OriginStep';
 import type { Character } from '@/types/database';
 import type { GrantBundle } from '@/types/sources';
-import type { ChoiceKey } from '@/types/choices';
+import { createChoiceKey, type ChoiceKey } from '@/types/choices';
 import type { ResolvedCharacter } from '@/types/resolved';
 
 // ---------------------------------------------------------------------------
@@ -342,6 +342,39 @@ describe('OriginStep', () => {
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
     const featureRadios = radios.filter((r) => r.name?.startsWith('choice-feature-'));
     expect(featureRadios.length).toBe(3);
+  });
+
+  it('fires makeChoice with the correct choiceKey and decision when a feature radio is changed', () => {
+    const magicInitiateChoiceKey = createChoiceKey('feature-choice', 'feat', 'magic-initiate', 0);
+    mockResolved = {
+      ...makeDefaultResolved(),
+      pendingChoices: [
+        {
+          type: 'feature-choice' as const,
+          choiceKey: magicInitiateChoiceKey,
+          source: { origin: 'feat', id: 'magic-initiate' } as const,
+          options: [
+            { optionId: 'cleric', featureId: 'feat-magic-initiate-cleric' },
+            { optionId: 'druid', featureId: 'feat-magic-initiate-druid' },
+            { optionId: 'wizard', featureId: 'feat-magic-initiate-wizard' },
+          ],
+        },
+      ],
+    };
+
+    render(<OriginStep />);
+
+    // Click the cleric radio — identified by its label text (mock returns the last key segment)
+    // t('features.feat-magic-initiate-cleric.name', { defaultValue: 'feat-magic-initiate-cleric' }) → 'feat-magic-initiate-cleric'
+    const clericRadio = screen.getByRole('radio', {
+      name: /feat-magic-initiate-cleric/i,
+    }) as HTMLInputElement;
+    fireEvent.click(clericRadio);
+
+    expect(mockMakeChoice).toHaveBeenCalledWith(magicInitiateChoiceKey, {
+      type: 'feature-choice',
+      optionId: 'cleric',
+    });
   });
 
   it('does not render a feat-origin feature-choice picker when no such pending choice exists', () => {

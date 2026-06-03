@@ -20,6 +20,11 @@ import {
   getFeatSource,
   getItemSource,
   collectBundles,
+  SPECIES_SOURCES,
+  CLASS_SOURCES,
+  SUBCLASS_SOURCES,
+  BACKGROUND_SOURCES,
+  FEAT_SOURCES,
 } from '@/lib/sources';
 import { resolveCharacter } from '@/lib/resolver';
 import type { CharacterBuild } from '@/types/choices';
@@ -646,5 +651,76 @@ describe('feat-origin feature-choice pipeline (build.feats: magic-initiate)', ()
     const { warnings } = collectBundles(buildWithDecision);
     const originMismatch = warnings.find((w) => w.includes('non-class origin') && w.includes('feat'));
     expect(originMismatch, 'no origin-mismatch warning for resolved feat-origin feature-choice').toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Single-pass safety invariant
+// ---------------------------------------------------------------------------
+// collectBundles expands feature-choice options in a single pass (not a fixpoint).
+// This means any option grant of type 'feat', 'lineage-choice', or 'feature-choice'
+// would be silently dropped. The invariant test below iterates every feature-choice
+// grant across ALL sources and asserts no option contains such a grant.
+// If this test goes red, promote the expansion to a fixpoint loop before merging.
+
+describe('feature-choice single-pass safety invariant', () => {
+  it('no feature-choice option grant has type feat, lineage-choice, or feature-choice across all sources', () => {
+    const FORBIDDEN_GRANT_TYPES = new Set(['feat', 'lineage-choice', 'feature-choice']);
+
+    // Collect all feature-choice grants from every source collection.
+    // Classes: levels[].grants; Subclasses: features[].grants; others: .grants
+    const violations: string[] = [];
+
+    function checkGrants(sourceLabel: string, grants: readonly { type: string }[]) {
+      for (const grant of grants) {
+        if (grant.type === 'feature-choice') {
+          const fcGrant = grant as {
+            type: 'feature-choice';
+            options: readonly { optionId: string; grants: readonly { type: string }[] }[];
+            key: string;
+          };
+          for (const option of fcGrant.options) {
+            for (const optionGrant of option.grants) {
+              if (FORBIDDEN_GRANT_TYPES.has(optionGrant.type)) {
+                violations.push(
+                  `${sourceLabel} feature-choice key="${String(fcGrant.key)}" option="${option.optionId}" has forbidden grant type "${optionGrant.type}"`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (const source of SPECIES_SOURCES) {
+      checkGrants(`species:${source.id}`, source.grants);
+    }
+
+    for (const source of CLASS_SOURCES) {
+      for (const [i, level] of source.levels.entries()) {
+        checkGrants(`class:${source.id}:level${i + 1}`, level.grants);
+      }
+    }
+
+    for (const [subclassId, source] of Object.entries(SUBCLASS_SOURCES)) {
+      for (const feature of source.features) {
+        checkGrants(`subclass:${subclassId}:classLevel${feature.classLevel}`, feature.grants);
+      }
+    }
+
+    for (const source of BACKGROUND_SOURCES) {
+      checkGrants(`background:${source.id}`, source.grants);
+    }
+
+    for (const source of FEAT_SOURCES) {
+      checkGrants(`feat:${source.id}`, source.grants);
+    }
+
+    expect(
+      violations,
+      'feature-choice option grants must not contain feat, lineage-choice, or feature-choice — ' +
+        'collectBundles expands options in a single pass and would silently drop these. ' +
+        'Promote to a fixpoint loop before adding such an option.'
+    ).toHaveLength(0);
   });
 });

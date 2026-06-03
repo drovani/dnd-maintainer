@@ -15,6 +15,7 @@ import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPa
 import { ResourcePoolsPanel } from '@/components/character-sheet/ResourcePoolsPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
+import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
@@ -222,22 +223,13 @@ function CharacterSheetInner({
     return decision.type === 'lineage-choice' ? decision.lineageId : null;
   })();
 
-  // Origin feat: find the feat or direct feature granted by the character's background source.
-  // PR #177 made acolyte/guide/sage grant Magic Initiate as a direct `feature` grant whose id
-  // starts with 'feat-magic-initiate-', so we check both shapes. The `isDirectFeature` flag
-  // selects the right i18n namespace at the render site.
-  const originFeatInfo: { id: string; isDirectFeature: boolean } | null = (() => {
+  // Origin feat: derive badge info from the background source's grants.
+  // deriveOriginFeatInfo handles both shapes (feat grant and direct feat-magic-initiate-* feature).
+  const originFeatInfo = (() => {
     if (!character.background || !isBackgroundId(character.background)) return null;
     const bg = BACKGROUND_SOURCES.find((s) => s.id === character.background);
     if (!bg) return null;
-    const featGrant = bg.grants.find((g) => g.type === 'feat');
-    if (featGrant && 'featId' in featGrant) return { id: featGrant.featId, isDirectFeature: false };
-    const directFeatureGrant = bg.grants.find(
-      (g) => g.type === 'feature' && 'feature' in g && g.feature.id.startsWith('feat-magic-initiate-')
-    );
-    if (directFeatureGrant && 'feature' in directFeatureGrant)
-      return { id: directFeatureGrant.feature.id, isDirectFeature: true };
-    return null;
+    return deriveOriginFeatInfo(bg.grants);
   })();
 
   return (
@@ -326,7 +318,7 @@ function CharacterSheetInner({
               </p>
               {originFeatInfo && (
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {originFeatInfo.isDirectFeature
+                  {originFeatInfo.namespace === 'features'
                     ? t(`features.${originFeatInfo.id}.name` as `features.${string}.name`, {
                         defaultValue: originFeatInfo.id,
                       })
