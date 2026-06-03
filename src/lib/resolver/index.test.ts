@@ -2481,3 +2481,63 @@ describe('collapsed repeatable feat resolver integration', () => {
     });
   });
 });
+
+describe('spell-choice pending-gate counts only pool-valid ids', () => {
+  // The wizard cantrip pool (spellLevel 0) includes mending/message/poison-spray but NOT guidance
+  // (guidance is cleric+druid only). This lets us construct a decision where raw size >= count
+  // but pool-valid size < count — exactly the divergence the fix closes.
+  const spellChoiceKey = createChoiceKey('spell-choice', 'class', 'wizard', 0);
+
+  const spellChoiceBundle: GrantBundle = {
+    source: { origin: 'class', id: 'wizard', level: 1 },
+    grants: [
+      {
+        type: 'spell-choice',
+        key: spellChoiceKey,
+        count: 2,
+        spellList: 'wizard' as ClassId,
+        spellLevel: 0,
+      },
+    ],
+  };
+
+  it('emits pending when decision contains one pool-valid + one out-of-pool spell id (raw count satisfies, pool-valid does not)', () => {
+    // mending is in the wizard cantrip pool; guidance is NOT (cleric/druid only).
+    // Raw distinct size = 2, pool-valid size = 1 → should still be pending.
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles: [spellChoiceBundle],
+      choices: {
+        [spellChoiceKey]: { type: 'spell-choice' as const, spellIds: ['mending', 'guidance'] as const },
+      },
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'spell-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(spellChoiceKey);
+  });
+
+  it('does not emit pending when decision contains two distinct pool-valid wizard cantrips', () => {
+    // mending and message are both in the wizard cantrip pool → pool-valid size = 2 = count → complete
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles: [spellChoiceBundle],
+      choices: {
+        [spellChoiceKey]: { type: 'spell-choice' as const, spellIds: ['mending', 'message'] as const },
+      },
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'spell-choice');
+    expect(pending).toBeUndefined();
+  });
+
+  it('emits pending when no decision is provided', () => {
+    const result = resolveCharacter({ ...baseInput, bundles: [spellChoiceBundle], choices: {} });
+    const pending = result.pendingChoices.find((c) => c.type === 'spell-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(spellChoiceKey);
+    if (pending?.type === 'spell-choice') {
+      expect(pending.count).toBe(2);
+      expect(pending.spellList).toBe('wizard');
+      expect(pending.spellLevel).toBe(0);
+    }
+  });
+});
