@@ -2094,6 +2094,10 @@ describe('getSubclassSource — Aberrant Sorcery', () => {
     expect(level3?.grants.some((g) => g.type === 'feature' && g.feature.id === 'aberrantsorcery-subclass-spells')).toBe(
       false
     );
+    // psionic-sorcery NOT at L3 (relocated to L6 per 2024 PHB)
+    expect(level3?.grants.some((g) => g.type === 'feature' && g.feature.id === 'aberrantsorcery-psionic-sorcery')).toBe(
+      false
+    );
   });
 
   it('aberrantsorcery level 5 has hunger-of-hadar and sending spell grants', () => {
@@ -2205,6 +2209,45 @@ describe('getSubclassSource — Clockwork Sorcery', () => {
     });
   });
 
+  it('clockworksorcery level 5 has dispel-magic and protection-from-energy spell grants', () => {
+    const source = getSubclassSource('clockworksorcery');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('clockworksorcery level 7 has freedom-of-movement and summon-construct spell grants', () => {
+    const source = getSubclassSource('clockworksorcery');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'summon-construct', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('clockworksorcery level 9 has greater-restoration and wall-of-force spell grants', () => {
+    const source = getSubclassSource('clockworksorcery');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'greater-restoration', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'wall-of-force', alwaysPrepared: true }),
+      ])
+    );
+  });
+
   it('clockworksorcery level 14 grants trance-of-order feature (2024 PHB placement)', () => {
     const source = getSubclassSource('clockworksorcery');
     const level14 = source?.features.find((f) => f.classLevel === 14);
@@ -2255,6 +2298,45 @@ describe('getSubclassSource — Draconic Sorcery', () => {
     // feature-choice has 10 options
     const choice = level3?.grants.find((g) => g.type === 'feature-choice');
     expect(choice?.type === 'feature-choice' && choice.options).toHaveLength(10);
+  });
+
+  it('draconicsorcery level 5 has fear and fly spell grants', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'fear', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'fly', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('draconicsorcery level 7 has arcane-eye and charm-monster spell grants', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    expect(level7).toBeDefined();
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'arcane-eye', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'charm-monster', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('draconicsorcery level 9 has legend-lore and summon-dragon spell grants', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'legend-lore', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'summon-dragon', alwaysPrepared: true }),
+      ])
+    );
   });
 
   it('draconicsorcery level 6 grants 1 feature: elemental-affinity', () => {
@@ -3316,5 +3398,25 @@ describe('Sorcerer Draconic Sorcery Dragon Ancestor resolver integration', () =>
       (c) => c.type === 'feature-choice' && c.choiceKey === dragonAncestorKey
     );
     expect(pending).toBeUndefined();
+  });
+
+  it('Draconic L3 with red dragon choice: result.features contains draconicsorcery-dragon-ancestor-red', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: {
+        ...baseBuild.choices,
+        [dragonAncestorKey]: { type: 'feature-choice' as const, optionId: 'red' },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const featureIds = resolved.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('draconicsorcery-dragon-ancestor-red');
   });
 });
