@@ -83,6 +83,7 @@ export interface Character {
   weapon_masteries: readonly { readonly weaponId: string; readonly masteryId: WeaponMasteryId }[] | null;
   heroic_inspiration: boolean;
   exhaustion_level: ExhaustionLevel;
+  conditions: ConditionId[];
 }
 
 // Combat participant

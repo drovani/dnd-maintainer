@@ -56,6 +56,7 @@ const basePayload: AutosavePayload = {
     weapon_masteries: null,
     heroic_inspiration: false,
     exhaustion_level: 0 as const,
+    conditions: [],
   },
   rows: [],
   resolved: null,

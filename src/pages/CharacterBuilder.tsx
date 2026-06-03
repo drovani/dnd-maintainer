@@ -104,6 +104,7 @@ function buildSeedCharacter(campaignId: string): Character {
     weapon_masteries: null,
     heroic_inspiration: false,
     exhaustion_level: 0 as const,
+    conditions: [],
   };
 }
 

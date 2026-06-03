@@ -61,6 +61,7 @@ const TABLE_COLUMNS = {
     { name: 'weapon_masteries', type: 'jsonb' },
     { name: 'heroic_inspiration', type: 'boolean' },
     { name: 'exhaustion_level', type: 'integer' },
+    { name: 'conditions', type: 'text[]' },
     { name: 'gender', type: 'text' },
     { name: 'size', type: 'text' },
     { name: 'age', type: 'text' },

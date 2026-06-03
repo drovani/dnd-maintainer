@@ -85,6 +85,7 @@ function draftCharacter(build: CharacterBuild): Character {
     weapon_masteries: null,
     heroic_inspiration: false,
     exhaustion_level: 0,
+    conditions: [],
   };
 }
 
