@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { createWrapper } from '@/test/wrapper';
-import { supabase, mockQueryResult } from '@/test/mocks/supabase';
+import { supabase, mockQueryResult, mockStorageResult } from '@/test/mocks/supabase';
 
 // Minimal shape of result.current that all hook results share.
 interface QueryResult {
@@ -32,10 +32,31 @@ export function setupMockReset(): void {
   beforeEach(() => {
     mockQueryResult.data = null;
     mockQueryResult.error = null;
+    mockStorageResult.data = null;
+    mockStorageResult.error = null;
+    mockStorageResult.publicUrl = '';
     for (const key of Object.keys(supabase)) {
       const fn = supabase[key as keyof typeof supabase];
       if (typeof fn === 'function' && 'mockClear' in fn) {
         vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear();
+      }
+    }
+    // Clear storage spies
+    const { storage } = supabase;
+    if (storage) {
+      for (const key of Object.keys(storage)) {
+        const fn = storage[key as keyof typeof storage];
+        if (typeof fn === 'function' && 'mockClear' in fn) {
+          vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear();
+        }
+      }
+      // Clear bucket ref spies via storage.from()
+      const bucketRef = storage.from('character-portraits');
+      for (const key of Object.keys(bucketRef)) {
+        const fn = bucketRef[key as keyof typeof bucketRef];
+        if (typeof fn === 'function' && 'mockClear' in fn) {
+          vi.mocked(fn as ReturnType<typeof vi.fn>).mockClear();
+        }
       }
     }
   });
@@ -269,4 +290,4 @@ export async function withSuppressedRejections(fn: () => Promise<void>): Promise
 }
 
 // Re-export commonly needed test utilities so files only need one import line.
-export { renderHook, waitFor, createWrapper, supabase, mockQueryResult };
+export { renderHook, waitFor, createWrapper, supabase, mockQueryResult, mockStorageResult };

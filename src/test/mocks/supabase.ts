@@ -3,4 +3,4 @@ import { createSupabaseMock } from '@/test/mocks/supabase-factory';
 
 const mock = createSupabaseMock(((fn) => vi.fn(fn as never)) as Parameters<typeof createSupabaseMock>[0]);
 
-export const { supabase, mockQueryResult } = mock;
+export const { supabase, mockQueryResult, mockStorageResult } = mock;
