@@ -278,7 +278,7 @@ describe('ChoiceDecisionSchema', () => {
     it('rejects spell-choice with an unknown spell ID', () => {
       const result = ChoiceDecisionSchema.safeParse({
         type: 'spell-choice',
-        spellIds: ['fireball'],
+        spellIds: ['totally-not-a-real-spell'],
       });
       expect(result.success).toBe(false);
     });

@@ -46,10 +46,10 @@ missing: 0 · stub: 0 · partial: 45 · complete: 3 · golden-verified: 0/48
 | collegeglamour | partial | has 3/6; missing 14 (bard expects 3/6/14) | — |
 | collegelore | partial | has 3/6; missing 14 (bard expects 3/6/14) | — |
 | collegevalor | partial | has 3/6; missing 14 (bard expects 3/6/14) | — |
-| lifedomain | partial | has 3/6; missing 17 (cleric expects 3/6/17) | — |
-| lightdomain | partial | has 3/6; missing 17 (cleric expects 3/6/17) | — |
-| trickerydomain | partial | has 3/6; missing 17 (cleric expects 3/6/17) | — |
-| wardomain | partial | has 3/6; missing 17 (cleric expects 3/6/17) | — |
+| lifedomain | partial | has 3/5/6/7/9; missing 17 (cleric expects 3/6/17) | — |
+| lightdomain | partial | has 3/5/6/7/9; missing 17 (cleric expects 3/6/17) | — |
+| trickerydomain | partial | has 3/5/6/7/9; missing 17 (cleric expects 3/6/17) | — |
+| wardomain | partial | has 3/5/6/7/9; missing 17 (cleric expects 3/6/17) | — |
 | circleland | partial | has 3/6/10; missing 14 (druid expects 3/6/10/14) | — |
 | circlemoon | partial | has 3/6/10; missing 14 (druid expects 3/6/10/14) | — |
 | circlesea | partial | has 3/6/10; missing 14 (druid expects 3/6/10/14) | — |

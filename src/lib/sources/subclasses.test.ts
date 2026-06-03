@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getSubclassSource } from '@/lib/sources';
+import { getSubclassSource, collectBundles } from '@/lib/sources';
 import type { SubclassId } from '@/lib/sources/subclasses';
 import { createChoiceKey } from '@/types/choices';
+import type { CharacterBuild } from '@/types/choices';
+import type { ClassId, SpeciesId, BackgroundId } from '@/lib/dnd-helpers';
+import { resolveCharacter } from '@/lib/resolver';
 
 describe('assassin skill-expertise grant', () => {
   it('assassin level 9 has exactly 2 grants: feature and skill-expertise: deception', () => {
@@ -2379,5 +2382,104 @@ describe('getSubclassSource — Illusionist', () => {
 describe('getSubclassSource — unknown', () => {
   it('returns undefined for unknown subclass', () => {
     expect(getSubclassSource('unknown-subclass' as SubclassId)).toBeUndefined();
+  });
+});
+
+// ── Resolver integration: domain spell level-gating ──────────────────────────
+
+describe('Cleric Life Domain resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'cleric', 0);
+
+  function makeLifeDomainBuild(classLevels: number): CharacterBuild {
+    const levels = Array.from({ length: classLevels }, (_, i) => ({
+      classId: 'cleric' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 6,
+    }));
+    return {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 16, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'lifedomain' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Cleric L5 Life Domain: alwaysPreparedSpells includes mass-healing-word and revivify', () => {
+    const build = makeLifeDomainBuild(5);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting).not.toBeNull();
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('mass-healing-word');
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('revivify');
+  });
+
+  it('Cleric L5 Life Domain: alwaysPreparedSpells does NOT include aura-of-life (L7 spell)', () => {
+    const build = makeLifeDomainBuild(5);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('aura-of-life');
+  });
+
+  it('Cleric L5 Life Domain: alwaysPreparedSpells includes all L3 domain spells', () => {
+    const build = makeLifeDomainBuild(5);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const prepared = resolved.spellcasting!.alwaysPreparedSpells;
+    expect(prepared).toContain('aid');
+    expect(prepared).toContain('bless');
+    expect(prepared).toContain('cure-wounds');
+    expect(prepared).toContain('lesser-restoration');
+  });
+
+  it('Cleric L7 Life Domain: alwaysPreparedSpells includes aura-of-life and death-ward', () => {
+    const build = makeLifeDomainBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('aura-of-life');
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('death-ward');
+  });
+
+  it('Cleric L9 Life Domain: alwaysPreparedSpells includes greater-restoration and mass-cure-wounds', () => {
+    const build = makeLifeDomainBuild(9);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('greater-restoration');
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('mass-cure-wounds');
   });
 });
