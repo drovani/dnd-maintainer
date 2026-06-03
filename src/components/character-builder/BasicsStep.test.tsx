@@ -36,6 +36,38 @@ vi.mock('@/hooks/useCharacters', () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// Mock react-router-dom (useParams)
+// ---------------------------------------------------------------------------
+
+vi.mock('react-router-dom', () => ({
+  useParams: () => ({ campaignSlug: 'test-campaign' }),
+}));
+
+// ---------------------------------------------------------------------------
+// Mock useGameData — returns full lists (phb-2024 allowed) by default
+// ---------------------------------------------------------------------------
+
+import { SPECIES_SOURCES as _SS } from '@/lib/sources/species';
+import { CLASS_SOURCES as _CS } from '@/lib/sources/classes';
+import { BACKGROUND_SOURCES as _BS } from '@/lib/sources/backgrounds';
+import { FEAT_SOURCES as _FS } from '@/lib/sources/feats';
+import { SUBCLASS_SOURCES as _SCS } from '@/lib/sources/subclasses';
+import type { GameData } from '@/hooks/useGameData';
+
+const mockGameData: GameData = {
+  species: _SS,
+  classes: _CS,
+  backgrounds: _BS,
+  feats: _FS,
+  subclasses: _SCS,
+  allowedSourceBooks: ['phb-2024'],
+};
+
+vi.mock('@/hooks/useGameData', () => ({
+  useGameData: () => mockGameData,
+}));
+
+// ---------------------------------------------------------------------------
 // Mock sonner toast
 // ---------------------------------------------------------------------------
 

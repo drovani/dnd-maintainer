@@ -38,6 +38,8 @@ import {
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useGameData } from '@/hooks/useGameData';
 
 const logger = getLogger('basics-step');
 
@@ -67,6 +69,8 @@ interface BasicsStepProps {
 export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const gameData = useGameData(campaignSlug);
   const { data: playerNames = [], isError: playerNamesError } = usePlayerNames();
   const context = useCharacterContext();
 
@@ -84,6 +88,18 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
   const levelRows = rows.filter((r) => r.sequence !== 0);
   const characterClass = (levelRows[0]?.class_id ?? '') as ClassId | '';
   const level = levelRows.length;
+
+  // Compute allowed ID sets from gameData, then union with current values for
+  // no-data-loss: a selection made when a book was enabled stays visible in the
+  // picker even after the book is disabled, but shows a "disabled source book"
+  // warning badge so the DM knows to update it.
+  const allowedSpeciesIds = new Set(gameData.species.map((s) => s.id));
+  const allowedClassIds = new Set(gameData.classes.map((c) => c.id));
+  const allowedBackgroundIds = new Set(gameData.backgrounds.map((b) => b.id));
+
+  const filteredSpecies = DND_SPECIES.filter((s) => allowedSpeciesIds.has(s.id) || s.id === race);
+  const filteredClasses = DND_CLASSES.filter((c) => allowedClassIds.has(c.id) || c.id === characterClass);
+  const filteredBackgrounds = DND_BACKGROUNDS.filter((b) => allowedBackgroundIds.has(b.id) || b.id === background);
 
   // Ref-flag + useEffect for post-commit step advance. Refs dodge stale closures
   // and keep onRequestAdvance out of the effect deps (it is a new fn per render).
@@ -400,17 +416,23 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
                 </Badge>
                 <p className="text-xs text-muted-foreground">{race}</p>
               </div>
+            ) : race && !allowedSpeciesIds.has(race) ? (
+              <div className="space-y-1">
+                <Badge variant="destructive" className="text-xs">
+                  {tc('characterBuilder.hints.disabledSourceBook')}
+                </Badge>
+              </div>
             ) : null}
             <Select
               value={race || null}
               onValueChange={(value) => value && handleSpeciesChange(value as SpeciesId)}
-              items={DND_SPECIES.map((s) => ({ value: s.id, label: t(`species.${s.id}`) }))}
+              items={filteredSpecies.map((s) => ({ value: s.id, label: t(`species.${s.id}`) }))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseSpecies')} />
               </SelectTrigger>
               <SelectContent>
-                {DND_SPECIES.map((s) => (
+                {filteredSpecies.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {t(`species.${s.id}`)}
                     {speciesHasLaterChoices(s.id) && (
@@ -427,16 +449,23 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
               {tc('characterBuilder.fields.class')}
               <span className="text-destructive">*</span>
             </Label>
+            {characterClass && !allowedClassIds.has(characterClass) && (
+              <div className="space-y-1">
+                <Badge variant="destructive" className="text-xs">
+                  {tc('characterBuilder.hints.disabledSourceBook')}
+                </Badge>
+              </div>
+            )}
             <Select
               value={characterClass || null}
               onValueChange={(value) => value && handleClassChange(value as ClassId)}
-              items={DND_CLASSES.map((c) => ({ value: c.id, label: t(`classes.${c.id}`) }))}
+              items={filteredClasses.map((c) => ({ value: c.id, label: t(`classes.${c.id}`) }))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseClass')} />
               </SelectTrigger>
               <SelectContent>
-                {DND_CLASSES.map((cls) => (
+                {filteredClasses.map((cls) => (
                   <SelectItem key={cls.id} value={cls.id}>
                     {t(`classes.${cls.id}`)}
                     {classHasLaterChoices(cls.id) && (
@@ -450,16 +479,23 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
 
           <div className="space-y-2">
             <Label>{tc('characterBuilder.fields.background')}</Label>
+            {background && !allowedBackgroundIds.has(background as BackgroundId) && (
+              <div className="space-y-1">
+                <Badge variant="destructive" className="text-xs">
+                  {tc('characterBuilder.hints.disabledSourceBook')}
+                </Badge>
+              </div>
+            )}
             <Select
               value={background || null}
               onValueChange={(value) => value && context.updateCharacter({ background: value })}
-              items={DND_BACKGROUNDS.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
+              items={filteredBackgrounds.map((b) => ({ value: b.id, label: t(`backgrounds.${b.id}`) }))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={tc('characterBuilder.placeholders.chooseBackground')} />
               </SelectTrigger>
               <SelectContent>
-                {DND_BACKGROUNDS.map((b) => (
+                {filteredBackgrounds.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
                     {t(`backgrounds.${b.id}`)}
                     {backgroundHasLaterChoices(b.id as BackgroundId) && (
