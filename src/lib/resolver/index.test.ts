@@ -130,6 +130,8 @@ describe('Human Fighter L1 integration', () => {
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       // Soldier language choice
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      // Human Versatile origin feat choice (2024 PHB)
+      'feat-choice:species:human:0': { type: 'feat-choice', featId: 'alert' },
       // Fighter bundle choices
       'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
       'bundle-choice:class:fighter:1': {
@@ -217,14 +219,15 @@ describe('Human Fighter L1 integration', () => {
     expect(result.savingThrows.str.bonus).toBe(5);
   });
 
-  it('has 4 features: Resourceful (human), chosen fighting style, Second Wind, and savage-attacker feat (soldier background)', () => {
+  it('has 5 features: Resourceful (human), chosen fighting style, Second Wind, savage-attacker feat (soldier background), and alert feat (human Versatile choice)', () => {
     const result = resolveCharacter(input);
-    expect(result.features).toHaveLength(4);
+    expect(result.features).toHaveLength(5);
     const featureIds = result.features.map((f) => f.feature.id);
     expect(featureIds).toContain('human-resourceful');
     expect(featureIds).toContain('fighting-style-defense');
     expect(featureIds).toContain('fighter-second-wind');
     expect(featureIds).toContain('feat-savage-attacker');
+    expect(featureIds).toContain('feat-alert');
   });
 
   it('armor proficiencies include light, medium, heavy, shields', () => {
@@ -573,6 +576,8 @@ describe('Human Fighter L5 integration', () => {
       'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
       'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+      // Human Versatile origin feat choice (2024 PHB)
+      'feat-choice:species:human:0': { type: 'feat-choice', featId: 'alert' },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
       [asiKey]: { type: 'asi' as const, allocation: { str: 2 } },
       // Fighter bundle choices

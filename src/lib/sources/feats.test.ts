@@ -78,6 +78,68 @@ describe('FEAT_SOURCES', () => {
     expect(FEAT_SOURCES).toHaveLength(74);
   });
 
+  describe('mechanized origin feats', () => {
+    it('skilled grants a skill proficiency-choice (not feature) with count 3 and from null', () => {
+      const skilled = FEAT_SOURCES.find((f) => f.id === 'skilled');
+      expect(skilled).toBeDefined();
+      const skillChoice = skilled?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'skill');
+      expect(skillChoice).toBeDefined();
+      if (skillChoice?.type === 'proficiency-choice' && skillChoice.category === 'skill') {
+        expect(skillChoice.count).toBe(3);
+        expect(skillChoice.from).toBeNull();
+      }
+      // Skilled no longer has a feature grant — only the proficiency-choice
+      const featureGrant = skilled?.grants.find((g) => g.type === 'feature');
+      expect(featureGrant).toBeUndefined();
+    });
+
+    it('tough grants both a feature and an hp-bonus of perLevel 2', () => {
+      const tough = FEAT_SOURCES.find((f) => f.id === 'tough');
+      expect(tough).toBeDefined();
+      const feature = tough?.grants.find((g) => g.type === 'feature');
+      expect(feature).toBeDefined();
+      const hpBonus = tough?.grants.find((g) => g.type === 'hp-bonus');
+      expect(hpBonus).toBeDefined();
+      if (hpBonus?.type === 'hp-bonus') {
+        expect(hpBonus.perLevel).toBe(2);
+      }
+    });
+
+    it('crafter grants a feature and a tool proficiency-choice with count 3 and 16 artisan tool IDs', () => {
+      const crafter = FEAT_SOURCES.find((f) => f.id === 'crafter');
+      expect(crafter).toBeDefined();
+      const feature = crafter?.grants.find((g) => g.type === 'feature');
+      expect(feature).toBeDefined();
+      const toolChoice = crafter?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'tool');
+      expect(toolChoice).toBeDefined();
+      if (toolChoice?.type === 'proficiency-choice' && toolChoice.category === 'tool') {
+        expect(toolChoice.count).toBe(3);
+        expect(toolChoice.from).toHaveLength(16);
+        // Spot-check some artisan tools and ensure herbalismkit is not included
+        expect(toolChoice.from).toContain('smithstools');
+        expect(toolChoice.from).toContain('woodcarverstools');
+        expect(toolChoice.from).not.toContain('herbalismkit');
+        expect(toolChoice.from).not.toContain('bagpipes');
+      }
+    });
+
+    it('musician grants a feature and a tool proficiency-choice with count 3 and 10 musical instrument IDs', () => {
+      const musician = FEAT_SOURCES.find((f) => f.id === 'musician');
+      expect(musician).toBeDefined();
+      const feature = musician?.grants.find((g) => g.type === 'feature');
+      expect(feature).toBeDefined();
+      const toolChoice = musician?.grants.find((g) => g.type === 'proficiency-choice' && g.category === 'tool');
+      expect(toolChoice).toBeDefined();
+      if (toolChoice?.type === 'proficiency-choice' && toolChoice.category === 'tool') {
+        expect(toolChoice.count).toBe(3);
+        expect(toolChoice.from).toHaveLength(10);
+        expect(toolChoice.from).toContain('lute');
+        expect(toolChoice.from).toContain('viol');
+        expect(toolChoice.from).not.toContain('smithstools');
+      }
+    });
+  });
+
   it('all fightingStyle feats have no prerequisites', () => {
     const feats = FEAT_SOURCES.filter((f) => f.category === 'fightingStyle');
     expect(feats.length).toBeGreaterThan(0);

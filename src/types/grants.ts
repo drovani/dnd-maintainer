@@ -12,6 +12,7 @@ import type {
 } from '@/lib/dnd-helpers';
 import type { ChoiceKey } from '@/types/choices';
 import type { BundleCategory } from '@/types/items';
+import type { FeatCategory } from '@/types/sources';
 
 // Supporting types
 
@@ -266,6 +267,13 @@ export interface LineageChoiceGrant {
   readonly from: readonly string[];
 }
 
+export interface FeatChoiceGrant {
+  readonly type: 'feat-choice';
+  readonly key: ChoiceKey;
+  readonly from: readonly FeatId[] | null;
+  readonly category: FeatCategory;
+}
+
 export type ResourcePoolMax =
   | { readonly mode: 'class-level'; readonly classId: ClassId }
   | { readonly mode: 'fixed'; readonly value: number };
@@ -304,6 +312,7 @@ export type Grant =
   | EquipmentGrant
   | BundleChoiceGrant
   | LineageChoiceGrant
+  | FeatChoiceGrant
   | FeatureChoiceGrant
   | FeatGrant
   | ResourcePoolGrant;

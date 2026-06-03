@@ -308,6 +308,20 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved feat-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'feat-choice')) {
+    const decision = choices[grant.key];
+    if (!decision || decision.type !== 'feat-choice') {
+      pendingChoices.push({
+        type: 'feat-choice',
+        choiceKey: grant.key,
+        source,
+        from: grant.from,
+        category: grant.category,
+      });
+    }
+  }
+
   // Unresolved subclass grants
   for (const { grant, source } of collectGrantsByType(bundles, 'subclass')) {
     const decision = choices[grant.key];

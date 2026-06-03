@@ -158,6 +158,7 @@
       "weaponMasteryChoice": "Choose {{count}} weapon mastery",
       "damageChoice": "Choose {{count}} damage type(s)",
       "lineageChoice": "Choose your lineage",
+      "featChoice": "Choose an origin feat",
       "featureChoice": "Choose an option",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining",

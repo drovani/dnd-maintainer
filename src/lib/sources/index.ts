@@ -19,6 +19,7 @@ import type {
   LineageChoiceGrant,
   DamageTypeChoiceGrant,
   FeatureChoiceGrant,
+  FeatChoiceGrant,
 } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
@@ -283,6 +284,34 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
       const msg = `No source data found for feat "${featId}" — feat grants will be empty`;
       warnings.push(msg);
       logger.warn(msg);
+    }
+  }
+
+  // Feat-choice expansion — runs AFTER build.feats so that a chosen feat's own sub-grants
+  // (feature-choice, proficiency-choice, etc.) are visible to the feature-choice pass below.
+  // Snapshot bundles at the start of the pass to avoid iterating bundles added in this pass.
+  const allFeatChoiceGrants: { grant: FeatChoiceGrant; source: SourceTag }[] = [];
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'feat-choice') {
+        allFeatChoiceGrants.push({ grant: grant as FeatChoiceGrant, source: bundle.source });
+      }
+    }
+  }
+
+  for (const { grant } of allFeatChoiceGrants) {
+    const decision = build.choices[grant.key];
+    if (decision?.type === 'feat-choice') {
+      const featSource = getFeatSource(decision.featId);
+      if (featSource) {
+        const tag: SourceTag = { origin: 'feat', id: decision.featId };
+        bundles.push({ source: tag, grants: featSource.grants });
+        expandedFeats.add(decision.featId);
+      } else {
+        const msg = `No source data found for feat-choice decision "${decision.featId}" — feat grants will be empty`;
+        warnings.push(msg);
+        logger.warn(msg);
+      }
     }
   }
 

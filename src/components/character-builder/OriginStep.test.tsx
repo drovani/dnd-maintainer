@@ -431,4 +431,85 @@ describe('OriginStep', () => {
 
     expect(screen.queryByText('originFeatTitle')).toBeNull();
   });
+
+  // ---------------------------------------------------------------------------
+  // Part 5: species-origin feat-choice picker (Human Versatile)
+  // ---------------------------------------------------------------------------
+
+  it('renders a feat-choice picker (radios) when a species-origin feat-choice is pending', () => {
+    mockResolved = {
+      ...makeDefaultResolved(),
+      pendingChoices: [
+        {
+          type: 'feat-choice' as const,
+          choiceKey: 'feat-choice:species:human:0' as ChoiceKey,
+          source: { origin: 'species', id: 'human' } as const,
+          from: null,
+          category: 'origin' as const,
+        },
+      ],
+    };
+    // Provide species bundles so FEAT_SOURCES are visible for rendering
+    mockBundles = [
+      {
+        source: { origin: 'species', id: 'human' as const },
+        grants: [
+          {
+            type: 'feat-choice' as const,
+            key: 'feat-choice:species:human:0' as ChoiceKey,
+            from: ['alert', 'lucky', 'skilled'] as unknown as readonly import('@/lib/dnd-helpers').FeatId[],
+            category: 'origin' as const,
+          },
+        ],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<OriginStep />);
+
+    // ChoicePicker renders radio inputs for each feat (name = choice-feat-<key>)
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const featRadios = radios.filter((r) => r.name?.startsWith('choice-feat-'));
+    expect(featRadios.length).toBeGreaterThan(0);
+  });
+
+  it('does not render a species-origin feat-choice picker when no such pending choice exists', () => {
+    mockResolved = {
+      ...makeDefaultResolved(),
+      pendingChoices: [],
+    };
+
+    render(<OriginStep />);
+
+    const radios = screen.queryAllByRole('radio') as HTMLInputElement[];
+    const featRadios = radios.filter((r) => r.name?.startsWith('choice-feat-'));
+    expect(featRadios).toHaveLength(0);
+  });
+
+  it('fires makeChoice with the correct choiceKey and feat-choice decision when a feat radio is changed', () => {
+    const featChoiceKey = createChoiceKey('feat-choice', 'species', 'human', 0);
+    mockResolved = {
+      ...makeDefaultResolved(),
+      pendingChoices: [
+        {
+          type: 'feat-choice' as const,
+          choiceKey: featChoiceKey,
+          source: { origin: 'species', id: 'human' } as const,
+          from: ['alert'] as unknown as readonly import('@/lib/dnd-helpers').FeatId[],
+          category: 'origin' as const,
+        },
+      ],
+    };
+
+    render(<OriginStep />);
+
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const featRadio = radios.find((r) => r.name?.startsWith('choice-feat-'));
+    expect(featRadio).toBeDefined();
+    fireEvent.click(featRadio!);
+
+    expect(mockMakeChoice).toHaveBeenCalledWith(featChoiceKey, {
+      type: 'feat-choice',
+      featId: 'alert',
+    });
+  });
 });

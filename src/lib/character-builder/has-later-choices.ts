@@ -10,6 +10,7 @@ const CHOICE_GRANT_TYPES = new Set<Grant['type']>([
   'weapon-mastery-choice',
   'bundle-choice',
   'lineage-choice',
+  'feat-choice',
 ]);
 
 // `proficiency-choice` categories that every option of a given kind already has

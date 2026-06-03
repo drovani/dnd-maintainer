@@ -6,8 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DND_LANGUAGES, DND_SKILLS, type LanguageId, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+import type { FeatId } from '@/lib/dnd-helpers';
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles';
+import { FEAT_SOURCES } from '@/lib/sources';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items';
 import type { PendingChoice } from '@/types/resolved';
@@ -223,6 +225,53 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
           })}
         </div>
         {currentLineageId !== undefined && (
+          <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+            {tc('characterBuilder.equipment.clearSelection')}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (choice.type === 'feat-choice') {
+    const { from, category } = choice;
+    const pool: readonly FeatId[] = from ?? FEAT_SOURCES.filter((f) => f.category === category).map((f) => f.id);
+    const currentFeatId = currentDecision?.type === 'feat-choice' ? currentDecision.featId : undefined;
+
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{tc('characterBuilder.pendingChoices.featChoice')}</p>
+        <div className="space-y-1">
+          {pool.map((featId) => {
+            const radioId = `choice-feat-${choice.choiceKey}-${featId}`;
+            const nameKey = `feats.${featId}.name` as `feats.${string}.name`;
+            const descKey = `feats.${featId}.description` as `feats.${string}.description`;
+            const label = t(nameKey, { defaultValue: featId });
+            const description = t(descKey, { defaultValue: '' });
+            return (
+              <div
+                key={featId}
+                className="flex items-start gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <input
+                  type="radio"
+                  id={radioId}
+                  name={`choice-feat-${choice.choiceKey}`}
+                  checked={currentFeatId === featId}
+                  onChange={() => onDecide(choice.choiceKey, { type: 'feat-choice', featId })}
+                  className="mt-1 size-4 text-primary"
+                />
+                <Label htmlFor={radioId} className="flex-1 cursor-pointer">
+                  <span className="font-medium">{label}</span>
+                  {description ? (
+                    <span className="block text-xs text-muted-foreground mt-0.5">{description}</span>
+                  ) : null}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+        {currentFeatId !== undefined && (
           <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
             {tc('characterBuilder.equipment.clearSelection')}
           </Button>

@@ -655,6 +655,136 @@ describe('feat-origin feature-choice pipeline (build.feats: magic-initiate)', ()
 });
 
 // ---------------------------------------------------------------------------
+// Human feat-choice (Versatile) pipeline
+// ---------------------------------------------------------------------------
+
+describe('Human feat-choice (Versatile) pipeline', () => {
+  const featChoiceKey = createChoiceKey('feat-choice', 'species', 'human', 0);
+
+  const humanBaseL1: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: null,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('(a) Human with no decision emits a feat-choice pending (category origin, source.origin species)', () => {
+    const { bundles, expandedFeats } = collectBundles(humanBaseL1);
+    const result = resolveCharacter({
+      baseAbilities: humanBaseL1.baseAbilities,
+      level: 1,
+      bundles,
+      choices: humanBaseL1.choices,
+      levels: humanBaseL1.levels,
+      expandedFeats,
+    });
+    const pending = result.pendingChoices.filter((c) => c.type === 'feat-choice' && c.source.origin === 'species');
+    expect(pending).toHaveLength(1);
+    expect(pending[0].type).toBe('feat-choice');
+    if (pending[0].type === 'feat-choice') {
+      expect(pending[0].category).toBe('origin');
+      expect(pending[0].source.origin).toBe('species');
+    }
+  });
+
+  it('(b) Human + Skilled decided: no feat-choice pending; a skill-choice pending with source.origin feat is emitted (count 3)', () => {
+    const buildWithSkilled: CharacterBuild = {
+      ...humanBaseL1,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'skilled' as FeatId },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithSkilled);
+    const result = resolveCharacter({
+      baseAbilities: buildWithSkilled.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithSkilled.choices,
+      levels: buildWithSkilled.levels,
+      expandedFeats,
+    });
+    // No pending feat-choice
+    expect(result.pendingChoices.filter((c) => c.type === 'feat-choice')).toHaveLength(0);
+    // A skill-choice pending with source.origin feat is emitted
+    const skillPending = result.pendingChoices.filter((c) => c.type === 'skill-choice' && c.source.origin === 'feat');
+    expect(skillPending).toHaveLength(1);
+    if (skillPending[0].type === 'skill-choice') {
+      expect(skillPending[0].count).toBe(3);
+    }
+  });
+
+  it('(c) Human + Tough decided: resolved hitPoints.max includes +2 per level', () => {
+    const buildWithTough: CharacterBuild = {
+      ...humanBaseL1,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'tough' as FeatId },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithTough);
+    const result = resolveCharacter({
+      baseAbilities: buildWithTough.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithTough.choices,
+      levels: buildWithTough.levels,
+      expandedFeats,
+    });
+    // CON is 10 → modifier 0, Fighter hit die 10, L1 HP = 10 + 0 con + 2 tough = 12
+    // Without Tough: 10 + 0 = 10
+    expect(result.hitPoints.max).toBe(12);
+  });
+
+  it('(d) Human + Crafter decided: a tool-choice pending with source.origin feat is emitted', () => {
+    const buildWithCrafter: CharacterBuild = {
+      ...humanBaseL1,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'crafter' as FeatId },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithCrafter);
+    const result = resolveCharacter({
+      baseAbilities: buildWithCrafter.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithCrafter.choices,
+      levels: buildWithCrafter.levels,
+      expandedFeats,
+    });
+    const toolPending = result.pendingChoices.filter((c) => c.type === 'tool-choice' && c.source.origin === 'feat');
+    expect(toolPending).toHaveLength(1);
+    if (toolPending[0].type === 'tool-choice') {
+      expect(toolPending[0].count).toBe(3);
+    }
+  });
+
+  it('(e) Human + Magic Initiate decided: a feature-choice pending with source.origin feat is emitted', () => {
+    const buildWithMagicInitiate: CharacterBuild = {
+      ...humanBaseL1,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'magic-initiate' as FeatId },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithMagicInitiate);
+    const result = resolveCharacter({
+      baseAbilities: buildWithMagicInitiate.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithMagicInitiate.choices,
+      levels: buildWithMagicInitiate.levels,
+      expandedFeats,
+    });
+    const featureChoicePending = result.pendingChoices.filter(
+      (c) => c.type === 'feature-choice' && c.source.origin === 'feat'
+    );
+    expect(featureChoicePending).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Single-pass safety invariant
 // ---------------------------------------------------------------------------
 // collectBundles expands feature-choice options in a single pass (not a fixpoint).

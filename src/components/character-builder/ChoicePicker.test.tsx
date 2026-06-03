@@ -235,6 +235,88 @@ describe('ChoicePicker bundle-choice', () => {
 });
 
 // ---------------------------------------------------------------------------
+// ChoicePicker — feat-choice branch
+// ---------------------------------------------------------------------------
+
+const HUMAN_SPECIES_SOURCE = { origin: 'species' as const, id: 'human' as const };
+
+const FEAT_CHOICE: PendingChoice & { type: 'feat-choice' } = {
+  type: 'feat-choice',
+  choiceKey: 'feat-choice:species:human:0' as ChoiceKey,
+  source: HUMAN_SPECIES_SOURCE,
+  from: ['alert', 'lucky', 'skilled'] as unknown as readonly import('@/lib/dnd-helpers').FeatId[],
+  category: 'origin',
+};
+
+describe('ChoicePicker feat-choice', () => {
+  it('renders one radio per feat option', () => {
+    render(<ChoicePicker choice={FEAT_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios).toHaveLength(3);
+  });
+
+  it('no radio is checked when currentDecision is undefined', () => {
+    render(<ChoicePicker choice={FEAT_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios.every((r) => !r.checked)).toBe(true);
+  });
+
+  it('clicking a feat radio calls onDecide with {type: feat-choice, featId}', () => {
+    const onDecide = vi.fn();
+    render(<ChoicePicker choice={FEAT_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    fireEvent.click(radios[0]);
+    expect(onDecide).toHaveBeenCalledWith(FEAT_CHOICE.choiceKey, {
+      type: 'feat-choice',
+      featId: 'alert',
+    });
+  });
+
+  it('selected radio reflects currentDecision.featId', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'lucky' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker choice={FEAT_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios[0].checked).toBe(false); // alert
+    expect(radios[1].checked).toBe(true); // lucky
+    expect(radios[2].checked).toBe(false); // skilled
+  });
+
+  it('Clear button does NOT appear when no feat is selected', () => {
+    render(<ChoicePicker choice={FEAT_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /clear/i })).toBeNull();
+  });
+
+  it('Clear button appears when a feat is selected', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'alert' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker choice={FEAT_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    expect(screen.getByRole('button', { name: /clear/i })).toBeTruthy();
+  });
+
+  it('clicking Clear calls onClear with the correct choiceKey', () => {
+    const onClear = vi.fn();
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'alert' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker choice={FEAT_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={onClear} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(onClear).toHaveBeenCalledWith(FEAT_CHOICE.choiceKey);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // ChoicePicker — feature-choice branch
 // ---------------------------------------------------------------------------
 

@@ -1,5 +1,38 @@
 import { createChoiceKey } from '@/types/choices';
 import type { FeatSource } from '@/types/sources';
+import type { ToolProficiencyId } from '@/lib/dnd-helpers';
+
+const ARTISAN_TOOL_IDS: readonly ToolProficiencyId[] = [
+  'smithstools',
+  'brewersupplies',
+  'masonstools',
+  'calligrapherstools',
+  'carpentertools',
+  'cartographerstools',
+  'cobblerstools',
+  'cooksutensils',
+  'glassblowerstools',
+  'jewelerstools',
+  'leatherworkerstools',
+  'painterstools',
+  'potterstools',
+  'tinkerstools',
+  'weaverstools',
+  'woodcarverstools',
+] as const;
+
+const MUSICAL_INSTRUMENT_IDS: readonly ToolProficiencyId[] = [
+  'bagpipes',
+  'drum',
+  'dulcimer',
+  'flute',
+  'lute',
+  'lyre',
+  'horn',
+  'panflute',
+  'shawm',
+  'viol',
+] as const;
 
 export const FEAT_SOURCES: readonly FeatSource[] = [
   // Origin feats — no level prerequisite, granted by backgrounds
@@ -7,24 +40,36 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     id: 'alert',
     category: 'origin',
     prerequisites: [],
+    // TODO(#162-followup): needs initiative-bonus grant type — deferred
     grants: [{ type: 'feature', feature: { id: 'feat-alert' } }],
   },
   {
     id: 'crafter',
     category: 'origin',
     prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-crafter' } }],
+    grants: [
+      { type: 'feature', feature: { id: 'feat-crafter' } },
+      {
+        type: 'proficiency-choice',
+        category: 'tool',
+        key: createChoiceKey('tool-choice', 'feat', 'crafter', 0),
+        count: 3,
+        from: ARTISAN_TOOL_IDS,
+      },
+    ],
   },
   {
     id: 'healer',
     category: 'origin',
     prerequisites: [],
+    // TODO(#162-followup): needs healerskit ToolProficiencyId + bonus-action heal grant type — deferred
     grants: [{ type: 'feature', feature: { id: 'feat-healer' } }],
   },
   {
     id: 'lucky',
     category: 'origin',
     prerequisites: [],
+    // TODO(#162-followup): needs resource-pool with max=proficiency-bonus mode — deferred
     grants: [{ type: 'feature', feature: { id: 'feat-lucky' } }],
   },
   {
@@ -40,31 +85,37 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
           {
             optionId: 'bard',
             featureId: 'feat-magic-initiate-bard',
+            // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
           {
             optionId: 'cleric',
             featureId: 'feat-magic-initiate-cleric',
+            // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
           {
             optionId: 'druid',
             featureId: 'feat-magic-initiate-druid',
+            // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
           {
             optionId: 'sorcerer',
             featureId: 'feat-magic-initiate-sorcerer',
+            // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
           {
             optionId: 'warlock',
             featureId: 'feat-magic-initiate-warlock',
+            // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
           {
             optionId: 'wizard',
             featureId: 'feat-magic-initiate-wizard',
+            // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
         ],
@@ -75,31 +126,53 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
     id: 'musician',
     category: 'origin',
     prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-musician' } }],
+    grants: [
+      { type: 'feature', feature: { id: 'feat-musician' } },
+      {
+        type: 'proficiency-choice',
+        category: 'tool',
+        key: createChoiceKey('tool-choice', 'feat', 'musician', 0),
+        count: 3,
+        from: MUSICAL_INSTRUMENT_IDS,
+      },
+    ],
   },
   {
     id: 'savage-attacker',
     category: 'origin',
     prerequisites: [],
+    // TODO(#162-followup): needs damage-reroll grant type — deferred
     grants: [{ type: 'feature', feature: { id: 'feat-savage-attacker' } }],
   },
   {
     id: 'skilled',
     category: 'origin',
     prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-skilled' } }],
+    grants: [
+      {
+        type: 'proficiency-choice',
+        category: 'skill',
+        key: createChoiceKey('skill-choice', 'feat', 'skilled', 0),
+        count: 3,
+        from: null,
+      },
+    ],
   },
   {
     id: 'tavern-brawler',
     category: 'origin',
     prerequisites: [],
+    // TODO(#162-followup): needs unarmed-die upgrade + grapple grant types — deferred
     grants: [{ type: 'feature', feature: { id: 'feat-tavern-brawler' } }],
   },
   {
     id: 'tough',
     category: 'origin',
     prerequisites: [],
-    grants: [{ type: 'feature', feature: { id: 'feat-tough' } }],
+    grants: [
+      { type: 'feature', feature: { id: 'feat-tough' } },
+      { type: 'hp-bonus', perLevel: 2 },
+    ],
   },
 
   // Fighting Style feats — grants must be kept manually in sync with FIGHTING_STYLE_SOURCES

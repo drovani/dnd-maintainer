@@ -35,6 +35,7 @@ const CHOICE_CATEGORIES = [
   'damage-choice',
   'bundle-choice',
   'lineage-choice',
+  'feat-choice',
   'feature-choice',
 ] as const;
 export type ChoiceCategory = (typeof CHOICE_CATEGORIES)[number];
@@ -102,6 +103,7 @@ export type ChoiceDecision =
       readonly slotPicks: Readonly<Record<string, string>>;
     }
   | { readonly type: 'lineage-choice'; readonly lineageId: string }
+  | { readonly type: 'feat-choice'; readonly featId: FeatId }
   | { readonly type: 'feature-choice'; readonly optionId: string };
 
 export interface BuildLevel {

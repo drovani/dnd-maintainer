@@ -129,7 +129,8 @@ export const LINEAGE_GRANTS_REGISTRY = {
 } as const satisfies Partial<Record<SpeciesId, Readonly<Partial<Record<string, readonly Grant[]>>>>>;
 
 export const SPECIES_SOURCES: readonly SpeciesSource[] = [
-  // Human (2024 PHB) — no ASIs; gains Heroic Inspiration (Resourceful), skill + language choice
+  // Human (2024 PHB) — no ASIs; gains Heroic Inspiration (Resourceful), skill + language choice,
+  // plus one origin feat of choice (Versatile feature).
   {
     id: 'human',
     defaultSize: 'medium',
@@ -152,6 +153,12 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
         from: null,
       },
       { type: 'feature', feature: { id: 'human-resourceful' } },
+      {
+        type: 'feat-choice',
+        key: createChoiceKey('feat-choice', 'species', 'human', 0),
+        from: null,
+        category: 'origin',
+      },
     ],
   },
   // Dwarf (2024 PHB) — 30 ft speed, 120 ft darkvision, Dwarven Toughness (+1 HP/level)

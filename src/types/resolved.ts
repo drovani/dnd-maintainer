@@ -7,9 +7,10 @@ import type {
   ToolProficiencyId,
   LanguageId,
   ClassId,
+  FeatId,
 } from '@/lib/dnd-helpers';
 import type { FeatureDef, DamageTypeId, HitDie, SpeedMode, ResourcePoolRegen } from '@/types/grants';
-import type { SourceTag } from '@/types/sources';
+import type { SourceTag, FeatCategory } from '@/types/sources';
 import type { ChoiceKey } from '@/types/choices';
 import type {
   DamageDice,
@@ -206,6 +207,13 @@ export type PendingChoice =
       readonly source: SourceTag;
       readonly speciesId: SpeciesId;
       readonly from: readonly string[];
+    }
+  | {
+      readonly type: 'feat-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly from: readonly FeatId[] | null;
+      readonly category: FeatCategory;
     }
   | {
       readonly type: 'feature-choice';

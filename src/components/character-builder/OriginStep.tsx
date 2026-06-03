@@ -42,6 +42,14 @@ export function OriginStep() {
     );
   }, [resolved]);
 
+  // Pending species-origin feat-choices (e.g. Human Versatile origin feat picker).
+  const speciesFeatChoices = useMemo<readonly Extract<PendingChoice, { type: 'feat-choice' }>[]>(() => {
+    return (resolved?.pendingChoices ?? []).filter(
+      (c): c is Extract<PendingChoice, { type: 'feat-choice' }> =>
+        c.type === 'feat-choice' && c.source.origin === 'species'
+    );
+  }, [resolved]);
+
   // Synthesize tool-choice and language-choice PendingChoices from background grants
   const backgroundToolChoiceGrants = collectGrantsByType(bundles, 'proficiency-choice').filter(
     (tg) => tg.source.origin === 'background' && tg.grant.category === 'tool'
@@ -72,6 +80,22 @@ export function OriginStep() {
           makeChoice={context.makeChoice}
           clearChoice={context.clearChoice}
         />
+      )}
+
+      {/* Species-origin feat-choice picker (e.g. Human Versatile origin feat) */}
+      {speciesFeatChoices.length > 0 && (
+        <div className="space-y-4">
+          {speciesFeatChoices.map((choice) => (
+            <div key={choice.choiceKey}>
+              <ChoicePicker
+                choice={choice}
+                currentDecision={build?.choices[choice.choiceKey]}
+                onDecide={(choiceKey, decision) => context.makeChoice(choiceKey, decision)}
+                onClear={(choiceKey) => context.clearChoice(choiceKey)}
+              />
+            </div>
+          ))}
+        </div>
       )}
 
       {!background && (

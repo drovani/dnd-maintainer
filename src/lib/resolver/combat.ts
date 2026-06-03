@@ -30,6 +30,12 @@ export function resolveHp(
     max += value + conModifier;
   }
 
+  // Apply flat per-level HP bonuses (e.g. Tough feat grants +2 per level)
+  const hpBonusGrants = collectGrantsByType(bundles, 'hp-bonus');
+  for (const { grant } of hpBonusGrants) {
+    max += grant.perLevel * level;
+  }
+
   return { max };
 }
 
