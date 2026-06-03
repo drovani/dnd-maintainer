@@ -2590,7 +2590,9 @@ describe('Circle of the Land terrain feature-choice integration', () => {
         [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'arid' },
       },
     };
-    const { bundles } = collectBundles(build);
+    const { bundles, warnings } = collectBundles(build);
+    // The subclass-origin feature-choice must NOT produce an "invisible choice" warning
+    expect(warnings).toEqual([]);
     const result = resolveCharacter({
       baseAbilities: build.baseAbilities,
       level: 3,
@@ -2634,6 +2636,56 @@ describe('Circle of the Land terrain feature-choice integration', () => {
     expect(alwaysPrepared).not.toContain('ray-of-frost');
     expect(result.spellcasting!.cantrips).toContain('ray-of-frost');
   });
+
+  it.each([
+    {
+      optionId: 'arid',
+      cantrip: 'fire-bolt',
+      leveledSpells: ['burning-hands', 'blur', 'fireball', 'blight', 'wall-of-stone'],
+    },
+    {
+      optionId: 'polar',
+      cantrip: 'ray-of-frost',
+      leveledSpells: ['fog-cloud', 'hold-person', 'sleet-storm', 'ice-storm', 'cone-of-cold'],
+    },
+    {
+      optionId: 'temperate',
+      cantrip: 'shocking-grasp',
+      leveledSpells: ['sleep', 'misty-step', 'lightning-bolt', 'freedom-of-movement', 'tree-stride'],
+    },
+    {
+      optionId: 'tropical',
+      cantrip: 'acid-splash',
+      leveledSpells: ['ray-of-sickness', 'web', 'stinking-cloud', 'polymorph', 'insect-plague'],
+    },
+  ])(
+    '$optionId terrain: cantrip in cantrips[], leveled spells in alwaysPreparedSpells',
+    ({ optionId, cantrip, leveledSpells }) => {
+      const build: CharacterBuild = {
+        ...baseBuild,
+        choices: {
+          ...baseBuild.choices,
+          [terrainChoiceKey]: { type: 'feature-choice' as const, optionId },
+        },
+      };
+      const { bundles } = collectBundles(build);
+      const result = resolveCharacter({
+        baseAbilities: build.baseAbilities,
+        level: 3,
+        bundles,
+        choices: build.choices,
+      });
+      expect(result.spellcasting).not.toBeNull();
+      const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+      for (const spellId of leveledSpells) {
+        expect(alwaysPrepared, `${optionId} leveled spell ${spellId}`).toContain(spellId);
+      }
+      expect(alwaysPrepared, `${optionId} cantrip ${cantrip} must not be in alwaysPreparedSpells`).not.toContain(
+        cantrip
+      );
+      expect(result.spellcasting!.cantrips, `${optionId} cantrip ${cantrip} must be in cantrips[]`).toContain(cantrip);
+    }
+  );
 
   it('does not emit a pending terrain choice once a valid option is selected', () => {
     const build: CharacterBuild = {

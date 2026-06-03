@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { FeatSource } from '@/types/sources';
+import type { FeatSource, ItemSource } from '@/types/sources';
 
 const mockFeatSources = vi.hoisted<{ value: readonly FeatSource[] | null }>(() => ({ value: null }));
 
@@ -8,6 +8,18 @@ vi.mock('@/lib/sources/feats', async (importActual) => {
   return {
     get FEAT_SOURCES() {
       return mockFeatSources.value ?? actual.FEAT_SOURCES;
+    },
+  };
+});
+
+const mockItemSources = vi.hoisted<{ value: readonly ItemSource[] | null }>(() => ({ value: null }));
+
+vi.mock('@/lib/sources/items', async (importActual) => {
+  const actual = await importActual<typeof import('@/lib/sources/items')>();
+  return {
+    ...actual,
+    get ITEM_SOURCES() {
+      return mockItemSources.value ?? actual.ITEM_SOURCES;
     },
   };
 });
@@ -1238,5 +1250,48 @@ describe('Wildheart Barbarian innate spells e2e', () => {
     });
     expect(result.spellcasting?.alwaysPreparedSpells).toContain('speak-with-animals');
     expect(result.spellcasting?.alwaysPreparedSpells).toContain('commune-with-nature');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Warning suppression boundary — item-origin feature-choice still warns
+// ---------------------------------------------------------------------------
+
+describe('feature-choice warning suppression boundary', () => {
+  it('item-origin feature-choice emits the "invisible choice" warning (suppression did not over-broaden)', () => {
+    // 'item' is not a ChoiceOrigin, so we cast the key string — the runtime format is the same.
+    const itemFeatureChoiceKey = 'feature-choice:item:test-magic-item:0' as ChoiceKey;
+    mockItemSources.value = [
+      {
+        id: 'test-magic-item',
+        requiresAttunement: false,
+        grants: [
+          {
+            type: 'feature-choice',
+            key: itemFeatureChoiceKey,
+            options: [
+              { optionId: 'option-a', featureId: 'test-feature-a', grants: [] },
+              { optionId: 'option-b', featureId: 'test-feature-b', grants: [] },
+            ],
+          },
+        ],
+      },
+    ];
+    try {
+      const build: CharacterBuild = {
+        speciesId: 'human' as SpeciesId,
+        backgroundId: null,
+        baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        abilityMethod: 'standard-array',
+        levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+        choices: {},
+        feats: [],
+        activeItems: ['test-magic-item'],
+      };
+      const { warnings } = collectBundles(build);
+      expect(warnings.some((w) => w.includes('non-class origin') && w.includes('item'))).toBe(true);
+    } finally {
+      mockItemSources.value = null;
+    }
   });
 });

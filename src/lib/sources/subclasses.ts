@@ -362,9 +362,6 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 3,
         grants: [
           { type: 'feature', feature: { id: 'circleland-lands-aid' } },
-          // Bonus Cantrip: gain one additional Druid cantrip of choice; modeled as inert feature grant
-          // TODO #93: replace with a cantrip-choice spell grant when spell id system supports it
-          { type: 'feature', feature: { id: 'circleland-bonus-cantrip' } },
           // Land type choice: Arid/Polar/Temperate/Tropical, each granting its circle spells as
           // always-prepared (leveled) plus a terrain cantrip (alwaysPrepared:false → routes to cantrips[]).
           // Level-gating (L3/5/7/9 tiers) is a known simplification: all spells applied at L3.

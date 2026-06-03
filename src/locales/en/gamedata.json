@@ -1279,14 +1279,6 @@
       "name": "Land's Aid",
       "description": "As a Magic action, expend a use of Channel Nature to create a 10-foot radius bloom of vegetation centered on a point within 60 feet. Creatures of your choice within the bloom regain 2d6 Hit Points; other creatures make a CON save or take 2d6 Necrotic damage (save halves). The bloom persists until the start of your next turn."
     },
-    "circleland-bonus-cantrip": {
-      "name": "Bonus Cantrip",
-      "description": "You learn one additional Druid cantrip of your choice."
-    },
-    "circleland-bonus-spells": {
-      "name": "Land's Bonus Spells",
-      "description": "Whenever you finish a Long Rest, choose one type of land — Arid, Polar, Temperate, or Tropical — and gain that land's prepared spells in addition to your usual prepared spells. The list expands at Druid levels 3, 5, 7, and 9. (Per-rest Land selection and associated spells are modeled as a descriptive feature pending gameplay-state tracking and spell-id catalog support.)"
-    },
     "circleland-natural-recovery": {
       "name": "Natural Recovery",
       "description": "During a Short Rest, you can recover expended spell slots with a combined level equal to half your Druid level (rounded up). You can't recover a slot of 6th level or higher. You can use this feature once per Long Rest."
