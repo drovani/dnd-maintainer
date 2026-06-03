@@ -47,8 +47,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // TODO #93: model as spell grant when spell id system supports 'speak-with-animals'
-          { type: 'feature', feature: { id: 'wildheart-animal-speaker' } },
+          { type: 'spell', spellId: 'speak-with-animals', alwaysPrepared: true },
           // Beast Spirit (Bear/Eagle/Elk/Tiger/Wolf) is a free-form choice; no pending-choice
           // mechanism exists for arbitrary string options — modeled as inert feature grant for now
           { type: 'feature', feature: { id: 'wildheart-rage-of-the-wilds' } },
@@ -63,10 +62,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       },
       {
         classLevel: 10,
-        grants: [
-          // TODO #93: model as spell grant when spell id system supports 'commune-with-nature'
-          { type: 'feature', feature: { id: 'wildheart-nature-speaker' } },
-        ],
+        grants: [{ type: 'spell', spellId: 'commune-with-nature', alwaysPrepared: true }],
       },
     ] satisfies readonly SubclassFeature[],
   },
