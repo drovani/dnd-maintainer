@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { computePurchaseTotal, getStartingGold, STARTING_GOLD_BY_CLASS } from '@/lib/gold-equipment';
+import {
+  computePurchaseTotal,
+  getStartingGold,
+  STARTING_GOLD_BY_CLASS,
+  collectClassBundleKeys,
+} from '@/lib/gold-equipment';
 import type { ClassId } from '@/lib/dnd-helpers';
+import type { GrantBundle } from '@/types/sources';
+import type { ChoiceKey } from '@/types/choices';
 
 describe('computePurchaseTotal', () => {
   it('returns 0 for an empty list', () => {
@@ -108,5 +115,86 @@ describe('STARTING_GOLD_BY_CLASS', () => {
       expect(typeof gp).toBe('number');
       expect(gp).toBeGreaterThanOrEqual(0);
     }
+  });
+});
+
+describe('collectClassBundleKeys', () => {
+  it('returns empty array for empty bundles', () => {
+    expect(collectClassBundleKeys([])).toEqual([]);
+  });
+
+  it('returns only bundle-choice keys with source.origin === class', () => {
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [
+          {
+            type: 'bundle-choice',
+            key: 'bundle-choice:class:fighter:0' as ChoiceKey,
+            category: 'loadout',
+            bundleIds: ['fighter-chainmail', 'fighter-archer-kit'],
+          },
+        ],
+      },
+    ];
+
+    const keys = collectClassBundleKeys(bundles);
+    expect(keys).toEqual(['bundle-choice:class:fighter:0']);
+  });
+
+  it('excludes bundle-choice keys with source.origin === background', () => {
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [
+          {
+            type: 'bundle-choice',
+            key: 'bundle-choice:background:soldier:0' as ChoiceKey,
+            category: 'loadout',
+            bundleIds: ['soldier-kit'],
+          },
+        ],
+      },
+    ];
+
+    expect(collectClassBundleKeys(bundles)).toEqual([]);
+  });
+
+  it('collects multiple class bundle-choice keys and skips non-bundle-choice grants', () => {
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [
+          {
+            type: 'bundle-choice',
+            key: 'bundle-choice:class:fighter:0' as ChoiceKey,
+            category: 'loadout',
+            bundleIds: ['fighter-chainmail'],
+          },
+          {
+            type: 'bundle-choice',
+            key: 'bundle-choice:class:fighter:1' as ChoiceKey,
+            category: 'melee-weapon',
+            bundleIds: ['martial-weapon-and-shield'],
+          },
+          // Non-bundle-choice grant — must be excluded
+          { type: 'proficiency', category: 'armor', id: 'heavy' },
+        ],
+      },
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [
+          {
+            type: 'bundle-choice',
+            key: 'bundle-choice:background:soldier:0' as ChoiceKey,
+            category: 'loadout',
+            bundleIds: ['soldier-kit'],
+          },
+        ],
+      },
+    ];
+
+    const keys = collectClassBundleKeys(bundles);
+    expect(keys).toEqual(['bundle-choice:class:fighter:0', 'bundle-choice:class:fighter:1']);
   });
 });

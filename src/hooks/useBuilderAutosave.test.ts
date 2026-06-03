@@ -251,6 +251,69 @@ describe('useBuilderAutosave', () => {
         await waitFor(() => expect(result.current.saveStatus).toBe<SaveStatus>('error'));
       });
     });
+
+    it('inserts purchasedItems into character_items when resolved is non-null and no existing items', async () => {
+      // Minimal ResolvedCharacter — only the fields saveDraft + buildMaterializedItemRows read.
+      const minimalResolved = {
+        hitPoints: { max: 10 },
+        armorClass: { effective: 16, calculations: [], bonuses: [] },
+        speed: { walk: { value: 30, sources: [] } },
+        proficiencyBonus: 2,
+        weaponMasteries: [],
+        equipment: [],
+      };
+
+      const payloadWithPurchase: AutosavePayload = {
+        ...basePayload,
+        resolved: minimalResolved as unknown as import('@/types/resolved').ResolvedCharacter,
+        purchasedItems: [{ itemId: 'longsword', quantity: 2, costGp: 15 }],
+      };
+
+      // Call sequence for finalize with rows=[]:
+      // 1: characters insert  → { id: 'char-new' }
+      // 2: build_levels cleanup update (always runs, even with empty rows)
+      // 3: character_items select (idempotency check) → []
+      // 4: character_items insert (our target assertion)
+      // 5: characters status update → { id: 'char-new', slug: 'hero-draft' }
+      let callIndex = 0;
+      supabase.then = (resolve, reject) => {
+        callIndex++;
+        if (callIndex === 1) {
+          return Promise.resolve({ data: { id: 'char-new' }, error: null }).then(resolve, reject);
+        }
+        if (callIndex === 2) {
+          // build_levels cleanup update
+          return Promise.resolve({ data: null, error: null }).then(resolve, reject);
+        }
+        if (callIndex === 3) {
+          // character_items select → empty (no existing items)
+          return Promise.resolve({ data: [], error: null }).then(resolve, reject);
+        }
+        if (callIndex === 4) {
+          // character_items insert — succeeds
+          return Promise.resolve({ data: null, error: null }).then(resolve, reject);
+        }
+        // call 5: status update → slug
+        return Promise.resolve({ data: { id: 'char-new', slug: 'hero-draft' }, error: null }).then(resolve, reject);
+      };
+
+      const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() });
+
+      await act(async () => {
+        await result.current.finalize(payloadWithPurchase);
+      });
+
+      // The insert must include a row for the purchased longsword
+      expect(supabase.insert).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            item_id: 'longsword',
+            quantity: 2,
+            source: { origin: 'loot', description: 'buy-with-gold' },
+          }),
+        ])
+      );
+    });
   });
 
   describe('build-level upsert', () => {

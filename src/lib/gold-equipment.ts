@@ -1,22 +1,22 @@
 import type { ClassId } from '@/lib/dnd-helpers';
+import type { ChoiceKey } from '@/types/choices';
+import { collectGrantsByType } from '@/lib/resolver/helpers';
+import type { GrantBundle } from '@/types/sources';
 
-// TODO(verify): confirm 2024 PHB starting-gold GP per class.
-// These are the fixed GP alternative to the class starting-equipment package.
-// Source: 2024 PHB Starting Equipment tables per class (one-time purchase alternative).
-// Reviewer: please cross-check against the "Starting Equipment" entry in each class chapter.
+// 2024 PHB starting-equipment Option B (spend-gold) values.
 export const STARTING_GOLD_BY_CLASS: Readonly<Record<ClassId, number>> = {
-  barbarian: 50,
-  bard: 125,
+  barbarian: 75,
+  bard: 90,
   cleric: 110,
   druid: 50,
-  fighter: 175,
-  monk: 25,
+  fighter: 155,
+  monk: 50,
   paladin: 150,
-  ranger: 125,
+  ranger: 150,
   rogue: 100,
-  sorcerer: 75,
+  sorcerer: 50,
   warlock: 100,
-  wizard: 75,
+  wizard: 55,
 };
 
 /**
@@ -39,4 +39,15 @@ export function computePurchaseTotal(items: readonly { costGp: number; quantity:
     totalCopper += Math.round(item.costGp * 100) * item.quantity;
   }
   return Math.round(totalCopper) / 100;
+}
+
+/**
+ * Collects all `bundle-choice` ChoiceKeys that originate from a class source.
+ * Used when switching to buy-with-gold mode to clear class equipment selections
+ * without touching background-origin bundle choices.
+ */
+export function collectClassBundleKeys(bundles: readonly GrantBundle[]): readonly ChoiceKey[] {
+  return collectGrantsByType(bundles, 'bundle-choice')
+    .filter((tg) => tg.source.origin === 'class')
+    .map((tg) => tg.grant.key);
 }

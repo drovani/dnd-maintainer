@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { DND_SPECIES, DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
-import { collectGrantsByType } from '@/lib/resolver/helpers';
+import { collectClassBundleKeys } from '@/lib/gold-equipment';
 import type { StepType } from '@/types/character-builder';
 
 const logger = getLogger('character-builder');
@@ -257,10 +257,7 @@ function CharacterBuilderInner() {
     // When switching away from starting-equipment, clear all class-origin bundle choices.
     // Background-origin equipment choices are intentionally left untouched.
     if (mode === 'buy-with-gold') {
-      const classBundleKeys = collectGrantsByType(bundles, 'bundle-choice')
-        .filter((tg) => tg.source.origin === 'class')
-        .map((tg) => tg.grant.key);
-      for (const key of classBundleKeys) {
+      for (const key of collectClassBundleKeys(bundles)) {
         context.clearChoice(key);
       }
     }

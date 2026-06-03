@@ -196,8 +196,20 @@ export function useBuilderAutosave(existingCharacterId?: string) {
     async (payload: AutosavePayload): Promise<string> => {
       const id = await saveDraft(payload);
       try {
-        // Materialize starting equipment on first finalize only (idempotency guard)
-        if (payload.resolved) {
+        // Materialize starting equipment and purchased items on first finalize only (idempotency guard).
+        // Map buy-with-gold purchases into character_items rows.
+        // costGp is UI-only; not stored as a column — only itemId, quantity, and source are persisted.
+        const purchasedRows: TablesInsert<'character_items'>[] = (payload.purchasedItems ?? []).map((p) => ({
+          character_id: id,
+          item_id: p.itemId,
+          quantity: p.quantity,
+          equipped: false,
+          attuned: false,
+          source: { origin: 'loot', description: 'buy-with-gold' } as TablesInsert<'character_items'>['source'],
+        }));
+        const startingRows = payload.resolved ? buildMaterializedItemRows(payload.resolved, id) : [];
+
+        if (startingRows.length > 0 || purchasedRows.length > 0) {
           const { data: existingItems, error: checkError } = await supabase
             .from('character_items')
             .select('id')
@@ -207,17 +219,6 @@ export function useBuilderAutosave(existingCharacterId?: string) {
           if (checkError) throw checkError;
 
           if (existingItems.length === 0) {
-            const startingRows = buildMaterializedItemRows(payload.resolved, id);
-            // Map buy-with-gold purchases into character_items rows.
-            // costGp is UI-only; not stored as a column — only itemId, quantity, and source are persisted.
-            const purchasedRows: TablesInsert<'character_items'>[] = (payload.purchasedItems ?? []).map((p) => ({
-              character_id: id,
-              item_id: p.itemId,
-              quantity: p.quantity,
-              equipped: false,
-              attuned: false,
-              source: { origin: 'loot', description: 'buy-with-gold' } as TablesInsert<'character_items'>['source'],
-            }));
             const allRows = [...startingRows, ...purchasedRows];
             if (allRows.length > 0) {
               const { error: insertError } = await supabase

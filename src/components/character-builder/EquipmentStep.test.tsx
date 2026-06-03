@@ -5,7 +5,7 @@ import type { EquipmentStepEquipmentProps } from '@/components/character-builder
 import type { ResolvedCharacter } from '@/types/resolved';
 import type { ChoiceKey } from '@/types/choices';
 import type { GrantBundle } from '@/types/sources';
-import { requireItemDef } from '@/lib/sources/items';
+import { requireItemDef, WEAPON_CATALOG } from '@/lib/sources/items';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -302,7 +302,7 @@ describe('EquipmentStep — buy-with-gold mode', () => {
     expect(screen.queryByText('classLoadoutTitle')).toBeNull();
   });
 
-  it('calls onPurchase when Add button is clicked for a weapon', () => {
+  it('calls onPurchase with the first weapon catalog item id and costGp when Add button is clicked', () => {
     const onPurchase = vi.fn();
     render(
       <EquipmentStep
@@ -313,11 +313,11 @@ describe('EquipmentStep — buy-with-gold mode', () => {
       />
     );
 
-    // Click the first "Add" button (first weapon in catalog)
+    // Click the first "Add" button — catalog renders WEAPON_CATALOG first, in array order
     const addButtons = screen.getAllByText('addItem');
     fireEvent.click(addButtons[0]);
 
-    expect(onPurchase).toHaveBeenCalledWith(expect.any(String), expect.any(Number));
+    expect(onPurchase).toHaveBeenCalledWith(WEAPON_CATALOG[0].id, WEAPON_CATALOG[0].costGp);
   });
 
   it('shows purchased items list when purchasedItems is non-empty', () => {
@@ -364,8 +364,12 @@ describe('EquipmentStep — buy-with-gold mode', () => {
       />
     );
 
-    // The currency tracker key is 'currencyTracker' — last segment of the key
+    // The currency tracker label renders via i18n
     expect(screen.getByText('currencyTracker')).toBeTruthy();
+    // quantity× renders as a real number — confirms the purchased item row is present
+    expect(screen.getByText('1×')).toBeTruthy();
+    // spentGp (15) is less than startingGoldTotal (175) — overBudget warning must NOT appear
+    expect(screen.queryByText('overBudgetWarning')).toBeNull();
   });
 
   it('calls onGoldChange with class gold amount when "Use class gold" button is clicked', () => {
@@ -383,6 +387,6 @@ describe('EquipmentStep — buy-with-gold mode', () => {
     const useClassGoldBtn = screen.getByText('useClassGold');
     fireEvent.click(useClassGoldBtn);
 
-    expect(onGoldChange).toHaveBeenCalledWith(175); // fighter starting gold
+    expect(onGoldChange).toHaveBeenCalledWith(155); // fighter starting gold (2024 PHB)
   });
 });
