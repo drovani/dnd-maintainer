@@ -188,7 +188,7 @@ function CharacterSheetInner({
   const handleClone = () => {
     const name = cloneName.trim() || tc('characterSheet.actions.copyOfName', { name: character.name });
     cloneMutation.mutate(
-      { sourceCharacterId: characterId, newName: name, campaignId: character.campaign_id },
+      { sourceCharacterId: characterId, newName: name },
       {
         onSuccess: (cloned) => {
           setConfirmAction(null);

@@ -180,7 +180,6 @@ describe('useCharacterMutations', () => {
       result.current.clone.mutate({
         sourceCharacterId: 'char-1',
         newName: 'Copy of Aria Silverwind',
-        campaignId: 'camp-1',
       });
 
       await waitFor(() => expect(result.current.clone.isSuccess).toBe(true));
@@ -193,45 +192,53 @@ describe('useCharacterMutations', () => {
       expect(payload).not.toHaveProperty('id');
       expect(payload).not.toHaveProperty('created_at');
       expect(payload).not.toHaveProperty('updated_at');
-      // Duplicate semantics: type/status/campaign carried over verbatim.
+      // Duplicate semantics: type/status/campaign carried over verbatim from the source.
       expect(payload.character_type).toBe('pc');
       expect(payload.status).toBe('ready');
       expect(payload.campaign_id).toBe('camp-1');
+      // Build levels are fetched excluding soft-deleted rows.
+      expect(supabase.is).toHaveBeenCalledWith('deleted_at', null);
     });
 
     it('skips child inserts when the source has no build levels or items', async () => {
       mockQueryResult.data = baseCharacter;
 
       const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
-      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy', campaignId: 'camp-1' });
+      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy' });
 
       await waitFor(() => expect(result.current.clone.isSuccess).toBe(true));
       // Only the character row is inserted (no child-table inserts).
       expect(supabase.insert).toHaveBeenCalledTimes(1);
     });
 
-    it('inserts child build levels and items when the source has them', async () => {
+    it('inserts child build levels and items (with DB columns dropped) when the source has them', async () => {
       // Array data => the child fetches report length > 0, exercising both child-insert branches.
       mockQueryResult.data = [{ id: 'row-1', character_id: 'char-1', sequence: 0, choices: {} }];
 
       const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
-      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy', campaignId: 'camp-1' });
+      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy' });
 
       await waitFor(() => expect(result.current.clone.isSuccess).toBe(true));
       // character + character_build_levels + character_items.
       expect(supabase.insert).toHaveBeenCalledTimes(3);
       expect(supabase.from).toHaveBeenCalledWith('character_build_levels');
       expect(supabase.from).toHaveBeenCalledWith('character_items');
+      // Child rows drop their own id/created_at before re-insert.
+      const levelRows = vi.mocked(supabase.insert).mock.calls[1][0] as Record<string, unknown>[];
+      expect(levelRows[0]).not.toHaveProperty('id');
+      expect(levelRows[0]).not.toHaveProperty('created_at');
     });
 
-    it('sets error state when the character insert fails', async () => {
+    it('propagates the error when the source fetch fails (insert never attempted)', async () => {
       mockQueryResult.data = baseCharacter;
-      mockQueryResult.error = { message: 'Clone failed' };
+      mockQueryResult.error = { message: 'Source fetch failed' };
 
       const { result } = renderHook(() => useCharacterMutations(), { wrapper: createWrapper() });
-      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy', campaignId: 'camp-1' });
+      result.current.clone.mutate({ sourceCharacterId: 'char-1', newName: 'Copy' });
 
       await waitFor(() => expect(result.current.clone.isError).toBe(true));
+      // The first awaited query (source select) throws, so no insert is attempted.
+      expect(supabase.insert).not.toHaveBeenCalled();
     });
   });
 });

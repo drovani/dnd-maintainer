@@ -110,14 +110,7 @@ export function useCharacterMutations() {
   // timestamps. Supabase JS has no client-side transaction, so on any child-insert failure
   // we compensate by deleting the new character (ON DELETE CASCADE removes partial children).
   const clone = useMutation({
-    mutationFn: async ({
-      sourceCharacterId,
-      newName,
-    }: {
-      sourceCharacterId: string;
-      newName: string;
-      campaignId: string;
-    }) => {
+    mutationFn: async ({ sourceCharacterId, newName }: { sourceCharacterId: string; newName: string }) => {
       const { data: source, error: sourceError } = await supabase
         .from('characters')
         .select('*')
@@ -187,7 +180,16 @@ export function useCharacterMutations() {
         }
       } catch (childError) {
         // Roll back the orphaned new character (cascade clears any partial children).
-        await supabase.from('characters').delete().eq('id', newCharacter.id);
+        // supabase-js resolves (doesn't reject) on a failed delete, so surface a rollback
+        // failure explicitly — otherwise a partially-cloned character persists silently.
+        const { error: rollbackError } = await supabase.from('characters').delete().eq('id', newCharacter.id);
+        if (rollbackError) {
+          const original = childError instanceof Error ? childError.message : String(childError);
+          throw new Error(
+            `Character clone failed and rollback also failed; an orphaned character (${newCharacter.id}) ` +
+              `may remain. Original error: ${original}; rollback error: ${rollbackError.message}`
+          );
+        }
         throw childError;
       }
 
