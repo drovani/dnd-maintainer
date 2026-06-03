@@ -11,6 +11,7 @@ import {
   EquipmentStep,
   OriginStep,
 } from '@/components/character-builder';
+import type { EquipmentStepEquipmentProps } from '@/components/character-builder/EquipmentStep';
 import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterContext';
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave';
 import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
@@ -25,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { DND_SPECIES, DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
+import { collectGrantsByType } from '@/lib/resolver/helpers';
 import type { StepType } from '@/types/character-builder';
 
 const logger = getLogger('character-builder');
@@ -39,7 +41,11 @@ const STEPS: { id: StepType }[] = [
   { id: 'backstory' },
 ];
 
-function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactElement {
+function renderStep(
+  step: StepType,
+  goToStep: (s: StepType) => void,
+  equipmentProps: EquipmentStepEquipmentProps
+): ReactElement {
   switch (step) {
     case 'basics':
       return <BasicsStep onRequestAdvance={goToStep} />;
@@ -52,7 +58,7 @@ function renderStep(step: StepType, goToStep: (s: StepType) => void): ReactEleme
     case 'details':
       return <DetailsStep />;
     case 'equipment':
-      return <EquipmentStep />;
+      return <EquipmentStep {...equipmentProps} />;
     case 'backstory':
       return <BackstoryStep />;
     default: {
@@ -127,8 +133,15 @@ function CharacterBuilderInner() {
   const [isAbandoning, setIsAbandoning] = useState(false);
   const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } = useBuilderAutosave();
 
+  // Buy-with-gold equipment state (ephemeral — not persisted in draft saves, only materialized at finalize)
+  type EquipmentMode = 'starting-equipment' | 'buy-with-gold';
+  type PurchasedItem = { itemId: string; quantity: number; costGp: number };
+  const [equipmentMode, setEquipmentMode] = useState<EquipmentMode>('starting-equipment');
+  const [startingGoldTotal, setStartingGoldTotal] = useState<number>(0);
+  const [purchasedItems, setPurchasedItems] = useState<readonly PurchasedItem[]>([]);
+
   const context = useCharacterContext();
-  const { character, rows, resolved, buildError, buildWarnings, isDirty, markSaved } = context;
+  const { character, rows, resolved, buildError, buildWarnings, isDirty, markSaved, bundles } = context;
 
   usePageTitle(t('characterBuilder.title'));
 
@@ -237,12 +250,62 @@ function CharacterBuilderInner() {
     }
   };
 
+  // Equipment mode handlers
+  const handleModeChange = (mode: EquipmentMode) => {
+    setEquipmentMode(mode);
+    setPurchasedItems([]);
+    // When switching away from starting-equipment, clear all class-origin bundle choices.
+    // Background-origin equipment choices are intentionally left untouched.
+    if (mode === 'buy-with-gold') {
+      const classBundleKeys = collectGrantsByType(bundles, 'bundle-choice')
+        .filter((tg) => tg.source.origin === 'class')
+        .map((tg) => tg.grant.key);
+      for (const key of classBundleKeys) {
+        context.clearChoice(key);
+      }
+    }
+  };
+
+  const handleGoldChange = (n: number) => {
+    setStartingGoldTotal(n);
+  };
+
+  const handlePurchase = (itemId: string, costGp: number) => {
+    setPurchasedItems((prev) => {
+      const existing = prev.find((p) => p.itemId === itemId);
+      if (existing) {
+        return prev.map((p) => (p.itemId === itemId ? { ...p, quantity: p.quantity + 1 } : p));
+      }
+      return [...prev, { itemId, quantity: 1, costGp }];
+    });
+  };
+
+  const handleRemovePurchase = (itemId: string) => {
+    setPurchasedItems((prev) => prev.filter((p) => p.itemId !== itemId));
+  };
+
+  const equipmentProps: EquipmentStepEquipmentProps = {
+    equipmentMode,
+    startingGoldTotal,
+    purchasedItems,
+    classId: character.class,
+    onModeChange: handleModeChange,
+    onGoldChange: handleGoldChange,
+    onPurchase: handlePurchase,
+    onRemovePurchase: handleRemovePurchase,
+  };
+
   const handleFinalize = async () => {
     if (!hasRequiredFields) return;
     setIsFinalizing(true);
     setFinalizeError(null);
     try {
-      const payload: AutosavePayload = { character, rows, resolved };
+      const payload: AutosavePayload = {
+        character,
+        rows,
+        resolved,
+        purchasedItems: equipmentMode === 'buy-with-gold' ? purchasedItems : [],
+      };
       const slug = await finalize(payload);
       navigate(`/campaign/${campaignSlug}/character/${slug}`);
     } catch (err) {
@@ -319,7 +382,7 @@ function CharacterBuilderInner() {
         <Card className="mb-8">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold mb-6">{t(`characterBuilder.steps.${STEPS[currentStepIndex].id}`)}</h2>
-            {renderStep(currentStep, goToStep)}
+            {renderStep(currentStep, goToStep, equipmentProps)}
           </CardContent>
         </Card>
 

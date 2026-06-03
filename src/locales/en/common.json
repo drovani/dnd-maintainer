@@ -348,7 +348,24 @@
         "ranged-weapon": "Ranged Weapon",
         "pack": "Pack",
         "gear": "Gear"
-      }
+      },
+      "modeToggleLabel": "Equipment mode",
+      "modeStartingEquipment": "Starting Equipment",
+      "modeBuyWithGold": "Buy with Gold",
+      "startingGoldTitle": "Starting Gold",
+      "useClassGold": "Use class gold ({{gp}} gp)",
+      "goldOverrideLabel": "Starting gold amount",
+      "gpUnit": "gp",
+      "currencyTracker": "Spent: {{spent}} gp / Starting: {{starting}} gp",
+      "overBudgetWarning": "You have spent more than your starting gold.",
+      "purchasedItemsTitle": "Purchased Items",
+      "itemCost": "{{gp}} gp",
+      "removeItem": "Remove {{name}}",
+      "addItem": "Add",
+      "catalogWeapons": "Weapons",
+      "catalogArmor": "Armor",
+      "catalogGear": "Adventuring Gear",
+      "catalogPacks": "Packs"
     },
     "errors": {
       "noCampaignId": "Campaign ID is required to create a character.",

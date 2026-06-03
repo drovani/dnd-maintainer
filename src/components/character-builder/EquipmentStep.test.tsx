@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EquipmentStep } from '@/components/character-builder/EquipmentStep';
+import type { EquipmentStepEquipmentProps } from '@/components/character-builder/EquipmentStep';
 import type { ResolvedCharacter } from '@/types/resolved';
 import type { ChoiceKey } from '@/types/choices';
 import type { GrantBundle } from '@/types/sources';
@@ -33,6 +34,24 @@ let mockContextValue: {
 vi.mock('@/hooks/useCharacterContext', () => ({
   useCharacterContext: () => mockContextValue,
 }));
+
+// ---------------------------------------------------------------------------
+// Default equipment props factory
+// ---------------------------------------------------------------------------
+
+function makeEquipmentProps(overrides: Partial<EquipmentStepEquipmentProps> = {}): EquipmentStepEquipmentProps {
+  return {
+    equipmentMode: 'starting-equipment',
+    startingGoldTotal: 0,
+    purchasedItems: [],
+    classId: null,
+    onModeChange: vi.fn(),
+    onGoldChange: vi.fn(),
+    onPurchase: vi.fn(),
+    onRemovePurchase: vi.fn(),
+    ...overrides,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -91,7 +110,7 @@ describe('EquipmentStep — two-column layout', () => {
   });
 
   it('renders both Class Equipment Loadout and Purchase Equipment section headers', () => {
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     expect(screen.getByText('classLoadoutTitle')).toBeTruthy();
     expect(screen.getByText('purchaseTitle')).toBeTruthy();
@@ -99,7 +118,7 @@ describe('EquipmentStep — two-column layout', () => {
   });
 
   it('always renders the Equipment Summary panel in the right column', () => {
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     expect(screen.getByText('summary')).toBeTruthy();
     // Empty-state message when no equipment is materialized yet
@@ -109,7 +128,7 @@ describe('EquipmentStep — two-column layout', () => {
   it('renders class bundle-choice grants as ChoicePicker options (from bundles, not pendingChoices)', () => {
     mockContextValue.bundles = [makeLoadoutBundle()];
 
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     const radios = screen.getAllByRole('radio');
     expect(radios).toHaveLength(2);
@@ -138,7 +157,7 @@ describe('EquipmentStep — two-column layout', () => {
       },
     ]) as ResolvedCharacter;
 
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     // Both radios must still render so the user can switch their pick
     const radios = screen.getAllByRole('radio') as HTMLInputElement[];
@@ -152,7 +171,7 @@ describe('EquipmentStep — two-column layout', () => {
     // Supply melee first, loadout second — the step should still render loadout first
     mockContextValue.bundles = [makeMeleeBundle(), makeLoadoutBundle()];
 
-    const { container } = render(<EquipmentStep />);
+    const { container } = render(<EquipmentStep {...makeEquipmentProps()} />);
 
     const radios = Array.from(container.querySelectorAll('input[type="radio"]'));
     const firstName = radios[0]?.getAttribute('name') ?? '';
@@ -162,7 +181,7 @@ describe('EquipmentStep — two-column layout', () => {
   it('shows coming-soon text when no class bundle-choice grants exist', () => {
     mockContextValue.bundles = [];
 
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     expect(screen.getByText('comingSoon')).toBeTruthy();
   });
@@ -186,7 +205,7 @@ describe('EquipmentStep — two-column layout', () => {
       },
     ]) as ResolvedCharacter;
 
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     // Summary should show both the weapon header and the armor header
     expect(screen.getByText('summary')).toBeTruthy();
@@ -219,7 +238,7 @@ describe('EquipmentStep — two-column layout', () => {
       },
     };
 
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     // The mastery badge renders the last segment of t('weaponMasteries.sap.name') → 'name'
     expect(screen.getByText('name')).toBeTruthy();
@@ -240,8 +259,130 @@ describe('EquipmentStep — two-column layout', () => {
       [{ weaponId: 'longsword', masteryId: 'sap' }]
     ) as ResolvedCharacter;
 
-    render(<EquipmentStep />);
+    render(<EquipmentStep {...makeEquipmentProps()} />);
 
     expect(screen.getByText('name')).toBeTruthy();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Buy-with-gold mode tests
+// ---------------------------------------------------------------------------
+
+describe('EquipmentStep — buy-with-gold mode', () => {
+  beforeEach(() => {
+    mockContextValue = {
+      bundles: [],
+      resolved: makeResolved() as ResolvedCharacter,
+      build: { choices: {} },
+      makeChoice: mockMakeChoice,
+      clearChoice: mockClearChoice,
+    };
+  });
+
+  it('shows the catalog sections when mode is buy-with-gold', () => {
+    render(<EquipmentStep {...makeEquipmentProps({ equipmentMode: 'buy-with-gold' })} />);
+
+    expect(screen.getByText('catalogWeapons')).toBeTruthy();
+    expect(screen.getByText('catalogArmor')).toBeTruthy();
+    expect(screen.getByText('catalogGear')).toBeTruthy();
+    expect(screen.getByText('catalogPacks')).toBeTruthy();
+  });
+
+  it('shows starting gold section when mode is buy-with-gold', () => {
+    render(<EquipmentStep {...makeEquipmentProps({ equipmentMode: 'buy-with-gold', classId: 'fighter' })} />);
+
+    expect(screen.getByText('startingGoldTitle')).toBeTruthy();
+    expect(screen.getByLabelText('goldOverrideLabel')).toBeTruthy();
+  });
+
+  it('hides the class loadout section when mode is buy-with-gold', () => {
+    render(<EquipmentStep {...makeEquipmentProps({ equipmentMode: 'buy-with-gold' })} />);
+
+    expect(screen.queryByText('classLoadoutTitle')).toBeNull();
+  });
+
+  it('calls onPurchase when Add button is clicked for a weapon', () => {
+    const onPurchase = vi.fn();
+    render(
+      <EquipmentStep
+        {...makeEquipmentProps({
+          equipmentMode: 'buy-with-gold',
+          onPurchase,
+        })}
+      />
+    );
+
+    // Click the first "Add" button (first weapon in catalog)
+    const addButtons = screen.getAllByText('addItem');
+    fireEvent.click(addButtons[0]);
+
+    expect(onPurchase).toHaveBeenCalledWith(expect.any(String), expect.any(Number));
+  });
+
+  it('shows purchased items list when purchasedItems is non-empty', () => {
+    render(
+      <EquipmentStep
+        {...makeEquipmentProps({
+          equipmentMode: 'buy-with-gold',
+          purchasedItems: [{ itemId: 'dagger', quantity: 2, costGp: 2 }],
+        })}
+      />
+    );
+
+    expect(screen.getByText('purchasedItemsTitle')).toBeTruthy();
+    // quantity × rendered
+    expect(screen.getByText('2×')).toBeTruthy();
+  });
+
+  it('calls onRemovePurchase when remove button is clicked', () => {
+    const onRemovePurchase = vi.fn();
+    render(
+      <EquipmentStep
+        {...makeEquipmentProps({
+          equipmentMode: 'buy-with-gold',
+          purchasedItems: [{ itemId: 'dagger', quantity: 1, costGp: 2 }],
+          onRemovePurchase,
+        })}
+      />
+    );
+
+    const removeBtn = screen.getByText('remove');
+    fireEvent.click(removeBtn);
+
+    expect(onRemovePurchase).toHaveBeenCalledWith('dagger');
+  });
+
+  it('shows currency tracker with spent and starting amounts', () => {
+    render(
+      <EquipmentStep
+        {...makeEquipmentProps({
+          equipmentMode: 'buy-with-gold',
+          startingGoldTotal: 175,
+          purchasedItems: [{ itemId: 'longsword', quantity: 1, costGp: 15 }],
+        })}
+      />
+    );
+
+    // The currency tracker key is 'currencyTracker' — last segment of the key
+    expect(screen.getByText('currencyTracker')).toBeTruthy();
+  });
+
+  it('calls onGoldChange with class gold amount when "Use class gold" button is clicked', () => {
+    const onGoldChange = vi.fn();
+    render(
+      <EquipmentStep
+        {...makeEquipmentProps({
+          equipmentMode: 'buy-with-gold',
+          classId: 'fighter',
+          onGoldChange,
+        })}
+      />
+    );
+
+    const useClassGoldBtn = screen.getByText('useClassGold');
+    fireEvent.click(useClassGoldBtn);
+
+    expect(onGoldChange).toHaveBeenCalledWith(175); // fighter starting gold
   });
 });
