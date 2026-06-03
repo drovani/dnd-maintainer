@@ -18,6 +18,7 @@ export interface AutosavePayload {
   readonly character: Character;
   readonly rows: readonly BuildLevelRow[];
   readonly resolved: ResolvedCharacter | null;
+  readonly purchasedItems?: readonly { itemId: string; quantity: number; costGp: number }[];
 }
 
 /**
@@ -206,11 +207,22 @@ export function useBuilderAutosave(existingCharacterId?: string) {
           if (checkError) throw checkError;
 
           if (existingItems.length === 0) {
-            const rows = buildMaterializedItemRows(payload.resolved, id);
-            if (rows.length > 0) {
+            const startingRows = buildMaterializedItemRows(payload.resolved, id);
+            // Map buy-with-gold purchases into character_items rows.
+            // costGp is UI-only; not stored as a column — only itemId, quantity, and source are persisted.
+            const purchasedRows: TablesInsert<'character_items'>[] = (payload.purchasedItems ?? []).map((p) => ({
+              character_id: id,
+              item_id: p.itemId,
+              quantity: p.quantity,
+              equipped: false,
+              attuned: false,
+              source: { origin: 'loot', description: 'buy-with-gold' } as TablesInsert<'character_items'>['source'],
+            }));
+            const allRows = [...startingRows, ...purchasedRows];
+            if (allRows.length > 0) {
               const { error: insertError } = await supabase
                 .from('character_items')
-                .insert(rows as TablesInsert<'character_items'>[]);
+                .insert(allRows as TablesInsert<'character_items'>[]);
               if (insertError) throw insertError;
             }
           }
