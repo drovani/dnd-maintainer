@@ -379,7 +379,9 @@
       "attacks": "Attacks",
       "resourcePools": "Resource Pools",
       "conditions": "Conditions",
-      "saveDC": "Save DC"
+      "saveDC": "Save DC",
+      "hitDice": "Hit Dice",
+      "spellSlots": "Spell Slots"
     },
     "fields": {
       "class": "Class",
@@ -539,6 +541,8 @@
       "cloneFailed": "Failed to clone character. Please try again."
     },
     "actions": {
+      "shortRest": "Short Rest",
+      "longRest": "Long Rest",
       "archiveTitle": "Archive Character",
       "archiveConfirm": "Are you sure you want to archive {{name}}? The character will be hidden from the active list but can be restored later.",
       "deleteTitle": "Delete Character",
