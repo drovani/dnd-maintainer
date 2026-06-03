@@ -197,13 +197,36 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'proficiency', category: 'armor', id: 'heavy' },
           { type: 'feature', feature: { id: 'lifedomain-disciple-of-life' } },
           { type: 'feature', feature: { id: 'lifedomain-preserve-life' } },
-          // TODO #93: model domain spells (Bless, Cure Wounds, etc.) as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'lifedomain-domain-spells' } },
+          { type: 'spell', spellId: 'aid', alwaysPrepared: true },
+          { type: 'spell', spellId: 'bless', alwaysPrepared: true },
+          { type: 'spell', spellId: 'cure-wounds', alwaysPrepared: true },
+          { type: 'spell', spellId: 'lesser-restoration', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'mass-healing-word', alwaysPrepared: true },
+          { type: 'spell', spellId: 'revivify', alwaysPrepared: true },
         ],
       },
       {
         classLevel: 6,
         grants: [{ type: 'feature', feature: { id: 'lifedomain-blessed-healer' } }],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'aura-of-life', alwaysPrepared: true },
+          { type: 'spell', spellId: 'death-ward', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'greater-restoration', alwaysPrepared: true },
+          { type: 'spell', spellId: 'mass-cure-wounds', alwaysPrepared: true },
+        ],
       },
     ] satisfies readonly SubclassFeature[],
   },
@@ -212,18 +235,40 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // Light cantrip always known — modeled as inert feature grant; no SpellGrant caller exists yet
-          // TODO #93: replace with a spell grant when the spell id system supports cantrips
-          { type: 'feature', feature: { id: 'lightdomain-bonus-cantrip' } },
+          // Light cantrip granted as an always-prepared spell grant (cantrip level 0)
+          { type: 'spell', spellId: 'light', alwaysPrepared: true },
           { type: 'feature', feature: { id: 'lightdomain-warding-flare' } },
           { type: 'feature', feature: { id: 'lightdomain-radiance-of-the-dawn' } },
-          // TODO #93: model domain spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'lightdomain-domain-spells' } },
+          { type: 'spell', spellId: 'burning-hands', alwaysPrepared: true },
+          { type: 'spell', spellId: 'faerie-fire', alwaysPrepared: true },
+          { type: 'spell', spellId: 'scorching-ray', alwaysPrepared: true },
+          { type: 'spell', spellId: 'see-invisibility', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'daylight', alwaysPrepared: true },
+          { type: 'spell', spellId: 'fireball', alwaysPrepared: true },
         ],
       },
       {
         classLevel: 6,
         grants: [{ type: 'feature', feature: { id: 'lightdomain-improved-warding-flare' } }],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'arcane-eye', alwaysPrepared: true },
+          { type: 'spell', spellId: 'wall-of-fire', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'flame-strike', alwaysPrepared: true },
+          { type: 'spell', spellId: 'scrying', alwaysPrepared: true },
+        ],
       },
     ] satisfies readonly SubclassFeature[],
   },
@@ -234,13 +279,36 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           { type: 'feature', feature: { id: 'trickerydomain-blessing-of-the-trickster' } },
           { type: 'feature', feature: { id: 'trickerydomain-invoke-duplicity' } },
-          // TODO #93: model domain spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'trickerydomain-domain-spells' } },
+          { type: 'spell', spellId: 'charm-person', alwaysPrepared: true },
+          { type: 'spell', spellId: 'disguise-self', alwaysPrepared: true },
+          { type: 'spell', spellId: 'invisibility', alwaysPrepared: true },
+          { type: 'spell', spellId: 'pass-without-trace', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'hypnotic-pattern', alwaysPrepared: true },
+          { type: 'spell', spellId: 'nondetection', alwaysPrepared: true },
         ],
       },
       {
         classLevel: 6,
         grants: [{ type: 'feature', feature: { id: 'trickerydomain-tricksters-transposition' } }],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'confusion', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dimension-door', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'dominate-person', alwaysPrepared: true },
+          { type: 'spell', spellId: 'modify-memory', alwaysPrepared: true },
+        ],
       },
     ] satisfies readonly SubclassFeature[],
   },
@@ -251,15 +319,39 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           { type: 'proficiency', category: 'armor', id: 'heavy' },
           { type: 'proficiency', category: 'weapon', id: 'martial' },
+          // TODO(#142): wire wardomain-war-priest to resource-pool once ability-score max mode exists
           { type: 'feature', feature: { id: 'wardomain-war-priest' } },
           { type: 'feature', feature: { id: 'wardomain-guided-strike' } },
-          // TODO #93: model domain spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'wardomain-domain-spells' } },
+          { type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: true },
+          { type: 'spell', spellId: 'magic-weapon', alwaysPrepared: true },
+          { type: 'spell', spellId: 'shield-of-faith', alwaysPrepared: true },
+          { type: 'spell', spellId: 'spiritual-weapon', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          { type: 'spell', spellId: 'crusaders-mantle', alwaysPrepared: true },
+          { type: 'spell', spellId: 'spirit-guardians', alwaysPrepared: true },
         ],
       },
       {
         classLevel: 6,
         grants: [{ type: 'feature', feature: { id: 'wardomain-war-gods-blessing' } }],
+      },
+      {
+        classLevel: 7,
+        grants: [
+          { type: 'spell', spellId: 'fire-shield', alwaysPrepared: true },
+          { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          { type: 'spell', spellId: 'hold-monster', alwaysPrepared: true },
+          { type: 'spell', spellId: 'steel-wind-strike', alwaysPrepared: true },
+        ],
       },
     ] satisfies readonly SubclassFeature[],
   },
