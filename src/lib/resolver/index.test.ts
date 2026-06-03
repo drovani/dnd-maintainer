@@ -2725,3 +2725,86 @@ describe('Circle of the Land terrain feature-choice integration', () => {
     expect(featureIds).toContain('circleland-land-arid');
   });
 });
+
+describe('Paladin oath spells integration — L9 Oath of the Ancients', () => {
+  const paladinSubclassKey = createChoiceKey('subclass', 'class', 'paladin', 0);
+
+  const baseBuild: CharacterBuild = {
+    speciesId: 'human' as const,
+    backgroundId: 'soldier',
+    baseAbilities: { str: 13, dex: 10, con: 14, int: 8, wis: 10, cha: 16 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'paladin' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 2, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 3, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 4, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 5, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 6, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 7, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 8, hpRoll: null },
+      { classId: 'paladin' as ClassId, classLevel: 9, hpRoll: null },
+    ],
+    choices: {
+      [paladinSubclassKey]: { type: 'subclass' as const, subclassId: 'oathofancients' as SubclassId },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  it('L3 oath spells (ensnaring-strike, speak-with-animals) are in alwaysPreparedSpells', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 9,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(alwaysPrepared).toContain('ensnaring-strike');
+    expect(alwaysPrepared).toContain('speak-with-animals');
+  });
+
+  it('L5 oath spells (misty-step, moonbeam) are in alwaysPreparedSpells', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 9,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(alwaysPrepared).toContain('misty-step');
+    expect(alwaysPrepared).toContain('moonbeam');
+  });
+
+  it('L9 oath spells (plant-growth, protection-from-energy) are in alwaysPreparedSpells', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 9,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(alwaysPrepared).toContain('plant-growth');
+    expect(alwaysPrepared).toContain('protection-from-energy');
+  });
+
+  it('L13 oath spells (ice-storm, stoneskin) are NOT in alwaysPreparedSpells at Paladin L9', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 9,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(alwaysPrepared).not.toContain('ice-storm');
+    expect(alwaysPrepared).not.toContain('stoneskin');
+  });
+});

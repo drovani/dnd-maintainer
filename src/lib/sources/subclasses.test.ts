@@ -1316,17 +1316,18 @@ describe('getSubclassSource — Oath of Devotion', () => {
     expect(getSubclassSource('oathofdevotion')).toBeDefined();
   });
 
-  it('oathofdevotion has 2 feature levels (L3, L7)', () => {
+  it('oathofdevotion has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
     const source = getSubclassSource('oathofdevotion');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('oathofdevotion level 3 grants 3 items: sacred-weapon, holy-rebuke, and oath-spells', () => {
+  it('oathofdevotion level 3 grants sacred-weapon, holy-rebuke, and L3 spell grants', () => {
     const source = getSubclassSource('oathofdevotion');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(3);
+    // 2 feature grants + 2 spell grants
+    expect(level3?.grants).toHaveLength(4);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -1337,10 +1338,21 @@ describe('getSubclassSource — Oath of Devotion', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'oathofdevotion-holy-rebuke' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofdevotion-oath-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'protection-from-evil-and-good', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'shield-of-faith', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofdevotion level 5 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'aid', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'zone-of-truth', alwaysPrepared: true }),
       ])
     );
   });
@@ -1355,6 +1367,45 @@ describe('getSubclassSource — Oath of Devotion', () => {
       feature: { id: 'oathofdevotion-aura-of-devotion' },
     });
   });
+
+  it('oathofdevotion level 9 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'beacon-of-hope', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofdevotion level 13 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level13 = source?.features.find((f) => f.classLevel === 13);
+    expect(level13).toBeDefined();
+    expect(level13?.grants).toHaveLength(2);
+    expect(level13?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'guardian-of-faith', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofdevotion level 17 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level17 = source?.features.find((f) => f.classLevel === 17);
+    expect(level17).toBeDefined();
+    expect(level17?.grants).toHaveLength(2);
+    expect(level17?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'commune', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'flame-strike', alwaysPrepared: true }),
+      ])
+    );
+  });
 });
 
 describe('getSubclassSource — Oath of Glory', () => {
@@ -1362,17 +1413,18 @@ describe('getSubclassSource — Oath of Glory', () => {
     expect(getSubclassSource('oathofglory')).toBeDefined();
   });
 
-  it('oathofglory has 2 feature levels (L3, L7)', () => {
+  it('oathofglory has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
     const source = getSubclassSource('oathofglory');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('oathofglory level 3 grants 3 items: peerless-athlete, inspiring-smite, and oath-spells', () => {
+  it('oathofglory level 3 grants peerless-athlete, inspiring-smite, and L3 spell grants', () => {
     const source = getSubclassSource('oathofglory');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(3);
+    // 2 feature grants + 2 spell grants
+    expect(level3?.grants).toHaveLength(4);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -1383,10 +1435,21 @@ describe('getSubclassSource — Oath of Glory', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'oathofglory-inspiring-smite' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofglory-oath-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'heroism', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofglory level 5 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofglory');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'enhance-ability', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'magic-weapon', alwaysPrepared: true }),
       ])
     );
   });
@@ -1401,6 +1464,45 @@ describe('getSubclassSource — Oath of Glory', () => {
       feature: { id: 'oathofglory-aura-of-alacrity' },
     });
   });
+
+  it('oathofglory level 9 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofglory');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'haste', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofglory level 13 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofglory');
+    const level13 = source?.features.find((f) => f.classLevel === 13);
+    expect(level13).toBeDefined();
+    expect(level13?.grants).toHaveLength(2);
+    expect(level13?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'compulsion', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofglory level 17 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofglory');
+    const level17 = source?.features.find((f) => f.classLevel === 17);
+    expect(level17).toBeDefined();
+    expect(level17?.grants).toHaveLength(2);
+    expect(level17?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'legend-lore', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'yolandes-regal-presence', alwaysPrepared: true }),
+      ])
+    );
+  });
 });
 
 describe('getSubclassSource — Oath of the Ancients', () => {
@@ -1408,31 +1510,56 @@ describe('getSubclassSource — Oath of the Ancients', () => {
     expect(getSubclassSource('oathofancients')).toBeDefined();
   });
 
-  it('oathofancients has 2 feature levels (L3, L7)', () => {
+  it('oathofancients has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
     const source = getSubclassSource('oathofancients');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('oathofancients level 3 grants 3 items: natures-wrath, turn-the-faithless, and oath-spells', () => {
+  it('oathofancients level 3 grants natures-wrath (with saveDC:cha) and L3 spell grants; turn-the-faithless removed', () => {
     const source = getSubclassSource('oathofancients');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
+    // 1 feature grant + 2 spell grants (turn-the-faithless removed in 2024)
     expect(level3?.grants).toHaveLength(3);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofancients-natures-wrath' }),
+          feature: expect.objectContaining({ id: 'oathofancients-natures-wrath', saveDC: { dcAbility: 'cha' } }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofancients-turn-the-faithless' }),
-        }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofancients-oath-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'ensnaring-strike', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'speak-with-animals', alwaysPrepared: true }),
+      ])
+    );
+    // Confirm 2014 holdover is absent
+    const featureIds = level3?.grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).not.toContain('oathofancients-turn-the-faithless');
+  });
+
+  it('oathofancients-natures-wrath has saveDC.dcAbility === "cha"', () => {
+    const source = getSubclassSource('oathofancients');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const naturesWrathGrant = level3?.grants.find(
+      (g) => g.type === 'feature' && g.feature.id === 'oathofancients-natures-wrath'
+    );
+    expect(naturesWrathGrant).toBeDefined();
+    if (naturesWrathGrant?.type === 'feature') {
+      expect(naturesWrathGrant.feature.saveDC?.dcAbility).toBe('cha');
+    }
+  });
+
+  it('oathofancients level 5 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofancients');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'misty-step', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'moonbeam', alwaysPrepared: true }),
       ])
     );
   });
@@ -1447,6 +1574,45 @@ describe('getSubclassSource — Oath of the Ancients', () => {
       feature: { id: 'oathofancients-aura-of-warding' },
     });
   });
+
+  it('oathofancients level 9 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofancients');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'plant-growth', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofancients level 13 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofancients');
+    const level13 = source?.features.find((f) => f.classLevel === 13);
+    expect(level13).toBeDefined();
+    expect(level13?.grants).toHaveLength(2);
+    expect(level13?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'ice-storm', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'stoneskin', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofancients level 17 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofancients');
+    const level17 = source?.features.find((f) => f.classLevel === 17);
+    expect(level17).toBeDefined();
+    expect(level17?.grants).toHaveLength(2);
+    expect(level17?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'commune-with-nature', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'tree-stride', alwaysPrepared: true }),
+      ])
+    );
+  });
 });
 
 describe('getSubclassSource — Oath of Vengeance', () => {
@@ -1454,16 +1620,17 @@ describe('getSubclassSource — Oath of Vengeance', () => {
     expect(getSubclassSource('oathofvengeance')).toBeDefined();
   });
 
-  it('oathofvengeance has 2 feature levels (L3, L7)', () => {
+  it('oathofvengeance has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
     const source = getSubclassSource('oathofvengeance');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('oathofvengeance level 3 grants 3 items: vow-of-enmity, abjure-enemy, and oath-spells', () => {
+  it('oathofvengeance level 3 grants vow-of-enmity and L3 spell grants; abjure-enemy removed', () => {
     const source = getSubclassSource('oathofvengeance');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
+    // 1 feature grant + 2 spell grants (abjure-enemy removed in 2024)
     expect(level3?.grants).toHaveLength(3);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
@@ -1471,14 +1638,26 @@ describe('getSubclassSource — Oath of Vengeance', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'oathofvengeance-vow-of-enmity' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofvengeance-abjure-enemy' }),
-        }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'oathofvengeance-oath-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'bane', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'hunters-mark', alwaysPrepared: true }),
+      ])
+    );
+    // Confirm 2014 holdover is absent
+    const featureIds = level3?.grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).not.toContain('oathofvengeance-abjure-enemy');
+  });
+
+  it('oathofvengeance level 5 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(2);
+    expect(level5?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'hold-person', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'misty-step', alwaysPrepared: true }),
       ])
     );
   });
@@ -1492,6 +1671,45 @@ describe('getSubclassSource — Oath of Vengeance', () => {
       type: 'feature',
       feature: { id: 'oathofvengeance-relentless-avenger' },
     });
+  });
+
+  it('oathofvengeance level 9 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(2);
+    expect(level9?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'haste', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofvengeance level 13 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level13 = source?.features.find((f) => f.classLevel === 13);
+    expect(level13).toBeDefined();
+    expect(level13?.grants).toHaveLength(2);
+    expect(level13?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'banishment', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'dimension-door', alwaysPrepared: true }),
+      ])
+    );
+  });
+
+  it('oathofvengeance level 17 grants 2 spell grants with alwaysPrepared:true', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level17 = source?.features.find((f) => f.classLevel === 17);
+    expect(level17).toBeDefined();
+    expect(level17?.grants).toHaveLength(2);
+    expect(level17?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'spell', spellId: 'hold-monster', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'scrying', alwaysPrepared: true }),
+      ])
+    );
   });
 });
 
