@@ -67,6 +67,14 @@ export function ClassStep() {
   }, [resolved]);
   const hasFeatureChoices = featureChoices.length > 0;
 
+  const spellChoices = useMemo<readonly Extract<PendingChoice, { type: 'spell-choice' }>[]>(() => {
+    return (resolved?.pendingChoices ?? []).filter(
+      (c): c is Extract<PendingChoice, { type: 'spell-choice' }> =>
+        c.type === 'spell-choice' && c.source.origin === 'class'
+    );
+  }, [resolved]);
+  const hasSpellChoices = spellChoices.length > 0;
+
   const levelOneClassFeatures = useMemo(() => {
     if (!resolved?.features) return [];
     return resolved.features.filter((f) => f.source.origin === 'class' && f.source.level === 1);
@@ -74,7 +82,12 @@ export function ClassStep() {
   const hasLevelOneFeatures = levelOneClassFeatures.length > 0;
 
   const hasAnyContent =
-    hasFightingStyles || hasSpellcasting || hasLevelOneFeatures || hasSubclassChoices || hasFeatureChoices;
+    hasFightingStyles ||
+    hasSpellcasting ||
+    hasLevelOneFeatures ||
+    hasSubclassChoices ||
+    hasFeatureChoices ||
+    hasSpellChoices;
 
   return (
     <div className="space-y-6">
@@ -192,6 +205,26 @@ export function ClassStep() {
       {hasFeatureChoices && (
         <div className="space-y-4">
           {featureChoices.map((choice) => (
+            <div key={choice.choiceKey}>
+              <p className="text-xs text-muted-foreground mb-1">
+                {tc('characterBuilder.pendingChoices.fromSource', {
+                  source: getChoiceSourceName(choice.choiceKey, t),
+                })}
+              </p>
+              <ChoicePicker
+                choice={choice}
+                currentDecision={build?.choices[choice.choiceKey]}
+                onDecide={(choiceKey, decision) => context.makeChoice(choiceKey, decision)}
+                onClear={(choiceKey) => context.clearChoice(choiceKey)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {hasSpellChoices && (
+        <div className="space-y-4">
+          {spellChoices.map((choice) => (
             <div key={choice.choiceKey}>
               <p className="text-xs text-muted-foreground mb-1">
                 {tc('characterBuilder.pendingChoices.fromSource', {

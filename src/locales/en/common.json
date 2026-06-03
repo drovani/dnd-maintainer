@@ -155,6 +155,7 @@
       "toolChoice": "Choose {{count}} tool(s)",
       "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
+      "spellChoice": "Choose {{count}} cantrip(s)",
       "weaponMasteryChoice": "Choose {{count}} weapon mastery",
       "damageChoice": "Choose {{count}} damage type(s)",
       "lineageChoice": "Choose your lineage",

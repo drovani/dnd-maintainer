@@ -10,6 +10,8 @@ import type { FeatId } from '@/lib/dnd-helpers';
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles';
 import { FEAT_SOURCES } from '@/lib/sources';
+import { getSpellsForList } from '@/lib/sources/spells';
+import type { SpellId } from '@/types/spells';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items';
 import type { PendingChoice } from '@/types/resolved';
@@ -460,6 +462,62 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
             );
           })}
         </div>
+      </div>
+    );
+  }
+
+  if (choice.type === 'spell-choice') {
+    const pool = getSpellsForList(choice.spellList, choice.spellLevel);
+    const current = currentDecision?.type === 'spell-choice' ? currentDecision.spellIds : [];
+    const atMax = current.length >= choice.count;
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            {tc('characterBuilder.pendingChoices.spellChoice', { count: choice.count })}
+          </p>
+          <Badge variant="outline" className="text-xs">
+            {current.length} / {choice.count}
+          </Badge>
+        </div>
+        <div className="space-y-1">
+          {pool.map((spell) => {
+            const isSelected = (current as readonly string[]).includes(spell.id);
+            const isDisabled = atMax && !isSelected;
+            const nameKey = `spells.${spell.id}.name` as `spells.${string}.name`;
+            return (
+              <div
+                key={spell.id}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <Checkbox
+                  id={`choice-spell-${choice.choiceKey}-${spell.id}`}
+                  checked={isSelected}
+                  disabled={isDisabled}
+                  onCheckedChange={(checked) => {
+                    const next = checked
+                      ? ([...current, spell.id] as readonly SpellId[])
+                      : (current.filter((id) => id !== spell.id) as readonly SpellId[]);
+                    if (next.length === 0) {
+                      onClear(choice.choiceKey);
+                    } else {
+                      onDecide(choice.choiceKey, { type: 'spell-choice', spellIds: next });
+                    }
+                  }}
+                />
+                <Label htmlFor={`choice-spell-${choice.choiceKey}-${spell.id}`} className="flex-1 cursor-pointer">
+                  {t(nameKey, { defaultValue: spell.id })}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+        {current.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+            {tc('characterBuilder.equipment.clearSelection')}
+          </Button>
+        )}
       </div>
     );
   }

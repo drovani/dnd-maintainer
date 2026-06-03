@@ -389,3 +389,167 @@ describe('ChoicePicker feature-choice', () => {
     expect(onClear).toHaveBeenCalledWith(FEATURE_CHOICE.choiceKey);
   });
 });
+
+// ---------------------------------------------------------------------------
+// ChoicePicker — spell-choice branch
+// ---------------------------------------------------------------------------
+
+const DRUID_SOURCE = { origin: 'class' as const, id: 'druid' as const, level: 1 };
+
+const DRUID_CANTRIP_CHOICE: PendingChoice & { type: 'spell-choice' } = {
+  type: 'spell-choice',
+  choiceKey: 'spell-choice:class:druid:0' as ChoiceKey,
+  source: DRUID_SOURCE,
+  count: 2,
+  spellList: 'druid',
+  spellLevel: 0,
+};
+
+describe('ChoicePicker spell-choice', () => {
+  it('renders one checkbox per druid cantrip (10 total)', () => {
+    render(
+      <ChoicePicker choice={DRUID_CANTRIP_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(10);
+  });
+
+  it('no checkbox is checked when currentDecision is undefined', () => {
+    render(
+      <ChoicePicker choice={DRUID_CANTRIP_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
+    expect(checkboxes.every((cb) => !cb.checked)).toBe(true);
+  });
+
+  it('checking a cantrip calls onDecide with { type: spell-choice, spellIds: [id] }', () => {
+    const onDecide = vi.fn();
+    render(
+      <ChoicePicker choice={DRUID_CANTRIP_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    // Click the first checkbox (druidcraft)
+    fireEvent.click(checkboxes[0]);
+    expect(onDecide).toHaveBeenCalledWith(
+      DRUID_CANTRIP_CHOICE.choiceKey,
+      expect.objectContaining({ type: 'spell-choice', spellIds: expect.arrayContaining(['druidcraft']) })
+    );
+  });
+
+  it('unchecking a selected cantrip calls onClear when the result would be empty', () => {
+    const onClear = vi.fn();
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['druidcraft'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={onClear}
+      />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    // druidcraft is first in SPELL_CATALOG; uncheck it
+    fireEvent.click(checkboxes[0]);
+    expect(onClear).toHaveBeenCalledWith(DRUID_CANTRIP_CHOICE.choiceKey);
+  });
+
+  it('at-max (2 selected): unchecked checkboxes have aria-disabled=true', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['druidcraft', 'thorn-whip'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    const unselectedDisabled = checkboxes.filter(
+      (cb) => cb.getAttribute('aria-checked') !== 'true' && cb.getAttribute('aria-disabled') === 'true'
+    );
+    expect(unselectedDisabled.length).toBeGreaterThan(0);
+  });
+
+  it('selected checkboxes remain enabled even at max', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['druidcraft', 'thorn-whip'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    const selectedEnabled = checkboxes.filter(
+      (cb) => cb.getAttribute('aria-checked') === 'true' && cb.getAttribute('aria-disabled') !== 'true'
+    );
+    expect(selectedEnabled).toHaveLength(2);
+  });
+
+  it('Clear button does NOT appear when no cantrips are selected', () => {
+    render(
+      <ChoicePicker choice={DRUID_CANTRIP_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    expect(screen.queryByRole('button', { name: /clear/i })).toBeNull();
+  });
+
+  it('Clear button appears when cantrips are selected', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['guidance'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />
+    );
+    expect(screen.getByRole('button', { name: /clear/i })).toBeTruthy();
+  });
+
+  it('clicking Clear calls onClear with the correct choiceKey', () => {
+    const onClear = vi.fn();
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['guidance'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={onClear}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(onClear).toHaveBeenCalledWith(DRUID_CANTRIP_CHOICE.choiceKey);
+  });
+
+  it('shows count badge with selected / total', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['druidcraft'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />
+    );
+    expect(screen.getByText('1 / 2')).toBeTruthy();
+  });
+});
