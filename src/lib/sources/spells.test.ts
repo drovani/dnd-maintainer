@@ -3,6 +3,8 @@ import { SPELL_CATALOG, getSpellDef, requireSpellDef, getSpellsForList } from '@
 import { CLASS_SOURCES } from '@/lib/sources/classes';
 import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
 import { SPECIES_SOURCES } from '@/lib/sources/species';
+import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
+import { FEAT_SOURCES } from '@/lib/sources/feats';
 import gamedata from '@/locales/en/gamedata.json';
 
 describe('SPELL_CATALOG', () => {
@@ -121,6 +123,22 @@ describe('spell-grant catalog invariant', () => {
           if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
             missing.push(`subclass:${subclassId}:classLevel${feature.classLevel} → "${grant.spellId}"`);
           }
+        }
+      }
+    }
+
+    for (const source of BACKGROUND_SOURCES) {
+      for (const grant of source.grants) {
+        if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
+          missing.push(`background:${source.id} → "${grant.spellId}"`);
+        }
+      }
+    }
+
+    for (const source of FEAT_SOURCES) {
+      for (const grant of source.grants) {
+        if (grant.type === 'spell' && !getSpellDef(grant.spellId)) {
+          missing.push(`feat:${source.id} → "${grant.spellId}"`);
         }
       }
     }
