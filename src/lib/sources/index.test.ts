@@ -21,6 +21,7 @@ import {
   getItemSource,
   collectBundles,
 } from '@/lib/sources';
+import { resolveCharacter } from '@/lib/resolver';
 import type { CharacterBuild } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
 import type { SpeciesId, BackgroundId, ClassId, FeatId } from '@/lib/dnd-helpers';
@@ -142,10 +143,15 @@ describe('all 2024 backgrounds have correct structure', () => {
     expect(skillGrants).toHaveLength(2);
   });
 
-  it.each(EXPECTED_BACKGROUNDS)('$id has exactly 1 feat grant', ({ id }) => {
+  it.each(EXPECTED_BACKGROUNDS)('$id has exactly 1 origin grant (feat or direct feature)', ({ id }) => {
     const source = getBackgroundSource(id as BackgroundId);
-    const featGrants = source?.grants.filter((g) => g.type === 'feat');
-    expect(featGrants).toHaveLength(1);
+    // acolyte/guide/sage grant Magic Initiate as a direct feature (not a feat grant)
+    const directMagicInitiateIds = new Set(['feat-magic-initiate-cleric', 'feat-magic-initiate-druid', 'feat-magic-initiate-wizard']);
+    const hasFeatGrant = source?.grants.some((g) => g.type === 'feat') ?? false;
+    const hasDirectMagicInitiateFeature = source?.grants.some(
+      (g) => g.type === 'feature' && directMagicInitiateIds.has(g.feature.id)
+    ) ?? false;
+    expect(hasFeatGrant || hasDirectMagicInitiateFeature).toBe(true);
   });
 });
 
@@ -478,5 +484,44 @@ describe('collectBundles', () => {
       .flatMap((b) => b.grants)
       .find((g) => g.type === 'feature' && g.feature.id === 'zealot-divine-fury-fire');
     expect(fireFeature).toBeUndefined();
+  });
+});
+
+describe('Magic Initiate pipeline integration (acolyte → cleric spells)', () => {
+  const acolyte1Build: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: 'acolyte' as BackgroundId,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 15, cha: 12 },
+    abilityMethod: 'standard-array',
+    levels: [{ classId: 'cleric' as ClassId, classLevel: 1, hpRoll: null }],
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('collectBundles → resolveCharacter: feat-magic-initiate-cleric resolves exactly once in features', () => {
+    const { bundles, warnings, expandedFeats } = collectBundles(acolyte1Build);
+    const result = resolveCharacter({
+      baseAbilities: acolyte1Build.baseAbilities,
+      level: acolyte1Build.levels.length,
+      bundles,
+      choices: acolyte1Build.choices,
+      levels: acolyte1Build.levels,
+      expandedFeats,
+    });
+    const clericInitiateFeatures = result.features.filter(
+      (f) => f.feature.id === 'feat-magic-initiate-cleric'
+    );
+    expect(
+      clericInitiateFeatures,
+      'feat-magic-initiate-cleric should resolve exactly once (no double-grant)'
+    ).toHaveLength(1);
+    // No pending choice for magic-initiate (direct feature, no user selection needed)
+    const magicInitiateChoice = result.pendingChoices.find(
+      (c) => 'key' in c && String(c.key).includes('magic-initiate')
+    );
+    expect(magicInitiateChoice, 'no pending magic-initiate choice should exist').toBeUndefined();
+    // No warnings about background feat expansion
+    expect(warnings.some((w) => w.includes('magic-initiate'))).toBe(false);
   });
 });

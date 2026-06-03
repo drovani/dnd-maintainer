@@ -140,5 +140,26 @@ describe('FEAT_SOURCES', () => {
         expect(optionIds).toEqual(['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']);
       }
     });
+
+    it.each(['magic-initiate', 'elemental-adept', 'resilient'] as const)(
+      '%s: each option has grants: [] and featureId matching feat-<feat>-<optionId>',
+      (featId) => {
+        const feat = FEAT_SOURCES.find((f) => f.id === featId);
+        const choiceGrant = feat?.grants.find((g) => g.type === 'feature-choice');
+        expect(choiceGrant).toBeDefined();
+        if (choiceGrant?.type === 'feature-choice') {
+          for (const option of choiceGrant.options) {
+            expect(
+              option.grants,
+              `${featId} option "${option.optionId}" should have empty grants (double-grant guard)`
+            ).toHaveLength(0);
+            expect(
+              option.featureId,
+              `${featId} option "${option.optionId}" featureId should be feat-${featId}-${option.optionId}`
+            ).toBe(`feat-${featId}-${option.optionId}`);
+          }
+        }
+      }
+    );
   });
 });

@@ -209,9 +209,13 @@ export function computeBackgroundCoverage(): ForkCoverage {
 
     // 2024 background formula: 2 skill proficiencies, +3 ability points, an origin
     // feat, and a tool proficiency (fixed or a choice).
+    // Some backgrounds (acolyte, guide, sage) grant Magic Initiate directly as a feature
+    // rather than as a feat grant — both forms satisfy the origin-feat requirement.
     const skillCount = grants.filter((g) => g.type === 'proficiency' && g.category === 'skill').length;
     const asiPoints = grants.reduce((n, g) => (g.type === 'asi' ? n + g.points : n), 0);
-    const hasFeat = grants.some((g) => g.type === 'feat');
+    const hasFeat =
+      grants.some((g) => g.type === 'feat') ||
+      grants.some((g) => g.type === 'feature' && g.feature.id.startsWith('feat-magic-initiate-'));
     const hasTool = grants.some(
       (g) => (g.type === 'proficiency' || g.type === 'proficiency-choice') && g.category === 'tool'
     );

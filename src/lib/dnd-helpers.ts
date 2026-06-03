@@ -428,11 +428,6 @@ export const DND_SPECIES = [
       'red',
       'silver',
       'white',
-      'amethyst',
-      'crystal',
-      'emerald',
-      'sapphire',
-      'topaz',
     ] as const,
   },
   {
@@ -456,7 +451,7 @@ export const DND_SPECIES = [
     speed: 30,
     languages: ['common'],
     languageChoices: 2,
-    lineages: ['forest', 'rock', 'deep'] as const,
+    lineages: ['forest', 'rock'] as const,
   },
   {
     id: 'goliath',

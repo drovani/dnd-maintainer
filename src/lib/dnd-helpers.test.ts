@@ -776,7 +776,7 @@ describe('averageDice', () => {
 });
 
 describe('DND_SPECIES lineages', () => {
-  it('dragonborn has all 15 specific dragon lineages', () => {
+  it('dragonborn has all 10 chromatic+metallic dragon lineages', () => {
     const s = DND_SPECIES.find((s) => s.id === 'dragonborn') as DndSpecies | undefined;
     expect(s?.lineages).toEqual([
       'black',
@@ -789,12 +789,12 @@ describe('DND_SPECIES lineages', () => {
       'red',
       'silver',
       'white',
-      'amethyst',
-      'crystal',
-      'emerald',
-      'sapphire',
-      'topaz',
     ]);
+  });
+
+  it('gnome has forest and rock lineages (no deep)', () => {
+    const s = DND_SPECIES.find((s) => s.id === 'gnome') as DndSpecies | undefined;
+    expect(s?.lineages).toEqual(['forest', 'rock']);
   });
 
   it('tiefling has abyssal, chthonic, infernal lineages', () => {
