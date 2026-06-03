@@ -1035,7 +1035,7 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 7,
         grants: [
           // Iron Mind (2024 PHB): grants Wisdom saving throw proficiency.
-          // INT/CHA-if-already-have-WIS multiclass branch is a known simplification.
+          // 2024 Iron Mind grants flat Wisdom saving-throw proficiency.
           { type: 'feature', feature: { id: 'gloomstalker-iron-mind' } },
           { type: 'proficiency', category: 'saving-throw', id: 'wis' },
         ],

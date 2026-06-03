@@ -3022,4 +3022,56 @@ describe('Ranger Gloom Stalker resolver integration', () => {
     });
     expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('rope-trick');
   });
+
+  it('Ranger L7 Gloom Stalker: alwaysPreparedSpells does NOT include fear (L9 spell)', () => {
+    const build = makeGloomStalkerBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('fear');
+  });
+
+  it('Ranger L7 Gloom Stalker: alwaysPreparedSpells does NOT include greater-invisibility (L13 spell)', () => {
+    const build = makeGloomStalkerBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('greater-invisibility');
+  });
+
+  it('Ranger L7 Gloom Stalker: alwaysPreparedSpells does NOT include seeming (L17 spell)', () => {
+    const build = makeGloomStalkerBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('seeming');
+  });
+
+  it('Ranger L6 Gloom Stalker: savingThrows.wis.proficient is false (Iron Mind not yet granted)', () => {
+    const build = makeGloomStalkerBuild(6);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 6,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.savingThrows.wis.proficient).toBe(false);
+  });
 });

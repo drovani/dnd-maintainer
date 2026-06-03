@@ -2822,3 +2822,94 @@ describe('Paladin oath spells integration — L9 Oath of the Ancients', () => {
     expect(naturesWrath!.saveDC).toBe(15);
   });
 });
+
+describe('Hunter Ranger feature-choice integration', () => {
+  const rangerSubclassKey = createChoiceKey('subclass', 'class', 'ranger', 0);
+  const huntersPreyChoiceKey = createChoiceKey('feature-choice', 'subclass', 'hunter', 0);
+  const defensiveTacticsChoiceKey = createChoiceKey('feature-choice', 'subclass', 'hunter', 1);
+
+  const baseL3Build: CharacterBuild = {
+    speciesId: 'human' as const,
+    backgroundId: 'acolyte' as const,
+    baseAbilities: { str: 10, dex: 14, con: 10, int: 10, wis: 14, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'ranger' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'ranger' as ClassId, classLevel: 2, hpRoll: 6 },
+      { classId: 'ranger' as ClassId, classLevel: 3, hpRoll: 6 },
+    ],
+    choices: {
+      [rangerSubclassKey]: { type: 'subclass' as const, subclassId: 'hunter' as SubclassId },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  it('Hunter Ranger L3 with colossus-slayer: features contains hunter-hunters-prey-colossus-slayer', () => {
+    const build: CharacterBuild = {
+      ...baseL3Build,
+      choices: {
+        ...baseL3Build.choices,
+        [huntersPreyChoiceKey]: { type: 'feature-choice' as const, optionId: 'colossus-slayer' },
+      },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+    });
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('hunter-hunters-prey-colossus-slayer');
+  });
+
+  it('Hunter Ranger L7 with escape-the-horde: features contains hunter-defensive-tactics-escape-the-horde', () => {
+    const build: CharacterBuild = {
+      ...baseL3Build,
+      levels: [
+        { classId: 'ranger' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'ranger' as ClassId, classLevel: 2, hpRoll: 6 },
+        { classId: 'ranger' as ClassId, classLevel: 3, hpRoll: 6 },
+        { classId: 'ranger' as ClassId, classLevel: 4, hpRoll: 6 },
+        { classId: 'ranger' as ClassId, classLevel: 5, hpRoll: 6 },
+        { classId: 'ranger' as ClassId, classLevel: 6, hpRoll: 6 },
+        { classId: 'ranger' as ClassId, classLevel: 7, hpRoll: 6 },
+      ],
+      choices: {
+        ...baseL3Build.choices,
+        [huntersPreyChoiceKey]: { type: 'feature-choice' as const, optionId: 'colossus-slayer' },
+        [defensiveTacticsChoiceKey]: { type: 'feature-choice' as const, optionId: 'escape-the-horde' },
+      },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+    });
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('hunter-defensive-tactics-escape-the-horde');
+  });
+
+  it("Hunter Ranger L3 with no Hunter's Prey decision: pendingChoices contains feature-choice with correct key and options", () => {
+    const { bundles } = collectBundles(baseL3Build);
+    const result = resolveCharacter({
+      baseAbilities: baseL3Build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: baseL3Build.choices,
+    });
+    const pending = result.pendingChoices.find(
+      (c) => c.type === 'feature-choice' && c.choiceKey === huntersPreyChoiceKey
+    );
+    expect(pending).toBeDefined();
+    if (pending?.type === 'feature-choice') {
+      expect(pending.source.origin).toBe('subclass');
+      const optionIds = pending.options.map((o) => o.optionId);
+      expect(optionIds).toContain('colossus-slayer');
+      expect(optionIds).toContain('horde-breaker');
+    }
+  });
+});

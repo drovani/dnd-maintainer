@@ -1549,7 +1549,7 @@
     },
     "gloomstalker-iron-mind": {
       "name": "Iron Mind",
-      "description": "You have honed your ability to resist the mind-altering powers of your prey. You gain proficiency in Wisdom saving throws. (2024 PHB: grants WIS save proficiency; the INT/CHA-if-already-have-WIS multiclass branch is a known simplification.)"
+      "description": "You gain proficiency in Wisdom saving throws."
     },
     "hunter-hunters-lore": {
       "name": "Hunter's Lore",
