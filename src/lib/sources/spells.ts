@@ -126,6 +126,30 @@ export const SPELL_CATALOG = [
     duration: 'Instantaneous',
     nativeClasses: ['druid'],
   },
+  {
+    id: 'speak-with-animals',
+    level: 1,
+    school: 'divination',
+    ritual: true,
+    concentration: false,
+    castingTime: '1 minute',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '10 minutes',
+    nativeClasses: ['bard', 'druid', 'ranger'],
+  },
+  {
+    id: 'commune-with-nature',
+    level: 5,
+    school: 'divination',
+    ritual: true,
+    concentration: false,
+    castingTime: '1 minute',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    nativeClasses: ['druid', 'ranger'],
+  },
 ] as const satisfies readonly SpellDef[];
 
 export type SpellId = (typeof SPELL_CATALOG)[number]['id'];

@@ -2476,6 +2476,14 @@
     "thorn-whip": {
       "name": "Thorn Whip",
       "description": "You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack against the target. On a hit, the target takes 1d6 Piercing damage, and if it is Large or smaller, you pull the creature up to 10 feet closer to you."
+    },
+    "speak-with-animals": {
+      "name": "Speak with Animals",
+      "description": "For the duration, you can comprehend and verbally communicate with Beasts, and you can use the Influence action's skill options to alter their attitude."
+    },
+    "commune-with-nature": {
+      "name": "Commune with Nature",
+      "description": "You briefly become one with nature and gain knowledge of the surrounding territory (3 miles outdoors, 300 feet underground): learn up to three facts about terrain, creatures, water, plants, minerals, or magical effects nearby."
     }
   }
 }
