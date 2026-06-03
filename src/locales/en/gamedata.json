@@ -2414,6 +2414,10 @@
     "focus-points": {
       "name": "Focus Points",
       "description": "Fuel Monk techniques. Regain on a Short Rest."
+    },
+    "sorcery-points": {
+      "name": "Sorcery Points",
+      "description": "Fuel Metamagic and subclass features. Regain on a Long Rest; maximum equals your Sorcerer level."
     }
   },
   "spells": {

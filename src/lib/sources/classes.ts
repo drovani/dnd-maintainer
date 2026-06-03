@@ -948,6 +948,12 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
         grants: [
           { type: 'feature', feature: { id: 'sorcerer-font-of-magic' } },
           { type: 'feature', feature: { id: 'sorcerer-metamagic' } },
+          {
+            type: 'resource-pool',
+            poolId: 'sorcery-points',
+            max: { mode: 'class-level', classId: 'sorcerer' },
+            regen: 'long-rest',
+          },
         ],
       },
       { grants: [{ type: 'subclass', classId: 'sorcerer', key: createChoiceKey('subclass', 'class', 'sorcerer', 0) }] },
