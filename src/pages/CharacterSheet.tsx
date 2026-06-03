@@ -17,7 +17,7 @@ import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoices
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
 import { ResourcePoolsPanel } from '@/components/character-sheet/ResourcePoolsPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
-import { applyLongRest, applyShortRest } from '@/lib/rest';
+import { buildRestUpdate } from '@/lib/rest';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
@@ -163,22 +163,12 @@ function CharacterSheetInner({
 
   const handleShortRest = () => {
     if (!resolved) return;
-    const restUsed = {
-      hitDiceUsed: character.hit_dice_used ?? {},
-      spellSlotsUsed: character.spell_slots_used ?? {},
-    };
-    const next = applyShortRest(restUsed, resolved);
-    handleUpdate({ hit_dice_used: next.hitDiceUsed, spell_slots_used: next.spellSlotsUsed });
+    handleUpdate(buildRestUpdate('short', character, resolved));
   };
 
   const handleLongRest = () => {
     if (!resolved) return;
-    const restUsed = {
-      hitDiceUsed: character.hit_dice_used ?? {},
-      spellSlotsUsed: character.spell_slots_used ?? {},
-    };
-    const next = applyLongRest(restUsed, resolved);
-    handleUpdate({ hit_dice_used: next.hitDiceUsed, spell_slots_used: next.spellSlotsUsed });
+    handleUpdate(buildRestUpdate('long', character, resolved));
   };
 
   const handleArchive = () => {

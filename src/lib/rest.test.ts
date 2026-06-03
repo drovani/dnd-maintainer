@@ -7,6 +7,7 @@ import {
   recoverSpellSlot,
   applyShortRest,
   applyLongRest,
+  buildRestUpdate,
   type HitDiceUsed,
   type SpellSlotsUsed,
   type RestUsed,
@@ -344,16 +345,17 @@ describe('applyLongRest', () => {
   });
 
   it('recovery budget is based on total character level, not stored used count', () => {
-    // 3 hit dice total, 0 used → budget = floor(3/2) = 1 but nothing to recover
-    // This verifies budget comes from hitDie.count, not from what's stored in hitDiceUsed
+    // totalLevel = 2 (count=2) → budget = max(1, floor(2/2)) = 1
+    // used = 4 → a used-count-derived budget would be 4; level-derived budget is 1
+    // so only 1 die is recovered: 4 - 1 = 3
     const used: RestUsed = {
-      hitDiceUsed: { '8': 0 },
+      hitDiceUsed: { '8': 4 },
       spellSlotsUsed: {},
     };
-    const resolved = makeResolved({ hitDie: [{ die: 8, count: 3 }] });
+    const resolved = makeResolved({ hitDie: [{ die: 8, count: 2 }] });
     const result = applyLongRest(used, resolved);
-    // budget = floor(3/2) = 1; but 0 used, so nothing changes
-    expect(result.hitDiceUsed['8']).toBe(0);
+    // budget comes from level (1), not from used (4) — proves level-derived formula
+    expect(result.hitDiceUsed['8']).toBe(3);
   });
 
   it('does not recover more than what is used (cannot go below 0)', () => {
@@ -412,5 +414,79 @@ describe('applyLongRest', () => {
     applyLongRest(used, resolved);
     expect(hitDiceUsed).toEqual({ '8': 3 });
     expect(spellSlotsUsed).toEqual({ '1': 2 });
+  });
+});
+
+// ─── buildRestUpdate ──────────────────────────────────────────────────────────
+
+describe('buildRestUpdate', () => {
+  it('long rest resets all spell slots and recovers hit dice, returning both columns', () => {
+    // level 4 → budget = floor(4/2) = 2; used 3 of 4 → recovers 2 → used becomes 1
+    const character = {
+      hit_dice_used: { '8': 3 } as HitDiceUsed,
+      spell_slots_used: { '1': 4, '2': 3, pact: 2 } as SpellSlotsUsed,
+    };
+    const resolved = makeResolved({
+      hitDie: [{ die: 8, count: 4 }],
+      spellcasting: makeSpellcasting({ slots: [4, 3, 0, 0, 0, 0, 0, 0, 0] }),
+    });
+    const result = buildRestUpdate('long', character, resolved);
+    // Both columns must be present
+    expect(result).toHaveProperty('hit_dice_used');
+    expect(result).toHaveProperty('spell_slots_used');
+    // All spell slots reset to 0
+    expect(result.spell_slots_used).toEqual({ '1': 0, '2': 0, pact: 0 });
+    // Hit dice recovered by budget (2): 3 - 2 = 1
+    expect(result.hit_dice_used['8']).toBe(1);
+  });
+
+  it('short rest leaves hit_dice_used untouched and resets only pact slots', () => {
+    const character = {
+      hit_dice_used: { '8': 2 } as HitDiceUsed,
+      spell_slots_used: { '1': 3, pact: 2 } as SpellSlotsUsed,
+    };
+    const resolved = makeResolved({
+      hitDie: [{ die: 8, count: 4 }],
+      spellcasting: makeSpellcasting({
+        slots: [4, 0, 0, 0, 0, 0, 0, 0, 0],
+        pactMagic: { count: 2, slotLevel: 3 },
+      }),
+    });
+    const result = buildRestUpdate('short', character, resolved);
+    // Both columns returned
+    expect(result).toHaveProperty('hit_dice_used');
+    expect(result).toHaveProperty('spell_slots_used');
+    // Hit dice unchanged
+    expect(result.hit_dice_used).toEqual({ '8': 2 });
+    // Normal spell slots unchanged; pact reset to 0
+    expect(result.spell_slots_used['1']).toBe(3);
+    expect(result.spell_slots_used['pact']).toBe(0);
+  });
+
+  it('short rest with no pact magic returns hit_dice_used unchanged', () => {
+    const character = {
+      hit_dice_used: { '10': 1 } as HitDiceUsed,
+      spell_slots_used: { '1': 2 } as SpellSlotsUsed,
+    };
+    const resolved = makeResolved({
+      hitDie: [{ die: 10, count: 3 }],
+      spellcasting: makeSpellcasting({ slots: [4, 0, 0, 0, 0, 0, 0, 0, 0], pactMagic: null }),
+    });
+    const result = buildRestUpdate('short', character, resolved);
+    expect(result.hit_dice_used).toEqual({ '10': 1 });
+    expect(result.spell_slots_used).toEqual({ '1': 2 });
+  });
+
+  it('handles null hit_dice_used and spell_slots_used (treats both as empty)', () => {
+    const character = {
+      hit_dice_used: null as unknown as HitDiceUsed,
+      spell_slots_used: null as unknown as SpellSlotsUsed,
+    };
+    const resolved = makeResolved({
+      hitDie: [{ die: 8, count: 2 }],
+    });
+    const result = buildRestUpdate('long', character, resolved);
+    expect(result.hit_dice_used).toEqual({});
+    expect(result.spell_slots_used).toEqual({});
   });
 });

@@ -390,7 +390,11 @@
     },
     "spellSlots": {
       "levelLabel": "Level {{level}}",
-      "pactLabel": "Pact (L{{slotLevel}})"
+      "pactLabel": "Pact (L{{slotLevel}})",
+      "useSlot": "Use level {{level}} spell slot",
+      "recoverSlot": "Recover level {{level}} spell slot",
+      "usePact": "Use Pact Magic slot",
+      "recoverPact": "Recover Pact Magic slot"
     },
     "fields": {
       "class": "Class",

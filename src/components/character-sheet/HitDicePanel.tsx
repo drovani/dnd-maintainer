@@ -30,7 +30,7 @@ export function HitDicePanel({ resolved, character, onUpdate }: HitDicePanelProp
         {resolved.hitDie.map(({ die, count }) => {
           const key = String(die);
           const usedCount = used[key] ?? 0;
-          const available = (maxByDie[key] ?? 0) - usedCount;
+          const available = Math.max(0, (maxByDie[key] ?? 0) - usedCount);
           const isDisabled = usedCount >= (maxByDie[key] ?? 0);
 
           return (

@@ -1,3 +1,4 @@
+import type { Character } from '@/types/database';
 import type { ResolvedCharacter } from '@/types/resolved';
 
 // Local aliases for clarity
@@ -85,6 +86,23 @@ export function recoverSpellSlot(used: SpellSlotsUsed, level: number | 'pact'): 
   const currentUsed = used[key] ?? 0;
   if (currentUsed <= 0) return used;
   return { ...used, [key]: currentUsed - 1 };
+}
+
+/**
+ * Builds the Partial<Character> update payload for a short or long rest.
+ * Pure function — safe to test without any component or mutation machinery.
+ */
+export function buildRestUpdate(
+  kind: 'short' | 'long',
+  character: Pick<Character, 'hit_dice_used' | 'spell_slots_used'>,
+  resolved: ResolvedCharacter
+): { hit_dice_used: HitDiceUsed; spell_slots_used: SpellSlotsUsed } {
+  const restUsed: RestUsed = {
+    hitDiceUsed: character.hit_dice_used ?? {},
+    spellSlotsUsed: character.spell_slots_used ?? {},
+  };
+  const next = kind === 'short' ? applyShortRest(restUsed, resolved) : applyLongRest(restUsed, resolved);
+  return { hit_dice_used: next.hitDiceUsed, spell_slots_used: next.spellSlotsUsed };
 }
 
 /**

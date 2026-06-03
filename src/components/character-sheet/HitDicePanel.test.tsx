@@ -185,4 +185,20 @@ describe('HitDicePanel', () => {
     expect(screen.getByText('available')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'spend' })).not.toBeDisabled();
   });
+
+  it('clamps available to 0 when used exceeds max (de-leveled stale data)', () => {
+    // used=5 > max=3 — available must never go negative; Spend must be disabled
+    const resolved = buildMinimalResolved({ hitDie: [{ die: 8, count: 3 }] });
+    render(
+      <HitDicePanel
+        resolved={resolved}
+        character={buildMinimalCharacter({ hit_dice_used: { '8': 5 } })}
+        onUpdate={vi.fn()}
+      />
+    );
+    // "available" text is still rendered (not negative label)
+    expect(screen.getByText('available')).toBeInTheDocument();
+    // Spend disabled because usedCount(5) >= max(3)
+    expect(screen.getByRole('button', { name: 'spend' })).toBeDisabled();
+  });
 });

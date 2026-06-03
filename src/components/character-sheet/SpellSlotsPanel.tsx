@@ -1,4 +1,4 @@
-import { getSpellSlotMax, markSpellSlot, recoverSpellSlot } from '@/lib/rest';
+import { getSpellSlotMax } from '@/lib/rest';
 import type { Character } from '@/types/database';
 import type { ResolvedCharacter } from '@/types/resolved';
 import { useTranslation } from 'react-i18next';
@@ -22,12 +22,10 @@ export function SpellSlotsPanel({ resolved, character, onUpdate }: SpellSlotsPan
   const max = getSpellSlotMax(resolved);
   const used = character.spell_slots_used ?? {};
 
-  function handleToggle(level: number | 'pact'): void {
-    const key = String(level);
-    const usedCount = used[key] ?? 0;
+  function handlePipClick(key: string, i: number, isFilled: boolean): void {
     const maxCount = max[key] ?? 0;
-    const next = usedCount < maxCount ? markSpellSlot(used, level, max) : recoverSpellSlot(used, level);
-    onUpdate({ spell_slots_used: next });
+    const newUsed = isFilled ? Math.max(0, i) : Math.min(i + 1, maxCount);
+    onUpdate({ spell_slots_used: { ...used, [key]: newUsed } });
   }
 
   return (
@@ -53,9 +51,13 @@ export function SpellSlotsPanel({ resolved, character, onUpdate }: SpellSlotsPan
                     <button
                       key={i}
                       type="button"
-                      aria-label={isFilled ? `recover level ${level} slot` : `use level ${level} slot`}
+                      aria-label={
+                        isFilled
+                          ? tc('characterSheet.spellSlots.recoverSlot', { level })
+                          : tc('characterSheet.spellSlots.useSlot', { level })
+                      }
                       aria-pressed={isFilled}
-                      onClick={() => handleToggle(level)}
+                      onClick={() => handlePipClick(key, i, isFilled)}
                       className={`size-6 rounded-full border-2 transition-colors cursor-pointer ${
                         isFilled
                           ? 'bg-primary border-primary'
@@ -83,9 +85,11 @@ export function SpellSlotsPanel({ resolved, character, onUpdate }: SpellSlotsPan
                   <button
                     key={i}
                     type="button"
-                    aria-label={isFilled ? 'recover pact slot' : 'use pact slot'}
+                    aria-label={
+                      isFilled ? tc('characterSheet.spellSlots.recoverPact') : tc('characterSheet.spellSlots.usePact')
+                    }
                     aria-pressed={isFilled}
-                    onClick={() => handleToggle('pact')}
+                    onClick={() => handlePipClick('pact', i, isFilled)}
                     className={`size-6 rounded-full border-2 transition-colors cursor-pointer ${
                       isFilled
                         ? 'bg-purple-600 border-purple-600'

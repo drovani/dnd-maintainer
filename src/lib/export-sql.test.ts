@@ -280,6 +280,24 @@ describe('generateSeedSql', () => {
     expect(sql).toContain("ARRAY['blinded', 'charmed']::text[]");
   });
 
+  it('character INSERT includes hit_dice_used and spell_slots_used as jsonb', () => {
+    const data: ExportData = {
+      ...emptyData,
+      characters: [
+        {
+          id: 'ch1',
+          campaign_id: 'c1',
+          name: 'Hero',
+          hit_dice_used: { '8': 2 },
+          spell_slots_used: { '1': 1 },
+        },
+      ],
+    };
+    const sql = generateSeedSql(data);
+    expect(sql).toContain('\'{"8":2}\'::jsonb');
+    expect(sql).toContain('\'{"1":1}\'::jsonb');
+  });
+
   it('character INSERT uses species column not race', () => {
     const data: ExportData = {
       ...emptyData,
