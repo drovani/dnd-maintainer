@@ -1547,13 +1547,9 @@
       "name": "Umbral Sight",
       "description": "You gain Darkvision to a range of 60 feet. If you already have Darkvision, its range increases by 30 feet. You are also naturally adept at hiding from creatures that rely on Darkvision — you are invisible to creatures with Darkvision when they try to detect you using that sense."
     },
-    "gloomstalker-subclass-spells": {
-      "name": "Gloom Stalker Spells",
-      "description": "You always have certain spells prepared based on your Gloom Stalker subclass. (Spell grant system pending — see TODO #93.)"
-    },
     "gloomstalker-iron-mind": {
       "name": "Iron Mind",
-      "description": "You have honed your ability to resist the mind-altering powers of your prey. You gain proficiency in Wisdom, Intelligence, or Charisma saving throws (your choice). (One-time choice at level 7; no pending-choice mechanism — modeled as inert feature grant.)"
+      "description": "You have honed your ability to resist the mind-altering powers of your prey. You gain proficiency in Wisdom saving throws. (2024 PHB: grants WIS save proficiency; the INT/CHA-if-already-have-WIS multiclass branch is a known simplification.)"
     },
     "hunter-hunters-lore": {
       "name": "Hunter's Lore",

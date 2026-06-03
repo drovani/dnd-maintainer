@@ -1861,13 +1861,13 @@ describe('getSubclassSource — Gloom Stalker', () => {
     expect(getSubclassSource('gloomstalker')).toBeDefined();
   });
 
-  it('gloomstalker has 2 feature levels (L3, L7)', () => {
+  it('gloomstalker has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
     const source = getSubclassSource('gloomstalker');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
+    expect(source?.features).toHaveLength(6);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
   });
 
-  it('gloomstalker level 3 grants 3 features: dread-ambusher, umbral-sight, subclass-spells', () => {
+  it('gloomstalker level 3 grants 3 items: dread-ambusher, umbral-sight, disguise-self', () => {
     const source = getSubclassSource('gloomstalker');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
@@ -1882,23 +1882,66 @@ describe('getSubclassSource — Gloom Stalker', () => {
           type: 'feature',
           feature: expect.objectContaining({ id: 'gloomstalker-umbral-sight' }),
         }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'gloomstalker-subclass-spells' }),
-        }),
+        expect.objectContaining({ type: 'spell', spellId: 'disguise-self', alwaysPrepared: true }),
       ])
     );
   });
 
-  it('gloomstalker level 7 grants 1 feature: iron-mind', () => {
+  it('gloomstalker level 3 has no inert subclass-spells feature grant', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const inertGrant = level3?.grants.find(
+      (g) => g.type === 'feature' && 'feature' in g && g.feature.id === 'gloomstalker-subclass-spells'
+    );
+    expect(inertGrant).toBeUndefined();
+  });
+
+  it('gloomstalker level 5 grants rope-trick (alwaysPrepared)', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level5 = source?.features.find((f) => f.classLevel === 5);
+    expect(level5).toBeDefined();
+    expect(level5?.grants).toHaveLength(1);
+    expect(level5?.grants[0]).toMatchObject({ type: 'spell', spellId: 'rope-trick', alwaysPrepared: true });
+  });
+
+  it('gloomstalker level 7 grants iron-mind feature and WIS saving-throw proficiency', () => {
     const source = getSubclassSource('gloomstalker');
     const level7 = source?.features.find((f) => f.classLevel === 7);
     expect(level7).toBeDefined();
-    expect(level7?.grants).toHaveLength(1);
-    expect(level7?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'gloomstalker-iron-mind' },
-    });
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'gloomstalker-iron-mind' }),
+        }),
+        expect.objectContaining({ type: 'proficiency', category: 'saving-throw', id: 'wis' }),
+      ])
+    );
+  });
+
+  it('gloomstalker level 9 grants fear (alwaysPrepared)', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level9 = source?.features.find((f) => f.classLevel === 9);
+    expect(level9).toBeDefined();
+    expect(level9?.grants).toHaveLength(1);
+    expect(level9?.grants[0]).toMatchObject({ type: 'spell', spellId: 'fear', alwaysPrepared: true });
+  });
+
+  it('gloomstalker level 13 grants greater-invisibility (alwaysPrepared)', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level13 = source?.features.find((f) => f.classLevel === 13);
+    expect(level13).toBeDefined();
+    expect(level13?.grants).toHaveLength(1);
+    expect(level13?.grants[0]).toMatchObject({ type: 'spell', spellId: 'greater-invisibility', alwaysPrepared: true });
+  });
+
+  it('gloomstalker level 17 grants seeming (alwaysPrepared)', () => {
+    const source = getSubclassSource('gloomstalker');
+    const level17 = source?.features.find((f) => f.classLevel === 17);
+    expect(level17).toBeDefined();
+    expect(level17?.grants).toHaveLength(1);
+    expect(level17?.grants[0]).toMatchObject({ type: 'spell', spellId: 'seeming', alwaysPrepared: true });
   });
 });
 

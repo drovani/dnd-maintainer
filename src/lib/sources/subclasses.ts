@@ -1020,17 +1020,45 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'gloomstalker-dread-ambusher' } },
           // Umbral Sight: Darkvision 60 ft (or +30 to existing); invisible to creatures relying on Darkvision
           { type: 'feature', feature: { id: 'gloomstalker-umbral-sight' } },
-          // TODO #93: model Gloom Stalker subclass spells as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'gloomstalker-subclass-spells' } },
+          // Gloom Stalker Spells — L3 tier (2024 PHB)
+          { type: 'spell', spellId: 'disguise-self', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          // Gloom Stalker Spells — L5 tier
+          { type: 'spell', spellId: 'rope-trick', alwaysPrepared: true },
         ],
       },
       {
         classLevel: 7,
         grants: [
-          // Iron Mind: gain proficiency in WIS, INT, or CHA saving throw of your choice
-          // ProficiencyChoiceGrant does not support category: 'saving-throw'; modeled as inert feature grant
-          // (same pattern as wildheart-rage-of-the-wilds, zealot-divine-fury, etc.)
+          // Iron Mind (2024 PHB): grants Wisdom saving throw proficiency.
+          // INT/CHA-if-already-have-WIS multiclass branch is a known simplification.
           { type: 'feature', feature: { id: 'gloomstalker-iron-mind' } },
+          { type: 'proficiency', category: 'saving-throw', id: 'wis' },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          // Gloom Stalker Spells — L9 tier
+          { type: 'spell', spellId: 'fear', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 13,
+        grants: [
+          // Gloom Stalker Spells — L13 tier
+          { type: 'spell', spellId: 'greater-invisibility', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 17,
+        grants: [
+          // Gloom Stalker Spells — L17 tier
+          { type: 'spell', spellId: 'seeming', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
