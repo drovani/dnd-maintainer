@@ -43,7 +43,9 @@ export function SpellSlotsPanel({ resolved, character, onUpdate }: SpellSlotsPan
 
           return (
             <div key={level} className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-foreground w-16 shrink-0">Level {level}</span>
+              <span className="text-sm font-semibold text-foreground w-16 shrink-0">
+                {tc('characterSheet.spellSlots.levelLabel', { level })}
+              </span>
               <div className="flex gap-1 flex-wrap">
                 {Array.from({ length: slotMax }, (_, i) => {
                   const isFilled = i < usedCount;
@@ -71,7 +73,7 @@ export function SpellSlotsPanel({ resolved, character, onUpdate }: SpellSlotsPan
         {hasPactMagic && spellcasting.pactMagic !== null && (
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-semibold text-foreground w-16 shrink-0">
-              Pact (L{spellcasting.pactMagic.slotLevel})
+              {tc('characterSheet.spellSlots.pactLabel', { slotLevel: spellcasting.pactMagic.slotLevel })}
             </span>
             <div className="flex gap-1 flex-wrap">
               {Array.from({ length: spellcasting.pactMagic.count }, (_, i) => {

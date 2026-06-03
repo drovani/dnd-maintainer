@@ -10,11 +10,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { AttacksPanel } from '@/components/character-sheet/AttacksPanel';
 import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown';
 import { ConditionsPanel } from '@/components/character-sheet/ConditionsPanel';
+import { HitDicePanel } from '@/components/character-sheet/HitDicePanel';
+import { SpellSlotsPanel } from '@/components/character-sheet/SpellSlotsPanel';
 import { LevelControls } from '@/components/character-sheet/LevelControls';
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel';
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
 import { ResourcePoolsPanel } from '@/components/character-sheet/ResourcePoolsPanel';
 import { SkillsPanel } from '@/components/character-sheet/SkillsPanel';
+import { applyLongRest, applyShortRest } from '@/lib/rest';
 import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
@@ -156,6 +159,26 @@ function CharacterSheetInner({
         onError: () => toast.error(tc('characterSheet.errors.updateFailed')),
       }
     );
+  };
+
+  const handleShortRest = () => {
+    if (!resolved) return;
+    const restUsed = {
+      hitDiceUsed: character.hit_dice_used ?? {},
+      spellSlotsUsed: character.spell_slots_used ?? {},
+    };
+    const next = applyShortRest(restUsed, resolved);
+    handleUpdate({ hit_dice_used: next.hitDiceUsed, spell_slots_used: next.spellSlotsUsed });
+  };
+
+  const handleLongRest = () => {
+    if (!resolved) return;
+    const restUsed = {
+      hitDiceUsed: character.hit_dice_used ?? {},
+      spellSlotsUsed: character.spell_slots_used ?? {},
+    };
+    const next = applyLongRest(restUsed, resolved);
+    handleUpdate({ hit_dice_used: next.hitDiceUsed, spell_slots_used: next.spellSlotsUsed });
   };
 
   const handleArchive = () => {
@@ -531,6 +554,22 @@ function CharacterSheetInner({
 
             {/* Conditions */}
             <ConditionsPanel character={character} onUpdate={handleUpdate} />
+
+            {/* Rest buttons + Hit Dice + Spell Slots */}
+            {resolved && (
+              <>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={handleShortRest}>
+                    {tc('characterSheet.actions.shortRest')}
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={handleLongRest}>
+                    {tc('characterSheet.actions.longRest')}
+                  </Button>
+                </div>
+                <HitDicePanel resolved={resolved} character={character} onUpdate={handleUpdate} />
+                <SpellSlotsPanel resolved={resolved} character={character} onUpdate={handleUpdate} />
+              </>
+            )}
 
             {/* Attacks */}
             {resolved && <AttacksPanel attacks={resolved.attacks} weaponMasteries={resolved.weaponMasteries} />}

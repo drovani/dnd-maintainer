@@ -37,14 +37,14 @@ export function HitDicePanel({ resolved, character, onUpdate }: HitDicePanelProp
             <div key={die} className="flex items-center justify-between bg-muted/50 p-3 rounded border">
               <div className="flex items-center gap-3">
                 <span className="font-semibold text-foreground text-sm">
-                  d{die} × {count}
+                  {tc('characterSheet.hitDice.dieLabel', { die, count })}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {available} / {maxByDie[key] ?? 0} available
+                  {tc('characterSheet.hitDice.available', { available, max: maxByDie[key] ?? 0 })}
                 </span>
               </div>
               <Button type="button" variant="outline" size="sm" disabled={isDisabled} onClick={() => handleSpend(die)}>
-                Spend
+                {tc('characterSheet.hitDice.spend')}
               </Button>
             </div>
           );

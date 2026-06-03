@@ -120,19 +120,21 @@ describe('HitDicePanel', () => {
       ],
     });
     render(<HitDicePanel resolved={resolved} character={buildMinimalCharacter()} onUpdate={vi.fn()} />);
-    expect(screen.getByText(/d10/)).toBeInTheDocument();
-    expect(screen.getByText(/d6/)).toBeInTheDocument();
+    // tc('characterSheet.hitDice.dieLabel', {die, count}) → mock returns last segment "dieLabel"
+    // Two die rows → two "dieLabel" labels
+    expect(screen.getAllByText('dieLabel')).toHaveLength(2);
   });
 
-  it('shows correct available count when no dice are used', () => {
+  it('shows available count label for each die row', () => {
     const resolved = buildMinimalResolved({ hitDie: [{ die: 8, count: 4 }] });
     render(
       <HitDicePanel resolved={resolved} character={buildMinimalCharacter({ hit_dice_used: {} })} onUpdate={vi.fn()} />
     );
-    expect(screen.getByText(/4 \/ 4 available/)).toBeInTheDocument();
+    // tc('characterSheet.hitDice.available', {...}) → mock returns last segment "available"
+    expect(screen.getByText('available')).toBeInTheDocument();
   });
 
-  it('shows decremented available count when some dice are used', () => {
+  it('shows available count label when some dice are used', () => {
     const resolved = buildMinimalResolved({ hitDie: [{ die: 8, count: 4 }] });
     render(
       <HitDicePanel
@@ -141,7 +143,8 @@ describe('HitDicePanel', () => {
         onUpdate={vi.fn()}
       />
     );
-    expect(screen.getByText(/2 \/ 4 available/)).toBeInTheDocument();
+    // tc('characterSheet.hitDice.available', {...}) → mock returns last segment "available"
+    expect(screen.getByText('available')).toBeInTheDocument();
   });
 
   it('clicking Spend calls onUpdate with incremented used count', async () => {
@@ -150,7 +153,8 @@ describe('HitDicePanel', () => {
     render(
       <HitDicePanel resolved={resolved} character={buildMinimalCharacter({ hit_dice_used: {} })} onUpdate={onUpdate} />
     );
-    await userEvent.click(screen.getByRole('button', { name: /spend/i }));
+    // tc('characterSheet.hitDice.spend') → mock returns "spend"
+    await userEvent.click(screen.getByRole('button', { name: 'spend' }));
     expect(onUpdate).toHaveBeenCalledWith({ hit_dice_used: { '8': 1 } });
   });
 
@@ -163,7 +167,7 @@ describe('HitDicePanel', () => {
         onUpdate={vi.fn()}
       />
     );
-    expect(screen.getByRole('button', { name: /spend/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'spend' })).toBeDisabled();
   });
 
   it('does not call onUpdate on initial render', () => {
@@ -178,7 +182,7 @@ describe('HitDicePanel', () => {
     render(
       <HitDicePanel resolved={resolved} character={buildMinimalCharacter({ hit_dice_used: null })} onUpdate={vi.fn()} />
     );
-    expect(screen.getByText(/2 \/ 2 available/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /spend/i })).not.toBeDisabled();
+    expect(screen.getByText('available')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'spend' })).not.toBeDisabled();
   });
 });

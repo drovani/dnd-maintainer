@@ -383,6 +383,15 @@
       "hitDice": "Hit Dice",
       "spellSlots": "Spell Slots"
     },
+    "hitDice": {
+      "dieLabel": "d{{die}} × {{count}}",
+      "available": "{{available}} / {{max}} available",
+      "spend": "Spend"
+    },
+    "spellSlots": {
+      "levelLabel": "Level {{level}}",
+      "pactLabel": "Pact (L{{slotLevel}})"
+    },
     "fields": {
       "class": "Class",
       "level": "Level",
