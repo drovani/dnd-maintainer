@@ -20,6 +20,7 @@ import type {
   DamageTypeChoiceGrant,
   FeatureChoiceGrant,
   FeatChoiceGrant,
+  SpellChoiceGrant,
 } from '@/types/grants';
 import type { CharacterBuild } from '@/types/choices';
 import { SPECIES_SOURCES, LINEAGE_GRANTS_REGISTRY } from '@/lib/sources/species';
@@ -189,6 +190,29 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
           warnings.push(msg);
           logger.warn(msg);
         }
+      }
+    }
+  }
+
+  // Spell-choice decisions — expand chosen spellIds into individual spell grants so the
+  // resolver's collectGrantsByType('spell') loop picks them up.
+  const allSpellChoiceGrants: { grant: SpellChoiceGrant; source: SourceTag }[] = [];
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'spell-choice') {
+        allSpellChoiceGrants.push({ grant: grant as SpellChoiceGrant, source: bundle.source });
+      }
+    }
+  }
+
+  for (const { grant, source } of allSpellChoiceGrants) {
+    const decision = build.choices[grant.key];
+    if (decision?.type === 'spell-choice') {
+      for (const spellId of decision.spellIds) {
+        bundles.push({
+          source,
+          grants: [{ type: 'spell', spellId, alwaysPrepared: false }],
+        });
       }
     }
   }

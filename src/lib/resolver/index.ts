@@ -324,6 +324,22 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     }
   }
 
+  // Unresolved or underfilled spell-choice grants
+  for (const { grant, source } of collectGrantsByType(bundles, 'spell-choice')) {
+    const decision = choices[grant.key];
+    const chosenIds = decision?.type === 'spell-choice' ? decision.spellIds : [];
+    if (!decision || decision.type !== 'spell-choice' || chosenIds.length < grant.count) {
+      pendingChoices.push({
+        type: 'spell-choice',
+        choiceKey: grant.key,
+        source,
+        count: grant.count,
+        spellList: grant.spellList,
+        spellLevel: grant.spellLevel,
+      });
+    }
+  }
+
   // Unresolved subclass grants
   for (const { grant, source } of collectGrantsByType(bundles, 'subclass')) {
     const decision = choices[grant.key];
