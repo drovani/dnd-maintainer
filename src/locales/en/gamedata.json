@@ -1491,10 +1491,6 @@
       "name": "Holy Rebuke",
       "description": "Channel Divinity: when a creature within 30 feet attacks an ally, you can use your Reaction to rebuke it — the creature takes radiant damage and is rebuked."
     },
-    "oathofdevotion-oath-spells": {
-      "name": "Oath of Devotion Spells",
-      "description": "Your sacred oath lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day. Consult the Oath of Devotion Spells table in the Player's Handbook for the full list."
-    },
     "oathofdevotion-aura-of-devotion": {
       "name": "Aura of Devotion",
       "description": "You and friendly creatures within 10 feet of you can't be Charmed while you are conscious. At level 18, the range of this aura increases to 30 feet."
@@ -1507,10 +1503,6 @@
       "name": "Inspiring Smite",
       "description": "Channel Divinity: immediately after you deal damage with Divine Smite, you can distribute Temporary Hit Points equal to 2d8 plus your Paladin level among creatures of your choice within 30 feet of you, including yourself."
     },
-    "oathofglory-oath-spells": {
-      "name": "Oath of Glory Spells",
-      "description": "Your sacred oath lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day. Consult the Oath of Glory Spells table in the Player's Handbook for the full list."
-    },
     "oathofglory-aura-of-alacrity": {
       "name": "Aura of Alacrity",
       "description": "You and friendly creatures within 10 feet of you gain a +10-foot bonus to walking speed while you are conscious. At level 18, the range of this aura increases."
@@ -1519,14 +1511,6 @@
       "name": "Nature's Wrath",
       "description": "Channel Divinity: you can cause spectral vines to spring up and bind a creature. The target must succeed on a Dexterity or Strength saving throw or be Restrained until you use this feature again."
     },
-    "oathofancients-turn-the-faithless": {
-      "name": "Turn the Faithless",
-      "description": "Channel Divinity: you can utter ancient words that are painful for Fey and Fiends to hear. Each Fey or Fiend within 30 feet of you must make a Wisdom saving throw. On a failed save, the creature is Turned for 1 minute or until it takes damage."
-    },
-    "oathofancients-oath-spells": {
-      "name": "Oath of the Ancients Spells",
-      "description": "Your sacred oath lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day. Consult the Oath of the Ancients Spells table in the Player's Handbook for the full list."
-    },
     "oathofancients-aura-of-warding": {
       "name": "Aura of Warding",
       "description": "Ancient magic lies so heavily upon you that it forms an aura. You and friendly creatures within 10 feet of you have resistance to damage from spells while you are conscious. At level 18, the range of this aura increases to 30 feet."
@@ -1534,14 +1518,6 @@
     "oathofvengeance-vow-of-enmity": {
       "name": "Vow of Enmity",
       "description": "Channel Divinity: as a Bonus Action, you can utter a vow of enmity against a creature you can see within 10 feet of you. You gain Advantage on attack rolls against the creature for 1 minute or until you use this feature again."
-    },
-    "oathofvengeance-abjure-enemy": {
-      "name": "Abjure Enemy",
-      "description": "Channel Divinity: as an Action, you present your holy symbol and speak a prayer of denunciation. One creature within 60 feet must make a Wisdom saving throw. On a failed save, the creature is Frightened for 1 minute or until it takes damage; its speed is also halved."
-    },
-    "oathofvengeance-oath-spells": {
-      "name": "Oath of Vengeance Spells",
-      "description": "Your sacred oath lets you always have certain spells prepared. These spells don't count against the number of spells you can prepare each day. Consult the Oath of Vengeance Spells table in the Player's Handbook for the full list."
     },
     "oathofvengeance-relentless-avenger": {
       "name": "Relentless Avenger",

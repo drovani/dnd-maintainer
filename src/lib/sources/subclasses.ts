@@ -717,10 +717,21 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Sacred Weapon: 1 minute — weapon glows, +CHA mod to attack rolls (Channel Divinity option)
           { type: 'feature', feature: { id: 'oathofdevotion-sacred-weapon' } },
-          // Holy Rebuke: Reaction within 30 ft when ally is attacked — target takes radiant damage (Channel Divinity option)
+          // KEEP+FLAG: Holy Rebuke — "oathofdevotion-holy-rebuke" is not a recognizable 2024 PHB option name.
+          // 2014 Devotion had Sacred Weapon + Turn the Unholy; 2024 Devotion has only Sacred Weapon.
+          // Cannot confirm "holy-rebuke" is a valid 2014 option being removed — keeping until human review.
           { type: 'feature', feature: { id: 'oathofdevotion-holy-rebuke' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'oathofdevotion-oath-spells' } },
+          // Devotion L3 oath spells (2024 PHB)
+          { type: 'spell', spellId: 'protection-from-evil-and-good', alwaysPrepared: true },
+          { type: 'spell', spellId: 'shield-of-faith', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          // Devotion L5 oath spells (Paladin 5 → spell levels 1–2)
+          { type: 'spell', spellId: 'aid', alwaysPrepared: true },
+          { type: 'spell', spellId: 'zone-of-truth', alwaysPrepared: true },
         ],
       },
       {
@@ -728,6 +739,30 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Aura of Devotion: you and allies within 10 ft can't be Charmed; expands to 30 ft at L18
           { type: 'feature', feature: { id: 'oathofdevotion-aura-of-devotion' } },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          // Devotion L9 oath spells (Paladin 9 → spell levels 3)
+          { type: 'spell', spellId: 'beacon-of-hope', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 13,
+        grants: [
+          // Devotion L13 oath spells (Paladin 13 → spell level 4)
+          { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true },
+          { type: 'spell', spellId: 'guardian-of-faith', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 17,
+        grants: [
+          // Devotion L17 oath spells (Paladin 17 → spell level 5)
+          { type: 'spell', spellId: 'commune', alwaysPrepared: true },
+          { type: 'spell', spellId: 'flame-strike', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -741,8 +776,17 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'oathofglory-peerless-athlete' } },
           // Inspiring Smite: after Divine Smite, distribute 2d8 + Paladin level temp HP to creatures within 30 ft (Channel Divinity option)
           { type: 'feature', feature: { id: 'oathofglory-inspiring-smite' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'oathofglory-oath-spells' } },
+          // Glory L3 oath spells (2024 PHB)
+          { type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: true },
+          { type: 'spell', spellId: 'heroism', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          // Glory L5 oath spells (Paladin 5 → spell levels 1–2)
+          { type: 'spell', spellId: 'enhance-ability', alwaysPrepared: true },
+          { type: 'spell', spellId: 'magic-weapon', alwaysPrepared: true },
         ],
       },
       {
@@ -752,6 +796,30 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'oathofglory-aura-of-alacrity' } },
         ],
       },
+      {
+        classLevel: 9,
+        grants: [
+          // Glory L9 oath spells (Paladin 9 → spell level 3)
+          { type: 'spell', spellId: 'haste', alwaysPrepared: true },
+          { type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 13,
+        grants: [
+          // Glory L13 oath spells (Paladin 13 → spell level 4)
+          { type: 'spell', spellId: 'compulsion', alwaysPrepared: true },
+          { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 17,
+        grants: [
+          // Glory L17 oath spells (Paladin 17 → spell level 5)
+          { type: 'spell', spellId: 'legend-lore', alwaysPrepared: true },
+          { type: 'spell', spellId: 'yolandes-regal-presence', alwaysPrepared: true },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   oathofancients: {
@@ -759,12 +827,21 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 3,
         grants: [
-          // Nature's Wrath: DEX or STR save vs Restrained by spectral vines (Channel Divinity option)
+          // Nature's Wrath: STR or DEX save vs Restrained by spectral vines (Channel Divinity option)
+          // Phase 3 will add saveDC: { dcAbility: 'cha' }
           { type: 'feature', feature: { id: 'oathofancients-natures-wrath' } },
-          // Turn the Faithless: Fey and Fiend WIS save vs Turned for 1 minute (Channel Divinity option)
-          { type: 'feature', feature: { id: 'oathofancients-turn-the-faithless' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'oathofancients-oath-spells' } },
+          // REMOVED: oathofancients-turn-the-faithless — 2024 PHB Ancients CD has only Nature's Wrath (confirmed removal)
+          // Ancients L3 oath spells (2024 PHB)
+          { type: 'spell', spellId: 'ensnaring-strike', alwaysPrepared: true },
+          { type: 'spell', spellId: 'speak-with-animals', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          // Ancients L5 oath spells (Paladin 5 → spell levels 1–2)
+          { type: 'spell', spellId: 'misty-step', alwaysPrepared: true },
+          { type: 'spell', spellId: 'moonbeam', alwaysPrepared: true },
         ],
       },
       {
@@ -773,6 +850,30 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Aura of Warding: you and allies within 10 ft have resistance to damage from spells; expands at L18
           // Modeled as feature grant — source-conditional resistance (spells only) doesn't map to existing resistance grant
           { type: 'feature', feature: { id: 'oathofancients-aura-of-warding' } },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          // Ancients L9 oath spells (Paladin 9 → spell level 3)
+          { type: 'spell', spellId: 'plant-growth', alwaysPrepared: true },
+          { type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 13,
+        grants: [
+          // Ancients L13 oath spells (Paladin 13 → spell level 4)
+          { type: 'spell', spellId: 'ice-storm', alwaysPrepared: true },
+          { type: 'spell', spellId: 'stoneskin', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 17,
+        grants: [
+          // Ancients L17 oath spells (Paladin 17 → spell level 5)
+          { type: 'spell', spellId: 'commune-with-nature', alwaysPrepared: true },
+          { type: 'spell', spellId: 'tree-stride', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -784,10 +885,18 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Vow of Enmity: Bonus Action, single target within 10 ft for 1 min — Advantage on attack rolls against it (Channel Divinity option)
           { type: 'feature', feature: { id: 'oathofvengeance-vow-of-enmity' } },
-          // Abjure Enemy: 60 ft creature WIS save or Frightened and half speed for 1 minute (Channel Divinity option)
-          { type: 'feature', feature: { id: 'oathofvengeance-abjure-enemy' } },
-          // TODO #93: model as spell grants when spell id system is available
-          { type: 'feature', feature: { id: 'oathofvengeance-oath-spells' } },
+          // REMOVED: oathofvengeance-abjure-enemy — 2024 PHB Vengeance CD has only Vow of Enmity (confirmed removal)
+          // Vengeance L3 oath spells (2024 PHB)
+          { type: 'spell', spellId: 'bane', alwaysPrepared: true },
+          { type: 'spell', spellId: 'hunters-mark', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 5,
+        grants: [
+          // Vengeance L5 oath spells (Paladin 5 → spell levels 1–2)
+          { type: 'spell', spellId: 'hold-person', alwaysPrepared: true },
+          { type: 'spell', spellId: 'misty-step', alwaysPrepared: true },
         ],
       },
       {
@@ -795,6 +904,30 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Relentless Avenger: when you hit with an opportunity attack, move up to half your speed (no OA provocation)
           { type: 'feature', feature: { id: 'oathofvengeance-relentless-avenger' } },
+        ],
+      },
+      {
+        classLevel: 9,
+        grants: [
+          // Vengeance L9 oath spells (Paladin 9 → spell level 3)
+          { type: 'spell', spellId: 'haste', alwaysPrepared: true },
+          { type: 'spell', spellId: 'protection-from-energy', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 13,
+        grants: [
+          // Vengeance L13 oath spells (Paladin 13 → spell level 4)
+          { type: 'spell', spellId: 'banishment', alwaysPrepared: true },
+          { type: 'spell', spellId: 'dimension-door', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 17,
+        grants: [
+          // Vengeance L17 oath spells (Paladin 17 → spell level 5)
+          { type: 'spell', spellId: 'hold-monster', alwaysPrepared: true },
+          { type: 'spell', spellId: 'scrying', alwaysPrepared: true },
         ],
       },
     ] satisfies readonly SubclassFeature[],
