@@ -471,12 +471,21 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
     const current = currentDecision?.type === 'spell-choice' ? currentDecision.spellIds : [];
     const atMax = current.length >= choice.count;
 
+    const choiceLabel =
+      choice.spellLevel === 0
+        ? tc('characterBuilder.pendingChoices.spellChoice', { count: choice.count })
+        : tc('characterBuilder.pendingChoices.spellChoiceLeveled', { count: choice.count, level: choice.spellLevel });
+
+    if (pool.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground italic">{tc('characterBuilder.pendingChoices.spellChoiceEmpty')}</p>
+      );
+    }
+
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <p className="text-sm text-muted-foreground">
-            {tc('characterBuilder.pendingChoices.spellChoice', { count: choice.count })}
-          </p>
+          <p className="text-sm text-muted-foreground">{choiceLabel}</p>
           <Badge variant="outline" className="text-xs">
             {current.length} / {choice.count}
           </Badge>

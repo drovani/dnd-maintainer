@@ -13,6 +13,7 @@ import type {
 import type { ChoiceKey } from '@/types/choices';
 import type { BundleCategory } from '@/types/items';
 import type { FeatCategory } from '@/types/sources';
+import type { SpellDef } from '@/types/spells';
 
 // Supporting types
 
@@ -292,7 +293,7 @@ export interface SpellChoiceGrant {
   readonly key: ChoiceKey;
   readonly count: number;
   readonly spellList: ClassId;
-  readonly spellLevel: number;
+  readonly spellLevel: SpellDef['level'];
 }
 
 export type Grant =

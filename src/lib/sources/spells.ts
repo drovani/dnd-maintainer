@@ -12,7 +12,7 @@ export const SPELL_CATALOG = [
     range: '30 feet',
     components: { verbal: true, somatic: true, material: false },
     duration: 'Instantaneous',
-    nativeClasses: ['druid'] as readonly ClassId[],
+    nativeClasses: ['druid'],
   },
   {
     id: 'guidance',
@@ -24,7 +24,7 @@ export const SPELL_CATALOG = [
     range: 'Touch',
     components: { verbal: true, somatic: true, material: false },
     duration: '1 minute',
-    nativeClasses: ['cleric', 'druid'] as readonly ClassId[],
+    nativeClasses: ['cleric', 'druid'],
   },
   {
     id: 'mending',
@@ -40,7 +40,7 @@ export const SPELL_CATALOG = [
       material: 'two lodestones',
     },
     duration: 'Instantaneous',
-    nativeClasses: ['bard', 'cleric', 'druid', 'sorcerer', 'wizard'] as readonly ClassId[],
+    nativeClasses: ['bard', 'cleric', 'druid', 'sorcerer', 'wizard'],
   },
   {
     id: 'message',
@@ -52,7 +52,7 @@ export const SPELL_CATALOG = [
     range: '120 feet',
     components: { verbal: true, somatic: true, material: 'a copper wire' },
     duration: '1 round',
-    nativeClasses: ['bard', 'druid', 'sorcerer', 'wizard'] as readonly ClassId[],
+    nativeClasses: ['bard', 'druid', 'sorcerer', 'wizard'],
   },
   {
     id: 'poison-spray',
@@ -64,7 +64,7 @@ export const SPELL_CATALOG = [
     range: '30 feet',
     components: { verbal: true, somatic: true, material: false },
     duration: 'Instantaneous',
-    nativeClasses: ['druid', 'sorcerer', 'warlock', 'wizard'] as readonly ClassId[],
+    nativeClasses: ['druid', 'sorcerer', 'warlock', 'wizard'],
   },
   {
     id: 'produce-flame',
@@ -72,11 +72,11 @@ export const SPELL_CATALOG = [
     school: 'conjuration',
     ritual: false,
     concentration: false,
-    castingTime: 'Bonus Action',
+    castingTime: 'Action',
     range: 'Self',
     components: { verbal: true, somatic: true, material: false },
     duration: '10 minutes',
-    nativeClasses: ['druid'] as readonly ClassId[],
+    nativeClasses: ['druid'],
   },
   {
     id: 'resistance',
@@ -88,7 +88,7 @@ export const SPELL_CATALOG = [
     range: 'Touch',
     components: { verbal: true, somatic: true, material: 'a miniature cloak' },
     duration: '1 minute',
-    nativeClasses: ['cleric', 'druid'] as readonly ClassId[],
+    nativeClasses: ['cleric', 'druid'],
   },
   {
     id: 'shillelagh',
@@ -100,7 +100,7 @@ export const SPELL_CATALOG = [
     range: 'Self',
     components: { verbal: true, somatic: true, material: 'mistletoe and shamrock leaves, plus a club or quarterstaff' },
     duration: '1 minute',
-    nativeClasses: ['druid'] as readonly ClassId[],
+    nativeClasses: ['druid'],
   },
   {
     id: 'spare-the-dying',
@@ -112,7 +112,7 @@ export const SPELL_CATALOG = [
     range: '15 feet',
     components: { verbal: true, somatic: true, material: false },
     duration: 'Instantaneous',
-    nativeClasses: ['cleric', 'druid'] as readonly ClassId[],
+    nativeClasses: ['cleric', 'druid'],
   },
   {
     id: 'thorn-whip',
@@ -124,7 +124,7 @@ export const SPELL_CATALOG = [
     range: '30 feet',
     components: { verbal: true, somatic: true, material: 'the stem of a plant with thorns' },
     duration: 'Instantaneous',
-    nativeClasses: ['druid'] as readonly ClassId[],
+    nativeClasses: ['druid'],
   },
 ] as const satisfies readonly SpellDef[];
 

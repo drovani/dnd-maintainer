@@ -29,5 +29,5 @@ export interface SpellDef {
   readonly range: string;
   readonly components: SpellComponents;
   readonly duration: string;
-  readonly nativeClasses: readonly ClassId[];
+  readonly nativeClasses: readonly [ClassId, ...ClassId[]];
 }

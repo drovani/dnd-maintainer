@@ -156,6 +156,8 @@
       "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "spellChoice": "Choose {{count}} cantrip(s)",
+      "spellChoiceLeveled": "Choose {{count}} level-{{level}} spell(s)",
+      "spellChoiceEmpty": "No spells available for this list and level.",
       "weaponMasteryChoice": "Choose {{count}} weapon mastery",
       "damageChoice": "Choose {{count}} damage type(s)",
       "lineageChoice": "Choose your lineage",

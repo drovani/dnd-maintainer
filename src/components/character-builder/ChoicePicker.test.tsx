@@ -537,6 +537,30 @@ describe('ChoicePicker spell-choice', () => {
     expect(onClear).toHaveBeenCalledWith(DRUID_CANTRIP_CHOICE.choiceKey);
   });
 
+  it('appends a second cantrip to an existing selection', () => {
+    const onDecide = vi.fn();
+    const currentDecision: ChoiceDecision = {
+      type: 'spell-choice',
+      spellIds: ['guidance'] as readonly import('@/types/spells').SpellId[],
+    };
+    render(
+      <ChoicePicker
+        choice={DRUID_CANTRIP_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={onDecide}
+        onClear={vi.fn()}
+      />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    // druidcraft is index 0 in SPELL_CATALOG; guidance is index 1 (already selected)
+    // clicking druidcraft (index 0) should append — result: ['guidance', 'druidcraft']
+    fireEvent.click(checkboxes[0]);
+    expect(onDecide).toHaveBeenCalledWith(DRUID_CANTRIP_CHOICE.choiceKey, {
+      type: 'spell-choice',
+      spellIds: ['guidance', 'druidcraft'],
+    });
+  });
+
   it('shows count badge with selected / total', () => {
     const currentDecision: ChoiceDecision = {
       type: 'spell-choice',
