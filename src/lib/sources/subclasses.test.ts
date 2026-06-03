@@ -165,7 +165,7 @@ describe('getSubclassSource — Wild Heart', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
   });
 
-  it('wildheart level 3 grants 2 features: animal-speaker and rage-of-the-wilds', () => {
+  it('wildheart level 3 grants 2 grants: speak-with-animals spell and rage-of-the-wilds', () => {
     const source = getSubclassSource('wildheart');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
@@ -173,8 +173,9 @@ describe('getSubclassSource — Wild Heart', () => {
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'wildheart-animal-speaker' }),
+          type: 'spell',
+          spellId: 'speak-with-animals',
+          alwaysPrepared: true,
         }),
         expect.objectContaining({
           type: 'feature',
@@ -195,14 +196,15 @@ describe('getSubclassSource — Wild Heart', () => {
     });
   });
 
-  it('wildheart level 10 grants nature-speaker feature', () => {
+  it('wildheart level 10 grants commune-with-nature spell (always prepared)', () => {
     const source = getSubclassSource('wildheart');
     const level10 = source?.features.find((f) => f.classLevel === 10);
     expect(level10).toBeDefined();
     expect(level10?.grants).toHaveLength(1);
     expect(level10?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'wildheart-nature-speaker' },
+      type: 'spell',
+      spellId: 'commune-with-nature',
+      alwaysPrepared: true,
     });
   });
 });

@@ -98,6 +98,15 @@ function makeBardBundles(level: number): GrantBundle[] {
 
 const NO_BUNDLES: readonly GrantBundle[] = [];
 
+function makeInnateOnlyBundles(spellId: string): GrantBundle[] {
+  return [
+    {
+      source: { origin: 'subclass', id: 'wildheart', classId: 'barbarian', level: 3 },
+      grants: [{ type: 'spell', spellId, alwaysPrepared: true }],
+    },
+  ];
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -105,8 +114,40 @@ const NO_BUNDLES: readonly GrantBundle[] = [];
 describe('resolveSpellcasting', () => {
   const defaultAbilities = makeAbilities();
 
-  it('returns null when no spellcasting grants', () => {
+  it('returns null when no spellcasting grants and no spell grants', () => {
     expect(resolveSpellcasting(NO_BUNDLES, defaultAbilities, 2, 1)).toBeNull();
+  });
+
+  describe('innate-only (non-spellcaster) with always-prepared spell grant', () => {
+    it('returns non-null for non-spellcaster with alwaysPrepared spell grant', () => {
+      const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
+      expect(result).not.toBeNull();
+    });
+
+    it('alwaysPreparedSpells contains the granted spell id', () => {
+      const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
+      expect(result!.alwaysPreparedSpells).toEqual(['speak-with-animals']);
+    });
+
+    it('ability is null for innate-only caster', () => {
+      const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
+      expect(result!.ability).toBeNull();
+    });
+
+    it('spellSaveDC is null for innate-only caster', () => {
+      const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
+      expect(result!.spellSaveDC).toBeNull();
+    });
+
+    it('spellAttackBonus is null for innate-only caster', () => {
+      const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
+      expect(result!.spellAttackBonus).toBeNull();
+    });
+
+    it('cantrips is empty array for innate-only caster', () => {
+      const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
+      expect(result!.cantrips).toEqual([]);
+    });
   });
 
   it('computes spellSaveDC = 8 + proficiencyBonus + abilityMod', () => {

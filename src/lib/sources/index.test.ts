@@ -1153,3 +1153,90 @@ describe('Druid L1 cantrip spell-choice (end-to-end)', () => {
     expect(spellChoicePending.length).toBe(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Wildheart Barbarian — innate always-prepared spells e2e
+// ---------------------------------------------------------------------------
+
+describe('Wildheart Barbarian innate spells e2e', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'barbarian', 0);
+
+  function makeWildheart(classLevel: number): CharacterBuild {
+    const levels = Array.from({ length: classLevel }, (_, i) => ({
+      classId: 'barbarian' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? (null as null) : 7,
+    }));
+    return {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'soldier' as BackgroundId,
+      baseAbilities: { str: 16, dex: 13, con: 14, int: 8, wis: 12, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'wildheart' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Wildheart L3: resolved.spellcasting is non-null', () => {
+    const build = makeWildheart(3);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+      expandedFeats,
+    });
+    expect(result.spellcasting).not.toBeNull();
+  });
+
+  it('Wildheart L3: alwaysPreparedSpells contains speak-with-animals', () => {
+    const build = makeWildheart(3);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+      expandedFeats,
+    });
+    expect(result.spellcasting?.alwaysPreparedSpells).toContain('speak-with-animals');
+  });
+
+  it('Wildheart L3: ability/spellSaveDC/spellAttackBonus are null (no spellcasting grant)', () => {
+    const build = makeWildheart(3);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+      expandedFeats,
+    });
+    expect(result.spellcasting?.ability).toBeNull();
+    expect(result.spellcasting?.spellSaveDC).toBeNull();
+    expect(result.spellcasting?.spellAttackBonus).toBeNull();
+  });
+
+  it('Wildheart L10: alwaysPreparedSpells contains both speak-with-animals and commune-with-nature', () => {
+    const build = makeWildheart(10);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 10,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+      expandedFeats,
+    });
+    expect(result.spellcasting?.alwaysPreparedSpells).toContain('speak-with-animals');
+    expect(result.spellcasting?.alwaysPreparedSpells).toContain('commune-with-nature');
+  });
+});
