@@ -18,7 +18,8 @@ import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
 import { getGrantIcon, getSourceDisplayName } from '@/lib/class-icons';
 import { getItemDef, getItemNameKey } from '@/lib/sources/items';
-import { getSpellDef, isSpellId } from '@/lib/sources/spells';
+import { isSpellId } from '@/lib/sources/spells';
+import { getSpellDisplayMeta } from '@/lib/spell-display';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -630,6 +631,9 @@ function CharacterSheetInner({
             )}
 
             {/* Spells */}
+            {/* knownSpells is not yet rendered — no UI surface exists for it.
+                When leveled known-spell grants land, extend this guard to include
+                resolved.spellcasting.knownSpells.length > 0 as well. */}
             {resolved?.spellcasting &&
               (resolved.spellcasting.cantrips.length > 0 || resolved.spellcasting.alwaysPreparedSpells.length > 0) && (
                 <div className="bg-card border border-purple-200 rounded-lg p-6">
@@ -656,13 +660,13 @@ function CharacterSheetInner({
                         </div>
                         <div className="space-y-1">
                           {resolved.spellcasting.alwaysPreparedSpells.map((id, i) => {
-                            const def = isSpellId(id) ? getSpellDef(id) : undefined;
+                            const meta = getSpellDisplayMeta(id);
                             return (
                               <div key={i} className="text-sm text-foreground">
                                 &bull; {isSpellId(id) ? t(`spells.${id}.name`) : id}
-                                {def && (
+                                {meta && (
                                   <span className="text-xs text-muted-foreground ml-2">
-                                    {`(lvl ${def.level} ${def.school})`}
+                                    {`(lvl ${meta.level} ${meta.school})`}
                                   </span>
                                 )}
                               </div>

@@ -160,6 +160,22 @@ describe('ClassStep', () => {
     expect(screen.getByText(/Fire Bolt, Mage Hand, Prestidigitation/)).toBeTruthy();
   });
 
+  it('renders always-prepared section with translated spell names', () => {
+    mockContextValue.resolved = {
+      spellcasting: {
+        ...wizardSpellcasting(),
+        alwaysPreparedSpells: ['speak-with-animals'],
+      },
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassStep />);
+
+    // The i18n mock returns the last segment: spells.speak-with-animals.name -> "name"
+    // The alwaysPrepared label renders as "alwaysPrepared: " (with trailing colon+space)
+    expect(screen.getByText(/alwaysPrepared/)).toBeTruthy();
+    expect(screen.getByText('name')).toBeTruthy();
+  });
+
   it('renders fallback when class has no fighting styles and no spellcasting', () => {
     // default context: no bundles, no spellcasting
     render(<ClassStep />);

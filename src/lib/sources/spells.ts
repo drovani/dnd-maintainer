@@ -132,7 +132,7 @@ export const SPELL_CATALOG = [
     school: 'divination',
     ritual: true,
     concentration: false,
-    castingTime: '1 minute',
+    castingTime: 'Action',
     range: 'Self',
     components: { verbal: true, somatic: true, material: false },
     duration: '10 minutes',

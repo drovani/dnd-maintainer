@@ -715,10 +715,6 @@
       "name": "Intimidating Presence",
       "description": "As an Action, you can cause one creature you can see within 30 feet of you to make a WIS save (DC = 8 + your proficiency bonus + your STR or CHA modifier). On a failed save, the creature has the Frightened condition until the start of your next turn."
     },
-    "wildheart-animal-speaker": {
-      "name": "Animal Speaker",
-      "description": "You can cast Speak with Animals as a Ritual. Wisdom is your spellcasting ability for this spell."
-    },
     "wildheart-rage-of-the-wilds": {
       "name": "Rage of the Wilds",
       "description": "When you activate your Rage, you choose a Beast Spirit (Bear, Eagle, Elk, Tiger, or Wolf) and gain its associated benefit for the duration of your Rage."
@@ -726,10 +722,6 @@
     "wildheart-aspect-of-the-wilds": {
       "name": "Aspect of the Wilds",
       "description": "You gain an ongoing benefit based on the Beast Spirit you chose at level 3; this benefit can be changed on a Long Rest. Bear: resistance to one damage type. Eagle: you don't need to sleep and can't be forced to sleep. Elk: your Speed increases by 15 feet. Tiger: add d6 to one damage roll per turn. Wolf: knock a creature prone when you hit it with an opportunity attack."
-    },
-    "wildheart-nature-speaker": {
-      "name": "Nature Speaker",
-      "description": "You can cast Commune with Nature as a Ritual. Wisdom is your spellcasting ability for this spell."
     },
     "worldtree-vitality-of-the-tree": {
       "name": "Vitality of the Tree",

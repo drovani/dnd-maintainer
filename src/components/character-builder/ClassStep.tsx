@@ -10,6 +10,7 @@ import { FIGHTING_STYLE_SOURCES } from '@/lib/sources/fighting-styles';
 import type { PendingChoice } from '@/types/resolved';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isSpellId } from '@/lib/sources/spells';
 
 interface FightingStyleChoiceInfo {
   readonly choiceKey: ChoiceKey;
@@ -163,13 +164,19 @@ export function ClassStep() {
           {spellcasting.cantrips.length > 0 && (
             <div>
               <span className="text-sm font-semibold">{tc('characterBuilder.classFeatures.cantrips')}: </span>
-              <span className="text-sm">{spellcasting.cantrips.join(', ')}</span>
+              <span className="text-sm">
+                {spellcasting.cantrips.map((id) => (isSpellId(id) ? t(`spells.${id}.name`) : id)).join(', ')}
+              </span>
             </div>
           )}
           {spellcasting.alwaysPreparedSpells.length > 0 && (
             <div>
               <span className="text-sm font-semibold">{tc('characterSheet.sections.alwaysPrepared')}: </span>
-              <span className="text-sm">{spellcasting.alwaysPreparedSpells.join(', ')}</span>
+              <span className="text-sm">
+                {spellcasting.alwaysPreparedSpells
+                  .map((id) => (isSpellId(id) ? t(`spells.${id}.name`) : id))
+                  .join(', ')}
+              </span>
             </div>
           )}
         </div>

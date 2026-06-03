@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { resolveSpellcasting } from '@/lib/resolver/spellcasting';
 import type { GrantBundle } from '@/types/sources';
 import type { AbilityKey } from '@/lib/dnd-helpers';
@@ -119,6 +119,14 @@ describe('resolveSpellcasting', () => {
   });
 
   describe('innate-only (non-spellcaster) with always-prepared spell grant', () => {
+    it('uncatalogued spell with alwaysPrepared=true still routes to alwaysPreparedSpells (and warns)', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const result = resolveSpellcasting(makeInnateOnlyBundles('totally-unknown-spell'), defaultAbilities, 2, 3);
+      expect(result).not.toBeNull();
+      expect(result!.alwaysPreparedSpells).toContain('totally-unknown-spell');
+      warnSpy.mockRestore();
+    });
+
     it('returns non-null for non-spellcaster with alwaysPrepared spell grant', () => {
       const result = resolveSpellcasting(makeInnateOnlyBundles('speak-with-animals'), defaultAbilities, 2, 3);
       expect(result).not.toBeNull();
