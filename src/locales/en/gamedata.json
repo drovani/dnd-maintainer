@@ -2640,6 +2640,90 @@
     "steel-wind-strike": {
       "name": "Steel Wind Strike",
       "description": "You flourish the weapon used in the casting and then vanish to strike like the wind. Choose up to five creatures you can see within range. Make a melee spell attack against each target. On a hit, a target takes 6d10 Force damage. You can then teleport to an unoccupied space you can see within 5 feet of one of the targets you hit or missed."
+    },
+    "fire-bolt": {
+      "name": "Fire Bolt",
+      "description": "You hurl a mote of fire at a creature or an object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 Fire damage. A flammable object hit by this spell ignites if it isn't being worn or carried."
+    },
+    "blur": {
+      "name": "Blur",
+      "description": "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has Disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight or can see through illusions."
+    },
+    "blight": {
+      "name": "Blight",
+      "description": "Necromantic energy washes over a creature of your choice that you can see within range, draining moisture and vitality from it. The target must make a Constitution saving throw. On a failed save, the target takes 8d8 Necrotic damage, or half as much on a successful save. Plants and water elementals make this save with Disadvantage."
+    },
+    "wall-of-stone": {
+      "name": "Wall of Stone",
+      "description": "A nonmagical wall of solid stone springs into existence at a point you choose within range. The wall is 6 inches thick and is composed of ten 10-foot-by-10-foot panels. Each panel must be contiguous with at least one other panel. The wall can't be created in a space occupied by a creature or object."
+    },
+    "ray-of-frost": {
+      "name": "Ray of Frost",
+      "description": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 1d8 Cold damage, and its Speed is reduced by 10 feet until the start of your next turn."
+    },
+    "fog-cloud": {
+      "name": "Fog Cloud",
+      "description": "You create a 20-foot-radius Sphere of fog centered on a point within range. The Sphere spreads around corners, and its area is Heavily Obscured. It lasts for the duration or until a strong wind (at least 10 miles per hour) disperses it."
+    },
+    "hold-person": {
+      "name": "Hold Person",
+      "description": "Choose a Humanoid that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the effect on itself on a success."
+    },
+    "sleet-storm": {
+      "name": "Sleet Storm",
+      "description": "Until the spell ends, freezing rain and sleet fall in a 20-foot-tall cylinder with a 40-foot radius centered on a point you choose within range. The area is Heavily Obscured, and exposed flames in the area are doused. The ground in the area is covered with slick ice, making it Difficult Terrain."
+    },
+    "ice-storm": {
+      "name": "Ice Storm",
+      "description": "A hail of rock-hard ice pounds to the ground in a 20-foot-radius, 40-foot-high Cylinder centered on a point within range. Each creature in the Cylinder makes a Dexterity saving throw. On a failed save, a creature takes 2d8 Bludgeoning damage plus 4d6 Cold damage. On a successful save, it takes half as much damage."
+    },
+    "cone-of-cold": {
+      "name": "Cone of Cold",
+      "description": "A blast of cold air erupts from your hands in a 60-foot cone. Each creature in that area makes a Constitution saving throw. On a failed save, a creature takes 8d8 Cold damage. On a successful save, it takes half as much damage. A creature killed by this spell becomes a frozen statue until it thaws."
+    },
+    "shocking-grasp": {
+      "name": "Shocking Grasp",
+      "description": "Lightning springs from you to a creature you try to touch. Make a melee spell attack against the target. You have Advantage on the attack roll if the target is wearing armor made of metal. On a hit, the target takes 1d8 Lightning damage, and it can't make Opportunity Attacks until the start of its next turn."
+    },
+    "sleep": {
+      "name": "Sleep",
+      "description": "Each creature of your choice in a 5-foot-radius Sphere centered on a point within range must succeed on a Wisdom saving throw or have the Incapacitated condition until the end of its next turn, at which point it must repeat the save. If the target fails the second save, the target has the Unconscious condition for the duration."
+    },
+    "misty-step": {
+      "name": "Misty Step",
+      "description": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+    },
+    "lightning-bolt": {
+      "name": "Lightning Bolt",
+      "description": "A stroke of lightning forming a line of 100 feet long and 5 feet wide blasts out from you in a direction you choose. Each creature in the line makes a Dexterity saving throw. On a failed save, a creature takes 8d6 Lightning damage. On a successful save, it takes half as much damage."
+    },
+    "tree-stride": {
+      "name": "Tree Stride",
+      "description": "You gain the ability to enter a tree and move from inside it to inside another tree of the same kind within 500 feet. Once a round you can use 5 feet of movement to magically teleport from inside a living tree to another living tree of the same kind within range."
+    },
+    "acid-splash": {
+      "name": "Acid Splash",
+      "description": "You create an acidic bubble at a point within range, where it explodes in a 5-foot-radius Sphere. Each creature in that Sphere must succeed on a Dexterity saving throw or take 1d6 Acid damage."
+    },
+    "ray-of-sickness": {
+      "name": "Ray of Sickness",
+      "description": "A ray of sickening greenish energy lashes out toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 2d8 Poison damage and must make a Constitution saving throw. On a failed save, the target has the Poisoned condition until the end of your next turn."
+    },
+    "web": {
+      "name": "Web",
+      "description": "You conjure a mass of thick, sticky webbing at a point of your choice within range. The webs fill a 20-foot cube from that point for the duration. The webs are Difficult Terrain, and the area is Lightly Obscured. Each creature that starts its turn in the webs or that enters them during its turn must succeed on a Dexterity saving throw or have the Restrained condition while in the webs."
+    },
+    "stinking-cloud": {
+      "name": "Stinking Cloud",
+      "description": "You create a 20-foot-radius Sphere of yellow, nauseating gas centered on a point within range. The cloud spreads around corners, and its area is Heavily Obscured. The cloud lingers in the air for the duration. Each creature that starts its turn in the cloud must succeed on a Constitution saving throw or have the Poisoned condition until the start of its next turn."
+    },
+    "polymorph": {
+      "name": "Polymorph",
+      "description": "This spell transforms a creature that you can see within range into a new form. An unwilling creature must make a Wisdom saving throw to avoid the effect. The spell has no effect on a shapechanger or a creature with 0 Hit Points. The transformation lasts for the duration, or until the target drops to 0 Hit Points or dies."
+    },
+    "insect-plague": {
+      "name": "Insect Plague",
+      "description": "Swarming, biting locusts fill a 20-foot-radius Sphere centered on a point you choose within range. The Sphere spreads around corners. The Sphere remains for the duration, and its area is Lightly Obscured. The swarm's area is Difficult Terrain. Each creature in the Sphere when it appears and each creature that enters it during a turn or ends its turn there must make a Constitution saving throw, taking 4d10 Piercing damage on a failed save, or half as much on a successful save."
     }
   }
 }
