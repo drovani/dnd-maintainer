@@ -401,4 +401,63 @@ describe('ClassStep', () => {
       optionId: 'protector',
     });
   });
+
+  it('renders a feature-choice picker for subclass-origin pending choices (Circle of the Land terrain)', () => {
+    const TERRAIN_CHOICE_KEY = 'feature-choice:subclass:circleland:0' as ChoiceKey;
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [
+        {
+          type: 'feature-choice',
+          choiceKey: TERRAIN_CHOICE_KEY,
+          source: { origin: 'subclass', id: 'circleland', classId: 'druid', level: 3 },
+          options: [
+            { optionId: 'arid', featureId: 'circleland-land-arid' },
+            { optionId: 'polar', featureId: 'circleland-land-polar' },
+            { optionId: 'temperate', featureId: 'circleland-land-temperate' },
+            { optionId: 'tropical', featureId: 'circleland-land-tropical' },
+          ],
+        },
+      ],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassStep />);
+
+    // All 4 terrain options should render as radio inputs
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(4);
+  });
+
+  it('dispatches makeChoice with terrain optionId when a terrain radio is clicked', () => {
+    const TERRAIN_CHOICE_KEY = 'feature-choice:subclass:circleland:0' as ChoiceKey;
+    mockContextValue.resolved = {
+      spellcasting: null,
+      features: [],
+      pendingChoices: [
+        {
+          type: 'feature-choice',
+          choiceKey: TERRAIN_CHOICE_KEY,
+          source: { origin: 'subclass', id: 'circleland', classId: 'druid', level: 3 },
+          options: [
+            { optionId: 'arid', featureId: 'circleland-land-arid' },
+            { optionId: 'polar', featureId: 'circleland-land-polar' },
+            { optionId: 'temperate', featureId: 'circleland-land-temperate' },
+            { optionId: 'tropical', featureId: 'circleland-land-tropical' },
+          ],
+        },
+      ],
+    } as Partial<ResolvedCharacter>;
+
+    render(<ClassStep />);
+
+    const aridRadio = document.getElementById(`choice-feature-${TERRAIN_CHOICE_KEY}-arid`) as HTMLInputElement;
+    expect(aridRadio).toBeTruthy();
+    fireEvent.click(aridRadio);
+
+    expect(mockMakeChoice).toHaveBeenCalledWith(TERRAIN_CHOICE_KEY, {
+      type: 'feature-choice',
+      optionId: 'arid',
+    });
+  });
 });

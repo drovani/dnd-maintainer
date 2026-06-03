@@ -2541,3 +2541,135 @@ describe('spell-choice pending-gate counts only pool-valid ids', () => {
     }
   });
 });
+
+describe('Circle of the Land terrain feature-choice integration', () => {
+  const druidSubclassKey = createChoiceKey('subclass', 'class', 'druid', 0);
+  const druidPrimalOrderKey = createChoiceKey('feature-choice', 'class', 'druid', 0);
+  const terrainChoiceKey = createChoiceKey('feature-choice', 'subclass', 'circleland', 0);
+
+  const baseBuild: CharacterBuild = {
+    speciesId: 'human' as const,
+    backgroundId: 'acolyte',
+    baseAbilities: { str: 10, dex: 10, con: 14, int: 8, wis: 15, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'druid' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'druid' as ClassId, classLevel: 2, hpRoll: null },
+      { classId: 'druid' as ClassId, classLevel: 3, hpRoll: null },
+    ],
+    choices: {
+      [druidSubclassKey]: { type: 'subclass' as const, subclassId: 'circleland' as SubclassId },
+      [druidPrimalOrderKey]: { type: 'feature-choice' as const, optionId: 'warden' },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  it('emits a pending feature-choice with 4 terrain options when no terrain decision is recorded', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 3,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice' && c.choiceKey === terrainChoiceKey);
+    expect(pending).toBeDefined();
+    if (pending?.type === 'feature-choice') {
+      expect(pending.source.origin).toBe('subclass');
+      const optionIds = pending.options.map((o) => o.optionId);
+      expect(optionIds).toEqual(['arid', 'polar', 'temperate', 'tropical']);
+    }
+  });
+
+  it('arid terrain: resolves leveled spells into alwaysPreparedSpells and cantrip into cantrips', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: {
+        ...baseBuild.choices,
+        [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'arid' },
+      },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(alwaysPrepared).toContain('burning-hands');
+    expect(alwaysPrepared).toContain('blur');
+    expect(alwaysPrepared).toContain('fireball');
+    expect(alwaysPrepared).toContain('blight');
+    expect(alwaysPrepared).toContain('wall-of-stone');
+    // Cantrip routes to cantrips[], not alwaysPreparedSpells
+    expect(alwaysPrepared).not.toContain('fire-bolt');
+    expect(result.spellcasting!.cantrips).toContain('fire-bolt');
+  });
+
+  it('polar terrain: resolves leveled spells into alwaysPreparedSpells', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: {
+        ...baseBuild.choices,
+        [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'polar' },
+      },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+    });
+    expect(result.spellcasting).not.toBeNull();
+    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+    expect(alwaysPrepared).toContain('fog-cloud');
+    expect(alwaysPrepared).toContain('hold-person');
+    expect(alwaysPrepared).toContain('sleet-storm');
+    expect(alwaysPrepared).toContain('ice-storm');
+    expect(alwaysPrepared).toContain('cone-of-cold');
+    expect(alwaysPrepared).not.toContain('ray-of-frost');
+    expect(result.spellcasting!.cantrips).toContain('ray-of-frost');
+  });
+
+  it('does not emit a pending terrain choice once a valid option is selected', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: {
+        ...baseBuild.choices,
+        [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'temperate' },
+      },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice' && c.choiceKey === terrainChoiceKey);
+    expect(pending).toBeUndefined();
+  });
+
+  it('arid selection adds circleland-land-arid feature to resolved features', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: {
+        ...baseBuild.choices,
+        [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'arid' },
+      },
+    };
+    const { bundles } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+    });
+    const featureIds = result.features.map((f) => f.feature.id);
+    expect(featureIds).toContain('circleland-land-arid');
+  });
+});
