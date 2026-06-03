@@ -22,4 +22,12 @@ describe('CHARACTER_DETAIL_COLS', () => {
   it('contains conditions so the sheet loads persisted conditions (word boundary match)', () => {
     expect(CHARACTER_DETAIL_COLS).toMatch(/\bconditions\b/);
   });
+
+  it('contains hit_dice_used so the sheet loads hit dice tracking (word boundary match)', () => {
+    expect(CHARACTER_DETAIL_COLS).toMatch(/\bhit_dice_used\b/);
+  });
+
+  it('contains spell_slots_used so the sheet loads spell slot tracking (word boundary match)', () => {
+    expect(CHARACTER_DETAIL_COLS).toMatch(/\bspell_slots_used\b/);
+  });
 });

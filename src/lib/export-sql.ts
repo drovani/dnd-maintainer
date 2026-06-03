@@ -62,6 +62,8 @@ const TABLE_COLUMNS = {
     { name: 'heroic_inspiration', type: 'boolean' },
     { name: 'exhaustion_level', type: 'integer' },
     { name: 'conditions', type: 'text[]' },
+    { name: 'hit_dice_used', type: 'jsonb' },
+    { name: 'spell_slots_used', type: 'jsonb' },
     { name: 'gender', type: 'text' },
     { name: 'size', type: 'text' },
     { name: 'age', type: 'text' },

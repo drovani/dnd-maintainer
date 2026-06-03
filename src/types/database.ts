@@ -84,6 +84,8 @@ export interface Character {
   heroic_inspiration: boolean;
   exhaustion_level: ExhaustionLevel;
   conditions: ConditionId[];
+  hit_dice_used: Record<string, number> | null;
+  spell_slots_used: Record<string, number> | null;
 }
 
 // Combat participant

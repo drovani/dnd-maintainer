@@ -86,6 +86,8 @@ function draftCharacter(build: CharacterBuild): Character {
     heroic_inspiration: false,
     exhaustion_level: 0,
     conditions: [],
+    hit_dice_used: null,
+    spell_slots_used: null,
   };
 }
 

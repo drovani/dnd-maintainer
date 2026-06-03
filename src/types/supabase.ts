@@ -198,6 +198,8 @@ export type Database = {
           character_type: string
           class: string | null
           conditions: string[]
+          hit_dice_used: Json
+          spell_slots_used: Json
           created_at: string
           exhaustion_level: number
           eye_color: string | null
@@ -241,6 +243,8 @@ export type Database = {
           character_type: string
           class?: string | null
           conditions?: string[]
+          hit_dice_used?: Json
+          spell_slots_used?: Json
           created_at?: string
           exhaustion_level?: number
           eye_color?: string | null
@@ -284,6 +288,8 @@ export type Database = {
           character_type?: string
           class?: string | null
           conditions?: string[]
+          hit_dice_used?: Json
+          spell_slots_used?: Json
           created_at?: string
           exhaustion_level?: number
           eye_color?: string | null

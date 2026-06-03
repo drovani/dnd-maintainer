@@ -176,6 +176,8 @@ function buildSeedCharacter(overrides: Partial<Character> = {}): Character {
     heroic_inspiration: false,
     exhaustion_level: 0 as const,
     conditions: [],
+    hit_dice_used: null,
+    spell_slots_used: null,
     ...overrides,
   };
 }
