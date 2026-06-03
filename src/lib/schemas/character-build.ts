@@ -7,6 +7,7 @@ import {
   type SkillId,
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers';
+import type { ChoiceDecision } from '@/types/choices';
 
 const SKILL_IDS = DND_SKILLS.map((s) => s.id) as [SkillId, ...SkillId[]];
 const TOOL_IDS = DND_TOOL_PROFICIENCIES as unknown as [ToolProficiencyId, ...ToolProficiencyId[]];
@@ -53,7 +54,19 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('lineage-choice'), lineageId: z.string().min(1) }),
   z.object({ type: z.literal('feature-choice'), optionId: z.string().min(1) }),
+  z.object({ type: z.literal('feat-choice'), featId: z.string().refine(isFeatId, { message: 'Unknown feat ID' }) }),
 ]);
+
+// Compile-time parity: every ChoiceDecision discriminant must have a schema arm.
+// If a new ChoiceDecision variant is added to @/types/choices without a matching arm here,
+// this assignment will fail to typecheck.
+type _AssertChoiceDecisionParity = [z.infer<typeof ChoiceDecisionSchema>['type']] extends [ChoiceDecision['type']]
+  ? [ChoiceDecision['type']] extends [z.infer<typeof ChoiceDecisionSchema>['type']]
+    ? true
+    : never
+  : never;
+const _choiceDecisionParity: _AssertChoiceDecisionParity = true;
+void _choiceDecisionParity;
 
 export const CharacterBuildSchema = z.object({
   speciesId: z.string().min(1),

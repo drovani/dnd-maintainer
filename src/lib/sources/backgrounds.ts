@@ -1,37 +1,6 @@
 import type { BackgroundSource } from '@/types/sources';
 import { createChoiceKey } from '@/types/choices';
-
-const ARTISAN_TOOLS = [
-  'smithstools',
-  'brewersupplies',
-  'masonstools',
-  'calligrapherstools',
-  'carpentertools',
-  'cartographerstools',
-  'cobblerstools',
-  'cooksutensils',
-  'glassblowerstools',
-  'jewelerstools',
-  'leatherworkerstools',
-  'painterstools',
-  'potterstools',
-  'tinkerstools',
-  'weaverstools',
-  'woodcarverstools',
-] as const;
-
-const MUSICAL_INSTRUMENTS = [
-  'bagpipes',
-  'drum',
-  'dulcimer',
-  'flute',
-  'lute',
-  'lyre',
-  'horn',
-  'panflute',
-  'shawm',
-  'viol',
-] as const;
+import { ARTISAN_TOOL_IDS, MUSICAL_INSTRUMENT_IDS } from '@/lib/sources/tool-groups';
 
 const GAMING_SETS = [
   'gaming-set-dice',
@@ -79,7 +48,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         category: 'tool',
         key: createChoiceKey('tool-choice', 'background', 'artisan', 0),
         count: 1,
-        from: ARTISAN_TOOLS,
+        from: ARTISAN_TOOL_IDS,
       },
       {
         type: 'proficiency-choice',
@@ -151,7 +120,7 @@ export const BACKGROUND_SOURCES: readonly BackgroundSource[] = [
         category: 'tool',
         key: createChoiceKey('tool-choice', 'background', 'entertainer', 0),
         count: 1,
-        from: MUSICAL_INSTRUMENTS,
+        from: MUSICAL_INSTRUMENT_IDS,
       },
       {
         type: 'proficiency-choice',

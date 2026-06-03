@@ -242,6 +242,26 @@ describe('ChoiceDecisionSchema', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('feat-choice', () => {
+    it('accepts a feat-choice decision with a known feat ID and round-trips correctly', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'feat-choice', featId: 'tough' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual({ type: 'feat-choice', featId: 'tough' });
+      }
+    });
+
+    it('rejects feat-choice with an unknown feat ID', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'feat-choice', featId: 'nonexistent-feat' });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects feat-choice missing featId', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'feat-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
 });
 
 describe('CharacterBuildSchemaStrict', () => {

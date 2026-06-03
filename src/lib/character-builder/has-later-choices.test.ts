@@ -16,6 +16,11 @@ describe('has-later-choices', () => {
       expect(speciesHasLaterChoices('halfling')).toBe(false);
       expect(speciesHasLaterChoices('dwarf')).toBe(false);
     });
+
+    it('detects a pending feat-choice grant as a later choice (Human grants Versatile feat-choice)', () => {
+      // Human grants a feat-choice (Versatile) — must trigger the indicator
+      expect(speciesHasLaterChoices('human')).toBe(true);
+    });
   });
 
   describe('classHasLaterChoices', () => {

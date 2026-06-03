@@ -1,38 +1,6 @@
 import { createChoiceKey } from '@/types/choices';
 import type { FeatSource } from '@/types/sources';
-import type { ToolProficiencyId } from '@/lib/dnd-helpers';
-
-const ARTISAN_TOOL_IDS: readonly ToolProficiencyId[] = [
-  'smithstools',
-  'brewersupplies',
-  'masonstools',
-  'calligrapherstools',
-  'carpentertools',
-  'cartographerstools',
-  'cobblerstools',
-  'cooksutensils',
-  'glassblowerstools',
-  'jewelerstools',
-  'leatherworkerstools',
-  'painterstools',
-  'potterstools',
-  'tinkerstools',
-  'weaverstools',
-  'woodcarverstools',
-] as const;
-
-const MUSICAL_INSTRUMENT_IDS: readonly ToolProficiencyId[] = [
-  'bagpipes',
-  'drum',
-  'dulcimer',
-  'flute',
-  'lute',
-  'lyre',
-  'horn',
-  'panflute',
-  'shawm',
-  'viol',
-] as const;
+import { ARTISAN_TOOL_IDS, MUSICAL_INSTRUMENT_IDS } from '@/lib/sources/tool-groups';
 
 export const FEAT_SOURCES: readonly FeatSource[] = [
   // Origin feats — no level prerequisite, granted by backgrounds

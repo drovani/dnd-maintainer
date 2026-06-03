@@ -276,10 +276,12 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
 
   // Feats explicitly listed in the build (manually chosen at level-up)
   for (const featId of build.feats) {
+    if (expandedFeats.has(featId)) continue; // already expanded by background or a prior pass
     const featSource = getFeatSource(featId);
     if (featSource) {
       const tag: SourceTag = { origin: 'feat', id: featId };
       bundles.push({ source: tag, grants: featSource.grants });
+      expandedFeats.add(featId);
     } else {
       const msg = `No source data found for feat "${featId}" — feat grants will be empty`;
       warnings.push(msg);
@@ -302,6 +304,7 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   for (const { grant } of allFeatChoiceGrants) {
     const decision = build.choices[grant.key];
     if (decision?.type === 'feat-choice') {
+      if (expandedFeats.has(decision.featId)) continue; // already expanded by background or build.feats pass
       const featSource = getFeatSource(decision.featId);
       if (featSource) {
         const tag: SourceTag = { origin: 'feat', id: decision.featId };

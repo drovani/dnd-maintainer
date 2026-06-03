@@ -71,6 +71,70 @@ describe('resolveHp', () => {
     // Level 2: 7 + (roll 4 + (-1)) = 7 + 3 = 10
     expect(resolveHp(bundles, [null, 4], -1, 2).max).toBe(10);
   });
+
+  it('applies hp-bonus perLevel × level (perLevel 2 at level 3 → +6)', () => {
+    const bundlesBase: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'hit-die', die: 10 }],
+      },
+    ];
+    const bundlesWithBonus: GrantBundle[] = [
+      ...bundlesBase,
+      {
+        source: { origin: 'feat', id: 'tough' },
+        grants: [{ type: 'hp-bonus', perLevel: 2 }],
+      },
+    ];
+    // L3 baseline (CON 0, avg rolls): 10 + 6 + 6 = 22
+    const baseline = resolveHp(bundlesBase, [null, null, null], 0, 3).max;
+    // L3 with perLevel:2 bonus: baseline + 2*3 = baseline + 6
+    const withBonus = resolveHp(bundlesWithBonus, [null, null, null], 0, 3).max;
+    expect(withBonus - baseline).toBe(6);
+  });
+
+  it('sums multiple hp-bonus grants (perLevel 1 + perLevel 2 at level 3 → +9)', () => {
+    const bundlesBase: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'hit-die', die: 10 }],
+      },
+    ];
+    const bundlesWithTwoBonus: GrantBundle[] = [
+      ...bundlesBase,
+      {
+        source: { origin: 'feat', id: 'tough' },
+        grants: [{ type: 'hp-bonus', perLevel: 2 }],
+      },
+      {
+        source: { origin: 'species', id: 'dwarf' },
+        grants: [{ type: 'hp-bonus', perLevel: 1 }],
+      },
+    ];
+    const baseline = resolveHp(bundlesBase, [null, null, null], 0, 3).max;
+    const withTwoBonus = resolveHp(bundlesWithTwoBonus, [null, null, null], 0, 3).max;
+    // (perLevel:2 × 3) + (perLevel:1 × 3) = 6 + 3 = 9
+    expect(withTwoBonus - baseline).toBe(9);
+  });
+
+  it('Dwarven Toughness adds +1 per level (level 3 → +3)', () => {
+    const bundlesBase: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'fighter', level: 1 },
+        grants: [{ type: 'hit-die', die: 10 }],
+      },
+    ];
+    const bundlesWithDwarvenToughness: GrantBundle[] = [
+      ...bundlesBase,
+      {
+        source: { origin: 'species', id: 'dwarf' },
+        grants: [{ type: 'hp-bonus', perLevel: 1 }],
+      },
+    ];
+    const baseline = resolveHp(bundlesBase, [null, null, null], 0, 3).max;
+    const withToughness = resolveHp(bundlesWithDwarvenToughness, [null, null, null], 0, 3).max;
+    expect(withToughness - baseline).toBe(3);
+  });
 });
 
 describe('resolveSpeed', () => {

@@ -738,6 +738,29 @@ describe('Human feat-choice (Versatile) pipeline', () => {
     expect(result.hitPoints.max).toBe(12);
   });
 
+  it('(c2) HP dedupe regression: Human + Farmer background (grants tough) + Versatile=tough → hp-bonus applied once, not twice', () => {
+    // Farmer background expands tough via the embedded-feat pass.
+    // Versatile feat-choice also picks tough — should be skipped (already expanded).
+    // CON 10 → mod 0, Fighter d10 L1 → base 10 + 2 tough = 12 (not 14).
+    const buildWithFarmerAndTough: CharacterBuild = {
+      ...humanBaseL1,
+      backgroundId: 'farmer' as BackgroundId,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'tough' as FeatId },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithFarmerAndTough);
+    const result = resolveCharacter({
+      baseAbilities: buildWithFarmerAndTough.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithFarmerAndTough.choices,
+      levels: buildWithFarmerAndTough.levels,
+      expandedFeats,
+    });
+    expect(result.hitPoints.max).toBe(12);
+  });
+
   it('(d) Human + Crafter decided: a tool-choice pending with source.origin feat is emitted', () => {
     const buildWithCrafter: CharacterBuild = {
       ...humanBaseL1,
@@ -781,6 +804,94 @@ describe('Human feat-choice (Versatile) pipeline', () => {
       (c) => c.type === 'feature-choice' && c.source.origin === 'feat'
     );
     expect(featureChoicePending).toHaveLength(1);
+  });
+
+  it('(f) feat-choice→skill END-TO-END: Human + Versatile=skilled + 3 skills decided → skill proficiencies with source.origin feat', () => {
+    const skillChoiceKey = createChoiceKey('skill-choice', 'feat', 'skilled', 0);
+    const buildWithSkilledDecided: CharacterBuild = {
+      ...humanBaseL1,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'skilled' as FeatId },
+        [skillChoiceKey]: { type: 'skill-choice' as const, skills: ['arcana', 'history', 'nature'] as const },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithSkilledDecided);
+    const result = resolveCharacter({
+      baseAbilities: buildWithSkilledDecided.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithSkilledDecided.choices,
+      levels: buildWithSkilledDecided.levels,
+      expandedFeats,
+    });
+    // All 3 picked skills must be proficient with at least one source from feat origin
+    for (const skillId of ['arcana', 'history', 'nature'] as const) {
+      const skill = result.skills[skillId];
+      expect(skill.proficient, `${skillId} should be proficient`).toBe(true);
+      expect(
+        skill.sources.some((s) => s.origin === 'feat'),
+        `${skillId} source should include feat origin`
+      ).toBe(true);
+    }
+    // No pending feat-choice or skill-choice from feat
+    expect(result.pendingChoices.filter((c) => c.type === 'feat-choice')).toHaveLength(0);
+    expect(result.pendingChoices.filter((c) => c.type === 'skill-choice' && c.source.origin === 'feat')).toHaveLength(
+      0
+    );
+  });
+
+  it('(g) Magic Initiate finalize-ready: Human + Versatile=magic-initiate + class decision cleric → no feature-choice or feat-choice pending', () => {
+    const magicInitiateFeatureChoiceKey = createChoiceKey('feature-choice', 'feat', 'magic-initiate', 0);
+    const buildWithMagicInitiateDecided: CharacterBuild = {
+      ...humanBaseL1,
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'magic-initiate' as FeatId },
+        [magicInitiateFeatureChoiceKey]: { type: 'feature-choice' as const, optionId: 'cleric' },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(buildWithMagicInitiateDecided);
+    const result = resolveCharacter({
+      baseAbilities: buildWithMagicInitiateDecided.baseAbilities,
+      level: 1,
+      bundles,
+      choices: buildWithMagicInitiateDecided.choices,
+      levels: buildWithMagicInitiateDecided.levels,
+      expandedFeats,
+    });
+    const remainingFeatOrFeatureChoices = result.pendingChoices.filter(
+      (c) => c.type === 'feat-choice' || c.type === 'feature-choice'
+    );
+    expect(
+      remainingFeatOrFeatureChoices,
+      'build with magic-initiate fully decided should have no pending feat-choice or feature-choice'
+    ).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// feat-choice invalid decision (Fix 6)
+// ---------------------------------------------------------------------------
+
+describe('feat-choice decision with unknown featId', () => {
+  it('collectBundles emits a warning and does not throw when decision.featId is unresolvable', () => {
+    const featChoiceKey = createChoiceKey('feat-choice', 'species', 'human', 0);
+    const buildWithBadFeat: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: null,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: [{ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null }],
+      choices: {
+        [featChoiceKey]: { type: 'feat-choice' as const, featId: 'nonexistent-feat' as FeatId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    let result: ReturnType<typeof collectBundles>;
+    expect(() => {
+      result = collectBundles(buildWithBadFeat);
+    }).not.toThrow();
+    expect(result!.warnings.some((w) => w.includes('nonexistent-feat'))).toBe(true);
   });
 });
 
