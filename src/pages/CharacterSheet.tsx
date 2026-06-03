@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { AttacksPanel } from '@/components/character-sheet/AttacksPanel';
 import { BonusBreakdown } from '@/components/character-sheet/BonusBreakdown';
+import { ConditionsPanel } from '@/components/character-sheet/ConditionsPanel';
 import { LevelControls } from '@/components/character-sheet/LevelControls';
 import { PendingChoicesPanel } from '@/components/character-sheet/PendingChoicesPanel';
 import { ProficienciesPanel } from '@/components/character-sheet/ProficienciesPanel';
@@ -527,6 +528,9 @@ function CharacterSheetInner({
                 </div>
               </div>
             </div>
+
+            {/* Conditions */}
+            <ConditionsPanel character={character} onUpdate={handleUpdate} />
 
             {/* Attacks */}
             {resolved && <AttacksPanel attacks={resolved.attacks} weaponMasteries={resolved.weaponMasteries} />}

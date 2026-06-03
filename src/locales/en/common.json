@@ -378,6 +378,7 @@
       "proficiencies": "Proficiencies",
       "attacks": "Attacks",
       "resourcePools": "Resource Pools",
+      "conditions": "Conditions",
       "saveDC": "Save DC"
     },
     "fields": {
