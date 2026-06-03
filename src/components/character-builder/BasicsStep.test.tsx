@@ -54,7 +54,21 @@ import { FEAT_SOURCES as _FS } from '@/lib/sources/feats';
 import { SUBCLASS_SOURCES as _SCS } from '@/lib/sources/subclasses';
 import type { GameData } from '@/hooks/useGameData';
 
-const mockGameData: GameData = {
+// Mutable container — the mock reads `.current` so tests can swap game data
+// without reassigning a const. `let` would be simpler but ESLint/Prettier
+// prefer-const promotes it back to const on format.
+const gameDataRef = {
+  current: {
+    species: _SS,
+    classes: _CS,
+    backgrounds: _BS,
+    feats: _FS,
+    subclasses: _SCS,
+    allowedSourceBooks: ['phb-2024'],
+  } as GameData,
+};
+
+const DEFAULT_GAME_DATA: GameData = {
   species: _SS,
   classes: _CS,
   backgrounds: _BS,
@@ -64,7 +78,7 @@ const mockGameData: GameData = {
 };
 
 vi.mock('@/hooks/useGameData', () => ({
-  useGameData: () => mockGameData,
+  useGameData: () => gameDataRef.current,
 }));
 
 // ---------------------------------------------------------------------------
@@ -226,6 +240,7 @@ function resetContext() {
 describe('BasicsStep', () => {
   beforeEach(() => {
     resetContext();
+    gameDataRef.current = DEFAULT_GAME_DATA;
     vi.clearAllMocks();
   });
 
@@ -632,5 +647,41 @@ describe('BasicsStep', () => {
     render(<BasicsStep />);
 
     expect(screen.getByText('chooseBackground')).toBeTruthy();
+  });
+
+  // ---------------------------------------------------------------------------
+  // No-data-loss: current value stays visible when its source book is disabled
+  // ---------------------------------------------------------------------------
+
+  describe('no-data-loss when source book is disabled', () => {
+    it('keeps the currently selected species in the picker even when its source book is disabled', () => {
+      // Character already has 'elf' selected
+      contextCharacter = buildSeedCharacter({ species: 'elf' });
+      // Simulate a campaign that only allows a hypothetical future book (no PHB species)
+      gameDataRef.current = { ...DEFAULT_GAME_DATA, species: [], allowedSourceBooks: [] };
+
+      render(<BasicsStep />);
+
+      // The species picker's current value label should still render 'elf'
+      // (the i18n mock returns the last key segment, so species.elf → 'elf')
+      expect(screen.getByText('elf')).toBeTruthy();
+    });
+
+    it('shows the disabled-source-book badge when the current species is not in allowed source books', () => {
+      contextCharacter = buildSeedCharacter({ species: 'elf' });
+      gameDataRef.current = { ...DEFAULT_GAME_DATA, species: [], allowedSourceBooks: [] };
+
+      render(<BasicsStep />);
+
+      expect(screen.getByText('disabledSourceBook')).toBeTruthy();
+    });
+
+    it('does not show the disabled-source-book badge when the species is allowed', () => {
+      contextCharacter = buildSeedCharacter({ species: 'elf' });
+      // Default mockGameData has all species (phb-2024 allowed)
+      render(<BasicsStep />);
+
+      expect(screen.queryByText('disabledSourceBook')).toBeNull();
+    });
   });
 });
