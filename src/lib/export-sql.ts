@@ -27,6 +27,7 @@ const TABLE_COLUMNS = {
     { name: 'status', type: 'text' },
     { name: 'image_url', type: 'text' },
     { name: 'dm_notes', type: 'text' },
+    { name: 'allowed_source_books', type: 'text[]' },
     { name: 'created_at', type: 'timestamptz' },
     { name: 'updated_at', type: 'timestamptz' },
   ],

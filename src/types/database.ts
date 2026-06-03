@@ -10,6 +10,7 @@ import type {
 import type { ThemeId } from '@/lib/theme';
 import type { ConditionId } from '@/lib/sources/conditions';
 import type { WeaponMasteryId } from '@/types/items';
+import type { SourceBookId } from '@/lib/source-books';
 
 export type { Proficiencies };
 
@@ -40,6 +41,7 @@ export interface Campaign {
   /** null = inherit global preference; a ThemeId = explicit override for this campaign */
   theme: ThemeId | null;
   archived_at?: string | null;
+  allowed_source_books: SourceBookId[];
 }
 
 export interface Character {

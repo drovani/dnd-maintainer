@@ -36,6 +36,7 @@ export type Database = {
     Tables: {
       campaigns: {
         Row: {
+          allowed_source_books: string[]
           archived_at: string | null
           created_at: string
           description: string | null
@@ -51,6 +52,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allowed_source_books?: string[]
           archived_at?: string | null
           created_at?: string
           description?: string | null
@@ -66,6 +68,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allowed_source_books?: string[]
           archived_at?: string | null
           created_at?: string
           description?: string | null

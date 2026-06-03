@@ -1,6 +1,7 @@
 import type { SpeciesId, ClassId, BackgroundId, SizeId, AbilityKey, FeatId } from '@/lib/dnd-helpers';
 import type { Grant } from '@/types/grants';
 import type { SubclassId } from '@/lib/sources/subclasses';
+import type { SourceBookId } from '@/lib/source-books';
 
 export type { SubclassId } from '@/lib/sources/subclasses';
 export { isSubclassId } from '@/lib/sources/subclasses';
@@ -26,6 +27,7 @@ export interface SpeciesSource {
   readonly defaultSize: SizeId;
   readonly defaultSpeed: number;
   readonly grants: readonly Grant[];
+  readonly sourceBook?: SourceBookId;
 }
 
 export interface LevelUp {
@@ -70,6 +72,7 @@ export interface ClassSource {
   readonly primaryAbility: AbilityKey;
   readonly levels: readonly LevelUp[];
   readonly quickBuild?: ClassQuickBuild;
+  readonly sourceBook?: SourceBookId;
 }
 
 export interface SubclassFeature {
@@ -79,11 +82,13 @@ export interface SubclassFeature {
 
 export interface SubclassSource {
   readonly features: readonly SubclassFeature[];
+  readonly sourceBook?: SourceBookId;
 }
 
 export interface BackgroundSource {
   readonly id: BackgroundId;
   readonly grants: readonly Grant[];
+  readonly sourceBook?: SourceBookId;
 }
 
 export const FEAT_CATEGORIES = ['origin', 'general', 'fightingStyle', 'epicBoon'] as const;
@@ -108,10 +113,12 @@ export interface FeatSource {
    * per-instance indexing. Tracked in #178.
    */
   readonly repeatable?: boolean;
+  readonly sourceBook?: SourceBookId;
 }
 
 export interface ItemSource {
   readonly id: string;
   readonly grants: readonly Grant[];
   readonly requiresAttunement: boolean;
+  readonly sourceBook?: SourceBookId;
 }

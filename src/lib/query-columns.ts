@@ -1,7 +1,7 @@
 export const CAMPAIGN_SUMMARY_COLS =
   'id, slug, previous_slugs, name, description, setting, status, theme, created_at, updated_at, archived_at' as const;
 export const CAMPAIGN_DETAIL_COLS =
-  'id, slug, previous_slugs, name, description, setting, status, image_url, dm_notes, theme, created_at, updated_at, archived_at' as const;
+  'id, slug, previous_slugs, name, description, setting, status, image_url, dm_notes, theme, created_at, updated_at, archived_at, allowed_source_books' as const;
 
 export const CHARACTER_SUMMARY_COLS =
   'id, slug, previous_slugs, campaign_id, name, player_name, character_type, species, class, subclass, level, hit_points_max, armor_class, updated_at' as const;

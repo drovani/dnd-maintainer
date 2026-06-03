@@ -280,6 +280,15 @@ describe('generateSeedSql', () => {
     expect(sql).toContain("ARRAY['blinded', 'charmed']::text[]");
   });
 
+  it('campaign INSERT includes allowed_source_books as a text[] array', () => {
+    const data: ExportData = {
+      ...emptyData,
+      campaigns: [{ id: 'camp-1', name: 'Test Campaign', allowed_source_books: ['phb-2024'] }],
+    };
+    const sql = generateSeedSql(data);
+    expect(sql).toContain("ARRAY['phb-2024']::text[]");
+  });
+
   it('character INSERT includes hit_dice_used and spell_slots_used as jsonb', () => {
     const data: ExportData = {
       ...emptyData,

@@ -63,6 +63,7 @@ function seedCampaign(world: DndWorld): Campaign {
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z',
     archived_at: null,
+    allowed_source_books: ['phb-2024'],
   };
   world.db.seed('campaigns', [campaign as unknown as Row]);
   world.createdCampaign = campaign;

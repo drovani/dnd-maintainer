@@ -1,4 +1,10 @@
-import { CHARACTER_DETAIL_COLS, CHARACTER_SUMMARY_COLS } from '@/lib/query-columns';
+import { CAMPAIGN_DETAIL_COLS, CHARACTER_DETAIL_COLS, CHARACTER_SUMMARY_COLS } from '@/lib/query-columns';
+
+describe('CAMPAIGN_DETAIL_COLS', () => {
+  it('contains allowed_source_books so the campaign detail loads source book settings (word boundary match)', () => {
+    expect(CAMPAIGN_DETAIL_COLS).toMatch(/\ballowed_source_books\b/);
+  });
+});
 
 describe('CHARACTER_SUMMARY_COLS', () => {
   it('contains species (word boundary match)', () => {

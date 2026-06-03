@@ -1,5 +1,6 @@
 import type { ClassId } from '@/lib/dnd-helpers';
 import type { SpellId } from '@/lib/sources/spells';
+import type { SourceBookId } from '@/lib/source-books';
 
 export type { SpellId };
 
@@ -30,4 +31,5 @@ export interface SpellDef {
   readonly components: SpellComponents;
   readonly duration: string;
   readonly nativeClasses: readonly [ClassId, ...ClassId[]];
+  readonly sourceBook?: SourceBookId;
 }

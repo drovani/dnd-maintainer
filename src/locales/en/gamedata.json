@@ -2957,5 +2957,8 @@
       "name": "Summon Celestial",
       "description": "You call forth a celestial spirit. It manifests in an angelic form in an unoccupied space within range. The creature is friendly to you and obeys your commands for the duration."
     }
+  },
+  "sourceBooks": {
+    "phb-2024": "Player's Handbook 2024"
   }
 }
