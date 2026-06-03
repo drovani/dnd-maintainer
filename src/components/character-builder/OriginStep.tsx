@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { useGameData } from '@/hooks/useGameData';
 import { type SpeciesId, type ToolProficiencyId } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
@@ -9,6 +10,7 @@ import type { ChoiceDecision } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { ChoicePicker } from './ChoicePicker';
 import { LineagePicker } from './LineagePicker';
 import { SPECIES_SOURCES } from '@/lib/sources/species';
@@ -16,6 +18,8 @@ import { SPECIES_SOURCES } from '@/lib/sources/species';
 export function OriginStep() {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const gameData = useGameData(campaignSlug);
   const context = useCharacterContext();
   const { character, bundles, build, resolved } = context;
 
@@ -92,6 +96,7 @@ export function OriginStep() {
                 currentDecision={build?.choices[choice.choiceKey]}
                 onDecide={(choiceKey, decision) => context.makeChoice(choiceKey, decision)}
                 onClear={(choiceKey) => context.clearChoice(choiceKey)}
+                allowedFeats={gameData.feats}
               />
             </div>
           ))}

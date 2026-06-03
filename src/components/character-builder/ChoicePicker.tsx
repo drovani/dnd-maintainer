@@ -10,6 +10,7 @@ import type { FeatId } from '@/lib/dnd-helpers';
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles';
 import { FEAT_SOURCES } from '@/lib/sources';
+import type { FeatSource } from '@/lib/sources';
 import { getSpellsForList } from '@/lib/sources/spells';
 import type { SpellId } from '@/types/spells';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
@@ -29,6 +30,12 @@ interface ChoicePickerProps {
   readonly currentDecision: ChoiceDecision | undefined;
   readonly onDecide: (key: ChoiceKey, decision: ChoiceDecision) => void;
   readonly onClear: (key: ChoiceKey) => void;
+  /**
+   * Optional filtered feat list from useGameData. When provided, only feats in
+   * this list are shown for feat-choice prompts, PLUS the currently chosen feat
+   * (no-data-loss union). Falls back to the full FEAT_SOURCES when undefined.
+   */
+  readonly allowedFeats?: readonly FeatSource[];
 }
 
 const ALL_SKILL_IDS: readonly SkillId[] = DND_SKILLS.map((s) => s.id);
@@ -42,7 +49,7 @@ function isLanguageId(id: string): id is LanguageId {
   return (ALL_LANGUAGE_IDS as readonly string[]).includes(id);
 }
 
-export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: ChoicePickerProps) {
+export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allowedFeats }: ChoicePickerProps) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
 
@@ -237,8 +244,15 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear }: Cho
 
   if (choice.type === 'feat-choice') {
     const { from, category } = choice;
-    const pool: readonly FeatId[] = from ?? FEAT_SOURCES.filter((f) => f.category === category).map((f) => f.id);
     const currentFeatId = currentDecision?.type === 'feat-choice' ? currentDecision.featId : undefined;
+    // Base feat source list: use allowedFeats when provided, else full FEAT_SOURCES.
+    const featSource = allowedFeats ?? FEAT_SOURCES;
+    // Compute the pool: explicit `from` list takes priority; otherwise filter by category.
+    // Union with currentFeatId for no-data-loss (keep current selection visible even if its
+    // book is now disabled).
+    const basePool: readonly FeatId[] = from ?? featSource.filter((f) => f.category === category).map((f) => f.id);
+    const pool: readonly FeatId[] =
+      currentFeatId && !basePool.includes(currentFeatId) ? [...basePool, currentFeatId] : basePool;
 
     return (
       <div className="space-y-2">

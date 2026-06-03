@@ -27,6 +27,35 @@ vi.mock('react-i18next', () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// react-router-dom mock
+// ---------------------------------------------------------------------------
+
+vi.mock('react-router-dom', () => ({
+  useParams: () => ({ campaignSlug: 'test-campaign' }),
+}));
+
+// ---------------------------------------------------------------------------
+// useGameData mock — returns full lists by default
+// ---------------------------------------------------------------------------
+
+import { SPECIES_SOURCES } from '@/lib/sources/species';
+import { CLASS_SOURCES } from '@/lib/sources/classes';
+import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
+import { FEAT_SOURCES } from '@/lib/sources/feats';
+import { SUBCLASS_SOURCES } from '@/lib/sources/subclasses';
+
+vi.mock('@/hooks/useGameData', () => ({
+  useGameData: () => ({
+    species: SPECIES_SOURCES,
+    classes: CLASS_SOURCES,
+    backgrounds: BACKGROUND_SOURCES,
+    feats: FEAT_SOURCES,
+    subclasses: SUBCLASS_SOURCES,
+    allowedSourceBooks: ['phb-2024'],
+  }),
+}));
+
+// ---------------------------------------------------------------------------
 // Mock useCharacterContext
 // ---------------------------------------------------------------------------
 

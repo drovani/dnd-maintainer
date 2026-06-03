@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
+import { useGameData } from '@/hooks/useGameData';
 import { type ChoiceKey } from '@/types/choices';
 import { type FightingStyleId } from '@/lib/dnd-helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
@@ -11,6 +12,7 @@ import type { PendingChoice } from '@/types/resolved';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isSpellId } from '@/lib/sources/spells';
+import { useParams } from 'react-router-dom';
 
 interface FightingStyleChoiceInfo {
   readonly choiceKey: ChoiceKey;
@@ -21,6 +23,8 @@ interface FightingStyleChoiceInfo {
 export function ClassStep() {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
+  const { campaignSlug } = useParams<{ campaignSlug: string }>();
+  const gameData = useGameData(campaignSlug);
   const context = useCharacterContext();
   const { resolved, build, bundles } = context;
 
@@ -211,6 +215,7 @@ export function ClassStep() {
               onDecide={(choiceKey, subclassId) => context.makeChoice(choiceKey, { type: 'subclass', subclassId })}
               onClear={(choiceKey) => context.clearChoice(choiceKey)}
               autoCommit
+              allowedSubclasses={gameData.subclasses}
             />
           ))}
         </div>

@@ -7,6 +7,7 @@ import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { SubclassId } from '@/lib/sources/subclasses';
 import { isSubclassId } from '@/lib/sources/subclasses';
 import { useTranslation } from 'react-i18next';
+import type { SubclassSource } from '@/types/sources';
 
 interface SubclassPickerProps {
   readonly choice: Extract<PendingChoice, { type: 'subclass' }>;
@@ -15,9 +16,22 @@ interface SubclassPickerProps {
   readonly onClear?: (key: ChoiceKey) => void;
   /** When true, calls onDecide immediately on selection and hides the confirm button. */
   readonly autoCommit?: boolean;
+  /**
+   * Optional filtered subclass map from useGameData. Only subclasses present in
+   * this map are shown, PLUS the currently selected subclass (no-data-loss union).
+   * Falls back to the full SUBCLASS_SOURCES when undefined.
+   */
+  readonly allowedSubclasses?: Readonly<Record<SubclassId, SubclassSource>>;
 }
 
-export function SubclassPicker({ choice, currentDecision, onDecide, onClear, autoCommit }: SubclassPickerProps) {
+export function SubclassPicker({
+  choice,
+  currentDecision,
+  onDecide,
+  onClear,
+  autoCommit,
+  allowedSubclasses,
+}: SubclassPickerProps) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
 
@@ -28,8 +42,14 @@ export function SubclassPicker({ choice, currentDecision, onDecide, onClear, aut
   const [selected, setSelected] = useState<SubclassId | null>(existingSubclassId);
   const hasExistingDecision = existingSubclassId !== null;
 
+  // Use the provided allowed map or fall back to the full registry.
+  const sourceMap = allowedSubclasses ?? SUBCLASS_SOURCES;
+
+  // Filter to ids that are present in sourceMap OR are the currently selected id
+  // (no-data-loss: keep the selection visible even when its book is disabled).
   const subclasses = SUBCLASS_IDS_BY_CLASS[choice.classId]
-    .map((id) => ({ id, ...SUBCLASS_SOURCES[id] }))
+    .filter((id) => id in sourceMap || id === existingSubclassId)
+    .map((id) => ({ id, ...sourceMap[id] }))
     .sort((a, b) => t(`subclasses.${a.id}.name`).localeCompare(t(`subclasses.${b.id}.name`)));
   const className = t(`classes.${choice.classId}`, { defaultValue: choice.classId });
 
