@@ -1956,34 +1956,63 @@ describe('getSubclassSource — Hunter', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7]);
   });
 
-  it('hunter level 3 grants 2 features: hunters-lore and hunters-prey', () => {
+  it('hunter level 3 grants 2 items: hunters-lore and hunters-prey feature-choice', () => {
     const source = getSubclassSource('hunter');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
     expect(level3?.grants).toHaveLength(2);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'hunter-hunters-lore' }) }),
         expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'hunter-hunters-lore' }),
-        }),
-        expect.objectContaining({
-          type: 'feature',
-          feature: expect.objectContaining({ id: 'hunter-hunters-prey' }),
+          type: 'feature-choice',
+          key: createChoiceKey('feature-choice', 'subclass', 'hunter', 0),
+          options: expect.arrayContaining([
+            expect.objectContaining({ optionId: 'colossus-slayer', featureId: 'hunter-hunters-prey-colossus-slayer' }),
+            expect.objectContaining({ optionId: 'horde-breaker', featureId: 'hunter-hunters-prey-horde-breaker' }),
+          ]),
         }),
       ])
     );
   });
 
-  it('hunter level 7 grants 1 feature: defensive-tactics', () => {
+  it('hunter level 3 has no inert hunters-prey feature grant', () => {
+    const source = getSubclassSource('hunter');
+    const level3 = source?.features.find((f) => f.classLevel === 3);
+    const inertGrant = level3?.grants.find(
+      (g) => g.type === 'feature' && 'feature' in g && g.feature.id === 'hunter-hunters-prey'
+    );
+    expect(inertGrant).toBeUndefined();
+  });
+
+  it('hunter level 7 grants 1 item: defensive-tactics feature-choice (escape-the-horde / multiattack-defense)', () => {
     const source = getSubclassSource('hunter');
     const level7 = source?.features.find((f) => f.classLevel === 7);
     expect(level7).toBeDefined();
     expect(level7?.grants).toHaveLength(1);
     expect(level7?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'hunter-defensive-tactics' },
+      type: 'feature-choice',
+      key: createChoiceKey('feature-choice', 'subclass', 'hunter', 1),
+      options: expect.arrayContaining([
+        expect.objectContaining({
+          optionId: 'escape-the-horde',
+          featureId: 'hunter-defensive-tactics-escape-the-horde',
+        }),
+        expect.objectContaining({
+          optionId: 'multiattack-defense',
+          featureId: 'hunter-defensive-tactics-multiattack-defense',
+        }),
+      ]),
     });
+  });
+
+  it('hunter level 7 has no inert defensive-tactics feature grant', () => {
+    const source = getSubclassSource('hunter');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    const inertGrant = level7?.grants.find(
+      (g) => g.type === 'feature' && 'feature' in g && g.feature.id === 'hunter-defensive-tactics'
+    );
+    expect(inertGrant).toBeUndefined();
   });
 });
 

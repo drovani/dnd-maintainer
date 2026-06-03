@@ -1070,17 +1070,45 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Hunter's Lore: when you mark a creature with Hunter's Mark, you learn its damage resistances/immunities
           { type: 'feature', feature: { id: 'hunter-hunters-lore' } },
-          // Hunter's Prey: one-time choice of Colossus Slayer or Horde Breaker
-          // No pending-choice mechanism for free-form options; collapsed to inert feature grant
-          { type: 'feature', feature: { id: 'hunter-hunters-prey' } },
+          // Hunter's Prey: choose Colossus Slayer or Horde Breaker (2024 PHB)
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'subclass', 'hunter', 0),
+            options: [
+              {
+                optionId: 'colossus-slayer',
+                featureId: 'hunter-hunters-prey-colossus-slayer',
+                grants: [],
+              },
+              {
+                optionId: 'horde-breaker',
+                featureId: 'hunter-hunters-prey-horde-breaker',
+                grants: [],
+              },
+            ],
+          },
         ],
       },
       {
         classLevel: 7,
         grants: [
-          // Defensive Tactics: one-time choice of Escape the Horde, Multiattack Defense, or Steel Will
-          // No pending-choice mechanism for free-form options; collapsed to inert feature grant
-          { type: 'feature', feature: { id: 'hunter-defensive-tactics' } },
+          // Defensive Tactics: choose Escape the Horde or Multiattack Defense (2024 PHB)
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'subclass', 'hunter', 1),
+            options: [
+              {
+                optionId: 'escape-the-horde',
+                featureId: 'hunter-defensive-tactics-escape-the-horde',
+                grants: [],
+              },
+              {
+                optionId: 'multiattack-defense',
+                featureId: 'hunter-defensive-tactics-multiattack-defense',
+                grants: [],
+              },
+            ],
+          },
         ],
       },
     ] satisfies readonly SubclassFeature[],

@@ -1557,11 +1557,27 @@
     },
     "hunter-hunters-prey": {
       "name": "Hunter's Prey",
-      "description": "You gain one of the following features of your choice. Colossus Slayer: once per turn, your weapon attack deals an extra 1d8 damage if the target has fewer Hit Points than its Hit Point maximum. Horde Breaker: once on each of your turns when you make an attack with a weapon as part of the Attack action, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within your weapon's range."
+      "description": "You gain one of the following features of your choice: Colossus Slayer or Horde Breaker."
+    },
+    "hunter-hunters-prey-colossus-slayer": {
+      "name": "Colossus Slayer",
+      "description": "Once per turn, your weapon attack deals an extra 1d8 damage if the target has fewer Hit Points than its Hit Point maximum."
+    },
+    "hunter-hunters-prey-horde-breaker": {
+      "name": "Horde Breaker",
+      "description": "Once on each of your turns when you make an attack with a weapon as part of the Attack action, you can make another attack with the same weapon against a different creature within 5 feet of the original target and within your weapon's range."
     },
     "hunter-defensive-tactics": {
       "name": "Defensive Tactics",
-      "description": "You gain one of the following features of your choice. Escape the Horde: Opportunity Attacks against you are made with Disadvantage. Multiattack Defense: when a creature hits you with an attack roll, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the current turn. Steel Will: you have Advantage on saving throws against the Frightened condition."
+      "description": "You gain one of the following features of your choice: Escape the Horde or Multiattack Defense."
+    },
+    "hunter-defensive-tactics-escape-the-horde": {
+      "name": "Escape the Horde",
+      "description": "Opportunity Attacks against you are made with Disadvantage."
+    },
+    "hunter-defensive-tactics-multiattack-defense": {
+      "name": "Multiattack Defense",
+      "description": "When a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you this turn."
     },
     "ranger-favored-enemy": {
       "name": "Favored Enemy",
