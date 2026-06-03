@@ -959,6 +959,303 @@ export const SPELL_CATALOG = [
     duration: 'Up to 10 minutes',
     nativeClasses: ['cleric', 'druid', 'ranger', 'sorcerer'],
   },
+  // ── Paladin oath spells (added for issue #150) ────────────────────────────
+  // Devotion L3
+  {
+    id: 'protection-from-evil-and-good',
+    level: 1,
+    school: 'abjuration',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'holy water or powdered silver and iron, which the spell consumes',
+    },
+    duration: '10 minutes',
+    // 2024 PHB: native to cleric, druid, paladin, warlock, wizard
+    nativeClasses: ['cleric', 'druid', 'paladin', 'warlock', 'wizard'],
+  },
+  // Devotion/Glory L5
+  {
+    id: 'zone-of-truth',
+    level: 2,
+    school: 'enchantment',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '60 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '10 minutes',
+    // 2024 PHB: native to cleric, paladin
+    nativeClasses: ['cleric', 'paladin'],
+  },
+  // Devotion L9
+  {
+    // 2024 PHB: Beacon of Hope — school is Abjuration (same as 2014)
+    // FLAG: school should be verified against 2024 PHB — confident it is Abjuration, not Evocation
+    id: 'beacon-of-hope',
+    level: 3,
+    school: 'abjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to cleric
+    nativeClasses: ['cleric'],
+  },
+  {
+    id: 'dispel-magic',
+    level: 3,
+    school: 'abjuration',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '120 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    // 2024 PHB: native to bard, cleric, druid, paladin, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'cleric', 'druid', 'paladin', 'sorcerer', 'warlock', 'wizard'],
+  },
+  // Devotion L13
+  {
+    id: 'guardian-of-faith',
+    level: 4,
+    school: 'conjuration',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: '8 hours',
+    // 2024 PHB: native to cleric, paladin
+    nativeClasses: ['cleric', 'paladin'],
+  },
+  // Devotion/Ancients L17
+  {
+    id: 'commune',
+    level: 5,
+    school: 'divination',
+    ritual: true,
+    concentration: false,
+    castingTime: '1 minute',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: 'incense and a vial of holy or unholy water' },
+    duration: '1 minute',
+    // 2024 PHB: native to cleric, paladin
+    nativeClasses: ['cleric', 'paladin'],
+  },
+  // Glory L3
+  {
+    id: 'heroism',
+    level: 1,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to bard, paladin
+    nativeClasses: ['bard', 'paladin'],
+  },
+  // Glory L5
+  {
+    id: 'enhance-ability',
+    level: 2,
+    school: 'transmutation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'fur or a feather from a beast',
+    },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to bard, cleric, druid, ranger, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'cleric', 'druid', 'ranger', 'sorcerer', 'warlock', 'wizard'],
+  },
+  // Glory/Vengeance L9
+  {
+    id: 'haste',
+    level: 3,
+    school: 'transmutation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: 'a shaving of licorice root' },
+    duration: 'Up to 1 minute',
+    nativeClasses: ['sorcerer', 'wizard'],
+  },
+  // Glory/Ancients/Vengeance L9
+  {
+    id: 'protection-from-energy',
+    level: 3,
+    school: 'abjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 hour',
+    nativeClasses: ['cleric', 'druid', 'ranger', 'sorcerer', 'wizard'],
+  },
+  // Glory L13
+  {
+    id: 'compulsion',
+    level: 4,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    nativeClasses: ['bard'],
+  },
+  // Glory L17
+  {
+    id: 'legend-lore',
+    level: 5,
+    school: 'divination',
+    ritual: false,
+    concentration: false,
+    castingTime: '10 minutes',
+    range: 'Self',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'incense worth 250+ GP, which the spell consumes, and four ivory strips worth 50+ GP each',
+    },
+    duration: 'Instantaneous',
+    nativeClasses: ['bard', 'cleric', 'wizard'],
+  },
+  {
+    // FLAG: "Yolande's Regal Presence" — 2024-NEW spell (not in 2014 PHB).
+    // Slug follows repo convention (apostrophes dropped, lowercase, hyphens).
+    // nativeClasses: bard and paladin per 2024 PHB.
+    // Verify slug against final 2024 PHB printing — using 'yolandes-regal-presence' per brief.
+    id: 'yolandes-regal-presence',
+    level: 5,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    nativeClasses: ['bard', 'paladin'],
+  },
+  // Ancients L3
+  {
+    id: 'ensnaring-strike',
+    level: 1,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Bonus Action',
+    range: 'Self',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Up to 1 minute',
+    nativeClasses: ['ranger'],
+  },
+  // Ancients L5
+  {
+    id: 'moonbeam',
+    level: 2,
+    school: 'evocation',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '120 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'several seeds of any moonseed plant and a piece of opalescent feldspar',
+    },
+    duration: 'Up to 1 minute',
+    nativeClasses: ['druid'],
+  },
+  // Ancients L9
+  {
+    id: 'plant-growth',
+    level: 3,
+    school: 'transmutation',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '150 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    nativeClasses: ['bard', 'druid', 'ranger'],
+  },
+  // Ancients L13
+  {
+    id: 'stoneskin',
+    level: 4,
+    school: 'abjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'diamond dust worth 100+ GP, which the spell consumes',
+    },
+    duration: 'Up to 1 hour',
+    nativeClasses: ['druid', 'ranger', 'sorcerer', 'wizard'],
+  },
+  // Vengeance L3
+  {
+    id: 'bane',
+    level: 1,
+    school: 'enchantment',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'a drop of blood',
+    },
+    duration: 'Up to 1 minute',
+    nativeClasses: ['cleric'],
+  },
+  {
+    id: 'hunters-mark',
+    level: 1,
+    school: 'divination',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Bonus Action',
+    range: '90 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Up to 1 hour',
+    nativeClasses: ['ranger'],
+  },
+  // Vengeance L13
+  {
+    id: 'banishment',
+    level: 4,
+    school: 'abjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: 'an item distasteful to the target' },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to cleric, paladin, sorcerer, warlock, wizard
+    nativeClasses: ['cleric', 'paladin', 'sorcerer', 'warlock', 'wizard'],
+  },
 ] as const satisfies readonly SpellDef[];
 
 export type SpellId = (typeof SPELL_CATALOG)[number]['id'];

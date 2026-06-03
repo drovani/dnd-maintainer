@@ -2732,6 +2732,86 @@
     "insect-plague": {
       "name": "Insect Plague",
       "description": "Swarming, biting locusts fill a 20-foot-radius Sphere centered on a point you choose within range. The Sphere spreads around corners. The Sphere remains for the duration, and its area is Lightly Obscured. The swarm's area is Difficult Terrain. Each creature in the Sphere when it appears and each creature that enters it during a turn or ends its turn there must make a Constitution saving throw, taking 4d10 Piercing damage on a failed save, or half as much on a successful save."
+    },
+    "protection-from-evil-and-good": {
+      "name": "Protection from Evil and Good",
+      "description": "Until the spell ends, one willing creature you touch is protected against certain types of creatures: aberrations, celestials, elementals, fey, fiends, and undead. The protection grants several benefits. Creatures of those types have disadvantage on attack rolls against the target. The target also can't be charmed, frightened, or possessed by them."
+    },
+    "zone-of-truth": {
+      "name": "Zone of Truth",
+      "description": "You create a magical zone that guards against deception in a 15-foot-radius Sphere centered on a point of your choice within range. Until the spell ends, a creature that enters the spell's area for the first time on a turn or starts its turn there must succeed on a Charisma saving throw or be unable to speak a deliberate lie while in the Sphere."
+    },
+    "beacon-of-hope": {
+      "name": "Beacon of Hope",
+      "description": "This spell bestows hope and vitality. Choose any number of creatures within range. For the duration, each target has Advantage on Wisdom saving throws and Death Saving Throws, and regains the maximum number of Hit Points possible from any healing."
+    },
+    "dispel-magic": {
+      "name": "Dispel Magic",
+      "description": "Choose any creature, object, or magical effect within range. Any spell of 3rd level or lower on the target ends. For each spell of 4th level or higher on the target, make an ability check using your spellcasting ability. The DC equals 10 plus that spell's level. On a successful check, the spell ends."
+    },
+    "guardian-of-faith": {
+      "name": "Guardian of Faith",
+      "description": "A Large spectral guardian appears and hovers for the duration in an unoccupied space of your choice that you can see within range. The guardian occupies that space and is indistinct except for a gleaming sword and shield emblazoned with the symbol of your deity. Any creature hostile to you that moves to a space within 10 feet of the guardian for the first time on a turn must succeed on a Dexterity saving throw. On a failed save, the creature takes 20 Radiant damage, or half as much on a successful save."
+    },
+    "commune": {
+      "name": "Commune",
+      "description": "You contact your deity or a divine proxy and ask up to three questions that can be answered with a yes or no. You must ask your questions before the spell ends. You receive a correct answer for each question. Divine beings aren't necessarily omniscient, so you might receive 'unclear' as an answer if a question pertains to information that lies beyond the deity's knowledge."
+    },
+    "heroism": {
+      "name": "Heroism",
+      "description": "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to the Frightened condition and gains Temporary Hit Points equal to your spellcasting ability modifier at the start of each of its turns."
+    },
+    "enhance-ability": {
+      "name": "Enhance Ability",
+      "description": "You touch a creature and give it a magical enhancement. Choose one of the following effects: Bear's Endurance (Advantage on CON checks, 2d6 Temp HP), Bull's Strength (Advantage on STR checks, carrying capacity doubled), Cat's Grace (Advantage on DEX checks, no fall damage up to 20 ft), Eagle's Splendor (Advantage on CHA checks), Fox's Cunning (Advantage on INT checks), or Owl's Wisdom (Advantage on WIS checks)."
+    },
+    "haste": {
+      "name": "Haste",
+      "description": "Choose a willing creature that you can see within range. Until the spell ends, the target's Speed is doubled, it gains a +2 bonus to AC, it has Advantage on Dexterity saving throws, and it gains one additional action on each of its turns. When the spell ends, the target can't move or take actions until after its next turn."
+    },
+    "protection-from-energy": {
+      "name": "Protection from Energy",
+      "description": "For the duration, the willing creature you touch has resistance to one damage type of your choice: acid, cold, fire, lightning, or thunder."
+    },
+    "compulsion": {
+      "name": "Compulsion",
+      "description": "Creatures of your choice that you can see within range and that can hear you must make a Wisdom saving throw. A target automatically succeeds if it can't be Charmed. On a failed save, a target is affected by this spell. Until the spell ends, you can use a Bonus Action to designate a direction that is horizontal to you. Each affected target must use as much of its movement as possible to move in that direction on its next turn."
+    },
+    "legend-lore": {
+      "name": "Legend Lore",
+      "description": "Name or describe a person, place, or object. The spell brings to your mind a brief summary of the significant lore about the thing you named. The lore might consist of current tales, forgotten stories, or even secret lore that has never been widely known. If the thing you named isn't of legendary importance, you gain no information."
+    },
+    "yolandes-regal-presence": {
+      "name": "Yolande's Regal Presence",
+      "description": "You surround yourself with an unearthly presence, channeling the bearing of the Faerie Queen Yolande. For the duration, whenever any creature tries to move into a space within 10 feet of you for the first time on a turn, it must succeed on a Wisdom saving throw or its speed drops to 0 until the start of your next turn, and the creature falls Prone."
+    },
+    "ensnaring-strike": {
+      "name": "Ensnaring Strike",
+      "description": "As you hit the target, grasping vines sprout from your weapon or fist and wrap around the target. The target must succeed on a Strength saving throw or have the Restrained condition until the spell ends. A Large or larger creature has Advantage on this saving throw. While Restrained, the target takes 1d6 Piercing damage at the start of each of its turns."
+    },
+    "moonbeam": {
+      "name": "Moonbeam",
+      "description": "A silver beam of pale light shines down in a 5-foot-radius, 40-foot-high Cylinder centered on a point within range. Until the spell ends, dim light fills the Cylinder. When a creature enters the spell's area for the first time on a turn or starts its turn there, it is engulfed in ghostly flames that cause searing pain and must make a Constitution saving throw, taking 2d10 Radiant damage on a failed save, or half as much on a successful save."
+    },
+    "plant-growth": {
+      "name": "Plant Growth",
+      "description": "This spell channels vitality into plants within a specific area. There are two possible uses for the spell, granting either immediate or long-term benefits. If you cast this spell using its 1 Action casting time, choose a point within range. All normal plants in a 100-foot radius centered on that point become thick and overgrown, making the area Difficult Terrain."
+    },
+    "stoneskin": {
+      "name": "Stoneskin",
+      "description": "Until the spell ends, one willing creature you touch has resistance to Bludgeoning, Piercing, and Slashing damage."
+    },
+    "bane": {
+      "name": "Bane",
+      "description": "Up to three creatures of your choice that you can see within range must make Charisma saving throws. Whenever a target that fails this saving throw makes an attack roll or a saving throw before the spell ends, the target must roll a d4 and subtract the number rolled from the attack roll or saving throw."
+    },
+    "hunters-mark": {
+      "name": "Hunter's Mark",
+      "description": "You magically mark one creature you can see within range as your quarry. Until the spell ends, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll. You also have Advantage on any Wisdom (Perception or Survival) check you make to find it."
+    },
+    "banishment": {
+      "name": "Banishment",
+      "description": "One creature that you can see within range must succeed on a Charisma saving throw or be transported to a harmless demiplane for the duration. While there, the target has the Incapacitated condition. When the spell ends, the target reappears in the space it left or in the nearest unoccupied space if that space is occupied."
     }
   }
 }
