@@ -264,6 +264,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allow
             const descKey = `feats.${featId}.description` as `feats.${string}.description`;
             const label = t(nameKey, { defaultValue: featId });
             const description = t(descKey, { defaultValue: '' });
+            const isDisabledBook = featId === currentFeatId && !basePool.includes(featId);
             return (
               <div
                 key={featId}
@@ -279,6 +280,11 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allow
                 />
                 <Label htmlFor={radioId} className="flex-1 cursor-pointer">
                   <span className="font-medium">{label}</span>
+                  {isDisabledBook && (
+                    <Badge variant="destructive" className="text-xs ml-2">
+                      {tc('characterBuilder.hints.disabledSourceBook')}
+                    </Badge>
+                  )}
                   {description ? (
                     <span className="block text-xs text-muted-foreground mt-0.5">{description}</span>
                   ) : null}

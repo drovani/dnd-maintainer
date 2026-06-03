@@ -20,7 +20,7 @@ export interface GameData {
   readonly classes: readonly ClassSource[];
   readonly backgrounds: readonly BackgroundSource[];
   readonly feats: readonly FeatSource[];
-  readonly subclasses: Readonly<Record<SubclassId, SubclassSource>>;
+  readonly subclasses: Readonly<Partial<Record<SubclassId, SubclassSource>>>;
   readonly allowedSourceBooks: readonly SourceBookId[];
 }
 
@@ -45,10 +45,9 @@ export function useGameData(campaignSlug: string | undefined): GameData {
     const feats = filterBySourceBooks(FEAT_SOURCES, allowed);
     const subclasses = Object.fromEntries(
       Object.entries(SUBCLASS_SOURCES).filter(([, v]) => allowed.includes(v.sourceBook ?? 'phb-2024'))
-    ) as Record<SubclassId, SubclassSource>;
+    ) as Partial<Record<SubclassId, SubclassSource>>;
 
     return { species, classes, backgrounds, feats, subclasses, allowedSourceBooks: allowed };
     // allowedKey is a stable string representation of the source book list
-     
   }, [allowedKey]);
 }

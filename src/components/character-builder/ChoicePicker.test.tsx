@@ -577,3 +577,99 @@ describe('ChoicePicker spell-choice', () => {
     expect(screen.getByText('1 / 2')).toBeTruthy();
   });
 });
+
+// ---------------------------------------------------------------------------
+// ChoicePicker — feat-choice with allowedFeats (disabled-book no-data-loss)
+// ---------------------------------------------------------------------------
+
+import { FEAT_SOURCES } from '@/lib/sources';
+import type { FeatSource } from '@/lib/sources';
+
+// Fixture: no `from` so allowedFeats controls the pool via category filtering.
+const ORIGIN_FEAT_CHOICE: PendingChoice & { type: 'feat-choice' } = {
+  type: 'feat-choice',
+  choiceKey: 'feat-choice:species:human:1' as ChoiceKey,
+  source: { origin: 'species' as const, id: 'human' as const },
+  from: null,
+  category: 'origin',
+};
+
+// allowedFeats includes 'lucky' and 'skilled' but NOT 'alert'
+const ALLOWED_FEATS_WITHOUT_ALERT: readonly FeatSource[] = FEAT_SOURCES.filter(
+  (f) => f.id === 'lucky' || f.id === 'skilled'
+);
+
+describe('ChoicePicker feat-choice — allowedFeats (disabled-book no-data-loss)', () => {
+  it('renders only allowed feats when no current selection', () => {
+    render(
+      <ChoicePicker
+        choice={ORIGIN_FEAT_CHOICE}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+        allowedFeats={ALLOWED_FEATS_WITHOUT_ALERT}
+      />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    // Only lucky and skilled are in allowedFeats; alert is absent
+    expect(radios).toHaveLength(2);
+  });
+
+  it('unions in the current feat even when its book is disabled (feat absent from allowedFeats)', () => {
+    // alert is NOT in ALLOWED_FEATS_WITHOUT_ALERT but is the current selection
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'alert' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker
+        choice={ORIGIN_FEAT_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+        allowedFeats={ALLOWED_FEATS_WITHOUT_ALERT}
+      />
+    );
+    // All three radios: lucky, skilled, alert (unioned in)
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios).toHaveLength(3);
+    // alert radio is checked
+    const alertRadio = radios.find((r) => r.id.includes('alert'));
+    expect(alertRadio?.checked).toBe(true);
+  });
+
+  it('shows disabled-book badge for the unioned-in feat', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'alert' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker
+        choice={ORIGIN_FEAT_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+        allowedFeats={ALLOWED_FEATS_WITHOUT_ALERT}
+      />
+    );
+    // The mock returns the last key segment: 'disabledSourceBook'
+    expect(screen.getByText('disabledSourceBook')).toBeTruthy();
+  });
+
+  it('does NOT show disabled-book badge when the current feat is in allowedFeats', () => {
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'lucky' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker
+        choice={ORIGIN_FEAT_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+        allowedFeats={ALLOWED_FEATS_WITHOUT_ALERT}
+      />
+    );
+    expect(screen.queryByText('disabledSourceBook')).toBeNull();
+  });
+});
