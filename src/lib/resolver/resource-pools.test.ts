@@ -63,6 +63,25 @@ describe('resolveResourcePools', () => {
     expect(pools[0].max).toBe(3);
   });
 
+  it('psiwarrior psionic-energy pool resolves to max 4, regen long-rest', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'psiwarrior', classId: 'fighter', level: 3 },
+        grants: [
+          {
+            type: 'resource-pool',
+            poolId: 'psionic-energy',
+            max: { mode: 'fixed', value: 4 },
+            regen: 'long-rest',
+          },
+        ],
+      },
+    ];
+    const pools = resolveResourcePools(bundles);
+    expect(pools).toHaveLength(1);
+    expect(pools[0]).toMatchObject({ poolId: 'psionic-energy', max: 4, regen: 'long-rest' });
+  });
+
   it('tags pool with its source bundle', () => {
     const bundles = classBundles('monk', 4, [
       {

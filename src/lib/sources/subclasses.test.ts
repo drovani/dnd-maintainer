@@ -1114,25 +1114,35 @@ describe('getSubclassSource — Psi Warrior', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7, 10]);
   });
 
-  it('psiwarrior level 3 grants 1 feature: psionic-power', () => {
+  it('psiwarrior level 3 grants psionic-power feature + psionic-energy resource pool', () => {
     const source = getSubclassSource('psiwarrior');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(1);
-    expect(level3?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'psiwarrior-psionic-power' },
-    });
+    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'psiwarrior-psionic-power' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'psionic-energy',
+          max: { mode: 'fixed', value: 4 },
+          regen: 'long-rest',
+        }),
+      ])
+    );
   });
 
-  it('psiwarrior level 7 grants 1 feature: telekinetic-adept', () => {
+  it('psiwarrior level 7 grants telekinetic-adept feature with INT-based saveDC', () => {
     const source = getSubclassSource('psiwarrior');
     const level7 = source?.features.find((f) => f.classLevel === 7);
     expect(level7).toBeDefined();
     expect(level7?.grants).toHaveLength(1);
     expect(level7?.grants[0]).toMatchObject({
       type: 'feature',
-      feature: { id: 'psiwarrior-telekinetic-adept' },
+      feature: { id: 'psiwarrior-telekinetic-adept', saveDC: { dcAbility: 'int' } },
     });
   });
 

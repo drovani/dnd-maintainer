@@ -2426,6 +2426,10 @@
     "illusory-self": {
       "name": "Illusory Self",
       "description": "As a Reaction when hit by an attack, interpose an illusory duplicate so the attack misses. Recharges on a Short or Long Rest."
+    },
+    "psionic-energy": {
+      "name": "Psionic Energy Dice",
+      "description": "Fuel Psi Warrior abilities. You have 4 dice, regained on a Long Rest (the +1-per-Short-Rest regain and the PB-scaled die size d6–d12 are not yet modeled)."
     }
   },
   "spells": {

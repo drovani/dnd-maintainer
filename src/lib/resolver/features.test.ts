@@ -72,4 +72,21 @@ describe('resolveFeatures saveDC', () => {
     const features = resolveFeatures(bundles, abilityMap({ wis: 4 }), 3);
     expect(features[0].saveDC).toBeUndefined();
   });
+
+  it('psiwarrior Telekinetic Adept: Fighter 7 with INT 18 resolves saveDC to 15 (8 + PB 3 + INT mod 4)', () => {
+    // INT 18 → modifier +4; Fighter 7 → PB 3; DC = 8 + 3 + 4 = 15
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'psiwarrior', classId: 'fighter', level: 7 },
+        grants: [
+          {
+            type: 'feature',
+            feature: { id: 'psiwarrior-telekinetic-adept', saveDC: { dcAbility: 'int' } },
+          },
+        ],
+      },
+    ];
+    const features = resolveFeatures(bundles, abilityMap({ int: 4 }), 3);
+    expect(features[0].saveDC).toBe(15);
+  });
 });

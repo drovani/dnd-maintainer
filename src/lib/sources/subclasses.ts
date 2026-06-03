@@ -592,13 +592,17 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Single umbrella feature for Psionic Power pool (Protective Field, Psionic Strike,
           // Telekinetic Movement). Die size scales with PB (d6 at PB+2 → d12 at PB+6); encoded in description.
           { type: 'feature', feature: { id: 'psiwarrior-psionic-power' } },
+          // Psionic Energy resource pool: always 4 dice, regain on Long Rest.
+          // Deferred: PB-scaled die size (d6–d12) and +1 per Short Rest partial regen are not yet modeled.
+          { type: 'resource-pool', poolId: 'psionic-energy', max: { mode: 'fixed', value: 4 }, regen: 'long-rest' },
         ],
       },
       {
         classLevel: 7,
         grants: [
-          // Umbrella feature for Psi-Powered Leap and Telekinetic Thrust
-          { type: 'feature', feature: { id: 'psiwarrior-telekinetic-adept' } },
+          // Umbrella feature for Psi-Powered Leap and Telekinetic Thrust.
+          // Telekinetic Thrust forces a STR save vs DC 8 + PB + INT mod.
+          { type: 'feature', feature: { id: 'psiwarrior-telekinetic-adept', saveDC: { dcAbility: 'int' } } },
         ],
       },
       {
