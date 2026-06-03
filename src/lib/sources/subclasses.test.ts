@@ -2869,3 +2869,157 @@ describe('Cleric Light Domain resolver integration', () => {
     expect(prepared).toContain('see-invisibility');
   });
 });
+
+// ── Resolver integration: Ranger subclasses ──────────────────────────────────
+
+describe('Ranger Fey Wanderer resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'ranger', 0);
+
+  function makeFeyWandererBuild(classLevels: number): CharacterBuild {
+    const levels = Array.from({ length: classLevels }, (_, i) => ({
+      classId: 'ranger' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 6,
+    }));
+    return {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 14, con: 10, int: 10, wis: 14, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'feywanderer' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Ranger L9 Fey Wanderer: alwaysPreparedSpells has L3 charm-person', () => {
+    const build = makeFeyWandererBuild(9);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('charm-person');
+  });
+
+  it('Ranger L9 Fey Wanderer: alwaysPreparedSpells has L5 misty-step', () => {
+    const build = makeFeyWandererBuild(9);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('misty-step');
+  });
+
+  it('Ranger L9 Fey Wanderer: alwaysPreparedSpells has L9 summon-fey', () => {
+    const build = makeFeyWandererBuild(9);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('summon-fey');
+  });
+
+  it('Ranger L9 Fey Wanderer: alwaysPreparedSpells does NOT include L13 dimension-door', () => {
+    const build = makeFeyWandererBuild(9);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('dimension-door');
+  });
+
+  it('Ranger L9 Fey Wanderer: alwaysPreparedSpells does NOT include L17 mislead', () => {
+    const build = makeFeyWandererBuild(9);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 9,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('mislead');
+  });
+});
+
+describe('Ranger Gloom Stalker resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'ranger', 0);
+
+  function makeGloomStalkerBuild(classLevels: number): CharacterBuild {
+    const levels = Array.from({ length: classLevels }, (_, i) => ({
+      classId: 'ranger' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 6,
+    }));
+    return {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 14, con: 10, int: 10, wis: 14, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'gloomstalker' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Ranger L7 Gloom Stalker: savingThrows.wis.proficient is true (Iron Mind WIS save grant)', () => {
+    const build = makeGloomStalkerBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.savingThrows.wis.proficient).toBe(true);
+  });
+
+  it('Ranger L7 Gloom Stalker: alwaysPreparedSpells has L3 disguise-self', () => {
+    const build = makeGloomStalkerBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('disguise-self');
+  });
+
+  it('Ranger L7 Gloom Stalker: alwaysPreparedSpells has L5 rope-trick', () => {
+    const build = makeGloomStalkerBuild(7);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 7,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).toContain('rope-trick');
+  });
+});

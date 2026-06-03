@@ -67,8 +67,8 @@ missing: 0 · stub: 0 · partial: 45 · complete: 3 · golden-verified: 0/48
 | oathofancients | partial | has 3/5/7/9/13/17; missing 15/20 (paladin expects 3/7/15/20) | — |
 | oathofvengeance | partial | has 3/5/7/9/13/17; missing 15/20 (paladin expects 3/7/15/20) | — |
 | beastmaster | partial | has 3/7; missing 11/15 (ranger expects 3/7/11/15) | — |
-| feywanderer | partial | has 3/7; missing 11/15 (ranger expects 3/7/11/15) | — |
-| gloomstalker | partial | has 3/7; missing 11/15 (ranger expects 3/7/11/15) | — |
+| feywanderer | partial | has 3/5/7/9/13/17; missing 11/15 (ranger expects 3/7/11/15) | — |
+| gloomstalker | partial | has 3/5/7/9/13/17; missing 11/15 (ranger expects 3/7/11/15) | — |
 | hunter | partial | has 3/7; missing 11/15 (ranger expects 3/7/11/15) | — |
 | thief | partial | has 3/9; missing 13/17 (rogue expects 3/9/13/17) | — |
 | assassin | partial | has 3/9; missing 13/17 (rogue expects 3/9/13/17) | — |
