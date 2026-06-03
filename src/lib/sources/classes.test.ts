@@ -969,6 +969,19 @@ describe('Sorcerer class grant structures', () => {
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
     expect(featureIds).toContain('sorcerer-sorcerous-restoration');
   });
+
+  it('level 2 has resource-pool grant for sorcery-points with class-level max and long-rest regen', () => {
+    const grant = source?.levels[1].grants.find((g) => g.type === 'resource-pool');
+    expect(grant).toBeDefined();
+    if (grant?.type === 'resource-pool') {
+      expect(grant.poolId).toBe('sorcery-points');
+      expect(grant.max.mode).toBe('class-level');
+      if (grant.max.mode === 'class-level') {
+        expect(grant.max.classId).toBe('sorcerer');
+      }
+      expect(grant.regen).toBe('long-rest');
+    }
+  });
 });
 
 describe('Warlock class grant structures', () => {

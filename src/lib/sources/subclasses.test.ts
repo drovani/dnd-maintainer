@@ -3146,3 +3146,175 @@ describe('Ranger Gloom Stalker resolver integration', () => {
     expect(resolved.savingThrows.wis.proficient).toBe(false);
   });
 });
+
+// ── Resolver integration: Sorcerer subclasses ────────────────────────────────
+
+describe('Sorcerer Aberrant Sorcery resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'sorcerer', 0);
+
+  function makeAberrantBuild(classLevels: number): CharacterBuild {
+    const levels = Array.from({ length: classLevels }, (_, i) => ({
+      classId: 'sorcerer' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 4,
+    }));
+    return {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 16 },
+      abilityMethod: 'standard-array',
+      levels,
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'aberrantsorcery' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+  }
+
+  it('Sorcerer L5 Aberrant: alwaysPreparedSpells includes L3 spells (arms-of-hadar, dissonant-whispers) and L5 spells (hunger-of-hadar, sending)', () => {
+    const build = makeAberrantBuild(5);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const prepared = resolved.spellcasting!.alwaysPreparedSpells;
+    expect(prepared).toContain('arms-of-hadar');
+    expect(prepared).toContain('calm-emotions');
+    expect(prepared).toContain('detect-thoughts');
+    expect(prepared).toContain('dissonant-whispers');
+    expect(prepared).toContain('hunger-of-hadar');
+    expect(prepared).toContain('sending');
+  });
+
+  it('Sorcerer L5 Aberrant: alwaysPreparedSpells does NOT include L7 spells (evards-black-tentacles)', () => {
+    const build = makeAberrantBuild(5);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('evards-black-tentacles');
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('summon-aberration');
+  });
+
+  it('Sorcerer L5 Aberrant: mind-sliver is in cantrips (not alwaysPreparedSpells)', () => {
+    const build = makeAberrantBuild(5);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 5,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    expect(resolved.spellcasting!.cantrips).toContain('mind-sliver');
+    expect(resolved.spellcasting!.alwaysPreparedSpells).not.toContain('mind-sliver');
+  });
+});
+
+describe('Sorcerer resource pool resolver integration', () => {
+  it('Sorcerer L2: resourcePools includes sorcery-points with max=2 and long-rest regen', () => {
+    const subclassKey = createChoiceKey('subclass', 'class', 'sorcerer', 0);
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 16 },
+      abilityMethod: 'standard-array',
+      levels: [
+        { classId: 'sorcerer' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'sorcerer' as ClassId, classLevel: 2, hpRoll: 4 },
+      ],
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'wildmagicsorcery' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 2,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const pool = resolved.resourcePools.find((p) => p.poolId === 'sorcery-points');
+    expect(pool).toBeDefined();
+    expect(pool?.max).toBe(2);
+    expect(pool?.regen).toBe('long-rest');
+  });
+});
+
+describe('Sorcerer Draconic Sorcery Dragon Ancestor resolver integration', () => {
+  const subclassKey = createChoiceKey('subclass', 'class', 'sorcerer', 0);
+  const dragonAncestorKey = createChoiceKey('feature-choice', 'subclass', 'draconicsorcery', 0);
+
+  const baseBuild: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: 'acolyte' as BackgroundId,
+    baseAbilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 16 },
+    abilityMethod: 'standard-array',
+    levels: [
+      { classId: 'sorcerer' as ClassId, classLevel: 1, hpRoll: null },
+      { classId: 'sorcerer' as ClassId, classLevel: 2, hpRoll: 4 },
+      { classId: 'sorcerer' as ClassId, classLevel: 3, hpRoll: 4 },
+    ],
+    choices: {
+      [subclassKey]: { type: 'subclass' as const, subclassId: 'draconicsorcery' as SubclassId },
+    },
+    feats: [],
+    activeItems: [],
+  };
+
+  it('Draconic L3 undecided: emits a pending feature-choice for dragon ancestor (subclass origin)', () => {
+    const { bundles, expandedFeats } = collectBundles(baseBuild);
+    const resolved = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 3,
+      bundles,
+      choices: baseBuild.choices,
+      expandedFeats,
+    });
+    const pending = resolved.pendingChoices.find(
+      (c) => c.type === 'feature-choice' && c.choiceKey === dragonAncestorKey
+    );
+    expect(pending).toBeDefined();
+    if (pending?.type === 'feature-choice') {
+      expect(pending.options).toHaveLength(10);
+      const optionIds = pending.options.map((o) => o.optionId);
+      expect(optionIds).toContain('red');
+      expect(optionIds).toContain('gold');
+      expect(optionIds).toContain('silver');
+    }
+  });
+
+  it('Draconic L3 with red dragon choice: no pending dragon-ancestor feature-choice', () => {
+    const build: CharacterBuild = {
+      ...baseBuild,
+      choices: {
+        ...baseBuild.choices,
+        [dragonAncestorKey]: { type: 'feature-choice' as const, optionId: 'red' },
+      },
+    };
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const pending = resolved.pendingChoices.find(
+      (c) => c.type === 'feature-choice' && c.choiceKey === dragonAncestorKey
+    );
+    expect(pending).toBeUndefined();
+  });
+});
