@@ -3,6 +3,7 @@ import type { AbilityKey } from '@/lib/dnd-helpers';
 import type { ResolvedAbility, ResolvedSpellcasting } from '@/types/resolved';
 import { getPactMagicSlots, getPreparedSpellCount, getSpellSlots } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
+import { getSpellDef } from '@/lib/sources/spells';
 
 export function resolveSpellcasting(
   bundles: readonly GrantBundle[],
@@ -27,6 +28,8 @@ export function resolveSpellcasting(
   for (const { grant } of collectGrantsByType(bundles, 'spell')) {
     if (grant.alwaysPrepared) {
       alwaysPreparedSpells.push(grant.spellId);
+    } else if (getSpellDef(grant.spellId)?.level === 0) {
+      cantrips.push(grant.spellId);
     } else {
       knownSpells.push(grant.spellId);
     }

@@ -376,11 +376,72 @@ describe('resolveSpellcasting', () => {
   });
 
   describe('cantrips behavior', () => {
-    it('cleric L1: cantrips is always []', () => {
-      // TODO(#93 followup): cantrip detection requires SpellGrant.level field; deferred.
+    it('cleric L1 with no spell grants: cantrips is []', () => {
       const abilities = makeAbilities({ wis: 14 });
       const result = resolveSpellcasting(makeClericBundles(1), abilities, 2, 1);
       expect(result!.cantrips).toEqual([]);
+    });
+
+    it('level-0 catalog spell routes to cantrips, not knownSpells', () => {
+      const bundles: GrantBundle[] = [
+        ...makeDruidBundles(1),
+        {
+          source: { origin: 'class', id: 'druid', level: 1 },
+          grants: [{ type: 'spell', spellId: 'guidance', alwaysPrepared: false }],
+        },
+      ];
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(bundles, abilities, 2, 1);
+      expect(result!.cantrips).toContain('guidance');
+      expect(result!.knownSpells).not.toContain('guidance');
+    });
+
+    it('level-0 catalog spell does not go to alwaysPreparedSpells even when alwaysPrepared=true', () => {
+      // alwaysPrepared takes priority regardless of spell level
+      const bundles: GrantBundle[] = [
+        ...makeClericBundles(1),
+        {
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          grants: [{ type: 'spell', spellId: 'guidance', alwaysPrepared: true }],
+        },
+      ];
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(bundles, abilities, 2, 1);
+      expect(result!.alwaysPreparedSpells).toContain('guidance');
+      expect(result!.cantrips).not.toContain('guidance');
+    });
+
+    it('unknown spell id (not in catalog) with alwaysPrepared=false routes to knownSpells', () => {
+      const bundles: GrantBundle[] = [
+        ...makeClericBundles(1),
+        {
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          grants: [{ type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: false }],
+        },
+      ];
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(bundles, abilities, 2, 1);
+      expect(result!.knownSpells).toContain('guiding-bolt');
+      expect(result!.cantrips).not.toContain('guiding-bolt');
+    });
+
+    it('multiple druid cantrips all route to cantrips array', () => {
+      const bundles: GrantBundle[] = [
+        ...makeDruidBundles(1),
+        {
+          source: { origin: 'class', id: 'druid', level: 1 },
+          grants: [
+            { type: 'spell', spellId: 'druidcraft', alwaysPrepared: false },
+            { type: 'spell', spellId: 'thorn-whip', alwaysPrepared: false },
+          ],
+        },
+      ];
+      const abilities = makeAbilities({ wis: 14 });
+      const result = resolveSpellcasting(bundles, abilities, 2, 1);
+      expect(result!.cantrips).toContain('druidcraft');
+      expect(result!.cantrips).toContain('thorn-whip');
+      expect(result!.knownSpells).not.toContain('druidcraft');
+      expect(result!.knownSpells).not.toContain('thorn-whip');
     });
   });
 });
