@@ -2784,6 +2784,30 @@
     "banishment": {
       "name": "Banishment",
       "description": "One creature that you can see within range must succeed on a Charisma saving throw or be transported to a harmless demiplane for the duration. While there, the target has the Incapacitated condition. When the spell ends, the target reappears in the space it left or in the nearest unoccupied space if that space is occupied."
+    },
+    "rope-trick": {
+      "name": "Rope Trick",
+      "description": "You touch a length of rope up to 60 feet long. One end of the rope rises into the air until the rope hangs perpendicular, with its upper end fixed in place. Up to eight creatures can climb up the rope and into the extradimensional space at the top, which is invisible from outside."
+    },
+    "fear": {
+      "name": "Fear",
+      "description": "You project a phantasmal image of a creature's worst fears. Each creature in a 30-foot cone must succeed on a Wisdom saving throw or drop whatever it is holding and have the Frightened condition for the duration. While Frightened, it must take the Dash action and move away from you on each of its turns."
+    },
+    "summon-fey": {
+      "name": "Summon Fey",
+      "description": "You call forth a fey spirit. It manifests in an unoccupied space within range in a form you choose: Fuming, Mirthful, or Tricksy. The creature disappears when it drops to 0 Hit Points or when the spell ends. The summoned creature is friendly to you and your companions for the duration."
+    },
+    "greater-invisibility": {
+      "name": "Greater Invisibility",
+      "description": "A creature you touch has the Invisible condition until the spell ends. Unlike Invisibility, this spell doesn't end if the target attacks or casts a spell."
+    },
+    "mislead": {
+      "name": "Mislead",
+      "description": "You become Invisible and simultaneously cause an illusory double of yourself to appear. You can use a Bonus Action to move the illusion up to twice your Speed. Through the illusion's senses, you can perceive its surroundings; you are Blinded and Deafened while doing so."
+    },
+    "seeming": {
+      "name": "Seeming",
+      "description": "You change the appearance of any number of creatures that you can see within range. Each target receives an illusory disguise for the duration. A creature can make an Investigation check against your Spell Save DC to discern the illusion."
     }
   }
 }

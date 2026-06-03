@@ -1256,6 +1256,90 @@ export const SPELL_CATALOG = [
     // 2024 PHB: native to cleric, paladin, sorcerer, warlock, wizard
     nativeClasses: ['cleric', 'paladin', 'sorcerer', 'warlock', 'wizard'],
   },
+  // Fey Wanderer L3
+  {
+    id: 'rope-trick',
+    level: 2,
+    school: 'transmutation',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: 'powdered corn extract and a twisted loop of parchment' },
+    duration: '1 hour',
+    // 2024 PHB: native to wizard
+    nativeClasses: ['wizard'],
+  },
+  // Fey Wanderer L9 / Gloom Stalker L9
+  {
+    id: 'fear',
+    level: 3,
+    school: 'illusion',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: 'a white feather or the heart of a hen' },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to bard, sorcerer, warlock, wizard
+    nativeClasses: ['bard', 'sorcerer', 'warlock', 'wizard'],
+  },
+  // Fey Wanderer L9
+  {
+    id: 'summon-fey',
+    level: 3,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: 'a gilded flower worth 300+ GP' },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to druid, ranger, warlock, wizard
+    nativeClasses: ['druid', 'ranger', 'warlock', 'wizard'],
+  },
+  // Gloom Stalker L13
+  {
+    id: 'greater-invisibility',
+    level: 4,
+    school: 'illusion',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 minute',
+    // 2024 PHB: native to bard, sorcerer, wizard
+    nativeClasses: ['bard', 'sorcerer', 'wizard'],
+  },
+  // Fey Wanderer L17
+  {
+    id: 'mislead',
+    level: 5,
+    school: 'illusion',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: 'Self',
+    components: { verbal: false, somatic: true, material: false },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to bard, wizard
+    nativeClasses: ['bard', 'wizard'],
+  },
+  // Gloom Stalker L17
+  {
+    id: 'seeming',
+    level: 5,
+    school: 'illusion',
+    ritual: false,
+    concentration: false,
+    castingTime: 'Action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '8 hours',
+    // 2024 PHB: native to bard, sorcerer, wizard
+    nativeClasses: ['bard', 'sorcerer', 'wizard'],
+  },
 ] as const satisfies readonly SpellDef[];
 
 export type SpellId = (typeof SPELL_CATALOG)[number]['id'];
