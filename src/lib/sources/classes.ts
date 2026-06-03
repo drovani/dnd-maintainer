@@ -335,7 +335,26 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: ['arcana', 'animalhandling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival'],
           },
           { type: 'spellcasting', ability: 'wis', source: 'class' },
-          { type: 'feature', feature: { id: 'druid-primal-order' } },
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'class', 'druid', 0),
+            options: [
+              {
+                optionId: 'magician',
+                featureId: 'druid-primal-order-magician',
+                // inert pending cantrip-grant + ability-check-bonus systems
+                grants: [],
+              },
+              {
+                optionId: 'warden',
+                featureId: 'druid-primal-order-warden',
+                grants: [
+                  { type: 'proficiency', category: 'weapon', id: 'martial' },
+                  { type: 'proficiency', category: 'armor', id: 'medium-nonmetal' },
+                ],
+              },
+            ],
+          },
           { type: 'armor-class', calculation: { mode: 'armored' } },
         ],
       },
@@ -363,7 +382,28 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       },
       EMPTY_LEVEL,
       EMPTY_LEVEL,
-      { grants: [{ type: 'feature', feature: { id: 'druid-elemental-fury' } }] },
+      {
+        grants: [
+          {
+            type: 'feature-choice',
+            key: createChoiceKey('feature-choice', 'class', 'druid', 1),
+            options: [
+              {
+                optionId: 'potent-spellcasting',
+                featureId: 'druid-elemental-fury-potent-spellcasting',
+                // inert pending cantrip-damage model
+                grants: [],
+              },
+              {
+                optionId: 'primal-strike',
+                featureId: 'druid-elemental-fury-primal-strike',
+                // inert pending on-hit damage model
+                grants: [],
+              },
+            ],
+          },
+        ],
+      },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 2), points: 2, from: null }] },
       EMPTY_LEVEL,
       EMPTY_LEVEL,

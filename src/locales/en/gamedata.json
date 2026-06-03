@@ -1235,9 +1235,13 @@
       "name": "War God's Blessing",
       "description": "You can use your Reaction to expend one use of your Channel Divinity and give an attack roll made by a creature within 30 feet of you a +10 bonus. You make this choice after you see the roll but before the DM says whether it hits or misses."
     },
-    "druid-primal-order": {
-      "name": "Primal Order",
-      "description": "You have dedicated yourself to one of the following sacred roles of your choice: Magician or Warden."
+    "druid-primal-order-magician": {
+      "name": "Primal Order: Magician",
+      "description": "You know one extra Druid cantrip. In addition, your mystical connection to nature gives you a bonus to Intelligence (Arcana) checks equal to your Wisdom modifier."
+    },
+    "druid-primal-order-warden": {
+      "name": "Primal Order: Warden",
+      "description": "Trained for battle, you gain proficiency with Martial weapons and the ability to wear Medium armor."
     },
     "druid-wild-shape": {
       "name": "Wild Shape",
@@ -1259,9 +1263,13 @@
       "name": "Wild Shape Improvement (Greater)",
       "description": "Your Wild Shape improves further, allowing you to transform into beasts with a higher challenge rating."
     },
-    "druid-elemental-fury": {
-      "name": "Elemental Fury",
-      "description": "The might of the elements flows through you. You gain the Potent Spellcasting or Primal Strike feature."
+    "druid-elemental-fury-potent-spellcasting": {
+      "name": "Elemental Fury: Potent Spellcasting",
+      "description": "Add your Wisdom modifier to the damage you deal with any Druid cantrip."
+    },
+    "druid-elemental-fury-primal-strike": {
+      "name": "Elemental Fury: Primal Strike",
+      "description": "Once on each of your turns when you hit a creature with an attack roll using a weapon or Unarmed Strike, you can cause the target to take extra damage of a type determined by the season: Cold (winter), Fire (summer), Lightning (spring), or Thunder (fall). The extra damage equals 1d8 at Druid level 7 and 2d8 at Druid level 17."
     },
     "druid-improved-elemental-fury": {
       "name": "Improved Elemental Fury",

@@ -642,6 +642,30 @@ describe('Druid class grant structures', () => {
     expect(featureIds).toContain('druid-wild-shape-improvement-1');
   });
 
+  it('level 1 has a primal-order feature-choice between Magician and Warden', () => {
+    const grant = source?.levels[0].grants.find((g) => g.type === 'feature-choice');
+    expect(grant?.type).toBe('feature-choice');
+    if (grant?.type === 'feature-choice') {
+      expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'druid', 0));
+      const optionIds = grant.options.map((o) => o.optionId);
+      expect(optionIds).toEqual(['magician', 'warden']);
+      const warden = grant.options.find((o) => o.optionId === 'warden');
+      expect(warden?.featureId).toBe('druid-primal-order-warden');
+      const wardenProfs = warden?.grants.filter((g) => g.type === 'proficiency') ?? [];
+      expect(wardenProfs).toHaveLength(2);
+    }
+  });
+
+  it('level 11 has an elemental-fury feature-choice between Potent Spellcasting and Primal Strike', () => {
+    const grant = source?.levels[10].grants.find((g) => g.type === 'feature-choice');
+    expect(grant?.type).toBe('feature-choice');
+    if (grant?.type === 'feature-choice') {
+      expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'druid', 1));
+      const optionIds = grant.options.map((o) => o.optionId);
+      expect(optionIds).toEqual(['potent-spellcasting', 'primal-strike']);
+    }
+  });
+
   it('level 20 has archdruid feature', () => {
     const featureIds = source?.levels[19].grants
       .filter((g) => g.type === 'feature')
