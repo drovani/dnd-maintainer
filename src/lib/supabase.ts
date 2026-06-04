@@ -19,7 +19,7 @@ export function createTimeoutFetch(timeoutMs: number): typeof fetch {
     } catch (error) {
       if (error instanceof DOMException && error.name === 'TimeoutError') {
         const target = typeof url === 'string' ? url : url.toString();
-        throw new Error(`Supabase request to ${target} timed out after ${timeoutMs}ms`);
+        throw new Error(`Supabase request to ${target} timed out after ${timeoutMs}ms`, { cause: error });
       }
       throw error;
     }

@@ -67,7 +67,7 @@ describe('2024 PHB coverage matrix', () => {
         writeFileSync(DOC_PATH, rendered, 'utf8');
         return;
       }
-      let committed = '';
+      let committed: string;
       try {
         committed = readFileSync(DOC_PATH, 'utf8');
       } catch {

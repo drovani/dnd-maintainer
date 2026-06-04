@@ -382,7 +382,7 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allow
         </div>
         <div className={isPackCategory ? 'grid gap-3 sm:grid-cols-2' : 'space-y-2'}>
           {choice.bundleIds.map((bundleId) => {
-            let ref: ReturnType<typeof resolveBundleRef> | null = null;
+            let ref: ReturnType<typeof resolveBundleRef>;
             try {
               ref = resolveBundleRef(bundleId);
             } catch (err) {

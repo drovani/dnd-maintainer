@@ -19,7 +19,7 @@ import {
 import type { AbilityKey } from '@/lib/dnd-helpers';
 import type { AbilityScores } from '@/types/database';
 import { Check, ChevronDown, ChevronUp, Dices, TrendingDown, TrendingUp } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const DEFAULT_ABILITIES: AbilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
@@ -131,7 +131,9 @@ export function AbilitiesStep() {
   };
 
   const onAbilitiesChangeRef = useRef(context.updateCreation);
-  onAbilitiesChangeRef.current = context.updateCreation;
+  useLayoutEffect(() => {
+    onAbilitiesChangeRef.current = context.updateCreation;
+  });
 
   const handleRollScores = useCallback(() => {
     if (isRolling) return;

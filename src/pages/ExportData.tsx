@@ -140,7 +140,7 @@ export default function ExportData() {
         downloadFile(sql, `seed-${timestamp}.sql`);
       } catch (downloadErr: unknown) {
         const msg = downloadErr instanceof Error ? downloadErr.message : 'Unknown download error';
-        throw new Error(`Data was generated successfully but the download failed: ${msg}`);
+        throw new Error(`Data was generated successfully but the download failed: ${msg}`, { cause: downloadErr });
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('errors.unexpectedError');

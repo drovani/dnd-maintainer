@@ -187,7 +187,8 @@ export function useCharacterMutations() {
           const original = childError instanceof Error ? childError.message : String(childError);
           throw new Error(
             `Character clone failed and rollback also failed; an orphaned character (${newCharacter.id}) ` +
-              `may remain. Original error: ${original}; rollback error: ${rollbackError.message}`
+              `may remain. Original error: ${original}; rollback error: ${rollbackError.message}`,
+            { cause: childError }
           );
         }
         throw childError;

@@ -15,7 +15,7 @@ interface PortraitUploadProps {
 export function PortraitUpload({ characterId, portraitUrl, characterName }: PortraitUploadProps): React.JSX.Element {
   const { t } = useTranslation('common');
   const { upload, remove, isUploading, isRemoving, error } = usePortraitUpload();
-  const [cacheBust, setCacheBust] = useState<number>(Date.now());
+  const [cacheBust, setCacheBust] = useState<number>(() => Date.now());
   const [localError, setLocalError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 

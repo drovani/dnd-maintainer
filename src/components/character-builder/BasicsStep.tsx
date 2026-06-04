@@ -513,6 +513,7 @@ export function BasicsStep({ onRequestAdvance }: BasicsStepProps) {
             {tc('characterBuilder.fields.alignment')} <span className="text-destructive">*</span>
           </Label>
           <div className="grid grid-cols-3 gap-0 rounded-md overflow-hidden border border-border">
+            {/* eslint-disable-next-line react-hooks/refs -- false positive: this render-phase map only reaches refs via the onClick handler (cancelPendingAdvance) below; the ref write lives in the useLayoutEffect above. */}
             {(['good', 'neutral', 'evil'] as const).map((moral) =>
               (['lawful', 'neutral', 'chaotic'] as const).map((ethic) => {
                 const gridKey =

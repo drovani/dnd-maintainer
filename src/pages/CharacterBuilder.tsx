@@ -21,7 +21,7 @@ import { useCampaignContext } from '@/hooks/useCampaignContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import type { Character } from '@/types/database';
 import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -153,7 +153,9 @@ function CharacterBuilderInner() {
 
   // Keep a ref to the latest payload so the debounced save always uses fresh data
   const latestPayloadRef = useRef<AutosavePayload>({ character, rows, resolved });
-  latestPayloadRef.current = { character, rows, resolved };
+  useLayoutEffect(() => {
+    latestPayloadRef.current = { character, rows, resolved };
+  });
 
   // Required fields before any draft can be saved
   const hasRequiredFields =
