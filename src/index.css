@@ -181,6 +181,50 @@ body,
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
   }
 
+  /* WotC-inspired character sheet grid: stats (left) / combat (center, wider) / roleplay & gear (right).
+     Collapses to a single column on mobile, matching the flow of the official 5e sheet. */
+  .sheet-grid {
+    @apply grid gap-6;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'left'
+      'center'
+      'right';
+  }
+
+  @media (min-width: 1024px) {
+    .sheet-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-areas: 'left center right';
+      align-items: start;
+    }
+  }
+
+  .sheet-area-left {
+    grid-area: left;
+    @apply space-y-6;
+  }
+
+  .sheet-area-center {
+    grid-area: center;
+    @apply space-y-6;
+  }
+
+  .sheet-area-right {
+    grid-area: right;
+    @apply space-y-6;
+  }
+
+  /* Card shell shared by every character-sheet panel. */
+  .sheet-panel {
+    @apply bg-card border rounded-lg p-6;
+  }
+
+  /* Ability "shield" box — large modifier, small score pill below, echoing the official sheet. */
+  .ability-shield {
+    @apply flex flex-col items-center rounded-lg border bg-muted/50 px-3 py-3 text-center;
+  }
+
   .form-group {
     @apply mb-4;
   }
