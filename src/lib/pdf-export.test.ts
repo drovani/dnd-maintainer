@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
-import { fillCharacterPdf, PdfTemplateError } from '@/lib/pdf-export';
+import { exportCharacterPdf, fillCharacterPdf, PdfTemplateError } from '@/lib/pdf-export';
 import type { Character } from '@/types/database';
 import type { ResolvedAbility, ResolvedCharacter } from '@/types/resolved';
 
@@ -155,5 +155,47 @@ describe('fillCharacterPdf', () => {
     await expect(fillCharacterPdf(garbage, minimalResolved(), minimalCharacter())).rejects.toBeInstanceOf(
       PdfTemplateError
     );
+  });
+
+  it('reports a present-but-wrong-type field as missing instead of throwing', async () => {
+    // 'AC' is a text-mapped semantic key (armorClass) but here it exists as a CHECKBOX.
+    const template = await tinyTemplate({ text: ['CharacterName'], checks: ['AC'] });
+    const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
+    expect(missingFields).toContain('AC');
+    expect(missingFields).not.toContain('CharacterName');
+  });
+});
+
+describe('exportCharacterPdf', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('fetches the template, fills it, downloads, and returns missing fields', async () => {
+    const template = await tinyTemplate({ text: ['CharacterName', 'AC'], checks: [] });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(template as BodyInit, { status: 200, headers: { 'Content-Type': 'application/pdf' } })
+    );
+    const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    const { missingFields } = await exportCharacterPdf(minimalResolved(), minimalCharacter());
+
+    expect(createUrl).toHaveBeenCalledOnce();
+    expect(click).toHaveBeenCalledOnce();
+    expect(Array.isArray(missingFields)).toBe(true);
+    // ProfBonus/saves etc. are mapped but absent from this 2-field stub → reported.
+    expect(missingFields).toContain('ProfBonus');
+  });
+
+  it('throws PdfTemplateError on a non-ok response (the default 404 first-run path)', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }));
+    await expect(exportCharacterPdf(minimalResolved(), minimalCharacter())).rejects.toBeInstanceOf(PdfTemplateError);
+  });
+
+  it('wraps a fetch rejection in PdfTemplateError (so the handler can discriminate it)', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('network down'));
+    await expect(exportCharacterPdf(minimalResolved(), minimalCharacter())).rejects.toBeInstanceOf(PdfTemplateError);
   });
 });
