@@ -39,3 +39,6 @@ supabase/.temp
 *.sw?
 /coverage
 .claude/worktrees
+
+# Copyrighted PDF templates dropped into public/assets are never committed.
+public/assets/*.pdf

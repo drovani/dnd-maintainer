@@ -6,7 +6,7 @@ import { BACKGROUND_SOURCES } from '@/lib/sources/backgrounds';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
 import { DND_CLASSES, isBackgroundId, type ClassId } from '@/lib/dnd-helpers';
 import type { Character } from '@/types/database';
-import { Archive, Copy, Edit2, Trash2 } from 'lucide-react';
+import { Archive, Copy, Edit2, FileDown, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function CharacterSheetHeader({
@@ -15,12 +15,16 @@ export function CharacterSheetHeader({
   onClone,
   onArchive,
   onDelete,
+  onExportPdf,
+  exportingPdf = false,
 }: {
   character: Character;
   onEdit: () => void;
   onClone: () => void;
   onArchive: () => void;
   onDelete: () => void;
+  onExportPdf?: () => void;
+  exportingPdf?: boolean;
 }) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
@@ -73,6 +77,17 @@ export function CharacterSheetHeader({
           >
             <Edit2 size={16} />
           </Button>
+          {onExportPdf && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onExportPdf}
+              pending={exportingPdf}
+              title={tc('characterSheet.export.button')}
+            >
+              <FileDown size={16} />
+            </Button>
+          )}
           <Button variant="ghost" size="icon-sm" onClick={onClone} title={tc('buttons.clone')}>
             <Copy size={16} />
           </Button>

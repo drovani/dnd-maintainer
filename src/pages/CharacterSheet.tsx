@@ -23,6 +23,7 @@ import { EditHeaderDialog } from '@/components/character-sheet/edit-dialogs/Edit
 import { EditPersonalityDialog } from '@/components/character-sheet/edit-dialogs/EditPersonalityDialog';
 import { EditTextDialog } from '@/components/character-sheet/edit-dialogs/EditTextDialog';
 import { buildRestUpdate } from '@/lib/rest';
+import { exportCharacterPdf, PdfTemplateError } from '@/lib/pdf-export';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -73,6 +74,7 @@ function CharacterSheetInner({
   } = useCharacterContext();
   const { saveDraft } = useBuilderAutosave(characterId);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   // Autosave when isDirty (level up/down, choices, etc.)
   const latestPayloadRef = useRef<AutosavePayload>({ character: ctxCharacter, rows, resolved });
@@ -177,6 +179,32 @@ function CharacterSheetInner({
     );
   };
 
+  const handleExportPdf = async () => {
+    if (!resolved) {
+      toast.error(tc('characterSheet.export.notReady'));
+      return;
+    }
+    setExportingPdf(true);
+    try {
+      const { missingFields } = await exportCharacterPdf(resolved, character);
+      if (missingFields.length > 0) {
+        toast.warning(tc('characterSheet.export.successWithMissing', { count: missingFields.length }));
+        logger.warn('PDF template missing mapped fields:', missingFields);
+      } else {
+        toast.success(tc('characterSheet.export.success'));
+      }
+    } catch (err: unknown) {
+      if (err instanceof PdfTemplateError) {
+        toast.error(tc('characterSheet.export.noTemplate'));
+      } else {
+        logger.error('PDF export failed:', err);
+        toast.error(tc('characterSheet.export.failed'));
+      }
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   const profBonus = resolved?.proficiencyBonus ?? getProficiencyBonus(character.level);
 
   // Combat stats — prefer resolved pipeline values, fall back to pre-calculated DB columns.
@@ -227,6 +255,8 @@ function CharacterSheetInner({
           }}
           onArchive={() => setConfirmAction('archive')}
           onDelete={() => setConfirmAction('delete')}
+          onExportPdf={handleExportPdf}
+          exportingPdf={exportingPdf}
         />
 
         {/* Pending Choices Panel */}

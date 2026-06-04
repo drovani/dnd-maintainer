@@ -593,6 +593,14 @@
       "dead": "Dead",
       "decrement": "Decrease exhaustion",
       "increment": "Increase exhaustion"
+    },
+    "export": {
+      "button": "Export PDF",
+      "success": "Character sheet PDF exported.",
+      "successWithMissing": "PDF exported, but {{count}} template field(s) did not match and were skipped.",
+      "noTemplate": "No fillable PDF template found. Add one at public/assets/character-sheet.pdf (see the README there).",
+      "failed": "PDF export failed.",
+      "notReady": "Character data is still loading — try again in a moment."
     }
   },
   "characterList": {
