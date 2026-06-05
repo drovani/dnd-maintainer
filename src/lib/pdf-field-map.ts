@@ -106,6 +106,63 @@ function featureLine(f: ResolvedFeature, t: GamedataT): string {
   return desc ? `${name} — ${desc}` : name;
 }
 
+// The 2024 sheet's Class Features box is split into two side-by-side columns
+// (Text54 / Text55), each a fixed Helvetica-10 multiline field roughly 175×202pt
+// that clips rather than shrinks. These are the empirically-calibrated capacities:
+// at ~40 chars/line a column holds ~17 wrapped lines before clipping.
+const CLASS_FEATURES_CHARS_PER_LINE = 40;
+const CLASS_FEATURES_LINES_PER_COLUMN = 17;
+
+/** Estimate how many wrapped lines `text` occupies at `charsPerLine`, word-wrapping like the PDF field. */
+function estimateWrappedLines(text: string, charsPerLine: number): number {
+  let lines = 0;
+  for (const paragraph of text.split('\n')) {
+    if (paragraph.length === 0) {
+      lines += 1;
+      continue;
+    }
+    let lineLen = 0;
+    let linesInParagraph = 1;
+    for (const word of paragraph.split(' ')) {
+      if (lineLen === 0) {
+        lineLen = word.length;
+      } else if (lineLen + 1 + word.length <= charsPerLine) {
+        lineLen += 1 + word.length;
+      } else {
+        linesInParagraph += 1;
+        lineLen = word.length;
+      }
+      // A single word longer than the column wraps onto extra lines.
+      while (lineLen > charsPerLine) {
+        linesInParagraph += 1;
+        lineLen -= charsPerLine;
+      }
+    }
+    lines += linesInParagraph;
+  }
+  return lines;
+}
+
+/**
+ * Split feature lines across the two Class Features columns: fill the first column
+ * until the next whole feature would overflow it, then put that feature and all the
+ * rest in the second column. Features are never split mid-text. With only two columns
+ * available, overflow beyond the second column clips (no third column exists).
+ */
+function splitClassFeatureColumns(lines: readonly string[]): readonly [string, string] {
+  let usedLines = 0;
+  let splitIndex = lines.length; // default: everything fits in column one
+  for (let i = 0; i < lines.length; i++) {
+    const needed = estimateWrappedLines(lines[i], CLASS_FEATURES_CHARS_PER_LINE);
+    if (usedLines > 0 && usedLines + needed > CLASS_FEATURES_LINES_PER_COLUMN) {
+      splitIndex = i;
+      break;
+    }
+    usedLines += needed;
+  }
+  return [lines.slice(0, splitIndex).join('\n'), lines.slice(splitIndex).join('\n')];
+}
+
 /** What granted a feat, plus the feat's own in-feat choices (e.g. Skilled's chosen skills). */
 export interface FeatGrantInfo {
   /** The source that granted the feat (background origin feat, species feat-choice, class/subclass ASI). */
@@ -299,7 +356,11 @@ export function buildFieldValues(
       .join(', ');
     classFeatureLines.push(`Weapon Mastery: ${masteryList}`);
   }
-  text.classFeatures = classFeatureLines.join('\n');
+  // Flow the features across the sheet's two Class Features columns so a long list
+  // (e.g. a Barbarian's descriptive Rage + Unarmored Defense) doesn't clip in column one.
+  const [classFeaturesCol1, classFeaturesCol2] = splitClassFeatureColumns(classFeatureLines);
+  text.classFeatures = classFeaturesCol1;
+  text.classFeatures2 = classFeaturesCol2;
   text.speciesTraits = resolved.features
     .filter((f) => f.source.origin === 'species')
     .map((f) => featureLine(f, t))
@@ -500,7 +561,8 @@ export const TEXT_FIELD_NAMES: Readonly<Record<string, string>> = {
     ]).flat()
   ),
 
-  classFeatures: 'Text54', // → Class Features
+  classFeatures: 'Text54', // → Class Features (left column)
+  classFeatures2: 'Text55', // → Class Features (right column — overflow from Text54)
   speciesTraits: 'Text57', // → Species Traits
   feats: 'Text58', // → Feats
   weaponProficienciesText: 'Text59', // → Equipment Training & Proficiencies: Weapons

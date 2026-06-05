@@ -372,6 +372,39 @@ describe('buildFieldValues — features split (2024 sections)', () => {
     expect(text.classFeatures).not.toContain('Weapon Mastery');
   });
 
+  it('flows overflowing class features into the second column', () => {
+    // Rage (~10 lines) + Unarmored Defense (~4) fit the first column; Weapon Mastery (~9 more)
+    // would overflow, so it and anything after it move to the second column (Text55).
+    const resolved = makeResolved({
+      features: [
+        { feature: { id: 'barbarian-rage' }, source: { origin: 'class', id: 'barbarian', level: 1 } },
+        { feature: { id: 'barbarian-unarmored-defense' }, source: { origin: 'class', id: 'barbarian', level: 1 } },
+        { feature: { id: 'barbarian-weapon-mastery' }, source: { origin: 'class', id: 'barbarian', level: 1 } },
+        { feature: { id: 'barbarian-reckless-attack' }, source: { origin: 'class', id: 'barbarian', level: 2 } },
+      ] as ResolvedCharacter['features'],
+    });
+    const { text } = bfv(resolved, makeCharacter());
+    // Column one: Rage + Unarmored Defense, and NOT the overflow features.
+    expect(text.classFeatures).toContain('Rage');
+    expect(text.classFeatures).toContain('Unarmored Defense');
+    expect(text.classFeatures).not.toContain('Weapon Mastery');
+    expect(text.classFeatures).not.toContain('Reckless Attack');
+    // Column two: the overflow.
+    expect(text.classFeatures2).toContain('Weapon Mastery');
+    expect(text.classFeatures2).toContain('Reckless Attack');
+  });
+
+  it('leaves the second column empty when the features fit in one column', () => {
+    const resolved = makeResolved({
+      features: [
+        { feature: { id: 'barbarian-rage' }, source: { origin: 'class', id: 'barbarian', level: 1 } },
+      ] as ResolvedCharacter['features'],
+    });
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.classFeatures).toContain('Rage');
+    expect(text.classFeatures2).toBe('');
+  });
+
   it('lists feats as "Name (Source)" with the feat description appended', () => {
     const featSources = new Map<string, FeatGrantInfo>([
       ['savage-attacker', { source: { origin: 'background', id: 'soldier' }, decisions: [] }],
