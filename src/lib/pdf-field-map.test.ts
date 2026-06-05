@@ -1,9 +1,32 @@
 import { describe, it, expect } from 'vitest';
-import { buildFieldValues, characterDisplayName, signed, PDF_SKILLS, PDF_ABILITIES } from '@/lib/pdf-field-map';
+import {
+  buildFieldValues,
+  characterDisplayName,
+  collectFeatSources,
+  signed,
+  PDF_SKILLS,
+  PDF_ABILITIES,
+} from '@/lib/pdf-field-map';
 import { requireItemDef } from '@/lib/sources/items';
+import i18n from '@/lib/i18n';
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
 import type { ResolvedAbility, ResolvedCharacter, ResolvedEquipmentItem, ResolvedSkill } from '@/types/resolved';
+import type { SourceTag } from '@/types/sources';
+
+// Real bundled gamedata translator — the export uses i18n for all user-facing text,
+// so tests assert against the actual translations (which also verifies the keys exist).
+const tg = i18n.getFixedT('en', 'gamedata');
+const NO_FEATS: ReadonlyMap<string, SourceTag> = new Map();
+
+/** buildFieldValues bound to the real gamedata translator; featSources defaults to none. */
+function bfv(
+  resolved: ResolvedCharacter,
+  character: Character,
+  featSources: ReadonlyMap<string, SourceTag> = NO_FEATS
+) {
+  return buildFieldValues(resolved, character, tg, featSources);
+}
 
 // --- minimal typed fixtures -------------------------------------------------
 
@@ -158,7 +181,7 @@ describe('signed', () => {
 
 describe('buildFieldValues — identity', () => {
   it('maps name, separate class/level, species, background, alignment, size (2024 sheet)', () => {
-    const { text } = buildFieldValues(makeResolved(), makeCharacter({ size: 'medium' }));
+    const { text } = bfv(makeResolved(), makeCharacter({ size: 'medium' }));
     // The in-sheet name field is just the character name (no player-name field on the 2024 sheet).
     expect(text.characterName).toBe('Aragorn');
     expect(text.class).toBe('Fighter');
@@ -173,12 +196,12 @@ describe('buildFieldValues — identity', () => {
   });
 
   it('emits the subclass in its own field when present', () => {
-    const { text } = buildFieldValues(makeResolved(), makeCharacter({ subclass: 'champion' }));
+    const { text } = bfv(makeResolved(), makeCharacter({ subclass: 'champion' }));
     expect(text.subclass).toBe('Champion');
   });
 
   it('keeps the in-sheet name field as just the character name', () => {
-    const pc = buildFieldValues(makeResolved(), makeCharacter({ player_name: 'Viggo' }));
+    const pc = bfv(makeResolved(), makeCharacter({ player_name: 'Viggo' }));
     expect(pc.text.characterName).toBe('Aragorn');
   });
 });
@@ -199,7 +222,7 @@ describe('characterDisplayName (download filename)', () => {
 
 describe('buildFieldValues — abilities & saves', () => {
   it('maps each ability score and signed modifier', () => {
-    const { text } = buildFieldValues(makeResolved(), makeCharacter());
+    const { text } = bfv(makeResolved(), makeCharacter());
     expect(text.strScore).toBe('16');
     expect(text.strMod).toBe('+3');
     expect(text.dexMod).toBe('+2');
@@ -208,7 +231,7 @@ describe('buildFieldValues — abilities & saves', () => {
   });
 
   it('maps saving-throw bonuses (signed) and proficiency checkboxes', () => {
-    const { text, checks } = buildFieldValues(makeResolved(), makeCharacter());
+    const { text, checks } = bfv(makeResolved(), makeCharacter());
     expect(text.strSave).toBe('+6');
     expect(text.chaSave).toBe('-1');
     expect(checks.strSaveProf).toBe(true);
@@ -217,7 +240,7 @@ describe('buildFieldValues — abilities & saves', () => {
   });
 
   it('emits a save entry for all six abilities', () => {
-    const { text } = buildFieldValues(makeResolved(), makeCharacter());
+    const { text } = bfv(makeResolved(), makeCharacter());
     for (const a of PDF_ABILITIES) {
       expect(text[`${a}Save`]).toMatch(/^[+-]\d+$/);
     }
@@ -233,7 +256,7 @@ describe('buildFieldValues — skills', () => {
         stealth: skill('dex', 5, true),
       },
     });
-    const { text, checks } = buildFieldValues(resolved, makeCharacter());
+    const { text, checks } = bfv(resolved, makeCharacter());
     expect(text.athletics).toBe('+6');
     expect(checks.athleticsProf).toBe(true);
     expect(text.stealth).toBe('+5');
@@ -247,7 +270,7 @@ describe('buildFieldValues — combat', () => {
     const resolved = makeResolved({
       skills: { ...makeResolved().skills, perception: skill('wis', 4, true) },
     });
-    const { text } = buildFieldValues(resolved, makeCharacter());
+    const { text } = bfv(resolved, makeCharacter());
     expect(text.armorClass).toBe('18');
     expect(text.initiative).toBe('+2');
     expect(text.speed).toBe('30 ft');
@@ -259,7 +282,7 @@ describe('buildFieldValues — combat', () => {
   });
 
   it('omits hit-dice max when the build has no hit dice', () => {
-    const { text } = buildFieldValues(makeResolved({ hitDie: [] }), makeCharacter());
+    const { text } = bfv(makeResolved({ hitDie: [] }), makeCharacter());
     expect(text.hitDiceMax).toBeUndefined();
   });
 });
@@ -281,10 +304,10 @@ describe('buildFieldValues — attacks', () => {
         },
       ],
     });
-    const { text } = buildFieldValues(resolved, makeCharacter());
+    const { text } = bfv(resolved, makeCharacter());
     expect(text.atk1Name).toBe('Longsword');
     expect(text.atk1Bonus).toBe('+6');
-    expect(text.atk1Damage).toBe('1d8+3 slashing');
+    expect(text.atk1Damage).toBe('1d8+3 Slashing'); // damage type localized via i18n
   });
 
   it('omits the damage bonus segment when it is zero', () => {
@@ -303,36 +326,66 @@ describe('buildFieldValues — attacks', () => {
         },
       ],
     });
-    const { text } = buildFieldValues(resolved, makeCharacter());
-    expect(text.atk1Damage).toBe('1d4 bludgeoning');
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.atk1Damage).toBe('1d4 Bludgeoning');
   });
 });
 
 describe('buildFieldValues — features split (2024 sections)', () => {
-  it('splits features into class features, species traits and feats by grant origin', () => {
+  it('splits class features and species traits by grant origin, using i18n names', () => {
     const resolved = makeResolved({
+      // Real ids so the i18n names resolve (barbarian-rage → "Rage", human-resourceful → "Resourceful").
       features: [
-        { feature: { id: 'second-wind', name: 'Second Wind' }, source: { origin: 'class', id: 'fighter', level: 1 } },
-        { feature: { id: 'darkvision', name: 'Darkvision' }, source: { origin: 'species', id: 'elf', level: 0 } },
-        { feature: { id: 'alert', name: 'Alert' }, source: { origin: 'feat', id: 'alert', level: 0 } },
+        { feature: { id: 'barbarian-rage' }, source: { origin: 'class', id: 'barbarian', level: 1 } },
+        { feature: { id: 'human-resourceful' }, source: { origin: 'species', id: 'human', level: 0 } },
       ] as ResolvedCharacter['features'],
       weaponMasteries: [{ weaponId: 'longsword', masteryId: 'sap' }],
     });
     const character = makeCharacter({ heroic_inspiration: true, exhaustion_level: 2 });
-    const { text, checks } = buildFieldValues(resolved, character);
-    // Class section gets class/subclass features plus the no-dedicated-field extras.
-    expect(text.classFeatures).toContain('Second Wind');
+    const { text, checks } = bfv(resolved, character);
+    // i18n display name, NOT the id, and no "Barbarian" class prefix.
+    expect(text.classFeatures).toContain('Rage');
+    expect(text.classFeatures).not.toContain('barbarian-rage');
     expect(text.classFeatures).toContain('Exhaustion: level 2');
     expect(text.classFeatures).toContain('Weapon Mastery: Longsword (Sap)');
-    expect(text.speciesTraits).toContain('Darkvision');
-    expect(text.feats).toContain('Alert');
+    expect(text.speciesTraits).toContain('Resourceful');
     expect(checks.inspiration).toBe(true);
   });
 
   it('omits the exhaustion / mastery extras from class features when inactive', () => {
-    const { text } = buildFieldValues(makeResolved(), makeCharacter());
+    const { text } = bfv(makeResolved(), makeCharacter());
     expect(text.classFeatures).not.toContain('Exhaustion');
     expect(text.classFeatures).not.toContain('Weapon Mastery');
+  });
+
+  it('lists feats as "Name (Source)" from the granted-feat map', () => {
+    const featSources = new Map<string, SourceTag>([
+      ['savage-attacker', { origin: 'background', id: 'soldier' }],
+      ['tough', { origin: 'species', id: 'human' }],
+    ]);
+    const { text } = bfv(makeResolved(), makeCharacter(), featSources);
+    expect(text.feats).toContain('Savage Attacker (Soldier)');
+    expect(text.feats).toContain('Tough (Human)');
+  });
+});
+
+describe('collectFeatSources', () => {
+  it('attributes a background origin feat and a species feat-choice to their granters', () => {
+    const featChoiceKey = 'feat-choice:species:human:0';
+    const bundles = [
+      { source: { origin: 'background', id: 'soldier' }, grants: [{ type: 'feat', featId: 'savage-attacker' }] },
+      {
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'feat-choice', key: featChoiceKey, from: null, category: 'origin' }],
+      },
+    ] as unknown as Parameters<typeof collectFeatSources>[0];
+    const choices = { [featChoiceKey]: { type: 'feat-choice', featId: 'tough' } } as unknown as Parameters<
+      typeof collectFeatSources
+    >[1];
+
+    const map = collectFeatSources(bundles, choices);
+    expect(map.get('savage-attacker')).toEqual({ origin: 'background', id: 'soldier' });
+    expect(map.get('tough')).toEqual({ origin: 'species', id: 'human' });
   });
 });
 
@@ -341,7 +394,7 @@ describe('buildFieldValues — equipment & backstory', () => {
     const resolved = makeResolved({
       equipment: [equippedWeapon('longsword'), equippedWeapon('dagger', 2)],
     });
-    const { text } = buildFieldValues(resolved, makeCharacter());
+    const { text } = bfv(resolved, makeCharacter());
     expect(text.equipment).toContain('Longsword');
     expect(text.equipment).toContain('Dagger ×2');
     // The 2024 sheet has a single combined Backstory & Personality block.
@@ -366,11 +419,10 @@ describe('buildFieldValues — 2024 proficiencies & languages', () => {
         sourced('shields'),
       ] as ResolvedCharacter['armorProficiencies'],
     });
-    const { text, checks } = buildFieldValues(resolved, makeCharacter());
+    const { text, checks } = bfv(resolved, makeCharacter());
     expect(text.weaponProficienciesText).toBe('Simple, Martial');
-    // Tool ids are concatenated (no separators) and this layer is i18n-free, so titleCase
-    // can't reinsert spaces — display names proper come from the i18n layer elsewhere.
-    expect(text.toolProficienciesText).toBe('Thievestools');
+    // Proper localized name from i18n (not a title-cased id).
+    expect(text.toolProficienciesText).toBe("Thieves' Tools");
     expect(text.languages).toBe('Common, Elvish');
     expect(checks.armorLight).toBe(true);
     expect(checks.armorMedium).toBe(true);
@@ -394,7 +446,7 @@ describe('buildFieldValues — spellcasting', () => {
         pactMagic: null,
       },
     });
-    const { text } = buildFieldValues(resolved, makeCharacter({ class: 'wizard' }));
+    const { text } = bfv(resolved, makeCharacter({ class: 'wizard' }));
     expect(text.spellSaveDc).toBe('15');
     expect(text.spellAttackBonus).toBe('+7');
     expect(text.spellcastingAbility).toBe('Intelligence');
@@ -404,7 +456,7 @@ describe('buildFieldValues — spellcasting', () => {
   });
 
   it('omits spell fields entirely for a non-caster', () => {
-    const { text } = buildFieldValues(makeResolved(), makeCharacter());
+    const { text } = bfv(makeResolved(), makeCharacter());
     expect(text.spellSaveDc).toBeUndefined();
     expect(text.spellAttackBonus).toBeUndefined();
   });

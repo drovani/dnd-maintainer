@@ -24,6 +24,7 @@ import { EditPersonalityDialog } from '@/components/character-sheet/edit-dialogs
 import { EditTextDialog } from '@/components/character-sheet/edit-dialogs/EditTextDialog';
 import { buildRestUpdate } from '@/lib/rest';
 import { exportCharacterPdf, PdfTemplateError } from '@/lib/pdf-export';
+import { collectFeatSources } from '@/lib/pdf-field-map';
 import { useCharacter, useCharacterMutations } from '@/hooks/useCharacters';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -53,6 +54,7 @@ function CharacterSheetInner({
   characterId: string;
 }) {
   const { t: tc } = useTranslation('common');
+  const { t: tg } = useTranslation('gamedata');
   const [editSection, setEditSection] = useState<EditSection>(null);
 
   const navigate = useNavigate();
@@ -67,6 +69,8 @@ function CharacterSheetInner({
     character: ctxCharacter,
     rows,
     resolved,
+    bundles,
+    build,
     buildError,
     buildWarnings,
     isDirty,
@@ -186,7 +190,8 @@ function CharacterSheetInner({
     }
     setExportingPdf(true);
     try {
-      const { missingFields } = await exportCharacterPdf(resolved, character);
+      const featSources = collectFeatSources(bundles, build?.choices ?? {});
+      const { missingFields } = await exportCharacterPdf(resolved, character, tg, featSources);
       if (missingFields.length > 0) {
         toast.warning(tc('characterSheet.export.successWithMissing', { count: missingFields.length }));
         logger.warn('PDF template missing mapped fields:', missingFields);

@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 import { exportCharacterPdf, fillCharacterPdf, PdfTemplateError } from '@/lib/pdf-export';
+import i18n from '@/lib/i18n';
 import type { Character } from '@/types/database';
 import type { ResolvedAbility, ResolvedCharacter } from '@/types/resolved';
+import type { SourceTag } from '@/types/sources';
+
+const tg = i18n.getFixedT('en', 'gamedata');
+const NO_FEATS: ReadonlyMap<string, SourceTag> = new Map();
 
 function ability(score: number): ResolvedAbility {
   return { base: score, bonuses: [], total: score, modifier: Math.floor((score - 10) / 2) };
@@ -124,7 +129,7 @@ describe('fillCharacterPdf', () => {
   it('fills matching fields and returns bytes', async () => {
     // 2024 sheet field names: Text1=Character Name, Text13=Armor Class, Check Box11=Heroic Inspiration.
     const template = await tinyTemplate({ text: ['Text1', 'Text13'], checks: ['Check Box11'] });
-    const { bytes, missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
+    const { bytes, missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter(), tg, NO_FEATS);
 
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(bytes.length).toBeGreaterThan(0);
@@ -143,7 +148,7 @@ describe('fillCharacterPdf', () => {
 
   it('reports mapped fields the template lacks instead of throwing', async () => {
     const template = await tinyTemplate({ text: ['Text1'], checks: [] });
-    const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
+    const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter(), tg, NO_FEATS);
 
     // e.g. Text13 (AC) / Text19 (ProfBonus) are mapped but absent from this stub template.
     expect(missingFields.length).toBeGreaterThan(0);
@@ -153,7 +158,7 @@ describe('fillCharacterPdf', () => {
 
   it('throws PdfTemplateError when the bytes are not a valid PDF', async () => {
     const garbage = new Uint8Array([1, 2, 3, 4, 5]);
-    await expect(fillCharacterPdf(garbage, minimalResolved(), minimalCharacter())).rejects.toBeInstanceOf(
+    await expect(fillCharacterPdf(garbage, minimalResolved(), minimalCharacter(), tg, NO_FEATS)).rejects.toBeInstanceOf(
       PdfTemplateError
     );
   });
@@ -161,7 +166,7 @@ describe('fillCharacterPdf', () => {
   it('reports a present-but-wrong-type field as missing instead of throwing', async () => {
     // Text13 (armorClass) is a text-mapped key but here it exists as a CHECKBOX.
     const template = await tinyTemplate({ text: ['Text1'], checks: ['Text13'] });
-    const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
+    const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter(), tg, NO_FEATS);
     expect(missingFields).toContain('Text13');
     expect(missingFields).not.toContain('Text1');
   });
@@ -181,7 +186,7 @@ describe('exportCharacterPdf', () => {
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
-    const { missingFields } = await exportCharacterPdf(minimalResolved(), minimalCharacter());
+    const { missingFields } = await exportCharacterPdf(minimalResolved(), minimalCharacter(), tg, NO_FEATS);
 
     expect(createUrl).toHaveBeenCalledOnce();
     expect(click).toHaveBeenCalledOnce();
@@ -192,11 +197,11 @@ describe('exportCharacterPdf', () => {
 
   it('throws PdfTemplateError on a non-ok response (the default 404 first-run path)', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }));
-    await expect(exportCharacterPdf(minimalResolved(), minimalCharacter())).rejects.toBeInstanceOf(PdfTemplateError);
+    await expect(exportCharacterPdf(minimalResolved(), minimalCharacter(), tg, NO_FEATS)).rejects.toBeInstanceOf(PdfTemplateError);
   });
 
   it('wraps a fetch rejection in PdfTemplateError (so the handler can discriminate it)', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('network down'));
-    await expect(exportCharacterPdf(minimalResolved(), minimalCharacter())).rejects.toBeInstanceOf(PdfTemplateError);
+    await expect(exportCharacterPdf(minimalResolved(), minimalCharacter(), tg, NO_FEATS)).rejects.toBeInstanceOf(PdfTemplateError);
   });
 });

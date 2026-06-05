@@ -20,9 +20,16 @@
  *     adjust these maps. The fill pipeline ({@link import('./pdf-export').fillCharacterPdf})
  *     reports any mapped name absent from the template rather than failing silently.
  */
+import type { TFunction } from 'i18next';
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
 import type { ResolvedCharacter, ResolvedFeature } from '@/types/resolved';
+import type { ChoiceDecision } from '@/types/choices';
+import type { GrantBundle, SourceTag } from '@/types/sources';
+import { getItemNameKey } from '@/lib/sources/items';
+
+/** Gamedata i18n translator. All user-facing text in the export comes from i18n — ids are never user-facing. */
+export type GamedataT = TFunction<'gamedata'>;
 
 export const PDF_ABILITIES: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 
@@ -86,67 +93,102 @@ export function characterDisplayName(character: Character): string {
     : character.name;
 }
 
-/** Humanize a kebab/lower id into a display label: "magic-initiate" → "Magic Initiate". */
-function titleCase(id: string): string {
-  return id
-    .replace(/[-_]/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .trim();
+/** i18n display name for a granted feature (class feature or species trait). */
+function featureLabel(f: ResolvedFeature, t: GamedataT): string {
+  return t(`features.${f.feature.id}.name` as `features.${string}.name`, { defaultValue: f.feature.id });
 }
 
-function abilityLabel(a: AbilityKey): string {
-  return {
-    str: 'Strength',
-    dex: 'Dexterity',
-    con: 'Constitution',
-    int: 'Intelligence',
-    wis: 'Wisdom',
-    cha: 'Charisma',
-  }[a];
+/** i18n display name for a grant source — used to attribute a feat to its granter (e.g. "Soldier"). */
+function sourceLabel(tag: SourceTag, t: GamedataT): string {
+  switch (tag.origin) {
+    case 'species':
+      return t(`species.${tag.id}`, { defaultValue: tag.id });
+    case 'class':
+      return t(`classes.${tag.id}`, { defaultValue: tag.id });
+    case 'subclass':
+      return t(`subclasses.${tag.id}.name`, { defaultValue: tag.id });
+    case 'background':
+      return t(`backgrounds.${tag.id}`, { defaultValue: tag.id });
+    case 'feat':
+      return t(`feats.${tag.id}.name`, { defaultValue: tag.id });
+    case 'loot':
+      return tag.description;
+    default:
+      return tag.id;
+  }
 }
-
-const featureName = (f: ResolvedFeature): string => f.feature.name ?? titleCase(f.feature.id);
 
 /**
- * Alignment is stored as a short code (`lg`, `ne`, …) rather than an English word,
- * so `titleCase` can't recover the display name — map the closed 9-value set here.
- * (class/species/background/subclass ids ARE their English words, so titleCase suffices.)
+ * Map each feat the character has to the source that granted it (background origin
+ * feat, a species feat-choice like Human's Versatile, or a class/subclass ASI feat).
+ * Scans the grant bundles: a `feat` grant's granter is its bundle's source; a resolved
+ * `feat-choice` decision's granter is the bundle that offered the choice. Drives the
+ * "Savage Attacker (Soldier)" rendering. First writer wins (a feat is granted once).
  */
-const ALIGNMENT_NAMES: Readonly<Record<string, string>> = {
-  lg: 'Lawful Good',
-  ng: 'Neutral Good',
-  cg: 'Chaotic Good',
-  ln: 'Lawful Neutral',
-  n: 'Neutral',
-  cn: 'Chaotic Neutral',
-  le: 'Lawful Evil',
-  ne: 'Neutral Evil',
-  ce: 'Chaotic Evil',
-};
+export function collectFeatSources(
+  bundles: readonly GrantBundle[],
+  choices: Readonly<Record<string, ChoiceDecision>>
+): ReadonlyMap<string, SourceTag> {
+  const map = new Map<string, SourceTag>();
+  for (const bundle of bundles) {
+    for (const grant of bundle.grants) {
+      if (grant.type === 'feat') {
+        if (!map.has(grant.featId)) map.set(grant.featId, bundle.source);
+      } else if (grant.type === 'feat-choice') {
+        const decision = choices[grant.key];
+        if (decision?.type === 'feat-choice' && !map.has(decision.featId)) {
+          map.set(decision.featId, bundle.source);
+        }
+      }
+    }
+  }
+  return map;
+}
 
 /**
- * Build the semantic field values for a (resolved) character. Pure — no i18n, no
- * DOM, no PDF. Every value here is verifiable against the resolver in tests.
+ * Build the semantic field values for a (resolved) character. All user-facing text
+ * comes from the gamedata i18n translator `t` — ids are never user-facing. `featSources`
+ * (see {@link collectFeatSources}) attributes each feat to its granter. No DOM, no PDF.
  *
  * Shaped for the 2024 WotC sheet: Class / Subclass / Level are distinct fields,
  * features are split into Class Features / Species Traits / Feats, and personality
  * + backstory are merged into one block (the sheet has a single combined section).
  */
-export function buildFieldValues(resolved: ResolvedCharacter, character: Character): PdfFieldValues {
+export function buildFieldValues(
+  resolved: ResolvedCharacter,
+  character: Character,
+  t: GamedataT,
+  featSources: ReadonlyMap<string, SourceTag>
+): PdfFieldValues {
   const text: Record<string, string> = {};
   const checks: Record<string, boolean> = {};
 
   // Identity — the 2024 sheet has separate Class, Subclass and Level fields and no
   // Player Name field, so the name field is just the character name.
   text.characterName = character.name;
-  if (character.class) text.class = titleCase(character.class);
-  if (character.subclass) text.subclass = titleCase(character.subclass);
+  if (character.class)
+    text.class = t(`classes.${character.class}` as `classes.${string}`, { defaultValue: character.class });
+  if (character.subclass)
+    text.subclass = t(`subclasses.${character.subclass}.name` as `subclasses.${string}.name`, {
+      defaultValue: character.subclass,
+    });
   text.level = String(character.level);
-  text.species = character.species ? titleCase(character.species) : '';
-  text.background = character.background ? titleCase(character.background) : '';
-  text.alignment = character.alignment ? (ALIGNMENT_NAMES[character.alignment] ?? titleCase(character.alignment)) : '';
-  // The 2024 sheet's Size box wants a single-letter abbreviation (S / M / L / …).
-  if (character.size) text.size = character.size.charAt(0).toUpperCase();
+  text.species = character.species
+    ? t(`species.${character.species}` as `species.${string}`, { defaultValue: character.species })
+    : '';
+  text.background = character.background
+    ? t(`backgrounds.${character.background}` as `backgrounds.${string}`, { defaultValue: character.background })
+    : '';
+  text.alignment = character.alignment
+    ? t(`alignments.${character.alignment}` as `alignments.${string}`, { defaultValue: character.alignment })
+    : '';
+  // The 2024 sheet's Size box wants a single-letter abbreviation (S / M / L / …), taken
+  // from the first letter of the localized size name.
+  if (character.size) {
+    text.size = t(`sizes.${character.size}` as `sizes.${string}`, { defaultValue: character.size })
+      .charAt(0)
+      .toUpperCase();
+  }
 
   // Abilities + saving throws
   for (const a of PDF_ABILITIES) {
@@ -186,40 +228,57 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   // Attacks (the 2024 sheet has six weapon rows).
   resolved.attacks.slice(0, PDF_ATTACK_ROWS).forEach((atk, i) => {
     const n = i + 1;
-    text[`atk${n}Name`] = titleCase(atk.weaponId);
+    text[`atk${n}Name`] = t(getItemNameKey('weapon', atk.weaponId), { defaultValue: atk.weaponId });
     text[`atk${n}Bonus`] = signed(atk.attackBonus);
     const dmgBonus = atk.damageBonus !== 0 ? signed(atk.damageBonus) : '';
-    text[`atk${n}Damage`] = `${atk.damageDice}${dmgBonus} ${atk.damageType}`.trim();
+    const dmgType = t(`damageTypes.${atk.damageType}`, { defaultValue: atk.damageType });
+    text[`atk${n}Damage`] = `${atk.damageDice}${dmgBonus} ${dmgType}`.trim();
   });
 
   // Features — the 2024 sheet has dedicated Class Features, Species Traits and
   // Feats sections, so we split by grant origin rather than lumping them together.
   const classFeatureLines: string[] = resolved.features
     .filter((f) => f.source.origin === 'class' || f.source.origin === 'subclass')
-    .map(featureName);
+    .map((f) => featureLabel(f, t));
   // 2024 concepts with no dedicated field are folded into the class-features block.
   if (character.exhaustion_level > 0) classFeatureLines.push(`Exhaustion: level ${character.exhaustion_level}`);
   const masteries = resolved.weaponMasteries.length > 0 ? resolved.weaponMasteries : (character.weapon_masteries ?? []);
   if (masteries.length > 0) {
-    classFeatureLines.push(
-      `Weapon Mastery: ${masteries.map((m) => `${titleCase(m.weaponId)} (${titleCase(m.masteryId)})`).join(', ')}`
-    );
+    const masteryList = masteries
+      .map(
+        (m) =>
+          `${t(getItemNameKey('weapon', m.weaponId), { defaultValue: m.weaponId })} ` +
+          `(${t(`weaponMasteries.${m.masteryId}.name`, { defaultValue: m.masteryId })})`
+      )
+      .join(', ');
+    classFeatureLines.push(`Weapon Mastery: ${masteryList}`);
   }
   text.classFeatures = classFeatureLines.join('\n');
   text.speciesTraits = resolved.features
     .filter((f) => f.source.origin === 'species')
-    .map(featureName)
+    .map((f) => featureLabel(f, t))
     .join('\n');
-  text.feats = resolved.features
-    .filter((f) => f.source.origin === 'feat')
-    .map(featureName)
+  // Feats: listed from the granted-feat map (not resolved.features, since some feats
+  // grant no feature) as "Name (Source)", e.g. "Savage Attacker (Soldier)".
+  text.feats = Array.from(featSources.entries())
+    .map(([featId, granter]) => {
+      const name = t(`feats.${featId}.name` as `feats.${string}.name`, { defaultValue: featId });
+      const granterLabel = sourceLabel(granter, t);
+      return granterLabel ? `${name} (${granterLabel})` : name;
+    })
     .join('\n');
 
   // Proficiency text blocks (the sheet has free-text Weapons / Tools lines + a
   // Languages box). Heroic Inspiration also maps to the sheet's checkbox.
-  text.weaponProficienciesText = resolved.weaponProficiencies.map((p) => titleCase(p.value)).join(', ');
-  text.toolProficienciesText = resolved.toolProficiencies.map((p) => titleCase(p.value)).join(', ');
-  text.languages = resolved.languages.map((l) => titleCase(l.value)).join(', ');
+  text.weaponProficienciesText = resolved.weaponProficiencies
+    .map((p) => t(`weapons.${p.value}` as `weapons.${string}`, { defaultValue: p.value }))
+    .join(', ');
+  text.toolProficienciesText = resolved.toolProficiencies
+    .map((p) => t(`tools.${p.value}` as `tools.${string}`, { defaultValue: p.value }))
+    .join(', ');
+  text.languages = resolved.languages
+    .map((l) => t(`languages.${l.value}` as `languages.${string}`, { defaultValue: l.value }))
+    .join(', ');
 
   // Armor Training checkboxes. The sheet distinguishes only Light/Medium/Heavy/Shields,
   // so the "-nonmetal" variants collapse onto their base category.
@@ -231,7 +290,10 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
 
   // Equipment
   text.equipment = resolved.equipment
-    .map((it) => (it.quantity > 1 ? `${titleCase(it.itemId)} ×${it.quantity}` : titleCase(it.itemId)))
+    .map((it) => {
+      const name = t(getItemNameKey(it.itemDef.type, it.itemId), { defaultValue: it.itemId });
+      return it.quantity > 1 ? `${name} ×${it.quantity}` : name;
+    })
     .join('\n');
 
   // Appearance + the combined Backstory & Personality block.
@@ -250,7 +312,7 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   const sc = resolved.spellcasting;
   if (sc) {
     if (sc.ability) {
-      text.spellcastingAbility = abilityLabel(sc.ability);
+      text.spellcastingAbility = t(`abilities.${sc.ability}`, { defaultValue: sc.ability });
       text.spellcastingModifier = signed(resolved.abilities[sc.ability].modifier);
     }
     if (sc.spellSaveDC != null) text.spellSaveDc = String(sc.spellSaveDC);

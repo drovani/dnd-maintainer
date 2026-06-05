@@ -11,7 +11,14 @@
 import { PDFDocument } from 'pdf-lib';
 import type { Character } from '@/types/database';
 import type { ResolvedCharacter } from '@/types/resolved';
-import { buildFieldValues, characterDisplayName, CHECK_FIELD_NAMES, TEXT_FIELD_NAMES } from '@/lib/pdf-field-map';
+import type { SourceTag } from '@/types/sources';
+import {
+  buildFieldValues,
+  characterDisplayName,
+  CHECK_FIELD_NAMES,
+  TEXT_FIELD_NAMES,
+  type GamedataT,
+} from '@/lib/pdf-field-map';
 
 export class PdfTemplateError extends Error {
   constructor(
@@ -36,7 +43,9 @@ export interface FillResult {
 export async function fillCharacterPdf(
   templateBytes: ArrayBuffer | Uint8Array,
   resolved: ResolvedCharacter,
-  character: Character
+  character: Character,
+  t: GamedataT,
+  featSources: ReadonlyMap<string, SourceTag>
 ): Promise<FillResult> {
   let pdfDoc: PDFDocument;
   try {
@@ -47,7 +56,7 @@ export async function fillCharacterPdf(
 
   const form = pdfDoc.getForm();
   const existing = new Set(form.getFields().map((f) => f.getName()));
-  const values = buildFieldValues(resolved, character);
+  const values = buildFieldValues(resolved, character, t, featSources);
   const missingFields: string[] = [];
 
   for (const [semanticKey, value] of Object.entries(values.text)) {
@@ -114,6 +123,8 @@ const DEFAULT_TEMPLATE_URL = '/assets/character-sheet.pdf';
 export async function exportCharacterPdf(
   resolved: ResolvedCharacter,
   character: Character,
+  t: GamedataT,
+  featSources: ReadonlyMap<string, SourceTag>,
   opts: ExportOptions = {}
 ): Promise<{ missingFields: readonly string[] }> {
   const templateUrl = opts.templateUrl ?? DEFAULT_TEMPLATE_URL;
@@ -129,7 +140,7 @@ export async function exportCharacterPdf(
   }
 
   const templateBytes = await response.arrayBuffer();
-  const { bytes, missingFields } = await fillCharacterPdf(templateBytes, resolved, character);
+  const { bytes, missingFields } = await fillCharacterPdf(templateBytes, resolved, character, t, featSources);
   downloadPdf(bytes, `${opts.filename ?? characterDisplayName(character)}.pdf`);
   return { missingFields };
 }
