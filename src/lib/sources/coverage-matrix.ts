@@ -141,13 +141,13 @@ export function computeClassCoverage(): ForkCoverage {
     // Epic Boon feature (id ending `-epic-boon`) / epic-boon feat grant. Most class
     // tables still model it as a plain ASI; only those carrying an actual epic-boon
     // grant are reported as "Epic Boon@19" so the matrix doesn't overstate coverage.
-    const l19 = src.levels[EPIC_BOON_LEVEL - 1]?.grants ?? [];
-    const hasL19EpicBoon = l19.some(
+    const hasL19EpicBoon = (src.levels[EPIC_BOON_LEVEL - 1]?.grants ?? []).some(
       (g) =>
         (g.type === 'feature' && g.feature.id.endsWith('-epic-boon')) ||
         (g.type === 'feat' && g.featId.endsWith('-epic-boon'))
     );
-    const hasL19Asi = l19.some((g) => g.type === 'asi');
+    // Reuse the asiLevels scan above rather than re-detecting an ASI grant at level 19.
+    const hasL19Asi = asiLevels.includes(EPIC_BOON_LEVEL);
     if (!hasL19EpicBoon && !hasL19Asi) problems.push(`missing ASI or Epic Boon at level ${EPIC_BOON_LEVEL}`);
     const l19Label = hasL19EpicBoon ? 'Epic Boon@19' : 'ASI@19';
 

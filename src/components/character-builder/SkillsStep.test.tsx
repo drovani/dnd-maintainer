@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { SkillsStep } from '@/components/character-builder/SkillsStep';
 import type { ResolvedCharacter, ResolvedSkill } from '@/types/resolved';
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
@@ -282,6 +282,45 @@ describe('SkillsStep skill-choice multi-source routing', () => {
       type: 'skill-choice',
       skills: ['perception'],
     });
+  });
+
+  it('renders a single source icon when one source grants two skill-choices', () => {
+    // Barbarian L1 (choose 2) + L3 Primal Knowledge (choose 1) both list the same skills.
+    // A skill in both pools is eligible for two grants from the SAME source, so the row must
+    // show one Barbarian icon — not two identical ones.
+    const pool: readonly SkillId[] = [
+      'athletics',
+      'animalhandling',
+      'intimidation',
+      'nature',
+      'perception',
+      'survival',
+    ];
+    mockContextValue.bundles = [
+      {
+        source: { origin: 'class', id: 'barbarian', level: 1 },
+        grants: [
+          { type: 'proficiency-choice', category: 'skill', key: BARBARIAN_SKILL_KEY, count: 2, from: [...pool] },
+        ],
+      },
+      {
+        source: { origin: 'class', id: 'barbarian', level: 3 },
+        grants: [
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: 'skill-choice:class:barbarian:1' as ChoiceKey,
+            count: 1,
+            from: [...pool],
+          },
+        ],
+      },
+    ];
+    render(<SkillsStep />);
+    const athletics = document.querySelector('#skill-athletics') as HTMLInputElement;
+    const row = athletics.closest('.gap-3') as HTMLElement;
+    // getSourceDisplayName(class:barbarian) → mocked i18n returns the last key segment 'barbarian'.
+    expect(within(row).getAllByLabelText('barbarian')).toHaveLength(1);
   });
 
   it('disables a skill checkbox only when every eligible pool is full', () => {

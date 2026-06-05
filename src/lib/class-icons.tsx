@@ -1,11 +1,8 @@
 import React from 'react';
 import type { ClassId } from '@/lib/dnd-helpers';
 import { CLASS_SOURCES } from '@/lib/sources/classes';
-import { getBundleNameKey } from '@/lib/sources/bundles';
-import { getItemNameKey } from '@/lib/sources/items';
 import type { SourceTag } from '@/types/sources';
 import type { BundleCategory } from '@/types/items';
-import type { TFunction } from 'i18next';
 import {
   Axe,
   Backpack,
@@ -56,32 +53,9 @@ const BUNDLE_TO_CLASS: ReadonlyMap<string, ClassId> = (() => {
   return map;
 })();
 
-/**
- * Resolve a user-friendly display name for a grant source (race name, class name,
- * background name, bundle/item name, etc.) using the gamedata namespace.
- */
-export function getSourceDisplayName(source: SourceTag, tGamedata: TFunction<'gamedata'>): string {
-  switch (source.origin) {
-    case 'species':
-      return tGamedata(`species.${source.id}`, { defaultValue: source.id });
-    case 'class':
-      return tGamedata(`classes.${source.id}`, { defaultValue: source.id });
-    case 'subclass':
-      return tGamedata(`subclasses.${source.id}.name`, { defaultValue: source.id });
-    case 'background':
-      return tGamedata(`backgrounds.${source.id}`, { defaultValue: source.id });
-    case 'feat':
-      return tGamedata(`feats.${source.id}.name`, { defaultValue: source.id });
-    case 'item':
-      return tGamedata(getItemNameKey('gear', source.id), { defaultValue: source.id });
-    case 'bundle':
-      return tGamedata(getBundleNameKey(source.id), { defaultValue: source.id });
-    case 'pack':
-      return tGamedata(getItemNameKey('pack', source.id), { defaultValue: source.id });
-    case 'loot':
-      return source.description;
-  }
-}
+// Re-exported from the React-free `source-display` module so existing importers
+// (and their test mocks of `@/lib/class-icons`) keep working unchanged.
+export { getSourceDisplayName } from '@/lib/source-display';
 
 /**
  * Resolve an icon for an equipment grant based on its source and (optionally) bundle category.

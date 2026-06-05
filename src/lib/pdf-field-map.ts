@@ -27,7 +27,7 @@ import type { ResolvedCharacter, ResolvedFeature } from '@/types/resolved';
 import { parseChoiceKey, type ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import { getItemNameKey } from '@/lib/sources/items';
-import { getSourceDisplayName } from '@/lib/class-icons';
+import { getSourceDisplayName } from '@/lib/source-display';
 
 /** Gamedata i18n translator. All user-facing text in the export comes from i18n — ids are never user-facing. */
 export type GamedataT = TFunction<'gamedata'>;

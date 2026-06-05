@@ -11,6 +11,11 @@ import { ABILITY_ABBREVIATIONS, DND_SKILLS, type SkillId, type ToolProficiencyId
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/** Stable identity for a grant source, so multiple grants from the same source dedupe to one icon. */
+function sourceKey(source: SourceTag): string {
+  return `${source.origin}:${'id' in source ? source.id : source.description}`;
+}
+
 interface SkillChoiceInfo {
   readonly choiceKey: ChoiceKey;
   readonly source: SourceTag;
@@ -189,17 +194,27 @@ export function SkillsStep() {
                 {t(`skills.${skill.id}`)}
                 <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
               </label>
-              {/* Source icons — one per eligible grant, hover to see the source name */}
+              {/* Source icons — one per DISTINCT source, hover to see the source name.
+                  A single source can grant more than one skill-choice (e.g. Barbarian's
+                  level-1 list plus the level-3 Primal Knowledge pick), so dedupe by source
+                  to avoid rendering two identical icons on the same skill row. */}
               {eligibleChoices.length > 0 && (
                 <div className="flex items-center gap-1 shrink-0">
-                  {eligibleChoices.map((sc) => {
-                    const sourceName = getSourceDisplayName(sc.source, t);
-                    return (
-                      <span key={sc.choiceKey} title={sourceName} aria-label={sourceName} className="inline-flex">
-                        <SourceIcon source={sc.source} className="size-3.5 text-muted-foreground" />
-                      </span>
-                    );
-                  })}
+                  {Array.from(new Map(eligibleChoices.map((sc) => [sourceKey(sc.source), sc.source])).values()).map(
+                    (source) => {
+                      const sourceName = getSourceDisplayName(source, t);
+                      return (
+                        <span
+                          key={sourceKey(source)}
+                          title={sourceName}
+                          aria-label={sourceName}
+                          className="inline-flex"
+                        >
+                          <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
+                        </span>
+                      );
+                    }
+                  )}
                 </div>
               )}
             </div>
