@@ -9,6 +9,9 @@ functionality the app does not have yet.
 - `npm run test:bdd` — run the default profile (implemented, passing scenarios). Stays green.
 - `npm run test:bdd:future` — run the `future` profile (spec-ahead scenarios, expected to fail
   with meaningful assertions).
+- `npm run uat:checklist` — export the specs to a manual UAT checklist (`docs/uat-checklist.csv`,
+  or `-- --format md` for a printable Markdown version). One row per scenario, labeled with its
+  tag-derived status (Ready / Future / Draft). See `scripts/gen-uat-checklist.ts`.
 
 Always run via the npm scripts, not raw `npx tsx`. The scripts set
 `TSX_TSCONFIG_PATH=tsconfig.app.json` so JSX uses the automatic runtime — the root

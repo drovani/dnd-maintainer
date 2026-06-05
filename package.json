@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "coverage:matrix": "COVERAGE_WRITE=1 vitest run src/lib/sources/coverage-matrix.test.ts",
+    "uat:checklist": "TSX_TSCONFIG_PATH=tsconfig.app.json tsx scripts/gen-uat-checklist.ts",
     "supabase:types": "npx supabase gen types typescript --local > src/types/supabase.ts",
     "supabase:reset": "npx supabase stop --no-backup && npx supabase start && npm run supabase:types",
     "format": "prettier --write .",
@@ -44,6 +45,8 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^13.0.0",
+    "@cucumber/gherkin": "^39.1.0",
+    "@cucumber/messages": "^32.3.1",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/devtools-vite": "^0.7.0",

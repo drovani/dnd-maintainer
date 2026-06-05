@@ -24,6 +24,7 @@ D&D 5.5e (2024 PHB) Campaign Manager — a React SPA for managing campaigns, cha
 - `npm run test:bdd` — run the Cucumber BDD suite (default profile, stays green). See `docs/bdd.md`.
 - `npm run test:bdd:future` — run spec-ahead BDD scenarios (`@future` profile, expected to fail). See `docs/bdd.md`.
 - `npm run coverage:matrix` — regenerate `docs/coverage-matrix.md` from `src/lib/sources/coverage-matrix.ts`
+- `npm run uat:checklist` — generate a manual UAT checklist (one row per BDD scenario) from `features/` into `docs/uat-checklist.csv`. Add `-- --format md` (or `both`) for a printable Markdown checklist. See `scripts/gen-uat-checklist.ts`.
 
 ### Formatting
 
@@ -108,7 +109,7 @@ Three color themes (Default/gold, Sylvan/green, Arcane/purple) with light and da
 
 #### BDD (Cucumber)
 
-Spec-first acceptance tests live in `features/`, run via `npm run test:bdd` (and `npm run test:bdd:future` for spec-ahead scenarios). The suite **drives** development — never edit `src/` or `supabase/migrations/` to force a scenario green; tag genuinely-missing functionality `@future` instead. Full guide — tag taxonomy, the two binding seams (resolver vs. render-app), and run-time gotchas — is in **`docs/bdd.md`**.
+Spec-first acceptance tests live in `features/`, run via `npm run test:bdd` (and `npm run test:bdd:future` for spec-ahead scenarios). The suite **drives** development — never edit `src/` or `supabase/migrations/` to force a scenario green; tag genuinely-missing functionality `@future` instead. Full guide — tag taxonomy, the two binding seams (resolver vs. render-app), and run-time gotchas — is in **`docs/bdd.md`**. The same specs export to a manual UAT checklist via `npm run uat:checklist` (see Commands).
 
 ## Environment Variables
 

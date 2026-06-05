@@ -67,18 +67,41 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Scripts
 
-| Command                 | Description                                       |
-| ----------------------- | ------------------------------------------------- |
-| `npm run start`         | Start Supabase, regenerate types, and launch Vite |
-| `npm run stop`          | Stop the local Supabase instance                  |
-| `npm run dev`           | Start Vite dev server                             |
-| `npm run build`         | Typecheck and build for production                |
-| `npm run preview`       | Preview the production build                      |
-| `npm run typecheck`     | Run TypeScript type checking                      |
-| `npm run lint`          | Lint with ESLint (`--max-warnings 0`)             |
-| `npm run test`          | Run unit tests                                    |
-| `npm run test:watch`    | Run tests in watch mode                           |
-| `npm run test:coverage` | Run tests with coverage report                    |
+| Command                 | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| `npm run start`         | Start Supabase, regenerate types, and launch Vite  |
+| `npm run stop`          | Stop the local Supabase instance                   |
+| `npm run dev`           | Start Vite dev server                              |
+| `npm run build`         | Typecheck and build for production                 |
+| `npm run preview`       | Preview the production build                       |
+| `npm run typecheck`     | Run TypeScript type checking                       |
+| `npm run lint`          | Lint with ESLint (`--max-warnings 0`)              |
+| `npm run test`          | Run unit tests                                     |
+| `npm run test:watch`    | Run tests in watch mode                            |
+| `npm run test:coverage` | Run tests with coverage report                     |
+| `npm run uat:checklist` | Generate a manual UAT checklist from the BDD specs |
+
+## Acceptance Testing (UAT Checklist)
+
+The Cucumber BDD specs under `features/` double as a manual user-acceptance-testing
+script. `npm run uat:checklist` parses every `.feature` file and writes one row per
+scenario so a human tester can tick each behavior off by hand.
+
+| Command                                  | Output                   | Use for                                                      |
+| ---------------------------------------- | ------------------------ | ------------------------------------------------------------ |
+| `npm run uat:checklist`                  | `docs/uat-checklist.csv` | Open in Excel / Google Sheets (blank Result + Notes columns) |
+| `npm run uat:checklist -- --format md`   | `docs/uat-checklist.md`  | Printable list with `[ ]` checkboxes                         |
+| `npm run uat:checklist -- --format both` | both files               | —                                                            |
+
+Each scenario is labeled with a **status** derived from its tags (see `docs/bdd.md`):
+
+- **Ready** — the app is expected to support this today; validate it now.
+- **Future** — `@future` spec-ahead work order; not built yet, expect it to fail or skip.
+- **Draft** — `@draft`; steps not yet implemented.
+
+Scenario Outlines are expanded into one row per Examples table entry, with placeholders
+substituted, so every concrete case is listed. Re-run the script to refresh after the
+specs change — don't hand-edit the generated files.
 
 ## Tech Stack
 

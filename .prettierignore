@@ -6,3 +6,5 @@ supabase/.temp/
 package-lock.json
 src/types/supabase.ts
 docs/coverage-matrix.md
+docs/uat-checklist.md
+docs/uat-checklist.csv

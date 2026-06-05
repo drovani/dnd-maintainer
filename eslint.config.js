@@ -82,5 +82,12 @@ export default defineConfig(
       'no-console': 'off',
     },
   },
+  {
+    // Standalone CLI tooling (run via tsx, not bundled into the app).
+    files: ['scripts/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
   prettierConfig
 );
