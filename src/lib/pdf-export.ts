@@ -11,7 +11,7 @@
 import { PDFDocument } from 'pdf-lib';
 import type { Character } from '@/types/database';
 import type { ResolvedCharacter } from '@/types/resolved';
-import { buildFieldValues, CHECK_FIELD_NAMES, TEXT_FIELD_NAMES } from '@/lib/pdf-field-map';
+import { buildFieldValues, characterDisplayName, CHECK_FIELD_NAMES, TEXT_FIELD_NAMES } from '@/lib/pdf-field-map';
 
 export class PdfTemplateError extends Error {
   constructor(
@@ -130,6 +130,6 @@ export async function exportCharacterPdf(
 
   const templateBytes = await response.arrayBuffer();
   const { bytes, missingFields } = await fillCharacterPdf(templateBytes, resolved, character);
-  downloadPdf(bytes, `${opts.filename ?? character.name}.pdf`);
+  downloadPdf(bytes, `${opts.filename ?? characterDisplayName(character)}.pdf`);
   return { missingFields };
 }

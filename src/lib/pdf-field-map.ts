@@ -74,6 +74,18 @@ export function signed(value: number): string {
   return value >= 0 ? `+${value}` : `${value}`;
 }
 
+/**
+ * Display name for the exported PDF's filename. A PC with a player reads as
+ * "Character (Player)" so files are easy to tell apart; NPCs (and PCs without a
+ * player) use just the character name. The in-sheet name field uses the bare
+ * character name — the 2024 sheet has no player-name field.
+ */
+export function characterDisplayName(character: Character): string {
+  return character.character_type === 'pc' && character.player_name
+    ? `${character.name} (${character.player_name})`
+    : character.name;
+}
+
 /** Humanize a kebab/lower id into a display label: "magic-initiate" → "Magic Initiate". */
 function titleCase(id: string): string {
   return id
@@ -124,13 +136,9 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   const text: Record<string, string> = {};
   const checks: Record<string, boolean> = {};
 
-  // Identity — the 2024 sheet has separate Class, Subclass and Level fields but no
-  // dedicated Player Name field, so a PC folds its player into the name as
-  // "Character (Player)". NPCs (and PCs without a player) show just the name.
-  text.characterName =
-    character.character_type === 'pc' && character.player_name
-      ? `${character.name} (${character.player_name})`
-      : character.name;
+  // Identity — the 2024 sheet has separate Class, Subclass and Level fields and no
+  // Player Name field, so the name field is just the character name.
+  text.characterName = character.name;
   if (character.class) text.class = titleCase(character.class);
   if (character.subclass) text.subclass = titleCase(character.subclass);
   text.level = String(character.level);

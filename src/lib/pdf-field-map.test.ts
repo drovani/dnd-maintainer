@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildFieldValues, signed, PDF_SKILLS, PDF_ABILITIES } from '@/lib/pdf-field-map';
+import { buildFieldValues, characterDisplayName, signed, PDF_SKILLS, PDF_ABILITIES } from '@/lib/pdf-field-map';
 import { requireItemDef } from '@/lib/sources/items';
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
@@ -159,8 +159,8 @@ describe('signed', () => {
 describe('buildFieldValues — identity', () => {
   it('maps name, separate class/level, species, background, alignment, size (2024 sheet)', () => {
     const { text } = buildFieldValues(makeResolved(), makeCharacter({ size: 'medium' }));
-    // PC with a player → "Character (Player)" since the 2024 sheet has no player-name field.
-    expect(text.characterName).toBe('Aragorn (Viggo)');
+    // The in-sheet name field is just the character name (no player-name field on the 2024 sheet).
+    expect(text.characterName).toBe('Aragorn');
     expect(text.class).toBe('Fighter');
     expect(text.level).toBe('5');
     expect(text.species).toBe('Human');
@@ -177,11 +177,23 @@ describe('buildFieldValues — identity', () => {
     expect(text.subclass).toBe('Champion');
   });
 
-  it('shows just the name for an NPC, or a PC with no player', () => {
-    const npc = buildFieldValues(makeResolved(), makeCharacter({ character_type: 'npc', player_name: 'Ignored' }));
-    expect(npc.text.characterName).toBe('Aragorn');
-    const pcNoPlayer = buildFieldValues(makeResolved(), makeCharacter({ player_name: null }));
-    expect(pcNoPlayer.text.characterName).toBe('Aragorn');
+  it('keeps the in-sheet name field as just the character name', () => {
+    const pc = buildFieldValues(makeResolved(), makeCharacter({ player_name: 'Viggo' }));
+    expect(pc.text.characterName).toBe('Aragorn');
+  });
+});
+
+describe('characterDisplayName (download filename)', () => {
+  it('folds player into the name for a PC, e.g. "Sebastian (Sebastian)"', () => {
+    expect(characterDisplayName(makeCharacter({ name: 'Sebastian', player_name: 'Sebastian' }))).toBe(
+      'Sebastian (Sebastian)'
+    );
+    expect(characterDisplayName(makeCharacter({ player_name: 'Viggo' }))).toBe('Aragorn (Viggo)');
+  });
+
+  it('uses just the name for an NPC or a player-less PC', () => {
+    expect(characterDisplayName(makeCharacter({ character_type: 'npc', player_name: 'Ignored' }))).toBe('Aragorn');
+    expect(characterDisplayName(makeCharacter({ player_name: null }))).toBe('Aragorn');
   });
 });
 
