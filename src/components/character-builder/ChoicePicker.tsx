@@ -36,6 +36,12 @@ interface ChoicePickerProps {
    * (no-data-loss union). Falls back to the full FEAT_SOURCES when undefined.
    */
   readonly allowedFeats?: readonly FeatSource[];
+  /**
+   * Feat ids the character already has from another source and that cannot be
+   * taken again (non-repeatable). For feat-choice prompts these are shown but
+   * disabled, so e.g. a Human can't pick a feat their background already granted.
+   */
+  readonly unavailableFeats?: ReadonlySet<FeatId>;
 }
 
 const ALL_SKILL_IDS: readonly SkillId[] = DND_SKILLS.map((s) => s.id);
@@ -49,7 +55,14 @@ function isLanguageId(id: string): id is LanguageId {
   return (ALL_LANGUAGE_IDS as readonly string[]).includes(id);
 }
 
-export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allowedFeats }: ChoicePickerProps) {
+export function ChoicePicker({
+  choice,
+  currentDecision,
+  onDecide,
+  onClear,
+  allowedFeats,
+  unavailableFeats,
+}: ChoicePickerProps) {
   const { t } = useTranslation('gamedata');
   const { t: tc } = useTranslation('common');
 
@@ -265,6 +278,9 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allow
             const label = t(nameKey, { defaultValue: featId });
             const description = t(descKey, { defaultValue: '' });
             const isDisabledBook = featId === currentFeatId && !basePool.includes(featId);
+            // Already granted elsewhere and non-repeatable → show but block re-selection
+            // (never blocks the current pick, so a valid selection stays changeable).
+            const isAlreadyGranted = (unavailableFeats?.has(featId) ?? false) && featId !== currentFeatId;
             return (
               <div
                 key={featId}
@@ -275,14 +291,23 @@ export function ChoicePicker({ choice, currentDecision, onDecide, onClear, allow
                   id={radioId}
                   name={`choice-feat-${choice.choiceKey}`}
                   checked={currentFeatId === featId}
+                  disabled={isAlreadyGranted}
                   onChange={() => onDecide(choice.choiceKey, { type: 'feat-choice', featId })}
-                  className="mt-1 size-4 text-primary"
+                  className="mt-1 size-4 text-primary disabled:opacity-50"
                 />
-                <Label htmlFor={radioId} className="flex-1 cursor-pointer">
+                <Label
+                  htmlFor={radioId}
+                  className={`flex-1 ${isAlreadyGranted ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                >
                   <span className="font-medium">{label}</span>
                   {isDisabledBook && (
                     <Badge variant="destructive" className="text-xs ml-2">
                       {tc('characterBuilder.hints.disabledSourceBook')}
+                    </Badge>
+                  )}
+                  {isAlreadyGranted && (
+                    <Badge variant="secondary" className="text-xs ml-2">
+                      {tc('characterBuilder.hints.alreadyGranted')}
                     </Badge>
                   )}
                   {description ? (

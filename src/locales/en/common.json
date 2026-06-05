@@ -225,7 +225,8 @@
       "quickNpcAdvanceTimeout": "NPC was created but the step did not advance — please navigate manually",
       "quickNpcOverwriteTitle": "Replace your current work?",
       "quickNpcOverwriteConfirm": "This will overwrite the data you have already entered. Continue?",
-      "disabledSourceBook": "This option is from a source book not enabled for this campaign."
+      "disabledSourceBook": "This option is from a source book not enabled for this campaign.",
+      "alreadyGranted": "Already granted by another source"
     },
     "abilities": {
       "standardArray": "Standard Array",

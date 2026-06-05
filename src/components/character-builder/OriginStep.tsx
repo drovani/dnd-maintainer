@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { useGameData } from '@/hooks/useGameData';
-import { type SpeciesId } from '@/lib/dnd-helpers';
+import { type FeatId, type SpeciesId } from '@/lib/dnd-helpers';
+import { FEAT_SOURCES } from '@/lib/sources';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
@@ -61,6 +62,26 @@ export function OriginStep() {
       }));
   }, [bundles]);
 
+  // Feats the character already has from any source AND that can't be taken again, so the
+  // species origin-feat picker can lock them out (e.g. Soldier grants Savage Attacker, which
+  // a Human must not also pick). Repeatable feats (magic-initiate, etc.) stay selectable.
+  const unavailableFeats = useMemo<ReadonlySet<FeatId>>(() => {
+    const repeatable = new Set(FEAT_SOURCES.filter((f) => f.repeatable).map((f) => f.id));
+    const granted = new Set<FeatId>();
+    for (const bundle of bundles) {
+      for (const grant of bundle.grants) {
+        if (grant.type === 'feat' && !repeatable.has(grant.featId)) granted.add(grant.featId);
+      }
+    }
+    for (const featId of build?.feats ?? []) {
+      if (!repeatable.has(featId)) granted.add(featId);
+    }
+    for (const decision of Object.values(build?.choices ?? {})) {
+      if (decision?.type === 'feat-choice' && !repeatable.has(decision.featId)) granted.add(decision.featId);
+    }
+    return granted;
+  }, [bundles, build]);
+
   const backgroundName = background
     ? t(`backgrounds.${background}` as `backgrounds.${string}`, { defaultValue: background })
     : null;
@@ -83,12 +104,18 @@ export function OriginStep() {
         <div className="space-y-4">
           {speciesFeatChoices.map((choice) => (
             <div key={choice.choiceKey}>
+              <p className="text-xs text-muted-foreground mb-1">
+                {tc('characterBuilder.pendingChoices.fromSource', {
+                  source: getChoiceSourceName(choice.choiceKey, t),
+                })}
+              </p>
               <ChoicePicker
                 choice={choice}
                 currentDecision={build?.choices[choice.choiceKey]}
                 onDecide={(choiceKey, decision) => context.makeChoice(choiceKey, decision)}
                 onClear={(choiceKey) => context.clearChoice(choiceKey)}
                 allowedFeats={gameData.feats}
+                unavailableFeats={unavailableFeats}
               />
             </div>
           ))}

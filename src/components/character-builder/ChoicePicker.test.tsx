@@ -314,6 +314,44 @@ describe('ChoicePicker feat-choice', () => {
     fireEvent.click(screen.getByRole('button', { name: /clear/i }));
     expect(onClear).toHaveBeenCalledWith(FEAT_CHOICE.choiceKey);
   });
+
+  it('disables a feat already granted elsewhere (unavailableFeats) and flags it', () => {
+    const unavailable = new Set(['lucky'] as unknown as import('@/lib/dnd-helpers').FeatId[]);
+    render(
+      <ChoicePicker
+        choice={FEAT_CHOICE}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+        unavailableFeats={unavailable}
+      />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios[0].disabled).toBe(false); // alert
+    expect(radios[1].disabled).toBe(true); // lucky — granted elsewhere
+    expect(radios[2].disabled).toBe(false); // skilled
+    expect(screen.getByText('alreadyGranted')).toBeInTheDocument();
+  });
+
+  it('does NOT disable the feat that is the current selection even if in unavailableFeats', () => {
+    const unavailable = new Set(['lucky'] as unknown as import('@/lib/dnd-helpers').FeatId[]);
+    const currentDecision: ChoiceDecision = {
+      type: 'feat-choice',
+      featId: 'lucky' as import('@/lib/dnd-helpers').FeatId,
+    };
+    render(
+      <ChoicePicker
+        choice={FEAT_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+        unavailableFeats={unavailable}
+      />
+    );
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    expect(radios[1].checked).toBe(true);
+    expect(radios[1].disabled).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

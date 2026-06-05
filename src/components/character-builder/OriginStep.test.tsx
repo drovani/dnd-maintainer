@@ -503,6 +503,41 @@ describe('OriginStep', () => {
     expect(featRadios.length).toBeGreaterThan(0);
   });
 
+  it('shows the source label and locks out a feat the background already granted', () => {
+    // Human origin feat-choice (Savage Attacker is in the pool) + Soldier background that
+    // already grants Savage Attacker → that radio must be disabled, and a "from <species>"
+    // source label must render above the picker.
+    mockBundles = [
+      {
+        source: { origin: 'species', id: 'human' as const },
+        grants: [
+          {
+            type: 'feat-choice' as const,
+            key: 'feat-choice:species:human:0' as ChoiceKey,
+            from: ['alert', 'savage-attacker'] as unknown as readonly import('@/lib/dnd-helpers').FeatId[],
+            category: 'origin' as const,
+          },
+        ],
+      },
+      {
+        source: { origin: 'background', id: 'soldier' as const },
+        grants: [{ type: 'feat' as const, featId: 'savage-attacker' as import('@/lib/dnd-helpers').FeatId }],
+      },
+    ] as readonly GrantBundle[];
+
+    render(<OriginStep />);
+
+    const featRadios = (screen.getAllByRole('radio') as HTMLInputElement[]).filter((r) =>
+      r.name?.startsWith('choice-feat-')
+    );
+    // Pool order ['alert', 'savage-attacker'] → alert enabled, savage-attacker disabled.
+    expect(featRadios).toHaveLength(2);
+    expect(featRadios[0].disabled).toBe(false);
+    expect(featRadios[1].disabled).toBe(true);
+    // Source attribution label is rendered (interpolated "from {{source}}").
+    expect(screen.getByText('fromSource')).toBeInTheDocument();
+  });
+
   it('does not render a species-origin feat-choice picker when no such pending choice exists', () => {
     mockResolved = {
       ...makeDefaultResolved(),
