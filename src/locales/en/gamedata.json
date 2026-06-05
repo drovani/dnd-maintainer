@@ -1029,11 +1029,19 @@
     },
     "barbarian-rage": {
       "name": "Rage",
-      "description": "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action."
+      "description": "In battle, you fight with primal ferocity. As a Bonus Action you can enter a Rage: you gain resistance to Bludgeoning, Piercing, and Slashing damage, advantage on Strength checks and Strength saving throws, and a Rage Damage bonus to Strength-based attacks (+2 at level 1, +3 at level 9, +4 at level 16). The number of times you can Rage is tracked as a resource pool."
     },
     "barbarian-unarmored-defense": {
       "name": "Unarmored Defense",
       "description": "While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier."
+    },
+    "barbarian-weapon-mastery": {
+      "name": "Weapon Mastery",
+      "description": "You can use the mastery properties of two kinds of weapons of your choice with which you have proficiency (a Simple or Martial weapon). The number of weapons increases as you gain Barbarian levels — three at level 4 and four at level 10 — and you can change your choices when you finish a Long Rest."
+    },
+    "barbarian-primal-knowledge": {
+      "name": "Primal Knowledge",
+      "description": "You gain proficiency in one additional skill of your choice from the Barbarian skill list. In addition, while your Rage is active you can channel it into certain skills: you can make Acrobatics, Intimidation, Perception, Stealth, or Survival checks as Strength checks even if they normally use a different ability."
     },
     "barbarian-reckless-attack": {
       "name": "Reckless Attack",
@@ -1082,6 +1090,10 @@
     "barbarian-indomitable-might": {
       "name": "Indomitable Might",
       "description": "If your total for a Strength check is less than your Strength score, you can use that score in place of the total."
+    },
+    "barbarian-epic-boon": {
+      "name": "Epic Boon",
+      "description": "You gain an Epic Boon feat or another feat of your choice for which you qualify. The Boon of Irresistible Offense is recommended."
     },
     "barbarian-primal-champion": {
       "name": "Primal Champion",
@@ -2411,6 +2423,10 @@
     }
   },
   "resourcePools": {
+    "rage": {
+      "name": "Rage",
+      "description": "The number of times you can enter a Rage (2 at level 1, scaling to 6 at level 17). You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest."
+    },
     "focus-points": {
       "name": "Focus Points",
       "description": "Fuel Monk techniques. Regain on a Short Rest."

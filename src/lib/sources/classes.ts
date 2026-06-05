@@ -47,7 +47,24 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: ['athletics', 'animalhandling', 'intimidation', 'nature', 'perception', 'survival'],
           },
           { type: 'feature', feature: { id: 'barbarian-rage' } },
+          {
+            type: 'resource-pool',
+            poolId: 'rage',
+            max: {
+              mode: 'level-steps',
+              classId: 'barbarian',
+              steps: [
+                { minLevel: 1, value: 2 },
+                { minLevel: 3, value: 3 },
+                { minLevel: 6, value: 4 },
+                { minLevel: 12, value: 5 },
+                { minLevel: 17, value: 6 },
+              ],
+            },
+            regen: 'long-rest',
+          },
           { type: 'feature', feature: { id: 'barbarian-unarmored-defense' } },
+          { type: 'feature', feature: { id: 'barbarian-weapon-mastery' } },
           { type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } },
           {
             type: 'weapon-mastery-choice',
@@ -63,7 +80,17 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
         ],
       },
       {
-        grants: [{ type: 'subclass', classId: 'barbarian', key: createChoiceKey('subclass', 'class', 'barbarian', 0) }],
+        grants: [
+          { type: 'subclass', classId: 'barbarian', key: createChoiceKey('subclass', 'class', 'barbarian', 0) },
+          { type: 'feature', feature: { id: 'barbarian-primal-knowledge' } },
+          {
+            type: 'proficiency-choice',
+            category: 'skill',
+            key: createChoiceKey('skill-choice', 'class', 'barbarian', 1),
+            count: 1,
+            from: ['athletics', 'animalhandling', 'intimidation', 'nature', 'perception', 'survival'],
+          },
+        ],
       },
       {
         grants: [
@@ -107,7 +134,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 3), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'barbarian-improved-brutal-strike-2' } }] },
       { grants: [{ type: 'feature', feature: { id: 'barbarian-indomitable-might' } }] },
-      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'barbarian', 4), points: 2, from: null }] },
+      { grants: [{ type: 'feature', feature: { id: 'barbarian-epic-boon' } }] },
       { grants: [{ type: 'feature', feature: { id: 'barbarian-primal-champion' } }] },
     ],
   },

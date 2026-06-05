@@ -277,7 +277,17 @@ export interface FeatChoiceGrant {
 
 export type ResourcePoolMax =
   | { readonly mode: 'class-level'; readonly classId: ClassId }
-  | { readonly mode: 'fixed'; readonly value: number };
+  | { readonly mode: 'fixed'; readonly value: number }
+  /**
+   * A stepped table keyed on class level — e.g. the Barbarian's Rages column
+   * (2 at L1, 3 at L3, 4 at L6, 5 at L12, 6 at L17). The max is the `value` of
+   * the step with the highest `minLevel` that is ≤ the character's class level.
+   */
+  | {
+      readonly mode: 'level-steps';
+      readonly classId: ClassId;
+      readonly steps: readonly { readonly minLevel: number; readonly value: number }[];
+    };
 
 export type ResourcePoolRegen = 'short-rest' | 'long-rest';
 

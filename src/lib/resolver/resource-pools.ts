@@ -12,6 +12,23 @@ export function resolveResourcePools(bundles: readonly GrantBundle[]): readonly 
     let max: number;
     if (maxSpec.mode === 'fixed') {
       max = maxSpec.value;
+    } else if (maxSpec.mode === 'level-steps') {
+      const level = getClassLevel(bundles, maxSpec.classId);
+      // Highest-minLevel step that the class level satisfies wins (order-independent).
+      let bestMin = -1;
+      let value = 0;
+      for (const step of maxSpec.steps) {
+        if (level >= step.minLevel && step.minLevel > bestMin) {
+          bestMin = step.minLevel;
+          value = step.value;
+        }
+      }
+      max = value;
+      if (level === 0) {
+        logger.warn(
+          `resource-pool "${grant.poolId}" declares classId "${maxSpec.classId}" but no bundles for that class were found — max will be 0`
+        );
+      }
     } else {
       max = getClassLevel(bundles, maxSpec.classId);
       if (max === 0) {

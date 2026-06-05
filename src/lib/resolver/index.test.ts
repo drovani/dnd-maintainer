@@ -1624,6 +1624,82 @@ describe('Weapon mastery resolver', () => {
     expect(pending[0].count).toBe(2);
   });
 
+  it('L3 Barbarian surfaces the Primal Knowledge skill choice and a rage pool (max 3) without crashing', () => {
+    const barbarianL3Build: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {
+        // L1 barbarian skill choice already made — Primal Knowledge (index 1) is the new one.
+        'skill-choice:class:barbarian:0': { type: 'skill-choice', skills: ['athletics', 'perception'] },
+        'skill-choice:species:human:0': { type: 'skill-choice', skills: ['intimidation'] },
+        'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
+        'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
+        'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
+        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
+        'subclass:class:barbarian:0': { type: 'subclass', subclassId: 'berserker' as SubclassId },
+      },
+      levels: [
+        { classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null },
+        { classId: 'barbarian' as ClassId, classLevel: 2, hpRoll: null },
+        { classId: 'barbarian' as ClassId, classLevel: 3, hpRoll: null },
+      ],
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(barbarianL3Build);
+    const result = resolveCharacter({
+      baseAbilities: barbarianL3Build.baseAbilities,
+      level: 3,
+      bundles,
+      choices: barbarianL3Build.choices,
+      levels: barbarianL3Build.levels,
+    });
+
+    // The L3 Primal Knowledge extra skill choice surfaces as its own pending skill-choice.
+    const skillKeys = result.pendingChoices.filter((c) => c.type === 'skill-choice').map((c) => c.choiceKey);
+    expect(skillKeys).toContain('skill-choice:class:barbarian:1');
+
+    // Primal Knowledge feature present; Rage pool scales to 3 at L3.
+    expect(result.features.map((f) => f.feature.id)).toContain('barbarian-primal-knowledge');
+    const ragePool = result.resourcePools.find((p) => p.poolId === 'rage');
+    expect(ragePool).toMatchObject({ max: 3, regen: 'long-rest' });
+  });
+
+  it('L19 Barbarian gains an Epic Boon feature and only four ASIs (no spurious 5th)', () => {
+    const levels = Array.from({ length: 19 }, (_, i) => ({
+      classId: 'barbarian' as ClassId,
+      classLevel: i + 1,
+      hpRoll: null,
+    }));
+    const barbarianL19Build: CharacterBuild = {
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      baseAbilities: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 12 },
+      abilityMethod: 'standard-array',
+      choices: {},
+      levels,
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles } = collectBundles(barbarianL19Build);
+    const result = resolveCharacter({
+      baseAbilities: barbarianL19Build.baseAbilities,
+      level: 19,
+      bundles,
+      choices: barbarianL19Build.choices,
+      levels: barbarianL19Build.levels,
+    });
+    expect(result.features.map((f) => f.feature.id)).toContain('barbarian-epic-boon');
+    const asiKeys = result.pendingChoices.filter((c) => c.type === 'asi').map((c) => c.choiceKey);
+    // Four class ASIs (L4/8/12/16) — the old L19 ASI is now the Epic Boon.
+    expect(asiKeys).toContain('asi:class:barbarian:3');
+    expect(asiKeys).not.toContain('asi:class:barbarian:4');
+    // Rage pool tops out at 6 by level 17+.
+    expect(result.resourcePools.find((p) => p.poolId === 'rage')).toMatchObject({ max: 6 });
+  });
+
   it('L1 Paladin has a weapon-mastery-choice pending choice with count 2', () => {
     const paladinBuild: CharacterBuild = {
       speciesId: 'human',

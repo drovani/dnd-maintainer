@@ -75,8 +75,16 @@ export const SUBCLASS_MILESTONES_BY_CLASS: Readonly<Record<string, readonly numb
   wizard: [3, 6, 10, 14],
 } as const;
 
-/** 2024 PHB Ability Score Improvement levels common to every class. */
-export const EXPECTED_ASI_LEVELS: readonly number[] = [4, 8, 12, 16, 19] as const;
+/**
+ * 2024 PHB Ability Score Improvement levels common to every class. Level 19 is
+ * NOT here: in the 2024 rules every class gains an Epic Boon at level 19 instead
+ * of a regular ASI ({@link EPIC_BOON_LEVEL}), so that slot is checked separately
+ * and accepts either grant shape.
+ */
+export const EXPECTED_ASI_LEVELS: readonly number[] = [4, 8, 12, 16] as const;
+
+/** 2024 PHB level at which every class gains an Epic Boon feat in place of an ASI. */
+export const EPIC_BOON_LEVEL = 19 as const;
 
 /**
  * Golden-verified registry — the ONLY source of "matches the PHB" confidence.
@@ -129,11 +137,22 @@ export function computeClassCoverage(): ForkCoverage {
     const missingAsi = missingLevels(asiLevels, EXPECTED_ASI_LEVELS);
     if (missingAsi.length > 0) problems.push(`missing ASI at level(s) ${missingAsi.join(', ')}`);
 
+    // Level 19 is the Epic Boon slot in 2024: accept either an ASI grant or an
+    // Epic Boon feature (id ending `-epic-boon`) / epic-boon feat grant.
+    const l19 = src.levels[EPIC_BOON_LEVEL - 1]?.grants ?? [];
+    const hasEpicBoonSlot = l19.some(
+      (g) =>
+        g.type === 'asi' ||
+        (g.type === 'feature' && g.feature.id.endsWith('-epic-boon')) ||
+        (g.type === 'feat' && g.featId.endsWith('-epic-boon'))
+    );
+    if (!hasEpicBoonSlot) problems.push(`missing ASI or Epic Boon at level ${EPIC_BOON_LEVEL}`);
+
     const status: EntryStatus = problems.length === 0 ? 'complete' : 'partial';
     return {
       id: c.id,
       status,
-      detail: problems.length === 0 ? '20 levels, subclass@3, ASI@4/8/12/16/19' : problems.join('; '),
+      detail: problems.length === 0 ? '20 levels, subclass@3, ASI@4/8/12/16, Epic Boon@19' : problems.join('; '),
       goldenVerified: GOLDEN_VERIFIED.has(c.id),
     };
   });

@@ -3,7 +3,7 @@ import type { GrantBundle } from '@/types/sources';
 import { resolveResourcePools } from '@/lib/resolver/resource-pools';
 
 function classBundles(
-  classId: 'monk' | 'sorcerer',
+  classId: 'monk' | 'sorcerer' | 'barbarian',
   count: number,
   extraGrants: GrantBundle['grants'] = []
 ): GrantBundle[] {
@@ -80,6 +80,53 @@ describe('resolveResourcePools', () => {
     const pools = resolveResourcePools(bundles);
     expect(pools).toHaveLength(1);
     expect(pools[0]).toMatchObject({ poolId: 'psionic-energy', max: 4, regen: 'long-rest' });
+  });
+
+  describe('level-steps max (Barbarian Rage table)', () => {
+    const RAGE_GRANT: GrantBundle['grants'][number] = {
+      type: 'resource-pool',
+      poolId: 'rage',
+      max: {
+        mode: 'level-steps',
+        classId: 'barbarian',
+        steps: [
+          { minLevel: 1, value: 2 },
+          { minLevel: 3, value: 3 },
+          { minLevel: 6, value: 4 },
+          { minLevel: 12, value: 5 },
+          { minLevel: 17, value: 6 },
+        ],
+      },
+      regen: 'long-rest',
+    };
+
+    function barbarianAtLevel(level: number): GrantBundle[] {
+      const bundles: GrantBundle[] = [];
+      for (let l = 1; l <= level; l++) {
+        bundles.push({
+          source: { origin: 'class', id: 'barbarian', level: l },
+          grants: l === 1 ? [RAGE_GRANT] : [],
+        });
+      }
+      return bundles;
+    }
+
+    it.each([
+      [1, 2],
+      [2, 2],
+      [3, 3],
+      [5, 3],
+      [6, 4],
+      [11, 4],
+      [12, 5],
+      [16, 5],
+      [17, 6],
+      [20, 6],
+    ])('resolves rage max to %i uses at barbarian level %i', (level, expectedMax) => {
+      const pools = resolveResourcePools(barbarianAtLevel(level));
+      expect(pools).toHaveLength(1);
+      expect(pools[0]).toMatchObject({ poolId: 'rage', max: expectedMax, regen: 'long-rest' });
+    });
   });
 
   it('tags pool with its source bundle', () => {
