@@ -11,8 +11,25 @@ import {
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'));
 
+import { createElement, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import { useCampaigns, useCampaign, useCampaignMutations } from '@/hooks/useCampaigns';
-import type { Campaign } from '@/types/database';
+import type { Campaign, CampaignSummary } from '@/types/database';
+import { CAMPAIGN_SUMMARY_COLS } from '@/lib/query-columns';
+
+// Wrapper that exposes its QueryClient so tests can seed and inspect the cache
+// (the shared createWrapper() keeps its client private).
+function wrapperWithClient(): { queryClient: QueryClient; Wrapper: (props: { children: ReactNode }) => ReactNode } {
+  // gcTime: Infinity keeps observer-less cache entries (seeded directly via
+  // setQueryData) alive so the mutation's in-place patches are observable.
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: ReactNode }): ReactNode =>
+    createElement(ThemeProvider, null, createElement(QueryClientProvider, { client: queryClient }, children));
+  return { queryClient, Wrapper };
+}
 
 const baseCampaign: Campaign = {
   id: 'camp-1',
@@ -40,6 +57,22 @@ describeListQuery(
   baseCampaign,
   null
 );
+
+describe('useCampaigns ordering', () => {
+  it('orders by the last_activity_at computed field, descending', async () => {
+    // Ordering is done server-side by the PostgREST `last_activity_at` computed
+    // field (most recent session date, falling back to created_at), decoupling list
+    // order from `updated_at` so theme/metadata edits don't reorder campaigns.
+    mockQueryResult.data = [baseCampaign];
+
+    const { result } = renderHook(() => useCampaigns(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(supabase.select).toHaveBeenCalledWith(CAMPAIGN_SUMMARY_COLS);
+    expect(supabase.order).toHaveBeenCalledWith('last_activity_at', { ascending: false });
+  });
+});
 
 describeSingleQuery(
   'useCampaign',
@@ -90,6 +123,44 @@ describe('useCampaignMutations', () => {
     await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
     expect(supabase.update).toHaveBeenCalledWith(expect.objectContaining({ name: 'Updated Name' }));
     expect(supabase.eq).toHaveBeenCalledWith('id', 'camp-1');
+  });
+
+  it('update patches the list and detail caches in place rather than refetching', async () => {
+    const { queryClient, Wrapper } = wrapperWithClient();
+    const campA: Campaign = { ...baseCampaign, id: 'camp-1', slug: 'a', theme: null };
+    const campB: Campaign = { ...baseCampaign, id: 'camp-2', slug: 'b', theme: 'sylvan' };
+    // Seed a two-item list. A refetch would replace it with mockQueryResult.data
+    // (a single object), so an intact [A, B] proves the cache was patched in place.
+    queryClient.setQueryData(['campaigns'], [campA, campB]);
+    queryClient.setQueryData(['campaign', 'a'], campA);
+
+    mockQueryResult.data = { ...campA, theme: 'arcane' };
+
+    const { result } = renderHook(() => useCampaignMutations(), { wrapper: Wrapper });
+    result.current.update.mutate({ id: 'camp-1', theme: 'arcane' });
+    await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
+
+    const list = queryClient.getQueryData<CampaignSummary[]>(['campaigns'])!;
+    expect(list.map((c) => c.id)).toEqual(['camp-1', 'camp-2']); // order preserved, B untouched
+    expect(list[0].theme).toBe('arcane'); // matching row patched
+    expect('allowed_source_books' in list[0]).toBe(false); // projected down to the summary shape
+    expect(queryClient.getQueryData<Campaign>(['campaign', 'a'])!.theme).toBe('arcane');
+  });
+
+  it('update on rename refreshes the old-slug detail cache without a round-trip', async () => {
+    const { queryClient, Wrapper } = wrapperWithClient();
+    const original: Campaign = { ...baseCampaign, id: 'camp-1', slug: 'old-name', name: 'Old Name' };
+    queryClient.setQueryData(['campaign', 'old-name'], original);
+
+    mockQueryResult.data = { ...original, slug: 'new-name', name: 'New Name', previous_slugs: ['old-name'] };
+
+    const { result } = renderHook(() => useCampaignMutations(), { wrapper: Wrapper });
+    result.current.update.mutate({ id: 'camp-1', name: 'New Name' });
+    await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
+
+    // onMutate captured 'old-name' by id; onSuccess wrote the fresh row to both keys.
+    expect(queryClient.getQueryData<Campaign>(['campaign', 'new-name'])!.name).toBe('New Name');
+    expect(queryClient.getQueryData<Campaign>(['campaign', 'old-name'])!.name).toBe('New Name');
   });
 
   it('archive sets archived_at to an ISO string', async () => {

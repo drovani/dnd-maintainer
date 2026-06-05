@@ -239,9 +239,26 @@ export function createStatefulSupabase(): { supabase: unknown; db: StatefulDb } 
         let result = matched;
         if (this.s.orderBy) {
           const { col, ascending } = this.s.orderBy;
+          // `last_activity_at` is a PostgREST computed field on campaigns (see migration
+          // 20260607000000): most recent session date, falling back to created_at. Mirror
+          // it here by reading the related sessions from the store so list-ordering tests
+          // exercise the real sort key rather than a missing column.
+          const valueFor = (r: Row): string => {
+            if (col === 'last_activity_at') {
+              const dates = store
+                .get('sessions')
+                .filter((s) => s.campaign_id === r.id)
+                .map((s) => s.date as string | null)
+                .filter((d): d is string => d != null)
+                .map((d) => new Date(d).toISOString());
+              if (dates.length > 0) return dates.reduce((max, d) => (d > max ? d : max));
+              return new Date(r.created_at as string).toISOString();
+            }
+            return r[col] as string;
+          };
           result = [...result].sort((a, b) => {
-            const av = a[col] as string;
-            const bv = b[col] as string;
+            const av = valueFor(a);
+            const bv = valueFor(b);
             const cmp = av < bv ? -1 : av > bv ? 1 : 0;
             return ascending ? cmp : -cmp;
           });

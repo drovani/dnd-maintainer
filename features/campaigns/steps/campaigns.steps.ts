@@ -205,17 +205,28 @@ Given('another campaign named {string} exists', function (this: DndWorld, name: 
   seedRow(this, makeCampaignRow({ name }));
 });
 
+// "Last played" seeds a session dated accordingly — the campaign list orders by the
+// `last_activity_at` computed field (most recent session date, falling back to
+// created_at), not by `updated_at`, so activity must be modeled as a real session.
+function seedPlayedSession(world: DndWorld, name: string, daysAgo: number): void {
+  const playedOn = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const row = makeCampaignRow({ name });
+  seedRow(world, row);
+  world.db.seed('sessions', [
+    ...world.db.rows('sessions'),
+    { id: `s-${row.id}`, campaign_id: row.id, session_number: 1, date: playedOn },
+  ]);
+}
+
 Given(
   'a campaign named {string} exists and was last played {int} weeks ago',
   function (this: DndWorld, name: string, weeks: number) {
-    const updatedAt = new Date(Date.now() - weeks * 7 * 24 * 60 * 60 * 1000).toISOString();
-    seedRow(this, makeCampaignRow({ name, updated_at: updatedAt }));
+    seedPlayedSession(this, name, weeks * 7);
   }
 );
 
 Given('a campaign named {string} exists and was last played yesterday', function (this: DndWorld, name: string) {
-  const updatedAt = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-  seedRow(this, makeCampaignRow({ name, updated_at: updatedAt }));
+  seedPlayedSession(this, name, 1);
 });
 
 Given('a campaign named {string} exists with no theme set', function (this: DndWorld, name: string) {

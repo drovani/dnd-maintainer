@@ -201,8 +201,6 @@ export type Database = {
           character_type: string
           class: string | null
           conditions: string[]
-          hit_dice_used: Json
-          spell_slots_used: Json
           created_at: string
           exhaustion_level: number
           eye_color: string | null
@@ -211,6 +209,7 @@ export type Database = {
           hair_color: string | null
           height: string | null
           heroic_inspiration: boolean
+          hit_dice_used: Json
           hit_points_max: number | null
           id: string
           ideals: string | null
@@ -228,6 +227,7 @@ export type Database = {
           slug: string
           species: string | null
           speed: number | null
+          spell_slots_used: Json
           status: string
           subclass: string | null
           updated_at: string
@@ -246,8 +246,6 @@ export type Database = {
           character_type: string
           class?: string | null
           conditions?: string[]
-          hit_dice_used?: Json
-          spell_slots_used?: Json
           created_at?: string
           exhaustion_level?: number
           eye_color?: string | null
@@ -256,6 +254,7 @@ export type Database = {
           hair_color?: string | null
           height?: string | null
           heroic_inspiration?: boolean
+          hit_dice_used?: Json
           hit_points_max?: number | null
           id?: string
           ideals?: string | null
@@ -273,6 +272,7 @@ export type Database = {
           slug?: string
           species?: string | null
           speed?: number | null
+          spell_slots_used?: Json
           status?: string
           subclass?: string | null
           updated_at?: string
@@ -291,8 +291,6 @@ export type Database = {
           character_type?: string
           class?: string | null
           conditions?: string[]
-          hit_dice_used?: Json
-          spell_slots_used?: Json
           created_at?: string
           exhaustion_level?: number
           eye_color?: string | null
@@ -301,6 +299,7 @@ export type Database = {
           hair_color?: string | null
           height?: string | null
           heroic_inspiration?: boolean
+          hit_dice_used?: Json
           hit_points_max?: number | null
           id?: string
           ideals?: string | null
@@ -318,6 +317,7 @@ export type Database = {
           slug?: string
           species?: string | null
           speed?: number | null
+          spell_slots_used?: Json
           status?: string
           subclass?: string | null
           updated_at?: string
@@ -498,6 +498,10 @@ export type Database = {
     Functions: {
       generate_slug: {
         Args: { entity_id: string; entity_name: string }
+        Returns: string
+      }
+      last_activity_at: {
+        Args: { c: Database["public"]["Tables"]["campaigns"]["Row"] }
         Returns: string
       }
     }
