@@ -5,10 +5,10 @@ Feature: Autosave character builder draft
 
   # Render-app seam: a draft is persisted as a characters row (status='draft') plus
   # character_build_levels rows. Returning to the builder at the draft's URL loads
-  # it — useCharacter(slug) + useCharacterBuildLevels rehydrate the wizard, so step
+  # it — useCharacter(slug) + useCharacterBuildLevels rehydrate the builder, so step
   # 1 (name, species) is pre-filled. This exercises the resume/reload path (AC2 and
   # the reload half of AC1); it seeds the draft rows directly rather than driving
-  # the autosave WRITE through the wizard's inputs.
+  # the autosave WRITE through the builder's inputs.
 
   Scenario: A saved draft is reloaded when returning to the builder
     Given a saved character draft named "Aldara"

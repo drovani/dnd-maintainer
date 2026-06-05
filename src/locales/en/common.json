@@ -216,7 +216,7 @@
       "selectSpeciesFirst": "Select a species to see lineage options.",
       "loadingLineage": "Loading lineage options...",
       "couldNotLoadPlayerNames": "Could not load player name suggestions",
-      "quickNpcDescription": "Click a class icon to create a random NPC of that class and jump ahead in the wizard",
+      "quickNpcDescription": "Click a class icon to create a random NPC of that class and jump ahead in the builder",
       "quickNpcButton": "Random {{class}} NPC",
       "quickNpcFailed": "Could not generate NPC — name data missing for selected species",
       "quickNpcUnknownClass": "Could not generate NPC — unknown class",

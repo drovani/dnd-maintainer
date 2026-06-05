@@ -11,7 +11,7 @@ import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
  * Finalize-character seam: render-app / data seam (persistence) + resolver.
  *
  * The build is finalized through the REAL `useBuilderAutosave().finalize` — the
- * production entry point the wizard uses. The stateful supabase double now honors
+ * production entry point the builder uses. The stateful supabase double now honors
  * the calls it makes (`.upsert` for build-level rows, `.not('sequence','in',...)`
  * for orphan cleanup, `character_items` insert, and the `status` promotion update),
  * so the draft→ready promotion and the resolver-derived stat mapping are exercised

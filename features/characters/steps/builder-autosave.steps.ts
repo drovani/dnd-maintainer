@@ -9,7 +9,7 @@ import type { Row } from '../../steps/support/stateful-supabase.js';
 //
 // Seeds a draft (characters status='draft' + character_build_levels) and renders
 // the real CharacterBuilder at the draft's resume URL. useCharacter +
-// useCharacterBuildLevels rehydrate the wizard via the pure CharacterProvider,
+// useCharacterBuildLevels rehydrate the builder via the pure CharacterProvider,
 // so BasicsStep shows the saved name and species. useCampaignContext is stubbed.
 // ---------------------------------------------------------------------------
 
