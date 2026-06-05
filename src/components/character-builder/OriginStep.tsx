@@ -2,11 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { useGameData } from '@/hooks/useGameData';
-import { type SpeciesId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+import { type SpeciesId } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
 import { deriveOriginFeatInfo } from '@/lib/character-builder/origin-feat-info';
-import type { ChoiceDecision } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,28 +45,21 @@ export function OriginStep() {
     );
   }, [resolved]);
 
-  // Pending species-origin feat-choices (e.g. Human Versatile origin feat picker).
+  // Species-origin feat-choices (e.g. Human Versatile origin feat picker). Collected from the
+  // grant bundles rather than resolved.pendingChoices so the picker STAYS rendered after a feat
+  // is chosen — otherwise the selection vanishes and the user can't change a misclick. The
+  // ChoicePicker shows the current selection and a Clear button for re-selection.
   const speciesFeatChoices = useMemo<readonly Extract<PendingChoice, { type: 'feat-choice' }>[]>(() => {
-    return (resolved?.pendingChoices ?? []).filter(
-      (c): c is Extract<PendingChoice, { type: 'feat-choice' }> =>
-        c.type === 'feat-choice' && c.source.origin === 'species'
-    );
-  }, [resolved]);
-
-  // Synthesize tool-choice and language-choice PendingChoices from background grants
-  const backgroundToolChoiceGrants = collectGrantsByType(bundles, 'proficiency-choice').filter(
-    (tg) => tg.source.origin === 'background' && tg.grant.category === 'tool'
-  );
-  const backgroundToolChoices: readonly (PendingChoice & { type: 'tool-choice' })[] = backgroundToolChoiceGrants.map(
-    ({ grant, source }) => ({
-      type: 'tool-choice' as const,
-      choiceKey: grant.key,
-      source,
-      category: 'tool' as const,
-      count: grant.count,
-      from: grant.from as readonly ToolProficiencyId[] | null,
-    })
-  );
+    return collectGrantsByType(bundles, 'feat-choice')
+      .filter(({ source }) => source.origin === 'species')
+      .map(({ grant, source }) => ({
+        type: 'feat-choice' as const,
+        choiceKey: grant.key,
+        source,
+        from: grant.from,
+        category: grant.category,
+      }));
+  }, [bundles]);
 
   const backgroundName = background
     ? t(`backgrounds.${background}` as `backgrounds.${string}`, { defaultValue: background })
@@ -143,28 +135,8 @@ export function OriginStep() {
         </div>
       )}
 
-      {/* Tool proficiency choices */}
-      {background && backgroundToolChoices.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-base font-semibold">
-            {tc('characterBuilder.backgroundStep.toolProficiencyTitle')}
-          </Label>
-          <div className="space-y-4">
-            {backgroundToolChoices.map((choice) => {
-              const decision = build?.choices[choice.choiceKey];
-              return (
-                <ChoicePicker
-                  key={choice.choiceKey}
-                  choice={choice}
-                  currentDecision={decision as ChoiceDecision | undefined}
-                  onDecide={(key, d) => context.makeChoice(key, d)}
-                  onClear={(key) => context.clearChoice(key)}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Tool proficiency choices are owned by the Proficiencies (Details) step to avoid
+          duplicating the picker in two places — see ProficienciesStep. */}
 
       {/* Feat-origin feature-choices (e.g. magic-initiate spellcasting class, elemental-adept element).
           Renders only when such a choice is pending — i.e. the feat is in build.feats but the user

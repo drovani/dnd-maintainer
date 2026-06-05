@@ -340,7 +340,9 @@ describe('ClassStep', () => {
     );
   });
 
-  it('hides empty-state when only L1 class features are present', () => {
+  it('shows the no-choices notice when only L1 class features are present (no actionable choices)', () => {
+    // Display-only features (e.g. Barbarian Rage / Unarmored Defense) are not choices, so the
+    // soft notice still surfaces to tell the user there's nothing to decide on this step.
     mockContextValue.resolved = {
       spellcasting: null,
       features: rogueL1Features(),
@@ -349,7 +351,10 @@ describe('ClassStep', () => {
 
     render(<ClassStep />);
 
-    expect(screen.queryByText('noClassChoices')).toBeNull();
+    // The features still render above the notice...
+    expect(screen.getAllByText('name').length).toBeGreaterThan(0);
+    // ...and the notice is shown because there are no actionable choices.
+    expect(screen.getByText('noClassChoices')).toBeTruthy();
   });
 
   it('renders a feature-choice picker for class-origin pending choices', () => {

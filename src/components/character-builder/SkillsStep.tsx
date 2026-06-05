@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
 import { useCharacterContext } from '@/hooks/useCharacterContext';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
+import { pickMostRestrictiveChoiceWithRoom } from '@/lib/character-builder/route-choice';
 import { SourceIcon, getSourceDisplayName } from '@/lib/class-icons';
 import type { ChoiceKey } from '@/types/choices';
 import type { SourceTag } from '@/types/sources';
@@ -122,7 +123,12 @@ export function SkillsStep() {
           // Every choice this skill is eligible for (could be multiple sources, e.g. Elf + Barbarian)
           const eligibleChoices = skillChoices.filter((sc) => sc.from.includes(skill.id));
           const choiceHoldingSkill = eligibleChoices.find((sc) => getSelectedSkills(sc.choiceKey).includes(skill.id));
-          const choiceWithRoom = eligibleChoices.find((sc) => getSelectedSkills(sc.choiceKey).length < sc.count);
+          // Route a new selection to the most restrictive eligible grant with room (smallest pool),
+          // so e.g. Athletics consumes the narrow Barbarian list before the "any skill" Human grant.
+          const choiceWithRoom = pickMostRestrictiveChoiceWithRoom(
+            eligibleChoices,
+            (sc) => getSelectedSkills(sc.choiceKey).length
+          );
 
           let checkbox: React.ReactNode = null;
           if (eligibleChoices.length > 0) {

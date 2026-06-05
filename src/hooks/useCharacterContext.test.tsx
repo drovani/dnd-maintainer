@@ -63,6 +63,12 @@ describe('resolveChoiceSequence', () => {
     expect(resolveChoiceSequence('skill-choice:background:soldier:0', rows)).toBe(0);
   });
 
+  it('routes feat (origin feat) choices to sequence 0', () => {
+    // Regression: a feat-origin key carries a feat id ("skilled"), not a class id. It used to
+    // fall through to the class branch and throw `No active level row found for class "skilled"`.
+    expect(resolveChoiceSequence('skill-choice:feat:skilled:0', rows)).toBe(0);
+  });
+
   it('routes class choices to the matching level row', () => {
     expect(resolveChoiceSequence('skill-choice:class:fighter:0', rows)).toBe(1);
   });

@@ -12,6 +12,7 @@ import {
   type ToolProficiencyId,
 } from '@/lib/dnd-helpers';
 import { getChoiceSourceName } from '@/lib/character-builder/choice-source-name';
+import { pickMostRestrictiveChoiceWithRoom } from '@/lib/character-builder/route-choice';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -99,8 +100,11 @@ export function ProficienciesStep() {
 
     // Which choice, if any, currently holds this language
     const choiceHoldingLang = eligibleChoices.find((lc) => getSelectedLanguages(lc.choiceKey).includes(langId));
-    // First eligible choice that still has room — target for a new check
-    const choiceWithRoom = eligibleChoices.find((lc) => getSelectedLanguages(lc.choiceKey).length < lc.count);
+    // Route a new selection to the most restrictive eligible grant with room (smallest pool).
+    const choiceWithRoom = pickMostRestrictiveChoiceWithRoom(
+      eligibleChoices,
+      (lc) => getSelectedLanguages(lc.choiceKey).length
+    );
 
     let checkbox: React.ReactNode = null;
     if (isGranted) {

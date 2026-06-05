@@ -264,16 +264,15 @@ describe('OriginStep', () => {
     expect(screen.queryByText('originFeatTitle')).toBeNull();
   });
 
-  it('renders ChoicePicker for tool-choice when background grants a tool proficiency choice', () => {
+  it('does not render a tool-choice picker (tool picks are owned by the Proficiencies step)', () => {
     mockCharacter = buildSeedCharacter({ background: 'acolyte' });
     mockBundles = [makeAcolyteAsiBundle(), makeAcolyteToolChoiceBundle()];
 
     render(<OriginStep />);
 
-    expect(screen.getByText('toolProficiencyTitle')).toBeTruthy();
-    // ChoicePicker renders checkboxes for each tool
-    const checkboxes = screen.getAllByRole('checkbox');
-    expect(checkboxes.length).toBeGreaterThan(0);
+    // Tool proficiency choices were duplicated on both Origin and Proficiencies; they now live
+    // only in the Proficiencies (Details) step.
+    expect(screen.queryByText('toolProficiencyTitle')).toBeNull();
   });
 
   it('does not render a language-choice picker (language picks are unified in DetailsStep)', () => {
@@ -519,18 +518,21 @@ describe('OriginStep', () => {
 
   it('fires makeChoice with the correct choiceKey and feat-choice decision when a feat radio is changed', () => {
     const featChoiceKey = createChoiceKey('feat-choice', 'species', 'human', 0);
-    mockResolved = {
-      ...makeDefaultResolved(),
-      pendingChoices: [
-        {
-          type: 'feat-choice' as const,
-          choiceKey: featChoiceKey,
-          source: { origin: 'species', id: 'human' } as const,
-          from: ['alert'] as unknown as readonly import('@/lib/dnd-helpers').FeatId[],
-          category: 'origin' as const,
-        },
-      ],
-    };
+    // The picker is now sourced from grant bundles (so it persists after selection), not from
+    // resolved.pendingChoices — provide the species feat-choice grant in the bundles.
+    mockBundles = [
+      {
+        source: { origin: 'species', id: 'human' as const },
+        grants: [
+          {
+            type: 'feat-choice' as const,
+            key: featChoiceKey,
+            from: ['alert'] as unknown as readonly import('@/lib/dnd-helpers').FeatId[],
+            category: 'origin' as const,
+          },
+        ],
+      },
+    ] as readonly GrantBundle[];
 
     render(<OriginStep />);
 

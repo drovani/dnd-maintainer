@@ -73,7 +73,7 @@ function resolveSubclassToClassId(subclassId: string): string {
  * Determine which row sequence a choice key belongs to.
  *
  * Key format: `category:origin:id:index`
- * Keys with `:species:` or `:background:` go to sequence-0.
+ * Keys with `:species:`, `:background:`, or `:feat:` go to sequence-0 (the creation row).
  * Keys with `:class:` go to the matching level row (by class_id embedded in the key).
  * Keys with `:subclass:` resolve the parent class then go to its first active level row.
  * Unknown origins cause `parseChoiceKey` to throw.
@@ -82,7 +82,10 @@ function resolveSubclassToClassId(subclassId: string): string {
 export function resolveChoiceSequence(choiceKey: string, rows: readonly BuildLevelRow[]): number {
   const { origin, id: classId } = parseChoiceKey(choiceKey);
 
-  if (origin === 'species' || origin === 'background') {
+  // Species, background, and feat (origin feat) sub-choices are part of character creation and
+  // are stored in the creation row's choices JSONB. Feat keys carry a feat id (e.g. "skilled"),
+  // not a class id, so they have no level row of their own.
+  if (origin === 'species' || origin === 'background' || origin === 'feat') {
     return 0;
   }
 
@@ -185,7 +188,8 @@ function applyDecisionToRows(rows: BuildLevelRow[], choiceKey: ChoiceKey, decisi
 
   const { origin, id: classId } = parseChoiceKey(choiceKey);
   let targetSeq: number;
-  if (origin === 'species' || origin === 'background') {
+  // Species, background, and feat (origin feat) sub-choices live in the creation row (sequence 0).
+  if (origin === 'species' || origin === 'background' || origin === 'feat') {
     targetSeq = 0;
   } else if (origin === 'subclass') {
     const parentClassId = resolveSubclassToClassId(classId);

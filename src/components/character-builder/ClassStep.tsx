@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { InfoIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
 import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
@@ -87,13 +88,11 @@ export function ClassStep() {
   }, [resolved]);
   const hasLevelOneFeatures = levelOneClassFeatures.length > 0;
 
-  const hasAnyContent =
-    hasFightingStyles ||
-    hasSpellcasting ||
-    hasLevelOneFeatures ||
-    hasSubclassChoices ||
-    hasFeatureChoices ||
-    hasSpellChoices;
+  // Interactive choices the user must act on (excludes display-only content like the
+  // spellcasting summary and granted level-1 features). When none are present we surface a
+  // soft notice so the step doesn't look broken — e.g. a level-1 Barbarian sees Rage and
+  // Unarmored Defense but has no class choices to make here.
+  const hasAnyChoices = hasFightingStyles || hasSubclassChoices || hasFeatureChoices || hasSpellChoices;
 
   return (
     <div className="space-y-6">
@@ -261,8 +260,14 @@ export function ClassStep() {
         </div>
       )}
 
-      {!hasAnyContent && (
-        <p className="text-muted-foreground text-sm">{tc('characterBuilder.classFeatures.noClassChoices')}</p>
+      {resolved && !hasAnyChoices && (
+        <div
+          className="flex items-start gap-2 p-3 rounded-md border border-border bg-muted/30 text-sm text-muted-foreground"
+          role="note"
+        >
+          <InfoIcon aria-hidden className="size-4 mt-0.5 shrink-0" />
+          <span>{tc('characterBuilder.classFeatures.noClassChoices')}</span>
+        </div>
       )}
     </div>
   );
