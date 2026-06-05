@@ -352,6 +352,20 @@ describe('buildFieldValues — features split (2024 sections)', () => {
     expect(checks.inspiration).toBe(true);
   });
 
+  it('folds background-granted features into class features rather than dropping them', () => {
+    // Backgrounds grant features directly (e.g. Acolyte → feat-magic-initiate-cleric, origin
+    // 'background'). These belong to no dedicated 2024 field and are NOT in featSources, so they
+    // must land in the catch-all Class Features block — never silently dropped from the sheet.
+    const resolved = makeResolved({
+      features: [
+        { feature: { id: 'feat-magic-initiate-cleric' }, source: { origin: 'background', id: 'acolyte' } },
+      ] as ResolvedCharacter['features'],
+    });
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.classFeatures).toContain('Magic Initiate');
+    expect(text.classFeatures).not.toContain('feat-magic-initiate-cleric');
+  });
+
   it('omits the exhaustion / mastery extras from class features when inactive', () => {
     const { text } = bfv(makeResolved(), makeCharacter());
     expect(text.classFeatures).not.toContain('Exhaustion');

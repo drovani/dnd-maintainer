@@ -138,21 +138,24 @@ export function computeClassCoverage(): ForkCoverage {
     if (missingAsi.length > 0) problems.push(`missing ASI at level(s) ${missingAsi.join(', ')}`);
 
     // Level 19 is the Epic Boon slot in 2024: accept either an ASI grant or an
-    // Epic Boon feature (id ending `-epic-boon`) / epic-boon feat grant.
+    // Epic Boon feature (id ending `-epic-boon`) / epic-boon feat grant. Most class
+    // tables still model it as a plain ASI; only those carrying an actual epic-boon
+    // grant are reported as "Epic Boon@19" so the matrix doesn't overstate coverage.
     const l19 = src.levels[EPIC_BOON_LEVEL - 1]?.grants ?? [];
-    const hasEpicBoonSlot = l19.some(
+    const hasL19EpicBoon = l19.some(
       (g) =>
-        g.type === 'asi' ||
         (g.type === 'feature' && g.feature.id.endsWith('-epic-boon')) ||
         (g.type === 'feat' && g.featId.endsWith('-epic-boon'))
     );
-    if (!hasEpicBoonSlot) problems.push(`missing ASI or Epic Boon at level ${EPIC_BOON_LEVEL}`);
+    const hasL19Asi = l19.some((g) => g.type === 'asi');
+    if (!hasL19EpicBoon && !hasL19Asi) problems.push(`missing ASI or Epic Boon at level ${EPIC_BOON_LEVEL}`);
+    const l19Label = hasL19EpicBoon ? 'Epic Boon@19' : 'ASI@19';
 
     const status: EntryStatus = problems.length === 0 ? 'complete' : 'partial';
     return {
       id: c.id,
       status,
-      detail: problems.length === 0 ? '20 levels, subclass@3, ASI@4/8/12/16, Epic Boon@19' : problems.join('; '),
+      detail: problems.length === 0 ? `20 levels, subclass@3, ASI@4/8/12/16, ${l19Label}` : problems.join('; '),
       goldenVerified: GOLDEN_VERIFIED.has(c.id),
     };
   });

@@ -27,6 +27,7 @@ import type { ResolvedCharacter, ResolvedFeature } from '@/types/resolved';
 import { parseChoiceKey, type ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import { getItemNameKey } from '@/lib/sources/items';
+import { getSourceDisplayName } from '@/lib/class-icons';
 
 /** Gamedata i18n translator. All user-facing text in the export comes from i18n — ids are never user-facing. */
 export type GamedataT = TFunction<'gamedata'>;
@@ -103,26 +104,6 @@ function featureLine(f: ResolvedFeature, t: GamedataT): string {
   const name = featureLabel(f, t);
   const desc = t(`features.${f.feature.id}.description` as `features.${string}.description`, { defaultValue: '' });
   return desc ? `${name} — ${desc}` : name;
-}
-
-/** i18n display name for a grant source — used to attribute a feat to its granter (e.g. "Soldier"). */
-function sourceLabel(tag: SourceTag, t: GamedataT): string {
-  switch (tag.origin) {
-    case 'species':
-      return t(`species.${tag.id}`, { defaultValue: tag.id });
-    case 'class':
-      return t(`classes.${tag.id}`, { defaultValue: tag.id });
-    case 'subclass':
-      return t(`subclasses.${tag.id}.name`, { defaultValue: tag.id });
-    case 'background':
-      return t(`backgrounds.${tag.id}`, { defaultValue: tag.id });
-    case 'feat':
-      return t(`feats.${tag.id}.name`, { defaultValue: tag.id });
-    case 'loot':
-      return tag.description;
-    default:
-      return tag.id;
-  }
 }
 
 /** What granted a feat, plus the feat's own in-feat choices (e.g. Skilled's chosen skills). */
@@ -298,8 +279,12 @@ export function buildFieldValues(
   // Feats sections, so we split by grant origin rather than lumping them together.
   // Each line carries the feature's i18n description (where one exists), so the sheet
   // shows what a feature does — including reset/usage wording when the text has it.
+  // Species features go to Species Traits and feat-granted features are listed in the
+  // Feats block (from featSources); everything else — class/subclass plus
+  // background/item/loot-granted features (e.g. a background's Magic Initiate) — folds
+  // into Class Features so no resolved feature is silently dropped from the sheet.
   const classFeatureLines: string[] = resolved.features
-    .filter((f) => f.source.origin === 'class' || f.source.origin === 'subclass')
+    .filter((f) => f.source.origin !== 'species' && f.source.origin !== 'feat')
     .map((f) => featureLine(f, t));
   // 2024 concepts with no dedicated field are folded into the class-features block.
   if (character.exhaustion_level > 0) classFeatureLines.push(`Exhaustion: level ${character.exhaustion_level}`);
@@ -325,7 +310,7 @@ export function buildFieldValues(
   text.feats = Array.from(featSources.entries())
     .map(([featId, info]) => {
       const name = t(`feats.${featId}.name` as `feats.${string}.name`, { defaultValue: featId });
-      const granterLabel = sourceLabel(info.source, t);
+      const granterLabel = getSourceDisplayName(info.source, t);
       const head = granterLabel ? `${name} (${granterLabel})` : name;
       const choiceStr = info.decisions.flatMap((d) => formatDecisionValues(d, t)).join(', ');
       const desc = t(`feats.${featId}.description` as `feats.${string}.description`, { defaultValue: '' });

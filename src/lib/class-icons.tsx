@@ -71,7 +71,7 @@ export function getSourceDisplayName(source: SourceTag, tGamedata: TFunction<'ga
     case 'background':
       return tGamedata(`backgrounds.${source.id}`, { defaultValue: source.id });
     case 'feat':
-      return source.id;
+      return tGamedata(`feats.${source.id}.name`, { defaultValue: source.id });
     case 'item':
       return tGamedata(getItemNameKey('gear', source.id), { defaultValue: source.id });
     case 'bundle':
