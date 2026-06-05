@@ -59,7 +59,7 @@ Each entry follows the template:
 **Acceptance criteria:**
 
 - Given I have filled in step 1 (name, species), when I navigate to a different page and return, then my step 1 data is still present
-- Given I have a draft saved, when I land on the builder URL, then the draft is loaded and the wizard starts from where I left off
+- Given I have a draft saved, when I land on the builder URL, then the draft is loaded and the builder starts from where I left off
   **Implementing code:** `src/hooks/useBuilderAutosave.ts`, `src/hooks/useCharacterBuild.ts`
   **Notes:** `useBuilderAutosave` writes to the `characters` table with `build_json` JSONB column. `finalize()` creates the resolved character.
 
