@@ -122,32 +122,33 @@ async function tinyTemplate(fieldNames: { text: string[]; checks: string[] }): P
 
 describe('fillCharacterPdf', () => {
   it('fills matching fields and returns bytes', async () => {
-    const template = await tinyTemplate({ text: ['CharacterName', 'AC'], checks: ['Inspiration'] });
+    // 2024 sheet field names: Text1=Character Name, Text13=Armor Class, Check Box11=Heroic Inspiration.
+    const template = await tinyTemplate({ text: ['Text1', 'Text13'], checks: ['Check Box11'] });
     const { bytes, missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
 
     expect(bytes).toBeInstanceOf(Uint8Array);
     expect(bytes.length).toBeGreaterThan(0);
-    // CharacterName / AC / Inspiration are present, so not reported missing.
-    expect(missingFields).not.toContain('CharacterName');
-    expect(missingFields).not.toContain('AC');
-    expect(missingFields).not.toContain('Inspiration');
+    // Name / AC / Inspiration fields are present, so not reported missing.
+    expect(missingFields).not.toContain('Text1');
+    expect(missingFields).not.toContain('Text13');
+    expect(missingFields).not.toContain('Check Box11');
 
     // The written values round-trip through the saved PDF.
     const reloaded = await PDFDocument.load(bytes);
     const rf = reloaded.getForm();
-    expect(rf.getTextField('CharacterName').getText()).toBe('Boromir');
-    expect(rf.getTextField('AC').getText()).toBe('17');
-    expect(rf.getCheckBox('Inspiration').isChecked()).toBe(true);
+    expect(rf.getTextField('Text1').getText()).toBe('Boromir');
+    expect(rf.getTextField('Text13').getText()).toBe('17');
+    expect(rf.getCheckBox('Check Box11').isChecked()).toBe(true);
   });
 
   it('reports mapped fields the template lacks instead of throwing', async () => {
-    const template = await tinyTemplate({ text: ['CharacterName'], checks: [] });
+    const template = await tinyTemplate({ text: ['Text1'], checks: [] });
     const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
 
-    // e.g. AC / ProfBonus / ST Strength are mapped but absent from this stub template.
+    // e.g. Text13 (AC) / Text19 (ProfBonus) are mapped but absent from this stub template.
     expect(missingFields.length).toBeGreaterThan(0);
-    expect(missingFields).toContain('AC');
-    expect(missingFields).not.toContain('CharacterName');
+    expect(missingFields).toContain('Text13');
+    expect(missingFields).not.toContain('Text1');
   });
 
   it('throws PdfTemplateError when the bytes are not a valid PDF', async () => {
@@ -158,11 +159,11 @@ describe('fillCharacterPdf', () => {
   });
 
   it('reports a present-but-wrong-type field as missing instead of throwing', async () => {
-    // 'AC' is a text-mapped semantic key (armorClass) but here it exists as a CHECKBOX.
-    const template = await tinyTemplate({ text: ['CharacterName'], checks: ['AC'] });
+    // Text13 (armorClass) is a text-mapped key but here it exists as a CHECKBOX.
+    const template = await tinyTemplate({ text: ['Text1'], checks: ['Text13'] });
     const { missingFields } = await fillCharacterPdf(template, minimalResolved(), minimalCharacter());
-    expect(missingFields).toContain('AC');
-    expect(missingFields).not.toContain('CharacterName');
+    expect(missingFields).toContain('Text13');
+    expect(missingFields).not.toContain('Text1');
   });
 });
 
@@ -172,7 +173,7 @@ describe('exportCharacterPdf', () => {
   });
 
   it('fetches the template, fills it, downloads, and returns missing fields', async () => {
-    const template = await tinyTemplate({ text: ['CharacterName', 'AC'], checks: [] });
+    const template = await tinyTemplate({ text: ['Text1', 'Text13'], checks: [] });
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(template as BodyInit, { status: 200, headers: { 'Content-Type': 'application/pdf' } })
     );
@@ -185,8 +186,8 @@ describe('exportCharacterPdf', () => {
     expect(createUrl).toHaveBeenCalledOnce();
     expect(click).toHaveBeenCalledOnce();
     expect(Array.isArray(missingFields)).toBe(true);
-    // ProfBonus/saves etc. are mapped but absent from this 2-field stub → reported.
-    expect(missingFields).toContain('ProfBonus');
+    // Text19 (ProfBonus)/saves etc. are mapped but absent from this 2-field stub → reported.
+    expect(missingFields).toContain('Text19');
   });
 
   it('throws PdfTemplateError on a non-ok response (the default 404 first-run path)', async () => {

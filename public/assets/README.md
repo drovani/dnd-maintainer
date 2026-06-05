@@ -6,8 +6,8 @@ the Coast character sheet is copyrighted and cannot be redistributed here.
 
 ## To enable PDF export
 
-1. Obtain a **form-fillable** D&D character-sheet PDF (e.g. the official WotC fillable
-   sheet, or a community form such as MorePurpleMoreBetter's).
+1. Obtain the **official 2024 WotC form-fillable** character sheet (© 2024 Wizards of the
+   Coast, the one distributed with the 2024 Player's Handbook).
 2. Save it in this folder as:
 
    ```
@@ -18,10 +18,18 @@ the Coast character sheet is copyrighted and cannot be redistributed here.
    pipeline fetches (`src/lib/pdf-export.ts`).
 
 3. The field-name binding in `src/lib/pdf-field-map.ts` (`TEXT_FIELD_NAMES` /
-   `CHECK_FIELD_NAMES`) targets the **2014 WotC fillable form** field names. No stable
-   2024 fillable form with documented field names is publicly distributed, so the 2024
-   concepts that the 2014 sheet has no field for (Heroic Inspiration, Exhaustion level,
-   Weapon Mastery, Origin Feat) are folded into the **Features & Traits** text block.
+   `CHECK_FIELD_NAMES`) targets the **official 2024 WotC sheet**. That sheet ships with
+   auto-generated, semantically-opaque field names (`Text1`, `Check Box37`, …), so the
+   binding values look meaningless on their own — each line carries a `// → label` comment
+   recording which cell it fills. The map covers the page-1 statblock (identity, abilities,
+   saves, skills, combat, attacks, class features / species traits / feats, proficiencies)
+   and the page-2 header (spellcasting stats, appearance, backstory, languages, equipment,
+   alignment). 2024 concepts with no dedicated field (Exhaustion, Weapon Mastery) are folded
+   into the Class Features block.
+
+> The map is keyed to the official 2024 sheet's exact field names. A _different_ fillable
+> form (2014 WotC, MPMB, other community sheets) uses a different naming scheme and will not
+> fill — see the next section.
 
 ## If the exported PDF comes out blank
 

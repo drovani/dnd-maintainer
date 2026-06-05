@@ -8,19 +8,21 @@
  *
  *  2. {@link TEXT_FIELD_NAMES} / {@link CHECK_FIELD_NAMES} — the *binding* layer.
  *     A thin map from those semantic keys to the form-field names of a specific
- *     fillable PDF. The names below target the widely-circulated **2014 WotC
- *     form-fillable character sheet** (the de-facto community standard; no stable
- *     2024 fillable form with documented field names is publicly distributed).
+ *     fillable PDF. The names below target the **official 2024 WotC fillable
+ *     character sheet** (© 2024 Wizards of the Coast). That sheet ships with
+ *     auto-generated, semantically-opaque field names (`Text1`, `Check Box37`,
+ *     `Text105.0`, …), so the binding values look meaningless on their own — the
+ *     `// → label` comment on each line records what cell the field actually is.
  *
- *     ⚠️ These strings are TEMPLATE-DEPENDENT. Different PDFs (official WotC, MPMB,
- *     community forms) use different field-name schemes. If your supplied template
- *     fills blank, run `form.getFields().map(f => f.getName())` on it and adjust
- *     these maps. The fill pipeline ({@link import('./pdf-export').fillCharacterPdf})
+ *     ⚠️ These strings are TEMPLATE-DEPENDENT. A different PDF (2014 WotC, MPMB,
+ *     other community forms) uses a different field-name scheme. If your supplied
+ *     template fills blank, run `form.getFields().map(f => f.getName())` on it and
+ *     adjust these maps. The fill pipeline ({@link import('./pdf-export').fillCharacterPdf})
  *     reports any mapped name absent from the template rather than failing silently.
  */
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
-import type { ResolvedCharacter } from '@/types/resolved';
+import type { ResolvedCharacter, ResolvedFeature } from '@/types/resolved';
 
 export const PDF_ABILITIES: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 
@@ -47,6 +49,9 @@ export const PDF_SKILLS = [
 ] as const;
 
 export type PdfSkillId = (typeof PDF_SKILLS)[number];
+
+/** The 2024 sheet's "Weapons & Damage Cantrips" table has six rows. */
+const PDF_ATTACK_ROWS = 6;
 
 export interface PdfFieldValues {
   /** Text fields keyed by semantic name. */
@@ -88,6 +93,8 @@ function abilityLabel(a: AbilityKey): string {
   }[a];
 }
 
+const featureName = (f: ResolvedFeature): string => f.feature.name ?? titleCase(f.feature.id);
+
 /**
  * Alignment is stored as a short code (`lg`, `ne`, …) rather than an English word,
  * so `titleCase` can't recover the display name — map the closed 9-value set here.
@@ -108,22 +115,25 @@ const ALIGNMENT_NAMES: Readonly<Record<string, string>> = {
 /**
  * Build the semantic field values for a (resolved) character. Pure — no i18n, no
  * DOM, no PDF. Every value here is verifiable against the resolver in tests.
+ *
+ * Shaped for the 2024 WotC sheet: Class / Subclass / Level are distinct fields,
+ * features are split into Class Features / Species Traits / Feats, and personality
+ * + backstory are merged into one block (the sheet has a single combined section).
  */
 export function buildFieldValues(resolved: ResolvedCharacter, character: Character): PdfFieldValues {
   const text: Record<string, string> = {};
   const checks: Record<string, boolean> = {};
 
-  // Identity
+  // Identity — the 2024 sheet has separate Class, Subclass and Level fields and
+  // no Player Name field.
   text.characterName = character.name;
-  text.classLevel = [character.class ? titleCase(character.class) : '', character.level]
-    .filter(Boolean)
-    .join(' ')
-    .trim();
-  if (character.subclass) text.classLevel += ` (${titleCase(character.subclass)})`;
-  text.background = character.background ? titleCase(character.background) : '';
+  if (character.class) text.class = titleCase(character.class);
+  if (character.subclass) text.subclass = titleCase(character.subclass);
+  text.level = String(character.level);
   text.species = character.species ? titleCase(character.species) : '';
+  text.background = character.background ? titleCase(character.background) : '';
   text.alignment = character.alignment ? (ALIGNMENT_NAMES[character.alignment] ?? titleCase(character.alignment)) : '';
-  text.playerName = character.player_name ?? '';
+  if (character.size) text.size = titleCase(character.size);
 
   // Abilities + saving throws
   for (const a of PDF_ABILITIES) {
@@ -149,12 +159,14 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   text.initiative = signed(resolved.initiative);
   text.speed = resolved.speed.walk ? `${resolved.speed.walk.value} ft` : '';
   text.maxHp = String(resolved.hitPoints.max);
+  // No current-HP concept in the build model; a freshly-built character starts at full.
+  text.currentHp = String(resolved.hitPoints.max);
   // Passive perception = 10 + Perception skill bonus.
   const perception = resolved.skills.perception;
   if (perception) text.passivePerception = String(10 + perception.bonus);
 
-  // Attacks (the 2014 form has three weapon rows).
-  resolved.attacks.slice(0, 3).forEach((atk, i) => {
+  // Attacks (the 2024 sheet has six weapon rows).
+  resolved.attacks.slice(0, PDF_ATTACK_ROWS).forEach((atk, i) => {
     const n = i + 1;
     text[`atk${n}Name`] = titleCase(atk.weaponId);
     text[`atk${n}Bonus`] = signed(atk.attackBonus);
@@ -162,127 +174,227 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
     text[`atk${n}Damage`] = `${atk.damageDice}${dmgBonus} ${atk.damageType}`.trim();
   });
 
-  // Features & Traits — the 2014 form has no dedicated fields for several 2024
-  // concepts (Heroic Inspiration, Exhaustion, weapon mastery, Origin Feat), so we
-  // fold them into the features text block.
-  const featureLines: string[] = resolved.features.map((f) => f.feature.name ?? titleCase(f.feature.id));
-  if (character.heroic_inspiration) featureLines.push('Heroic Inspiration: yes');
-  if (character.exhaustion_level > 0) featureLines.push(`Exhaustion: level ${character.exhaustion_level}`);
+  // Features — the 2024 sheet has dedicated Class Features, Species Traits and
+  // Feats sections, so we split by grant origin rather than lumping them together.
+  const classFeatureLines: string[] = resolved.features
+    .filter((f) => f.source.origin === 'class' || f.source.origin === 'subclass')
+    .map(featureName);
+  // 2024 concepts with no dedicated field are folded into the class-features block.
+  if (character.exhaustion_level > 0) classFeatureLines.push(`Exhaustion: level ${character.exhaustion_level}`);
   const masteries = resolved.weaponMasteries.length > 0 ? resolved.weaponMasteries : (character.weapon_masteries ?? []);
   if (masteries.length > 0) {
-    featureLines.push(
+    classFeatureLines.push(
       `Weapon Mastery: ${masteries.map((m) => `${titleCase(m.weaponId)} (${titleCase(m.masteryId)})`).join(', ')}`
     );
   }
-  text.featuresTraits = featureLines.join('\n');
+  text.classFeatures = classFeatureLines.join('\n');
+  text.speciesTraits = resolved.features
+    .filter((f) => f.source.origin === 'species')
+    .map(featureName)
+    .join('\n');
+  text.feats = resolved.features
+    .filter((f) => f.source.origin === 'feat')
+    .map(featureName)
+    .join('\n');
+
+  // Proficiency text blocks (the sheet has free-text Weapons / Tools lines + a
+  // Languages box). Heroic Inspiration also maps to the sheet's checkbox.
+  text.weaponProficienciesText = resolved.weaponProficiencies.map((p) => titleCase(p.value)).join(', ');
+  text.toolProficienciesText = resolved.toolProficiencies.map((p) => titleCase(p.value)).join(', ');
+  text.languages = resolved.languages.map((l) => titleCase(l.value)).join(', ');
+
+  // Armor Training checkboxes. The sheet distinguishes only Light/Medium/Heavy/Shields,
+  // so the "-nonmetal" variants collapse onto their base category.
+  const armorIds = new Set(resolved.armorProficiencies.map((p) => p.value));
+  checks.armorLight = armorIds.has('light');
+  checks.armorMedium = armorIds.has('medium') || armorIds.has('medium-nonmetal');
+  checks.armorHeavy = armorIds.has('heavy');
+  checks.armorShields = armorIds.has('shields') || armorIds.has('shields-nonmetal');
 
   // Equipment
   text.equipment = resolved.equipment
     .map((it) => (it.quantity > 1 ? `${titleCase(it.itemId)} ×${it.quantity}` : titleCase(it.itemId)))
     .join('\n');
 
-  // Personality
-  text.personalityTraits = character.personality_traits ?? '';
-  text.ideals = character.ideals ?? '';
-  text.bonds = character.bonds ?? '';
-  text.flaws = character.flaws ?? '';
-  text.backstory = character.backstory ?? '';
+  // Appearance + the combined Backstory & Personality block.
   text.appearance = character.appearance ?? '';
+  text.backstory = [
+    character.backstory,
+    character.personality_traits ? `Personality Traits: ${character.personality_traits}` : '',
+    character.ideals ? `Ideals: ${character.ideals}` : '',
+    character.bonds ? `Bonds: ${character.bonds}` : '',
+    character.flaws ? `Flaws: ${character.flaws}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 
   // Spellcasting
   const sc = resolved.spellcasting;
   if (sc) {
-    if (sc.ability) text.spellcastingAbility = abilityLabel(sc.ability);
+    if (sc.ability) {
+      text.spellcastingAbility = abilityLabel(sc.ability);
+      text.spellcastingModifier = signed(resolved.abilities[sc.ability].modifier);
+    }
     if (sc.spellSaveDC != null) text.spellSaveDc = String(sc.spellSaveDC);
     if (sc.spellAttackBonus != null) text.spellAttackBonus = signed(sc.spellAttackBonus);
-    if (character.class) text.spellcastingClass = titleCase(character.class);
   }
 
-  // Heroic Inspiration also maps to the 2024 sheet's inspiration checkbox.
+  // Heroic Inspiration → the 2024 sheet's inspiration checkbox.
   checks.inspiration = character.heroic_inspiration;
 
   return { text, checks };
 }
 
-// --- binding layer: semantic key → 2014 WotC fillable-form field name (TEMPLATE-DEPENDENT) ---
+// --- binding layer: semantic key → 2024 WotC field name (TEMPLATE-DEPENDENT) ---
+//
+// The official 2024 sheet uses opaque auto-generated names. Per-ability and per-skill
+// fields don't follow a derivable pattern, so they're enumerated explicitly. Each
+// `// → …` comment names the cell the field occupies on the sheet.
+
+const ABILITY_MOD_FIELD: Readonly<Record<AbilityKey, string>> = {
+  str: 'Text21',
+  dex: 'Text22',
+  con: 'Text24',
+  int: 'Text20',
+  wis: 'Text23',
+  cha: 'Text25',
+};
+const ABILITY_SCORE_FIELD: Readonly<Record<AbilityKey, string>> = {
+  str: 'Text64',
+  dex: 'Text66',
+  con: 'Text67',
+  int: 'Text63',
+  wis: 'Text65',
+  cha: 'Text68',
+};
+const ABILITY_SAVE_FIELD: Readonly<Record<AbilityKey, string>> = {
+  str: 'Text91',
+  dex: 'Text87',
+  con: 'Text86',
+  int: 'Text69',
+  wis: 'Text75',
+  cha: 'Text81',
+};
+const ABILITY_SAVE_PROF_FIELD: Readonly<Record<AbilityKey, string>> = {
+  str: 'Check Box37',
+  dex: 'Check Box33',
+  con: 'Check Box32',
+  int: 'Check Box4',
+  wis: 'Check Box21',
+  cha: 'Check Box26',
+};
+
+const SKILL_FIELD: Readonly<Record<PdfSkillId, string>> = {
+  acrobatics: 'Text88',
+  animalhandling: 'Text76',
+  arcana: 'Text70',
+  athletics: 'Text92',
+  deception: 'Text82',
+  history: 'Text71',
+  insight: 'Text77',
+  intimidation: 'Text83',
+  investigation: 'Text72',
+  medicine: 'Text78',
+  nature: 'Text73',
+  perception: 'Text79',
+  performance: 'Text84',
+  persuasion: 'Text85',
+  religion: 'Text74',
+  sleightofhand: 'Text89',
+  stealth: 'Text90',
+  survival: 'Text80',
+};
+const SKILL_PROF_FIELD: Readonly<Record<PdfSkillId, string>> = {
+  acrobatics: 'Check Box34',
+  animalhandling: 'Check Box22',
+  arcana: 'Check Box16',
+  athletics: 'Check Box38',
+  deception: 'Check Box27',
+  history: 'Check Box17',
+  insight: 'Check Box23',
+  intimidation: 'Check Box28',
+  investigation: 'Check Box19',
+  medicine: 'Check Box25',
+  nature: 'Check Box20',
+  perception: 'Check Box31',
+  performance: 'Check Box30',
+  persuasion: 'Check Box29',
+  religion: 'Check Box18',
+  sleightofhand: 'Check Box35',
+  stealth: 'Check Box36',
+  survival: 'Check Box24',
+};
+
+// Weapons & Damage Cantrips table — six rows of [Name, Atk/DC, Damage&Type].
+const ATTACK_NAME_FIELDS = ['Text30', 'Text34', 'Text38', 'Text42', 'Text46', 'Text50'] as const;
+const ATTACK_BONUS_FIELDS = ['Text31', 'Text35', 'Text39', 'Text43', 'Text47', 'Text51'] as const;
+const ATTACK_DAMAGE_FIELDS = ['Text32', 'Text36', 'Text40', 'Text44', 'Text48', 'Text52'] as const;
 
 /**
- * Maps semantic text keys to 2014 WotC form field names. Adjust to your template
+ * Maps semantic text keys to 2024 WotC form field names. Adjust to your template
  * (see module header). Keys absent here are simply not written.
  */
 export const TEXT_FIELD_NAMES: Readonly<Record<string, string>> = {
-  characterName: 'CharacterName',
-  classLevel: 'ClassLevel',
-  background: 'Background',
-  species: 'Race ',
-  alignment: 'Alignment',
-  playerName: 'PlayerName',
+  characterName: 'Text1', // → Character Name
+  background: 'Text6', // → Background
+  class: 'Text7', // → Class
+  species: 'Text8', // → Species
+  subclass: 'Text9', // → Subclass
+  level: 'Text11', // → Level
+  alignment: 'Text100', // → Alignment (page 2)
+  size: 'Text28', // → Size
 
   ...Object.fromEntries(
     PDF_ABILITIES.flatMap((a) => [
-      [scoreKey(a), a.toUpperCase()],
-      [modKey(a), `${a.toUpperCase()}mod`],
+      [scoreKey(a), ABILITY_SCORE_FIELD[a]],
+      [modKey(a), ABILITY_MOD_FIELD[a]],
+      [saveKey(a), ABILITY_SAVE_FIELD[a]],
     ])
   ),
-  ...Object.fromEntries(PDF_ABILITIES.map((a) => [saveKey(a), `ST ${abilityLabel(a)}`])),
+  ...Object.fromEntries(PDF_SKILLS.map((s) => [skillKey(s), SKILL_FIELD[s]])),
 
-  acrobatics: 'Acrobatics',
-  animalhandling: 'Animal',
-  arcana: 'Arcana',
-  athletics: 'Athletics',
-  deception: 'Deception ',
-  history: 'History ',
-  insight: 'Insight',
-  intimidation: 'Intimidation',
-  investigation: 'Investigation ',
-  medicine: 'Medicine',
-  nature: 'Nature',
-  perception: 'Perception ',
-  performance: 'Performance',
-  persuasion: 'Persuasion',
-  religion: 'Religion',
-  sleightofhand: 'SleightofHand',
-  stealth: 'Stealth ',
-  survival: 'Survival',
+  profBonus: 'Text19', // → Proficiency Bonus
+  armorClass: 'Text13', // → Armor Class
+  initiative: 'Text26', // → Initiative
+  speed: 'Text27', // → Speed
+  maxHp: 'Text16', // → Hit Points Max
+  currentHp: 'Text14', // → Hit Points Current
+  passivePerception: 'Text29', // → Passive Perception
 
-  profBonus: 'ProfBonus',
-  armorClass: 'AC',
-  initiative: 'Initiative',
-  speed: 'Speed',
-  maxHp: 'HPMax',
-  passivePerception: 'Passive',
+  ...Object.fromEntries(
+    Array.from({ length: PDF_ATTACK_ROWS }, (_unused, i) => [
+      [`atk${i + 1}Name`, ATTACK_NAME_FIELDS[i]],
+      [`atk${i + 1}Bonus`, ATTACK_BONUS_FIELDS[i]],
+      [`atk${i + 1}Damage`, ATTACK_DAMAGE_FIELDS[i]],
+    ]).flat()
+  ),
 
-  atk1Name: 'Wpn Name',
-  atk1Bonus: 'Wpn1 AtkBonus',
-  atk1Damage: 'Wpn1 Damage',
-  atk2Name: 'Wpn Name 2',
-  atk2Bonus: 'Wpn2 AtkBonus ',
-  atk2Damage: 'Wpn2 Damage ',
-  atk3Name: 'Wpn Name 3',
-  atk3Bonus: 'Wpn3 AtkBonus  ',
-  atk3Damage: 'Wpn3 Damage ',
+  classFeatures: 'Text54', // → Class Features
+  speciesTraits: 'Text57', // → Species Traits
+  feats: 'Text58', // → Feats
+  weaponProficienciesText: 'Text59', // → Equipment Training & Proficiencies: Weapons
+  toolProficienciesText: 'Text60', // → Equipment Training & Proficiencies: Tools
+  languages: 'Text98', // → Languages (page 2)
+  equipment: 'Text99', // → Equipment (page 2)
+  appearance: 'Text96', // → Appearance (page 2)
+  backstory: 'Text97', // → Backstory & Personality (page 2)
 
-  featuresTraits: 'Features and Traits',
-  equipment: 'Equipment',
-  personalityTraits: 'PersonalityTraits ',
-  ideals: 'Ideals',
-  bonds: 'Bonds',
-  flaws: 'Flaws',
-  backstory: 'Backstory',
-  appearance: 'CharacterAppearance',
-  spellcastingAbility: 'Spellcasting Ability 2',
-  spellSaveDc: 'SpellSaveDC  2',
-  spellAttackBonus: 'SpellAtkBonus 2',
-  spellcastingClass: 'Spellcasting Class 2',
+  spellcastingAbility: 'Text111', // → Spellcasting Ability (page 2)
+  spellcastingModifier: 'Text93', // → Spellcasting Modifier (page 2)
+  spellSaveDc: 'Text94', // → Spell Save DC (page 2)
+  spellAttackBonus: 'Text95', // → Spell Attack Bonus (page 2)
 };
 
 /**
- * Maps semantic checkbox keys to 2014 WotC form checkbox field names. The classic
- * form names proficiency checkboxes as opaque "Check Box NN" — adjust to your
- * template. Keys absent here are not written.
+ * Maps semantic checkbox keys to 2024 WotC form checkbox field names. Adjust to
+ * your template (see module header). Keys absent here are not written.
  */
 export const CHECK_FIELD_NAMES: Readonly<Record<string, string>> = {
-  ...Object.fromEntries(PDF_ABILITIES.map((a, i) => [saveProfKey(a), `Check Box ${11 + i}`])),
-  ...Object.fromEntries(PDF_SKILLS.map((s, i) => [skillProfKey(s), `Check Box ${23 + i}`])),
-  inspiration: 'Inspiration',
+  ...Object.fromEntries(PDF_ABILITIES.map((a) => [saveProfKey(a), ABILITY_SAVE_PROF_FIELD[a]])),
+  ...Object.fromEntries(PDF_SKILLS.map((s) => [skillProfKey(s), SKILL_PROF_FIELD[s]])),
+  inspiration: 'Check Box11', // → Heroic Inspiration
+  armorLight: 'Check Box13', // → Armor Training: Light
+  armorMedium: 'Check Box14', // → Armor Training: Medium
+  armorHeavy: 'Check Box15', // → Armor Training: Heavy
+  armorShields: 'Check Box12', // → Armor Training: Shields
 };
