@@ -133,7 +133,8 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   text.species = character.species ? titleCase(character.species) : '';
   text.background = character.background ? titleCase(character.background) : '';
   text.alignment = character.alignment ? (ALIGNMENT_NAMES[character.alignment] ?? titleCase(character.alignment)) : '';
-  if (character.size) text.size = titleCase(character.size);
+  // The 2024 sheet's Size box wants a single-letter abbreviation (S / M / L / …).
+  if (character.size) text.size = character.size.charAt(0).toUpperCase();
 
   // Abilities + saving throws
   for (const a of PDF_ABILITIES) {
@@ -161,6 +162,11 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   text.maxHp = String(resolved.hitPoints.max);
   // No current-HP concept in the build model; a freshly-built character starts at full.
   text.currentHp = String(resolved.hitPoints.max);
+  // Hit Dice maximum is fixed by level (one die per class level): "5d10", or
+  // "3d10 + 2d6" when multiclassed. Spent hit dice aren't tracked in the build model.
+  if (resolved.hitDie.length > 0) {
+    text.hitDiceMax = resolved.hitDie.map((hd) => `${hd.count}d${hd.die}`).join(' + ');
+  }
   // Passive perception = 10 + Perception skill bonus.
   const perception = resolved.skills.perception;
   if (perception) text.passivePerception = String(10 + perception.bonus);
@@ -359,6 +365,7 @@ export const TEXT_FIELD_NAMES: Readonly<Record<string, string>> = {
   speed: 'Text27', // → Speed
   maxHp: 'Text16', // → Hit Points Max
   currentHp: 'Text14', // → Hit Points Current
+  hitDiceMax: 'Text17', // → Hit Dice Max
   passivePerception: 'Text29', // → Passive Perception
 
   ...Object.fromEntries(

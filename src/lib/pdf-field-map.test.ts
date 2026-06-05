@@ -165,7 +165,7 @@ describe('buildFieldValues — identity', () => {
     expect(text.species).toBe('Human');
     expect(text.background).toBe('Soldier');
     expect(text.alignment).toBe('Lawful Good');
-    expect(text.size).toBe('Medium');
+    expect(text.size).toBe('M'); // single-letter abbreviation on the 2024 sheet
     // No subclass on the base fixture, and the 2024 sheet has no player-name field.
     expect(text.subclass).toBeUndefined();
     expect(text.playerName).toBeUndefined();
@@ -233,8 +233,14 @@ describe('buildFieldValues — combat', () => {
     expect(text.speed).toBe('30 ft');
     expect(text.maxHp).toBe('44');
     expect(text.currentHp).toBe('44'); // freshly-built character starts at full
+    expect(text.hitDiceMax).toBe('5d10'); // fixture: 5× d10
     expect(text.profBonus).toBe('+3');
     expect(text.passivePerception).toBe('14'); // 10 + 4
+  });
+
+  it('omits hit-dice max when the build has no hit dice', () => {
+    const { text } = buildFieldValues(makeResolved({ hitDie: [] }), makeCharacter());
+    expect(text.hitDiceMax).toBeUndefined();
   });
 });
 
