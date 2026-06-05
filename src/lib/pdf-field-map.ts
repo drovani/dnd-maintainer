@@ -24,7 +24,7 @@ import type { TFunction } from 'i18next';
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
 import type { ResolvedCharacter, ResolvedFeature } from '@/types/resolved';
-import type { ChoiceDecision } from '@/types/choices';
+import { parseChoiceKey, type ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import { getItemNameKey } from '@/lib/sources/items';
 
@@ -98,6 +98,13 @@ function featureLabel(f: ResolvedFeature, t: GamedataT): string {
   return t(`features.${f.feature.id}.name` as `features.${string}.name`, { defaultValue: f.feature.id });
 }
 
+/** "Name — description" line for a feature, with the i18n description appended when present. */
+function featureLine(f: ResolvedFeature, t: GamedataT): string {
+  const name = featureLabel(f, t);
+  const desc = t(`features.${f.feature.id}.description` as `features.${string}.description`, { defaultValue: '' });
+  return desc ? `${name} — ${desc}` : name;
+}
+
 /** i18n display name for a grant source — used to attribute a feat to its granter (e.g. "Soldier"). */
 function sourceLabel(tag: SourceTag, t: GamedataT): string {
   switch (tag.origin) {
@@ -118,31 +125,83 @@ function sourceLabel(tag: SourceTag, t: GamedataT): string {
   }
 }
 
+/** What granted a feat, plus the feat's own in-feat choices (e.g. Skilled's chosen skills). */
+export interface FeatGrantInfo {
+  /** The source that granted the feat (background origin feat, species feat-choice, class/subclass ASI). */
+  readonly source: SourceTag;
+  /** Decisions made for the feat's own choices (keyed `…:feat:<featId>:…` in the build). */
+  readonly decisions: readonly ChoiceDecision[];
+}
+
 /**
- * Map each feat the character has to the source that granted it (background origin
- * feat, a species feat-choice like Human's Versatile, or a class/subclass ASI feat).
- * Scans the grant bundles: a `feat` grant's granter is its bundle's source; a resolved
- * `feat-choice` decision's granter is the bundle that offered the choice. Drives the
- * "Savage Attacker (Soldier)" rendering. First writer wins (a feat is granted once).
+ * Map each feat the character has to {@link FeatGrantInfo}. The granter comes from the
+ * grant bundles: a `feat` grant's granter is its bundle's source; a resolved `feat-choice`
+ * decision's granter is the bundle that offered the choice. The feat's own choices (a
+ * feat-origin choice key, e.g. Skilled's `skill-choice:feat:skilled:0`) are gathered from
+ * `choices`. Drives the "Skilled (Human): Nature" rendering. First writer wins.
  */
 export function collectFeatSources(
   bundles: readonly GrantBundle[],
   choices: Readonly<Record<string, ChoiceDecision>>
-): ReadonlyMap<string, SourceTag> {
-  const map = new Map<string, SourceTag>();
+): ReadonlyMap<string, FeatGrantInfo> {
+  const sources = new Map<string, SourceTag>();
   for (const bundle of bundles) {
     for (const grant of bundle.grants) {
       if (grant.type === 'feat') {
-        if (!map.has(grant.featId)) map.set(grant.featId, bundle.source);
+        if (!sources.has(grant.featId)) sources.set(grant.featId, bundle.source);
       } else if (grant.type === 'feat-choice') {
         const decision = choices[grant.key];
-        if (decision?.type === 'feat-choice' && !map.has(decision.featId)) {
-          map.set(decision.featId, bundle.source);
+        if (decision?.type === 'feat-choice' && !sources.has(decision.featId)) {
+          sources.set(decision.featId, bundle.source);
         }
       }
     }
   }
-  return map;
+
+  // Gather each feat's own choice decisions (feat-origin choice keys) for granted feats.
+  const decisions = new Map<string, ChoiceDecision[]>();
+  for (const [key, decision] of Object.entries(choices)) {
+    let parsed: ReturnType<typeof parseChoiceKey>;
+    try {
+      parsed = parseChoiceKey(key);
+    } catch {
+      continue;
+    }
+    if (parsed.origin !== 'feat' || !sources.has(parsed.id)) continue;
+    const list = decisions.get(parsed.id) ?? [];
+    list.push(decision);
+    decisions.set(parsed.id, list);
+  }
+
+  const result = new Map<string, FeatGrantInfo>();
+  for (const [featId, source] of sources) {
+    result.set(featId, { source, decisions: decisions.get(featId) ?? [] });
+  }
+  return result;
+}
+
+/** Format a choice decision's chosen values as localized display strings (for feat choice summaries). */
+function formatDecisionValues(d: ChoiceDecision, t: GamedataT): readonly string[] {
+  switch (d.type) {
+    case 'skill-choice':
+      return d.skills.map((s) => t(`skills.${s}` as `skills.${string}`, { defaultValue: s }));
+    case 'tool-choice':
+      return d.tools.map((x) => t(`tools.${x}` as `tools.${string}`, { defaultValue: x }));
+    case 'language-choice':
+      return d.languages.map((x) => t(`languages.${x}` as `languages.${string}`, { defaultValue: x }));
+    case 'spell-choice':
+      return d.spellIds.map((x) => t(`spells.${x}.name` as `spells.${string}.name`, { defaultValue: x }));
+    case 'ability-choice':
+      return d.abilities.map((a) => t(`abilities.${a}`, { defaultValue: a }));
+    case 'damage-choice':
+      return d.damageTypes.map((x) => t(`damageTypes.${x}` as `damageTypes.${string}`, { defaultValue: x }));
+    case 'feature-choice':
+      return [t(`features.${d.optionId}.name` as `features.${string}.name`, { defaultValue: d.optionId })];
+    case 'feat-choice':
+      return [t(`feats.${d.featId}.name` as `feats.${string}.name`, { defaultValue: d.featId })];
+    default:
+      return [];
+  }
 }
 
 /**
@@ -158,7 +217,7 @@ export function buildFieldValues(
   resolved: ResolvedCharacter,
   character: Character,
   t: GamedataT,
-  featSources: ReadonlyMap<string, SourceTag>
+  featSources: ReadonlyMap<string, FeatGrantInfo>
 ): PdfFieldValues {
   const text: Record<string, string> = {};
   const checks: Record<string, boolean> = {};
@@ -237,9 +296,11 @@ export function buildFieldValues(
 
   // Features — the 2024 sheet has dedicated Class Features, Species Traits and
   // Feats sections, so we split by grant origin rather than lumping them together.
+  // Each line carries the feature's i18n description (where one exists), so the sheet
+  // shows what a feature does — including reset/usage wording when the text has it.
   const classFeatureLines: string[] = resolved.features
     .filter((f) => f.source.origin === 'class' || f.source.origin === 'subclass')
-    .map((f) => featureLabel(f, t));
+    .map((f) => featureLine(f, t));
   // 2024 concepts with no dedicated field are folded into the class-features block.
   if (character.exhaustion_level > 0) classFeatureLines.push(`Exhaustion: level ${character.exhaustion_level}`);
   const masteries = resolved.weaponMasteries.length > 0 ? resolved.weaponMasteries : (character.weapon_masteries ?? []);
@@ -256,15 +317,19 @@ export function buildFieldValues(
   text.classFeatures = classFeatureLines.join('\n');
   text.speciesTraits = resolved.features
     .filter((f) => f.source.origin === 'species')
-    .map((f) => featureLabel(f, t))
+    .map((f) => featureLine(f, t))
     .join('\n');
   // Feats: listed from the granted-feat map (not resolved.features, since some feats
-  // grant no feature) as "Name (Source)", e.g. "Savage Attacker (Soldier)".
+  // grant no feature). Format: "Name (Source): chosen options — description", e.g.
+  // "Skilled (Human): Nature, Athletics — Gain proficiency in any combination of …".
   text.feats = Array.from(featSources.entries())
-    .map(([featId, granter]) => {
+    .map(([featId, info]) => {
       const name = t(`feats.${featId}.name` as `feats.${string}.name`, { defaultValue: featId });
-      const granterLabel = sourceLabel(granter, t);
-      return granterLabel ? `${name} (${granterLabel})` : name;
+      const granterLabel = sourceLabel(info.source, t);
+      const head = granterLabel ? `${name} (${granterLabel})` : name;
+      const choiceStr = info.decisions.flatMap((d) => formatDecisionValues(d, t)).join(', ');
+      const desc = t(`feats.${featId}.description` as `feats.${string}.description`, { defaultValue: '' });
+      return `${head}${choiceStr ? `: ${choiceStr}` : ''}${desc ? ` — ${desc}` : ''}`;
     })
     .join('\n');
 

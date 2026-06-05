@@ -6,24 +6,24 @@ import {
   signed,
   PDF_SKILLS,
   PDF_ABILITIES,
+  type FeatGrantInfo,
 } from '@/lib/pdf-field-map';
 import { requireItemDef } from '@/lib/sources/items';
 import i18n from '@/lib/i18n';
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
 import type { ResolvedAbility, ResolvedCharacter, ResolvedEquipmentItem, ResolvedSkill } from '@/types/resolved';
-import type { SourceTag } from '@/types/sources';
 
 // Real bundled gamedata translator — the export uses i18n for all user-facing text,
 // so tests assert against the actual translations (which also verifies the keys exist).
 const tg = i18n.getFixedT('en', 'gamedata');
-const NO_FEATS: ReadonlyMap<string, SourceTag> = new Map();
+const NO_FEATS: ReadonlyMap<string, FeatGrantInfo> = new Map();
 
 /** buildFieldValues bound to the real gamedata translator; featSources defaults to none. */
 function bfv(
   resolved: ResolvedCharacter,
   character: Character,
-  featSources: ReadonlyMap<string, SourceTag> = NO_FEATS
+  featSources: ReadonlyMap<string, FeatGrantInfo> = NO_FEATS
 ) {
   return buildFieldValues(resolved, character, tg, featSources);
 }
@@ -358,34 +358,58 @@ describe('buildFieldValues — features split (2024 sections)', () => {
     expect(text.classFeatures).not.toContain('Weapon Mastery');
   });
 
-  it('lists feats as "Name (Source)" from the granted-feat map', () => {
-    const featSources = new Map<string, SourceTag>([
-      ['savage-attacker', { origin: 'background', id: 'soldier' }],
-      ['tough', { origin: 'species', id: 'human' }],
+  it('lists feats as "Name (Source)" with the feat description appended', () => {
+    const featSources = new Map<string, FeatGrantInfo>([
+      ['savage-attacker', { source: { origin: 'background', id: 'soldier' }, decisions: [] }],
+      ['tough', { source: { origin: 'species', id: 'human' }, decisions: [] }],
     ]);
     const { text } = bfv(makeResolved(), makeCharacter(), featSources);
     expect(text.feats).toContain('Savage Attacker (Soldier)');
     expect(text.feats).toContain('Tough (Human)');
+    // Feat descriptions are appended after an em dash.
+    expect(text.feats).toContain('Savage Attacker (Soldier) — Once per turn');
+  });
+
+  it('lists a feat\'s chosen options, e.g. "Skilled (Human): Nature, Athletics"', () => {
+    const featSources = new Map<string, FeatGrantInfo>([
+      [
+        'skilled',
+        {
+          source: { origin: 'species', id: 'human' },
+          decisions: [{ type: 'skill-choice', skills: ['nature', 'athletics'] }],
+        },
+      ],
+    ]);
+    const { text } = bfv(makeResolved(), makeCharacter(), featSources);
+    expect(text.feats).toContain('Skilled (Human): Nature, Athletics');
+    expect(text.feats).toContain('Gain proficiency'); // description still appended
   });
 });
 
 describe('collectFeatSources', () => {
-  it('attributes a background origin feat and a species feat-choice to their granters', () => {
+  it("attributes feats to their granters and gathers a feat's own choices", () => {
     const featChoiceKey = 'feat-choice:species:human:0';
+    const skilledChoiceKey = 'skill-choice:feat:skilled:0';
     const bundles = [
+      // Soldier grants Savage Attacker directly.
       { source: { origin: 'background', id: 'soldier' }, grants: [{ type: 'feat', featId: 'savage-attacker' }] },
+      // Human's Versatile feat-choice (resolved below to Skilled).
       {
         source: { origin: 'species', id: 'human' },
         grants: [{ type: 'feat-choice', key: featChoiceKey, from: null, category: 'origin' }],
       },
     ] as unknown as Parameters<typeof collectFeatSources>[0];
-    const choices = { [featChoiceKey]: { type: 'feat-choice', featId: 'tough' } } as unknown as Parameters<
-      typeof collectFeatSources
-    >[1];
+    const choices = {
+      [featChoiceKey]: { type: 'feat-choice', featId: 'skilled' },
+      [skilledChoiceKey]: { type: 'skill-choice', skills: ['nature', 'athletics'] },
+    } as unknown as Parameters<typeof collectFeatSources>[1];
 
     const map = collectFeatSources(bundles, choices);
-    expect(map.get('savage-attacker')).toEqual({ origin: 'background', id: 'soldier' });
-    expect(map.get('tough')).toEqual({ origin: 'species', id: 'human' });
+    // Savage Attacker came from the background.
+    expect(map.get('savage-attacker')?.source).toEqual({ origin: 'background', id: 'soldier' });
+    // Skilled came from the species feat-choice, and its own skill-choice was gathered.
+    expect(map.get('skilled')?.source).toEqual({ origin: 'species', id: 'human' });
+    expect(map.get('skilled')?.decisions).toContainEqual({ type: 'skill-choice', skills: ['nature', 'athletics'] });
   });
 });
 

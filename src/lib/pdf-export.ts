@@ -11,12 +11,12 @@
 import { PDFDocument } from 'pdf-lib';
 import type { Character } from '@/types/database';
 import type { ResolvedCharacter } from '@/types/resolved';
-import type { SourceTag } from '@/types/sources';
 import {
   buildFieldValues,
   characterDisplayName,
   CHECK_FIELD_NAMES,
   TEXT_FIELD_NAMES,
+  type FeatGrantInfo,
   type GamedataT,
 } from '@/lib/pdf-field-map';
 
@@ -45,7 +45,7 @@ export async function fillCharacterPdf(
   resolved: ResolvedCharacter,
   character: Character,
   t: GamedataT,
-  featSources: ReadonlyMap<string, SourceTag>
+  featSources: ReadonlyMap<string, FeatGrantInfo>
 ): Promise<FillResult> {
   let pdfDoc: PDFDocument;
   try {
@@ -124,7 +124,7 @@ export async function exportCharacterPdf(
   resolved: ResolvedCharacter,
   character: Character,
   t: GamedataT,
-  featSources: ReadonlyMap<string, SourceTag>,
+  featSources: ReadonlyMap<string, FeatGrantInfo>,
   opts: ExportOptions = {}
 ): Promise<{ missingFields: readonly string[] }> {
   const templateUrl = opts.templateUrl ?? DEFAULT_TEMPLATE_URL;
