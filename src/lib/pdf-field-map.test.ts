@@ -159,7 +159,8 @@ describe('signed', () => {
 describe('buildFieldValues — identity', () => {
   it('maps name, separate class/level, species, background, alignment, size (2024 sheet)', () => {
     const { text } = buildFieldValues(makeResolved(), makeCharacter({ size: 'medium' }));
-    expect(text.characterName).toBe('Aragorn');
+    // PC with a player → "Character (Player)" since the 2024 sheet has no player-name field.
+    expect(text.characterName).toBe('Aragorn (Viggo)');
     expect(text.class).toBe('Fighter');
     expect(text.level).toBe('5');
     expect(text.species).toBe('Human');
@@ -174,6 +175,13 @@ describe('buildFieldValues — identity', () => {
   it('emits the subclass in its own field when present', () => {
     const { text } = buildFieldValues(makeResolved(), makeCharacter({ subclass: 'champion' }));
     expect(text.subclass).toBe('Champion');
+  });
+
+  it('shows just the name for an NPC, or a PC with no player', () => {
+    const npc = buildFieldValues(makeResolved(), makeCharacter({ character_type: 'npc', player_name: 'Ignored' }));
+    expect(npc.text.characterName).toBe('Aragorn');
+    const pcNoPlayer = buildFieldValues(makeResolved(), makeCharacter({ player_name: null }));
+    expect(pcNoPlayer.text.characterName).toBe('Aragorn');
   });
 });
 

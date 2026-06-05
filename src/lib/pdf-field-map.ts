@@ -124,9 +124,13 @@ export function buildFieldValues(resolved: ResolvedCharacter, character: Charact
   const text: Record<string, string> = {};
   const checks: Record<string, boolean> = {};
 
-  // Identity — the 2024 sheet has separate Class, Subclass and Level fields and
-  // no Player Name field.
-  text.characterName = character.name;
+  // Identity — the 2024 sheet has separate Class, Subclass and Level fields but no
+  // dedicated Player Name field, so a PC folds its player into the name as
+  // "Character (Player)". NPCs (and PCs without a player) show just the name.
+  text.characterName =
+    character.character_type === 'pc' && character.player_name
+      ? `${character.name} (${character.player_name})`
+      : character.name;
   if (character.class) text.class = titleCase(character.class);
   if (character.subclass) text.subclass = titleCase(character.subclass);
   text.level = String(character.level);
