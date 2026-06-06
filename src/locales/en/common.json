@@ -153,13 +153,15 @@
       "title": "Choices Required",
       "skillChoice": "Choose {{count}} skill(s)",
       "languageChoice": "Choose {{count}} language(s)",
-      "toolChoice": "Choose {{count}} tool(s)",
+      "toolChoice": "Choose {{count}} tool",
+      "toolChoice_plural": "Choose {{count}} tools",
       "expertiseChoice": "Choose {{count}} expertise",
       "fightingStyleChoice": "Choose {{count}} fighting style(s)",
       "spellChoice": "Choose {{count}} cantrip(s)",
       "spellChoiceLeveled": "Choose {{count}} level-{{level}} spell(s)",
       "spellChoiceEmpty": "No spells available for this list and level.",
       "weaponMasteryChoice": "Choose {{count}} weapon mastery",
+      "weaponMasteryChoice_plural": "Choose {{count}} weapon masteries",
       "damageChoice": "Choose {{count}} damage type(s)",
       "lineageChoice": "Choose your lineage",
       "featChoice": "Choose an origin feat",
@@ -260,7 +262,9 @@
       "backgroundAsiRemaining": "({{count}} point remaining)",
       "backgroundAsiRemaining_plural": "({{count}} points remaining)",
       "backgroundAsiLabel": "Background ASI",
-      "backgroundAsiHelp": "Distribute 3 points across your eligible abilities (maximum +2 per ability)."
+      "backgroundAsiHelp": "Distribute 3 points across your eligible abilities (maximum +2 per ability).",
+      "totalLabel": "Total",
+      "modLabel": "Mod"
     },
     "skills": {
       "selectClassFirst": "Please select a class in the Basics step before choosing skills.",

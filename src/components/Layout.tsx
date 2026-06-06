@@ -13,7 +13,10 @@ export function Layout() {
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // On mobile, isCollapsed=false means the nav drawer is open and overlays the page. Start
+  // collapsed (closed) at mobile widths so the builder isn't covered on load (#243.2); desktop
+  // keeps the sidebar expanded. The resize handler below re-expands when crossing to desktop.
+  const [isCollapsed, setIsCollapsed] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [pageTitle, setPageTitleState] = useState<string>('');
 
   // Stable setter — pages call this via outlet context inside useEffect

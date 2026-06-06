@@ -349,7 +349,11 @@ function CharacterBuilderInner() {
                   >
                     {index + 1}
                   </button>
-                  <span className="text-xs text-muted-foreground mt-2">{t(`characterBuilder.steps.${step.id}`)}</span>
+                  {/* Labels are hidden on the narrowest viewports so all 7 steps fit (#243.1);
+                      the numbered circles + the step content heading convey position there. */}
+                  <span className="hidden text-xs text-muted-foreground mt-2 sm:block">
+                    {t(`characterBuilder.steps.${step.id}`)}
+                  </span>
                 </div>
                 {index < STEPS.length - 1 && (
                   <div

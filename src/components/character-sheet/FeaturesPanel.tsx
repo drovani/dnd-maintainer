@@ -35,7 +35,11 @@ export function FeaturesPanel({ features }: { features: ResolvedCharacter['featu
                             ? t(`backgrounds.${resolvedFeature.source.id}`)
                             : resolvedFeature.source.origin === 'loot'
                               ? resolvedFeature.source.description
-                              : resolvedFeature.source.id,
+                              : resolvedFeature.source.origin === 'feat'
+                                ? t(`feats.${resolvedFeature.source.id}.name`, {
+                                    defaultValue: resolvedFeature.source.id,
+                                  })
+                                : resolvedFeature.source.id,
                 })}
               </div>
             )}

@@ -298,11 +298,21 @@ export function AbilitiesStep() {
                   +{bgBonus} {tc('characterBuilder.abilities.backgroundBonusSuffix')}
                 </Badge>
               )}
-              <span className="text-sm font-bold">{totalScore}</span>
-              <span className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {modifier >= 0 ? '+' : ''}
-                {modifier}
-              </span>
+              <div className="flex flex-col items-center leading-none">
+                <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
+                  {tc('characterBuilder.abilities.totalLabel')}
+                </span>
+                <span className="text-sm font-bold">{totalScore}</span>
+              </div>
+              <div className="flex flex-col items-center leading-none">
+                <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
+                  {tc('characterBuilder.abilities.modLabel')}
+                </span>
+                <span className={`text-lg font-bold ${modifier >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {modifier >= 0 ? '+' : ''}
+                  {modifier}
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>
