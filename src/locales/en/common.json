@@ -263,7 +263,8 @@
       "chooseSkills_plural": "Choose {{count}} skills from your class list.",
       "selected": "{{count}} / {{max}} selected",
       "expertiseEmptyPool": "Pick your skill proficiencies first — expertise requires an already-proficient skill.",
-      "expertiseAlreadyChosen": "already has expertise"
+      "expertiseAlreadyChosen": "already has expertise",
+      "alreadyProficient": "Already proficient"
     },
     "proficiencies": {
       "selectClassFirst": "Please select a class in the Basics step before viewing proficiencies.",

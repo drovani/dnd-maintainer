@@ -323,6 +323,27 @@ describe('SkillsStep skill-choice multi-source routing', () => {
     expect(within(row).getAllByLabelText('barbarian')).toHaveLength(1);
   });
 
+  it('excludes a background-granted skill from choice pools (no wasted pick, #238)', () => {
+    // Soldier grants Athletics as a FIXED proficiency; Barbarian's pool also lists Athletics.
+    mockContextValue.bundles = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'proficiency', category: 'skill', id: 'athletics' }],
+      },
+      ...elfBarbarianSkillBundles(),
+    ];
+    mockContextValue.resolved = {
+      skills: skillsWithProficient(['athletics']),
+    } as Partial<ResolvedCharacter>;
+    render(<SkillsStep />);
+    // Athletics must not be a selectable checkbox — it's already granted.
+    expect(document.querySelector('#skill-athletics')).toBeNull();
+    // The row marks it as already proficient.
+    expect(screen.getByText(/alreadyProficient/)).toBeInTheDocument();
+    // Other skills in the Barbarian pool remain selectable.
+    expect(document.querySelector('#skill-nature')).not.toBeNull();
+  });
+
   it('disables a skill checkbox only when every eligible pool is full', () => {
     // Barbarian filled with two skills (athletics + animalhandling). Elf still empty.
     mockContextValue.build = {

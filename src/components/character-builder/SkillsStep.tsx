@@ -56,6 +56,24 @@ export function SkillsStep() {
     return choices;
   }, [bundles]);
 
+  // Scan grant bundles for skills granted as FIXED proficiencies (not via a choice),
+  // e.g. a background's Athletics/Intimidation. These are already proficient, so they
+  // must not be selectable in any "choose N skills" pool — picking one would silently
+  // waste the pick for zero benefit (#238). Map each such skill to its granting sources.
+  const fixedSkillGrants = useMemo((): ReadonlyMap<SkillId, readonly SourceTag[]> => {
+    const map = new Map<SkillId, SourceTag[]>();
+    for (const bundle of bundles) {
+      for (const grant of bundle.grants) {
+        if (grant.type === 'proficiency' && grant.category === 'skill') {
+          const existing = map.get(grant.id) ?? [];
+          existing.push(bundle.source);
+          map.set(grant.id, existing);
+        }
+      }
+    }
+    return map;
+  }, [bundles]);
+
   // Scan grant bundles for all expertise-choice grants (regardless of pending status)
   const expertiseChoices = useMemo((): readonly ExpertiseChoiceInfo[] => {
     if (bundles.length === 0) return [];
@@ -125,8 +143,14 @@ export function SkillsStep() {
           const abilityKey = resolvedSkill.ability;
           const abbrev = t(`abilityAbbreviations.${abilityKey}`, { defaultValue: ABILITY_ABBREVIATIONS[abilityKey] });
 
-          // Every choice this skill is eligible for (could be multiple sources, e.g. Elf + Barbarian)
-          const eligibleChoices = skillChoices.filter((sc) => sc.from.includes(skill.id));
+          // Skills already granted as a fixed proficiency (e.g. by the background) can't be
+          // taken again — exclude them from every choice pool so a pick isn't silently wasted.
+          const fixedSources = fixedSkillGrants.get(skill.id) ?? [];
+          const isFixedGranted = fixedSources.length > 0;
+
+          // Every choice this skill is eligible for (could be multiple sources, e.g. Elf + Barbarian).
+          // A fixed-granted skill is removed from the selectable pools entirely.
+          const eligibleChoices = isFixedGranted ? [] : skillChoices.filter((sc) => sc.from.includes(skill.id));
           const choiceHoldingSkill = eligibleChoices.find((sc) => getSelectedSkills(sc.choiceKey).includes(skill.id));
           // Route a new selection to the most restrictive eligible grant with room (smallest pool),
           // so e.g. Athletics consumes the narrow Barbarian list before the "any skill" Human grant.
@@ -193,30 +217,40 @@ export function SkillsStep() {
               >
                 {t(`skills.${skill.id}`)}
                 <span className="text-xs text-muted-foreground ml-1">({abbrev})</span>
+                {isFixedGranted && (
+                  <span className="text-xs text-muted-foreground ml-2 italic">
+                    {tc('characterBuilder.skills.alreadyProficient')}
+                  </span>
+                )}
               </label>
               {/* Source icons — one per DISTINCT source, hover to see the source name.
-                  A single source can grant more than one skill-choice (e.g. Barbarian's
-                  level-1 list plus the level-3 Primal Knowledge pick), so dedupe by source
-                  to avoid rendering two identical icons on the same skill row. */}
-              {eligibleChoices.length > 0 && (
-                <div className="flex items-center gap-1 shrink-0">
-                  {Array.from(new Map(eligibleChoices.map((sc) => [sourceKey(sc.source), sc.source])).values()).map(
-                    (source) => {
-                      const sourceName = getSourceDisplayName(source, t);
-                      return (
-                        <span
-                          key={sourceKey(source)}
-                          title={sourceName}
-                          aria-label={sourceName}
-                          className="inline-flex"
-                        >
-                          <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
-                        </span>
-                      );
-                    }
-                  )}
-                </div>
-              )}
+                  For a fixed-granted skill, show the granting source(s) (e.g. the background)
+                  so the player can see why it's already proficient. Otherwise show the eligible
+                  choice sources. A single source can grant more than one skill-choice (e.g.
+                  Barbarian's level-1 list plus the level-3 Primal Knowledge pick), so dedupe. */}
+              {(() => {
+                const iconSources = isFixedGranted ? fixedSources : eligibleChoices.map((sc) => sc.source);
+                if (iconSources.length === 0) return null;
+                return (
+                  <div className="flex items-center gap-1 shrink-0">
+                    {Array.from(new Map(iconSources.map((source) => [sourceKey(source), source])).values()).map(
+                      (source) => {
+                        const sourceName = getSourceDisplayName(source, t);
+                        return (
+                          <span
+                            key={sourceKey(source)}
+                            title={sourceName}
+                            aria-label={sourceName}
+                            className="inline-flex"
+                          >
+                            <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
+                          </span>
+                        );
+                      }
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
