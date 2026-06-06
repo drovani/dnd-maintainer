@@ -71,6 +71,12 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 0),
             count: 2,
           },
+          {
+            type: 'bundle-choice',
+            key: createChoiceKey('bundle-choice', 'class', 'barbarian', 0),
+            category: 'loadout',
+            bundleIds: ['barbarian-loadout'],
+          },
         ],
       },
       {

@@ -2150,6 +2150,7 @@
     }
   },
   "bundles": {
+    "barbarian-loadout": { "name": "Greataxe + 4 Handaxes + Explorer's Pack" },
     "rogue-loadout": { "name": "Leather Armor + 2 Daggers + Thieves' Tools" },
     "rogue-rapier": { "name": "Rapier" },
     "rogue-shortsword-melee": { "name": "Shortsword" },

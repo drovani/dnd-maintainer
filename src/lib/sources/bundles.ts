@@ -2,6 +2,17 @@ import type { BundleDef, ItemDef, SlotFilter } from '@/types/items';
 import { ARMOR_CATALOG, getItemDef, WEAPON_CATALOG } from '@/lib/sources/items';
 
 export const BUNDLE_CATALOG: readonly BundleDef[] = [
+  // Barbarian starting equipment (2024 PHB, Option A): a single fixed package.
+  {
+    id: 'barbarian-loadout',
+    category: 'loadout',
+    contents: [
+      { itemId: 'greataxe', quantity: 1 },
+      { itemId: 'handaxe', quantity: 4 },
+      { itemId: 'explorers-pack', quantity: 1 },
+    ],
+    slots: [],
+  },
   {
     id: 'fighter-chainmail',
     category: 'loadout',

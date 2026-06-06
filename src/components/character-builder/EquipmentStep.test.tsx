@@ -109,12 +109,10 @@ describe('EquipmentStep — two-column layout', () => {
     };
   });
 
-  it('renders both Class Equipment Loadout and Purchase Equipment section headers', () => {
+  it('renders the Class Equipment Loadout section header', () => {
     render(<EquipmentStep {...makeEquipmentProps()} />);
 
     expect(screen.getByText('classLoadoutTitle')).toBeTruthy();
-    expect(screen.getByText('purchaseTitle')).toBeTruthy();
-    expect(screen.getByText('purchaseComingSoon')).toBeTruthy();
   });
 
   it('always renders the Equipment Summary panel in the right column', () => {
@@ -178,12 +176,12 @@ describe('EquipmentStep — two-column layout', () => {
     expect(firstName).toContain('bundle-choice:class:fighter:0');
   });
 
-  it('shows coming-soon text when no class bundle-choice grants exist', () => {
+  it('shows the loadout-unavailable hint when no class bundle-choice grants exist', () => {
     mockContextValue.bundles = [];
 
     render(<EquipmentStep {...makeEquipmentProps()} />);
 
-    expect(screen.getByText('comingSoon')).toBeTruthy();
+    expect(screen.getByText('loadoutUnavailable')).toBeTruthy();
   });
 
   it('summary panel lists materialized equipment grouped by type', () => {
@@ -300,6 +298,26 @@ describe('EquipmentStep — buy-with-gold mode', () => {
     render(<EquipmentStep {...makeEquipmentProps({ equipmentMode: 'buy-with-gold' })} />);
 
     expect(screen.queryByText('classLoadoutTitle')).toBeNull();
+  });
+
+  it('surfaces the Weapon Mastery picker in buy-with-gold mode (#241)', () => {
+    mockContextValue.bundles = [
+      {
+        source: FIGHTER_SOURCE,
+        grants: [
+          {
+            type: 'weapon-mastery-choice',
+            key: 'weapon-mastery-choice:class:fighter:0' as ChoiceKey,
+            count: 1,
+          },
+        ],
+      },
+    ];
+
+    render(<EquipmentStep {...makeEquipmentProps({ equipmentMode: 'buy-with-gold' })} />);
+
+    // Weapon Mastery is a class feature, not gear — it must show even when buying with gold.
+    expect(screen.getByText('weaponMasteryTitle')).toBeTruthy();
   });
 
   it('calls onPurchase with the first weapon catalog item id and costGp when Add button is clicked', () => {

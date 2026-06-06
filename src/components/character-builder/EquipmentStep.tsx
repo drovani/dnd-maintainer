@@ -147,8 +147,13 @@ export function EquipmentStep({
   const isOverBudget = startingGoldTotal > 0 && spentGp > startingGoldTotal;
   const classStartingGold = getStartingGold(classId);
 
+  // The running Equipment Summary reflects materialized loadout items. In Buy-with-Gold mode
+  // those purchases live in the "Purchased Items" list instead, so the summary would always read
+  // "No equipment selected yet" — hide it there and let the layout reclaim the full width (#243.3).
+  const showSummary = equipmentMode === 'starting-equipment';
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div className={`grid gap-6 ${showSummary ? 'lg:grid-cols-[minmax(0,1fr)_20rem]' : ''}`}>
       <div className="space-y-8">
         {/* Mode toggle */}
         <section className="space-y-3">
@@ -170,70 +175,61 @@ export function EquipmentStep({
           </ToggleGroup>
         </section>
 
-        {equipmentMode === 'starting-equipment' && (
-          <>
-            <section className="space-y-4">
-              <div className="space-y-1">
-                <h2 className="text-base font-semibold text-foreground">
-                  {tc('characterBuilder.equipment.classLoadoutTitle')}
-                </h2>
-                <p className="text-sm text-muted-foreground">{tc('characterBuilder.equipment.classLoadoutSubtitle')}</p>
-              </div>
-
-              {hasClassBundleChoices ? (
-                <div className="space-y-4">
-                  {classBundleChoices.map((choice) => {
-                    const decision = build?.choices[choice.choiceKey];
-                    return (
-                      <ChoicePicker
-                        key={choice.choiceKey}
-                        choice={choice}
-                        currentDecision={decision as ChoiceDecision | undefined}
-                        onDecide={(key, d) => context.makeChoice(key, d)}
-                        onClear={(key) => context.clearChoice(key)}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">{tc('characterBuilder.equipment.comingSoon')}</p>
-              )}
-            </section>
-
-            {hasWeaponMasteryChoices && (
-              <section className="space-y-4 border-t pt-6">
-                <div className="space-y-1">
-                  <h2 className="text-base font-semibold text-foreground">
-                    {tc('characterBuilder.equipment.weaponMasteryTitle')}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {tc('characterBuilder.equipment.weaponMasterySubtitle')}
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  {weaponMasteryChoices.map((choice) => {
-                    const decision = build?.choices[choice.choiceKey];
-                    return (
-                      <ChoicePicker
-                        key={choice.choiceKey}
-                        choice={choice}
-                        currentDecision={decision as ChoiceDecision | undefined}
-                        onDecide={(key, d) => context.makeChoice(key, d)}
-                        onClear={(key) => context.clearChoice(key)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            <section className="space-y-2 border-t pt-6">
+        {/* Weapon Mastery is a class feature independent of how gear is acquired, so it must be
+            available in BOTH equipment modes — not hidden behind the Starting-Equipment toggle (#241). */}
+        {hasWeaponMasteryChoices && (
+          <section className="space-y-4">
+            <div className="space-y-1">
               <h2 className="text-base font-semibold text-foreground">
-                {tc('characterBuilder.equipment.purchaseTitle')}
+                {tc('characterBuilder.equipment.weaponMasteryTitle')}
               </h2>
-              <p className="text-sm text-muted-foreground">{tc('characterBuilder.equipment.purchaseComingSoon')}</p>
-            </section>
-          </>
+              <p className="text-sm text-muted-foreground">{tc('characterBuilder.equipment.weaponMasterySubtitle')}</p>
+            </div>
+            <div className="space-y-4">
+              {weaponMasteryChoices.map((choice) => {
+                const decision = build?.choices[choice.choiceKey];
+                return (
+                  <ChoicePicker
+                    key={choice.choiceKey}
+                    choice={choice}
+                    currentDecision={decision as ChoiceDecision | undefined}
+                    onDecide={(key, d) => context.makeChoice(key, d)}
+                    onClear={(key) => context.clearChoice(key)}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {equipmentMode === 'starting-equipment' && (
+          <section className={`space-y-4 ${hasWeaponMasteryChoices ? 'border-t pt-6' : ''}`}>
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-foreground">
+                {tc('characterBuilder.equipment.classLoadoutTitle')}
+              </h2>
+              <p className="text-sm text-muted-foreground">{tc('characterBuilder.equipment.classLoadoutSubtitle')}</p>
+            </div>
+
+            {hasClassBundleChoices ? (
+              <div className="space-y-4">
+                {classBundleChoices.map((choice) => {
+                  const decision = build?.choices[choice.choiceKey];
+                  return (
+                    <ChoicePicker
+                      key={choice.choiceKey}
+                      choice={choice}
+                      currentDecision={decision as ChoiceDecision | undefined}
+                      onDecide={(key, d) => context.makeChoice(key, d)}
+                      onClear={(key) => context.clearChoice(key)}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">{tc('characterBuilder.equipment.loadoutUnavailable')}</p>
+            )}
+          </section>
         )}
 
         {equipmentMode === 'buy-with-gold' && (
@@ -397,95 +393,97 @@ export function EquipmentStep({
         )}
       </div>
 
-      <aside className="lg:sticky lg:top-4 lg:self-start">
-        <div className="rounded-lg border bg-card p-4 space-y-3">
-          <h3 className="text-sm font-semibold text-foreground">{tc('characterBuilder.equipment.summary')}</h3>
-          {hasAnyEquipment ? (
-            <div className="space-y-3 text-sm">
-              {weapons.length > 0 && (
-                <div>
-                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                    {t('weaponCategories.simple')}/{t('weaponCategories.martial')}
+      {showSummary && (
+        <aside className="lg:sticky lg:top-4 lg:self-start">
+          <div className="rounded-lg border bg-card p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">{tc('characterBuilder.equipment.summary')}</h3>
+            {hasAnyEquipment ? (
+              <div className="space-y-3 text-sm">
+                {weapons.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                      {t('weaponCategories.simple')}/{t('weaponCategories.martial')}
+                    </div>
+                    <ul className="space-y-0.5">
+                      {weapons.map((e) => {
+                        const masteryId = e.itemDef.type === 'weapon' ? getWeaponMasteryId(e.itemId) : null;
+                        return (
+                          <li key={e.itemId} className="flex gap-2 text-foreground items-center">
+                            <span className="text-muted-foreground">{e.quantity}×</span>
+                            <span>{renderItemName(e.itemId)}</span>
+                            {masteryId && (
+                              <Badge variant="secondary" className="text-xs">
+                                {t(`weaponMasteries.${masteryId}.name`)}
+                              </Badge>
+                            )}
+                            {e.itemDef.type === 'weapon' && (
+                              <span className="text-muted-foreground">
+                                ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
-                  <ul className="space-y-0.5">
-                    {weapons.map((e) => {
-                      const masteryId = e.itemDef.type === 'weapon' ? getWeaponMasteryId(e.itemId) : null;
-                      return (
-                        <li key={e.itemId} className="flex gap-2 text-foreground items-center">
+                )}
+                {armor.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                      {tc('characterSheet.proficiencies.armor')}
+                    </div>
+                    <ul className="space-y-0.5">
+                      {armor.map((e) => (
+                        <li key={e.itemId} className="flex gap-2 text-foreground">
                           <span className="text-muted-foreground">{e.quantity}×</span>
                           <span>{renderItemName(e.itemId)}</span>
-                          {masteryId && (
-                            <Badge variant="secondary" className="text-xs">
-                              {t(`weaponMasteries.${masteryId}.name`)}
-                            </Badge>
-                          )}
-                          {e.itemDef.type === 'weapon' && (
+                          {e.itemDef.type === 'armor' && (
                             <span className="text-muted-foreground">
-                              ({e.itemDef.damageDice} {t(`damageTypes.${e.itemDef.damageType}`)})
+                              {tc('characterSheet.attacks.acFormat', { ac: e.itemDef.baseAc })}
                             </span>
                           )}
                         </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-              {armor.length > 0 && (
-                <div>
-                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                    {tc('characterSheet.proficiencies.armor')}
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-0.5">
-                    {armor.map((e) => (
-                      <li key={e.itemId} className="flex gap-2 text-foreground">
-                        <span className="text-muted-foreground">{e.quantity}×</span>
-                        <span>{renderItemName(e.itemId)}</span>
-                        {e.itemDef.type === 'armor' && (
-                          <span className="text-muted-foreground">
-                            {tc('characterSheet.attacks.acFormat', { ac: e.itemDef.baseAc })}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {gear.length > 0 && (
-                <div>
-                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                    {tc('characterSheet.sections.equipment')}
+                )}
+                {gear.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                      {tc('characterSheet.sections.equipment')}
+                    </div>
+                    <ul className="space-y-0.5">
+                      {gear.map((e) => (
+                        <li key={e.itemId} className="flex gap-2 text-foreground">
+                          <span className="text-muted-foreground">{e.quantity}×</span>
+                          <span>{renderItemName(e.itemId)}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-0.5">
-                    {gear.map((e) => (
-                      <li key={e.itemId} className="flex gap-2 text-foreground">
-                        <span className="text-muted-foreground">{e.quantity}×</span>
-                        <span>{renderItemName(e.itemId)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {packs.length > 0 && (
-                <div>
-                  <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
-                    {t('bundleCategories.pack')}
+                )}
+                {packs.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-muted-foreground mb-1 uppercase">
+                      {t('bundleCategories.pack')}
+                    </div>
+                    <ul className="space-y-0.5">
+                      {packs.map((e) => (
+                        <li key={e.itemId} className="flex gap-2 text-foreground">
+                          <span className="text-muted-foreground">{e.quantity}×</span>
+                          <span>{renderItemName(e.itemId)}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-0.5">
-                    {packs.map((e) => (
-                      <li key={e.itemId} className="flex gap-2 text-foreground">
-                        <span className="text-muted-foreground">{e.quantity}×</span>
-                        <span>{renderItemName(e.itemId)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground italic">{tc('characterBuilder.equipment.summaryEmpty')}</p>
-          )}
-        </div>
-      </aside>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">{tc('characterBuilder.equipment.summaryEmpty')}</p>
+            )}
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
