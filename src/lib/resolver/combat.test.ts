@@ -328,6 +328,34 @@ describe('resolveAc', () => {
     expect(result.effective).toBe(13);
   });
 
+  it('barbarian unarmored mode: 10 + DEX + CON modifier', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'barbarian', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } }],
+      },
+    ];
+    // DEX 13 → mod +1, CON 15 → mod +2, AC = 10 + 1 + 2 = 13 (issue #236 repro)
+    const result = resolveAc(bundles, 1, undefined, null, 2, 0);
+    expect(result.calculations[0].mode).toBe('unarmored');
+    expect(result.calculations[0].baseValue).toBe(13);
+    expect(result.effective).toBe(13);
+  });
+
+  it('monk unarmored mode: 10 + DEX + WIS modifier', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'monk', level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'monk' } }],
+      },
+    ];
+    // DEX 16 → mod +3, WIS 14 → mod +2, AC = 10 + 3 + 2 = 15
+    const result = resolveAc(bundles, 3, undefined, null, 0, 2);
+    expect(result.calculations[0].mode).toBe('unarmored');
+    expect(result.calculations[0].baseValue).toBe(15);
+    expect(result.effective).toBe(15);
+  });
+
   it('equipped chain mail returns effective AC 16 (ignores DEX)', () => {
     const bundles: GrantBundle[] = [
       {

@@ -97,7 +97,9 @@ export function resolveAc(
   bundles: readonly GrantBundle[],
   dexModifier: number,
   equippedArmor?: { readonly totalBase: number | null; readonly shieldBonus: number } | null,
-  bardicDieSize?: 6 | 8 | 10 | 12 | null
+  bardicDieSize?: 6 | 8 | 10 | 12 | null,
+  conModifier: number = 0,
+  wisModifier: number = 0
 ): ResolvedArmorClass {
   const acGrants = collectGrantsByType(bundles, 'armor-class');
   const acBonusGrants = collectGrantsByType(bundles, 'ac-bonus');
@@ -127,10 +129,12 @@ export function resolveAc(
             if (bardicDieSize != null) baseValue += bardicDieSize;
             break;
           case 'barbarian':
-            // TODO: add CON modifier when ability scores are threaded through here
+            // Barbarian Unarmored Defense: 10 + DEX + CON
+            baseValue += conModifier;
             break;
           case 'monk':
-            // TODO: add WIS modifier when ability scores are threaded through here
+            // Monk Unarmored Defense: 10 + DEX + WIS
+            baseValue += wisModifier;
             break;
           default: {
             const _exhaustive: never = calc.formula;
