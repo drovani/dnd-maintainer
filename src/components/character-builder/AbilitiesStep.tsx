@@ -405,7 +405,7 @@ export function AbilitiesStep() {
               })}
             </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {abilityKeys.map((ability) => renderAbilityCard(ability, renderAssignmentSelect(ability, STANDARD_ARRAY)))}
           </div>
         </TabsContent>
@@ -425,7 +425,7 @@ export function AbilitiesStep() {
               <span className="text-sm text-muted-foreground">/ {POINT_BUY_TOTAL}</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {abilityKeys.map((ability) => {
               const score = baseAbilities[ability];
               const canIncrement = score < 15 && pointsRemaining >= getPointBuyIncrementCost(score);
@@ -531,7 +531,7 @@ export function AbilitiesStep() {
                   })}
             </div>
           )}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {abilityKeys.map((ability) =>
               renderAbilityCard(
                 ability,
