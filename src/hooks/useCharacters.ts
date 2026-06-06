@@ -23,6 +23,30 @@ export function useCharacters(campaignId: string) {
   });
 }
 
+/**
+ * Drafts in a campaign, fetched once and frozen for the lifetime of the query (staleTime: Infinity)
+ * under a dedicated key the autosave mutation does NOT invalidate. The character builder uses this
+ * for its resume-draft banner so it reflects the drafts that existed when the builder opened — it
+ * must not pick up the new draft autosave creates for the build currently in progress (#242).
+ */
+export function useCampaignDrafts(campaignId: string) {
+  return useQuery({
+    queryKey: ['campaign-drafts', campaignId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('characters')
+        .select(CHARACTER_SUMMARY_COLS)
+        .eq('campaign_id', campaignId)
+        .eq('status', 'draft')
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as unknown as CharacterSummary[];
+    },
+    enabled: !!campaignId,
+    staleTime: Infinity,
+  });
+}
+
 export function useCharacter(slug: string | undefined) {
   return useQuery({
     queryKey: ['character', slug],

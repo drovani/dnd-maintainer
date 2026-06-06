@@ -16,7 +16,7 @@ import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterCont
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave';
 import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
-import { useCharacter, useCharacters } from '@/hooks/useCharacters';
+import { useCharacter, useCampaignDrafts } from '@/hooks/useCharacters';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import type { Character } from '@/types/database';
@@ -524,15 +524,13 @@ export default function CharacterBuilder() {
     isNew ? undefined : existingCharacter?.id
   );
 
-  // On a fresh build, offer to resume the most recent in-progress draft instead of
-  // silently starting blank (#242). Query is disabled (enabled: !!campaignId) when not new.
+  // On a fresh build, offer to resume the most recent in-progress draft instead of silently
+  // starting blank (#242). useCampaignDrafts is frozen (staleTime: Infinity) under a key autosave
+  // doesn't invalidate, so the banner reflects drafts that existed when the builder opened and
+  // never points at the new draft autosave creates for this build. Disabled when not new.
   const [resumeDismissed, setResumeDismissed] = useState(false);
-  const { data: campaignCharacters = [] } = useCharacters(isNew ? (campaignId ?? '') : '');
-  const resumableDraft = isNew
-    ? [...campaignCharacters]
-        .filter((c) => c.status === 'draft')
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]
-    : undefined;
+  const { data: campaignDrafts } = useCampaignDrafts(isNew ? (campaignId ?? '') : '');
+  const resumableDraft = isNew ? campaignDrafts?.[0] : undefined;
 
   if (!campaignId || !campaignSlug) {
     return (
