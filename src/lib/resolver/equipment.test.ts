@@ -140,6 +140,34 @@ describe('resolveEquipment bundle-choice', () => {
     }
   });
 
+  it('materializes the real Barbarian loadout package (#239): greataxe, 4 handaxes, explorers pack', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'barbarian', level: 1 },
+        grants: [
+          {
+            type: 'bundle-choice',
+            key: 'bundle-choice:class:barbarian:0' as ChoiceKey,
+            category: 'loadout',
+            bundleIds: ['barbarian-loadout'],
+          },
+        ],
+      },
+    ];
+    const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+      'bundle-choice:class:barbarian:0': { type: 'bundle-choice', bundleId: 'barbarian-loadout', slotPicks: {} },
+    };
+    const result = resolveEquipment(bundles, choices, NO_EQUIPPED);
+    const byId = new Map(result.items.map((i) => [i.itemId, i.quantity]));
+    expect(byId.get('greataxe')).toBe(1);
+    expect(byId.get('handaxe')).toBe(4);
+    expect(byId.get('explorers-pack')).toBe(1);
+    for (const item of result.items) {
+      expect(item.source).toEqual({ origin: 'bundle', id: 'barbarian-loadout' });
+    }
+    expect(result.pendingChoices).toHaveLength(0);
+  });
+
   it('pack-type id expands pack contents with source.origin "pack"', () => {
     const bundles = [makeBundleChoiceBundle(['dungeoneers-pack', 'explorers-pack'])];
     const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
