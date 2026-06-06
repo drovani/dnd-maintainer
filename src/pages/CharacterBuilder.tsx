@@ -16,7 +16,7 @@ import { CharacterProvider, useCharacterContext } from '@/hooks/useCharacterCont
 import { useBuilderAutosave } from '@/hooks/useBuilderAutosave';
 import type { AutosavePayload } from '@/hooks/useBuilderAutosave';
 import { useCharacterBuildLevels, useCharacterItems } from '@/hooks/useCharacterBuild';
-import { useCharacter } from '@/hooks/useCharacters';
+import { useCharacter, useCharacters } from '@/hooks/useCharacters';
 import { useCampaignContext } from '@/hooks/useCampaignContext';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import type { Character } from '@/types/database';
@@ -506,6 +506,7 @@ export default function CharacterBuilder() {
   const { campaignId } = useCampaignContext();
   const { t } = useTranslation('common');
 
+  const navigate = useNavigate();
   const isNew = !characterSlug;
   const {
     data: existingCharacter,
@@ -518,6 +519,16 @@ export default function CharacterBuilder() {
   const { data: itemsData = [], isLoading: itemsLoading } = useCharacterItems(
     isNew ? undefined : existingCharacter?.id
   );
+
+  // On a fresh build, offer to resume the most recent in-progress draft instead of
+  // silently starting blank (#242). Query is disabled (enabled: !!campaignId) when not new.
+  const [resumeDismissed, setResumeDismissed] = useState(false);
+  const { data: campaignCharacters = [] } = useCharacters(isNew ? (campaignId ?? '') : '');
+  const resumableDraft = isNew
+    ? [...campaignCharacters]
+        .filter((c) => c.status === 'draft')
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]
+    : undefined;
 
   if (!campaignId || !campaignSlug) {
     return (
@@ -562,13 +573,35 @@ export default function CharacterBuilder() {
         .map((item: { item_id?: string }) => item.item_id ?? '');
 
   return (
-    <CharacterProvider
-      key={characterSlug ?? 'new'}
-      initialCharacter={initialCharacter}
-      initialRows={initialRows}
-      initialEquippedItems={initialEquippedItems}
-    >
-      <CharacterBuilderInner />
-    </CharacterProvider>
+    <>
+      {resumableDraft && !resumeDismissed && (
+        <div className="page-container pt-4">
+          <div className="flex flex-col gap-3 rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-foreground">
+              {t('characterBuilder.resumeDraft.message', { name: resumableDraft.name })}
+            </p>
+            <div className="flex shrink-0 gap-2">
+              <Button
+                size="sm"
+                onClick={() => navigate(`/campaign/${campaignSlug}/character/${resumableDraft.slug}/edit`)}
+              >
+                {t('characterBuilder.resumeDraft.resume')}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setResumeDismissed(true)}>
+                {t('characterBuilder.resumeDraft.dismiss')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      <CharacterProvider
+        key={characterSlug ?? 'new'}
+        initialCharacter={initialCharacter}
+        initialRows={initialRows}
+        initialEquippedItems={initialEquippedItems}
+      >
+        <CharacterBuilderInner />
+      </CharacterProvider>
+    </>
   );
 }

@@ -72,6 +72,15 @@ export default function CharacterList() {
   const pcCount = characters.filter((c) => c.character_type === 'pc').length;
   const npcCount = characters.filter((c) => c.character_type === 'npc').length;
 
+  // Drafts open back in the builder to be resumed; finalized characters open their sheet.
+  const openCharacter = (character: (typeof characters)[number]) => {
+    const path =
+      character.status === 'draft'
+        ? `/campaign/${campaignSlug}/character/${character.slug}/edit`
+        : `/campaign/${campaignSlug}/character/${character.slug}`;
+    navigate(path);
+  };
+
   useEffect(() => {
     if (error) {
       logger.error('Failed to load characters:', error);
@@ -190,11 +199,14 @@ export default function CharacterList() {
             {filteredAndSortedCharacters.map((character) => (
               <div
                 key={character.id}
-                onClick={() => navigate(`/campaign/${campaignSlug}/character/${character.slug}`)}
+                onClick={() => openCharacter(character)}
+                title={character.status === 'draft' ? t('characterList.draftHint') : undefined}
                 className={`p-6 rounded-lg border cursor-pointer transition-all hover:shadow-lg ${
-                  character.character_type === 'pc'
-                    ? 'bg-muted border-blue-500/50 hover:border-blue-400'
-                    : 'bg-muted/50 border-purple-500/30 hover:border-purple-400'
+                  character.status === 'draft'
+                    ? 'bg-muted/40 border-amber-500/50 hover:border-amber-400 border-dashed'
+                    : character.character_type === 'pc'
+                      ? 'bg-muted border-blue-500/50 hover:border-blue-400'
+                      : 'bg-muted/50 border-purple-500/30 hover:border-purple-400'
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
@@ -219,13 +231,22 @@ export default function CharacterList() {
                       )}
                     </div>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
-                      character.character_type === 'pc' ? 'bg-blue-900 text-blue-200' : 'bg-purple-900 text-purple-200'
-                    }`}
-                  >
-                    {t(`characterType.${character.character_type}`)}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {character.status === 'draft' && (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase bg-amber-900 text-amber-200">
+                        {t('characterList.draftBadge')}
+                      </span>
+                    )}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                        character.character_type === 'pc'
+                          ? 'bg-blue-900 text-blue-200'
+                          : 'bg-purple-900 text-purple-200'
+                      }`}
+                    >
+                      {t(`characterType.${character.character_type}`)}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-2 mb-4">

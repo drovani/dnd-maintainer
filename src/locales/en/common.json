@@ -180,6 +180,11 @@
       "saving": "Saving...",
       "draftSaved": "Draft saved"
     },
+    "resumeDraft": {
+      "message": "You have an in-progress draft: {{name}}",
+      "resume": "Resume draft",
+      "dismiss": "Start fresh"
+    },
     "abandon": {
       "title": "Abandon this character?",
       "confirm": "This will permanently delete your draft. This action cannot be undone.",
@@ -625,6 +630,8 @@
     "level": "Level",
     "hp": "HP",
     "ac": "AC",
+    "draftBadge": "Draft",
+    "draftHint": "In progress — click to resume",
     "errorLoading": "Error loading characters. Please try again."
   },
   "sessions": {

@@ -21,6 +21,7 @@ export default function App() {
           <Route path="/campaign/:campaignSlug" element={<CampaignDashboard />} />
           <Route path="/campaign/:campaignSlug/characters" element={<CharacterList />} />
           <Route path="/campaign/:campaignSlug/character/new" element={<CharacterBuilder />} />
+          <Route path="/campaign/:campaignSlug/character/:characterSlug/edit" element={<CharacterBuilder />} />
           <Route path="/campaign/:campaignSlug/character/:characterSlug" element={<CharacterSheet />} />
           <Route path="/campaign/:campaignSlug/sessions" element={<SessionList />} />
           <Route path="/campaign/:campaignSlug/session/:sessionSlug" element={<SessionDetail />} />
