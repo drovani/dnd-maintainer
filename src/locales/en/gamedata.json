@@ -327,6 +327,14 @@
       "name": "Guarded Mind",
       "description": "You have Resistance to Psychic damage. In addition, if you start your turn with the Charmed or Frightened condition, you can spend one Psionic Energy die (no action required) to end one of those conditions on yourself."
     },
+    "psiwarrior-bulwark-of-force": {
+      "name": "Bulwark of Force",
+      "description": "As a Bonus Action, choose creatures you can see within 30 feet (up to your Intelligence modifier, minimum 1, including yourself); each chosen creature gains half cover for 1 minute or until you use this feature again, and you expend one Psionic Energy die."
+    },
+    "psiwarrior-telekinetic-master": {
+      "name": "Telekinetic Master",
+      "description": "You can cast the Telekinesis spell without expending a spell slot or requiring a spell slot (using Intelligence as your spellcasting ability), and when you concentrate on it you can still make one weapon attack as a Bonus Action; once you cast it this way, you must finish a Long Rest before doing so again without expending a Psionic Energy die."
+    },
     "warriorofmercy-implements-of-mercy": {
       "name": "Implements of Mercy",
       "description": "You gain proficiency in the Insight and Medicine skills, and proficiency with the Herbalism Kit."

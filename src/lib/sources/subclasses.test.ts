@@ -1108,10 +1108,10 @@ describe('getSubclassSource — Psi Warrior', () => {
     expect(getSubclassSource('psiwarrior')).toBeDefined();
   });
 
-  it('psiwarrior has 3 feature levels (L3, L7, L10)', () => {
+  it('psiwarrior has 5 feature levels (L3, L7, L10, L15, L18)', () => {
     const source = getSubclassSource('psiwarrior');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7, 10]);
+    expect(source?.features).toHaveLength(5);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7, 10, 15, 18]);
   });
 
   it('psiwarrior level 3 grants psionic-power feature + psionic-energy resource pool', () => {
@@ -1160,6 +1160,28 @@ describe('getSubclassSource — Psi Warrior', () => {
         }),
       ])
     );
+  });
+
+  it('psiwarrior level 15 grants bulwark-of-force feature', () => {
+    const source = getSubclassSource('psiwarrior');
+    const level15 = source?.features.find((f) => f.classLevel === 15);
+    expect(level15).toBeDefined();
+    expect(level15?.grants).toHaveLength(1);
+    expect(level15?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'psiwarrior-bulwark-of-force' },
+    });
+  });
+
+  it('psiwarrior level 18 grants telekinetic-master feature', () => {
+    const source = getSubclassSource('psiwarrior');
+    const level18 = source?.features.find((f) => f.classLevel === 18);
+    expect(level18).toBeDefined();
+    expect(level18?.grants).toHaveLength(1);
+    expect(level18?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'psiwarrior-telekinetic-master' },
+    });
   });
 });
 

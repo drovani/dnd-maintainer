@@ -616,6 +616,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'psiwarrior-guarded-mind' } },
         ],
       },
+      {
+        classLevel: 15,
+        grants: [
+          // Spend Psionic Energy dice to grant half cover to allies within 30 ft as a Bonus Action
+          { type: 'feature', feature: { id: 'psiwarrior-bulwark-of-force' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Cast Telekinesis (no spell slot, Concentration) using INT as spellcasting ability; also expands Psionic Strike
+          { type: 'feature', feature: { id: 'psiwarrior-telekinetic-master' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   // Monk
