@@ -761,11 +761,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Smite of Protection: when you use Divine Smite, all allies within 30 ft gain a bonus to AC equal to your CHA modifier until your next turn
+          { type: 'feature', feature: { id: 'oathofdevotion-smite-of-protection' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Devotion L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'commune', alwaysPrepared: true },
           { type: 'spell', spellId: 'flame-strike', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Holy Nimbus: action, 1 minute — aura of sunlight (60 ft radius), enemies starting turn in it take 10 Radiant damage; advantage on saves vs spells cast by Fiends and Undead
+          { type: 'feature', feature: { id: 'oathofdevotion-holy-nimbus' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -816,11 +830,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Glorious Defense: when you or another creature within 10 ft is hit, use your Reaction to grant a bonus to AC equal to your CHA modifier; if the attack misses, you can make one weapon attack against the attacker
+          { type: 'feature', feature: { id: 'oathofglory-glorious-defense' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Glory L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'legend-lore', alwaysPrepared: true },
           { type: 'spell', spellId: 'yolandes-regal-presence', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Living Legend: bonus action, 1 minute — become a figure of divine glory; CHA modifier replaces any ability modifier for attack rolls, and once per turn on a hit add CHA modifier as extra damage; failed saves can be rerolled once
+          { type: 'feature', feature: { id: 'oathofglory-living-legend' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -872,11 +900,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Undying Sentinel: when you are reduced to 0 HP, you can drop to 1 HP instead; you can't use this feature again until you finish a Long Rest; you don't age and can't be aged magically
+          { type: 'feature', feature: { id: 'oathofancients-undying-sentinel' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Ancients L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'commune-with-nature', alwaysPrepared: true },
           { type: 'spell', spellId: 'tree-stride', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Elder Champion: action, 1 minute — transform into avatar of ancient nature; regain 10 HP at start of each turn, Druid spells cost 1 fewer spell slot, enemies within 10 ft must save vs frightened/blinded by nature
+          { type: 'feature', feature: { id: 'oathofancients-elder-champion' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -926,11 +968,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Soul of Vengeance: when a creature under your Vow of Enmity makes an attack, you can use your Reaction to make a melee weapon attack against it if it is within reach
+          { type: 'feature', feature: { id: 'oathofvengeance-soul-of-vengeance' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Vengeance L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'hold-monster', alwaysPrepared: true },
           { type: 'spell', spellId: 'scrying', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Avenging Angel: action, 1 hour — sprout wings (fly speed 60 ft), aura of menace (30 ft radius) frightens enemies on failed WIS save for 1 minute, frightened creatures grant you Advantage and your attacks deal extra 2d8 Radiant damage
+          { type: 'feature', feature: { id: 'oathofvengeance-avenging-angel' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],

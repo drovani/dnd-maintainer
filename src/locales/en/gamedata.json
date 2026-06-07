@@ -1531,6 +1531,38 @@
       "name": "Relentless Avenger",
       "description": "Your supernatural focus helps you close off a foe's retreat. When you hit a creature with an opportunity attack, you can move up to half your speed immediately after the attack as part of the same Reaction. This movement doesn't provoke opportunity attacks."
     },
+    "oathofdevotion-smite-of-protection": {
+      "name": "Smite of Protection",
+      "description": "Whenever you use your Divine Smite, you can simultaneously protect those near you — all friendly creatures within 30 feet of you gain a bonus to their Armor Class equal to your Charisma modifier (minimum 1) until the start of your next turn."
+    },
+    "oathofdevotion-holy-nimbus": {
+      "name": "Holy Nimbus",
+      "description": "As a Magic action, you emit an aura of sunlight for 1 minute; the aura extends 60 feet from you, grants you Advantage on saving throws against spells cast by Fiends and Undead, and deals 10 Radiant damage to any enemy that starts its turn in the aura."
+    },
+    "oathofglory-glorious-defense": {
+      "name": "Glorious Defense",
+      "description": "When you or another creature you can see within 10 feet of you is hit by an attack roll, you can use your Reaction to grant a bonus to the target's AC equal to your Charisma modifier (minimum 1) against that attack; if the attack then misses, you can make one weapon attack against the attacker as part of the same Reaction."
+    },
+    "oathofglory-living-legend": {
+      "name": "Living Legend",
+      "description": "You can empower yourself with the legends that have built up around you as a Bonus Action, gaining a divine aura for 1 minute: you can use your Charisma modifier instead of the relevant ability modifier for weapon attack rolls, once per turn when you hit you can add your Charisma modifier to the damage, and when you fail a saving throw you can reroll it once."
+    },
+    "oathofancients-undying-sentinel": {
+      "name": "Undying Sentinel",
+      "description": "When you are reduced to 0 Hit Points and not killed outright, you can choose to drop to 1 Hit Point instead (no action required); you can't use this feature again until you finish a Long Rest, and you can no longer be aged magically nor do you age naturally."
+    },
+    "oathofancients-elder-champion": {
+      "name": "Elder Champion",
+      "description": "As a Bonus Action, you assume the form of an ancient nature spirit for 1 minute: you regain 10 Hit Points at the start of each of your turns, spells by Druids and Rangers cost you 1 fewer spell slot level, and enemies within 10 feet of you must succeed on a Constitution saving throw (DC = 8 + your Proficiency Bonus + your Strength modifier) or be Frightened for 1 minute."
+    },
+    "oathofvengeance-soul-of-vengeance": {
+      "name": "Soul of Vengeance",
+      "description": "Whenever a creature under the effect of your Vow of Enmity makes an attack, you can use your Reaction to make a melee weapon attack against that creature if it is within reach."
+    },
+    "oathofvengeance-avenging-angel": {
+      "name": "Avenging Angel",
+      "description": "As a Bonus Action, you assume the form of an angelic avenger for 1 hour: you sprout wings granting you a Fly Speed equal to your walking speed, and enemies that start their turn within 30 feet of you must succeed on a Wisdom saving throw (DC = 8 + your Proficiency Bonus + your Charisma modifier) or be Frightened of you for 1 minute."
+    },
     "beastmaster-primal-companion": {
       "name": "Primal Companion",
       "description": "You magically summon a primal beast — a Beast of the Land, Sea, or Sky — by expending one spell slot. The beast obeys your commands and uses your Proficiency Bonus in place of its own. Its stat block scales with your Ranger level. On each of your turns, you can command the beast to take an action as a Bonus Action. If the beast is slain, you can resummon it by expending a spell slot."
