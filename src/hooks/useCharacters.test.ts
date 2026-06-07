@@ -11,8 +11,16 @@ import {
 
 vi.mock('@/lib/supabase', () => import('@/test/mocks/supabase'));
 
-import { useCharacters, useCharacter, usePlayerNames, useCharacterMutations } from '@/hooks/useCharacters';
-import type { Character } from '@/types/database';
+import { createElement } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  useCharacters,
+  useCharacter,
+  usePlayerNames,
+  useCharacterMutations,
+  useCampaignDrafts,
+} from '@/hooks/useCharacters';
+import type { Character, CharacterSummary } from '@/types/database';
 
 const baseCharacter: Character = {
   id: 'char-1',
@@ -60,7 +68,81 @@ const baseCharacter: Character = {
   spell_slots_used: null,
 };
 
+const baseDraftSummary: CharacterSummary = {
+  id: 'char-2',
+  slug: 'brynn-draft',
+  previous_slugs: [],
+  updated_at: '2024-06-01T00:00:00Z',
+  campaign_id: 'camp-1',
+  name: 'Brynn',
+  player_name: 'Bob',
+  character_type: 'pc',
+  species: 'human',
+  class: 'fighter',
+  subclass: null,
+  background: 'soldier',
+  level: 1,
+  hit_points_max: 12,
+  armor_class: 16,
+  portrait_url: null,
+  status: 'draft',
+};
+
 setupMockReset();
+
+describe('useCampaignDrafts', () => {
+  // Test 1 — success and disabled paths via shared helper
+  describeListQuery(
+    'useCampaignDrafts',
+    () => renderHook(() => useCampaignDrafts('camp-1'), { wrapper: createWrapper() }),
+    baseDraftSummary,
+    () => renderHook(() => useCampaignDrafts(''), { wrapper: createWrapper() }),
+    'campaign_id'
+  );
+
+  // Test 2 — filter and ordering contract
+  it('filters by status=draft and orders by updated_at descending', async () => {
+    mockQueryResult.data = [baseDraftSummary];
+
+    const { result } = renderHook(() => useCampaignDrafts('camp-1'), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(supabase.eq).toHaveBeenCalledWith('status', 'draft');
+    expect(supabase.order).toHaveBeenCalledWith('updated_at', { ascending: false });
+  });
+
+  // Test 3 — freezing contract: invalidating ['characters', campaignId] must NOT refetch
+  // the ['campaign-drafts', campaignId] query (distinct key, staleTime: Infinity).
+  it('is not refetched when the characters query key is invalidated', async () => {
+    mockQueryResult.data = [baseDraftSummary];
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      createElement(QueryClientProvider, { client }, children);
+
+    const { result } = renderHook(() => useCampaignDrafts('camp-1'), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Record supabase.from call count after initial fetch
+    const callsBefore = vi.mocked(supabase.from).mock.calls.length;
+
+    // Invalidate the sibling key that autosave/finalize touches — must NOT affect drafts query
+    await client.invalidateQueries({ queryKey: ['characters', 'camp-1'] });
+
+    // staleTime: Infinity means the cache entry is never stale, so invalidation of a
+    // different key cannot trigger a refetch. The from() call count must not increase.
+    const callsAfter = vi.mocked(supabase.from).mock.calls.length;
+    expect(callsAfter).toBe(callsBefore);
+
+    // Belt-and-suspenders: the queryKey stored on the cache entry must be the dedicated
+    // campaign-drafts key — collapsing it to ['characters',...] in a future refactor breaks this.
+    const cacheEntry = client.getQueryCache().find({ queryKey: ['campaign-drafts', 'camp-1'] });
+    expect(cacheEntry).toBeDefined();
+  });
+});
 
 describeListQuery(
   'useCharacters',
