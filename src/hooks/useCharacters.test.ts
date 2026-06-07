@@ -111,8 +111,10 @@ describe('useCampaignDrafts', () => {
     expect(supabase.order).toHaveBeenCalledWith('updated_at', { ascending: false });
   });
 
-  // Test 3 — freezing contract: invalidating ['characters', campaignId] must NOT refetch
-  // the ['campaign-drafts', campaignId] query (distinct key, staleTime: Infinity).
+  // Test 3 — freezing contract. Two things keep the resume banner from picking up the
+  // in-progress draft autosave creates: a dedicated ['campaign-drafts'] key (so autosave/
+  // finalize invalidating ['characters'] can't match it) and staleTime: Infinity. This test
+  // pins the KEY half — a sibling ['characters'] invalidation must not refetch this query.
   it('is not refetched when the characters query key is invalidated', async () => {
     mockQueryResult.data = [baseDraftSummary];
 
@@ -132,8 +134,9 @@ describe('useCampaignDrafts', () => {
     // Invalidate the sibling key that autosave/finalize touches — must NOT affect drafts query
     await client.invalidateQueries({ queryKey: ['characters', 'camp-1'] });
 
-    // staleTime: Infinity means the cache entry is never stale, so invalidation of a
-    // different key cannot trigger a refetch. The from() call count must not increase.
+    // ['characters'] shares no prefix with ['campaign-drafts'], so React Query's prefix-matching
+    // invalidation cannot target this query — the from() call count must not increase. (This is the
+    // key-distinctness guarantee, independent of staleTime; collapsing the keys would break it.)
     const callsAfter = vi.mocked(supabase.from).mock.calls.length;
     expect(callsAfter).toBe(callsBefore);
 
