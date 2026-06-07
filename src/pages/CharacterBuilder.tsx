@@ -116,7 +116,7 @@ function buildSeedCharacter(campaignId: string): Character {
   };
 }
 
-function CharacterBuilderInner() {
+function CharacterBuilderInner({ existingCharacterId }: { existingCharacterId?: string }) {
   const { t } = useTranslation('common');
   const { t: tg } = useTranslation('gamedata');
   const { campaignSlug } = useParams<{ campaignSlug: string }>();
@@ -131,7 +131,10 @@ function CharacterBuilderInner() {
   const [finalizeError, setFinalizeError] = useState<string | null>(null);
   const [confirmAbandon, setConfirmAbandon] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
-  const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } = useBuilderAutosave();
+  // Seed the autosave hook with the resumed draft's id so saves UPDATE (not duplicate) it and
+  // abandon deletes the right row. On a fresh build this is undefined → first save INSERTs (#247).
+  const { saveStatus, saveDraft, finalize, clearStatus, abandon, markSaveError } =
+    useBuilderAutosave(existingCharacterId);
 
   // Buy-with-gold equipment state (ephemeral — not persisted in draft saves, only materialized at finalize)
   type EquipmentMode = 'starting-equipment' | 'buy-with-gold';
@@ -602,7 +605,7 @@ export default function CharacterBuilder() {
         initialRows={initialRows}
         initialEquippedItems={initialEquippedItems}
       >
-        <CharacterBuilderInner />
+        <CharacterBuilderInner existingCharacterId={initialCharacter.id || undefined} />
       </CharacterProvider>
     </>
   );

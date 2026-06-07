@@ -109,11 +109,16 @@ export function EquipmentStep({
     })
   );
 
-  // Group resolved equipment by type for the running summary
-  const weapons = allEquipment.filter((e) => e.itemDef.type === 'weapon');
-  const armor = allEquipment.filter((e) => e.itemDef.type === 'armor');
-  const gear = allEquipment.filter((e) => e.itemDef.type === 'gear');
-  const packs = allEquipment.filter((e) => e.itemDef.type === 'pack');
+  // The running Equipment Summary reflects materialized loadout items. In Buy-with-Gold mode
+  // those purchases live in the "Purchased Items" list instead, so the summary would always read
+  // "No equipment selected yet" — hide it there and let the layout reclaim the full width (#243.3).
+  const showSummary = equipmentMode === 'starting-equipment';
+
+  // Group resolved equipment by type for the running summary — only computed when it's shown (#247).
+  const weapons = showSummary ? allEquipment.filter((e) => e.itemDef.type === 'weapon') : [];
+  const armor = showSummary ? allEquipment.filter((e) => e.itemDef.type === 'armor') : [];
+  const gear = showSummary ? allEquipment.filter((e) => e.itemDef.type === 'gear') : [];
+  const packs = showSummary ? allEquipment.filter((e) => e.itemDef.type === 'pack') : [];
 
   const hasAnyEquipment = allEquipment.length > 0;
   const hasClassBundleChoices = classBundleChoices.length > 0;
@@ -146,11 +151,6 @@ export function EquipmentStep({
   const spentGp = computePurchaseTotal(purchasedItems);
   const isOverBudget = startingGoldTotal > 0 && spentGp > startingGoldTotal;
   const classStartingGold = getStartingGold(classId);
-
-  // The running Equipment Summary reflects materialized loadout items. In Buy-with-Gold mode
-  // those purchases live in the "Purchased Items" list instead, so the summary would always read
-  // "No equipment selected yet" — hide it there and let the layout reclaim the full width (#243.3).
-  const showSummary = equipmentMode === 'starting-equipment';
 
   return (
     <div className={`grid gap-6 ${showSummary ? 'lg:grid-cols-[minmax(0,1fr)_20rem]' : ''}`}>

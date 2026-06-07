@@ -344,6 +344,36 @@ describe('SkillsStep skill-choice multi-source routing', () => {
     expect(document.querySelector('#skill-nature')).not.toBeNull();
   });
 
+  it('keeps a removable checkbox for a fixed-granted skill still held by a stale pick (#247 reorder case)', () => {
+    // User picked Athletics from the Barbarian pool, THEN switched to a background (Soldier) that
+    // fixed-grants Athletics. The stale Barbarian pick must stay un-checkable so the slot can be
+    // freed — not silently stuck consuming a choice.
+    mockContextValue.bundles = [
+      {
+        source: { origin: 'background', id: 'soldier' },
+        grants: [{ type: 'proficiency', category: 'skill', id: 'athletics' }],
+      },
+      ...elfBarbarianSkillBundles(),
+    ];
+    mockContextValue.build = {
+      choices: {
+        [BARBARIAN_SKILL_KEY]: { type: 'skill-choice', skills: ['athletics'] },
+      } as Record<ChoiceKey, ChoiceDecision>,
+    };
+    mockContextValue.resolved = {
+      skills: skillsWithProficient(['athletics']),
+    } as Partial<ResolvedCharacter>;
+    render(<SkillsStep />);
+
+    // The checkbox is still present (the redundant pick is recoverable), unlike the forward case
+    // where a never-picked fixed-granted skill has no checkbox.
+    const athletics = document.querySelector('#skill-athletics') as HTMLInputElement | null;
+    expect(athletics).not.toBeNull();
+    // Un-checking it clears the stale Barbarian pick, freeing the slot.
+    fireEvent.click(athletics!);
+    expect(mockClearChoice).toHaveBeenCalledWith(BARBARIAN_SKILL_KEY);
+  });
+
   it('disables a skill checkbox only when every eligible pool is full', () => {
     // Barbarian filled with two skills (athletics + animalhandling). Elf still empty.
     mockContextValue.build = {

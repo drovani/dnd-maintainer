@@ -101,13 +101,21 @@ export function useBuilderAutosave(existingCharacterId?: string) {
 
           let savedId: string;
 
-          if (characterIdRef.current) {
+          // Decide UPDATE vs INSERT from the ref first, then fall back to the id carried on the
+          // payload. The fallback is a structural guard: on the /edit resume route the builder
+          // mounts this hook without an init id, but the resumed draft's id rides on
+          // payload.character.id — without honoring it we'd INSERT a duplicate instead of
+          // updating the draft being resumed (#247).
+          const existingId = characterIdRef.current ?? (character.id || null);
+
+          if (existingId) {
             const { error } = await supabase
               .from('characters')
               .update(characterPayload as unknown as TablesUpdate<'characters'>)
-              .eq('id', characterIdRef.current);
+              .eq('id', existingId);
             if (error) throw error;
-            savedId = characterIdRef.current;
+            characterIdRef.current = existingId;
+            savedId = existingId;
           } else {
             const insertPayload = { ...characterPayload, status: 'draft' as const };
             const { data, error } = await supabase

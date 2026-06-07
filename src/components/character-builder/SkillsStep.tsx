@@ -149,8 +149,13 @@ export function SkillsStep() {
           const isFixedGranted = fixedSources.length > 0;
 
           // Every choice this skill is eligible for (could be multiple sources, e.g. Elf + Barbarian).
-          // A fixed-granted skill is removed from the selectable pools entirely.
-          const eligibleChoices = isFixedGranted ? [] : skillChoices.filter((sc) => sc.from.includes(skill.id));
+          // A fixed-granted skill is removed from the selectable pools — EXCEPT a pool that still
+          // holds a stale pick of it (picked from a class/species list, then a background later
+          // fixed-granted the same skill). Keep that pool so its checkbox stays, letting the user
+          // un-check the now-redundant pick and free the slot instead of being silently stuck (#247).
+          const eligibleChoices = isFixedGranted
+            ? skillChoices.filter((sc) => getSelectedSkills(sc.choiceKey).includes(skill.id))
+            : skillChoices.filter((sc) => sc.from.includes(skill.id));
           const choiceHoldingSkill = eligibleChoices.find((sc) => getSelectedSkills(sc.choiceKey).includes(skill.id));
           // Route a new selection to the most restrictive eligible grant with room (smallest pool),
           // so e.g. Athletics consumes the narrow Barbarian list before the "any skill" Human grant.
@@ -158,6 +163,11 @@ export function SkillsStep() {
             eligibleChoices,
             (sc) => getSelectedSkills(sc.choiceKey).length
           );
+
+          // Source icons — one per DISTINCT source. For a fixed-granted skill show the granting
+          // source(s) (e.g. the background) so the player sees why it's already proficient;
+          // otherwise show the eligible choice sources.
+          const iconSources = isFixedGranted ? fixedSources : eligibleChoices.map((sc) => sc.source);
 
           let checkbox: React.ReactNode = null;
           if (eligibleChoices.length > 0) {
@@ -223,34 +233,28 @@ export function SkillsStep() {
                   </span>
                 )}
               </label>
-              {/* Source icons — one per DISTINCT source, hover to see the source name.
-                  For a fixed-granted skill, show the granting source(s) (e.g. the background)
-                  so the player can see why it's already proficient. Otherwise show the eligible
-                  choice sources. A single source can grant more than one skill-choice (e.g.
-                  Barbarian's level-1 list plus the level-3 Primal Knowledge pick), so dedupe. */}
-              {(() => {
-                const iconSources = isFixedGranted ? fixedSources : eligibleChoices.map((sc) => sc.source);
-                if (iconSources.length === 0) return null;
-                return (
-                  <div className="flex items-center gap-1 shrink-0">
-                    {Array.from(new Map(iconSources.map((source) => [sourceKey(source), source])).values()).map(
-                      (source) => {
-                        const sourceName = getSourceDisplayName(source, t);
-                        return (
-                          <span
-                            key={sourceKey(source)}
-                            title={sourceName}
-                            aria-label={sourceName}
-                            className="inline-flex"
-                          >
-                            <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
-                          </span>
-                        );
-                      }
-                    )}
-                  </div>
-                );
-              })()}
+              {/* One icon per DISTINCT source (hover for the name). A single source can grant more
+                  than one skill-choice (e.g. Barbarian's level-1 list plus the level-3 Primal
+                  Knowledge pick), so dedupe by source. */}
+              {iconSources.length > 0 && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {Array.from(new Map(iconSources.map((source) => [sourceKey(source), source])).values()).map(
+                    (source) => {
+                      const sourceName = getSourceDisplayName(source, t);
+                      return (
+                        <span
+                          key={sourceKey(source)}
+                          title={sourceName}
+                          aria-label={sourceName}
+                          className="inline-flex"
+                        >
+                          <SourceIcon source={source} className="size-3.5 text-muted-foreground" />
+                        </span>
+                      );
+                    }
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

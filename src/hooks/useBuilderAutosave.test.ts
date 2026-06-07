@@ -143,6 +143,42 @@ describe('useBuilderAutosave', () => {
       expect(supabase.update).toHaveBeenCalled();
     });
 
+    it('updates (not inserts) the existing row when called with no init id but the payload carries one — the /edit resume footgun (#247)', async () => {
+      // CharacterBuilderInner calls useBuilderAutosave() with no arg, but on the new /edit
+      // resume route the draft's id arrives via payload.character.id. The first save must
+      // UPDATE that row, not INSERT a duplicate draft (the bug that orphaned resumed drafts).
+      mockQueryResult.data = null; // update returns no data
+
+      const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() });
+
+      await act(async () => {
+        await result.current.saveDraft({
+          ...basePayload,
+          character: { ...basePayload.character, id: 'existing-draft-id' },
+        });
+      });
+
+      expect(supabase.insert).not.toHaveBeenCalled();
+      expect(supabase.update).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith('id', 'existing-draft-id');
+    });
+
+    it('seeds the characterId from the init arg so the first save updates (not inserts)', async () => {
+      // Threading existingCharacterId (as CharacterSheet and the fixed CharacterBuilder do)
+      // seeds characterIdRef, so the very first save and abandon target the right row.
+      mockQueryResult.data = null;
+
+      const { result } = renderHook(() => useBuilderAutosave('seeded-id'), { wrapper: createWrapper() });
+
+      await act(async () => {
+        await result.current.saveDraft(basePayload);
+      });
+
+      expect(supabase.insert).not.toHaveBeenCalled();
+      expect(supabase.update).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith('id', 'seeded-id');
+    });
+
     it('sets saveStatus to error when supabase returns an error', async () => {
       expect.assertions(2);
       mockQueryResult.error = { message: 'Save failed' };
@@ -547,6 +583,32 @@ describe('useBuilderAutosave', () => {
       });
 
       expect(result.current.saveStatus).toBe<SaveStatus>('idle');
+    });
+  });
+
+  describe('abandon', () => {
+    // Contract test for the load-bearing prop wiring in CharacterBuilder: abandon() has no payload
+    // to fall back on, so resume-then-abandon (delete before any save) works ONLY because the init
+    // arg seeds characterIdRef. If that wiring regresses, abandon silently no-ops on a resumed draft.
+    it('deletes the row seeded from the init arg, even before any save (resume-then-abandon, #247)', async () => {
+      const { result } = renderHook(() => useBuilderAutosave('seeded-id'), { wrapper: createWrapper() });
+
+      await act(async () => {
+        await result.current.abandon('camp-1');
+      });
+
+      expect(supabase.delete).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith('id', 'seeded-id');
+    });
+
+    it('no-ops when there is no characterId (nothing to delete yet)', async () => {
+      const { result } = renderHook(() => useBuilderAutosave(), { wrapper: createWrapper() });
+
+      await act(async () => {
+        await result.current.abandon('camp-1');
+      });
+
+      expect(supabase.delete).not.toHaveBeenCalled();
     });
   });
 });
