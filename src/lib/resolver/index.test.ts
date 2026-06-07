@@ -3215,3 +3215,50 @@ describe('Warlock patron spells — resolver integration', () => {
     expect(prepared).not.toContain('summon-aberration');
   });
 });
+
+describe('Unarmored Defense AC wiring through resolveCharacter (#236/#247)', () => {
+  // These tests guard the index.ts wiring at line ~86 that passes conModifier/wisModifier
+  // into resolveAc. They call resolveCharacter with ability SCORES (not pre-computed modifiers)
+  // so the real threading path is exercised end-to-end. Calling resolveAc directly (as the
+  // unit tests in combat.test.ts do) would miss a regression in the index.ts wiring.
+  //
+  // Use level:0 to sidestep the "no hit-die grant" throw in resolveHp — AC resolution is
+  // level-independent and the wiring happens regardless of level.
+
+  it('barbarian unarmored AC includes CON modifier end-to-end through resolveCharacter (#236/#247)', () => {
+    // DEX 14 → mod +2; CON 16 → mod +3
+    // Barbarian Unarmored Defense: 10 + DEX + CON = 10 + 2 + 3 = 15
+    // A regression that passes 0 instead of conModifier would yield 10 + 2 = 12.
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'barbarian' as ClassId, level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'barbarian' } }],
+      },
+    ];
+    const result = resolveCharacter({
+      ...baseInput,
+      baseAbilities: { str: 10, dex: 14, con: 16, int: 10, wis: 10, cha: 10 },
+      bundles,
+    });
+    expect(result.armorClass.effective).toBe(15);
+  });
+
+  it('monk unarmored AC includes WIS modifier end-to-end through resolveCharacter (#236/#247)', () => {
+    // DEX 14 → mod +2; WIS 16 → mod +3; CON 18 → mod +4
+    // Monk Unarmored Defense: 10 + DEX + WIS = 10 + 2 + 3 = 15
+    // A regression swapping con/wis would yield 10 + 2 + 4 = 16 (fails).
+    // A regression dropping wisModifier to 0 would yield 10 + 2 = 12 (also fails).
+    const bundles: readonly GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'monk' as ClassId, level: 1 },
+        grants: [{ type: 'armor-class', calculation: { mode: 'unarmored', formula: 'monk' } }],
+      },
+    ];
+    const result = resolveCharacter({
+      ...baseInput,
+      baseAbilities: { str: 10, dex: 14, con: 18, int: 10, wis: 16, cha: 10 },
+      bundles,
+    });
+    expect(result.armorClass.effective).toBe(15);
+  });
+});
