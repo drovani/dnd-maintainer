@@ -658,9 +658,15 @@ describe('Druid class grant structures', () => {
     }
   });
 
-  // TODO(#180): Elemental Fury belongs at L7 (levels[6]); currently misplaced at L11.
-  it('level 11 has an elemental-fury feature-choice between Potent Spellcasting and Primal Strike', () => {
-    const grant = source?.levels[10].grants.find((g) => g.type === 'feature-choice');
+  it('level 5 has wild-resurgence feature', () => {
+    const featureIds = source?.levels[4].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('druid-wild-resurgence');
+  });
+
+  it('level 7 has an elemental-fury feature-choice between Potent Spellcasting and Primal Strike', () => {
+    const grant = source?.levels[6].grants.find((g) => g.type === 'feature-choice');
     expect(grant?.type).toBe('feature-choice');
     if (grant?.type === 'feature-choice') {
       expect(grant.key).toBe(createChoiceKey('feature-choice', 'class', 'druid', 1));
@@ -671,6 +677,13 @@ describe('Druid class grant structures', () => {
       const primalStrike = grant.options.find((o) => o.optionId === 'primal-strike');
       expect(primalStrike?.featureId).toBe('druid-elemental-fury-primal-strike');
     }
+  });
+
+  it('level 15 has improved-elemental-fury feature', () => {
+    const featureIds = source?.levels[14].grants
+      .filter((g) => g.type === 'feature')
+      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(featureIds).toContain('druid-improved-elemental-fury');
   });
 
   it('level 20 has archdruid feature', () => {
