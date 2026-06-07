@@ -639,6 +639,34 @@
       "name": "Bend Luck",
       "description": "You have the ability to twist fate using your Wild Magic. As a Reaction when another creature you can see within 60 feet makes an attack roll, ability check, or saving throw, you can spend 2 Sorcery Points and roll 1d4. You can add or subtract the number rolled from the creature's roll (your choice)."
     },
+    "aberrantsorcery-revelation-in-flesh": {
+      "name": "Revelation in Flesh",
+      "description": "As a Bonus Action, you can spend 1–4 Sorcery Points to magically transform your body for 10 minutes, gaining one benefit per Sorcery Point spent: Swim Speed equal to your Speed and the ability to breathe underwater, Fly Speed equal to your Speed, the ability to see 60 feet through solid objects and terrain (though it appears blurry and you can't see through more than 10 feet), or the ability to move through and occupy the space of other creatures."
+    },
+    "aberrantsorcery-warping-implosion": {
+      "name": "Warping Implosion",
+      "description": "As a Magic action, you can teleport to an unoccupied space you can see within 120 feet of you. Immediately after you disappear, each creature within 30 feet of the space you left must succeed on a Strength saving throw or take 3d10 Force damage and be pulled toward your destination space, ending up in the nearest unoccupied space to that destination."
+    },
+    "clockworksorcery-clockwork-cavalcade": {
+      "name": "Clockwork Cavalcade",
+      "description": "As a Magic action, you summon a parade of semicorporeal clockwork creatures that fill a 30-foot Cube you can see within 120 feet of you for 1 round; inside that Cube, each creature that has fewer than half its Hit Points regains Hit Points equal to 10d10, damaged objects are fully repaired, and each spell of level 6 or lower ends."
+    },
+    "draconicsorcery-dragon-wings": {
+      "name": "Dragon Wings",
+      "description": "As a Bonus Action, you sprout dragon wings from your back, gaining a Fly Speed equal to your Speed, unless you are wearing armor not made to accommodate your wings."
+    },
+    "draconicsorcery-dragon-companion": {
+      "name": "Dragon Companion",
+      "description": "You can channel the draconic power within you into a concentrated magical form; as a Bonus Action, you can expend a spell slot to summon a CR-appropriate dragon of your ancestor's type that obeys your commands."
+    },
+    "wildmagicsorcery-controlled-chaos": {
+      "name": "Controlled Chaos",
+      "description": "You gain a modicum of control over the surges of your wild magic. Whenever you roll on the Wild Magic Surge table, you can roll twice and use either number."
+    },
+    "wildmagicsorcery-tamed-surge": {
+      "name": "Tamed Surge",
+      "description": "You can use your Wild Magic in a limited but controlled way. Immediately after you cast a Sorcerer spell of level 1 or higher, you can create the effect of your choice from the Wild Magic Surge table; once you use this feature, you can't use it again until you finish a Long Rest."
+    },
     "archfeypatron-steps-of-the-fey": {
       "name": "Steps of the Fey",
       "description": "Misty Step is always prepared for you. When you cast it, you can also choose one of two rider effects: Refreshing Step (you or an ally within 30 feet regains hit points equal to a roll of your Warlock spell slot die) or Taunting Step (one creature of your choice within 5 feet of the space you left must succeed on a Wisdom saving throw or have Disadvantage on attack rolls against creatures other than you until the start of your next turn). You can cast Misty Step a number of times equal to your Proficiency Bonus per Long Rest without expending a spell slot."

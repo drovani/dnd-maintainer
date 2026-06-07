@@ -1244,6 +1244,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'spell', spellId: 'telekinesis', alwaysPrepared: true },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Revelation in Flesh: spend 1-4 Sorcery Points as a Bonus Action to gain temporary transformation benefits (swim speed, flight, see through walls, pass through objects) for 10 minutes
+          { type: 'feature', feature: { id: 'aberrantsorcery-revelation-in-flesh' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Warping Implosion: Action - teleport up to 120 ft; each creature within 30 ft of origin must succeed on STR save or take 3d10 Force damage and be pulled 30 ft toward your destination
+          { type: 'feature', feature: { id: 'aberrantsorcery-warping-implosion' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   clockworksorcery: {
@@ -1292,6 +1306,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         // Trance of Order: 2024 PHB places this at L14 (not L3)
         classLevel: 14,
         grants: [{ type: 'feature', feature: { id: 'clockworksorcery-trance-of-order' } }],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Clockwork Cavalcade: Action - summon a parade of clockwork creatures that restore HP, repair objects, and dispel spells within a 30-ft Cube
+          { type: 'feature', feature: { id: 'clockworksorcery-clockwork-cavalcade' } },
+        ],
       },
     ] satisfies readonly SubclassFeature[],
   },
@@ -1358,6 +1379,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'spell', spellId: 'summon-dragon', alwaysPrepared: true },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Dragon Wings: sprout dragon wings as a Bonus Action, gaining a Fly speed equal to your Speed
+          { type: 'feature', feature: { id: 'draconicsorcery-dragon-wings' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Dragon Companion: your draconic power manifests as a permanent Dragon form you can assume as a Bonus Action (no cost)
+          { type: 'feature', feature: { id: 'draconicsorcery-dragon-companion' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   wildmagicsorcery: {
@@ -1378,6 +1413,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Bend Luck: Reaction — spend 2 Sorcery Points to add or subtract 1d4 from a creature's roll within 60 ft
           { type: 'feature', feature: { id: 'wildmagicsorcery-bend-luck' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Controlled Chaos: when you roll on the Wild Magic Surge table, you can roll twice and choose which result applies
+          { type: 'feature', feature: { id: 'wildmagicsorcery-controlled-chaos' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Tamed Surge: immediately after casting a Sorcerer spell of L1+, you can create a controlled Wild Magic Surge effect chosen from the table (no d20 roll needed)
+          { type: 'feature', feature: { id: 'wildmagicsorcery-tamed-surge' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
