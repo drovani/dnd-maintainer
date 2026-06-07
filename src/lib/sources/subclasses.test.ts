@@ -2842,10 +2842,10 @@ describe('getSubclassSource — Abjurer', () => {
     expect(getSubclassSource('abjurer')).toBeDefined();
   });
 
-  it('abjurer has 3 feature levels (L3, L6, L10)', () => {
+  it('abjurer has 4 feature levels (L3, L6, L10, L14)', () => {
     const source = getSubclassSource('abjurer');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(4);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10, 14]);
   });
 
   it('abjurer level 3 grants 2 features: abjuration-savant and arcane-ward', () => {
@@ -2900,6 +2900,17 @@ describe('getSubclassSource — Abjurer', () => {
       ])
     );
   });
+
+  it('abjurer level 14 grants 1 feature: spell-resistance', () => {
+    const source = getSubclassSource('abjurer');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'abjurer-spell-resistance' },
+    });
+  });
 });
 
 describe('getSubclassSource — Diviner', () => {
@@ -2907,10 +2918,10 @@ describe('getSubclassSource — Diviner', () => {
     expect(getSubclassSource('diviner')).toBeDefined();
   });
 
-  it('diviner has 3 feature levels (L3, L6, L10)', () => {
+  it('diviner has 4 feature levels (L3, L6, L10, L14)', () => {
     const source = getSubclassSource('diviner');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(4);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10, 14]);
   });
 
   it('diviner level 3 grants 3 grants: divination-savant, portent, and portent resource pool', () => {
@@ -2931,7 +2942,14 @@ describe('getSubclassSource — Diviner', () => {
         expect.objectContaining({
           type: 'resource-pool',
           poolId: 'portent',
-          max: { mode: 'fixed', value: 2 },
+          max: {
+            mode: 'level-steps',
+            classId: 'wizard',
+            steps: [
+              { minLevel: 3, value: 2 },
+              { minLevel: 14, value: 3 },
+            ],
+          },
           regen: 'long-rest',
         }),
       ])
@@ -2959,6 +2977,17 @@ describe('getSubclassSource — Diviner', () => {
       feature: { id: 'diviner-the-third-eye' },
     });
   });
+
+  it('diviner level 14 grants 1 feature: greater-portent', () => {
+    const source = getSubclassSource('diviner');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'diviner-greater-portent' },
+    });
+  });
 });
 
 describe('getSubclassSource — Evoker', () => {
@@ -2966,10 +2995,10 @@ describe('getSubclassSource — Evoker', () => {
     expect(getSubclassSource('evoker')).toBeDefined();
   });
 
-  it('evoker has 3 feature levels (L3, L6, L10)', () => {
+  it('evoker has 4 feature levels (L3, L6, L10, L14)', () => {
     const source = getSubclassSource('evoker');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(4);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10, 14]);
   });
 
   it('evoker level 3 grants 2 features: evocation-savant and potent-cantrip (2024 PHB — NOT sculpt-spells)', () => {
@@ -3023,6 +3052,17 @@ describe('getSubclassSource — Evoker', () => {
       feature: { id: 'evoker-empowered-evocation' },
     });
   });
+
+  it('evoker level 14 grants 1 feature: overchannel', () => {
+    const source = getSubclassSource('evoker');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'evoker-overchannel' },
+    });
+  });
 });
 
 describe('getSubclassSource — Illusionist', () => {
@@ -3030,10 +3070,10 @@ describe('getSubclassSource — Illusionist', () => {
     expect(getSubclassSource('illusionist')).toBeDefined();
   });
 
-  it('illusionist has 3 feature levels (L3, L6, L10)', () => {
+  it('illusionist has 4 feature levels (L3, L6, L10, L14)', () => {
     const source = getSubclassSource('illusionist');
-    expect(source?.features).toHaveLength(3);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10]);
+    expect(source?.features).toHaveLength(4);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 10, 14]);
   });
 
   it('illusionist level 3 grants 2 features: illusion-savant and improved-illusions', () => {
@@ -3086,6 +3126,17 @@ describe('getSubclassSource — Illusionist', () => {
       ])
     );
   });
+
+  it('illusionist level 14 grants 1 feature: illusory-reality', () => {
+    const source = getSubclassSource('illusionist');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'illusionist-illusory-reality' },
+    });
+  });
 });
 
 describe('getSubclassSource — unknown', () => {
@@ -3127,6 +3178,37 @@ describe('Diviner Portent resource pool resolver integration', () => {
     const pool = resolved.resourcePools.find((p) => p.poolId === 'portent');
     expect(pool).toBeDefined();
     expect(pool?.max).toBe(2);
+    expect(pool?.regen).toBe('long-rest');
+  });
+
+  it('Diviner L14 (Greater Portent): portent pool upgrades to max=3', () => {
+    const build: CharacterBuild = {
+      speciesId: 'human' as SpeciesId,
+      backgroundId: 'acolyte' as BackgroundId,
+      baseAbilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
+      abilityMethod: 'standard-array',
+      levels: Array.from({ length: 14 }, (_, i) => ({
+        classId: 'wizard' as ClassId,
+        classLevel: i + 1,
+        hpRoll: i === 0 ? null : 4,
+      })),
+      choices: {
+        [subclassKey]: { type: 'subclass' as const, subclassId: 'diviner' as SubclassId },
+      },
+      feats: [],
+      activeItems: [],
+    };
+    const { bundles, expandedFeats } = collectBundles(build);
+    const resolved = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: 14,
+      bundles,
+      choices: build.choices,
+      expandedFeats,
+    });
+    const pool = resolved.resourcePools.find((p) => p.poolId === 'portent');
+    expect(pool).toBeDefined();
+    expect(pool?.max).toBe(3);
     expect(pool?.regen).toBe('long-rest');
   });
 });

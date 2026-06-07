@@ -1632,6 +1632,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'spell', spellId: 'dispel-magic', alwaysPrepared: true },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Spell Resistance: Advantage on saving throws against spells, and Resistance to the damage of spells
+          { type: 'feature', feature: { id: 'abjurer-spell-resistance' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   diviner: {
@@ -1644,8 +1651,21 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Portent: after each long rest, roll 2 d20s; replace any attack roll, ability check, or saving throw
           // you can see with one of these rolls; each pre-rolled die can be used once
           { type: 'feature', feature: { id: 'diviner-portent' } },
-          // Portent resource pool: tracks the 2 Portent dice (regain on Long Rest)
-          { type: 'resource-pool', poolId: 'portent', max: { mode: 'fixed', value: 2 }, regen: 'long-rest' },
+          // Portent resource pool: 2 Portent dice at L3, upgrading to 3 at L14 via Greater Portent.
+          // Uses level-steps (keyed on Wizard level) so the pool scales — a fixed pool cannot.
+          {
+            type: 'resource-pool',
+            poolId: 'portent',
+            max: {
+              mode: 'level-steps',
+              classId: 'wizard',
+              steps: [
+                { minLevel: 3, value: 2 },
+                { minLevel: 14, value: 3 },
+              ],
+            },
+            regen: 'long-rest',
+          },
         ],
       },
       {
@@ -1662,6 +1682,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // The Third Eye: Bonus Action — gain one of: Darkvision 120 ft, Ethereal Sight,
           // Greater Comprehension, or See Invisibility; lasts until incapacitated or until used again
           { type: 'feature', feature: { id: 'diviner-the-third-eye' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Greater Portent: you roll three d20s for Portent rather than two (Portent pool 2 → 3, handled above)
+          { type: 'feature', feature: { id: 'diviner-greater-portent' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1694,6 +1721,14 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'evoker-empowered-evocation' } },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Overchannel: deal maximum damage with a L1–5 damage spell; repeated uses before a Long Rest
+          // deal necrotic backlash damage (runtime mechanic — inert feature grant for now)
+          { type: 'feature', feature: { id: 'evoker-overchannel' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   illusionist: {
@@ -1724,6 +1759,14 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'illusionist-illusory-self' } },
           // Illusory Self resource pool: 1 use, recharges on Short or Long Rest
           { type: 'resource-pool', poolId: 'illusory-self', max: { mode: 'fixed', value: 1 }, regen: 'short-rest' },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Illusory Reality: make one inanimate, nonmagical object from an illusion spell real for 1 minute
+          // (runtime mechanic — inert feature grant for now)
+          { type: 'feature', feature: { id: 'illusionist-illusory-reality' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],

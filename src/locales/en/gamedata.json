@@ -1739,6 +1739,10 @@
       "name": "Spellbreaker",
       "description": "Counterspell and Dispel Magic are always prepared for you and don't count against the number of spells you can prepare each day. You can cast Dispel Magic as a Bonus Action. You add your Proficiency Bonus to the ability check of Counterspell or Dispel Magic. If you fail the ability check for either spell, the spell doesn't expend the spell slot."
     },
+    "abjurer-spell-resistance": {
+      "name": "Spell Resistance",
+      "description": "You have Advantage on saving throws against spells, and you have Resistance to the damage dealt by spells."
+    },
     "diviner-divination-savant": {
       "name": "Divination Savant",
       "description": "The gold and time you must spend to copy a Divination spell into your spellbook is halved."
@@ -1754,6 +1758,10 @@
     "diviner-the-third-eye": {
       "name": "The Third Eye",
       "description": "You can use a Bonus Action to increase your powers of perception. When you do so, choose one of the following benefits, which lasts until you are Incapacitated or until you use this feature again: Darkvision (60 ft. extended to 120 ft.), Ethereal Sight (see into the Ethereal Plane up to 60 ft.), Greater Comprehension (read any language), or See Invisibility (see Invisible creatures and objects within 10 ft.)."
+    },
+    "diviner-greater-portent": {
+      "name": "Greater Portent",
+      "description": "The visions in your dreams intensify and paint a more accurate picture in your mind of what is to come. You now roll three d20s for your Portent feature, rather than two, and you can use those foretelling rolls accordingly."
     },
     "evoker-evocation-savant": {
       "name": "Evocation Savant",
@@ -1771,6 +1779,10 @@
       "name": "Empowered Evocation",
       "description": "Whenever you cast a Wizard spell from the Evocation school, you can add your Intelligence modifier to one damage roll of that spell."
     },
+    "evoker-overchannel": {
+      "name": "Overchannel",
+      "description": "You can increase the power of your spells. When you cast a Wizard spell of levels 1 through 5 that deals damage, you can deal maximum damage with that spell on the turn you cast it. The first time you do so, you suffer no adverse effect. If you use this feature again before you finish a Long Rest, you take 2d12 Necrotic damage per level of the spell immediately after you cast it, and this damage increases each subsequent use. The Necrotic damage ignores Resistance and Immunity."
+    },
     "illusionist-illusion-savant": {
       "name": "Illusion Savant",
       "description": "The gold and time you must spend to copy an Illusion spell into your spellbook is halved."
@@ -1786,6 +1798,10 @@
     "illusionist-illusory-self": {
       "name": "Illusory Self",
       "description": "When a creature makes an attack roll against you, you can use your Reaction to interpose an illusory duplicate of yourself between the attacker and yourself. The attack automatically misses you, then the illusion dissipates. Once you use this feature, you can't use it again until you finish a Short or Long Rest."
+    },
+    "illusionist-illusory-reality": {
+      "name": "Illusory Reality",
+      "description": "When you cast an Illusion spell of level 1 or higher, you can choose one inanimate, nonmagical object that is part of the illusion and make that object real. You can do this on your turn as a Bonus Action while the spell persists. The object remains real for 1 minute; it can't deal damage or otherwise directly harm anyone."
     }
   },
   "subclasses": {
