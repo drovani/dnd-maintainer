@@ -23,7 +23,7 @@ import type { Character } from '@/types/database';
 import { ChevronLeft, ChevronRight, Save, Trash2 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { DND_SPECIES, DND_CLASSES, isBackgroundId } from '@/lib/dnd-helpers';
 import { collectClassBundleKeys } from '@/lib/gold-equipment';
@@ -567,6 +567,13 @@ export default function CharacterBuilder() {
         </p>
       </div>
     );
+  }
+
+  // Guard: if the /edit route was reached but the character is no longer a draft (e.g. a stale
+  // cached draft list navigated to a now-finalized character), redirect to the character sheet
+  // instead of opening the builder and inadvertently autosaving over the finalized row.
+  if (!isNew && existingCharacter && existingCharacter.status !== 'draft') {
+    return <Navigate to={`/campaign/${campaignSlug}/character/${existingCharacter.slug}`} replace />;
   }
 
   const initialCharacter = isNew ? buildSeedCharacter(campaignId) : existingCharacter!;
