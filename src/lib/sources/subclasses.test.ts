@@ -2414,10 +2414,10 @@ describe('getSubclassSource — Archfey Patron', () => {
     expect(getSubclassSource('archfeypatron')).toBeDefined();
   });
 
-  it('archfeypatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
+  it('archfeypatron has 7 feature levels (L3, L5, L6, L7, L9, L10, L14)', () => {
     const source = getSubclassSource('archfeypatron');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10, 14]);
   });
 
   it('archfeypatron level 3 has steps-of-the-fey feature and 5 always-prepared spell grants; no patron-spells stub', () => {
@@ -2504,6 +2504,17 @@ describe('getSubclassSource — Archfey Patron', () => {
       feature: { id: 'archfeypatron-beguiling-defenses' },
     });
   });
+
+  it('archfeypatron level 14 grants 1 feature: bewitching-magic', () => {
+    const source = getSubclassSource('archfeypatron');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'archfeypatron-bewitching-magic' },
+    });
+  });
 });
 
 describe('getSubclassSource — Celestial Patron', () => {
@@ -2511,10 +2522,10 @@ describe('getSubclassSource — Celestial Patron', () => {
     expect(getSubclassSource('celestialpatron')).toBeDefined();
   });
 
-  it('celestialpatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
+  it('celestialpatron has 7 feature levels (L3, L5, L6, L7, L9, L10, L14)', () => {
     const source = getSubclassSource('celestialpatron');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10, 14]);
   });
 
   it('celestialpatron level 3 has religion proficiency, healing-light, 2 cantrip grants (alwaysPrepared:false), 4 always-prepared spells; no bonus-cantrip or patron-spells stubs', () => {
@@ -2616,6 +2627,17 @@ describe('getSubclassSource — Celestial Patron', () => {
       feature: { id: 'celestialpatron-celestial-resilience' },
     });
   });
+
+  it('celestialpatron level 14 grants 1 feature: searing-vengeance', () => {
+    const source = getSubclassSource('celestialpatron');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'celestialpatron-searing-vengeance' },
+    });
+  });
 });
 
 describe('getSubclassSource — Fiend Patron', () => {
@@ -2623,10 +2645,10 @@ describe('getSubclassSource — Fiend Patron', () => {
     expect(getSubclassSource('fiendpatron')).toBeDefined();
   });
 
-  it('fiendpatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
+  it('fiendpatron has 7 feature levels (L3, L5, L6, L7, L9, L10, L14)', () => {
     const source = getSubclassSource('fiendpatron');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10, 14]);
   });
 
   it('fiendpatron level 3 has dark-ones-blessing and 4 always-prepared spells; no patron-spells stub', () => {
@@ -2710,6 +2732,17 @@ describe('getSubclassSource — Fiend Patron', () => {
       feature: { id: 'fiendpatron-fiendish-resilience' },
     });
   });
+
+  it('fiendpatron level 14 grants 1 feature: hurl-through-hell', () => {
+    const source = getSubclassSource('fiendpatron');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'fiendpatron-hurl-through-hell' },
+    });
+  });
 });
 
 describe('getSubclassSource — Great Old One Patron', () => {
@@ -2717,10 +2750,10 @@ describe('getSubclassSource — Great Old One Patron', () => {
     expect(getSubclassSource('greatoldonepatron')).toBeDefined();
   });
 
-  it('greatoldonepatron has 6 feature levels (L3, L5, L6, L7, L9, L10)', () => {
+  it('greatoldonepatron has 7 feature levels (L3, L5, L6, L7, L9, L10, L14)', () => {
     const source = getSubclassSource('greatoldonepatron');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 10, 14]);
   });
 
   it('greatoldonepatron level 3 has skill proficiency-choice, awakened-mind, and 4 always-prepared spells; no psychic-spells stub', () => {
@@ -2833,6 +2866,17 @@ describe('getSubclassSource — Great Old One Patron', () => {
     expect(level10?.grants[0]).toMatchObject({
       type: 'feature',
       feature: { id: 'greatoldonepatron-eldritch-hex' },
+    });
+  });
+
+  it('greatoldonepatron level 14 grants 1 feature: create-thrall', () => {
+    const source = getSubclassSource('greatoldonepatron');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'greatoldonepatron-create-thrall' },
     });
   });
 });

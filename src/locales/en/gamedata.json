@@ -651,6 +651,10 @@
       "name": "Beguiling Defenses",
       "description": "Your patron teaches you how to guard your mind and turn another's charms back on them. You are immune to the Charmed condition. If a creature attempts to Charm you, you can use your Reaction to force the creature to make a Wisdom saving throw against your spell save DC. On a failed save, the creature has the Charmed condition for 1 minute or until it takes any damage."
     },
+    "archfeypatron-bewitching-magic": {
+      "name": "Bewitching Magic",
+      "description": "Your patron grants you the ability to weave together your fey magic. Immediately after you cast an Enchantment or Illusion spell using a Warlock spell slot, you can cast Misty Step as part of the same action and without expending a spell slot."
+    },
     "celestialpatron-healing-light": {
       "name": "Healing Light",
       "description": "You gain the ability to channel celestial energy to heal wounds. You have a pool of d6s that you spend to fuel this healing. The number of dice in the pool equals 1 + your Warlock level. As a Bonus Action, you can heal one creature you can see within 60 feet by spending dice from the pool. The maximum number of dice you can spend at once equals your Charisma modifier (minimum 1). Roll the spent dice and restore a number of hit points equal to the total. Your pool regains all expended dice when you finish a Long Rest."
@@ -662,6 +666,10 @@
     "celestialpatron-celestial-resilience": {
       "name": "Celestial Resilience",
       "description": "You gain the ability to infuse yourself and your allies with the energy of the Upper Planes. When you finish a Short or Long Rest, you gain Temporary Hit Points equal to your Warlock level plus your Charisma modifier. Additionally, choose up to five creatures you can see at the end of the rest. Those creatures each gain Temporary Hit Points equal to half your Warlock level."
+    },
+    "celestialpatron-searing-vengeance": {
+      "name": "Searing Vengeance",
+      "description": "The radiant power you channel allows you to resist death. When you or an ally you can see within 60 feet of you is about to drop to 0 hit points, you can use your Reaction to have radiant energy erupt from the creature: each creature of your choice within 30 feet takes Radiant damage equal to 2d8 plus your Charisma modifier and has the Blinded condition until the end of the current turn. The downed creature then regains hit points equal to half its hit point maximum and stands up if it so chooses. Once you use this feature, you can't use it again until you finish a Long Rest."
     },
     "fiendpatron-dark-ones-blessing": {
       "name": "Dark One's Blessing",
@@ -675,6 +683,10 @@
       "name": "Fiendish Resilience",
       "description": "You can choose one damage type when you finish a Short or Long Rest. You gain Resistance to that damage type until you choose a different one with this feature. Damage from magical weapons and silver weapons ignores this resistance."
     },
+    "fiendpatron-hurl-through-hell": {
+      "name": "Hurl Through Hell",
+      "description": "When you hit a creature with an attack roll, you can use this feature to instantly transport the target through the Lower Planes. The creature disappears and hurtles through a nightmare landscape. At the end of your next turn, the target returns to the space it previously occupied or the nearest unoccupied space. If the target is not a Fiend, it takes 10d10 Psychic damage as it reels from its horrific experience. Once you use this feature, you can't use it again until you finish a Long Rest."
+    },
     "greatoldonepatron-awakened-mind": {
       "name": "Awakened Mind",
       "description": "Your patron's knowledge invades your very being. You can communicate telepathically with any creature you can see within 30 feet of you. You don't need to share a language with the creature for it to understand your telepathic communications, but the creature must be able to understand at least one language."
@@ -686,6 +698,10 @@
     "greatoldonepatron-eldritch-hex": {
       "name": "Eldritch Hex",
       "description": "Your patron grants you a powerful hex. As a Bonus Action, you can magically hex one creature you can see within 60 feet. Until the hex ends, whenever that creature deals damage to you, you deal Psychic damage to it equal to your Proficiency Bonus. The hex ends early if you die, or after 24 hours. Once you use this feature, you can't do so again until you finish a Long Rest."
+    },
+    "greatoldonepatron-create-thrall": {
+      "name": "Create Thrall",
+      "description": "You gain the ability to infect a Humanoid's mind with the alien magic of your patron. You can cast Dominate Monster on a Humanoid as an action, without expending a spell slot. When you cast it this way, the spell's duration is 1 hour, it requires no Concentration, and the target has Disadvantage on the saving throw. While a creature is affected by this casting, it has the Charmed condition immunity from sources other than you. Once you use this feature, you can't use it again until you finish a Long Rest."
     },
     "soulknife-psionic-power": {
       "name": "Psionic Power",

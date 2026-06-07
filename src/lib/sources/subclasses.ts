@@ -1433,6 +1433,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'archfeypatron-beguiling-defenses' } },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Bewitching Magic: after casting an Enchantment/Illusion spell with a Warlock slot, cast Misty Step as part of the same action without a slot
+          { type: 'feature', feature: { id: 'archfeypatron-bewitching-magic' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   celestialpatron: {
@@ -1490,6 +1497,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'celestialpatron-celestial-resilience' } },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Searing Vengeance: Reaction when you/an ally within 60 ft drops to 0 HP — Radiant burst (2d8 + CHA) and Blind nearby foes; the creature rises with 1 HP; 1/long rest
+          { type: 'feature', feature: { id: 'celestialpatron-searing-vengeance' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   fiendpatron: {
@@ -1539,6 +1553,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Fiendish Resilience: after short/long rest, choose one damage type to gain resistance to (runtime choice — no static resistance grant)
           { type: 'feature', feature: { id: 'fiendpatron-fiendish-resilience' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Hurl Through Hell: on a hit, teleport the target through the Lower Planes; it returns next turn taking 10d10 Psychic damage; 1/long rest
+          { type: 'feature', feature: { id: 'fiendpatron-hurl-through-hell' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1598,6 +1619,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Eldritch Hex: one creature you can see becomes Hexed; if it damages you, it takes psychic damage = PB; 1/day
           { type: 'feature', feature: { id: 'greatoldonepatron-eldritch-hex' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Create Thrall: cast Dominate Monster on a Humanoid as an action without a slot (1 hour, no Concentration); the thrall is immune to Charm from others; 1/long rest
+          { type: 'feature', feature: { id: 'greatoldonepatron-create-thrall' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
