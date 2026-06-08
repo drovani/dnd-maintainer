@@ -1326,10 +1326,10 @@ describe('getSubclassSource — Oath of Devotion', () => {
     expect(getSubclassSource('oathofdevotion')).toBeDefined();
   });
 
-  it('oathofdevotion has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
+  it('oathofdevotion has 8 feature levels (L3, L5, L7, L9, L13, L15, L17, L20)', () => {
     const source = getSubclassSource('oathofdevotion');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
+    expect(source?.features).toHaveLength(8);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 15, 17, 20]);
   });
 
   it('oathofdevotion level 3 grants sacred-weapon and L3 spell grants (holy-rebuke removed: not a 2024 PHB option)', () => {
@@ -1416,6 +1416,28 @@ describe('getSubclassSource — Oath of Devotion', () => {
       ])
     );
   });
+
+  it('oathofdevotion level 15 grants smite-of-protection feature', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level15 = source?.features.find((f) => f.classLevel === 15);
+    expect(level15).toBeDefined();
+    expect(level15?.grants).toHaveLength(1);
+    expect(level15?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofdevotion-smite-of-protection' },
+    });
+  });
+
+  it('oathofdevotion level 20 grants holy-nimbus feature', () => {
+    const source = getSubclassSource('oathofdevotion');
+    const level20 = source?.features.find((f) => f.classLevel === 20);
+    expect(level20).toBeDefined();
+    expect(level20?.grants).toHaveLength(1);
+    expect(level20?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofdevotion-holy-nimbus' },
+    });
+  });
 });
 
 describe('getSubclassSource — Oath of Glory', () => {
@@ -1423,10 +1445,10 @@ describe('getSubclassSource — Oath of Glory', () => {
     expect(getSubclassSource('oathofglory')).toBeDefined();
   });
 
-  it('oathofglory has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
+  it('oathofglory has 8 feature levels (L3, L5, L7, L9, L13, L15, L17, L20)', () => {
     const source = getSubclassSource('oathofglory');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
+    expect(source?.features).toHaveLength(8);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 15, 17, 20]);
   });
 
   it('oathofglory level 3 grants peerless-athlete, inspiring-smite, and L3 spell grants', () => {
@@ -1513,6 +1535,28 @@ describe('getSubclassSource — Oath of Glory', () => {
       ])
     );
   });
+
+  it('oathofglory level 15 grants glorious-defense feature', () => {
+    const source = getSubclassSource('oathofglory');
+    const level15 = source?.features.find((f) => f.classLevel === 15);
+    expect(level15).toBeDefined();
+    expect(level15?.grants).toHaveLength(1);
+    expect(level15?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofglory-glorious-defense' },
+    });
+  });
+
+  it('oathofglory level 20 grants living-legend feature', () => {
+    const source = getSubclassSource('oathofglory');
+    const level20 = source?.features.find((f) => f.classLevel === 20);
+    expect(level20).toBeDefined();
+    expect(level20?.grants).toHaveLength(1);
+    expect(level20?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofglory-living-legend' },
+    });
+  });
 });
 
 describe('getSubclassSource — Oath of the Ancients', () => {
@@ -1520,10 +1564,10 @@ describe('getSubclassSource — Oath of the Ancients', () => {
     expect(getSubclassSource('oathofancients')).toBeDefined();
   });
 
-  it('oathofancients has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
+  it('oathofancients has 8 feature levels (L3, L5, L7, L9, L13, L15, L17, L20)', () => {
     const source = getSubclassSource('oathofancients');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
+    expect(source?.features).toHaveLength(8);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 15, 17, 20]);
   });
 
   it('oathofancients level 3 grants natures-wrath (with saveDC:cha) and L3 spell grants; turn-the-faithless removed', () => {
@@ -1623,6 +1667,28 @@ describe('getSubclassSource — Oath of the Ancients', () => {
       ])
     );
   });
+
+  it('oathofancients level 15 grants undying-sentinel feature', () => {
+    const source = getSubclassSource('oathofancients');
+    const level15 = source?.features.find((f) => f.classLevel === 15);
+    expect(level15).toBeDefined();
+    expect(level15?.grants).toHaveLength(1);
+    expect(level15?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofancients-undying-sentinel' },
+    });
+  });
+
+  it('oathofancients level 20 grants elder-champion feature', () => {
+    const source = getSubclassSource('oathofancients');
+    const level20 = source?.features.find((f) => f.classLevel === 20);
+    expect(level20).toBeDefined();
+    expect(level20?.grants).toHaveLength(1);
+    expect(level20?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofancients-elder-champion' },
+    });
+  });
 });
 
 describe('getSubclassSource — Oath of Vengeance', () => {
@@ -1630,10 +1696,10 @@ describe('getSubclassSource — Oath of Vengeance', () => {
     expect(getSubclassSource('oathofvengeance')).toBeDefined();
   });
 
-  it('oathofvengeance has 6 feature levels (L3, L5, L7, L9, L13, L17)', () => {
+  it('oathofvengeance has 8 feature levels (L3, L5, L7, L9, L13, L15, L17, L20)', () => {
     const source = getSubclassSource('oathofvengeance');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 17]);
+    expect(source?.features).toHaveLength(8);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 7, 9, 13, 15, 17, 20]);
   });
 
   it('oathofvengeance level 3 grants vow-of-enmity and L3 spell grants; abjure-enemy removed', () => {
@@ -1720,6 +1786,28 @@ describe('getSubclassSource — Oath of Vengeance', () => {
         expect.objectContaining({ type: 'spell', spellId: 'scrying', alwaysPrepared: true }),
       ])
     );
+  });
+
+  it('oathofvengeance level 15 grants soul-of-vengeance feature', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level15 = source?.features.find((f) => f.classLevel === 15);
+    expect(level15).toBeDefined();
+    expect(level15?.grants).toHaveLength(1);
+    expect(level15?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofvengeance-soul-of-vengeance' },
+    });
+  });
+
+  it('oathofvengeance level 20 grants avenging-angel feature', () => {
+    const source = getSubclassSource('oathofvengeance');
+    const level20 = source?.features.find((f) => f.classLevel === 20);
+    expect(level20).toBeDefined();
+    expect(level20?.grants).toHaveLength(1);
+    expect(level20?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'oathofvengeance-avenging-angel' },
+    });
   });
 });
 
@@ -2073,10 +2161,10 @@ describe('getSubclassSource — Aberrant Sorcery', () => {
     expect(getSubclassSource('aberrantsorcery')).toBeDefined();
   });
 
-  it('aberrantsorcery has 5 feature levels (L3, L5, L6, L7, L9)', () => {
+  it('aberrantsorcery has 7 feature levels (L3, L5, L6, L7, L9, L14, L18)', () => {
     const source = getSubclassSource('aberrantsorcery');
-    expect(source?.features).toHaveLength(5);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 14, 18]);
   });
 
   it('aberrantsorcery level 3 grants telepathic-speech feature and 4 L3 spell grants (no subclass-spells stub)', () => {
@@ -2168,6 +2256,28 @@ describe('getSubclassSource — Aberrant Sorcery', () => {
       ])
     );
   });
+
+  it('aberrantsorcery level 14 grants revelation-in-flesh feature', () => {
+    const source = getSubclassSource('aberrantsorcery');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'aberrantsorcery-revelation-in-flesh' },
+    });
+  });
+
+  it('aberrantsorcery level 18 grants warping-implosion feature', () => {
+    const source = getSubclassSource('aberrantsorcery');
+    const level18 = source?.features.find((f) => f.classLevel === 18);
+    expect(level18).toBeDefined();
+    expect(level18?.grants).toHaveLength(1);
+    expect(level18?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'aberrantsorcery-warping-implosion' },
+    });
+  });
 });
 
 describe('getSubclassSource — Clockwork Sorcery', () => {
@@ -2175,10 +2285,10 @@ describe('getSubclassSource — Clockwork Sorcery', () => {
     expect(getSubclassSource('clockworksorcery')).toBeDefined();
   });
 
-  it('clockworksorcery has 6 feature levels (L3, L5, L6, L7, L9, L14)', () => {
+  it('clockworksorcery has 7 feature levels (L3, L5, L6, L7, L9, L14, L18)', () => {
     const source = getSubclassSource('clockworksorcery');
-    expect(source?.features).toHaveLength(6);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 14]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 14, 18]);
   });
 
   it('clockworksorcery level 3 grants restore-balance feature and 4 L3 spell grants (no subclass-spells stub, no trance-of-order)', () => {
@@ -2268,6 +2378,17 @@ describe('getSubclassSource — Clockwork Sorcery', () => {
       feature: { id: 'clockworksorcery-trance-of-order' },
     });
   });
+
+  it('clockworksorcery level 18 grants clockwork-cavalcade feature', () => {
+    const source = getSubclassSource('clockworksorcery');
+    const level18 = source?.features.find((f) => f.classLevel === 18);
+    expect(level18).toBeDefined();
+    expect(level18?.grants).toHaveLength(1);
+    expect(level18?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'clockworksorcery-clockwork-cavalcade' },
+    });
+  });
 });
 
 describe('getSubclassSource — Draconic Sorcery', () => {
@@ -2275,10 +2396,10 @@ describe('getSubclassSource — Draconic Sorcery', () => {
     expect(getSubclassSource('draconicsorcery')).toBeDefined();
   });
 
-  it('draconicsorcery has 5 feature levels (L3, L5, L6, L7, L9)', () => {
+  it('draconicsorcery has 7 feature levels (L3, L5, L6, L7, L9, L14, L18)', () => {
     const source = getSubclassSource('draconicsorcery');
-    expect(source?.features).toHaveLength(5);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9]);
+    expect(source?.features).toHaveLength(7);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9, 14, 18]);
   });
 
   it('draconicsorcery level 3 grants 8 items: hp-bonus, armor-class, draconic language, 10-option feature-choice, 4 spell grants (no inert stubs)', () => {
@@ -2359,6 +2480,28 @@ describe('getSubclassSource — Draconic Sorcery', () => {
       feature: { id: 'draconicsorcery-elemental-affinity' },
     });
   });
+
+  it('draconicsorcery level 14 grants dragon-wings feature', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'draconicsorcery-dragon-wings' },
+    });
+  });
+
+  it('draconicsorcery level 18 grants dragon-companion feature', () => {
+    const source = getSubclassSource('draconicsorcery');
+    const level18 = source?.features.find((f) => f.classLevel === 18);
+    expect(level18).toBeDefined();
+    expect(level18?.grants).toHaveLength(1);
+    expect(level18?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'draconicsorcery-dragon-companion' },
+    });
+  });
 });
 
 describe('getSubclassSource — Wild Magic Sorcery', () => {
@@ -2366,10 +2509,10 @@ describe('getSubclassSource — Wild Magic Sorcery', () => {
     expect(getSubclassSource('wildmagicsorcery')).toBeDefined();
   });
 
-  it('wildmagicsorcery has 2 feature levels (L3, L6)', () => {
+  it('wildmagicsorcery has 4 feature levels (L3, L6, L14, L18)', () => {
     const source = getSubclassSource('wildmagicsorcery');
-    expect(source?.features).toHaveLength(2);
-    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6]);
+    expect(source?.features).toHaveLength(4);
+    expect(source?.features.map((f) => f.classLevel)).toEqual([3, 6, 14, 18]);
   });
 
   it('wildmagicsorcery level 3 grants 2 features: wild-magic-surge and tides-of-chaos (no subclass spells, no subclass-spells stub)', () => {
@@ -2405,6 +2548,28 @@ describe('getSubclassSource — Wild Magic Sorcery', () => {
     expect(level6?.grants[0]).toMatchObject({
       type: 'feature',
       feature: { id: 'wildmagicsorcery-bend-luck' },
+    });
+  });
+
+  it('wildmagicsorcery level 14 grants controlled-chaos feature', () => {
+    const source = getSubclassSource('wildmagicsorcery');
+    const level14 = source?.features.find((f) => f.classLevel === 14);
+    expect(level14).toBeDefined();
+    expect(level14?.grants).toHaveLength(1);
+    expect(level14?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'wildmagicsorcery-controlled-chaos' },
+    });
+  });
+
+  it('wildmagicsorcery level 18 grants tamed-surge feature', () => {
+    const source = getSubclassSource('wildmagicsorcery');
+    const level18 = source?.features.find((f) => f.classLevel === 18);
+    expect(level18).toBeDefined();
+    expect(level18?.grants).toHaveLength(1);
+    expect(level18?.grants[0]).toMatchObject({
+      type: 'feature',
+      feature: { id: 'wildmagicsorcery-tamed-surge' },
     });
   });
 });
