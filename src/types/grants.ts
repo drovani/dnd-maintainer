@@ -287,7 +287,16 @@ export type ResourcePoolMax =
       readonly mode: 'level-steps';
       readonly classId: ClassId;
       readonly steps: readonly { readonly minLevel: number; readonly value: number }[];
-    };
+    }
+  /**
+   * The max equals the character's Proficiency Bonus — e.g. the 2024 Paladin's
+   * Channel Divinity uses (PB per rest). PB is derived from the character's level
+   * in the named class (`getProficiencyBonus`). Like `class-level`/`level-steps`,
+   * this keys on a single class's level, so it is correct for single-class
+   * characters; multiclass PB (which scales with total character level) is a
+   * pre-existing limitation shared by all level-keyed modes.
+   */
+  | { readonly mode: 'proficiency-bonus'; readonly classId: ClassId };
 
 export type ResourcePoolRegen = 'short-rest' | 'long-rest';
 

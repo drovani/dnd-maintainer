@@ -1,6 +1,7 @@
 import type { GrantBundle } from '@/types/sources';
 import type { ResolvedResourcePool } from '@/types/resolved';
 import { collectGrantsByType, getClassLevel } from '@/lib/resolver/helpers';
+import { getProficiencyBonus } from '@/lib/dnd-helpers';
 import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
@@ -29,14 +30,22 @@ export function resolveResourcePools(bundles: readonly GrantBundle[]): readonly 
     if (maxSpec.mode === 'fixed') {
       max = maxSpec.value;
     } else {
-      // class-level and level-steps both key off the character's level in the named class.
+      // class-level, level-steps, and proficiency-bonus all key off the character's level in the named class.
       const level = getClassLevel(bundles, maxSpec.classId);
       if (level === 0) {
         logger.warn(
           `resource-pool "${grant.poolId}" declares classId "${maxSpec.classId}" but no bundles for that class were found — max will be 0`
         );
       }
-      max = maxSpec.mode === 'level-steps' ? stepValueForLevel(maxSpec.steps, level) : level;
+      if (maxSpec.mode === 'level-steps') {
+        max = stepValueForLevel(maxSpec.steps, level);
+      } else if (maxSpec.mode === 'proficiency-bonus') {
+        // PB derived from the class level (correct for single-class characters).
+        max = level === 0 ? 0 : getProficiencyBonus(level);
+      } else {
+        // class-level
+        max = level;
+      }
     }
     pools.push({
       poolId: grant.poolId,

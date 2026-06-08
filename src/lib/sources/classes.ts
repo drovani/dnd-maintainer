@@ -715,6 +715,13 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
         grants: [
           { type: 'feature', feature: { id: 'paladin-divine-smite' } },
           { type: 'feature', feature: { id: 'paladin-channel-divinity' } },
+          // Channel Divinity uses = Proficiency Bonus per rest (2024 PHB); regained on a Short or Long Rest.
+          {
+            type: 'resource-pool',
+            poolId: 'channel-divinity',
+            max: { mode: 'proficiency-bonus', classId: 'paladin' },
+            regen: 'short-rest',
+          },
         ],
       },
       { grants: [{ type: 'subclass', classId: 'paladin', key: createChoiceKey('subclass', 'class', 'paladin', 0) }] },

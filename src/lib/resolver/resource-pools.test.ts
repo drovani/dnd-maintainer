@@ -129,6 +129,44 @@ describe('resolveResourcePools', () => {
     });
   });
 
+  describe('proficiency-bonus max (Paladin Channel Divinity)', () => {
+    const CD_GRANT: GrantBundle['grants'][number] = {
+      type: 'resource-pool',
+      poolId: 'channel-divinity',
+      max: { mode: 'proficiency-bonus', classId: 'paladin' },
+      regen: 'short-rest',
+    };
+
+    function paladinAtLevel(level: number): GrantBundle[] {
+      const bundles: GrantBundle[] = [];
+      for (let l = 1; l <= level; l++) {
+        bundles.push({
+          source: { origin: 'class', id: 'paladin', level: l },
+          grants: l === 2 ? [CD_GRANT] : [],
+        });
+      }
+      return bundles;
+    }
+
+    // Levels chosen to discriminate PB from a raw-level fallthrough: at L5 PB=3≠5, at L9 PB=4≠9, etc.
+    it.each([
+      [2, 2],
+      [4, 2],
+      [5, 3],
+      [8, 3],
+      [9, 4],
+      [12, 4],
+      [13, 5],
+      [16, 5],
+      [17, 6],
+      [20, 6],
+    ])('resolves channel-divinity max to PB at paladin level %i', (level, expectedMax) => {
+      const pools = resolveResourcePools(paladinAtLevel(level));
+      expect(pools).toHaveLength(1);
+      expect(pools[0]).toMatchObject({ poolId: 'channel-divinity', max: expectedMax, regen: 'short-rest' });
+    });
+  });
+
   it('tags pool with its source bundle', () => {
     const bundles = classBundles('monk', 4, [
       {
