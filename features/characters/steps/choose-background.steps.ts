@@ -59,18 +59,51 @@ Then('the background grants {int} points of ability score increases', function (
 
 Then('the character gains an origin feat', function (this: DndWorld) {
   const background = getBackgroundSource(this.build!.backgroundId as BackgroundId);
-  const featGrant = background?.grants.find((g) => g.type === 'feat');
-  if (!featGrant) {
-    throw new Error(`Background "${this.build!.backgroundId}" defines no origin feat grant`);
+  if (!background) {
+    throw new Error(`No background source found for "${this.build!.backgroundId}"`);
   }
-  const featId = (featGrant as { readonly featId: FeatId }).featId;
-  const hasFeat = this.resolved!.features.some((f) => f.source.origin === 'feat' && f.source.id === featId);
-  if (!hasFeat) {
-    const featSources = this.resolved!.features
-      .filter((f) => f.source.origin === 'feat')
-      .map((f) => (f.source.origin === 'feat' ? f.source.id : null));
-    throw new Error(
-      `Expected origin feat "${featId}" in resolved features; feat-origin sources: ${JSON.stringify(featSources)}`
+
+  // Case (a): background uses a `feat` grant — the feat expands into its own feat-origin bundle,
+  // so the resolved feature carries source.origin === 'feat'.
+  const featGrant = background.grants.find((g) => g.type === 'feat');
+  if (featGrant) {
+    const featId = (featGrant as { readonly featId: FeatId }).featId;
+    const hasFeat = this.resolved!.features.some((f) => f.source.origin === 'feat' && f.source.id === featId);
+    if (!hasFeat) {
+      const featSources = this.resolved!.features
+        .filter((f) => f.source.origin === 'feat')
+        .map((f) => (f.source.origin === 'feat' ? f.source.id : null));
+      throw new Error(
+        `Expected origin feat "${featId}" in resolved features; feat-origin sources: ${JSON.stringify(featSources)}`
+      );
+    }
+    return;
+  }
+
+  // Case (b): background uses a direct `feature` grant whose id matches feat-magic-initiate-*.
+  // The feature resolves directly from the background bundle, so source.origin === 'background'.
+  const directFeatFeatureGrant = background.grants.find(
+    (g) =>
+      g.type === 'feature' &&
+      (g as { readonly feature: { readonly id: string } }).feature.id.startsWith('feat-magic-initiate-')
+  );
+  if (directFeatFeatureGrant) {
+    const featureId = (directFeatFeatureGrant as { readonly feature: { readonly id: string } }).feature.id;
+    const hasFeature = this.resolved!.features.some(
+      (f) => f.source.origin === 'background' && f.feature.id === featureId
     );
+    if (!hasFeature) {
+      const backgroundFeatures = this.resolved!.features
+        .filter((f) => f.source.origin === 'background')
+        .map((f) => f.feature.id);
+      throw new Error(
+        `Expected direct-feature "${featureId}" in resolved features; background-origin features: ${JSON.stringify(backgroundFeatures)}`
+      );
+    }
+    return;
   }
+
+  throw new Error(
+    `Background "${this.build!.backgroundId}" defines no origin feat grant (neither feat nor direct Magic Initiate feature)`
+  );
 });

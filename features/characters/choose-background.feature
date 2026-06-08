@@ -33,12 +33,5 @@ Feature: Choose a background during character creation
       Examples:
         | background |
         | soldier    |
-
-      # Magic Initiate backgrounds model their origin feat as a fixed `feature`
-      # grant (not a `feat` grant) because Magic Initiate feats don't resolve
-      # through collectBundles — tracked in issue #178. Spec-ahead until then.
-      @future
-      Examples:
-        | background |
         | acolyte    |
         | sage       |
