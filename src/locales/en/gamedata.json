@@ -647,6 +647,34 @@
       "name": "Bend Luck",
       "description": "You have the ability to twist fate using your Wild Magic. As a Reaction when another creature you can see within 60 feet makes an attack roll, ability check, or saving throw, you can spend 2 Sorcery Points and roll 1d4. You can add or subtract the number rolled from the creature's roll (your choice)."
     },
+    "aberrantsorcery-revelation-in-flesh": {
+      "name": "Revelation in Flesh",
+      "description": "As a Bonus Action, you can spend 1–4 Sorcery Points to magically transform your body for 10 minutes, gaining one benefit per Sorcery Point spent: Swim Speed equal to your Speed and the ability to breathe underwater, Fly Speed equal to your Speed, the ability to see 60 feet through solid objects and terrain (though it appears blurry and you can't see through more than 10 feet), or the ability to move through and occupy the space of other creatures."
+    },
+    "aberrantsorcery-warping-implosion": {
+      "name": "Warping Implosion",
+      "description": "As a Magic action, you can teleport to an unoccupied space you can see within 120 feet of you. Immediately after you disappear, each creature within 30 feet of the space you left must succeed on a Strength saving throw or take 3d10 Force damage and be pulled toward your destination space, ending up in the nearest unoccupied space to that destination."
+    },
+    "clockworksorcery-clockwork-cavalcade": {
+      "name": "Clockwork Cavalcade",
+      "description": "As a Magic action, you summon a parade of semicorporeal clockwork creatures that fill a 30-foot Cube you can see within 120 feet of you for 1 round; inside that Cube, each creature that has fewer than half its Hit Points regains Hit Points equal to 10d10, damaged objects are fully repaired, and each spell of level 6 or lower ends."
+    },
+    "draconicsorcery-dragon-wings": {
+      "name": "Dragon Wings",
+      "description": "As a Bonus Action, you sprout dragon wings from your back, gaining a Fly Speed equal to your Speed, unless you are wearing armor not made to accommodate your wings."
+    },
+    "draconicsorcery-dragon-companion": {
+      "name": "Dragon Companion",
+      "description": "You can channel the draconic power within you into a concentrated magical form; as a Bonus Action, you can expend a spell slot to summon a CR-appropriate dragon of your ancestor's type that obeys your commands."
+    },
+    "wildmagicsorcery-controlled-chaos": {
+      "name": "Controlled Chaos",
+      "description": "You gain a modicum of control over the surges of your wild magic. Whenever you roll on the Wild Magic Surge table, you can roll twice and use either number."
+    },
+    "wildmagicsorcery-tamed-surge": {
+      "name": "Tamed Surge",
+      "description": "You can use your Wild Magic in a limited but controlled way. Immediately after you cast a Sorcerer spell of level 1 or higher, you can create the effect of your choice from the Wild Magic Surge table; once you use this feature, you can't use it again until you finish a Long Rest."
+    },
     "archfeypatron-steps-of-the-fey": {
       "name": "Steps of the Fey",
       "description": "Misty Step is always prepared for you. When you cast it, you can also choose one of two rider effects: Refreshing Step (you or an ally within 30 feet regains hit points equal to a roll of your Warlock spell slot die) or Taunting Step (one creature of your choice within 5 feet of the space you left must succeed on a Wisdom saving throw or have Disadvantage on attack rolls against creatures other than you until the start of your next turn). You can cast Misty Step a number of times equal to your Proficiency Bonus per Long Rest without expending a spell slot."
@@ -658,6 +686,10 @@
     "archfeypatron-beguiling-defenses": {
       "name": "Beguiling Defenses",
       "description": "Your patron teaches you how to guard your mind and turn another's charms back on them. You are immune to the Charmed condition. If a creature attempts to Charm you, you can use your Reaction to force the creature to make a Wisdom saving throw against your spell save DC. On a failed save, the creature has the Charmed condition for 1 minute or until it takes any damage."
+    },
+    "archfeypatron-bewitching-magic": {
+      "name": "Bewitching Magic",
+      "description": "Your patron grants you the ability to weave together your fey magic. Immediately after you cast an Enchantment or Illusion spell using a Warlock spell slot, you can cast Misty Step as part of the same action and without expending a spell slot."
     },
     "celestialpatron-healing-light": {
       "name": "Healing Light",
@@ -671,6 +703,10 @@
       "name": "Celestial Resilience",
       "description": "You gain the ability to infuse yourself and your allies with the energy of the Upper Planes. When you finish a Short or Long Rest, you gain Temporary Hit Points equal to your Warlock level plus your Charisma modifier. Additionally, choose up to five creatures you can see at the end of the rest. Those creatures each gain Temporary Hit Points equal to half your Warlock level."
     },
+    "celestialpatron-searing-vengeance": {
+      "name": "Searing Vengeance",
+      "description": "The radiant power you channel allows you to resist death. When you or an ally you can see within 60 feet of you is about to drop to 0 hit points, you can use your Reaction to have radiant energy erupt from the creature: each creature of your choice within 30 feet takes Radiant damage equal to 2d8 plus your Charisma modifier and has the Blinded condition until the end of the current turn. The downed creature then regains hit points equal to half its hit point maximum and stands up if it so chooses. Once you use this feature, you can't use it again until you finish a Long Rest."
+    },
     "fiendpatron-dark-ones-blessing": {
       "name": "Dark One's Blessing",
       "description": "When you reduce a hostile creature to 0 hit points, you gain Temporary Hit Points equal to your Charisma modifier plus your Warlock level (minimum 1)."
@@ -683,6 +719,10 @@
       "name": "Fiendish Resilience",
       "description": "You can choose one damage type when you finish a Short or Long Rest. You gain Resistance to that damage type until you choose a different one with this feature. Damage from magical weapons and silver weapons ignores this resistance."
     },
+    "fiendpatron-hurl-through-hell": {
+      "name": "Hurl Through Hell",
+      "description": "When you hit a creature with an attack roll, you can use this feature to instantly transport the target through the Lower Planes. The creature disappears and hurtles through a nightmare landscape. At the end of your next turn, the target returns to the space it previously occupied or the nearest unoccupied space. If the target is not a Fiend, it takes 10d10 Psychic damage as it reels from its horrific experience. Once you use this feature, you can't use it again until you finish a Long Rest."
+    },
     "greatoldonepatron-awakened-mind": {
       "name": "Awakened Mind",
       "description": "Your patron's knowledge invades your very being. You can communicate telepathically with any creature you can see within 30 feet of you. You don't need to share a language with the creature for it to understand your telepathic communications, but the creature must be able to understand at least one language."
@@ -694,6 +734,10 @@
     "greatoldonepatron-eldritch-hex": {
       "name": "Eldritch Hex",
       "description": "Your patron grants you a powerful hex. As a Bonus Action, you can magically hex one creature you can see within 60 feet. Until the hex ends, whenever that creature deals damage to you, you deal Psychic damage to it equal to your Proficiency Bonus. The hex ends early if you die, or after 24 hours. Once you use this feature, you can't do so again until you finish a Long Rest."
+    },
+    "greatoldonepatron-create-thrall": {
+      "name": "Create Thrall",
+      "description": "You gain the ability to infect a Humanoid's mind with the alien magic of your patron. You can cast Dominate Monster on a Humanoid as an action, without expending a spell slot. When you cast it this way, the spell's duration is 1 hour, it requires no Concentration, and the target has Disadvantage on the saving throw. While a creature is affected by this casting, it has the Charmed condition immunity from sources other than you. Once you use this feature, you can't use it again until you finish a Long Rest."
     },
     "soulknife-psionic-power": {
       "name": "Psionic Power",
@@ -1538,6 +1582,38 @@
     "oathofvengeance-relentless-avenger": {
       "name": "Relentless Avenger",
       "description": "Your supernatural focus helps you close off a foe's retreat. When you hit a creature with an opportunity attack, you can move up to half your speed immediately after the attack as part of the same Reaction. This movement doesn't provoke opportunity attacks."
+    },
+    "oathofdevotion-smite-of-protection": {
+      "name": "Smite of Protection",
+      "description": "Whenever you use your Divine Smite, you can simultaneously protect those near you — all friendly creatures within 30 feet of you gain a bonus to their Armor Class equal to your Charisma modifier (minimum 1) until the start of your next turn."
+    },
+    "oathofdevotion-holy-nimbus": {
+      "name": "Holy Nimbus",
+      "description": "As a Magic action, you emit an aura of sunlight for 1 minute; the aura extends 60 feet from you, grants you Advantage on saving throws against spells cast by Fiends and Undead, and deals 10 Radiant damage to any enemy that starts its turn in the aura."
+    },
+    "oathofglory-glorious-defense": {
+      "name": "Glorious Defense",
+      "description": "When you or another creature you can see within 10 feet of you is hit by an attack roll, you can use your Reaction to grant a bonus to the target's AC equal to your Charisma modifier (minimum 1) against that attack; if the attack then misses, you can make one weapon attack against the attacker as part of the same Reaction."
+    },
+    "oathofglory-living-legend": {
+      "name": "Living Legend",
+      "description": "You can empower yourself with the legends that have built up around you as a Bonus Action, gaining a divine aura for 1 minute: you can use your Charisma modifier instead of the relevant ability modifier for weapon attack rolls, once per turn when you hit you can add your Charisma modifier to the damage, and when you fail a saving throw you can reroll it once."
+    },
+    "oathofancients-undying-sentinel": {
+      "name": "Undying Sentinel",
+      "description": "When you are reduced to 0 Hit Points and not killed outright, you can choose to drop to 1 Hit Point instead (no action required); you can't use this feature again until you finish a Long Rest, and you can no longer be aged magically nor do you age naturally."
+    },
+    "oathofancients-elder-champion": {
+      "name": "Elder Champion",
+      "description": "As a Bonus Action, you assume the form of an ancient nature spirit for 1 minute: you regain 10 Hit Points at the start of each of your turns, spells by Druids and Rangers cost you 1 fewer spell slot level, and enemies within 10 feet of you must succeed on a Constitution saving throw (DC = 8 + your Proficiency Bonus + your Strength modifier) or be Frightened for 1 minute."
+    },
+    "oathofvengeance-soul-of-vengeance": {
+      "name": "Soul of Vengeance",
+      "description": "Whenever a creature under the effect of your Vow of Enmity makes an attack, you can use your Reaction to make a melee weapon attack against that creature if it is within reach."
+    },
+    "oathofvengeance-avenging-angel": {
+      "name": "Avenging Angel",
+      "description": "As a Bonus Action, you assume the form of an angelic avenger for 1 hour: you sprout wings granting you a Fly Speed equal to your walking speed, and enemies that start their turn within 30 feet of you must succeed on a Wisdom saving throw (DC = 8 + your Proficiency Bonus + your Charisma modifier) or be Frightened of you for 1 minute."
     },
     "beastmaster-primal-companion": {
       "name": "Primal Companion",
