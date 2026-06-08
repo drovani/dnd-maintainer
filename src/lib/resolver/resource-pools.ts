@@ -42,9 +42,11 @@ export function resolveResourcePools(bundles: readonly GrantBundle[]): readonly 
       } else if (maxSpec.mode === 'proficiency-bonus') {
         // PB derived from the class level (correct for single-class characters).
         max = level === 0 ? 0 : getProficiencyBonus(level);
-      } else {
-        // class-level
+      } else if (maxSpec.mode === 'class-level') {
         max = level;
+      } else {
+        const _exhaustive: never = maxSpec;
+        throw new Error(`Unhandled resource-pool max mode: ${JSON.stringify(_exhaustive)}`);
       }
     }
     pools.push({
