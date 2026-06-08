@@ -616,6 +616,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'psiwarrior-guarded-mind' } },
         ],
       },
+      {
+        classLevel: 15,
+        grants: [
+          // Spend Psionic Energy dice to grant half cover to allies within 30 ft as a Bonus Action
+          { type: 'feature', feature: { id: 'psiwarrior-bulwark-of-force' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Cast Telekinesis (no spell slot, Concentration) using INT as spellcasting ability; also expands Psionic Strike
+          { type: 'feature', feature: { id: 'psiwarrior-telekinetic-master' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   // Monk
@@ -761,11 +775,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Smite of Protection: when you use Divine Smite, all allies within 30 ft gain a bonus to AC equal to your CHA modifier until your next turn
+          { type: 'feature', feature: { id: 'oathofdevotion-smite-of-protection' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Devotion L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'commune', alwaysPrepared: true },
           { type: 'spell', spellId: 'flame-strike', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Holy Nimbus: action, 1 minute — aura of sunlight (60 ft radius), enemies starting turn in it take 10 Radiant damage; advantage on saves vs spells cast by Fiends and Undead
+          { type: 'feature', feature: { id: 'oathofdevotion-holy-nimbus' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -816,11 +844,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Glorious Defense: when you or another creature within 10 ft is hit, use your Reaction to grant a bonus to AC equal to your CHA modifier; if the attack misses, you can make one weapon attack against the attacker
+          { type: 'feature', feature: { id: 'oathofglory-glorious-defense' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Glory L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'legend-lore', alwaysPrepared: true },
           { type: 'spell', spellId: 'yolandes-regal-presence', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Living Legend: bonus action, 1 minute — become a figure of divine glory; CHA modifier replaces any ability modifier for attack rolls, and once per turn on a hit add CHA modifier as extra damage; failed saves can be rerolled once
+          { type: 'feature', feature: { id: 'oathofglory-living-legend' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -872,11 +914,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Undying Sentinel: when you are reduced to 0 HP, you can drop to 1 HP instead; you can't use this feature again until you finish a Long Rest; you don't age and can't be aged magically
+          { type: 'feature', feature: { id: 'oathofancients-undying-sentinel' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Ancients L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'commune-with-nature', alwaysPrepared: true },
           { type: 'spell', spellId: 'tree-stride', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Elder Champion: action, 1 minute — transform into avatar of ancient nature; regain 10 HP at start of each turn, Druid spells cost 1 fewer spell slot, enemies within 10 ft must save vs frightened/blinded by nature
+          { type: 'feature', feature: { id: 'oathofancients-elder-champion' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -926,11 +982,25 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         ],
       },
       {
+        classLevel: 15,
+        grants: [
+          // Soul of Vengeance: when a creature under your Vow of Enmity makes an attack, you can use your Reaction to make a melee weapon attack against it if it is within reach
+          { type: 'feature', feature: { id: 'oathofvengeance-soul-of-vengeance' } },
+        ],
+      },
+      {
         classLevel: 17,
         grants: [
           // Vengeance L17 oath spells (Paladin 17 → spell level 5)
           { type: 'spell', spellId: 'hold-monster', alwaysPrepared: true },
           { type: 'spell', spellId: 'scrying', alwaysPrepared: true },
+        ],
+      },
+      {
+        classLevel: 20,
+        grants: [
+          // Avenging Angel: action, 1 hour — sprout wings (fly speed 60 ft), aura of menace (30 ft radius) frightens enemies on failed WIS save for 1 minute, frightened creatures grant you Advantage and your attacks deal extra 2d8 Radiant damage
+          { type: 'feature', feature: { id: 'oathofvengeance-avenging-angel' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1244,6 +1314,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'spell', spellId: 'telekinesis', alwaysPrepared: true },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Revelation in Flesh: spend 1-4 Sorcery Points as a Bonus Action to gain temporary transformation benefits (swim speed, flight, see through walls, pass through objects) for 10 minutes
+          { type: 'feature', feature: { id: 'aberrantsorcery-revelation-in-flesh' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Warping Implosion: Action - teleport up to 120 ft; each creature within 30 ft of origin must succeed on STR save or take 3d10 Force damage and be pulled 30 ft toward your destination
+          { type: 'feature', feature: { id: 'aberrantsorcery-warping-implosion' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   clockworksorcery: {
@@ -1292,6 +1376,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         // Trance of Order: 2024 PHB places this at L14 (not L3)
         classLevel: 14,
         grants: [{ type: 'feature', feature: { id: 'clockworksorcery-trance-of-order' } }],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Clockwork Cavalcade: Action - summon a parade of clockwork creatures that restore HP, repair objects, and dispel spells within a 30-ft Cube
+          { type: 'feature', feature: { id: 'clockworksorcery-clockwork-cavalcade' } },
+        ],
       },
     ] satisfies readonly SubclassFeature[],
   },
@@ -1358,6 +1449,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'spell', spellId: 'summon-dragon', alwaysPrepared: true },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Dragon Wings: sprout dragon wings as a Bonus Action, gaining a Fly speed equal to your Speed
+          { type: 'feature', feature: { id: 'draconicsorcery-dragon-wings' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Dragon Companion: your draconic power manifests as a permanent Dragon form you can assume as a Bonus Action (no cost)
+          { type: 'feature', feature: { id: 'draconicsorcery-dragon-companion' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   wildmagicsorcery: {
@@ -1378,6 +1483,20 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Bend Luck: Reaction — spend 2 Sorcery Points to add or subtract 1d4 from a creature's roll within 60 ft
           { type: 'feature', feature: { id: 'wildmagicsorcery-bend-luck' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Controlled Chaos: when you roll on the Wild Magic Surge table, you can roll twice and choose which result applies
+          { type: 'feature', feature: { id: 'wildmagicsorcery-controlled-chaos' } },
+        ],
+      },
+      {
+        classLevel: 18,
+        grants: [
+          // Tamed Surge: immediately after casting a Sorcerer spell of L1+, you can create a controlled Wild Magic Surge effect chosen from the table (no d20 roll needed)
+          { type: 'feature', feature: { id: 'wildmagicsorcery-tamed-surge' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1431,6 +1550,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Beguiling Defenses: immunity to Charmed; when a creature tries to Charm you, target makes WIS save or is Charmed by you for 1 minute
           { type: 'feature', feature: { id: 'archfeypatron-beguiling-defenses' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Bewitching Magic: after casting an Enchantment/Illusion spell with a Warlock slot, cast Misty Step as part of the same action without a slot
+          { type: 'feature', feature: { id: 'archfeypatron-bewitching-magic' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1490,6 +1616,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'celestialpatron-celestial-resilience' } },
         ],
       },
+      {
+        classLevel: 14,
+        grants: [
+          // Searing Vengeance: Reaction when you/an ally within 60 ft drops to 0 HP — Radiant burst (2d8 + CHA) and Blind nearby foes; the creature rises with 1 HP; 1/long rest
+          { type: 'feature', feature: { id: 'celestialpatron-searing-vengeance' } },
+        ],
+      },
     ] satisfies readonly SubclassFeature[],
   },
   fiendpatron: {
@@ -1539,6 +1672,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Fiendish Resilience: after short/long rest, choose one damage type to gain resistance to (runtime choice — no static resistance grant)
           { type: 'feature', feature: { id: 'fiendpatron-fiendish-resilience' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Hurl Through Hell: on a hit, teleport the target through the Lower Planes; it returns next turn taking 10d10 Psychic damage; 1/long rest
+          { type: 'feature', feature: { id: 'fiendpatron-hurl-through-hell' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],
@@ -1598,6 +1738,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Eldritch Hex: one creature you can see becomes Hexed; if it damages you, it takes psychic damage = PB; 1/day
           { type: 'feature', feature: { id: 'greatoldonepatron-eldritch-hex' } },
+        ],
+      },
+      {
+        classLevel: 14,
+        grants: [
+          // Create Thrall: cast Dominate Monster on a Humanoid as an action without a slot (1 hour, no Concentration); the thrall is immune to Charm from others; 1/long rest
+          { type: 'feature', feature: { id: 'greatoldonepatron-create-thrall' } },
         ],
       },
     ] satisfies readonly SubclassFeature[],

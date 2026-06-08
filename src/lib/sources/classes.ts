@@ -411,16 +411,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'feature', feature: { id: 'druid-wild-shape-improvement-1' } },
         ],
       },
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
       { grants: [{ type: 'feature', feature: { id: 'druid-wild-resurgence' } }] },
-      {
-        grants: [
-          { type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 1), points: 2, from: null },
-          { type: 'feature', feature: { id: 'druid-wild-shape-improvement-2' } },
-        ],
-      },
-      EMPTY_LEVEL,
       EMPTY_LEVEL,
       {
         grants: [
@@ -444,12 +435,21 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
         ],
       },
+      {
+        grants: [
+          { type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 1), points: 2, from: null },
+          { type: 'feature', feature: { id: 'druid-wild-shape-improvement-2' } },
+        ],
+      },
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
+      EMPTY_LEVEL,
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 2), points: 2, from: null }] },
       EMPTY_LEVEL,
       EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 3), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'druid-improved-elemental-fury' } }] },
+      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 3), points: 2, from: null }] },
+      EMPTY_LEVEL,
       { grants: [{ type: 'feature', feature: { id: 'druid-beast-spells' } }] },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 4), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'druid-archdruid' } }] },
