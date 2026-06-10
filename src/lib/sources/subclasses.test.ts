@@ -1642,15 +1642,31 @@ describe('getSubclassSource — Oath of the Ancients', () => {
     );
   });
 
-  it('oathofancients level 7 grants aura-of-warding feature', () => {
+  it('oathofancients level 7 grants aura-of-warding + Necrotic/Psychic/Radiant resistance (2024, issue #195)', () => {
     const source = getSubclassSource('oathofancients');
     const level7 = source?.features.find((f) => f.classLevel === 7);
     expect(level7).toBeDefined();
-    expect(level7?.grants).toHaveLength(1);
-    expect(level7?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'oathofancients-aura-of-warding' },
-    });
+    expect(level7?.grants).toHaveLength(4);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'oathofancients-aura-of-warding' }),
+        }),
+        expect.objectContaining({ type: 'resistance', damageType: 'necrotic' }),
+        expect.objectContaining({ type: 'resistance', damageType: 'psychic' }),
+        expect.objectContaining({ type: 'resistance', damageType: 'radiant' }),
+      ])
+    );
+  });
+
+  it('oathofancients aura-of-warding no longer models 2014 "damage from spells"', () => {
+    const source = getSubclassSource('oathofancients');
+    const level7 = source?.features.find((f) => f.classLevel === 7);
+    // 2024 PHB grants typed resistance, not source-conditional "spells" resistance.
+    const damageTypes = level7?.grants.filter((g) => g.type === 'resistance').map((g) => g.damageType);
+    expect(damageTypes).toEqual(expect.arrayContaining(['necrotic', 'psychic', 'radiant']));
+    expect(damageTypes).toHaveLength(3);
   });
 
   it('oathofancients level 9 grants 2 spell grants with alwaysPrepared:true', () => {

@@ -1573,7 +1573,7 @@
     },
     "oathofancients-aura-of-warding": {
       "name": "Aura of Warding",
-      "description": "Ancient magic lies so heavily upon you that it forms an aura. You and friendly creatures within 10 feet of you have resistance to damage from spells while you are conscious. At level 18, the range of this aura increases to 30 feet."
+      "description": "Ancient magic lies so heavily upon you that it forms an aura. While you aren't Incapacitated, you and your allies within 10 feet of you have Resistance to Necrotic, Psychic, and Radiant damage. At level 18, the range of this aura increases to 30 feet."
     },
     "oathofvengeance-vow-of-enmity": {
       "name": "Vow of Enmity",

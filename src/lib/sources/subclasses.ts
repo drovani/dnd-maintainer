@@ -895,9 +895,15 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 7,
         grants: [
-          // Aura of Warding: you and allies within 10 ft have resistance to damage from spells; expands at L18
-          // Modeled as feature grant — source-conditional resistance (spells only) doesn't map to existing resistance grant
+          // Aura of Warding (2024 PHB): you and allies within 10 ft have Resistance to Necrotic,
+          // Psychic, and Radiant damage (while you are not Incapacitated). The 2024 rule is typed
+          // (not the 2014 "damage from spells"), so it maps to plain typed resistance grants — the
+          // paladin is always inside their own aura. The aura-to-allies + range expansion at L18 is
+          // descriptive (carried in the feature text) and out of scope here.
           { type: 'feature', feature: { id: 'oathofancients-aura-of-warding' } },
+          { type: 'resistance', damageType: 'necrotic' },
+          { type: 'resistance', damageType: 'psychic' },
+          { type: 'resistance', damageType: 'radiant' },
         ],
       },
       {
