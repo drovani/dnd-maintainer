@@ -1320,11 +1320,7 @@ export const SPELL_CATALOG = [
     concentration: true,
     castingTime: 'Action',
     range: '90 feet',
-    components: {
-      verbal: true,
-      somatic: true,
-      material: 'a feather, tuft of fur, and fish tail inside a gilded acorn worth 200+ GP',
-    },
+    components: { verbal: true, somatic: true, material: 'a gilded acorn worth 200+ GP' },
     duration: 'Up to 1 hour',
     // 2024 PHB: native to druid, ranger, wizard
     nativeClasses: ['druid', 'ranger', 'wizard'],
