@@ -7,6 +7,9 @@ const logger = getLogger('dnd-helpers');
 export type { AbilityKey };
 export type AbilityName = AbilityKey;
 
+/** The six ability score keys, in canonical order. */
+export const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const satisfies readonly AbilityKey[];
+
 export function getAbilityModifier(score: number): number {
   return Math.floor((score - 10) / 2);
 }
@@ -417,18 +420,7 @@ export const DND_SPECIES = [
     speed: 30,
     languages: ['common'],
     languageChoices: 2,
-    lineages: [
-      'black',
-      'blue',
-      'brass',
-      'bronze',
-      'copper',
-      'gold',
-      'green',
-      'red',
-      'silver',
-      'white',
-    ] as const,
+    lineages: ['black', 'blue', 'brass', 'bronze', 'copper', 'gold', 'green', 'red', 'silver', 'white'] as const,
   },
   {
     id: 'dwarf',

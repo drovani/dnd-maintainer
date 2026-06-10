@@ -711,3 +711,70 @@ describe('ChoicePicker feat-choice — allowedFeats (disabled-book no-data-loss)
     expect(screen.queryByText('disabledSourceBook')).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// ChoicePicker — saving-throw-choice branch (issue #202)
+// ---------------------------------------------------------------------------
+
+const SAVE_SOURCE = { origin: 'subclass' as const, id: 'gloomstalker' as const, classId: 'ranger' as const, level: 7 };
+
+const SAVE_CHOICE: PendingChoice & { type: 'saving-throw-choice' } = {
+  type: 'saving-throw-choice',
+  choiceKey: 'saving-throw-choice:subclass:gloomstalker:0' as ChoiceKey,
+  source: SAVE_SOURCE,
+  category: 'saving-throw',
+  count: 1,
+  from: ['int', 'cha'],
+};
+
+describe('ChoicePicker saving-throw-choice', () => {
+  it('renders one checkbox per ability in the from pool', () => {
+    render(<ChoicePicker choice={SAVE_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />);
+    expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+  });
+
+  it('falls back to all six abilities when from is null', () => {
+    render(
+      <ChoicePicker
+        choice={{ ...SAVE_CHOICE, from: null, count: 6 }}
+        currentDecision={undefined}
+        onDecide={vi.fn()}
+        onClear={vi.fn()}
+      />
+    );
+    expect(screen.getAllByRole('checkbox')).toHaveLength(6);
+  });
+
+  it('selecting an ability calls onDecide with the saving-throw-choice decision', () => {
+    const onDecide = vi.fn();
+    render(<ChoicePicker choice={SAVE_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />);
+    // Pool order is ['int','cha']; click the second (cha)
+    fireEvent.click(screen.getAllByRole('checkbox')[1]);
+    expect(onDecide).toHaveBeenCalledWith(SAVE_CHOICE.choiceKey, {
+      type: 'saving-throw-choice',
+      savingThrows: ['cha'],
+    });
+  });
+
+  it('disables unselected checkboxes once count is reached', () => {
+    const currentDecision: ChoiceDecision = { type: 'saving-throw-choice', savingThrows: ['int'] };
+    render(
+      <ChoicePicker choice={SAVE_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    // int (index 0) selected; cha (index 1) disabled because count=1 is reached
+    expect(checkboxes[0]).toBeChecked();
+    expect(checkboxes[1]).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('deselecting the last choice calls onClear', () => {
+    const onClear = vi.fn();
+    const currentDecision: ChoiceDecision = { type: 'saving-throw-choice', savingThrows: ['cha'] };
+    render(
+      <ChoicePicker choice={SAVE_CHOICE} currentDecision={currentDecision} onDecide={vi.fn()} onClear={onClear} />
+    );
+    // cha is index 1 and currently checked — unchecking it clears the decision
+    fireEvent.click(screen.getAllByRole('checkbox')[1]);
+    expect(onClear).toHaveBeenCalledWith(SAVE_CHOICE.choiceKey);
+  });
+});

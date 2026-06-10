@@ -409,6 +409,46 @@ describe('Pending ASI and Subclass choices', () => {
   });
 });
 
+describe('Pending saving-throw-choice (issue #202)', () => {
+  const saveKey = createChoiceKey('saving-throw-choice', 'subclass', 'gloomstalker', 0);
+  const saveBundles: GrantBundle[] = [
+    {
+      source: { origin: 'subclass', id: 'gloomstalker', classId: 'ranger', level: 7 },
+      grants: [
+        {
+          type: 'proficiency-choice',
+          category: 'saving-throw',
+          key: saveKey,
+          count: 1,
+          from: ['int', 'cha'],
+        },
+      ],
+    },
+  ];
+
+  it('emits a pending saving-throw-choice with from pool and count when undecided', () => {
+    const result = resolveCharacter({ ...baseInput, bundles: saveBundles });
+    const pending = result.pendingChoices.find((c) => c.type === 'saving-throw-choice');
+    expect(pending).toBeDefined();
+    expect(pending?.choiceKey).toBe(saveKey);
+    if (pending?.type === 'saving-throw-choice') {
+      expect(pending.count).toBe(1);
+      expect(pending.from).toEqual(['int', 'cha']);
+    }
+  });
+
+  it('does not emit pending and applies the save once decided', () => {
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles: saveBundles,
+      choices: { [saveKey]: { type: 'saving-throw-choice' as const, savingThrows: ['cha'] as AbilityKey[] } },
+    });
+    expect(result.pendingChoices.find((c) => c.type === 'saving-throw-choice')).toBeUndefined();
+    expect(result.savingThrows.cha.proficient).toBe(true);
+    expect(result.savingThrows.int.proficient).toBe(false);
+  });
+});
+
 describe('ASI from-constraint validation', () => {
   it('emits pending ASI with from pool when background soldier has no decision', () => {
     const soldierAsiKey = createChoiceKey('asi', 'background', 'soldier', 0);

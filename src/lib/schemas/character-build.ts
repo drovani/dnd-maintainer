@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  ABILITY_KEYS,
   DND_SKILLS,
   DND_TOOL_PROFICIENCIES,
   isFeatId,
@@ -33,7 +34,7 @@ export const ChoiceDecisionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('skill-choice'), skills: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('tool-choice'), tools: z.array(z.string()).readonly() }),
   z.object({ type: z.literal('language-choice'), languages: z.array(z.string()).readonly() }),
-  z.object({ type: z.literal('saving-throw-choice'), savingThrows: z.array(z.string()).readonly() }),
+  z.object({ type: z.literal('saving-throw-choice'), savingThrows: z.array(z.enum(ABILITY_KEYS)).readonly() }),
   z.object({
     type: z.literal('expertise-choice'),
     skills: z.array(z.enum(SKILL_IDS)).readonly(),
