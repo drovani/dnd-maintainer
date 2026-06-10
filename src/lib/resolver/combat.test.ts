@@ -284,6 +284,22 @@ describe('resolveSpeed', () => {
     expect(result.walk!.value).toBe(30);
     expect(result.walk!.condition).toBeUndefined();
   });
+
+  it('condition travels with the winning value when a higher conditional grant replaces a lower one', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'speed', mode: 'fly', value: 25 }],
+      },
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 10 },
+        grants: [{ type: 'speed', mode: 'fly', value: 30, condition: 'not-enclosed' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.fly!.value).toBe(30);
+    expect(result.fly!.condition).toBe('not-enclosed');
+  });
 });
 
 describe('resolveAc', () => {

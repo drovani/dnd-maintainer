@@ -65,6 +65,8 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
     } else if (grant.value > existing.value) {
       bestPerMode.set(grant.mode, { value: grant.value, sources: [source], condition: grant.condition });
     } else if (grant.value === existing.value) {
+      // Condition is not reconciled on a value tie (first-seen wins) — fine while
+      // Stormborn is the only conditional speed and no two fly grants tie.
       existing.sources.push(source);
     }
   }
