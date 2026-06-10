@@ -23,7 +23,8 @@ import { collectGrantsByType } from '@/lib/resolver/helpers';
 export function resolveSavingThrows(
   abilities: Readonly<Record<AbilityKey, ResolvedAbility>>,
   bundles: readonly GrantBundle[],
-  proficiencyBonus: number
+  proficiencyBonus: number,
+  choices: Readonly<Record<ChoiceKey, ChoiceDecision>>
 ): Readonly<
   Record<
     AbilityKey,
@@ -38,11 +39,29 @@ export function resolveSavingThrows(
   const keys: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
   const proficientAbilities = new Map<AbilityKey, SourceTag[]>();
+  const markProficient = (ability: AbilityKey, source: SourceTag): void => {
+    const existing = proficientAbilities.get(ability) ?? [];
+    existing.push(source);
+    proficientAbilities.set(ability, existing);
+  };
+
+  // Flat saving-throw proficiency grants (e.g. class saves, Gloom Stalker Iron Mind WIS).
   for (const { grant, source } of collectGrantsByType(bundles, 'proficiency')) {
     if (grant.category === 'saving-throw') {
-      const existing = proficientAbilities.get(grant.id) ?? [];
-      existing.push(source);
-      proficientAbilities.set(grant.id, existing);
+      markProficient(grant.id, source);
+    }
+  }
+
+  // Saving-throw proficiency-choice grants — apply the chosen abilities once decided.
+  // The `from` pool is enforced so a stale/invalid decision can't grant an off-list save.
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
+    if (grant.category !== 'saving-throw') continue;
+    const decision = choices[grant.key];
+    if (decision?.type !== 'saving-throw-choice') continue;
+    const pool = grant.from;
+    for (const ability of decision.savingThrows.slice(0, grant.count)) {
+      if (pool && !pool.includes(ability)) continue;
+      markProficient(ability, source);
     }
   }
 
@@ -278,6 +297,9 @@ export function resolveProficiencies(
       }
       case 'skill':
         // Handled in resolveSkills()
+        break;
+      case 'saving-throw':
+        // Handled in resolveSavingThrows()
         break;
       case 'armor':
       case 'weapon':

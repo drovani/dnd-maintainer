@@ -29,7 +29,7 @@ const POSITIVE_ABILITIES: Readonly<Record<string, ResolvedAbility>> = {
 
 describe('resolveSavingThrows', () => {
   it('all abilities not proficient with no bundles', () => {
-    const result = resolveSavingThrows(ZERO_ABILITIES, NO_BUNDLES, 2);
+    const result = resolveSavingThrows(ZERO_ABILITIES, NO_BUNDLES, 2, {});
     for (const key of ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const) {
       expect(result[key].proficient).toBe(false);
       expect(result[key].bonus).toBe(0);
@@ -47,7 +47,7 @@ describe('resolveSavingThrows', () => {
         ],
       },
     ];
-    const result = resolveSavingThrows(ZERO_ABILITIES, bundles, 2);
+    const result = resolveSavingThrows(ZERO_ABILITIES, bundles, 2, {});
     expect(result.str.proficient).toBe(true);
     expect(result.str.bonus).toBe(2);
     expect(result.con.proficient).toBe(true);
@@ -63,7 +63,7 @@ describe('resolveSavingThrows', () => {
         grants: [{ type: 'proficiency', category: 'saving-throw', id: 'str' }],
       },
     ];
-    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2);
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2, {});
     // STR: modifier 3 + proficiencyBonus 2 = 5
     expect(result.str.bonus).toBe(5);
     // DEX: modifier 2, not proficient
@@ -78,13 +78,13 @@ describe('resolveSavingThrows', () => {
         grants: [{ type: 'proficiency', category: 'saving-throw', id: 'str' }],
       },
     ];
-    const result = resolveSavingThrows(ZERO_ABILITIES, bundles, 2);
+    const result = resolveSavingThrows(ZERO_ABILITIES, bundles, 2, {});
     expect(result.str.sources).toHaveLength(1);
     expect(result.str.sources[0]).toEqual(source);
   });
 
   it('non-proficient save breakdown has exactly one ability component', () => {
-    const result = resolveSavingThrows(POSITIVE_ABILITIES, NO_BUNDLES, 2);
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, NO_BUNDLES, 2, {});
     // DEX mod = 2, not proficient
     expect(result.dex.breakdown).toHaveLength(1);
     expect(result.dex.breakdown[0]).toEqual({ type: 'ability', value: 2, label: 'dex' });
@@ -97,7 +97,7 @@ describe('resolveSavingThrows', () => {
         grants: [{ type: 'proficiency', category: 'saving-throw', id: 'str' }],
       },
     ];
-    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2);
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2, {});
     // STR mod = 3, proficiency = 2
     expect(result.str.breakdown).toHaveLength(2);
     expect(result.str.breakdown[0]).toEqual({ type: 'ability', value: 3, label: 'str' });
@@ -111,9 +111,84 @@ describe('resolveSavingThrows', () => {
         grants: [{ type: 'proficiency', category: 'saving-throw', id: 'str' }],
       },
     ];
-    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2);
+    const result = resolveSavingThrows(POSITIVE_ABILITIES, bundles, 2, {});
     const sum = result.str.breakdown.reduce((acc, c) => acc + c.value, 0);
     expect(sum).toBe(result.str.bonus);
+  });
+
+  // ── saving-throw proficiency-choice (issue #202) ──────────────────────────
+  describe('saving-throw proficiency-choice', () => {
+    const SAVE_CHOICE_KEY = 'saving-throw-choice:subclass:gloomstalker:0' as ChoiceKey;
+    const SAVE_SOURCE = { origin: 'subclass', id: 'gloomstalker', classId: 'ranger', level: 7 } as const;
+    const saveChoiceBundles: GrantBundle[] = [
+      {
+        source: SAVE_SOURCE,
+        grants: [
+          {
+            type: 'proficiency-choice',
+            category: 'saving-throw',
+            key: SAVE_CHOICE_KEY,
+            count: 1,
+            from: ['int', 'cha'],
+          },
+        ],
+      },
+    ];
+    const withDecision = (decision: ChoiceDecision): Record<ChoiceKey, ChoiceDecision> => ({
+      [SAVE_CHOICE_KEY]: decision,
+    });
+
+    it('marks the chosen ability proficient once decided', () => {
+      const result = resolveSavingThrows(
+        POSITIVE_ABILITIES,
+        saveChoiceBundles,
+        2,
+        withDecision({ type: 'saving-throw-choice', savingThrows: ['cha'] })
+      );
+      expect(result.cha.proficient).toBe(true);
+      // CHA mod 1 + proficiency 2 = 3
+      expect(result.cha.bonus).toBe(3);
+      expect(result.int.proficient).toBe(false);
+    });
+
+    it('does not mark anything proficient when undecided', () => {
+      const result = resolveSavingThrows(POSITIVE_ABILITIES, saveChoiceBundles, 2, {});
+      expect(result.int.proficient).toBe(false);
+      expect(result.cha.proficient).toBe(false);
+    });
+
+    it('ignores a decision for an ability outside the from pool', () => {
+      // 'wis' is not in the from pool ['int','cha'] — must be filtered out
+      const result = resolveSavingThrows(
+        POSITIVE_ABILITIES,
+        saveChoiceBundles,
+        2,
+        withDecision({ type: 'saving-throw-choice', savingThrows: ['wis'] })
+      );
+      expect(result.wis.proficient).toBe(false);
+    });
+
+    it('respects count, only applying the first N chosen abilities', () => {
+      const result = resolveSavingThrows(
+        POSITIVE_ABILITIES,
+        saveChoiceBundles,
+        2,
+        withDecision({ type: 'saving-throw-choice', savingThrows: ['cha', 'int'] })
+      );
+      expect(result.cha.proficient).toBe(true);
+      // count is 1, so the second pick (int) is not applied
+      expect(result.int.proficient).toBe(false);
+    });
+
+    it('records the grant source on the chosen save', () => {
+      const result = resolveSavingThrows(
+        POSITIVE_ABILITIES,
+        saveChoiceBundles,
+        2,
+        withDecision({ type: 'saving-throw-choice', savingThrows: ['int'] })
+      );
+      expect(result.int.sources).toEqual([SAVE_SOURCE]);
+    });
   });
 });
 

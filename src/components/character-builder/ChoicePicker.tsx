@@ -5,7 +5,14 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DND_LANGUAGES, DND_SKILLS, type LanguageId, type SkillId, type ToolProficiencyId } from '@/lib/dnd-helpers';
+import {
+  DND_LANGUAGES,
+  DND_SKILLS,
+  type AbilityKey,
+  type LanguageId,
+  type SkillId,
+  type ToolProficiencyId,
+} from '@/lib/dnd-helpers';
 import type { FeatId } from '@/lib/dnd-helpers';
 import { getItemDef, getItemNameKey, WEAPON_CATALOG } from '@/lib/sources/items';
 import { getBundleDef, getBundleNameKey, getItemsForSlot, resolveBundleRef } from '@/lib/sources/bundles';
@@ -46,9 +53,14 @@ interface ChoicePickerProps {
 
 const ALL_SKILL_IDS: readonly SkillId[] = DND_SKILLS.map((s) => s.id);
 const ALL_LANGUAGE_IDS: readonly LanguageId[] = DND_LANGUAGES;
+const ALL_ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 
 function isSkillId(id: string): id is SkillId {
   return (ALL_SKILL_IDS as readonly string[]).includes(id);
+}
+
+function isAbilityKey(id: string): id is AbilityKey {
+  return (ALL_ABILITY_KEYS as readonly string[]).includes(id);
 }
 
 function isLanguageId(id: string): id is LanguageId {
@@ -106,6 +118,55 @@ export function ChoicePicker({
                 />
                 <Label htmlFor={`choice-skill-${choice.choiceKey}-${skillId}`} className="flex-1 cursor-pointer">
                   {t(`skills.${skillId}`)}
+                </Label>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (choice.type === 'saving-throw-choice') {
+    const rawPool = choice.from ?? ALL_ABILITY_KEYS;
+    const pool: readonly AbilityKey[] = rawPool.filter(isAbilityKey);
+    const current = currentDecision?.type === 'saving-throw-choice' ? currentDecision.savingThrows : [];
+    const atMax = current.length >= choice.count;
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            {tc('characterBuilder.pendingChoices.savingThrowChoice', { count: choice.count })}
+          </p>
+          <Badge variant="outline" className="text-xs">
+            {current.length} / {choice.count}
+          </Badge>
+        </div>
+        <div className="space-y-1">
+          {pool.map((abilityKey) => {
+            const isSelected = current.includes(abilityKey);
+            const isDisabled = atMax && !isSelected;
+            return (
+              <div
+                key={abilityKey}
+                className="flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50"
+              >
+                <Checkbox
+                  id={`choice-save-${choice.choiceKey}-${abilityKey}`}
+                  checked={isSelected}
+                  disabled={isDisabled}
+                  onCheckedChange={(checked) => {
+                    const next = checked ? [...current, abilityKey] : current.filter((a) => a !== abilityKey);
+                    if (next.length === 0) {
+                      onClear(choice.choiceKey);
+                    } else {
+                      onDecide(choice.choiceKey, { type: 'saving-throw-choice', savingThrows: next });
+                    }
+                  }}
+                />
+                <Label htmlFor={`choice-save-${choice.choiceKey}-${abilityKey}`} className="flex-1 cursor-pointer">
+                  {t(`abilities.${abilityKey}`)}
                 </Label>
               </div>
             );

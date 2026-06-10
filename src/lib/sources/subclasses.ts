@@ -1110,8 +1110,12 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 7,
         grants: [
-          // Iron Mind (2024 PHB): grants Wisdom saving throw proficiency.
-          // 2024 Iron Mind grants flat Wisdom saving-throw proficiency.
+          // Iron Mind (2024 PHB): grants Wisdom saving throw proficiency. If you already have it
+          // (multiclass edge), you instead choose Intelligence or Charisma. The saving-throw
+          // proficiency-choice infra now exists (#202) to express that INT/CHA branch, but selecting
+          // it correctly is conditional on already having WIS proficiency from a prior source —
+          // conditional-grant support that doesn't exist yet (cf. #191). So single-class-correct
+          // flat WIS is applied here; the conditional branch awaits conditional-grant infra.
           { type: 'feature', feature: { id: 'gloomstalker-iron-mind' } },
           { type: 'proficiency', category: 'saving-throw', id: 'wis' },
         ],

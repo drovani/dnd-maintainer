@@ -155,6 +155,14 @@ export type PendingChoice =
       readonly from: readonly LanguageId[] | null;
     }
   | {
+      readonly type: 'saving-throw-choice';
+      readonly choiceKey: ChoiceKey;
+      readonly source: SourceTag;
+      readonly category: 'saving-throw';
+      readonly count: number;
+      readonly from: readonly AbilityKey[] | null;
+    }
+  | {
       readonly type: 'expertise-choice';
       readonly choiceKey: ChoiceKey;
       readonly source: SourceTag;

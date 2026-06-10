@@ -27,6 +27,7 @@ const CHOICE_CATEGORIES = [
   'skill-choice',
   'tool-choice',
   'language-choice',
+  'saving-throw-choice',
   'ability-choice',
   'expertise-choice',
   'asi',
@@ -88,6 +89,7 @@ export type ChoiceDecision =
   | { readonly type: 'skill-choice'; readonly skills: readonly SkillId[] }
   | { readonly type: 'tool-choice'; readonly tools: readonly ToolProficiencyId[] }
   | { readonly type: 'language-choice'; readonly languages: readonly LanguageId[] }
+  | { readonly type: 'saving-throw-choice'; readonly savingThrows: readonly AbilityKey[] }
   | {
       readonly type: 'expertise-choice';
       readonly skills: readonly SkillId[];

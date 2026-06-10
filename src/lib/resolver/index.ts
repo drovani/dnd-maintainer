@@ -64,7 +64,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const conModifier = abilities.con.modifier;
   const dexModifier = abilities.dex.modifier;
 
-  const savingThrows = resolveSavingThrows(abilities, bundles, proficiencyBonus);
+  const savingThrows = resolveSavingThrows(abilities, bundles, proficiencyBonus, choices);
   const skills = resolveSkills(abilities, bundles, proficiencyBonus, choices);
   const proficiencies = resolveProficiencies(bundles, choices);
   const features = resolveFeatures(bundles, abilities, proficiencyBonus);
@@ -142,6 +142,23 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
           choiceKey: grant.key,
           source,
           category: 'skill',
+          count: grant.count,
+          from: grant.from,
+        });
+      }
+    }
+  }
+
+  // Unresolved saving-throw-choice grants (e.g. the conditional Iron Mind INT/CHA branch)
+  for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
+    if (grant.category === 'saving-throw') {
+      const decision = choices[grant.key];
+      if (!decision || decision.type !== 'saving-throw-choice') {
+        pendingChoices.push({
+          type: 'saving-throw-choice',
+          choiceKey: grant.key,
+          source,
+          category: 'saving-throw',
           count: grant.count,
           from: grant.from,
         });

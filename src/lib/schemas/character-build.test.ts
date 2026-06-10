@@ -126,6 +126,21 @@ describe('ChoiceDecisionSchema', () => {
     });
   });
 
+  describe('saving-throw-choice', () => {
+    it('accepts valid saving-throw-choice', () => {
+      const result = ChoiceDecisionSchema.safeParse({
+        type: 'saving-throw-choice',
+        savingThrows: ['int', 'cha'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing savingThrows field', () => {
+      const result = ChoiceDecisionSchema.safeParse({ type: 'saving-throw-choice' });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('tool-choice', () => {
     it('accepts valid tool-choice', () => {
       const result = ChoiceDecisionSchema.safeParse({

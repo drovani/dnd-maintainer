@@ -114,6 +114,13 @@ export type ProficiencyChoiceGrant =
       readonly key: ChoiceKey;
       readonly count: number;
       readonly from: readonly LanguageId[] | null;
+    }
+  | {
+      readonly type: 'proficiency-choice';
+      readonly category: 'saving-throw';
+      readonly key: ChoiceKey;
+      readonly count: number;
+      readonly from: readonly AbilityKey[] | null;
     };
 
 export interface SkillExpertiseGrant {
