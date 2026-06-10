@@ -180,6 +180,19 @@ describe('resolveSavingThrows', () => {
       expect(result.int.proficient).toBe(false);
     });
 
+    it('filters out-of-pool picks before counting, so a valid pick is not wasted', () => {
+      // 'wis' is out of pool ['int','cha']; with filter-then-slice it is dropped before
+      // the count cap, so the valid 'cha' pick still lands (count=1).
+      const result = resolveSavingThrows(
+        POSITIVE_ABILITIES,
+        saveChoiceBundles,
+        2,
+        withDecision({ type: 'saving-throw-choice', savingThrows: ['wis', 'cha'] })
+      );
+      expect(result.cha.proficient).toBe(true);
+      expect(result.wis.proficient).toBe(false);
+    });
+
     it('records the grant source on the chosen save', () => {
       const result = resolveSavingThrows(
         POSITIVE_ABILITIES,

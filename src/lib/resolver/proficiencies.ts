@@ -53,14 +53,15 @@ export function resolveSavingThrows(
   }
 
   // Saving-throw proficiency-choice grants — apply the chosen abilities once decided.
-  // The `from` pool is enforced so a stale/invalid decision can't grant an off-list save.
+  // Filter to the `from` pool first, then cap at `count` (mirrors the expertise-choice
+  // handler) so a stale out-of-pool pick can't occupy and waste a count slot.
   for (const { grant, source } of collectGrantsByType(bundles, 'proficiency-choice')) {
     if (grant.category !== 'saving-throw') continue;
     const decision = choices[grant.key];
     if (decision?.type !== 'saving-throw-choice') continue;
     const pool = grant.from;
-    for (const ability of decision.savingThrows.slice(0, grant.count)) {
-      if (pool && !pool.includes(ability)) continue;
+    const picks = decision.savingThrows.filter((ability) => pool === null || pool.includes(ability));
+    for (const ability of picks.slice(0, grant.count)) {
       markProficient(ability, source);
     }
   }

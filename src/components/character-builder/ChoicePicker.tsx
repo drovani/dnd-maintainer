@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
+  ABILITY_KEYS,
   DND_LANGUAGES,
   DND_SKILLS,
   type AbilityKey,
@@ -53,7 +54,7 @@ interface ChoicePickerProps {
 
 const ALL_SKILL_IDS: readonly SkillId[] = DND_SKILLS.map((s) => s.id);
 const ALL_LANGUAGE_IDS: readonly LanguageId[] = DND_LANGUAGES;
-const ALL_ABILITY_KEYS: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+const ALL_ABILITY_KEYS: readonly AbilityKey[] = ABILITY_KEYS;
 
 function isSkillId(id: string): id is SkillId {
   return (ALL_SKILL_IDS as readonly string[]).includes(id);
