@@ -9,7 +9,7 @@ import type {
   ClassId,
   FeatId,
 } from '@/lib/dnd-helpers';
-import type { FeatureDef, DamageTypeId, HitDie, SpeedMode, ResourcePoolRegen } from '@/types/grants';
+import type { FeatureDef, DamageTypeId, HitDie, SpeedMode, SpeedCondition, ResourcePoolRegen } from '@/types/grants';
 import type { SourceTag, FeatCategory } from '@/types/sources';
 import type { ChoiceKey } from '@/types/choices';
 import type {
@@ -27,6 +27,13 @@ export interface Sourced<T> {
   readonly value: T;
   readonly sources: readonly SourceTag[];
 }
+
+/**
+ * A resolved speed for one mode. Carries an optional descriptive `condition`
+ * (e.g. Stormborn fly only when not enclosed) for display; the condition is
+ * never evaluated — the value is always present.
+ */
+export type ResolvedSpeed = Sourced<number> & { readonly condition?: SpeedCondition };
 
 export interface ResolvedAbility {
   readonly base: number;
@@ -245,7 +252,7 @@ export interface ResolvedCharacter {
   readonly abilities: Readonly<Record<AbilityKey, ResolvedAbility>>;
   readonly hitDie: readonly { readonly die: HitDie; readonly count: number }[];
   readonly hitPoints: { readonly max: number };
-  readonly speed: Readonly<Partial<Record<SpeedMode, Sourced<number>>>>;
+  readonly speed: Readonly<Partial<Record<SpeedMode, ResolvedSpeed>>>;
   readonly initiative: number;
   readonly proficiencyBonus: number;
   readonly armorClass: ResolvedArmorClass;

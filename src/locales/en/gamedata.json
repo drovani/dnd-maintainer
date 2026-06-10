@@ -1393,7 +1393,7 @@
     },
     "circlesea-stormborn": {
       "name": "Stormborn",
-      "description": "You gain a Fly speed of 30 feet while you are not in a confined space. (Conditional fly speed is modeled as a descriptive feature pending conditional speed support.)"
+      "description": "You gain a Fly speed of 30 feet while you are not in an enclosed space, such as a cave or a building."
     },
     "circlestars-star-map": {
       "name": "Star Map",

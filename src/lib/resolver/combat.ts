@@ -1,6 +1,6 @@
-import type { SpeedMode } from '@/types/grants';
+import type { SpeedMode, SpeedCondition } from '@/types/grants';
 import type { GrantBundle, SourceTag } from '@/types/sources';
-import type { ResolvedArmorClass, Sourced } from '@/types/resolved';
+import type { ResolvedArmorClass, ResolvedSpeed } from '@/types/resolved';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 
 export function resolveHp(
@@ -39,13 +39,14 @@ export function resolveHp(
   return { max };
 }
 
-export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<Record<SpeedMode, Sourced<number>>>> {
+export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<Record<SpeedMode, ResolvedSpeed>>> {
   const speedGrants = collectGrantsByType(bundles, 'speed');
 
   // First pass: resolve all fixed-value grants, taking the highest per mode.
   // 'walk-equivalent' grants are deferred to a second pass once the walk
-  // speed is known.
-  const bestPerMode = new Map<SpeedMode, { value: number; sources: SourceTag[] }>();
+  // speed is known. The winning grant's optional `condition` (e.g. Stormborn's
+  // not-enclosed fly) is carried through for display; it is never evaluated.
+  const bestPerMode = new Map<SpeedMode, { value: number; sources: SourceTag[]; condition?: SpeedCondition }>();
   const walkEquivalent = new Map<SpeedMode, SourceTag[]>();
 
   for (const { grant, source } of speedGrants) {
@@ -60,9 +61,9 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
     }
     const existing = bestPerMode.get(grant.mode);
     if (!existing) {
-      bestPerMode.set(grant.mode, { value: grant.value, sources: [source] });
+      bestPerMode.set(grant.mode, { value: grant.value, sources: [source], condition: grant.condition });
     } else if (grant.value > existing.value) {
-      bestPerMode.set(grant.mode, { value: grant.value, sources: [source] });
+      bestPerMode.set(grant.mode, { value: grant.value, sources: [source], condition: grant.condition });
     } else if (grant.value === existing.value) {
       existing.sources.push(source);
     }
@@ -86,9 +87,9 @@ export function resolveSpeed(bundles: readonly GrantBundle[]): Readonly<Partial<
     }
   }
 
-  const result: Partial<Record<SpeedMode, Sourced<number>>> = {};
-  for (const [mode, { value, sources }] of bestPerMode) {
-    result[mode] = { value, sources };
+  const result: Partial<Record<SpeedMode, ResolvedSpeed>> = {};
+  for (const [mode, { value, sources, condition }] of bestPerMode) {
+    result[mode] = condition ? { value, sources, condition } : { value, sources };
   }
   return result;
 }

@@ -1038,15 +1038,17 @@ describe('getSubclassSource — Circle of the Sea', () => {
     );
   });
 
-  it('circlesea level 10 grants stormborn feature', () => {
+  it('circlesea level 10 grants stormborn feature + condition-tagged fly speed (issue #191)', () => {
     const source = getSubclassSource('circlesea');
     const level10 = source?.features.find((f) => f.classLevel === 10);
     expect(level10).toBeDefined();
-    expect(level10?.grants).toHaveLength(1);
-    expect(level10?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'circlesea-stormborn' },
-    });
+    expect(level10?.grants).toHaveLength(2);
+    expect(level10?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'circlesea-stormborn' }) }),
+        expect.objectContaining({ type: 'speed', mode: 'fly', value: 30, condition: 'not-enclosed' }),
+      ])
+    );
   });
 });
 

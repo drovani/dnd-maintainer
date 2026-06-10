@@ -501,8 +501,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 10,
         grants: [
-          // Fly speed 30 ft while in a non-enclosed space; conditional speed not supported — inert feature grant
+          // Stormborn: Fly speed 30 ft while not in an enclosed space (2024 PHB). Modeled as a
+          // condition-tagged speed grant (descriptive, not runtime-evaluated) plus the feature
+          // grant for the full description — mirrors the L6 Aquatic Affinity speed+feature pairing.
           { type: 'feature', feature: { id: 'circlesea-stormborn' } },
+          { type: 'speed', mode: 'fly', value: 30, condition: 'not-enclosed' },
         ],
       },
     ] satisfies readonly SubclassFeature[],

@@ -143,12 +143,23 @@ export interface FeatureGrant {
 
 export type SpeedMode = 'walk' | 'fly' | 'swim' | 'climb' | 'burrow';
 
+/**
+ * Environment condition that gates a speed (descriptive, not runtime-evaluated).
+ * The label is carried through to the resolved speed so the UI can show e.g.
+ * "Fly 30 ft (while not in an enclosed space)" without modeling enclosed-space detection.
+ * - `'not-enclosed'`: Circle of the Sea L10 Stormborn fly speed.
+ */
+export type SpeedCondition = 'not-enclosed';
+
 export interface SpeedGrant {
   readonly type: 'speed';
   readonly mode: SpeedMode;
   // `'walk-equivalent'` resolves to the character's resolved walking speed
   // (e.g. Circle of the Sea L6 Aquatic Affinity). Only meaningful on non-walk modes.
   readonly value: number | 'walk-equivalent';
+  // Optional descriptive gating condition (e.g. Stormborn fly only when not enclosed).
+  // Carried through to the resolved speed for display; never evaluated at runtime.
+  readonly condition?: SpeedCondition;
 }
 
 export type HitDie = 4 | 6 | 8 | 10 | 12;

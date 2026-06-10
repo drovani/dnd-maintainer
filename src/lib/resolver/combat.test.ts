@@ -259,6 +259,31 @@ describe('resolveSpeed', () => {
     const result = resolveSpeed(bundles);
     expect(result.swim!.sources).toEqual([{ origin: 'subclass', id: 'circlesea', classId: 'druid', level: 6 }]);
   });
+
+  // ── Conditional speeds (issue #191) ────────────────────────────────────────
+  it('carries a speed grant condition through to the resolved speed (Stormborn fly)', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'subclass', id: 'circlesea', classId: 'druid', level: 10 },
+        grants: [{ type: 'speed', mode: 'fly', value: 30, condition: 'not-enclosed' }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.fly!.value).toBe(30);
+    expect(result.fly!.condition).toBe('not-enclosed');
+  });
+
+  it('omits condition on an unconditional speed', () => {
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'species', id: 'human' },
+        grants: [{ type: 'speed', mode: 'walk', value: 30 }],
+      },
+    ];
+    const result = resolveSpeed(bundles);
+    expect(result.walk!.value).toBe(30);
+    expect(result.walk!.condition).toBeUndefined();
+  });
 });
 
 describe('resolveAc', () => {

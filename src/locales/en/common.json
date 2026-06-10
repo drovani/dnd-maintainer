@@ -439,6 +439,9 @@
       "hitPoints": "HIT POINTS",
       "proficiencyBonus": "Proficiency Bonus",
       "speed": "Speed",
+      "speedConditions": {
+        "not-enclosed": "while not in an enclosed space"
+      },
       "source": "Source: {{source}}",
       "maxHp": "Max HP",
       "currentHp": "Current HP",
