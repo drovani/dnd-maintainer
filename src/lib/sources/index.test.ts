@@ -32,12 +32,14 @@ import {
   getFeatSource,
   getItemSource,
   collectBundles,
+  gateGrantsByMinClassLevel,
   SPECIES_SOURCES,
   CLASS_SOURCES,
   SUBCLASS_SOURCES,
   BACKGROUND_SOURCES,
   FEAT_SOURCES,
 } from '@/lib/sources';
+import type { GrantBundle } from '@/types/sources';
 import { resolveCharacter } from '@/lib/resolver';
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
@@ -1293,5 +1295,82 @@ describe('feature-choice warning suppression boundary', () => {
     } finally {
       mockItemSources.value = null;
     }
+  });
+});
+
+describe('gateGrantsByMinClassLevel (issue #189)', () => {
+  const druidSubclassSource = { origin: 'subclass', id: 'circleland', classId: 'druid', level: 3 } as const;
+
+  const bundleWith = (source: GrantBundle['source'], grants: GrantBundle['grants']): GrantBundle => ({
+    source,
+    grants,
+  });
+
+  it('drops a subclass spell grant whose minClassLevel exceeds the druid level', () => {
+    const bundles = [
+      bundleWith(druidSubclassSource, [
+        { type: 'spell', spellId: 'burning-hands', alwaysPrepared: true },
+        { type: 'spell', spellId: 'fireball', alwaysPrepared: true, minClassLevel: 5 },
+      ]),
+    ];
+    const { bundles: out, warnings } = gateGrantsByMinClassLevel(bundles, new Map([['druid', 3]]));
+    const spellIds = out[0].grants.filter((g) => g.type === 'spell').map((g) => g.spellId);
+    expect(spellIds).toEqual(['burning-hands']); // fireball gated at druid 3
+    expect(warnings).toEqual([]);
+  });
+
+  it('keeps the grant once the druid level reaches minClassLevel', () => {
+    const bundles = [
+      bundleWith(druidSubclassSource, [{ type: 'spell', spellId: 'fireball', alwaysPrepared: true, minClassLevel: 5 }]),
+    ];
+    const { bundles: out } = gateGrantsByMinClassLevel(bundles, new Map([['druid', 5]]));
+    expect(out[0].grants).toHaveLength(1);
+  });
+
+  it('gates an alwaysPrepared:false (cantrip) grant the same way', () => {
+    const bundles = [
+      bundleWith(druidSubclassSource, [
+        { type: 'spell', spellId: 'fire-bolt', alwaysPrepared: false, minClassLevel: 5 },
+      ]),
+    ];
+    expect(gateGrantsByMinClassLevel(bundles, new Map([['druid', 3]])).bundles[0].grants).toHaveLength(0);
+    expect(gateGrantsByMinClassLevel(bundles, new Map([['druid', 5]])).bundles[0].grants).toHaveLength(1);
+  });
+
+  it('leaves grants without minClassLevel untouched (identity-preserving)', () => {
+    const bundles = [
+      bundleWith(druidSubclassSource, [{ type: 'spell', spellId: 'burning-hands', alwaysPrepared: true }]),
+    ];
+    const { bundles: out, warnings } = gateGrantsByMinClassLevel(bundles, new Map([['druid', 1]]));
+    expect(out[0]).toBe(bundles[0]); // same reference — no rebuild when nothing is filtered
+    expect(warnings).toEqual([]);
+  });
+
+  it('keeps a minClassLevel grant on a non-class source and warns instead of silently dropping', () => {
+    const bundles = [
+      bundleWith({ origin: 'species', id: 'human' }, [
+        { type: 'spell', spellId: 'fireball', alwaysPrepared: true, minClassLevel: 5 },
+      ]),
+    ];
+    const { bundles: out, warnings } = gateGrantsByMinClassLevel(bundles, new Map([['druid', 9]]));
+    expect(out[0].grants).toHaveLength(1); // kept, not dropped
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('minClassLevel');
+    expect(warnings[0]).toContain('species');
+  });
+
+  it('gates on the granting class level, not another class (multiclass)', () => {
+    const bundles = [
+      bundleWith(druidSubclassSource, [{ type: 'spell', spellId: 'blight', alwaysPrepared: true, minClassLevel: 7 }]),
+    ];
+    // druid 5 / wizard 7 → druid tier 7 not yet unlocked (gate keys off druid, not wizard)
+    const { bundles: out } = gateGrantsByMinClassLevel(
+      bundles,
+      new Map([
+        ['druid', 5],
+        ['wizard', 7],
+      ])
+    );
+    expect(out[0].grants).toHaveLength(0);
   });
 });

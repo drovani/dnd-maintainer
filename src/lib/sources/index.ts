@@ -86,6 +86,48 @@ export function getItemSource(id: string): ItemSource | undefined {
   return ITEM_SOURCES.find((i) => i.id === id);
 }
 
+/**
+ * Level-gate grants by their optional `minClassLevel` (issue #189). A grant whose `minClassLevel`
+ * exceeds the granting class's current level (from `classCounts`) is suppressed. This mirrors the
+ * feature-level gate in `collectBundles` (`feature.classLevel <= levelCount`) at grant granularity —
+ * e.g. Circle of the Land unlocks its higher circle spells at druid L5/L7/L9 instead of all at L3.
+ *
+ * Gating is on the *granting class's* level (subclass → its `classId`, class → its `id`), which is
+ * multiclass-correct: a druid 5 / wizard 3 unlocks the druid-5 tier, not a total-level tier.
+ *
+ * If a grant carries `minClassLevel` but its source has no class level to gate against (e.g. a
+ * feat/species/background origin), the grant is KEPT and a warning is surfaced rather than silently
+ * dropped — `minClassLevel` is only meaningful on class/subclass grants, so this flags an authoring
+ * error loudly instead of making a feature vanish. Exported for direct unit testing.
+ */
+export function gateGrantsByMinClassLevel(
+  bundles: readonly GrantBundle[],
+  classCounts: ReadonlyMap<ClassId, number>
+): { readonly bundles: GrantBundle[]; readonly warnings: string[] } {
+  const warnings: string[] = [];
+  const classLevelOf = (source: SourceTag): number | undefined => {
+    if (source.origin === 'subclass') return classCounts.get(source.classId);
+    if (source.origin === 'class') return classCounts.get(source.id);
+    return undefined;
+  };
+  const gated = bundles.map((bundle) => {
+    const classLevel = classLevelOf(bundle.source);
+    const kept = bundle.grants.filter((g) => {
+      const min = (g as { readonly minClassLevel?: number }).minClassLevel;
+      if (min == null) return true;
+      if (classLevel == null) {
+        warnings.push(
+          `grant with minClassLevel=${min} on non-class source origin "${bundle.source.origin}" — minClassLevel ignored (no class level to gate against)`
+        );
+        return true;
+      }
+      return classLevel >= min;
+    });
+    return kept.length === bundle.grants.length ? bundle : { source: bundle.source, grants: kept };
+  });
+  return { bundles: gated, warnings };
+}
+
 export interface CollectBundlesResult {
   readonly bundles: readonly GrantBundle[];
   readonly warnings: readonly string[];
@@ -409,26 +451,13 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     }
   }
 
-  // Level-gate grants by `minClassLevel` (issue #189). This mirrors the feature-level gate above
-  // (`feature.classLevel <= levelCount`) but at grant granularity: a grant whose `minClassLevel`
-  // exceeds the granting class's current level is suppressed. Circle of the Land uses this to unlock
-  // its higher circle spells at druid L5/L7/L9 instead of all at once at L3. Runs after feature-choice
-  // expansion so expanded option grants are gated too. Gating is on the *granting class's* level
-  // (e.g. druid level), which is multiclass-correct — a druid 5 / wizard 3 unlocks the druid-5 tier.
-  const sourceClassLevel = (source: SourceTag): number | undefined => {
-    if (source.origin === 'subclass') return classCounts.get(source.classId);
-    if (source.origin === 'class') return classCounts.get(source.id);
-    return undefined;
-  };
-  const gatedBundles: GrantBundle[] = bundles.map((bundle) => {
-    const classLevel = sourceClassLevel(bundle.source);
-    const gated = bundle.grants.filter((g) => {
-      const min = (g as { readonly minClassLevel?: number }).minClassLevel;
-      if (min == null) return true;
-      return classLevel != null && classLevel >= min;
-    });
-    return gated.length === bundle.grants.length ? bundle : { source: bundle.source, grants: gated };
-  });
+  // Level-gate grants by `minClassLevel` (issue #189). Runs after feature-choice expansion so
+  // expanded option grants are gated too.
+  const gateResult = gateGrantsByMinClassLevel(bundles, classCounts);
+  for (const msg of gateResult.warnings) {
+    warnings.push(msg);
+    logger.warn(msg);
+  }
 
-  return { bundles: gatedBundles, warnings, expandedFeats };
+  return { bundles: gateResult.bundles, warnings, expandedFeats };
 }
