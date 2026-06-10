@@ -199,6 +199,10 @@ export interface SpellGrant {
   readonly type: 'spell';
   readonly spellId: string;
   readonly alwaysPrepared: boolean;
+  // Optional level gate: the grant is suppressed until the granting class reaches this level
+  // (e.g. Circle of the Land progressively unlocks its circle spells at druid L3/5/7/9).
+  // Gated generically in collectBundles against the granting class's level — see issue #189.
+  readonly minClassLevel?: number;
 }
 
 export interface AsiGrant {

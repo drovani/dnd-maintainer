@@ -409,5 +409,26 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     }
   }
 
-  return { bundles, warnings, expandedFeats };
+  // Level-gate grants by `minClassLevel` (issue #189). This mirrors the feature-level gate above
+  // (`feature.classLevel <= levelCount`) but at grant granularity: a grant whose `minClassLevel`
+  // exceeds the granting class's current level is suppressed. Circle of the Land uses this to unlock
+  // its higher circle spells at druid L5/L7/L9 instead of all at once at L3. Runs after feature-choice
+  // expansion so expanded option grants are gated too. Gating is on the *granting class's* level
+  // (e.g. druid level), which is multiclass-correct — a druid 5 / wizard 3 unlocks the druid-5 tier.
+  const sourceClassLevel = (source: SourceTag): number | undefined => {
+    if (source.origin === 'subclass') return classCounts.get(source.classId);
+    if (source.origin === 'class') return classCounts.get(source.id);
+    return undefined;
+  };
+  const gatedBundles: GrantBundle[] = bundles.map((bundle) => {
+    const classLevel = sourceClassLevel(bundle.source);
+    const gated = bundle.grants.filter((g) => {
+      const min = (g as { readonly minClassLevel?: number }).minClassLevel;
+      if (min == null) return true;
+      return classLevel != null && classLevel >= min;
+    });
+    return gated.length === bundle.grants.length ? bundle : { source: bundle.source, grants: gated };
+  });
+
+  return { bundles: gatedBundles, warnings, expandedFeats };
 }

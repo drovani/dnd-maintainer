@@ -364,8 +364,9 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'feature', feature: { id: 'circleland-lands-aid' } },
           // Land type choice: Arid/Polar/Temperate/Tropical, each granting its circle spells as
           // always-prepared (leveled) plus a terrain cantrip (alwaysPrepared:false → routes to cantrips[]).
-          // Level-gating (L3/5/7/9 tiers) is a known simplification: all spells applied at L3.
-          // A follow-up issue tracks proper per-tier gating.
+          // Per-tier gating (issue #189): the cantrip and the L1–2 spells are available the moment the
+          // subclass is chosen (druid 3); the higher tiers carry `minClassLevel` (5/7/9) and are gated
+          // generically in collectBundles against the druid level — so a druid unlocks them at L5/L7/L9.
           {
             type: 'feature-choice',
             key: createChoiceKey('feature-choice', 'subclass', 'circleland', 0),
@@ -380,11 +381,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
                   { type: 'spell', spellId: 'burning-hands', alwaysPrepared: true },
                   { type: 'spell', spellId: 'blur', alwaysPrepared: true },
                   // L5: spell level 3
-                  { type: 'spell', spellId: 'fireball', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'fireball', alwaysPrepared: true, minClassLevel: 5 },
                   // L7: spell level 4
-                  { type: 'spell', spellId: 'blight', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'blight', alwaysPrepared: true, minClassLevel: 7 },
                   // L9: spell level 5
-                  { type: 'spell', spellId: 'wall-of-stone', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'wall-of-stone', alwaysPrepared: true, minClassLevel: 9 },
                 ],
               },
               {
@@ -397,11 +398,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
                   { type: 'spell', spellId: 'fog-cloud', alwaysPrepared: true },
                   { type: 'spell', spellId: 'hold-person', alwaysPrepared: true },
                   // L5: spell level 3
-                  { type: 'spell', spellId: 'sleet-storm', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'sleet-storm', alwaysPrepared: true, minClassLevel: 5 },
                   // L7: spell level 4
-                  { type: 'spell', spellId: 'ice-storm', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'ice-storm', alwaysPrepared: true, minClassLevel: 7 },
                   // L9: spell level 5
-                  { type: 'spell', spellId: 'cone-of-cold', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'cone-of-cold', alwaysPrepared: true, minClassLevel: 9 },
                 ],
               },
               {
@@ -414,11 +415,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
                   { type: 'spell', spellId: 'sleep', alwaysPrepared: true },
                   { type: 'spell', spellId: 'misty-step', alwaysPrepared: true },
                   // L5: spell level 3
-                  { type: 'spell', spellId: 'lightning-bolt', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'lightning-bolt', alwaysPrepared: true, minClassLevel: 5 },
                   // L7: spell level 4
-                  { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'freedom-of-movement', alwaysPrepared: true, minClassLevel: 7 },
                   // L9: spell level 5
-                  { type: 'spell', spellId: 'tree-stride', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'tree-stride', alwaysPrepared: true, minClassLevel: 9 },
                 ],
               },
               {
@@ -431,11 +432,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
                   { type: 'spell', spellId: 'ray-of-sickness', alwaysPrepared: true },
                   { type: 'spell', spellId: 'web', alwaysPrepared: true },
                   // L5: spell level 3
-                  { type: 'spell', spellId: 'stinking-cloud', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'stinking-cloud', alwaysPrepared: true, minClassLevel: 5 },
                   // L7: spell level 4
-                  { type: 'spell', spellId: 'polymorph', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'polymorph', alwaysPrepared: true, minClassLevel: 7 },
                   // L9: spell level 5
-                  { type: 'spell', spellId: 'insect-plague', alwaysPrepared: true },
+                  { type: 'spell', spellId: 'insect-plague', alwaysPrepared: true, minClassLevel: 9 },
                 ],
               },
             ],

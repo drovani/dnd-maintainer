@@ -2758,110 +2758,132 @@ describe('Circle of the Land terrain feature-choice integration', () => {
     }
   });
 
-  it('arid terrain: resolves leveled spells into alwaysPreparedSpells and cantrip into cantrips', () => {
+  // Per-terrain spell tiers (2024 PHB). The cantrip and the L1–2 spells (`tier3`) are available the
+  // moment Circle of the Land is chosen (druid 3); the L3/L4/L5 spells unlock at druid 5/7/9 (#189).
+  const TERRAINS = [
+    {
+      optionId: 'arid',
+      cantrip: 'fire-bolt',
+      tier3: ['burning-hands', 'blur'],
+      l5: 'fireball',
+      l7: 'blight',
+      l9: 'wall-of-stone',
+    },
+    {
+      optionId: 'polar',
+      cantrip: 'ray-of-frost',
+      tier3: ['fog-cloud', 'hold-person'],
+      l5: 'sleet-storm',
+      l7: 'ice-storm',
+      l9: 'cone-of-cold',
+    },
+    {
+      optionId: 'temperate',
+      cantrip: 'shocking-grasp',
+      tier3: ['sleep', 'misty-step'],
+      l5: 'lightning-bolt',
+      l7: 'freedom-of-movement',
+      l9: 'tree-stride',
+    },
+    {
+      optionId: 'tropical',
+      cantrip: 'acid-splash',
+      tier3: ['ray-of-sickness', 'web'],
+      l5: 'stinking-cloud',
+      l7: 'polymorph',
+      l9: 'insect-plague',
+    },
+  ] as const;
+
+  const resolveDruidAtLevel = (optionId: string, druidLevel: number) => {
+    const levels = Array.from({ length: druidLevel }, (_, i) => ({
+      classId: 'druid' as ClassId,
+      classLevel: i + 1,
+      hpRoll: null,
+    }));
     const build: CharacterBuild = {
       ...baseBuild,
+      levels,
+      choices: {
+        ...baseBuild.choices,
+        [terrainChoiceKey]: { type: 'feature-choice' as const, optionId },
+      },
+    };
+    const { bundles, warnings } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: druidLevel,
+      bundles,
+      choices: build.choices,
+    });
+    return { result, warnings };
+  };
+
+  it.each(TERRAINS)(
+    '$optionId terrain at druid 3: cantrip + L1–2 spells only, higher tiers gated (issue #189)',
+    ({ optionId, cantrip, tier3, l5, l7, l9 }) => {
+      const { result, warnings } = resolveDruidAtLevel(optionId, 3);
+      // The subclass-origin feature-choice must NOT produce an "invisible choice" warning
+      expect(warnings).toEqual([]);
+      expect(result.spellcasting).not.toBeNull();
+      const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
+      for (const spellId of tier3) {
+        expect(alwaysPrepared, `${optionId} L1–2 spell ${spellId} @ druid 3`).toContain(spellId);
+      }
+      // Higher tiers are gated until druid 5/7/9
+      expect(alwaysPrepared, `${optionId} ${l5} gated @ druid 3`).not.toContain(l5);
+      expect(alwaysPrepared, `${optionId} ${l7} gated @ druid 3`).not.toContain(l7);
+      expect(alwaysPrepared, `${optionId} ${l9} gated @ druid 3`).not.toContain(l9);
+      // Cantrip routes to cantrips[], not alwaysPreparedSpells
+      expect(alwaysPrepared).not.toContain(cantrip);
+      expect(result.spellcasting!.cantrips).toContain(cantrip);
+    }
+  );
+
+  it.each(TERRAINS)(
+    '$optionId terrain unlocks the L3/L4/L5 spell progressively at druid 5/7/9 (issue #189)',
+    ({ optionId, tier3, l5, l7, l9 }) => {
+      // druid 5: the L3 spell unlocks; L4/L5 still gated
+      const at5 = resolveDruidAtLevel(optionId, 5).result.spellcasting!.alwaysPreparedSpells;
+      for (const s of tier3) expect(at5).toContain(s);
+      expect(at5).toContain(l5);
+      expect(at5).not.toContain(l7);
+      expect(at5).not.toContain(l9);
+      // druid 7: the L4 spell unlocks; L5 still gated
+      const at7 = resolveDruidAtLevel(optionId, 7).result.spellcasting!.alwaysPreparedSpells;
+      expect(at7).toContain(l5);
+      expect(at7).toContain(l7);
+      expect(at7).not.toContain(l9);
+      // druid 9: everything unlocked
+      const at9 = resolveDruidAtLevel(optionId, 9).result.spellcasting!.alwaysPreparedSpells;
+      expect(at9).toContain(l5);
+      expect(at9).toContain(l7);
+      expect(at9).toContain(l9);
+    }
+  );
+
+  it('gates on druid level, not total character level (multiclass druid 5 / wizard 3)', () => {
+    const levels = [
+      ...Array.from({ length: 5 }, (_, i) => ({ classId: 'druid' as ClassId, classLevel: i + 1, hpRoll: null })),
+      ...Array.from({ length: 3 }, (_, i) => ({ classId: 'wizard' as ClassId, classLevel: i + 1, hpRoll: null })),
+    ];
+    const build: CharacterBuild = {
+      ...baseBuild,
+      levels,
       choices: {
         ...baseBuild.choices,
         [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'arid' },
       },
     };
-    const { bundles, warnings } = collectBundles(build);
-    // The subclass-origin feature-choice must NOT produce an "invisible choice" warning
-    expect(warnings).toEqual([]);
-    const result = resolveCharacter({
-      baseAbilities: build.baseAbilities,
-      level: 3,
-      bundles,
-      choices: build.choices,
-    });
-    expect(result.spellcasting).not.toBeNull();
-    const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
-    expect(alwaysPrepared).toContain('burning-hands');
-    expect(alwaysPrepared).toContain('blur');
-    expect(alwaysPrepared).toContain('fireball');
-    expect(alwaysPrepared).toContain('blight');
-    expect(alwaysPrepared).toContain('wall-of-stone');
-    // Cantrip routes to cantrips[], not alwaysPreparedSpells
-    expect(alwaysPrepared).not.toContain('fire-bolt');
-    expect(result.spellcasting!.cantrips).toContain('fire-bolt');
-  });
-
-  it('polar terrain: resolves leveled spells into alwaysPreparedSpells', () => {
-    const build: CharacterBuild = {
-      ...baseBuild,
-      choices: {
-        ...baseBuild.choices,
-        [terrainChoiceKey]: { type: 'feature-choice' as const, optionId: 'polar' },
-      },
-    };
     const { bundles } = collectBundles(build);
-    const result = resolveCharacter({
-      baseAbilities: build.baseAbilities,
-      level: 3,
-      bundles,
-      choices: build.choices,
-    });
-    expect(result.spellcasting).not.toBeNull();
+    const result = resolveCharacter({ baseAbilities: build.baseAbilities, level: 8, bundles, choices: build.choices });
     const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
-    expect(alwaysPrepared).toContain('fog-cloud');
-    expect(alwaysPrepared).toContain('hold-person');
-    expect(alwaysPrepared).toContain('sleet-storm');
-    expect(alwaysPrepared).toContain('ice-storm');
-    expect(alwaysPrepared).toContain('cone-of-cold');
-    expect(alwaysPrepared).not.toContain('ray-of-frost');
-    expect(result.spellcasting!.cantrips).toContain('ray-of-frost');
+    // Druid is only level 5, so the L3-tier (fireball) unlocks but the L4/L5 tiers do NOT —
+    // even though the total character level is 8. Gating is on the druid level, not total level.
+    expect(alwaysPrepared).toContain('fireball');
+    expect(alwaysPrepared).not.toContain('blight');
+    expect(alwaysPrepared).not.toContain('wall-of-stone');
   });
-
-  it.each([
-    {
-      optionId: 'arid',
-      cantrip: 'fire-bolt',
-      leveledSpells: ['burning-hands', 'blur', 'fireball', 'blight', 'wall-of-stone'],
-    },
-    {
-      optionId: 'polar',
-      cantrip: 'ray-of-frost',
-      leveledSpells: ['fog-cloud', 'hold-person', 'sleet-storm', 'ice-storm', 'cone-of-cold'],
-    },
-    {
-      optionId: 'temperate',
-      cantrip: 'shocking-grasp',
-      leveledSpells: ['sleep', 'misty-step', 'lightning-bolt', 'freedom-of-movement', 'tree-stride'],
-    },
-    {
-      optionId: 'tropical',
-      cantrip: 'acid-splash',
-      leveledSpells: ['ray-of-sickness', 'web', 'stinking-cloud', 'polymorph', 'insect-plague'],
-    },
-  ])(
-    '$optionId terrain: cantrip in cantrips[], leveled spells in alwaysPreparedSpells',
-    ({ optionId, cantrip, leveledSpells }) => {
-      const build: CharacterBuild = {
-        ...baseBuild,
-        choices: {
-          ...baseBuild.choices,
-          [terrainChoiceKey]: { type: 'feature-choice' as const, optionId },
-        },
-      };
-      const { bundles } = collectBundles(build);
-      const result = resolveCharacter({
-        baseAbilities: build.baseAbilities,
-        level: 3,
-        bundles,
-        choices: build.choices,
-      });
-      expect(result.spellcasting).not.toBeNull();
-      const alwaysPrepared = result.spellcasting!.alwaysPreparedSpells;
-      for (const spellId of leveledSpells) {
-        expect(alwaysPrepared, `${optionId} leveled spell ${spellId}`).toContain(spellId);
-      }
-      expect(alwaysPrepared, `${optionId} cantrip ${cantrip} must not be in alwaysPreparedSpells`).not.toContain(
-        cantrip
-      );
-      expect(result.spellcasting!.cantrips, `${optionId} cantrip ${cantrip} must be in cantrips[]`).toContain(cantrip);
-    }
-  );
 
   it('does not emit a pending terrain choice once a valid option is selected', () => {
     const build: CharacterBuild = {
