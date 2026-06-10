@@ -2970,6 +2970,18 @@ describe('Paladin oath spells integration — L9 Oath of the Ancients', () => {
     expect(alwaysPrepared).toContain('protection-from-energy');
   });
 
+  it('L7 Aura of Warding surfaces Necrotic/Psychic/Radiant resistance end-to-end (issue #195)', () => {
+    const { bundles } = collectBundles(baseBuild);
+    const result = resolveCharacter({
+      baseAbilities: baseBuild.baseAbilities,
+      level: 9,
+      bundles,
+      choices: baseBuild.choices,
+    });
+    const resistances = result.resistances.map((r) => r.value);
+    expect(resistances).toEqual(expect.arrayContaining(['necrotic', 'psychic', 'radiant']));
+  });
+
   it('L13 oath spells (ice-storm, stoneskin) are NOT in alwaysPreparedSpells at Paladin L9', () => {
     const { bundles } = collectBundles(baseBuild);
     const result = resolveCharacter({
