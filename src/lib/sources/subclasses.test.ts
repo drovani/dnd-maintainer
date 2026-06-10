@@ -809,16 +809,22 @@ describe('getSubclassSource — War Domain', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 5, 6, 7, 9]);
   });
 
-  it('wardomain level 3 grants heavy armor, martial weapons, war-priest, guided-strike, and 4 domain spell grants', () => {
+  it('wardomain level 3 grants heavy armor, martial weapons, war-priest + its PB pool, guided-strike, and 4 domain spell grants', () => {
     const source = getSubclassSource('wardomain');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(8);
+    expect(level3?.grants).toHaveLength(9);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: 'proficiency', category: 'armor', id: 'heavy' }),
         expect.objectContaining({ type: 'proficiency', category: 'weapon', id: 'martial' }),
         expect.objectContaining({ type: 'feature', feature: expect.objectContaining({ id: 'wardomain-war-priest' }) }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'war-priest',
+          max: { mode: 'proficiency-bonus', classId: 'cleric' },
+          regen: 'long-rest',
+        }),
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'wardomain-guided-strike' }),
@@ -1082,15 +1088,25 @@ describe('getSubclassSource — Circle of Stars', () => {
     );
   });
 
-  it('circlestars level 6 grants cosmic-omen feature', () => {
+  it('circlestars level 6 grants cosmic-omen feature + its once-per-rest Reaction pool', () => {
     const source = getSubclassSource('circlestars');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
-    expect(level6?.grants).toHaveLength(1);
-    expect(level6?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'circlestars-cosmic-omen' },
-    });
+    expect(level6?.grants).toHaveLength(2);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'circlestars-cosmic-omen' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'cosmic-omen-use',
+          max: { mode: 'fixed', value: 1 },
+          regen: 'long-rest',
+        }),
+      ])
+    );
   });
 
   it('circlestars level 10 grants twinkling-constellations feature', () => {
@@ -1116,11 +1132,11 @@ describe('getSubclassSource — Psi Warrior', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 7, 10, 15, 18]);
   });
 
-  it('psiwarrior level 3 grants psionic-power feature + psionic-energy resource pool', () => {
+  it('psiwarrior level 3 grants psionic-power feature, the scaling psionic-energy pool, and the telekinetic-movement free use', () => {
     const source = getSubclassSource('psiwarrior');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toHaveLength(3);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -1130,22 +1146,54 @@ describe('getSubclassSource — Psi Warrior', () => {
         expect.objectContaining({
           type: 'resource-pool',
           poolId: 'psionic-energy',
-          max: { mode: 'fixed', value: 4 },
-          regen: 'long-rest',
+          max: {
+            mode: 'level-steps',
+            classId: 'fighter',
+            steps: [
+              { minLevel: 3, value: 4 },
+              { minLevel: 5, value: 6 },
+              { minLevel: 9, value: 8 },
+              { minLevel: 13, value: 10 },
+              { minLevel: 17, value: 12 },
+            ],
+          },
+          regen: { mode: 'compound', shortRestAmount: 1 },
+          dieSizeSteps: [
+            { minLevel: 3, dieSize: 6 },
+            { minLevel: 5, dieSize: 8 },
+            { minLevel: 9, dieSize: 10 },
+            { minLevel: 13, dieSize: 12 },
+          ],
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'telekinetic-movement-use',
+          max: { mode: 'fixed', value: 1 },
+          regen: 'short-rest',
         }),
       ])
     );
   });
 
-  it('psiwarrior level 7 grants telekinetic-adept feature with INT-based saveDC', () => {
+  it('psiwarrior level 7 grants telekinetic-adept feature (INT saveDC) + the psi-powered-leap free use', () => {
     const source = getSubclassSource('psiwarrior');
     const level7 = source?.features.find((f) => f.classLevel === 7);
     expect(level7).toBeDefined();
-    expect(level7?.grants).toHaveLength(1);
-    expect(level7?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'psiwarrior-telekinetic-adept', saveDC: { dcAbility: 'int' } },
-    });
+    expect(level7?.grants).toHaveLength(2);
+    expect(level7?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'psiwarrior-telekinetic-adept', saveDC: { dcAbility: 'int' } }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'psi-powered-leap-use',
+          max: { mode: 'fixed', value: 1 },
+          regen: 'short-rest',
+        }),
+      ])
+    );
   });
 
   it('psiwarrior level 10 grants 2 items: psychic resistance and guarded-mind feature', () => {
@@ -2165,16 +2213,22 @@ describe('getSubclassSource — Soulknife', () => {
     expect(source?.features.map((f) => f.classLevel)).toEqual([3, 9]);
   });
 
-  it('soulknife level 3 grants 2 features: psionic-power and psychic-blades', () => {
+  it('soulknife level 3 grants psionic-power, the rogue-keyed psionic-energy pool, and psychic-blades', () => {
     const source = getSubclassSource('soulknife');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(2);
+    expect(level3?.grants).toHaveLength(3);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'soulknife-psionic-power' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'psionic-energy',
+          max: expect.objectContaining({ mode: 'level-steps', classId: 'rogue' }),
+          regen: { mode: 'compound', shortRestAmount: 1 },
         }),
         expect.objectContaining({
           type: 'feature',
@@ -2662,15 +2716,25 @@ describe('getSubclassSource — Archfey Patron', () => {
     );
   });
 
-  it('archfeypatron level 6 grants 1 feature: misty-escape', () => {
+  it('archfeypatron level 6 grants misty-escape feature + its PB-scaled long-rest pool', () => {
     const source = getSubclassSource('archfeypatron');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
-    expect(level6?.grants).toHaveLength(1);
-    expect(level6?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'archfeypatron-misty-escape' },
-    });
+    expect(level6?.grants).toHaveLength(2);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'archfeypatron-misty-escape' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'misty-escape',
+          max: { mode: 'proficiency-bonus', classId: 'warlock' },
+          regen: 'long-rest',
+        }),
+      ])
+    );
   });
 
   it('archfeypatron level 7 grants dominate-beast and greater-invisibility (always prepared)', () => {
@@ -2737,13 +2801,19 @@ describe('getSubclassSource — Celestial Patron', () => {
     const source = getSubclassSource('celestialpatron');
     const level3 = source?.features.find((f) => f.classLevel === 3);
     expect(level3).toBeDefined();
-    expect(level3?.grants).toHaveLength(8);
+    expect(level3?.grants).toHaveLength(9);
     expect(level3?.grants).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: 'proficiency', category: 'skill', id: 'religion' }),
         expect.objectContaining({
           type: 'feature',
           feature: expect.objectContaining({ id: 'celestialpatron-healing-light' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'healing-light',
+          max: { mode: 'class-level-plus', classId: 'warlock', offset: 1 },
+          regen: 'long-rest',
         }),
         expect.objectContaining({ type: 'spell', spellId: 'light', alwaysPrepared: false }),
         expect.objectContaining({ type: 'spell', spellId: 'sacred-flame', alwaysPrepared: false }),
@@ -2890,15 +2960,25 @@ describe('getSubclassSource — Fiend Patron', () => {
     );
   });
 
-  it('fiendpatron level 6 grants 1 feature: dark-ones-own-luck', () => {
+  it('fiendpatron level 6 grants dark-ones-own-luck feature + its PB pool (short/long-rest regen)', () => {
     const source = getSubclassSource('fiendpatron');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
-    expect(level6?.grants).toHaveLength(1);
-    expect(level6?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'fiendpatron-dark-ones-own-luck' },
-    });
+    expect(level6?.grants).toHaveLength(2);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'fiendpatron-dark-ones-own-luck' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'dark-ones-own-luck',
+          max: { mode: 'proficiency-bonus', classId: 'warlock' },
+          regen: 'short-rest',
+        }),
+      ])
+    );
   });
 
   it('fiendpatron level 7 grants fire-shield and wall-of-fire (always prepared)', () => {
@@ -3026,15 +3106,25 @@ describe('getSubclassSource — Great Old One Patron', () => {
     );
   });
 
-  it('greatoldonepatron level 6 grants 1 feature: clairvoyant-combatant', () => {
+  it('greatoldonepatron level 6 grants clairvoyant-combatant feature + its PB long-rest pool', () => {
     const source = getSubclassSource('greatoldonepatron');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
-    expect(level6?.grants).toHaveLength(1);
-    expect(level6?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'greatoldonepatron-clairvoyant-combatant' },
-    });
+    expect(level6?.grants).toHaveLength(2);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'greatoldonepatron-clairvoyant-combatant' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'clairvoyant-combatant',
+          max: { mode: 'proficiency-bonus', classId: 'warlock' },
+          regen: 'long-rest',
+        }),
+      ])
+    );
   });
 
   it('greatoldonepatron level 7 grants confusion and summon-aberration (always prepared)', () => {
@@ -3063,15 +3153,25 @@ describe('getSubclassSource — Great Old One Patron', () => {
     );
   });
 
-  it('greatoldonepatron level 10 grants 1 feature: eldritch-hex', () => {
+  it('greatoldonepatron level 10 grants eldritch-hex feature + its 1/long-rest pool', () => {
     const source = getSubclassSource('greatoldonepatron');
     const level10 = source?.features.find((f) => f.classLevel === 10);
     expect(level10).toBeDefined();
-    expect(level10?.grants).toHaveLength(1);
-    expect(level10?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'greatoldonepatron-eldritch-hex' },
-    });
+    expect(level10?.grants).toHaveLength(2);
+    expect(level10?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'greatoldonepatron-eldritch-hex' }),
+        }),
+        expect.objectContaining({
+          type: 'resource-pool',
+          poolId: 'eldritch-hex',
+          max: { mode: 'fixed', value: 1 },
+          regen: 'long-rest',
+        }),
+      ])
+    );
   });
 
   it('greatoldonepatron level 14 grants 1 feature: create-thrall', () => {

@@ -16,21 +16,33 @@ export function ResourcePoolsPanel({ resolved }: ResourcePoolsPanelProps): React
     <div className="bg-card border rounded-lg p-6">
       <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.resourcePools')}</h2>
       <div className="space-y-3">
-        {resolved.resourcePools.map((pool) => (
-          <div key={pool.poolId} className="bg-muted/50 p-3 rounded border">
-            <div className="font-semibold text-foreground text-sm mb-1">
-              {t(`resourcePools.${pool.poolId}.name`, { defaultValue: pool.poolId })}
+        {resolved.resourcePools.map((pool) => {
+          const regenLabel =
+            typeof pool.regen === 'string'
+              ? tc(`characterSheet.resourcePools.regen.${pool.regen}`)
+              : tc('characterSheet.resourcePools.regen.compound', { shortRestAmount: pool.regen.shortRestAmount });
+          return (
+            <div key={pool.poolId} className="bg-muted/50 p-3 rounded border">
+              <div className="font-semibold text-foreground text-sm mb-1">
+                {t(`resourcePools.${pool.poolId}.name`, { defaultValue: pool.poolId })}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {tc('characterSheet.resourcePools.max', { max: pool.max })}
+                {pool.dieSize !== undefined && (
+                  <>
+                    {' · '}
+                    {tc('characterSheet.resourcePools.dieSize', { dieSize: pool.dieSize })}
+                  </>
+                )}
+                {' · '}
+                {regenLabel}
+              </div>
+              <div className="text-xs text-muted-foreground/70 mt-1">
+                {tc('characterSheet.resourcePools.source', { source: getSourceDisplayName(pool.source, t) })}
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {tc('characterSheet.resourcePools.max', { max: pool.max })}
-              {' · '}
-              {tc(`characterSheet.resourcePools.regen.${pool.regen}`)}
-            </div>
-            <div className="text-xs text-muted-foreground/70 mt-1">
-              {tc('characterSheet.resourcePools.source', { source: getSourceDisplayName(pool.source, t) })}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

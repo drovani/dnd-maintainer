@@ -2546,7 +2546,43 @@
     },
     "psionic-energy": {
       "name": "Psionic Energy Dice",
-      "description": "Fuel Psi Warrior abilities. You have 4 dice at level 3 (the count scales as 2×PB up to 12 at level 17, which is not yet modeled), regained on a Long Rest (the +1-per-Short-Rest regain and the PB-scaled die size d6–d12 are also not yet modeled)."
+      "description": "Fuel Psi Warrior and Soulknife abilities. You have a number of dice equal to twice your Proficiency Bonus (4 at level 3, scaling to 12 at level 17), and the die size grows from d6 to d12 as you level. You regain 1 die on a Short Rest and all dice on a Long Rest."
+    },
+    "telekinetic-movement-use": {
+      "name": "Telekinetic Movement",
+      "description": "Once per Short or Long Rest, move a Large or smaller object or a willing creature within 30 feet up to 30 feet — without spending a Psionic Energy die."
+    },
+    "psi-powered-leap-use": {
+      "name": "Psi-Powered Leap",
+      "description": "Once per Short or Long Rest, gain a Fly Speed equal to twice your Speed until the end of your turn — without spending a Psionic Energy die."
+    },
+    "misty-escape": {
+      "name": "Misty Escape",
+      "description": "As a Reaction when you take damage, turn invisible and teleport up to 60 feet. Uses equal your Proficiency Bonus; regain all on a Long Rest."
+    },
+    "healing-light": {
+      "name": "Healing Light",
+      "description": "A pool of d6s equal to 1 + your Warlock level. Spend as a Bonus Action to heal a creature within 60 feet. Regain all dice on a Long Rest."
+    },
+    "dark-ones-own-luck": {
+      "name": "Dark One's Own Luck",
+      "description": "Add a d10 to an ability check or saving throw. Uses equal your Proficiency Bonus; regain all on a Short or Long Rest."
+    },
+    "clairvoyant-combatant": {
+      "name": "Clairvoyant Combatant",
+      "description": "Force a creature within 60 feet to make a Wisdom save or you have Advantage against it (and it can't see you) for 1 minute. Uses equal your Proficiency Bonus; regain all on a Long Rest."
+    },
+    "eldritch-hex": {
+      "name": "Eldritch Hex",
+      "description": "Hex a creature you can see; when it damages you it takes Psychic damage equal to your Proficiency Bonus. One use; regain on a Long Rest."
+    },
+    "war-priest": {
+      "name": "War Priest",
+      "description": "Make one weapon attack as a Bonus Action. Uses equal your Proficiency Bonus; regain all on a Long Rest."
+    },
+    "cosmic-omen-use": {
+      "name": "Cosmic Omen",
+      "description": "After each Long Rest, roll a d6: even (Weal) lets you add a d6, odd (Woe) lets you subtract a d6, from a roll made by a creature within 30 feet. One Reaction use; regain on a Long Rest."
     }
   },
   "spells": {

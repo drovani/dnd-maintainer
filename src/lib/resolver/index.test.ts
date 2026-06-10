@@ -2488,12 +2488,22 @@ describe('Psi Warrior Fighter L7 integration', () => {
     expect(warnings).toEqual([]);
   });
 
-  it('resourcePools contains psionic-energy with max=4 and regen=long-rest', () => {
+  it('resourcePools contains psionic-energy scaled for fighter L7: max=6 (2×PB), die d8, compound regen', () => {
     const result = resolveCharacter(input);
     const psionicPool = result.resourcePools.filter((p) => p.poolId === 'psionic-energy');
     expect(psionicPool).toHaveLength(1);
-    expect(psionicPool[0].max).toBe(4);
-    expect(psionicPool[0].regen).toBe('long-rest');
+    // PB 3 at fighter L7 → 2×PB = 6 dice; die size d8 (minLevel 5 step)
+    expect(psionicPool[0].max).toBe(6);
+    expect(psionicPool[0].dieSize).toBe(8);
+    expect(psionicPool[0].regen).toEqual({ mode: 'compound', shortRestAmount: 1 });
+  });
+
+  it('resourcePools contains the psi-powered-leap free use (fixed:1, short-rest) at L7', () => {
+    const result = resolveCharacter(input);
+    const leap = result.resourcePools.filter((p) => p.poolId === 'psi-powered-leap-use');
+    expect(leap).toHaveLength(1);
+    expect(leap[0].max).toBe(1);
+    expect(leap[0].regen).toBe('short-rest');
   });
 
   it('psiwarrior-telekinetic-adept saveDC = 8 + PB(3 at L7) + INT mod(4) = 15', () => {

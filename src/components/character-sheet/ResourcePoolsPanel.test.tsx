@@ -157,6 +157,57 @@ describe('ResourcePoolsPanel', () => {
     expect(screen.getByText(/long-rest/)).toBeInTheDocument();
   });
 
+  it('renders compound regen label without crashing on the object regen', () => {
+    const resolved = buildMinimalResolved({
+      resourcePools: [
+        {
+          poolId: 'psionic-energy',
+          max: 6,
+          regen: { mode: 'compound', shortRestAmount: 1 },
+          source: { origin: 'subclass', id: 'psiwarrior', classId: 'fighter', level: 3 },
+        },
+      ],
+    });
+    render(<ResourcePoolsPanel resolved={resolved} />);
+    // tc('characterSheet.resourcePools.regen.compound', { shortRestAmount: 1 })
+    // → last segment 'compound', mock appends the interpolation value → "compound 1"
+    expect(screen.getByText(/compound/)).toBeInTheDocument();
+    expect(screen.getByText(/\b1\b/)).toBeInTheDocument();
+  });
+
+  it('renders the die size when the pool declares one', () => {
+    const resolved = buildMinimalResolved({
+      resourcePools: [
+        {
+          poolId: 'psionic-energy',
+          max: 6,
+          regen: { mode: 'compound', shortRestAmount: 1 },
+          dieSize: 8,
+          source: { origin: 'subclass', id: 'psiwarrior', classId: 'fighter', level: 3 },
+        },
+      ],
+    });
+    render(<ResourcePoolsPanel resolved={resolved} />);
+    // tc('characterSheet.resourcePools.dieSize', { dieSize: 8 }) → "dieSize 8"
+    expect(screen.getByText(/\b8\b/)).toBeInTheDocument();
+  });
+
+  it('omits the die size segment when no dieSize is present', () => {
+    const resolved = buildMinimalResolved({
+      resourcePools: [
+        {
+          poolId: 'focus-points',
+          max: 4,
+          regen: 'short-rest',
+          source: { origin: 'class', id: 'monk', level: 1 },
+        },
+      ],
+    });
+    render(<ResourcePoolsPanel resolved={resolved} />);
+    // dieSize label uses the 'dieSize' key segment; with no dieSize it must not render
+    expect(screen.queryByText(/dieSize/)).not.toBeInTheDocument();
+  });
+
   it('renders source attribution via getSourceDisplayName', async () => {
     const { getSourceDisplayName } = await import('@/lib/class-icons');
     const source = { origin: 'class' as const, id: 'monk' as const, level: 1 };

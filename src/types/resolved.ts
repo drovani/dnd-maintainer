@@ -9,7 +9,15 @@ import type {
   ClassId,
   FeatId,
 } from '@/lib/dnd-helpers';
-import type { FeatureDef, DamageTypeId, HitDie, SpeedMode, SpeedCondition, ResourcePoolRegen } from '@/types/grants';
+import type {
+  FeatureDef,
+  DamageTypeId,
+  HitDie,
+  SpeedMode,
+  SpeedCondition,
+  ResourcePoolRegen,
+  PsionicDieSize,
+} from '@/types/grants';
 import type { SourceTag, FeatCategory } from '@/types/sources';
 import type { ChoiceKey } from '@/types/choices';
 import type {
@@ -95,6 +103,8 @@ export interface ResolvedResourcePool {
   readonly max: number;
   readonly regen: ResourcePoolRegen;
   readonly source: SourceTag;
+  /** Present only when the pool declares `dieSizeSteps` — e.g. Psionic Energy (d6→d12). */
+  readonly dieSize?: PsionicDieSize;
 }
 
 export interface ResolvedArmorClass {

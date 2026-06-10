@@ -63,7 +63,7 @@ describe('resolveResourcePools', () => {
     expect(pools[0].max).toBe(3);
   });
 
-  it('psiwarrior psionic-energy pool resolves to max 4, regen long-rest', () => {
+  it('preserves compound regen on the resolved pool unchanged', () => {
     const bundles: GrantBundle[] = [
       {
         source: { origin: 'subclass', id: 'psiwarrior', classId: 'fighter', level: 3 },
@@ -72,14 +72,114 @@ describe('resolveResourcePools', () => {
             type: 'resource-pool',
             poolId: 'psionic-energy',
             max: { mode: 'fixed', value: 4 },
-            regen: 'long-rest',
+            regen: { mode: 'compound', shortRestAmount: 1 },
           },
         ],
       },
     ];
     const pools = resolveResourcePools(bundles);
     expect(pools).toHaveLength(1);
-    expect(pools[0]).toMatchObject({ poolId: 'psionic-energy', max: 4, regen: 'long-rest' });
+    expect(pools[0].max).toBe(4);
+    expect(pools[0].regen).toEqual({ mode: 'compound', shortRestAmount: 1 });
+  });
+
+  it('omits dieSize when the pool declares no dieSizeSteps', () => {
+    const bundles = classBundles('monk', 5, [
+      {
+        type: 'resource-pool',
+        poolId: 'focus-points',
+        max: { mode: 'class-level', classId: 'monk' },
+        regen: 'short-rest',
+      },
+    ]);
+    const pools = resolveResourcePools(bundles);
+    expect(pools[0].dieSize).toBeUndefined();
+  });
+
+  describe('class-level-plus max (Celestial Patron Healing Light)', () => {
+    const HEAL_GRANT: GrantBundle['grants'][number] = {
+      type: 'resource-pool',
+      poolId: 'healing-light',
+      max: { mode: 'class-level-plus', classId: 'warlock', offset: 1 },
+      regen: 'long-rest',
+    };
+
+    function warlockAtLevel(level: number): GrantBundle[] {
+      const bundles: GrantBundle[] = [];
+      for (let l = 1; l <= level; l++) {
+        bundles.push({
+          source: { origin: 'class', id: 'warlock', level: l },
+          grants: l === 1 ? [HEAL_GRANT] : [],
+        });
+      }
+      return bundles;
+    }
+
+    // max = warlock level + 1
+    it.each([
+      [1, 2],
+      [5, 6],
+      [10, 11],
+      [20, 21],
+    ])('resolves healing-light max to level+1 at warlock level %i', (level, expectedMax) => {
+      const pools = resolveResourcePools(warlockAtLevel(level));
+      expect(pools).toHaveLength(1);
+      expect(pools[0]).toMatchObject({ poolId: 'healing-light', max: expectedMax, regen: 'long-rest' });
+    });
+  });
+
+  describe('dieSizeSteps (Psionic Energy die scaling)', () => {
+    const PSIONIC_GRANT: GrantBundle['grants'][number] = {
+      type: 'resource-pool',
+      poolId: 'psionic-energy',
+      max: {
+        mode: 'level-steps',
+        classId: 'fighter',
+        steps: [
+          { minLevel: 3, value: 4 },
+          { minLevel: 5, value: 6 },
+          { minLevel: 9, value: 8 },
+          { minLevel: 13, value: 10 },
+          { minLevel: 17, value: 12 },
+        ],
+      },
+      regen: { mode: 'compound', shortRestAmount: 1 },
+      dieSizeSteps: [
+        { minLevel: 3, dieSize: 6 },
+        { minLevel: 5, dieSize: 8 },
+        { minLevel: 9, dieSize: 10 },
+        { minLevel: 13, dieSize: 12 },
+      ],
+    };
+
+    function psiwarriorAtLevel(level: number): GrantBundle[] {
+      const bundles: GrantBundle[] = [];
+      for (let l = 1; l <= level; l++) {
+        bundles.push({
+          source: { origin: 'class', id: 'fighter', level: l },
+          grants: l === 3 ? [PSIONIC_GRANT] : [],
+        });
+      }
+      return bundles;
+    }
+
+    it.each([
+      [3, 4, 6],
+      [4, 4, 6],
+      [5, 6, 8],
+      [8, 6, 8],
+      [9, 8, 10],
+      [12, 8, 10],
+      [13, 10, 12],
+      [17, 12, 12],
+      [20, 12, 12],
+    ])('at fighter level %i: max=%i dice of size d%i', (level, expectedMax, expectedDie) => {
+      const pools = resolveResourcePools(psiwarriorAtLevel(level));
+      expect(pools).toHaveLength(1);
+      expect(pools[0].max).toBe(expectedMax);
+      expect(pools[0].dieSize).toBe(expectedDie);
+      expect(pools[0].regen).toEqual({ mode: 'compound', shortRestAmount: 1 });
+    });
   });
 
   describe('level-steps max (Barbarian Rage table)', () => {

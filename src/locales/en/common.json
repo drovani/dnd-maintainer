@@ -487,10 +487,12 @@
     },
     "resourcePools": {
       "max": "Max: {{max}}",
+      "dieSize": "Die: d{{dieSize}}",
       "source": "Granted by {{source}}",
       "regen": {
         "short-rest": "Short Rest",
-        "long-rest": "Long Rest"
+        "long-rest": "Long Rest",
+        "compound": "Long Rest ({{shortRestAmount}} on Short Rest)"
       }
     },
     "attacks": {

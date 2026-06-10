@@ -318,15 +318,45 @@ export type ResourcePoolMax =
    * characters; multiclass PB (which scales with total character level) is a
    * pre-existing limitation shared by all level-keyed modes.
    */
-  | { readonly mode: 'proficiency-bonus'; readonly classId: ClassId };
+  | { readonly mode: 'proficiency-bonus'; readonly classId: ClassId }
+  /**
+   * The max equals the character's level in the named class plus a fixed `offset`
+   * — e.g. the Celestial Patron's Healing Light (1 + Warlock level). Keys on a
+   * single class's level (same single-class assumption as the other level-keyed
+   * modes). The resolver clamps the result at 0.
+   */
+  | { readonly mode: 'class-level-plus'; readonly classId: ClassId; readonly offset: number };
 
-export type ResourcePoolRegen = 'short-rest' | 'long-rest';
+/**
+ * Die sizes that scale with character level — currently only the Psi Warrior /
+ * Soulknife Psionic Energy dice (d6→d8→d10→d12). Declared on a `ResourcePoolGrant`
+ * via `dieSizeSteps`; resolved onto `ResolvedResourcePool.dieSize`.
+ */
+export type PsionicDieSize = 6 | 8 | 10 | 12;
+
+/**
+ * How a resource pool's uses are recovered.
+ * - `'short-rest'` / `'long-rest'`: all uses recovered on the named rest (short-rest also implies long).
+ * - `compound`: all uses recovered on a Long Rest, plus `shortRestAmount` uses recovered on a Short Rest
+ *   — e.g. Psionic Energy regains 1 die on a Short Rest and all dice on a Long Rest.
+ */
+export type ResourcePoolRegen =
+  | 'short-rest'
+  | 'long-rest'
+  | { readonly mode: 'compound'; readonly shortRestAmount: number };
 
 export interface ResourcePoolGrant {
   readonly type: 'resource-pool';
   readonly poolId: string;
   readonly max: ResourcePoolMax;
   readonly regen: ResourcePoolRegen;
+  /**
+   * Optional die-size scaling table — e.g. Psionic Energy dice scale d6→d8→d10→d12
+   * by class level. Resolved like `level-steps` (highest satisfied `minLevel` wins),
+   * keyed on the same class as `max`. Only meaningful when `max` keys on a class
+   * level; ignored for `fixed`-max pools (no class to key the steps on).
+   */
+  readonly dieSizeSteps?: readonly { readonly minLevel: number; readonly dieSize: PsionicDieSize }[];
 }
 
 export interface SpellChoiceGrant {

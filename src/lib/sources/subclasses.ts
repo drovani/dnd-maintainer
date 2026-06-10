@@ -319,8 +319,14 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           { type: 'proficiency', category: 'armor', id: 'heavy' },
           { type: 'proficiency', category: 'weapon', id: 'martial' },
-          // TODO(#142): wire wardomain-war-priest to resource-pool once ability-score max mode exists
+          // War Priest: a number of Bonus Action attacks equal to your Proficiency Bonus, regained on a Long Rest.
           { type: 'feature', feature: { id: 'wardomain-war-priest' } },
+          {
+            type: 'resource-pool',
+            poolId: 'war-priest',
+            max: { mode: 'proficiency-bonus', classId: 'cleric' },
+            regen: 'long-rest',
+          },
           { type: 'feature', feature: { id: 'wardomain-guided-strike' } },
           { type: 'spell', spellId: 'guiding-bolt', alwaysPrepared: true },
           { type: 'spell', spellId: 'magic-weapon', alwaysPrepared: true },
@@ -525,8 +531,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 6,
         grants: [
-          // After each Long Rest, roll d6: even = Weal, odd = Woe; Reaction to add/subtract d6 from rolls
+          // After each Long Rest, roll d6: even = Weal, odd = Woe; Reaction to add/subtract d6 from rolls.
+          // The Weal/Woe runtime state (which is active) is not modeled here — only the once-per-rest
+          // Reaction use, which resets on a Long Rest.
           { type: 'feature', feature: { id: 'circlestars-cosmic-omen' } },
+          { type: 'resource-pool', poolId: 'cosmic-omen-use', max: { mode: 'fixed', value: 1 }, regen: 'long-rest' },
         ],
       },
       {
@@ -594,13 +603,41 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 3,
         grants: [
           // Single umbrella feature for Psionic Power pool (Protective Field, Psionic Strike,
-          // Telekinetic Movement). Die size scales with PB (d6 at PB+2 → d12 at PB+6); encoded in description.
+          // Telekinetic Movement).
           { type: 'feature', feature: { id: 'psiwarrior-psionic-power' } },
-          // Psionic Energy resource pool: frozen at the L3 value of 4 dice, regain on Long Rest.
-          // Deferred: count scales as 2×PB (4 at L3–4, 6 at L5–8, 8 at L9–12, 10 at L13–16, 12 at L17–20)
-          // and is not yet modeled (no 2×PB step-function in the resource-pool grant); PB-scaled die size
-          // (d6–d12) and +1 per Short Rest partial regen are also not yet modeled.
-          { type: 'resource-pool', poolId: 'psionic-energy', max: { mode: 'fixed', value: 4 }, regen: 'long-rest' },
+          // Psionic Energy resource pool: count is 2×PB (4 at L3–4, 6 at L5–8, 8 at L9–12,
+          // 10 at L13–16, 12 at L17–20 — the step values equal 2×PB at each PB breakpoint),
+          // die size scales d6→d8→d10→d12 by level, and 1 die is regained on a Short Rest (all on a Long Rest).
+          {
+            type: 'resource-pool',
+            poolId: 'psionic-energy',
+            max: {
+              mode: 'level-steps',
+              classId: 'fighter',
+              steps: [
+                { minLevel: 3, value: 4 },
+                { minLevel: 5, value: 6 },
+                { minLevel: 9, value: 8 },
+                { minLevel: 13, value: 10 },
+                { minLevel: 17, value: 12 },
+              ],
+            },
+            regen: { mode: 'compound', shortRestAmount: 1 },
+            dieSizeSteps: [
+              { minLevel: 3, dieSize: 6 },
+              { minLevel: 5, dieSize: 8 },
+              { minLevel: 9, dieSize: 10 },
+              { minLevel: 13, dieSize: 12 },
+            ],
+          },
+          // Telekinetic Movement: usable once per Short Rest WITHOUT spending a Psionic Energy die
+          // — a per-feature counter distinct from the pool.
+          {
+            type: 'resource-pool',
+            poolId: 'telekinetic-movement-use',
+            max: { mode: 'fixed', value: 1 },
+            regen: 'short-rest',
+          },
         ],
       },
       {
@@ -609,6 +646,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           // Umbrella feature for Psi-Powered Leap and Telekinetic Thrust.
           // Telekinetic Thrust forces a STR save vs DC 8 + PB + INT mod.
           { type: 'feature', feature: { id: 'psiwarrior-telekinetic-adept', saveDC: { dcAbility: 'int' } } },
+          // Psi-Powered Leap: usable once per Short Rest WITHOUT spending a Psionic Energy die.
+          {
+            type: 'resource-pool',
+            poolId: 'psi-powered-leap-use',
+            max: { mode: 'fixed', value: 1 },
+            regen: 'short-rest',
+          },
         ],
       },
       {
@@ -1262,8 +1306,31 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         classLevel: 3,
         grants: [
           // Single umbrella feature for Psionic Power pool (Psi-Bolstered Knack, Psychic Whispers).
-          // Die size scales with PB (d6 at PB+2 → d12 at PB+6); shared resource pool with psiwarrior.
           { type: 'feature', feature: { id: 'soulknife-psionic-power' } },
+          // Psionic Energy pool — same shape as Psi Warrior but keyed on Rogue level: 2×PB dice
+          // (step values equal 2×PB at each breakpoint), die size scales d6→d12, +1 die on Short Rest.
+          {
+            type: 'resource-pool',
+            poolId: 'psionic-energy',
+            max: {
+              mode: 'level-steps',
+              classId: 'rogue',
+              steps: [
+                { minLevel: 3, value: 4 },
+                { minLevel: 5, value: 6 },
+                { minLevel: 9, value: 8 },
+                { minLevel: 13, value: 10 },
+                { minLevel: 17, value: 12 },
+              ],
+            },
+            regen: { mode: 'compound', shortRestAmount: 1 },
+            dieSizeSteps: [
+              { minLevel: 3, dieSize: 6 },
+              { minLevel: 5, dieSize: 8 },
+              { minLevel: 9, dieSize: 10 },
+              { minLevel: 13, dieSize: 12 },
+            ],
+          },
           // Psychic Blades: Bonus Action to produce glowing psychic blades as Unarmed Strike alternatives;
           // 1d6 psychic damage (1d8 for the off-hand blade in a two-weapon attack); counts as Finesse for Sneak Attack.
           // No weapon-grant infrastructure exists — described entirely in feature text.
@@ -1543,6 +1610,12 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Misty Escape: Reaction when you take damage — Misty Step and become Invisible until end of next turn; uses = PB/long rest
           { type: 'feature', feature: { id: 'archfeypatron-misty-escape' } },
+          {
+            type: 'resource-pool',
+            poolId: 'misty-escape',
+            max: { mode: 'proficiency-bonus', classId: 'warlock' },
+            regen: 'long-rest',
+          },
         ],
       },
       {
@@ -1587,6 +1660,12 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
           { type: 'spell', spellId: 'sacred-flame', alwaysPrepared: false },
           // Healing Light: pool of d6s = 1 + Warlock level; spend as Bonus Action to heal creature within 60 ft
           { type: 'feature', feature: { id: 'celestialpatron-healing-light' } },
+          {
+            type: 'resource-pool',
+            poolId: 'healing-light',
+            max: { mode: 'class-level-plus', classId: 'warlock', offset: 1 },
+            regen: 'long-rest',
+          },
           // Celestial patron spells (always prepared)
           { type: 'spell', spellId: 'aid', alwaysPrepared: true },
           { type: 'spell', spellId: 'cure-wounds', alwaysPrepared: true },
@@ -1663,8 +1742,15 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 6,
         grants: [
-          // Dark One's Own Luck: add d10 to an ability check or save; uses = PB per long rest; replenishes on short/long rest
+          // Dark One's Own Luck: add d10 to an ability check or save; uses = PB; regained on a Short or Long Rest
+          // ('short-rest' regen covers both short and long).
           { type: 'feature', feature: { id: 'fiendpatron-dark-ones-own-luck' } },
+          {
+            type: 'resource-pool',
+            poolId: 'dark-ones-own-luck',
+            max: { mode: 'proficiency-bonus', classId: 'warlock' },
+            regen: 'short-rest',
+          },
         ],
       },
       {
@@ -1731,6 +1817,12 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
         grants: [
           // Clairvoyant Combatant: creature within 60 ft must make WIS save or you have Advantage against it and are invisible to it for 1 min; uses = PB/long rest
           { type: 'feature', feature: { id: 'greatoldonepatron-clairvoyant-combatant' } },
+          {
+            type: 'resource-pool',
+            poolId: 'clairvoyant-combatant',
+            max: { mode: 'proficiency-bonus', classId: 'warlock' },
+            regen: 'long-rest',
+          },
         ],
       },
       {
@@ -1750,8 +1842,9 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 10,
         grants: [
-          // Eldritch Hex: one creature you can see becomes Hexed; if it damages you, it takes psychic damage = PB; 1/day
+          // Eldritch Hex: one creature you can see becomes Hexed; if it damages you, it takes psychic damage = PB; 1 use/long rest
           { type: 'feature', feature: { id: 'greatoldonepatron-eldritch-hex' } },
+          { type: 'resource-pool', poolId: 'eldritch-hex', max: { mode: 'fixed', value: 1 }, regen: 'long-rest' },
         ],
       },
       {
