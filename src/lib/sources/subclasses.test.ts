@@ -1161,8 +1161,8 @@ describe('getSubclassSource — Psi Warrior', () => {
           dieSizeSteps: [
             { minLevel: 3, dieSize: 6 },
             { minLevel: 5, dieSize: 8 },
-            { minLevel: 9, dieSize: 10 },
-            { minLevel: 13, dieSize: 12 },
+            { minLevel: 11, dieSize: 10 },
+            { minLevel: 17, dieSize: 12 },
           ],
         }),
         expect.objectContaining({
@@ -2227,8 +2227,24 @@ describe('getSubclassSource — Soulknife', () => {
         expect.objectContaining({
           type: 'resource-pool',
           poolId: 'psionic-energy',
-          max: expect.objectContaining({ mode: 'level-steps', classId: 'rogue' }),
+          max: {
+            mode: 'level-steps',
+            classId: 'rogue',
+            steps: [
+              { minLevel: 3, value: 4 },
+              { minLevel: 5, value: 6 },
+              { minLevel: 9, value: 8 },
+              { minLevel: 13, value: 10 },
+              { minLevel: 17, value: 12 },
+            ],
+          },
           regen: { mode: 'compound', shortRestAmount: 1 },
+          dieSizeSteps: [
+            { minLevel: 3, dieSize: 6 },
+            { minLevel: 5, dieSize: 8 },
+            { minLevel: 11, dieSize: 10 },
+            { minLevel: 17, dieSize: 12 },
+          ],
         }),
         expect.objectContaining({
           type: 'feature',

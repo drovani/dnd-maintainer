@@ -55,15 +55,21 @@ export function resolveResourcePools(bundles: readonly GrantBundle[]): readonly 
     }
 
     // Optional die-size scaling (e.g. Psionic Energy d6→d12). Keys on the same class as `max`;
-    // a `fixed`-max pool has no class to key on, so dieSizeSteps is ignored there.
+    // a `fixed`-max pool has no class to key on, so dieSizeSteps cannot be resolved there.
     let dieSize: PsionicDieSize | undefined;
-    if (grant.dieSizeSteps && grant.max.mode !== 'fixed') {
-      const dieLevel = getClassLevel(bundles, grant.max.classId);
-      const resolved = stepValueForLevel(
-        grant.dieSizeSteps.map((step) => ({ minLevel: step.minLevel, value: step.dieSize })),
-        dieLevel
-      );
-      if (resolved !== 0) dieSize = resolved as PsionicDieSize;
+    if (grant.dieSizeSteps) {
+      if (grant.max.mode === 'fixed') {
+        logger.warn(
+          `resource-pool "${grant.poolId}" declares dieSizeSteps with a fixed max — there is no class level to key the die size on, so dieSize is dropped`
+        );
+      } else {
+        const dieLevel = getClassLevel(bundles, grant.max.classId);
+        const resolved = stepValueForLevel(
+          grant.dieSizeSteps.map((step) => ({ minLevel: step.minLevel, value: step.dieSize })),
+          dieLevel
+        );
+        if (resolved !== 0) dieSize = resolved as PsionicDieSize;
+      }
     }
 
     pools.push({

@@ -623,11 +623,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
               ],
             },
             regen: { mode: 'compound', shortRestAmount: 1 },
+            // 2024 PHB die size scales d6 (L3) → d8 (L5) → d10 (L11) → d12 (L17).
+            // These thresholds differ from the 2×PB count steps above (3/5/9/13/17).
             dieSizeSteps: [
               { minLevel: 3, dieSize: 6 },
               { minLevel: 5, dieSize: 8 },
-              { minLevel: 9, dieSize: 10 },
-              { minLevel: 13, dieSize: 12 },
+              { minLevel: 11, dieSize: 10 },
+              { minLevel: 17, dieSize: 12 },
             ],
           },
           // Telekinetic Movement: usable once per Short Rest WITHOUT spending a Psionic Energy die
@@ -1324,11 +1326,13 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
               ],
             },
             regen: { mode: 'compound', shortRestAmount: 1 },
+            // 2024 PHB die size scales d6 (L3) → d8 (L5) → d10 (L11) → d12 (L17).
+            // These thresholds differ from the 2×PB count steps above (3/5/9/13/17).
             dieSizeSteps: [
               { minLevel: 3, dieSize: 6 },
               { minLevel: 5, dieSize: 8 },
-              { minLevel: 9, dieSize: 10 },
-              { minLevel: 13, dieSize: 12 },
+              { minLevel: 11, dieSize: 10 },
+              { minLevel: 17, dieSize: 12 },
             ],
           },
           // Psychic Blades: Bonus Action to produce glowing psychic blades as Unarmed Strike alternatives;

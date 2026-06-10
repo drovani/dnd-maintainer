@@ -126,6 +126,33 @@ describe('resolveResourcePools', () => {
       expect(pools).toHaveLength(1);
       expect(pools[0]).toMatchObject({ poolId: 'healing-light', max: expectedMax, regen: 'long-rest' });
     });
+
+    it('resolves to just the offset (no crash) when the named class is absent (level 0)', () => {
+      const otherClassBundles = classBundles('monk', 3); // no warlock bundles
+      const pools = resolveResourcePools([
+        ...otherClassBundles,
+        { source: { origin: 'class', id: 'monk', level: 1 }, grants: [HEAL_GRANT] },
+      ]);
+      expect(pools).toHaveLength(1);
+      // warlock level 0 + offset 1 = 1 (clamp at 0 does not fire for a positive offset)
+      expect(pools[0].max).toBe(1);
+    });
+
+    it('clamps a negative offset that underflows below 0 to 0', () => {
+      const NEG_GRANT: GrantBundle['grants'][number] = {
+        type: 'resource-pool',
+        poolId: 'underflow',
+        max: { mode: 'class-level-plus', classId: 'warlock', offset: -5 },
+        regen: 'long-rest',
+      };
+      const bundles: GrantBundle[] = [
+        { source: { origin: 'class', id: 'warlock', level: 1 }, grants: [NEG_GRANT] },
+        { source: { origin: 'class', id: 'warlock', level: 2 }, grants: [] },
+      ];
+      // warlock level 2 + (-5) = -3 → clamped to 0
+      const pools = resolveResourcePools(bundles);
+      expect(pools[0].max).toBe(0);
+    });
   });
 
   describe('dieSizeSteps (Psionic Energy die scaling)', () => {
@@ -144,11 +171,12 @@ describe('resolveResourcePools', () => {
         ],
       },
       regen: { mode: 'compound', shortRestAmount: 1 },
+      // Die size scales d6 (L3) → d8 (L5) → d10 (L11) → d12 (L17) — distinct thresholds from the count steps.
       dieSizeSteps: [
         { minLevel: 3, dieSize: 6 },
         { minLevel: 5, dieSize: 8 },
-        { minLevel: 9, dieSize: 10 },
-        { minLevel: 13, dieSize: 12 },
+        { minLevel: 11, dieSize: 10 },
+        { minLevel: 17, dieSize: 12 },
       ],
     };
 
@@ -163,14 +191,16 @@ describe('resolveResourcePools', () => {
       return bundles;
     }
 
+    // [fighter level, expected max (2×PB), expected die size]. Die transitions at 5/11/17; count at 5/9/13/17.
     it.each([
       [3, 4, 6],
       [4, 4, 6],
       [5, 6, 8],
-      [8, 6, 8],
-      [9, 8, 10],
-      [12, 8, 10],
-      [13, 10, 12],
+      [9, 8, 8], // count steps to 8, die still d8 (d10 not until L11)
+      [10, 8, 8],
+      [11, 8, 10], // die steps to d10 here, count unchanged at 8
+      [13, 10, 10], // count steps to 10, die still d10
+      [16, 10, 10],
       [17, 12, 12],
       [20, 12, 12],
     ])('at fighter level %i: max=%i dice of size d%i', (level, expectedMax, expectedDie) => {
@@ -179,6 +209,27 @@ describe('resolveResourcePools', () => {
       expect(pools[0].max).toBe(expectedMax);
       expect(pools[0].dieSize).toBe(expectedDie);
       expect(pools[0].regen).toEqual({ mode: 'compound', shortRestAmount: 1 });
+    });
+
+    it('drops dieSize (and does not throw) when dieSizeSteps is declared on a fixed-max pool', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'feat', id: 'magic-initiate' },
+          grants: [
+            {
+              type: 'resource-pool',
+              poolId: 'misconfigured',
+              max: { mode: 'fixed', value: 3 },
+              regen: 'long-rest',
+              dieSizeSteps: [{ minLevel: 1, dieSize: 6 }],
+            },
+          ],
+        },
+      ];
+      const pools = resolveResourcePools(bundles);
+      expect(pools).toHaveLength(1);
+      expect(pools[0].max).toBe(3);
+      expect(pools[0].dieSize).toBeUndefined();
     });
   });
 
