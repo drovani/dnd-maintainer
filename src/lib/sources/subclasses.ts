@@ -1893,9 +1893,11 @@ export const SUBCLASS_SOURCES: Record<SubclassId, SubclassSource> = {
       {
         classLevel: 6,
         grants: [
-          // Phantasmal Creatures: 2024 PHB grants Summon Beast + Summon Fey with free casts (PB uses per long rest)
-          // TODO(#159-followup): wire summon-beast/summon-fey always-prepared once catalogued
+          // Phantasmal Creatures: 2024 PHB grants Summon Beast + Summon Fey always prepared (issue #213).
+          // The PB free-casts-per-long-rest pool is deferred (runtime/PB-max blocker, refs #159).
           { type: 'feature', feature: { id: 'illusionist-phantasmal-creatures' } },
+          { type: 'spell', spellId: 'summon-beast', alwaysPrepared: true },
+          { type: 'spell', spellId: 'summon-fey', alwaysPrepared: true },
         ],
       },
       {

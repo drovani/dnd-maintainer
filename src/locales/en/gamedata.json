@@ -2942,6 +2942,10 @@
       "name": "Summon Fey",
       "description": "You call forth a fey spirit. It manifests in an unoccupied space within range in a form you choose: Fuming, Mirthful, or Tricksy. The creature disappears when it drops to 0 Hit Points or when the spell ends. The summoned creature is friendly to you and your companions for the duration."
     },
+    "summon-beast": {
+      "name": "Summon Beast",
+      "description": "You call forth a bestial spirit. It manifests in an unoccupied space that you can see within range in a form you choose: Land, Sea, or Sky. The creature disappears when it drops to 0 Hit Points or when the spell ends. The creature is an ally to you and your companions. In combat, it shares your Initiative count but takes its turn immediately after yours."
+    },
     "greater-invisibility": {
       "name": "Greater Invisibility",
       "description": "A creature you touch has the Invisible condition until the spell ends. Unlike Invisibility, this spell doesn't end if the target attacks or casts a spell."

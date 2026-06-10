@@ -1297,7 +1297,7 @@ export const SPELL_CATALOG = [
     // 2024 PHB: native to bard, sorcerer, warlock, wizard
     nativeClasses: ['bard', 'sorcerer', 'warlock', 'wizard'],
   },
-  // Fey Wanderer L9
+  // Fey Wanderer L9 / Illusionist Phantasmal Creatures (issue #213)
   {
     id: 'summon-fey',
     level: 3,
@@ -1310,6 +1310,24 @@ export const SPELL_CATALOG = [
     duration: 'Up to 1 hour',
     // 2024 PHB: native to druid, ranger, warlock, wizard
     nativeClasses: ['druid', 'ranger', 'warlock', 'wizard'],
+  },
+  // Illusionist Phantasmal Creatures (issue #213)
+  {
+    id: 'summon-beast',
+    level: 2,
+    school: 'conjuration',
+    ritual: false,
+    concentration: true,
+    castingTime: 'Action',
+    range: '90 feet',
+    components: {
+      verbal: true,
+      somatic: true,
+      material: 'a feather, tuft of fur, and fish tail inside a gilded acorn worth 200+ GP',
+    },
+    duration: 'Up to 1 hour',
+    // 2024 PHB: native to druid, ranger, wizard
+    nativeClasses: ['druid', 'ranger', 'wizard'],
   },
   // Gloom Stalker L13
   {

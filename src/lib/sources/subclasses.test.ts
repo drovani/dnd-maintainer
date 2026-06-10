@@ -3326,15 +3326,21 @@ describe('getSubclassSource — Illusionist', () => {
     );
   });
 
-  it('illusionist level 6 grants 1 feature: phantasmal-creatures', () => {
+  it('illusionist level 6 grants phantasmal-creatures + Summon Beast/Fey always prepared (issue #213)', () => {
     const source = getSubclassSource('illusionist');
     const level6 = source?.features.find((f) => f.classLevel === 6);
     expect(level6).toBeDefined();
-    expect(level6?.grants).toHaveLength(1);
-    expect(level6?.grants[0]).toMatchObject({
-      type: 'feature',
-      feature: { id: 'illusionist-phantasmal-creatures' },
-    });
+    expect(level6?.grants).toHaveLength(3);
+    expect(level6?.grants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'feature',
+          feature: expect.objectContaining({ id: 'illusionist-phantasmal-creatures' }),
+        }),
+        expect.objectContaining({ type: 'spell', spellId: 'summon-beast', alwaysPrepared: true }),
+        expect.objectContaining({ type: 'spell', spellId: 'summon-fey', alwaysPrepared: true }),
+      ])
+    );
   });
 
   it('illusionist level 10 grants 2 grants: illusory-self feature and illusory-self resource pool', () => {
