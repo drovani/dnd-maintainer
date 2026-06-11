@@ -51,6 +51,17 @@ export function LevelControls({ classId }: LevelControlsProps) {
     return styles;
   }, [rows]);
 
+  // Merge all decisions from all existing level rows for cross-row dedup (e.g. expertise)
+  const allDecisions = useMemo((): Readonly<Record<ChoiceKey, ChoiceDecision>> => {
+    const merged: Record<ChoiceKey, ChoiceDecision> = {};
+    for (const row of rows) {
+      if (row.choices) {
+        Object.assign(merged, row.choices);
+      }
+    }
+    return merged;
+  }, [rows]);
+
   const handleConfirmLevelUp = (hpRoll: number, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>) => {
     levelUp(classId, hpRoll, decisions);
   };
@@ -92,6 +103,9 @@ export function LevelControls({ classId }: LevelControlsProps) {
         currentSubclassId={currentSubclassId}
         currentAbilities={resolved?.abilities ?? null}
         alreadyChosenStyles={alreadyChosenStyles}
+        resolvedWeaponProficiencies={resolved?.weaponProficiencies ?? []}
+        resolvedSkills={resolved?.skills ?? null}
+        allDecisions={allDecisions}
       />
     </>
   );

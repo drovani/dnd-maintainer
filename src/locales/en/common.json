@@ -543,7 +543,10 @@
       "combat": "Unable to compute combat stats: {{message}}"
     },
     "levelUp": {
-      "abilitiesUnavailable": "Unable to allocate ability scores. Please fix any build errors first."
+      "abilitiesUnavailable": "Unable to allocate ability scores. Please fix any build errors first.",
+      "chooseAsi": "Ability Score Improvement",
+      "chooseFeat": "Feat",
+      "asiOrFeatPrompt": "Increase ability scores or take a feat"
     },
     "levelManagement": {
       "levelUp": "Level Up",

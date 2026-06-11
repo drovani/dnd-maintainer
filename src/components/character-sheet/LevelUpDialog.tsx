@@ -1,23 +1,20 @@
-import { AsiAllocator } from '@/components/character-sheet/AsiAllocator';
-import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
+import { AsiOrFeatPicker } from '@/components/character-sheet/AsiOrFeatPicker';
 import { DamageTypePicker } from '@/components/character-sheet/DamageTypePicker';
+import { ExpertiseChoicePicker } from '@/components/character-sheet/ExpertiseChoicePicker';
+import { FightingStylePicker } from '@/components/character-sheet/FightingStylePicker';
 import { SubclassPicker } from '@/components/character-sheet/SubclassPicker';
+import { ChoicePicker } from '@/components/character-builder/ChoicePicker';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RollingNumber } from '@/components/ui/rolling-number';
-import type { ClassId } from '@/lib/dnd-helpers';
+import type { ClassId, FightingStyleId } from '@/lib/dnd-helpers';
 import { getGrantsForLevel } from '@/lib/sources/level-grants';
+import { collectChoiceGrantsFromGrants } from '@/lib/use-all-choice-grants';
+import { parseChoiceKey } from '@/types/choices';
 import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
-import type {
-  AsiGrant,
-  DamageTypeChoiceGrant,
-  FeatureGrant,
-  FightingStyleChoiceGrant,
-  SubclassGrant,
-} from '@/types/grants';
+import type { FeatureGrant } from '@/types/grants';
 import type { PendingChoice, ResolvedCharacter } from '@/types/resolved';
-import type { SubclassId } from '@/types/sources';
-import type { FightingStyleId } from '@/lib/dnd-helpers';
+import type { SourceTag, SubclassId } from '@/types/sources';
 import { Dices } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +37,53 @@ interface LevelUpDialogProps {
   readonly currentAbilities: ResolvedCharacter['abilities'] | null;
   /** Fighting styles already chosen by the character (to exclude from picker). */
   readonly alreadyChosenStyles: readonly FightingStyleId[];
+  /** Weapon proficiencies from the resolved character — needed for mastery picker dedup. */
+  readonly resolvedWeaponProficiencies: readonly { readonly value: string }[];
+  /** Resolved skills from the resolved character — needed for expertise picker. */
+  readonly resolvedSkills: ResolvedCharacter['skills'] | null;
+  /** All decisions already made across all level rows — for expertise cross-dedup. */
+  readonly allDecisions: Readonly<Record<ChoiceKey, ChoiceDecision>>;
+}
+
+/** Returns true when a single PendingChoice is satisfied by the given decision map. */
+function isChoiceSatisfied(choice: PendingChoice, decisions: ReadonlyMap<ChoiceKey, ChoiceDecision>): boolean {
+  const decision = decisions.get(choice.choiceKey);
+  switch (choice.type) {
+    case 'asi':
+      if (decision?.type !== 'asi') return false;
+      return Object.values(decision.allocation).reduce((s, v) => s + (v ?? 0), 0) === choice.points;
+    case 'feat-choice':
+      return decision?.type === 'feat-choice' && decision.featId.length > 0;
+    case 'subclass':
+      return decision?.type === 'subclass';
+    case 'fighting-style-choice':
+      return decision?.type === 'fighting-style-choice' && decision.styles.length >= choice.count;
+    case 'damage-choice':
+      return decision?.type === 'damage-choice' && decision.damageTypes.length >= choice.count;
+    case 'weapon-mastery-choice':
+      return decision?.type === 'weapon-mastery-choice' && decision.weaponIds.length >= choice.count;
+    case 'expertise-choice':
+      if (decision?.type !== 'expertise-choice') return false;
+      return decision.skills.length + decision.tools.length === choice.count;
+    case 'skill-choice':
+      return decision?.type === 'skill-choice' && decision.skills.length >= choice.count;
+    case 'tool-choice':
+      return decision?.type === 'tool-choice' && decision.tools.length >= choice.count;
+    case 'language-choice':
+      return decision?.type === 'language-choice' && decision.languages.length >= choice.count;
+    case 'saving-throw-choice':
+      return decision?.type === 'saving-throw-choice' && decision.savingThrows.length >= choice.count;
+    case 'ability-choice':
+      return decision?.type === 'ability-choice' && decision.abilities.length >= choice.count;
+    case 'spell-choice':
+      return decision?.type === 'spell-choice' && decision.spellIds.length >= choice.count;
+    case 'bundle-choice':
+      return decision?.type === 'bundle-choice' && decision.bundleId.length > 0;
+    case 'lineage-choice':
+      return decision?.type === 'lineage-choice' && decision.lineageId.length > 0;
+    case 'feature-choice':
+      return decision?.type === 'feature-choice' && decision.optionId.length > 0;
+  }
 }
 
 export function LevelUpDialog({
@@ -53,6 +97,9 @@ export function LevelUpDialog({
   currentSubclassId,
   currentAbilities,
   alreadyChosenStyles,
+  resolvedWeaponProficiencies,
+  resolvedSkills,
+  allDecisions,
 }: LevelUpDialogProps) {
   const { t } = useTranslation('common');
   const { t: tg } = useTranslation('gamedata');
@@ -77,52 +124,81 @@ export function LevelUpDialog({
     [classId, targetLevel, currentSubclassId]
   );
 
-  // Categorize grants
+  // Features to display (not choices)
   const featureGrants = useMemo(() => {
     const allGrants = [...preview.classGrants, ...preview.subclassGrants];
     return allGrants.filter((g): g is FeatureGrant => g.type === 'feature');
   }, [preview]);
 
-  const asiGrants = useMemo(() => {
-    return preview.classGrants.filter((g): g is AsiGrant => g.type === 'asi');
-  }, [preview]);
+  // Source tag for this level's grants
+  const source: SourceTag = useMemo(
+    () => ({ origin: 'class', id: classId, level: targetLevel }),
+    [classId, targetLevel]
+  );
 
-  const subclassGrants = useMemo(() => {
-    return preview.classGrants.filter((g): g is SubclassGrant => g.type === 'subclass');
-  }, [preview]);
+  // Collect ALL choice-producing grants for this level.
+  // Do NOT pass choices/decisions — we want both ASI and companion feat-choice to always appear
+  // so AsiOrFeatPicker can offer both options; either-or is enforced by the picker + gate.
+  const levelChoices = useMemo(
+    () =>
+      collectChoiceGrantsFromGrants([...preview.classGrants, ...preview.subclassGrants], source, {
+        resolvedWeaponProficiencies: resolvedWeaponProficiencies,
+        alreadyClaimedMasteries: new Set(),
+        allChosenStyles: [...alreadyChosenStyles],
+      }),
+    [preview, source, resolvedWeaponProficiencies, alreadyChosenStyles]
+  );
 
-  const fightingStyleGrants = useMemo(() => {
-    const allGrants = [...preview.classGrants, ...preview.subclassGrants];
-    return allGrants.filter((g): g is FightingStyleChoiceGrant => g.type === 'fighting-style-choice');
-  }, [preview]);
+  // Pair each ASI choice with its companion feat-choice (same origin/id/index, different category)
+  const { asiOrFeatPairs, standaloneChoices } = useMemo(() => {
+    const pairs: Array<{
+      asiChoice: Extract<PendingChoice, { type: 'asi' }>;
+      featChoice: Extract<PendingChoice, { type: 'feat-choice' }>;
+    }> = [];
+    const pairedFeatKeys = new Set<ChoiceKey>();
 
-  const damageChoiceGrants = useMemo(() => {
-    const allGrants = [...preview.classGrants, ...preview.subclassGrants];
-    return allGrants.filter((g): g is DamageTypeChoiceGrant => g.type === 'damage-choice');
-  }, [preview]);
+    const asiChoices = levelChoices.filter((c): c is Extract<PendingChoice, { type: 'asi' }> => c.type === 'asi');
+    const featChoices = levelChoices.filter(
+      (c): c is Extract<PendingChoice, { type: 'feat-choice' }> => c.type === 'feat-choice'
+    );
 
-  // Check if all required choices are made
+    for (const asi of asiChoices) {
+      const parsedAsi = parseChoiceKey(asi.choiceKey);
+      const companion = featChoices.find((fc) => {
+        const p = parseChoiceKey(fc.choiceKey);
+        return p.origin === parsedAsi.origin && p.id === parsedAsi.id && p.index === parsedAsi.index;
+      });
+      if (companion) {
+        pairs.push({ asiChoice: asi, featChoice: companion });
+        pairedFeatKeys.add(companion.choiceKey);
+      }
+    }
+
+    // Standalone choices = everything that is NOT an asi with a companion,
+    // and NOT a paired companion feat-choice
+    const standalone = levelChoices.filter((c) => {
+      if (c.type === 'asi') return false; // all ASIs handled by pairs
+      if (c.type === 'feat-choice' && pairedFeatKeys.has(c.choiceKey)) return false;
+      return true;
+    });
+
+    return { asiOrFeatPairs: pairs, standaloneChoices: standalone };
+  }, [levelChoices]);
+
+  // Gate: all choices made?
   const allChoicesMade = useMemo(() => {
-    for (const grant of asiGrants) {
-      const decision = decisions.get(grant.key);
-      if (!decision || decision.type !== 'asi') return false;
-      const total = Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0);
-      if (total !== grant.points) return false;
+    // Check ASI/feat pairs: exactly one of the pair must be satisfied
+    for (const { asiChoice, featChoice } of asiOrFeatPairs) {
+      const asiSatisfied = isChoiceSatisfied(asiChoice, decisions);
+      const featSatisfied = isChoiceSatisfied(featChoice, decisions);
+      if (!asiSatisfied && !featSatisfied) return false;
     }
-    for (const grant of subclassGrants) {
-      const decision = decisions.get(grant.key);
-      if (!decision || decision.type !== 'subclass') return false;
-    }
-    for (const grant of fightingStyleGrants) {
-      const decision = decisions.get(grant.key);
-      if (!decision || decision.type !== 'fighting-style-choice' || decision.styles.length < grant.count) return false;
-    }
-    for (const grant of damageChoiceGrants) {
-      const decision = decisions.get(grant.key);
-      if (!decision || decision.type !== 'damage-choice' || decision.damageTypes.length < grant.count) return false;
+    // Check all standalone choices
+    for (const choice of standaloneChoices) {
+      if (!isChoiceSatisfied(choice, decisions)) return false;
     }
     return true;
-  }, [asiGrants, subclassGrants, fightingStyleGrants, damageChoiceGrants, decisions]);
+  }, [asiOrFeatPairs, standaloneChoices, decisions]);
 
   const canConfirm = hpSelection !== null && allChoicesMade;
 
@@ -150,6 +226,22 @@ export function LevelUpDialog({
     setHpSelection(value);
   };
 
+  const handleDecide = (key: ChoiceKey, decision: ChoiceDecision) => {
+    setDecisions((prev) => {
+      const next = new Map(prev);
+      next.set(key, decision);
+      return next;
+    });
+  };
+
+  const handleClear = (key: ChoiceKey) => {
+    setDecisions((prev) => {
+      const next = new Map(prev);
+      next.delete(key);
+      return next;
+    });
+  };
+
   const handleConfirm = () => {
     if (hpSelection === null) return;
     onConfirm(hpSelection, decisions);
@@ -170,21 +262,17 @@ export function LevelUpDialog({
     onOpenChange(nextOpen);
   };
 
-  const handleAsiDecide = (choiceKey: ChoiceKey, allocation: Partial<Record<string, number>>) => {
-    setDecisions((prev) => {
-      const next = new Map(prev);
-      next.set(choiceKey, { type: 'asi', allocation: allocation as Record<string, number> });
-      return next;
-    });
-  };
+  // Merged decisions: allDecisions (from prior levels) + local dialog decisions
+  const mergedDecisions = useMemo(
+    () => ({ ...allDecisions, ...Object.fromEntries(decisions) }),
+    [allDecisions, decisions]
+  );
 
-  const handleSubclassDecide = (choiceKey: ChoiceKey, subclassId: SubclassId) => {
-    setDecisions((prev) => {
-      const next = new Map(prev);
-      next.set(choiceKey, { type: 'subclass', subclassId });
-      return next;
-    });
-  };
+  // Expertise keys for ExpertiseChoicePicker
+  const expertiseKeys = useMemo(
+    () => standaloneChoices.filter((c) => c.type === 'expertise-choice').map((c) => c.choiceKey),
+    [standaloneChoices]
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -274,95 +362,93 @@ export function LevelUpDialog({
           </div>
         </div>
 
-        {/* Subclass choice */}
-        {subclassGrants.map((grant) => (
-          <SubclassPicker
-            key={grant.key}
-            choice={
-              {
-                type: 'subclass',
-                choiceKey: grant.key,
-                source: { origin: 'class', id: classId, level: targetLevel },
-                classId: grant.classId,
-              } satisfies Extract<PendingChoice, { type: 'subclass' }>
-            }
-            onDecide={handleSubclassDecide}
-            autoCommit
-          />
-        ))}
-
-        {/* Fighting style choice */}
-        {fightingStyleGrants.map((grant) => (
-          <FightingStylePicker
-            key={grant.key}
-            choice={
-              {
-                type: 'fighting-style-choice',
-                choiceKey: grant.key,
-                source: { origin: 'class', id: classId, level: targetLevel },
-                count: grant.count,
-                from: grant.from,
-                alreadyChosen: alreadyChosenStyles,
-              } satisfies Extract<PendingChoice, { type: 'fighting-style-choice' }>
-            }
-            onDecide={(choiceKey, decision) => {
-              setDecisions((prev) => {
-                const next = new Map(prev);
-                next.set(choiceKey, decision);
-                return next;
-              });
-            }}
-          />
-        ))}
-
-        {/* Damage-type choice */}
-        {damageChoiceGrants.map((grant) => (
-          <DamageTypePicker
-            key={grant.key}
-            choice={
-              {
-                type: 'damage-choice',
-                choiceKey: grant.key,
-                source: { origin: 'class', id: classId, level: targetLevel },
-                count: grant.count,
-                from: grant.from,
-                featureIdPrefix: grant.featureIdPrefix,
-              } satisfies Extract<PendingChoice, { type: 'damage-choice' }>
-            }
-            onDecide={(choiceKey, decision) => {
-              setDecisions((prev) => {
-                const next = new Map(prev);
-                next.set(choiceKey, decision);
-                return next;
-              });
-            }}
-          />
-        ))}
-
-        {/* ASI choice */}
-        {asiGrants.map((grant) =>
+        {/* ASI / feat pairs */}
+        {asiOrFeatPairs.map(({ asiChoice, featChoice }) =>
           currentAbilities ? (
-            <AsiAllocator
-              key={grant.key}
-              choice={
-                {
-                  type: 'asi',
-                  choiceKey: grant.key,
-                  source: { origin: 'class', id: classId, level: targetLevel },
-                  points: grant.points,
-                  from: grant.from,
-                } satisfies Extract<PendingChoice, { type: 'asi' }>
-              }
+            <AsiOrFeatPicker
+              key={asiChoice.choiceKey}
+              asiChoice={asiChoice}
+              featChoice={featChoice}
               abilities={currentAbilities}
-              onDecide={handleAsiDecide}
-              autoCommit
+              asiDecision={decisions.get(asiChoice.choiceKey)}
+              featDecision={decisions.get(featChoice.choiceKey)}
+              onDecide={handleDecide}
+              onClear={handleClear}
             />
           ) : (
-            <p key={grant.key} className="text-sm text-destructive">
+            <p key={asiChoice.choiceKey} className="text-sm text-destructive">
               {t('characterSheet.levelUp.abilitiesUnavailable')}
             </p>
           )
         )}
+
+        {/* All other choice types */}
+        {standaloneChoices.map((choice) => {
+          const currentDecision = decisions.get(choice.choiceKey);
+
+          if (choice.type === 'subclass') {
+            return (
+              <SubclassPicker
+                key={choice.choiceKey}
+                choice={choice}
+                currentDecision={currentDecision}
+                onDecide={(key, subclassId) => handleDecide(key, { type: 'subclass', subclassId })}
+                onClear={handleClear}
+                autoCommit
+              />
+            );
+          }
+
+          if (choice.type === 'fighting-style-choice') {
+            return (
+              <FightingStylePicker
+                key={choice.choiceKey}
+                choice={choice}
+                currentDecision={currentDecision}
+                onDecide={handleDecide}
+                onClear={handleClear}
+              />
+            );
+          }
+
+          if (choice.type === 'damage-choice') {
+            return (
+              <DamageTypePicker
+                key={choice.choiceKey}
+                choice={choice}
+                currentDecision={currentDecision}
+                onDecide={handleDecide}
+                onClear={handleClear}
+              />
+            );
+          }
+
+          if (choice.type === 'expertise-choice') {
+            return (
+              <ExpertiseChoicePicker
+                key={choice.choiceKey}
+                choice={choice}
+                currentDecision={currentDecision}
+                allDecisions={mergedDecisions}
+                allExpertiseChoiceKeys={expertiseKeys}
+                resolvedSkills={resolvedSkills ?? ({} as ResolvedCharacter['skills'])}
+                onDecide={handleDecide}
+                onClear={handleClear}
+              />
+            );
+          }
+
+          // Everything else (skill/tool/language/saving-throw/ability/bundle/lineage/feat/feature/weapon-mastery/spell)
+          return (
+            <ChoicePicker
+              key={choice.choiceKey}
+              choice={choice}
+              currentDecision={currentDecision}
+              onDecide={handleDecide}
+              onClear={handleClear}
+            />
+          );
+        })}
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="ghost" onClick={() => handleOpenChange(false)}>
