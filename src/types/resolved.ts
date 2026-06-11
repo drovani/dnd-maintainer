@@ -126,13 +126,23 @@ export interface ResolvedPactMagic {
  * Resolved spellcasting state. Invariant: warlocks have `pactMagic !== null` and `slots` is empty;
  * all other casters have `pactMagic === null` and use `slots`. `preparedCount` is `0` for known-spell
  * casters (bard, sorcerer, warlock) and non-class spellcasting sources.
+ *
+ * `cantripsKnown`: sum of all cantrip spell-choice grant counts (i.e. the number of cantrip slots
+ * the character has). `0` for non-casters and prepared casters that don't model cantrip counts.
+ *
+ * `spellsKnown`: per-spell-level target count for known-spell casters (bard, sorcerer, warlock,
+ * ranger). Empty for prepared casters — use `preparedCount` instead.
+ *
+ * `knownSpells`: each entry carries `spellLevel` so consumers can group by level.
  */
 export interface ResolvedSpellcasting {
   readonly ability: AbilityKey | null;
   readonly spellSaveDC: number | null;
   readonly spellAttackBonus: number | null;
   readonly cantrips: readonly string[];
-  readonly knownSpells: readonly string[];
+  readonly cantripsKnown: number;
+  readonly knownSpells: readonly { readonly spellId: string; readonly spellLevel: number }[];
+  readonly spellsKnown: readonly { readonly level: number; readonly count: number }[];
   readonly alwaysPreparedSpells: readonly string[];
   readonly slots: readonly number[];
   readonly preparedCount: number;

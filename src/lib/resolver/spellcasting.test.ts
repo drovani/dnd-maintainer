@@ -337,7 +337,7 @@ describe('resolveSpellcasting', () => {
         },
       ];
       const result = resolveSpellcasting(bundles, defaultAbilities, 2, 1);
-      expect(result!.knownSpells).toContain('guiding-bolt');
+      expect(result!.knownSpells.map((e) => e.spellId)).toContain('guiding-bolt');
       expect(result!.alwaysPreparedSpells).not.toContain('guiding-bolt');
     });
   });
@@ -470,7 +470,7 @@ describe('resolveSpellcasting', () => {
       ];
       const abilities = makeAbilities({ wis: 14 });
       const result = resolveSpellcasting(bundles, abilities, 2, 1);
-      expect(result!.knownSpells).toContain('guiding-bolt');
+      expect(result!.knownSpells.map((e) => e.spellId)).toContain('guiding-bolt');
       expect(result!.cantrips).not.toContain('guiding-bolt');
     });
 
@@ -484,7 +484,7 @@ describe('resolveSpellcasting', () => {
       ];
       const abilities = makeAbilities({ wis: 14 });
       const result = resolveSpellcasting(bundles, abilities, 2, 1);
-      expect(result!.knownSpells).toContain('totally-unknown-spell');
+      expect(result!.knownSpells.map((e) => e.spellId)).toContain('totally-unknown-spell');
       expect(result!.cantrips).not.toContain('totally-unknown-spell');
     });
 
@@ -505,6 +505,354 @@ describe('resolveSpellcasting', () => {
       expect(result!.cantrips).toContain('thorn-whip');
       expect(result!.knownSpells).not.toContain('druidcraft');
       expect(result!.knownSpells).not.toContain('thorn-whip');
+    });
+  });
+
+  describe('cantripsKnown aggregation', () => {
+    it('zero when no spell-choice grants present', () => {
+      const result = resolveSpellcasting(makeClericBundles(1), makeAbilities({ wis: 14 }), 2, 1);
+      expect(result!.cantripsKnown).toBe(0);
+    });
+
+    it('single cantrip spell-choice grant (count:N) → cantripsKnown === N', () => {
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:cantrip-test' as never,
+              count: 3,
+              spellList: 'bard',
+              spellLevel: 0,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
+      expect(result!.cantripsKnown).toBe(3);
+    });
+
+    it('two cantrip spell-choice grants sum their counts', () => {
+      const bundles: GrantBundle[] = [
+        ...makeWizardBundles(1),
+        {
+          source: { origin: 'class', id: 'wizard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:wizard:cantrip-a' as never,
+              count: 2,
+              spellList: 'wizard',
+              spellLevel: 0,
+            },
+          ],
+        },
+        {
+          source: { origin: 'class', id: 'wizard', level: 4 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:wizard:cantrip-b' as never,
+              count: 1,
+              spellList: 'wizard',
+              spellLevel: 0,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ int: 14 }), 2, 4);
+      expect(result!.cantripsKnown).toBe(3);
+    });
+
+    it('leveled spell-choice grants do not contribute to cantripsKnown', () => {
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:cantrip-1' as never,
+              count: 2,
+              spellList: 'bard',
+              spellLevel: 0,
+            },
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:level1-1' as never,
+              count: 4,
+              spellList: 'bard',
+              spellLevel: 1,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
+      expect(result!.cantripsKnown).toBe(2);
+    });
+  });
+
+  describe('spellsKnown aggregation', () => {
+    it('empty when no spell-choice grants present', () => {
+      const result = resolveSpellcasting(makeClericBundles(1), makeAbilities({ wis: 14 }), 2, 1);
+      expect(result!.spellsKnown).toEqual([]);
+    });
+
+    it('single leveled spell-choice grant → spellsKnown entry with matching level and count', () => {
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:l1-a' as never,
+              count: 4,
+              spellList: 'bard',
+              spellLevel: 1,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
+      expect(result!.spellsKnown).toEqual([{ level: 1, count: 4 }]);
+    });
+
+    it('two grants at different levels → two spellsKnown entries sorted by level', () => {
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:l1-a' as never,
+              count: 2,
+              spellList: 'bard',
+              spellLevel: 1,
+            },
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:l2-a' as never,
+              count: 1,
+              spellList: 'bard',
+              spellLevel: 2,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
+      expect(result!.spellsKnown).toContainEqual({ level: 1, count: 2 });
+      expect(result!.spellsKnown).toContainEqual({ level: 2, count: 1 });
+      expect(result!.spellsKnown).toHaveLength(2);
+    });
+
+    it('two grants at the same spell level accumulate their counts', () => {
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:l1-a' as never,
+              count: 4,
+              spellList: 'bard',
+              spellLevel: 1,
+            },
+          ],
+        },
+        {
+          source: { origin: 'class', id: 'bard', level: 2 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:l1-b' as never,
+              count: 1,
+              spellList: 'bard',
+              spellLevel: 1,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 2);
+      expect(result!.spellsKnown).toEqual([{ level: 1, count: 5 }]);
+    });
+
+    it('cantrip grants do not contribute to spellsKnown', () => {
+      const bundles: GrantBundle[] = [
+        ...makeWizardBundles(1),
+        {
+          source: { origin: 'class', id: 'wizard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:wizard:cantrip-1' as never,
+              count: 3,
+              spellList: 'wizard',
+              spellLevel: 0,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ int: 14 }), 2, 1);
+      expect(result!.spellsKnown).toEqual([]);
+    });
+  });
+
+  describe('knownSpells entries carry spellLevel', () => {
+    it('catalogued level-1 spell grant → knownSpells entry has spellLevel: 1', () => {
+      // bless is a catalogued level-1 spell (not alwaysPrepared here)
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [{ type: 'spell', spellId: 'bless', alwaysPrepared: false }],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
+      const entry = result!.knownSpells.find((e) => e.spellId === 'bless');
+      expect(entry).toBeDefined();
+      expect(entry!.spellLevel).toBe(1);
+    });
+
+    it('catalogued level-3 spell grant → knownSpells entry has spellLevel: 3', () => {
+      // fireball is a catalogued level-3 spell
+      const bundles: GrantBundle[] = [
+        ...makeWizardBundles(1),
+        {
+          source: { origin: 'class', id: 'wizard', level: 1 },
+          grants: [{ type: 'spell', spellId: 'fireball', alwaysPrepared: false }],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ int: 14 }), 2, 1);
+      const entry = result!.knownSpells.find((e) => e.spellId === 'fireball');
+      expect(entry).toBeDefined();
+      expect(entry!.spellLevel).toBe(3);
+    });
+
+    it('cantrip spell grant goes to cantrips, NOT knownSpells', () => {
+      // guidance is a catalogued level-0 cantrip
+      const bundles: GrantBundle[] = [
+        ...makeDruidBundles(1),
+        {
+          source: { origin: 'class', id: 'druid', level: 1 },
+          grants: [{ type: 'spell', spellId: 'guidance', alwaysPrepared: false }],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ wis: 14 }), 2, 1);
+      expect(result!.cantrips).toContain('guidance');
+      expect(result!.knownSpells.map((e) => e.spellId)).not.toContain('guidance');
+    });
+
+    it('uncatalogued spell grant → knownSpells entry has spellLevel: 0 (fallback)', () => {
+      const bundles: GrantBundle[] = [
+        ...makeClericBundles(1),
+        {
+          source: { origin: 'class', id: 'cleric', level: 1 },
+          grants: [{ type: 'spell', spellId: 'uncatalogued-spell-xyz', alwaysPrepared: false }],
+        },
+      ];
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const result = resolveSpellcasting(bundles, makeAbilities({ wis: 14 }), 2, 1);
+      warnSpy.mockRestore();
+      const entry = result!.knownSpells.find((e) => e.spellId === 'uncatalogued-spell-xyz');
+      expect(entry).toBeDefined();
+      expect(entry!.spellLevel).toBe(0);
+    });
+  });
+
+  describe('headline class counts: non-zero cantripsKnown and spellsKnown', () => {
+    it('bard L1 (full known caster): cantripsKnown=2, spellsKnown has level-1 entry with count 4', () => {
+      // Bard L1 has: +2 cantrips (spell-choice spellLevel:0 count:2) and +4 L1 spells
+      const bundles: GrantBundle[] = [
+        ...makeBardBundles(1),
+        {
+          source: { origin: 'class', id: 'bard', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:cantrips-l1' as never,
+              count: 2,
+              spellList: 'bard',
+              spellLevel: 0,
+            },
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:bard:spells-l1' as never,
+              count: 4,
+              spellList: 'bard',
+              spellLevel: 1,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 16 }), 2, 1);
+      expect(result!.cantripsKnown).toBeGreaterThan(0);
+      expect(result!.cantripsKnown).toBe(2);
+      const l1Entry = result!.spellsKnown.find((e) => e.level === 1);
+      expect(l1Entry).toBeDefined();
+      expect(l1Entry!.count).toBe(4);
+    });
+
+    it('ranger L2 (half caster, starts at L2): spellsKnown has level-1 entry when spell-choice grant present', () => {
+      // Ranger gains spellcasting at L2; a spell-choice grant for L1 is needed to test spellsKnown
+      const bundles: GrantBundle[] = [
+        ...makeRangerBundles({ level: 2 }),
+        {
+          source: { origin: 'class', id: 'ranger', level: 2 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:ranger:l1-test' as never,
+              count: 2,
+              spellList: 'ranger',
+              spellLevel: 1,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ wis: 14 }), 2, 2);
+      expect(result!.cantripsKnown).toBe(0); // rangers have no cantrips
+      const l1Entry = result!.spellsKnown.find((e) => e.level === 1);
+      expect(l1Entry).toBeDefined();
+      expect(l1Entry!.count).toBeGreaterThan(0);
+      expect(l1Entry!.count).toBe(2);
+    });
+
+    it('warlock L1 (pact caster): cantripsKnown reflects cantrip spell-choice grant count', () => {
+      // Warlocks use pact magic; cantripsKnown comes from spell-choice grants with spellLevel:0
+      const bundles: GrantBundle[] = [
+        ...makeWarlockBundles(1),
+        {
+          source: { origin: 'class', id: 'warlock', level: 1 },
+          grants: [
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:warlock:cantrips-l1' as never,
+              count: 2,
+              spellList: 'warlock',
+              spellLevel: 0,
+            },
+            {
+              type: 'spell-choice',
+              key: 'spell-choice:class:warlock:spells-l1' as never,
+              count: 2,
+              spellList: 'warlock',
+              spellLevel: 1,
+            },
+          ],
+        },
+      ];
+      const result = resolveSpellcasting(bundles, makeAbilities({ cha: 16 }), 2, 1);
+      expect(result!.pactMagic).not.toBeNull(); // confirms warlock pact magic path
+      expect(result!.cantripsKnown).toBeGreaterThan(0);
+      expect(result!.cantripsKnown).toBe(2);
+      const l1Entry = result!.spellsKnown.find((e) => e.level === 1);
+      expect(l1Entry).toBeDefined();
+      expect(l1Entry!.count).toBe(2);
     });
   });
 });

@@ -156,6 +156,7 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
     }),
     levels: [
       {
+        // L1
         grants: [
           { type: 'hit-die', die: 8 },
           { type: 'proficiency', category: 'armor', id: 'light' },
@@ -183,15 +184,40 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           { type: 'spellcasting', ability: 'cha', source: 'class' },
           { type: 'feature', feature: { id: 'bard-bardic-inspiration' } },
           { type: 'armor-class', calculation: { mode: 'armored' } },
+          // Cantrips: +2 at L1 (index 0)
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 0),
+            count: 2,
+            spellList: 'bard',
+            spellLevel: 0,
+          },
+          // Spells known: +4 at L1 (highest spell level available: 1)
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 3),
+            count: 4,
+            spellList: 'bard',
+            spellLevel: 1,
+          },
         ],
       },
       {
+        // L2: +1 spell known (highest: 1)
         grants: [
           { type: 'feature', feature: { id: 'bard-jack-of-all-trades' } },
           { type: 'feature', feature: { id: 'bard-song-of-rest' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 4),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 1,
+          },
         ],
       },
       {
+        // L3: +1 spell known (highest: 2)
         grants: [
           { type: 'subclass', classId: 'bard', key: createChoiceKey('subclass', 'class', 'bard', 0) },
           {
@@ -201,15 +227,100 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: null,
             fromTools: [],
           },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 5),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 2,
+          },
         ],
       },
-      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 0), points: 2, from: null }] },
-      { grants: [{ type: 'feature', feature: { id: 'bard-font-of-inspiration' } }] },
-      EMPTY_LEVEL,
-      { grants: [{ type: 'feature', feature: { id: 'bard-countercharm' } }] },
-      { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 1), points: 2, from: null }] },
-      EMPTY_LEVEL,
       {
+        // L4: +1 cantrip (index 1), +1 spell known (highest: 2)
+        grants: [
+          { type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 0), points: 2, from: null },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 1),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 0,
+          },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 6),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 2,
+          },
+        ],
+      },
+      {
+        // L5: +1 spell known (highest: 3)
+        grants: [
+          { type: 'feature', feature: { id: 'bard-font-of-inspiration' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 7),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 3,
+          },
+        ],
+      },
+      {
+        // L6: +1 spell known (highest: 3)
+        grants: [
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 8),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 3,
+          },
+        ],
+      },
+      {
+        // L7: +1 spell known (highest: 4)
+        grants: [
+          { type: 'feature', feature: { id: 'bard-countercharm' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 9),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 4,
+          },
+        ],
+      },
+      {
+        // L8: +1 spell known (highest: 4)
+        grants: [
+          { type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 1), points: 2, from: null },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 10),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 4,
+          },
+        ],
+      },
+      {
+        // L9: +1 spell known (highest: 5)
+        grants: [
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 11),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 5,
+          },
+        ],
+      },
+      {
+        // L10: +1 cantrip (index 2), +2 spells known (highest: 5)
         grants: [
           { type: 'feature', feature: { id: 'bard-magical-secrets' } },
           {
@@ -219,16 +330,98 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: null,
             fromTools: [],
           },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 2),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 0,
+          },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 12),
+            count: 2,
+            spellList: 'bard',
+            spellLevel: 5,
+          },
         ],
       },
-      EMPTY_LEVEL,
+      {
+        // L11: +1 spell known (highest: 6)
+        grants: [
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 13),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 6,
+          },
+        ],
+      },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 2), points: 2, from: null }] },
-      EMPTY_LEVEL,
-      EMPTY_LEVEL,
-      { grants: [{ type: 'feature', feature: { id: 'bard-superior-inspiration' } }] },
+      {
+        // L13: +1 spell known (highest: 7)
+        grants: [
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 14),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 7,
+          },
+        ],
+      },
+      {
+        // L14: +2 spells known (highest: 7)
+        grants: [
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 15),
+            count: 2,
+            spellList: 'bard',
+            spellLevel: 7,
+          },
+        ],
+      },
+      {
+        // L15: +1 spell known (highest: 8)
+        grants: [
+          { type: 'feature', feature: { id: 'bard-superior-inspiration' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 16),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 8,
+          },
+        ],
+      },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 3), points: 2, from: null }] },
-      EMPTY_LEVEL,
-      { grants: [{ type: 'feature', feature: { id: 'bard-words-of-creation' } }] },
+      {
+        // L17: +1 spell known (highest: 9)
+        grants: [
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 17),
+            count: 1,
+            spellList: 'bard',
+            spellLevel: 9,
+          },
+        ],
+      },
+      {
+        // L18: +2 spells known (highest: 9)
+        grants: [
+          { type: 'feature', feature: { id: 'bard-words-of-creation' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'bard', 18),
+            count: 2,
+            spellList: 'bard',
+            spellLevel: 9,
+          },
+        ],
+      },
       { grants: [{ type: 'asi', key: createChoiceKey('asi', 'class', 'bard', 4), points: 2, from: null }] },
       { grants: [{ type: 'feature', feature: { id: 'bard-epic-boon' } }] },
     ],
@@ -261,6 +454,14 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
             from: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
           },
           { type: 'spellcasting', ability: 'wis', source: 'class' },
+          // Cantrips: +3 at L1 (index 0)
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'cleric', 0),
+            count: 3,
+            spellList: 'cleric',
+            spellLevel: 0,
+          },
           {
             type: 'feature-choice',
             key: createChoiceKey('feature-choice', 'class', 'cleric', 0),
@@ -276,10 +477,18 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
               {
                 optionId: 'thaumaturge',
                 featureId: 'cleric-divine-order-thaumaturge',
-                // Mechanical effects (extra cantrip; Wis-mod bonus to Arcana/Religion checks) are
-                // inert pending a cantrip-grant system and an ability-check-bonus value beyond
-                // 'half-proficiency'.
-                grants: [],
+                // Extra cantrip now modeled as +1 cantrip spell-choice (index 1).
+                // Wis-mod bonus to Arcana/Religion checks remains inert pending
+                // an ability-check-bonus grant model.
+                grants: [
+                  {
+                    type: 'spell-choice',
+                    key: createChoiceKey('spell-choice', 'class', 'cleric', 1),
+                    count: 1,
+                    spellList: 'cleric',
+                    spellLevel: 0,
+                  },
+                ],
               },
             ],
           },
@@ -382,8 +591,18 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
               {
                 optionId: 'magician',
                 featureId: 'druid-primal-order-magician',
-                // inert pending cantrip-grant + ability-check-bonus systems
-                grants: [],
+                // Extra cantrip now modeled as +1 cantrip spell-choice (index 2).
+                // Wis-mod bonus to Arcana/Nature checks remains inert pending
+                // an ability-check-bonus grant model.
+                grants: [
+                  {
+                    type: 'spell-choice',
+                    key: createChoiceKey('spell-choice', 'class', 'druid', 2),
+                    count: 1,
+                    spellList: 'druid',
+                    spellLevel: 0,
+                  },
+                ],
               },
               {
                 optionId: 'warden',
@@ -406,9 +625,17 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
       },
       { grants: [{ type: 'subclass', classId: 'druid', key: createChoiceKey('subclass', 'class', 'druid', 0) }] },
       {
+        // L4: +1 cantrip (index 1)
         grants: [
           { type: 'asi', key: createChoiceKey('asi', 'class', 'druid', 0), points: 2, from: null },
           { type: 'feature', feature: { id: 'druid-wild-shape-improvement-1' } },
+          {
+            type: 'spell-choice',
+            key: createChoiceKey('spell-choice', 'class', 'druid', 1),
+            count: 1,
+            spellList: 'druid',
+            spellLevel: 0,
+          },
         ],
       },
       { grants: [{ type: 'feature', feature: { id: 'druid-wild-resurgence' } }] },
