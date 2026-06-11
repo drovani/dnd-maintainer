@@ -402,6 +402,7 @@
       "appearance": "Appearance",
       "cantrips": "CANTRIPS",
       "alwaysPrepared": "ALWAYS PREPARED",
+      "knownSpells": "SPELLS KNOWN",
       "physicalTraits": "Physical Traits",
       "proficiencies": "Proficiencies",
       "attacks": "Attacks",
@@ -442,6 +443,17 @@
       "speedConditions": {
         "not-enclosed": "while not in an enclosed space"
       },
+      "speedModes": {
+        "fly": "Fly",
+        "climb": "Climb",
+        "swim": "Swim",
+        "burrow": "Burrow"
+      },
+      "passivePerception": "Passive Perception",
+      "spellcastingAbility": "Spellcasting Ability",
+      "spellSaveDC": "Spell Save DC",
+      "spellAttackBonus": "Spell Attack Bonus",
+      "spellLevelLabel": "Level {{level}}",
       "source": "Source: {{source}}",
       "maxHp": "Max HP",
       "currentHp": "Current HP",

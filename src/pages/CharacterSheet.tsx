@@ -227,7 +227,12 @@ function CharacterSheetInner({
   const hasPersonality = character.personality_traits || character.ideals || character.bonds || character.flaws;
   const hasSpells =
     resolved?.spellcasting &&
-    (resolved.spellcasting.cantrips.length > 0 || resolved.spellcasting.alwaysPreparedSpells.length > 0);
+    (resolved.spellcasting.cantrips.length > 0 ||
+      resolved.spellcasting.alwaysPreparedSpells.length > 0 ||
+      resolved.spellcasting.knownSpells.length > 0 ||
+      resolved.spellcasting.preparedCount > 0 ||
+      resolved.spellcasting.ability != null ||
+      resolved.spellcasting.spellSaveDC != null);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -296,8 +301,10 @@ function CharacterSheetInner({
               abilities={abilities}
               armorClass={armorClass}
               speedValue={speedValue}
+              speed={resolved?.speed}
               maxHP={maxHP}
               profBonus={profBonus}
+              passivePerception={resolved ? 10 + resolved.skills.perception.bonus : null}
               isStale={isStale}
               buildError={buildError}
             />

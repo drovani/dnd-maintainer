@@ -6,8 +6,10 @@ export function CombatPanel({
   abilities,
   armorClass,
   speedValue,
+  speed,
   maxHP,
   profBonus,
+  passivePerception,
   isStale,
   buildError,
 }: {
@@ -15,12 +17,37 @@ export function CombatPanel({
   abilities: ResolvedCharacter['abilities'] | undefined;
   armorClass: number | null;
   speedValue: number | null | undefined;
+  speed?: ResolvedCharacter['speed'];
   maxHP: number | null | undefined;
   profBonus: number;
+  passivePerception?: number | null;
   isStale: boolean;
   buildError: string | null;
 }) {
   const { t: tc } = useTranslation('common');
+
+  const speedDisplay = (() => {
+    if (speed && Object.keys(speed).length > 0) {
+      const parts: string[] = [];
+      const walk = speed.walk;
+      if (walk != null) {
+        const walkStr = tc('characterSheet.fields.speedFt', { value: walk.value });
+        parts.push(walkStr);
+      }
+      const otherModes = (['fly', 'climb', 'swim', 'burrow'] as const).filter((m) => speed[m] != null);
+      for (const mode of otherModes) {
+        const entry = speed[mode]!;
+        const modeLabel = tc(`characterSheet.fields.speedModes.${mode}`);
+        let part = `${modeLabel} ${tc('characterSheet.fields.speedFt', { value: entry.value })}`;
+        if (entry.condition != null) {
+          part += ` (${tc(`characterSheet.fields.speedConditions.${entry.condition}`, { defaultValue: entry.condition })})`;
+        }
+        parts.push(part);
+      }
+      return parts.length > 0 ? parts.join(', ') : '—';
+    }
+    return speedValue != null ? tc('characterSheet.fields.speedFt', { value: speedValue }) : '—';
+  })();
 
   return (
     <div className="bg-card border-2 border-destructive/30 rounded-lg p-6">
@@ -65,10 +92,14 @@ export function CombatPanel({
         </div>
         <div className="flex justify-between py-1">
           <span>{tc('characterSheet.fields.speed')}</span>
-          <span className="font-mono font-bold text-foreground">
-            {speedValue != null ? tc('characterSheet.fields.speedFt', { value: speedValue }) : '—'}
-          </span>
+          <span className="font-mono font-bold text-foreground">{speedDisplay}</span>
         </div>
+        {passivePerception != null && (
+          <div className="flex justify-between py-1">
+            <span>{tc('characterSheet.fields.passivePerception')}</span>
+            <span className="font-mono font-bold text-foreground">{passivePerception}</span>
+          </div>
+        )}
       </div>
     </div>
   );
