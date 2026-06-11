@@ -6,6 +6,7 @@ import {
   signed,
   PDF_SKILLS,
   PDF_ABILITIES,
+  TEXT_FIELD_NAMES,
   type FeatGrantInfo,
 } from '@/lib/pdf-field-map';
 import { requireItemDef } from '@/lib/sources/items';
@@ -532,5 +533,171 @@ describe('buildFieldValues — spellcasting', () => {
     const { text } = bfv(makeResolved(), makeCharacter());
     expect(text.spellSaveDc).toBeUndefined();
     expect(text.spellAttackBonus).toBeUndefined();
+  });
+
+  it('writes spell slot totals to correct non-linear PDF fields for a non-warlock caster', () => {
+    // Slots: 4 at L1, 3 at L2, 2 at L3, 1 at L5 (index 4). The 3×3 grid is non-linear:
+    //   L5 → Text116 (NOT Text116's linear neighbor Text115 which is L6).
+    // This test guards that the mapping is applied from SPELL_SLOT_FIELDS_BY_LEVEL, not naively.
+    const resolved = makeResolved({
+      spellcasting: {
+        ability: 'int',
+        spellSaveDC: 14,
+        spellAttackBonus: 6,
+        cantrips: [],
+        cantripsKnown: 0,
+        knownSpells: [],
+        spellsKnown: [],
+        alwaysPreparedSpells: [],
+        slots: [4, 3, 2, 0, 1], // L1=4, L2=3, L3=2, L4=0, L5=1
+        preparedCount: 0,
+        pactMagic: null,
+      },
+    });
+    const { text } = bfv(resolved, makeCharacter({ class: 'wizard' }));
+
+    // Verify written values
+    expect(text.spellSlotsL1).toBe('4');
+    expect(text.spellSlotsL2).toBe('3');
+    expect(text.spellSlotsL3).toBe('2');
+    expect(text.spellSlotsL5).toBe('1');
+
+    // L4 has 0 slots — should not be emitted
+    expect(text.spellSlotsL4).toBeUndefined();
+
+    // Verify physical field bindings (non-linear grid guard):
+    // L5 → Text116 (index 4), NOT the linear neighbor
+    expect(TEXT_FIELD_NAMES['spellSlotsL1']).toBe('Text112');
+    expect(TEXT_FIELD_NAMES['spellSlotsL2']).toBe('Text113');
+    expect(TEXT_FIELD_NAMES['spellSlotsL3']).toBe('Text114');
+    expect(TEXT_FIELD_NAMES['spellSlotsL4']).toBe('Text117'); // L4 is Text117, not Text115/116
+    expect(TEXT_FIELD_NAMES['spellSlotsL5']).toBe('Text116'); // L5 is Text116
+    expect(TEXT_FIELD_NAMES['spellSlotsL6']).toBe('Text115'); // L6 is Text115
+    expect(TEXT_FIELD_NAMES['spellSlotsL7']).toBe('Text118');
+    expect(TEXT_FIELD_NAMES['spellSlotsL8']).toBe('Text119');
+    expect(TEXT_FIELD_NAMES['spellSlotsL9']).toBe('Text120');
+  });
+
+  it('writes pact magic composite slot field for a warlock, does not populate slot grid', () => {
+    const resolved = makeResolved({
+      spellcasting: {
+        ability: 'cha',
+        spellSaveDC: 14,
+        spellAttackBonus: 6,
+        cantrips: [],
+        cantripsKnown: 0,
+        knownSpells: [],
+        spellsKnown: [],
+        alwaysPreparedSpells: [],
+        slots: [], // warlocks have empty slots
+        preparedCount: 0,
+        pactMagic: { count: 2, slotLevel: 1 },
+      },
+    });
+    const { text } = bfv(resolved, makeCharacter({ class: 'warlock' }));
+
+    expect(text.pactMagicSlots).toBe('2 @ L1');
+    expect(TEXT_FIELD_NAMES['pactMagicSlots']).toBe('Text108');
+
+    // Standard slot fields should NOT be populated for a warlock
+    for (let lvl = 1; lvl <= 9; lvl++) {
+      expect(text[`spellSlotsL${lvl}`]).toBeUndefined();
+    }
+  });
+
+  it('fills spell list rows with cantrips first then leveled spells, grouped by level', () => {
+    // A wizard with 1 cantrip, 2 level-1 spells, 1 level-2 spell.
+    // Expected order: cantrip (L0), then L1 spells, then L2 spell.
+    const resolved = makeResolved({
+      spellcasting: {
+        ability: 'int',
+        spellSaveDC: 14,
+        spellAttackBonus: 6,
+        cantrips: ['fire-bolt'],
+        cantripsKnown: 1,
+        knownSpells: [
+          { spellId: 'magic-missile', spellLevel: 1 },
+          { spellId: 'burning-hands', spellLevel: 1 },
+          { spellId: 'misty-step', spellLevel: 2 },
+        ],
+        spellsKnown: [],
+        alwaysPreparedSpells: [],
+        slots: [4, 3],
+        preparedCount: 0,
+        pactMagic: null,
+      },
+    });
+    const { text } = bfv(resolved, makeCharacter({ class: 'wizard' }));
+
+    // Row 0: fire-bolt (cantrip, L0) — left column
+    expect(text.spellRow0Level).toBe('0');
+    expect(text.spellRow0Name).toBeTruthy();
+    expect(TEXT_FIELD_NAMES['spellRow0Name']).toBe('Text106.0');
+    expect(TEXT_FIELD_NAMES['spellRow0Level']).toBe('Text105.0');
+
+    // Rows 1–2: magic-missile and burning-hands (L1), both in left column
+    expect(text.spellRow1Level).toBe('1');
+    expect(text.spellRow2Level).toBe('1');
+    expect(TEXT_FIELD_NAMES['spellRow1Name']).toBe('Text106.1');
+    expect(TEXT_FIELD_NAMES['spellRow2Level']).toBe('Text105.2');
+
+    // Row 3: misty-step (L2), still in left column
+    expect(text.spellRow3Level).toBe('2');
+    expect(TEXT_FIELD_NAMES['spellRow3Name']).toBe('Text106.3');
+
+    // Row 4 should not be populated (only 4 spells total)
+    expect(text.spellRow4Name).toBeUndefined();
+
+    // Verify right-column binding starts at row 30
+    expect(TEXT_FIELD_NAMES['spellRow30Name']).toBe('Text109.0');
+    expect(TEXT_FIELD_NAMES['spellRow30Level']).toBe('Text107.0');
+    expect(TEXT_FIELD_NAMES['spellRow59Name']).toBe('Text109.29');
+    expect(TEXT_FIELD_NAMES['spellRow59Level']).toBe('Text107.29');
+  });
+});
+
+describe('buildFieldValues — speed', () => {
+  it('renders walk-only speed as bare value', () => {
+    const { text } = bfv(makeResolved({ speed: { walk: { value: 30, sources: [] } } }), makeCharacter());
+    expect(text.speed).toBe('30 ft');
+  });
+
+  it('composes walk + fly with a condition into a multi-mode string', () => {
+    const resolved = makeResolved({
+      speed: {
+        walk: { value: 30, sources: [] },
+        fly: { value: 30, condition: 'not-enclosed', sources: [] },
+      },
+    });
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.speed).toBe('30 ft, Fly 30 ft (not-enclosed)');
+  });
+
+  it('composes walk + fly + swim preserving mode order', () => {
+    const resolved = makeResolved({
+      speed: {
+        walk: { value: 35, sources: [] },
+        fly: { value: 60, sources: [] },
+        swim: { value: 15, sources: [] },
+      },
+    });
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.speed).toBe('35 ft, Fly 60 ft, Swim 15 ft');
+  });
+
+  it('renders non-walk-only speed when walk is absent', () => {
+    const resolved = makeResolved({
+      speed: {
+        swim: { value: 40, sources: [] },
+      },
+    });
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.speed).toBe('Swim 40 ft');
+  });
+
+  it('returns empty string when no speed modes are present', () => {
+    const resolved = makeResolved({ speed: {} });
+    const { text } = bfv(resolved, makeCharacter());
+    expect(text.speed).toBe('');
   });
 });

@@ -28,6 +28,7 @@ import { parseChoiceKey, type ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import { getItemNameKey } from '@/lib/sources/items';
 import { getSourceDisplayName } from '@/lib/source-display';
+import { getSpellDisplayMeta } from '@/lib/spell-display';
 
 /** Gamedata i18n translator. All user-facing text in the export comes from i18n — ids are never user-facing. */
 export type GamedataT = TFunction<'gamedata'>;
@@ -309,7 +310,18 @@ export function buildFieldValues(
   text.profBonus = signed(resolved.proficiencyBonus);
   text.armorClass = String(resolved.armorClass.effective);
   text.initiative = signed(resolved.initiative);
-  text.speed = resolved.speed.walk ? `${resolved.speed.walk.value} ft` : '';
+  // Compose all present speed modes in order: walk (bare value), then fly/climb/swim/burrow
+  // with a capitalized mode label. Append "(condition)" when present so the composed string
+  // matches what the on-screen sheet displays.
+  const SPEED_ORDER = ['walk', 'fly', 'climb', 'swim', 'burrow'] as const;
+  const speedParts: string[] = [];
+  for (const mode of SPEED_ORDER) {
+    const s = resolved.speed[mode];
+    if (!s) continue;
+    const base = mode === 'walk' ? `${s.value} ft` : `${mode.charAt(0).toUpperCase()}${mode.slice(1)} ${s.value} ft`;
+    speedParts.push(s.condition ? `${base} (${s.condition})` : base);
+  }
+  text.speed = speedParts.join(', ');
   text.maxHp = String(resolved.hitPoints.max);
   // No current-HP concept in the build model; a freshly-built character starts at full.
   text.currentHp = String(resolved.hitPoints.max);
@@ -428,6 +440,52 @@ export function buildFieldValues(
     }
     if (sc.spellSaveDC != null) text.spellSaveDc = String(sc.spellSaveDC);
     if (sc.spellAttackBonus != null) text.spellAttackBonus = signed(sc.spellAttackBonus);
+
+    // Spell slot totals per level (A — #266). Only written for non-warlock casters.
+    // Warlocks use pactMagic below; their slots array is always empty so this loop
+    // is harmless, but guard explicitly for clarity.
+    if (!sc.pactMagic) {
+      for (let lvl = 1; lvl <= 9; lvl++) {
+        const count = sc.slots[lvl - 1];
+        if (count != null && count > 0) {
+          text[`spellSlotsL${lvl}`] = String(count);
+        }
+      }
+    }
+
+    // Pact Magic (B — #266). Single composite field; Text108 label is template-pending.
+    if (sc.pactMagic) {
+      text.pactMagicSlots = `${sc.pactMagic.count} @ L${sc.pactMagic.slotLevel}`;
+    }
+
+    // Leveled spell list rows (C — #264).
+    // Build a single ordered list: cantrips (level 0) + knownSpells + alwaysPreparedSpells,
+    // sorted ascending by spell level so cantrips appear first.
+    type SpellEntry = { readonly spellId: string; readonly spellLevel: number };
+    const cantripEntries: SpellEntry[] = sc.cantrips.map((id) => ({ spellId: id, spellLevel: 0 }));
+    const knownEntries: SpellEntry[] = sc.knownSpells.map((s) => ({
+      spellId: s.spellId,
+      spellLevel: s.spellLevel,
+    }));
+    const alwaysPreparedEntries: SpellEntry[] = sc.alwaysPreparedSpells.map((id) => ({
+      spellId: id,
+      spellLevel: getSpellDisplayMeta(id)?.level ?? 0,
+    }));
+
+    const allSpells = [...cantripEntries, ...knownEntries, ...alwaysPreparedEntries].sort(
+      (a, b) => a.spellLevel - b.spellLevel
+    );
+
+    // Fill up to PDF_SPELL_ROWS (60); extras are silently dropped.
+    const limit = Math.min(allSpells.length, PDF_SPELL_ROWS);
+    for (let i = 0; i < limit; i++) {
+      const entry = allSpells[i];
+      const spellName = t(`spells.${entry.spellId}.name` as `spells.${string}.name`, {
+        defaultValue: entry.spellId,
+      });
+      text[`spellRow${i}Name`] = spellName;
+      text[`spellRow${i}Level`] = String(entry.spellLevel);
+    }
   }
 
   // Heroic Inspiration → the 2024 sheet's inspiration checkbox.
@@ -522,6 +580,32 @@ const ATTACK_BONUS_FIELDS = ['Text31', 'Text35', 'Text39', 'Text43', 'Text47', '
 const ATTACK_DAMAGE_FIELDS = ['Text32', 'Text36', 'Text40', 'Text44', 'Text48', 'Text52'] as const;
 
 /**
+ * Per-spell-level slot total fields. Index 0 = level 1 slots (Text112), …, index 8 = level 9 (Text120).
+ * The 3×3 grid layout on the sheet is non-linear, so the field names do NOT ascend in order.
+ * Verified from widget geometry: L1→Text112, L2→Text113, L3→Text114, L4→Text117, L5→Text116,
+ * L6→Text115, L7→Text118, L8→Text119, L9→Text120.
+ */
+const SPELL_SLOT_FIELDS_BY_LEVEL = [
+  'Text112', // level 1
+  'Text113', // level 2
+  'Text114', // level 3
+  'Text117', // level 4
+  'Text116', // level 5
+  'Text115', // level 6
+  'Text118', // level 7
+  'Text119', // level 8
+  'Text120', // level 9
+] as const;
+
+/**
+ * Spell list rows — the sheet's page-2 spell area is two flat free-form columns
+ * of 30 lines each (no per-level cells). Rows 0–29 fill the left column
+ * (Text106.i name, Text105.i level-marker), rows 30–59 fill the right column
+ * (Text109.(i-30) name, Text107.(i-30) level-marker). Spells beyond row 59 are dropped.
+ */
+const PDF_SPELL_ROWS = 60;
+
+/**
  * Maps semantic text keys to 2024 WotC form field names. Adjust to your template
  * (see module header). Keys absent here are simply not written.
  */
@@ -576,6 +660,27 @@ export const TEXT_FIELD_NAMES: Readonly<Record<string, string>> = {
   spellcastingModifier: 'Text93', // → Spellcasting Modifier (page 2)
   spellSaveDc: 'Text94', // → Spell Save DC (page 2)
   spellAttackBonus: 'Text95', // → Spell Attack Bonus (page 2)
+
+  // Pact Magic (warlock) — single composite slot field. Text108 exact label is template-pending.
+  pactMagicSlots: 'Text108',
+
+  // Spell slot totals per level (non-warlock). Non-linear grid: see SPELL_SLOT_FIELDS_BY_LEVEL.
+  ...Object.fromEntries(SPELL_SLOT_FIELDS_BY_LEVEL.map((field, idx) => [`spellSlotsL${idx + 1}`, field])),
+
+  // Spell list rows — left column (0–29) then right column (30–59).
+  ...Object.fromEntries(
+    Array.from({ length: PDF_SPELL_ROWS }, (_unused, i) =>
+      i < 30
+        ? [
+            [`spellRow${i}Name`, `Text106.${i}`],
+            [`spellRow${i}Level`, `Text105.${i}`],
+          ]
+        : [
+            [`spellRow${i}Name`, `Text109.${i - 30}`],
+            [`spellRow${i}Level`, `Text107.${i - 30}`],
+          ]
+    ).flat()
+  ),
 };
 
 /**
