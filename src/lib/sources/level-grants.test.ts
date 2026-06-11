@@ -11,17 +11,21 @@ describe('getGrantsForLevel', () => {
     expect(preview.subclassGrants).toHaveLength(0);
   });
 
-  it('returns ASI and weapon-mastery-choice grants for fighter level 4', () => {
+  it('returns ASI, companion feat-choice, and weapon-mastery-choice grants for fighter level 4', () => {
     const preview = getGrantsForLevel('fighter', 4, null);
-    expect(preview.classGrants).toHaveLength(2);
+    // ASI + companion feat-choice + weapon-mastery-choice = 3 grants
+    expect(preview.classGrants).toHaveLength(3);
     expect(preview.classGrants.some((g) => g.type === 'asi')).toBe(true);
+    expect(preview.classGrants.some((g) => g.type === 'feat-choice')).toBe(true);
     expect(preview.classGrants.some((g) => g.type === 'weapon-mastery-choice')).toBe(true);
   });
 
-  it('returns ASI grant for fighter level 6', () => {
+  it('returns ASI and companion feat-choice grants for fighter level 6', () => {
     const preview = getGrantsForLevel('fighter', 6, null);
-    expect(preview.classGrants).toHaveLength(1);
-    expect(preview.classGrants[0].type).toBe('asi');
+    // ASI + companion feat-choice = 2 grants
+    expect(preview.classGrants).toHaveLength(2);
+    expect(preview.classGrants.some((g) => g.type === 'asi')).toBe(true);
+    expect(preview.classGrants.some((g) => g.type === 'feat-choice')).toBe(true);
   });
 
   it('returns subclass feature grants when subclass is chosen', () => {
