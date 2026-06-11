@@ -160,9 +160,18 @@ function CharacterBuilderInner({ existingCharacterId }: { existingCharacterId?: 
     latestPayloadRef.current = { character, rows, resolved };
   });
 
+  // Single source of truth for "required at creation" — drives hasRequiredFields,
+  // isReadyToFinalize, and finalizeBlockers so all three stay consistent.
+  const REQUIRED_BASE_FIELDS = [
+    { present: !!character.name, blocker: 'characterBuilder.finalizeBlockers.missingName' as const },
+    { present: !!character.species, blocker: 'characterBuilder.finalizeBlockers.missingSpecies' as const },
+    { present: !!character.class, blocker: 'characterBuilder.finalizeBlockers.missingClass' as const },
+    { present: !!character.background, blocker: 'characterBuilder.finalizeBlockers.missingBackground' as const },
+    { present: !!character.alignment, blocker: 'characterBuilder.finalizeBlockers.missingAlignment' as const },
+  ] satisfies ReadonlyArray<{ present: boolean; blocker: Parameters<typeof t>[0] }>;
+
   // Required fields before any draft can be saved
-  const hasRequiredFields =
-    !!character.name && !!character.species && !!character.class && !!character.background && !!character.alignment;
+  const hasRequiredFields = REQUIRED_BASE_FIELDS.every((f) => f.present);
 
   // Autosave when isDirty changes to true — debounced 500ms, only if required fields present
   useEffect(() => {
@@ -186,30 +195,18 @@ function CharacterBuilderInner({ existingCharacterId }: { existingCharacterId?: 
   const selectedRace = character.species ? DND_SPECIES.find((s) => s.id === character.species) : null;
   const selectedClass = character.class ? DND_CLASSES.find((c) => c.id === character.class) : null;
 
-  const isReadyToFinalize =
-    !!character.name &&
-    !!character.species &&
-    !!character.class &&
-    !!character.background &&
-    (resolved?.pendingChoices.length ?? 0) === 0;
+  const isReadyToFinalize = hasRequiredFields && (resolved?.pendingChoices.length ?? 0) === 0;
 
   // Surface exactly what's blocking finalize so the user can find and fix it.
-  const finalizeBlockers: readonly string[] = (() => {
-    const reasons: string[] = [];
-    if (!character.name) reasons.push(t('characterBuilder.finalizeBlockers.missingName'));
-    if (!character.species) reasons.push(t('characterBuilder.finalizeBlockers.missingSpecies'));
-    if (!character.class) reasons.push(t('characterBuilder.finalizeBlockers.missingClass'));
-    if (!character.background) reasons.push(t('characterBuilder.finalizeBlockers.missingBackground'));
-    for (const pending of resolved?.pendingChoices ?? []) {
-      reasons.push(
-        t('characterBuilder.finalizeBlockers.pendingChoice', {
-          type: pending.type,
-          key: pending.choiceKey,
-        })
-      );
-    }
-    return reasons;
-  })();
+  const finalizeBlockers: readonly string[] = [
+    ...REQUIRED_BASE_FIELDS.filter((f) => !f.present).map((f) => t(f.blocker)),
+    ...(resolved?.pendingChoices ?? []).map((pending) =>
+      t('characterBuilder.finalizeBlockers.pendingChoice', {
+        type: pending.type,
+        key: pending.choiceKey,
+      })
+    ),
+  ];
 
   // Can only leave Basics step once required fields are filled
   const canLeaveBasics = hasRequiredFields;

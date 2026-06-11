@@ -177,6 +177,7 @@
       "missingSpecies": "Species is required",
       "missingClass": "Class is required",
       "missingBackground": "Background is required",
+      "missingAlignment": "Alignment is required",
       "pendingChoice": "Pending {{type}} ({{key}})"
     },
     "status": {
