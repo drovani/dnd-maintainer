@@ -1,6 +1,6 @@
 import type { GrantBundle } from '@/types/sources';
 import type { AbilityKey, ClassId } from '@/lib/dnd-helpers';
-import type { ResolvedAbility, ResolvedSpellcasting } from '@/types/resolved';
+import type { ResolvedAbility, ResolvedSpellcasting, SpellLevel } from '@/types/resolved';
 import { getPactMagicSlots, getPreparedSpellCount, getSpellSlots } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
 import { getSpellDef } from '@/lib/sources/spells';
@@ -42,7 +42,7 @@ export function resolveSpellcasting(
   }
 
   const cantrips: string[] = [];
-  const knownSpells: { spellId: string; spellLevel: number }[] = [];
+  const knownSpells: { spellId: string; spellLevel: SpellLevel }[] = [];
   const alwaysPreparedSpells: string[] = [];
   for (const { grant } of spellGrants) {
     if (grant.alwaysPrepared) {
@@ -67,7 +67,7 @@ export function resolveSpellcasting(
   // These represent the number of slots the character has to fill (via choices) —
   // not the choices themselves (those are expanded into spell grants by collectBundles).
   let cantripsKnown = 0;
-  const spellsKnownMap = new Map<number, number>();
+  const spellsKnownMap = new Map<SpellLevel, number>();
   for (const { grant } of spellChoiceGrants) {
     if (grant.spellLevel === 0) {
       cantripsKnown += grant.count;

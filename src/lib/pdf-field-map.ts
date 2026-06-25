@@ -23,7 +23,7 @@
 import type { TFunction } from 'i18next';
 import type { Character } from '@/types/database';
 import type { AbilityKey } from '@/types/database';
-import type { ResolvedCharacter, ResolvedFeature } from '@/types/resolved';
+import type { ResolvedCharacter, ResolvedFeature, SpellLevel } from '@/types/resolved';
 import { parseChoiceKey, type ChoiceDecision } from '@/types/choices';
 import type { GrantBundle, SourceTag } from '@/types/sources';
 import { getItemNameKey } from '@/lib/sources/items';
@@ -462,7 +462,7 @@ export function buildFieldValues(
     // Leveled spell list rows (C — #264).
     // Build a single ordered list: cantrips (level 0) + knownSpells + alwaysPreparedSpells,
     // sorted ascending by spell level so cantrips appear first.
-    type SpellEntry = { readonly spellId: string; readonly spellLevel: number };
+    type SpellEntry = { readonly spellId: string; readonly spellLevel: SpellLevel };
     const cantripEntries: SpellEntry[] = sc.cantrips.map((id) => ({ spellId: id, spellLevel: 0 }));
     const knownEntries: SpellEntry[] = sc.knownSpells.map((s) => ({
       spellId: s.spellId,
@@ -470,7 +470,9 @@ export function buildFieldValues(
     }));
     const alwaysPreparedEntries: SpellEntry[] = sc.alwaysPreparedSpells.map((id) => ({
       spellId: id,
-      spellLevel: getSpellDisplayMeta(id)?.level ?? 0,
+      // SpellDisplayMeta.level is typed as number, but the value always comes from SpellDef.level
+      // which is the literal union 0|1|...|9 — casting is safe here.
+      spellLevel: (getSpellDisplayMeta(id)?.level ?? 0) as SpellLevel,
     }));
 
     const allSpells = [...cantripEntries, ...knownEntries, ...alwaysPreparedEntries].sort(

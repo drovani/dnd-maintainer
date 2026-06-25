@@ -122,6 +122,9 @@ export interface ResolvedPactMagic {
   readonly slotLevel: number;
 }
 
+/** D&D spell levels: cantrips (0) through 9th level. */
+export type SpellLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
 /**
  * Resolved spellcasting state. Invariant: warlocks have `pactMagic !== null` and `slots` is empty;
  * all other casters have `pactMagic === null` and use `slots`. `preparedCount` is `0` for known-spell
@@ -141,8 +144,8 @@ export interface ResolvedSpellcasting {
   readonly spellAttackBonus: number | null;
   readonly cantrips: readonly string[];
   readonly cantripsKnown: number;
-  readonly knownSpells: readonly { readonly spellId: string; readonly spellLevel: number }[];
-  readonly spellsKnown: readonly { readonly level: number; readonly count: number }[];
+  readonly knownSpells: readonly { readonly spellId: string; readonly spellLevel: SpellLevel }[];
+  readonly spellsKnown: readonly { readonly spellLevel: SpellLevel; readonly count: number }[];
   readonly alwaysPreparedSpells: readonly string[];
   readonly slots: readonly number[];
   readonly preparedCount: number;
