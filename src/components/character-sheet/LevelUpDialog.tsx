@@ -83,6 +83,11 @@ function isChoiceSatisfied(choice: PendingChoice, decisions: ReadonlyMap<ChoiceK
       return decision?.type === 'lineage-choice' && decision.lineageId.length > 0;
     case 'feature-choice':
       return decision?.type === 'feature-choice' && decision.optionId.length > 0;
+    default: {
+      const _exhaustive: never = choice;
+      console.warn(`isChoiceSatisfied: unhandled choice type — treating as unsatisfied`, _exhaustive);
+      return false;
+    }
   }
 }
 
@@ -163,9 +168,21 @@ export function LevelUpDialog({
     );
 
     for (const asi of asiChoices) {
-      const parsedAsi = parseChoiceKey(asi.choiceKey);
+      let parsedAsi: ReturnType<typeof parseChoiceKey>;
+      try {
+        parsedAsi = parseChoiceKey(asi.choiceKey);
+      } catch (err) {
+        console.warn(`LevelUpDialog: failed to parse ASI choice key "${asi.choiceKey}" — skipping pair`, err);
+        continue;
+      }
       const companion = featChoices.find((fc) => {
-        const p = parseChoiceKey(fc.choiceKey);
+        let p: ReturnType<typeof parseChoiceKey>;
+        try {
+          p = parseChoiceKey(fc.choiceKey);
+        } catch (err) {
+          console.warn(`LevelUpDialog: failed to parse feat-choice key "${fc.choiceKey}" — skipping`, err);
+          return false;
+        }
         return p.origin === parsedAsi.origin && p.id === parsedAsi.id && p.index === parsedAsi.index;
       });
       if (companion) {

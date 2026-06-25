@@ -1,6 +1,5 @@
 import type { GrantBundle } from '@/types/sources';
 import type { AbilityKey, ClassId } from '@/lib/dnd-helpers';
-import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { ResolvedAbility, ResolvedSpellcasting } from '@/types/resolved';
 import { getPactMagicSlots, getPreparedSpellCount, getSpellSlots } from '@/lib/dnd-helpers';
 import { collectGrantsByType } from '@/lib/resolver/helpers';
@@ -9,13 +8,17 @@ import { getLogger } from '@/lib/logger';
 
 const logger = getLogger('resolver');
 
+// NOTE: spell-choice *selections* (which spells the player picked) are consumed
+// upstream in collectBundles (src/lib/sources/index.ts), which expands them into
+// individual `spell` grants before the bundles reach this function. This resolver
+// therefore never needs to inspect raw choices directly; it only sees the
+// already-expanded grants. If a future feature requires direct choice consumption
+// (e.g. per-resolver filtering), add a `_choices` parameter here at that point.
 export function resolveSpellcasting(
   bundles: readonly GrantBundle[],
   abilities: Readonly<Record<AbilityKey, ResolvedAbility>>,
   proficiencyBonus: number,
-  level: number,
-  // choices is accepted for future use; cantripsKnown/spellsKnown are computed from spell-choice grants
-  _choices?: Readonly<Record<ChoiceKey, ChoiceDecision>>
+  level: number
 ): ResolvedSpellcasting | null {
   const spellcastingGrants = collectGrantsByType(bundles, 'spellcasting');
   const spellGrants = collectGrantsByType(bundles, 'spell');
@@ -74,7 +77,7 @@ export function resolveSpellcasting(
   }
   const spellsKnown = Array.from(spellsKnownMap.entries())
     .sort(([a], [b]) => a - b)
-    .map(([lvl, count]) => ({ level: lvl, count }));
+    .map(([lvl, count]) => ({ spellLevel: lvl, count }));
 
   // TODO(#93): multiclass spell-slot tables not yet implemented; uses character level as class level.
   const isWarlock = classId === 'warlock';

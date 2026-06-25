@@ -313,6 +313,7 @@ export function buildFieldValues(
   // Compose all present speed modes in order: walk (bare value), then fly/climb/swim/burrow
   // with a capitalized mode label. Append "(condition)" when present so the composed string
   // matches what the on-screen sheet displays.
+  // TODO: translate speed mode labels via i18n, matching CombatPanel
   const SPEED_ORDER = ['walk', 'fly', 'climb', 'swim', 'burrow'] as const;
   const speedParts: string[] = [];
   for (const mode of SPEED_ORDER) {
@@ -476,7 +477,12 @@ export function buildFieldValues(
       (a, b) => a.spellLevel - b.spellLevel
     );
 
-    // Fill up to PDF_SPELL_ROWS (60); extras are silently dropped.
+    if (allSpells.length > PDF_SPELL_ROWS) {
+      console.warn(
+        `PDF export: ${allSpells.length - PDF_SPELL_ROWS} spell(s) dropped — sheet capacity is ${PDF_SPELL_ROWS}`
+      );
+    }
+    // Fill up to PDF_SPELL_ROWS (60); extras are dropped (warned above).
     const limit = Math.min(allSpells.length, PDF_SPELL_ROWS);
     for (let i = 0; i < limit; i++) {
       const entry = allSpells[i];
@@ -484,7 +490,14 @@ export function buildFieldValues(
         defaultValue: entry.spellId,
       });
       text[`spellRow${i}Name`] = spellName;
-      text[`spellRow${i}Level`] = String(entry.spellLevel);
+      // knownSpells entries with spellLevel 0 are uncatalogued spells (not cantrips — cantrips
+      // live in cantripEntries with spellLevel 0 as well, but are always at index 0 of allSpells
+      // before knownEntries). Use "?" for knownEntries with level 0 to avoid confusing them with
+      // real cantrips; cantrip entries from cantripEntries always have legitimate level 0.
+      // Distinguish by checking whether this entry came from knownEntries (uncatalogued fallback).
+      const isUncataloguedKnown =
+        entry.spellLevel === 0 && knownEntries.some((ke) => ke.spellId === entry.spellId && ke.spellLevel === 0);
+      text[`spellRow${i}Level`] = isUncataloguedKnown ? '?' : String(entry.spellLevel);
     }
   }
 

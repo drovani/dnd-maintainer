@@ -119,6 +119,10 @@ export function collectChoiceGrantsFromGrants(
             alreadyChosen: alreadyChosenByOthers,
           });
           for (const id of validWeaponIds) alreadyClaimedMasteries.add(id);
+        } else {
+          console.warn(
+            'collectChoiceGrantsFromGrants: weapon-mastery-choice grant skipped — alreadyClaimedMasteries context not provided'
+          );
         }
         break;
       }
@@ -218,6 +222,10 @@ export function collectChoiceGrantsFromGrants(
             count: grant.count,
             from: grant.from,
           });
+        } else {
+          console.warn(
+            `collectChoiceGrantsFromGrants: unhandled proficiency-choice category "${grant.category}" — no PendingChoice emitted`
+          );
         }
         break;
       }
