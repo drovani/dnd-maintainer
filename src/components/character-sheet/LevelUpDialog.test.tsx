@@ -62,10 +62,45 @@ vi.mock('@/components/character-builder/ChoicePicker', () => ({
               type: 'weapon-mastery-choice',
               weaponIds: ['longsword'],
             });
+          } else if (choice.type === 'saving-throw-choice') {
+            onDecide(choice.choiceKey, {
+              type: 'saving-throw-choice',
+              savingThrows: ['str', 'con'],
+            });
           }
         }}
       >
         Satisfy {choice.type}
+      </button>
+    </div>
+  ),
+}));
+
+vi.mock('@/components/character-sheet/SubclassPicker', () => ({
+  SubclassPicker: ({
+    choice,
+    onDecide,
+  }: {
+    choice: { choiceKey: ChoiceKey; classId: string };
+    onDecide: (key: ChoiceKey, subclassId: string) => void;
+  }) => (
+    <div data-testid="subclass-picker">
+      <button onClick={() => onDecide(choice.choiceKey, 'champion')}>Pick subclass</button>
+    </div>
+  ),
+}));
+
+vi.mock('@/components/character-sheet/FightingStylePicker', () => ({
+  FightingStylePicker: ({
+    choice,
+    onDecide,
+  }: {
+    choice: { choiceKey: ChoiceKey };
+    onDecide: (key: ChoiceKey, d: ChoiceDecision) => void;
+  }) => (
+    <div data-testid="fighting-style-picker">
+      <button onClick={() => onDecide(choice.choiceKey, { type: 'fighting-style-choice', styles: ['archery'] })}>
+        Satisfy fighting-style-choice
       </button>
     </div>
   ),
@@ -198,5 +233,94 @@ describe('LevelUpDialog', () => {
     mockCollectChoiceGrants.mockReturnValue([spellChoice]);
     render(<LevelUpDialog {...BASE_PROPS} />);
     expect(screen.getByTestId('choice-picker-spell-choice')).toBeInTheDocument();
+  });
+
+  it('Confirm is DISABLED when a subclass choice is unsatisfied (level-3 subclass selection)', () => {
+    const subclassChoice: PendingChoice = {
+      type: 'subclass',
+      choiceKey: 'subclass:class:fighter:0' as ChoiceKey,
+      source: { origin: 'class', id: 'fighter' as const, level: 3 },
+      classId: 'fighter' as const,
+    };
+    mockCollectChoiceGrants.mockReturnValue([subclassChoice]);
+    render(<LevelUpDialog {...BASE_PROPS} targetLevel={3} />);
+    const confirmBtn = screen.getByText('confirmLevelUp');
+    expect(confirmBtn).toBeDisabled();
+  });
+
+  it('Confirm is ENABLED once a subclass choice is made', () => {
+    const subclassChoice: PendingChoice = {
+      type: 'subclass',
+      choiceKey: 'subclass:class:fighter:0' as ChoiceKey,
+      source: { origin: 'class', id: 'fighter' as const, level: 3 },
+      classId: 'fighter' as const,
+    };
+    mockCollectChoiceGrants.mockReturnValue([subclassChoice]);
+    render(<LevelUpDialog {...BASE_PROPS} targetLevel={3} />);
+    fireEvent.click(screen.getByText('Pick subclass'));
+    const confirmBtn = screen.getByText('confirmLevelUp');
+    expect(confirmBtn).not.toBeDisabled();
+  });
+
+  it('Confirm is DISABLED when a fighting-style-choice is unsatisfied', () => {
+    const styleChoice: PendingChoice = {
+      type: 'fighting-style-choice',
+      choiceKey: 'fighting-style-choice:class:fighter:0' as ChoiceKey,
+      source: { origin: 'class', id: 'fighter' as const, level: 1 },
+      count: 1,
+      from: ['archery', 'defense'],
+      alreadyChosen: [],
+    };
+    mockCollectChoiceGrants.mockReturnValue([styleChoice]);
+    render(<LevelUpDialog {...BASE_PROPS} />);
+    const confirmBtn = screen.getByText('confirmLevelUp');
+    expect(confirmBtn).toBeDisabled();
+  });
+
+  it('Confirm is ENABLED once a fighting-style-choice is made', () => {
+    const styleChoice: PendingChoice = {
+      type: 'fighting-style-choice',
+      choiceKey: 'fighting-style-choice:class:fighter:0' as ChoiceKey,
+      source: { origin: 'class', id: 'fighter' as const, level: 1 },
+      count: 1,
+      from: ['archery', 'defense'],
+      alreadyChosen: [],
+    };
+    mockCollectChoiceGrants.mockReturnValue([styleChoice]);
+    render(<LevelUpDialog {...BASE_PROPS} />);
+    fireEvent.click(screen.getByText('Satisfy fighting-style-choice'));
+    const confirmBtn = screen.getByText('confirmLevelUp');
+    expect(confirmBtn).not.toBeDisabled();
+  });
+
+  it('Confirm is DISABLED when a saving-throw-choice is unsatisfied', () => {
+    const savingThrowChoice: PendingChoice = {
+      type: 'saving-throw-choice',
+      choiceKey: 'saving-throw-choice:class:fighter:0' as ChoiceKey,
+      source: { origin: 'class', id: 'fighter' as const, level: 1 },
+      category: 'saving-throw',
+      count: 2,
+      from: ['str', 'con'],
+    };
+    mockCollectChoiceGrants.mockReturnValue([savingThrowChoice]);
+    render(<LevelUpDialog {...BASE_PROPS} />);
+    const confirmBtn = screen.getByText('confirmLevelUp');
+    expect(confirmBtn).toBeDisabled();
+  });
+
+  it('Confirm is ENABLED once a saving-throw-choice is satisfied', () => {
+    const savingThrowChoice: PendingChoice = {
+      type: 'saving-throw-choice',
+      choiceKey: 'saving-throw-choice:class:fighter:0' as ChoiceKey,
+      source: { origin: 'class', id: 'fighter' as const, level: 1 },
+      category: 'saving-throw',
+      count: 2,
+      from: ['str', 'con'],
+    };
+    mockCollectChoiceGrants.mockReturnValue([savingThrowChoice]);
+    render(<LevelUpDialog {...BASE_PROPS} />);
+    fireEvent.click(screen.getByText('Satisfy saving-throw-choice'));
+    const confirmBtn = screen.getByText('confirmLevelUp');
+    expect(confirmBtn).not.toBeDisabled();
   });
 });

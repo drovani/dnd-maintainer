@@ -118,6 +118,33 @@ describe('resolveSpellcasting', () => {
     expect(resolveSpellcasting(NO_BUNDLES, defaultAbilities, 2, 1)).toBeNull();
   });
 
+  it('returns non-null when only spell-choice grants are present (no spellcasting or spell grants)', () => {
+    // Guard: `if (spellcastingGrants.length === 0 && spellGrants.length === 0 && spellChoiceGrants.length === 0) return null`
+    // A bundle with only spell-choice grants must NOT hit the early return.
+    const bundles: GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'bard', level: 1 },
+        grants: [
+          {
+            type: 'spell-choice',
+            key: 'spell-choice:class:bard:cantrip-only' as never,
+            count: 3,
+            spellList: 'bard',
+            spellLevel: 0,
+          },
+        ],
+      },
+    ];
+    const result = resolveSpellcasting(bundles, makeAbilities(), 2, 1);
+    expect(result).not.toBeNull();
+    expect(result!.cantripsKnown).toBe(3);
+    // No spellcasting grant → ability/DC/bonus are all null
+    expect(result!.ability).toBeNull();
+    expect(result!.spellSaveDC).toBeNull();
+    expect(result!.spellAttackBonus).toBeNull();
+    expect(result!.slots).toEqual([]);
+  });
+
   describe('innate-only (non-spellcaster) with always-prepared spell grant', () => {
     it('uncatalogued spell with alwaysPrepared=true still routes to alwaysPreparedSpells (and warns)', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -617,7 +644,7 @@ describe('resolveSpellcasting', () => {
         },
       ];
       const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
-      expect(result!.spellsKnown).toEqual([{ level: 1, count: 4 }]);
+      expect(result!.spellsKnown).toEqual([{ spellLevel: 1, count: 4 }]);
     });
 
     it('two grants at different levels → two spellsKnown entries sorted by level', () => {
@@ -644,8 +671,8 @@ describe('resolveSpellcasting', () => {
         },
       ];
       const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 1);
-      expect(result!.spellsKnown).toContainEqual({ level: 1, count: 2 });
-      expect(result!.spellsKnown).toContainEqual({ level: 2, count: 1 });
+      expect(result!.spellsKnown).toContainEqual({ spellLevel: 1, count: 2 });
+      expect(result!.spellsKnown).toContainEqual({ spellLevel: 2, count: 1 });
       expect(result!.spellsKnown).toHaveLength(2);
     });
 
@@ -678,7 +705,7 @@ describe('resolveSpellcasting', () => {
         },
       ];
       const result = resolveSpellcasting(bundles, makeAbilities({ cha: 14 }), 2, 2);
-      expect(result!.spellsKnown).toEqual([{ level: 1, count: 5 }]);
+      expect(result!.spellsKnown).toEqual([{ spellLevel: 1, count: 5 }]);
     });
 
     it('cantrip grants do not contribute to spellsKnown', () => {
@@ -792,7 +819,7 @@ describe('resolveSpellcasting', () => {
       const result = resolveSpellcasting(bundles, makeAbilities({ cha: 16 }), 2, 1);
       expect(result!.cantripsKnown).toBeGreaterThan(0);
       expect(result!.cantripsKnown).toBe(2);
-      const l1Entry = result!.spellsKnown.find((e) => e.level === 1);
+      const l1Entry = result!.spellsKnown.find((e) => e.spellLevel === 1);
       expect(l1Entry).toBeDefined();
       expect(l1Entry!.count).toBe(4);
     });
@@ -816,7 +843,7 @@ describe('resolveSpellcasting', () => {
       ];
       const result = resolveSpellcasting(bundles, makeAbilities({ wis: 14 }), 2, 2);
       expect(result!.cantripsKnown).toBe(0); // rangers have no cantrips
-      const l1Entry = result!.spellsKnown.find((e) => e.level === 1);
+      const l1Entry = result!.spellsKnown.find((e) => e.spellLevel === 1);
       expect(l1Entry).toBeDefined();
       expect(l1Entry!.count).toBeGreaterThan(0);
       expect(l1Entry!.count).toBe(2);
@@ -850,7 +877,7 @@ describe('resolveSpellcasting', () => {
       expect(result!.pactMagic).not.toBeNull(); // confirms warlock pact magic path
       expect(result!.cantripsKnown).toBeGreaterThan(0);
       expect(result!.cantripsKnown).toBe(2);
-      const l1Entry = result!.spellsKnown.find((e) => e.level === 1);
+      const l1Entry = result!.spellsKnown.find((e) => e.spellLevel === 1);
       expect(l1Entry).toBeDefined();
       expect(l1Entry!.count).toBe(2);
     });

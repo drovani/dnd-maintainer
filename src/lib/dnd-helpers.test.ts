@@ -129,6 +129,30 @@ describe('getSpellSlots', () => {
   it('returns empty array for warlock (Pact Magic is separate)', () => {
     expect(getSpellSlots('warlock', 5)).toEqual([]);
   });
+
+  it('returns correct slots for eldritchknight (1/3 caster) at level 3', () => {
+    expect(getSpellSlots('eldritchknight', 3)).toEqual([2]);
+  });
+
+  it('returns correct slots for eldritchknight at level 5', () => {
+    expect(getSpellSlots('eldritchknight', 5)).toEqual([4, 2]);
+  });
+
+  it('returns correct slots for eldritchknight at level 7', () => {
+    expect(getSpellSlots('eldritchknight', 7)).toEqual([4, 3]);
+  });
+
+  it('returns empty array for eldritchknight before level 3 (not yet a caster)', () => {
+    expect(getSpellSlots('eldritchknight', 2)).toEqual([]);
+  });
+
+  it('returns correct slots for arcanetrickster (same 1/3-caster progression) at level 3', () => {
+    expect(getSpellSlots('arcanetrickster', 3)).toEqual([2]);
+  });
+
+  it('returns correct slots for arcanetrickster at level 7', () => {
+    expect(getSpellSlots('arcanetrickster', 7)).toEqual([4, 3]);
+  });
 });
 
 // ---------------------------------------------------------------------------

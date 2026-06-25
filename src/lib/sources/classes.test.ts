@@ -525,6 +525,30 @@ describe('Bard class grant structures', () => {
       expect(expertiseGrant.key).toBe(createChoiceKey('expertise-choice', 'class', 'bard', 1));
     }
   });
+
+  describe('level 1 spell-choice grants', () => {
+    const l1Grants = source?.levels[0].grants ?? [];
+
+    it('has a cantrip spell-choice grant (spellLevel: 0, count: 2)', () => {
+      const cantripGrant = l1Grants.find((g) => g.type === 'spell-choice' && g.spellLevel === 0);
+      expect(cantripGrant?.type).toBe('spell-choice');
+      if (cantripGrant?.type === 'spell-choice') {
+        expect(cantripGrant.spellLevel).toBe(0);
+        expect(cantripGrant.count).toBe(2);
+        expect(cantripGrant.spellList).toBe('bard');
+      }
+    });
+
+    it('has a level-1 spell-choice grant (spellLevel: 1, count: 4)', () => {
+      const l1SpellGrant = l1Grants.find((g) => g.type === 'spell-choice' && g.spellLevel === 1);
+      expect(l1SpellGrant?.type).toBe('spell-choice');
+      if (l1SpellGrant?.type === 'spell-choice') {
+        expect(l1SpellGrant.spellLevel).toBe(1);
+        expect(l1SpellGrant.count).toBe(4);
+        expect(l1SpellGrant.spellList).toBe('bard');
+      }
+    });
+  });
 });
 
 describe('Cleric class grant structures', () => {
