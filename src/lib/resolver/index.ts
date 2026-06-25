@@ -71,7 +71,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   const features = resolveFeatures(bundles, abilities, proficiencyBonus);
   const hitPoints = resolveHp(bundles, hpRolls, conModifier, level);
   const speed = resolveSpeed(bundles);
-  const spellcasting = resolveSpellcasting(bundles, abilities, proficiencyBonus, level, choices);
+  const spellcasting = resolveSpellcasting(bundles, abilities, proficiencyBonus, level);
 
   // Equipment resolution — finalized characters read from DB inventory directly
   const equipmentResult =
@@ -196,6 +196,19 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
           points: grant.points,
           from: grant.from,
         });
+      }
+    } else {
+      // Both-set guard: warn when ASI is valid AND the companion feat-choice is also satisfied —
+      // the picker should prevent this state; log it so it surfaces during debugging.
+      const parsed = parseChoiceKey(grant.key);
+      const companionFeatKey = createChoiceKey('feat-choice', parsed.origin, parsed.id, parsed.index);
+      const companionFeatDecision = choices[companionFeatKey];
+      const featAlsoSatisfied =
+        companionFeatDecision?.type === 'feat-choice' && companionFeatDecision.featId.length > 0;
+      if (featAlsoSatisfied) {
+        logger.warn(
+          `BUG: both ASI "${grant.key}" and feat-choice "${companionFeatKey}" are satisfied for the same origin — this should never happen`
+        );
       }
     }
   }

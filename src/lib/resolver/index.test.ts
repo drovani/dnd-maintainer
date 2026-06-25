@@ -3416,3 +3416,85 @@ describe('Unarmored Defense AC wiring through resolveCharacter (#236/#247)', () 
     expect(result.armorClass.effective).toBe(15);
   });
 });
+
+describe('ASI + feat-choice both-set warning (FIX 6)', () => {
+  const asiKey = createChoiceKey('asi', 'class', 'fighter', 0);
+  const featKey = createChoiceKey('feat-choice', 'class', 'fighter', 0);
+
+  const bundlesWithBoth: readonly GrantBundle[] = [
+    {
+      source: { origin: 'class', id: 'fighter' as ClassId, level: 4 },
+      grants: [
+        { type: 'asi', key: asiKey, points: 2, from: null },
+        { type: 'feat-choice', key: featKey, from: null, category: 'general' },
+      ],
+    },
+  ];
+
+  it('emits a logger.warn when both ASI and feat-choice companion decisions are simultaneously satisfied', () => {
+    const logger = getLogger('resolver');
+    const warnSpy = vi.spyOn(logger, 'warn');
+
+    resolveCharacter({
+      ...baseInput,
+      bundles: bundlesWithBoth,
+      choices: {
+        [asiKey]: { type: 'asi', allocation: { str: 2 } } as const,
+        [featKey]: { type: 'feat-choice', featId: 'alert' } as const,
+      },
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('both ASI'));
+    warnSpy.mockRestore();
+  });
+
+  it('does NOT warn when only ASI is satisfied and feat-choice is not', () => {
+    const logger = getLogger('resolver');
+    const warnSpy = vi.spyOn(logger, 'warn');
+
+    resolveCharacter({
+      ...baseInput,
+      bundles: bundlesWithBoth,
+      choices: {
+        [asiKey]: { type: 'asi', allocation: { str: 2 } } as const,
+      },
+    });
+
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('both ASI'));
+    warnSpy.mockRestore();
+  });
+
+  it('does NOT warn when only feat-choice is satisfied and ASI is not', () => {
+    const logger = getLogger('resolver');
+    const warnSpy = vi.spyOn(logger, 'warn');
+
+    resolveCharacter({
+      ...baseInput,
+      bundles: bundlesWithBoth,
+      choices: {
+        [featKey]: { type: 'feat-choice', featId: 'alert' } as const,
+      },
+    });
+
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('both ASI'));
+    warnSpy.mockRestore();
+  });
+
+  it('does NOT change application behavior when both are set — no ASI pending, no feat pending', () => {
+    const warnSpy = vi.spyOn(getLogger('resolver'), 'warn');
+
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles: bundlesWithBoth,
+      choices: {
+        [asiKey]: { type: 'asi', allocation: { str: 2 } } as const,
+        [featKey]: { type: 'feat-choice', featId: 'alert' } as const,
+      },
+    });
+
+    // Warn fires but no pending choices are emitted (behavior unchanged)
+    expect(result.pendingChoices.find((c) => c.type === 'asi')).toBeUndefined();
+    expect(result.pendingChoices.find((c) => c.type === 'feat-choice')).toBeUndefined();
+    warnSpy.mockRestore();
+  });
+});
