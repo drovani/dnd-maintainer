@@ -455,6 +455,8 @@
       "spellSaveDC": "Spell Save DC",
       "spellAttackBonus": "Spell Attack Bonus",
       "spellLevelLabel": "Level {{level}}",
+      "spellLevelUnknown": "Unknown level",
+      "chosenOfTarget": "{{chosen}}/{{target}}",
       "source": "Source: {{source}}",
       "maxHp": "Max HP",
       "currentHp": "Current HP",

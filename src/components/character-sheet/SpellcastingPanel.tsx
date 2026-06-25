@@ -19,6 +19,12 @@ export function SpellcastingPanel({ spellcasting }: { spellcasting: Spellcasting
     .map(Number)
     .sort((a, b) => a - b);
 
+  // Cantrips header: show "CANTRIPS (chosen/target)" when cantripsKnown > 0
+  const cantripsHeader =
+    spellcasting.cantripsKnown > 0
+      ? `${tc('characterSheet.sections.cantrips')} (${tc('characterSheet.fields.chosenOfTarget', { chosen: spellcasting.cantrips.length, target: spellcasting.cantripsKnown })})`
+      : tc('characterSheet.sections.cantrips');
+
   return (
     <div className="bg-card border border-purple-200 rounded-lg p-6">
       <h2 className="text-lg font-bold text-foreground mb-4">{tc('characterSheet.sections.spells')}</h2>
@@ -55,13 +61,17 @@ export function SpellcastingPanel({ spellcasting }: { spellcasting: Spellcasting
       <div className="space-y-3">
         {spellcasting.cantrips.length > 0 && (
           <div>
-            <div className="text-xs font-bold text-muted-foreground mb-2">{tc('characterSheet.sections.cantrips')}</div>
+            <div className="text-xs font-bold text-muted-foreground mb-2">{cantripsHeader}</div>
             <div className="space-y-1">
-              {spellcasting.cantrips.map((cantrip, i) => (
-                <div key={i} className="text-sm text-foreground">
-                  &bull; {cantrip}
-                </div>
-              ))}
+              {spellcasting.cantrips.map((cantrip, i) => {
+                const meta = getSpellDisplayMeta(cantrip);
+                return (
+                  <div key={i} className="text-sm text-foreground">
+                    &bull; {isSpellId(cantrip) ? t(`spells.${cantrip}.name`) : cantrip}
+                    {meta && <span className="text-xs text-muted-foreground ml-2">{`(${meta.school})`}</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -72,26 +82,37 @@ export function SpellcastingPanel({ spellcasting }: { spellcasting: Spellcasting
               {tc('characterSheet.sections.knownSpells')}
             </div>
             <div className="space-y-2">
-              {sortedLevels.map((level) => (
-                <div key={level}>
-                  <div className="text-xs text-muted-foreground mb-1">
-                    {tc('characterSheet.fields.spellLevelLabel', { level })}
+              {sortedLevels.map((level) => {
+                // Level 0 in knownSpells means the spell was uncatalogued — show "Unknown level"
+                const levelLabel =
+                  level === 0
+                    ? tc('characterSheet.fields.spellLevelUnknown')
+                    : tc('characterSheet.fields.spellLevelLabel', { level });
+                // Find matching spellsKnown target count for this level
+                const spellsKnownEntry = spellcasting.spellsKnown.find((e) => e.spellLevel === level);
+                const levelHeader =
+                  spellsKnownEntry != null
+                    ? `${levelLabel} (${tc('characterSheet.fields.chosenOfTarget', { chosen: spellsByLevel[level].length, target: spellsKnownEntry.count })})`
+                    : levelLabel;
+                return (
+                  <div key={level}>
+                    <div className="text-xs text-muted-foreground mb-1">{levelHeader}</div>
+                    <div className="space-y-1">
+                      {spellsByLevel[level].map((id, i) => {
+                        const meta = getSpellDisplayMeta(id);
+                        return (
+                          <div key={i} className="text-sm text-foreground">
+                            &bull; {isSpellId(id) ? t(`spells.${id}.name`) : id}
+                            {meta && (
+                              <span className="text-xs text-muted-foreground ml-2">{`(lvl ${meta.level} ${meta.school})`}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {spellsByLevel[level].map((id, i) => {
-                      const meta = getSpellDisplayMeta(id);
-                      return (
-                        <div key={i} className="text-sm text-foreground">
-                          &bull; {isSpellId(id) ? t(`spells.${id}.name`) : id}
-                          {meta && (
-                            <span className="text-xs text-muted-foreground ml-2">{`(lvl ${meta.level} ${meta.school})`}</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

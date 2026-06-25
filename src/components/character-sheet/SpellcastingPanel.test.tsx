@@ -6,6 +6,10 @@ vi.mock('react-i18next', () => ({
   useTranslation: (_ns?: string) => ({
     t: (key: string, opts?: Record<string, unknown>) => {
       if (opts?.defaultValue !== undefined) return opts.defaultValue as string;
+      // Interpolate {{chosen}}/{{target}} for chosenOfTarget key
+      if (key.endsWith('chosenOfTarget') && opts) {
+        return `${opts.chosen}/${opts.target}`;
+      }
       const segments = key.split('.');
       return segments[segments.length - 1];
     },
@@ -85,6 +89,75 @@ describe('SpellcastingPanel', () => {
     });
   });
 
+  describe('cantrips section', () => {
+    it('renders translated spell name for a known spell id cantrip', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            cantrips: ['spell-fire-bolt'],
+            cantripsKnown: 0,
+          })}
+        />
+      );
+      // isSpellId('spell-fire-bolt') → true → t('spells.spell-fire-bolt.name') → last segment 'name'
+      expect(screen.getByText((content) => content.includes('name'))).toBeDefined();
+    });
+
+    it('renders raw id for a non-spell-id cantrip', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            cantrips: ['custom-cantrip'],
+            cantripsKnown: 0,
+          })}
+        />
+      );
+      expect(screen.getByText((content) => content.includes('custom-cantrip'))).toBeDefined();
+    });
+
+    it('shows school annotation for catalogued cantrip (no "lvl" prefix)', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            cantrips: ['spell-fire-bolt'],
+            cantripsKnown: 0,
+          })}
+        />
+      );
+      // getSpellDisplayMeta returns { level: 1, school: 'evocation' } for spell-* ids
+      // SpellcastingPanel renders "(evocation)" (no "lvl N" prefix for cantrips)
+      expect(screen.getByText('(evocation)')).toBeDefined();
+      expect(screen.queryByText((content) => content.includes('lvl'))).toBeNull();
+    });
+
+    it('shows chosen/target indicator in header when cantripsKnown > 0', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            cantrips: ['spell-fire-bolt', 'spell-mage-hand'],
+            cantripsKnown: 3,
+          })}
+        />
+      );
+      // Mock returns "2/3" for chosenOfTarget with chosen=2, target=3
+      // Header becomes "cantrips (2/3)"
+      expect(screen.getByText((content) => content.includes('2/3'))).toBeDefined();
+    });
+
+    it('does not show chosen/target indicator when cantripsKnown is 0', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            cantrips: ['spell-fire-bolt'],
+            cantripsKnown: 0,
+          })}
+        />
+      );
+      // Header should just be "cantrips" with no indicator
+      expect(screen.queryByText((content) => content.includes('/'))).toBeNull();
+    });
+  });
+
   describe('known spells grouped by level', () => {
     it('does not render knownSpells section when list is empty', () => {
       render(<SpellcastingPanel spellcasting={makeSpellcasting({ knownSpells: [] })} />);
@@ -159,6 +232,41 @@ describe('SpellcastingPanel', () => {
       );
       expect(screen.getByText('knownSpells')).toBeDefined();
       expect(screen.getByText('alwaysPrepared')).toBeDefined();
+    });
+
+    it('renders "spellLevelUnknown" label for a knownSpells entry with spellLevel 0', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            knownSpells: [{ spellId: 'mystery-spell', spellLevel: 0 }],
+          })}
+        />
+      );
+      // tc('characterSheet.fields.spellLevelUnknown') → last segment 'spellLevelUnknown'
+      expect(screen.getByText('spellLevelUnknown')).toBeDefined();
+      // Should not show 'spellLevelLabel' (which is used for real levels)
+      expect(screen.queryByText('spellLevelLabel')).toBeNull();
+    });
+
+    it('shows chosen/target per-level indicator when spellsKnown entry present', () => {
+      render(
+        <SpellcastingPanel
+          spellcasting={makeSpellcasting({
+            knownSpells: [
+              { spellId: 'spell-charm-person', spellLevel: 1 },
+              { spellId: 'spell-invisibility', spellLevel: 2 },
+            ],
+            spellsKnown: [
+              { spellLevel: 1, count: 4 },
+              { spellLevel: 2, count: 2 },
+            ],
+          })}
+        />
+      );
+      // Level 1: chosen=1, target=4 → "1/4"
+      expect(screen.getByText((content) => content.includes('1/4'))).toBeDefined();
+      // Level 2: chosen=1, target=2 → "1/2"
+      expect(screen.getByText((content) => content.includes('1/2'))).toBeDefined();
     });
   });
 });
