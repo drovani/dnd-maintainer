@@ -128,6 +128,23 @@ export function gateGrantsByMinClassLevel(
   return { bundles: gated, warnings };
 }
 
+/**
+ * Level-gate grants by their optional `minCharacterLevel` (#289). A grant whose `minCharacterLevel`
+ * exceeds the character's total level is suppressed. Unlike `gateGrantsByMinClassLevel`, this gates
+ * against total character level regardless of source, so it applies to species/background/feat
+ * origins too — e.g. Aasimar Celestial Revelation unlocks at character level 3. Exported for direct
+ * unit testing.
+ */
+export function gateGrantsByMinCharacterLevel(bundles: readonly GrantBundle[], characterLevel: number): GrantBundle[] {
+  return bundles.map((bundle) => {
+    const kept = bundle.grants.filter((g) => {
+      const min = (g as { readonly minCharacterLevel?: number }).minCharacterLevel;
+      return min == null || characterLevel >= min;
+    });
+    return kept.length === bundle.grants.length ? bundle : { source: bundle.source, grants: kept };
+  });
+}
+
 export interface CollectBundlesResult {
   readonly bundles: readonly GrantBundle[];
   readonly warnings: readonly string[];
@@ -459,5 +476,9 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     logger.warn(msg);
   }
 
-  return { bundles: gateResult.bundles, warnings, expandedFeats };
+  // Level-gate grants by total-character-level `minCharacterLevel` (#289), e.g. Aasimar Celestial
+  // Revelation unlocks at character level 3.
+  const characterGated = gateGrantsByMinCharacterLevel(gateResult.bundles, build.levels.length);
+
+  return { bundles: characterGated, warnings, expandedFeats };
 }

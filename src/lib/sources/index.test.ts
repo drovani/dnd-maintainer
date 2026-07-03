@@ -33,6 +33,7 @@ import {
   getItemSource,
   collectBundles,
   gateGrantsByMinClassLevel,
+  gateGrantsByMinCharacterLevel,
   SPECIES_SOURCES,
   CLASS_SOURCES,
   SUBCLASS_SOURCES,
@@ -40,6 +41,7 @@ import {
   FEAT_SOURCES,
 } from '@/lib/sources';
 import type { GrantBundle } from '@/types/sources';
+import type { Grant } from '@/types/grants';
 import { resolveCharacter } from '@/lib/resolver';
 import type { CharacterBuild, ChoiceDecision, ChoiceKey } from '@/types/choices';
 import { createChoiceKey } from '@/types/choices';
@@ -1372,5 +1374,70 @@ describe('gateGrantsByMinClassLevel (issue #189)', () => {
       ])
     );
     expect(out[0].grants).toHaveLength(0);
+  });
+});
+
+describe('gateGrantsByMinCharacterLevel (#289)', () => {
+  const speciesSource = { origin: 'species', id: 'aasimar' } as const;
+  const bundleWith = (grants: GrantBundle['grants']): GrantBundle => ({ source: speciesSource, grants });
+  const revelationChoice: Grant = {
+    type: 'feature-choice',
+    key: createChoiceKey('feature-choice', 'species', 'aasimar', 0),
+    minCharacterLevel: 3,
+    options: [{ optionId: 'inner-radiance', featureId: 'aasimar-celestial-revelation-inner-radiance', grants: [] }],
+  };
+
+  it('drops a minCharacterLevel:3 grant below character level 3', () => {
+    const out = gateGrantsByMinCharacterLevel([bundleWith([revelationChoice])], 2);
+    expect(out[0].grants).toHaveLength(0);
+  });
+
+  it('keeps a minCharacterLevel:3 grant at character level 3 and above', () => {
+    expect(gateGrantsByMinCharacterLevel([bundleWith([revelationChoice])], 3)[0].grants).toHaveLength(1);
+    expect(gateGrantsByMinCharacterLevel([bundleWith([revelationChoice])], 5)[0].grants).toHaveLength(1);
+  });
+
+  it('leaves grants without minCharacterLevel untouched (identity-preserving)', () => {
+    const bundles = [bundleWith([{ type: 'feature', feature: { id: 'aasimar-darkvision' } }])];
+    expect(gateGrantsByMinCharacterLevel(bundles, 1)[0]).toBe(bundles[0]);
+  });
+});
+
+describe('Aasimar Celestial Revelation surfacing by character level (#289)', () => {
+  const aasimarFighterBuild = (numLevels: number): CharacterBuild => ({
+    ...humanFighterL1Build,
+    speciesId: 'aasimar' as SpeciesId,
+    levels: Array.from({ length: numLevels }, () => ({ classId: 'fighter' as ClassId, classLevel: 1, hpRoll: null })),
+  });
+
+  const revelationKey = createChoiceKey('feature-choice', 'species', 'aasimar', 0);
+
+  const hasRevelationChoice = (build: CharacterBuild): boolean =>
+    collectBundles(build).bundles.some((b) =>
+      b.grants.some((g) => g.type === 'feature-choice' && g.key === revelationKey)
+    );
+
+  it('does not offer Celestial Revelation at character level 1 or 2', () => {
+    expect(hasRevelationChoice(aasimarFighterBuild(1))).toBe(false);
+    expect(hasRevelationChoice(aasimarFighterBuild(2))).toBe(false);
+  });
+
+  it('offers Celestial Revelation as a pending choice at character level 3', () => {
+    const build = aasimarFighterBuild(3);
+    expect(hasRevelationChoice(build)).toBe(true);
+    const { bundles, expandedFeats } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: build.levels.length,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+      expandedFeats,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'feature-choice' && c.choiceKey === revelationKey);
+    expect(pending).toBeDefined();
+    if (pending?.type === 'feature-choice') {
+      expect(pending.options).toHaveLength(3);
+    }
   });
 });

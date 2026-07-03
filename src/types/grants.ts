@@ -281,6 +281,11 @@ export interface FeatureChoiceGrant {
   readonly type: 'feature-choice';
   readonly key: ChoiceKey;
   readonly options: readonly [FeatureChoiceOption, ...FeatureChoiceOption[]];
+  // Optional total-character-level gate: the choice is suppressed until the character reaches this
+  // level. Unlike `minClassLevel` (gated against a single class's level), this gates against total
+  // character level — used for species traits that unlock at a character level, e.g. Aasimar
+  // Celestial Revelation at character level 3 (#289). Gated generically in collectBundles.
+  readonly minCharacterLevel?: number;
 }
 
 export interface LineageChoiceGrant {
