@@ -889,7 +889,19 @@
     },
     "aasimar-celestial-revelation": {
       "name": "Celestial Revelation",
-      "description": "When you reach character level 3, you can transform as a Bonus Action. Your transformation lasts for 1 minute or until you end it as a Bonus Action."
+      "description": "When you reach character level 3, choose one Celestial Revelation. You can transform as a Bonus Action, and the transformation lasts for 1 minute or until you end it (no action required). Once you transform, you can't do so again until you finish a Long Rest."
+    },
+    "aasimar-celestial-revelation-heavenly-wings": {
+      "name": "Celestial Revelation: Heavenly Wings",
+      "description": "While transformed, wings sprout from your back and you gain a Fly Speed equal to your Speed. The transformation lasts 1 minute or until you end it (no action required), starts with a Bonus Action, and can be used once per Long Rest."
+    },
+    "aasimar-celestial-revelation-inner-radiance": {
+      "name": "Celestial Revelation: Inner Radiance",
+      "description": "While transformed, you shed Bright Light in a 10-foot radius and Dim Light for an additional 10 feet, and any creature that ends its turn within 10 feet of you takes Radiant damage equal to your Proficiency Bonus. The transformation lasts 1 minute or until you end it (no action required), starts with a Bonus Action, and can be used once per Long Rest."
+    },
+    "aasimar-celestial-revelation-necrotic-shroud": {
+      "name": "Celestial Revelation: Necrotic Shroud",
+      "description": "While transformed, creatures other than your allies within 10 feet of you must succeed on a Charisma saving throw (DC 8 + your Charisma modifier + your Proficiency Bonus) or be Frightened of you until the end of your next turn. The transformation lasts 1 minute or until you end it (no action required), starts with a Bonus Action, and can be used once per Long Rest."
     },
     "dragonborn-darkvision": {
       "name": "Darkvision (60 ft.)",

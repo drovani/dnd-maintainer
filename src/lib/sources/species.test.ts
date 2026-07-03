@@ -372,9 +372,9 @@ describe('Aasimar species source (2024 PHB)', () => {
     );
   });
 
-  it('grants darkvision, celestial-resistance, healing-hands, light-bearer, celestial-revelation features', () => {
+  it('grants darkvision, celestial-resistance, healing-hands, light-bearer features', () => {
     const features = source?.grants.filter((g) => g.type === 'feature');
-    expect(features).toHaveLength(5);
+    expect(features).toHaveLength(4);
     const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
     expect(featureIds).toEqual(
       expect.arrayContaining([
@@ -382,9 +382,30 @@ describe('Aasimar species source (2024 PHB)', () => {
         'aasimar-celestial-resistance',
         'aasimar-healing-hands',
         'aasimar-light-bearer',
-        'aasimar-celestial-revelation',
       ])
     );
+  });
+
+  // Regression for #289: Celestial Revelation is a level-3 choice of three transformations,
+  // not a flat feature granted at level 1.
+  it('offers Celestial Revelation as a level-3 feature-choice with three options', () => {
+    const choice = source?.grants.find((g) => g.type === 'feature-choice');
+    expect(choice).toBeDefined();
+    if (choice?.type === 'feature-choice') {
+      expect(choice.minCharacterLevel).toBe(3);
+      expect(choice.key).toBe(createChoiceKey('feature-choice', 'species', 'aasimar', 0));
+      expect(choice.options.map((o) => o.optionId).sort()).toEqual([
+        'heavenly-wings',
+        'inner-radiance',
+        'necrotic-shroud',
+      ]);
+    }
+  });
+
+  it('does not grant Celestial Revelation as a flat feature', () => {
+    const features = source?.grants.filter((g) => g.type === 'feature');
+    const ids = features?.map((g) => (g.type === 'feature' ? g.feature.id : ''));
+    expect(ids).not.toContain('aasimar-celestial-revelation');
   });
 });
 

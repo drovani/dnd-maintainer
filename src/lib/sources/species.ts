@@ -284,7 +284,31 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
       { type: 'resistance', damageType: 'radiant' },
       { type: 'feature', feature: { id: 'aasimar-healing-hands' } },
       { type: 'feature', feature: { id: 'aasimar-light-bearer' } },
-      { type: 'feature', feature: { id: 'aasimar-celestial-revelation' } },
+      // Celestial Revelation: at character level 3, choose one transformation (2024 PHB). #289
+      {
+        type: 'feature-choice',
+        key: createChoiceKey('feature-choice', 'species', 'aasimar', 0),
+        minCharacterLevel: 3,
+        options: [
+          {
+            optionId: 'heavenly-wings',
+            featureId: 'aasimar-celestial-revelation-heavenly-wings',
+            // Transformation-only fly speed (1 min, Bonus Action); the engine does not model
+            // transient activated speeds, so the mechanics live in the feature description.
+            grants: [],
+          },
+          {
+            optionId: 'inner-radiance',
+            featureId: 'aasimar-celestial-revelation-inner-radiance',
+            grants: [],
+          },
+          {
+            optionId: 'necrotic-shroud',
+            featureId: 'aasimar-celestial-revelation-necrotic-shroud',
+            grants: [],
+          },
+        ],
+      },
     ],
   },
   // Dragonborn (2024 PHB) — lineage choice from 10 options (5 chromatic, 5 metallic)

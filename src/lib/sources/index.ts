@@ -128,6 +128,23 @@ export function gateGrantsByMinClassLevel(
   return { bundles: gated, warnings };
 }
 
+/**
+ * Level-gate grants by their optional `minCharacterLevel` (#289). A grant whose `minCharacterLevel`
+ * exceeds the character's total level is suppressed. Unlike `gateGrantsByMinClassLevel`, this gates
+ * against total character level regardless of source, so it applies to species/background/feat
+ * origins too — e.g. Aasimar Celestial Revelation unlocks at character level 3. Exported for direct
+ * unit testing.
+ */
+export function gateGrantsByMinCharacterLevel(bundles: readonly GrantBundle[], characterLevel: number): GrantBundle[] {
+  return bundles.map((bundle) => {
+    const kept = bundle.grants.filter((g) => {
+      const min = (g as { readonly minCharacterLevel?: number }).minCharacterLevel;
+      return min == null || characterLevel >= min;
+    });
+    return kept.length === bundle.grants.length ? bundle : { source: bundle.source, grants: kept };
+  });
+}
+
 export interface CollectBundlesResult {
   readonly bundles: readonly GrantBundle[];
   readonly warnings: readonly string[];
@@ -426,10 +443,23 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
   }
 
   for (const { grant, source } of allFeatureChoiceGrants) {
-    // ClassStep handles 'class' and 'subclass' origins; OriginStep handles 'feat'.
-    // Any other origin (e.g. 'item') would produce an invisible pending choice;
-    // surface as a warning so the CharacterBuilder amber banner shows it instead of failing silently.
-    if (source.origin !== 'class' && source.origin !== 'feat' && source.origin !== 'subclass') {
+    // Suppress feature-choices gated above the character's current level (#289) before both the
+    // visibility warning and expansion. This prevents a chosen option's expanded feature from
+    // leaking below its unlock level after a level-down, and avoids a spurious warning at levels
+    // where the choice is not yet offered. The top-level grant is separately removed from the
+    // returned bundles by gateGrantsByMinCharacterLevel below.
+    if (grant.minCharacterLevel != null && build.levels.length < grant.minCharacterLevel) continue;
+
+    // ClassStep handles 'class' and 'subclass' origins; OriginStep handles 'feat'; the character
+    // sheet's PendingChoicesPanel renders 'species' origins generically via ChoicePicker.
+    // Any other origin (e.g. 'item') would produce an invisible pending choice; surface as a warning
+    // so the CharacterBuilder amber banner shows it instead of failing silently.
+    if (
+      source.origin !== 'class' &&
+      source.origin !== 'feat' &&
+      source.origin !== 'subclass' &&
+      source.origin !== 'species'
+    ) {
       const msg = `feature-choice "${grant.key}" has non-class origin "${source.origin}" — no builder UI exists for this origin, choice will be invisible`;
       warnings.push(msg);
       logger.warn(msg);
@@ -459,5 +489,9 @@ export function collectBundles(build: CharacterBuild): CollectBundlesResult {
     logger.warn(msg);
   }
 
-  return { bundles: gateResult.bundles, warnings, expandedFeats };
+  // Level-gate grants by total-character-level `minCharacterLevel` (#289), e.g. Aasimar Celestial
+  // Revelation unlocks at character level 3.
+  const characterGated = gateGrantsByMinCharacterLevel(gateResult.bundles, build.levels.length);
+
+  return { bundles: characterGated, warnings, expandedFeats };
 }
