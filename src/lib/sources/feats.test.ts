@@ -171,13 +171,13 @@ describe('FEAT_SOURCES', () => {
       expect(feat?.repeatable).toBe(true);
     });
 
-    it('magic-initiate has 6 feature-choice options (bard/cleric/druid/sorcerer/warlock/wizard)', () => {
+    it('magic-initiate has 3 feature-choice options (cleric/druid/wizard) per 2024 PHB (#288)', () => {
       const feat = FEAT_SOURCES.find((f) => f.id === 'magic-initiate');
       const choiceGrant = feat?.grants.find((g) => g.type === 'feature-choice');
       expect(choiceGrant).toBeDefined();
       if (choiceGrant?.type === 'feature-choice') {
         const optionIds = choiceGrant.options.map((o) => o.optionId);
-        expect(optionIds).toEqual(['bard', 'cleric', 'druid', 'sorcerer', 'warlock', 'wizard']);
+        expect(optionIds).toEqual(['cleric', 'druid', 'wizard']);
       }
     });
 

@@ -2589,11 +2589,8 @@ describe('collapsed repeatable feat resolver integration', () => {
               type: 'feature-choice',
               key: magicInitiateKey,
               options: [
-                { optionId: 'bard', featureId: 'feat-magic-initiate-bard', grants: [] },
                 { optionId: 'cleric', featureId: 'feat-magic-initiate-cleric', grants: [] },
                 { optionId: 'druid', featureId: 'feat-magic-initiate-druid', grants: [] },
-                { optionId: 'sorcerer', featureId: 'feat-magic-initiate-sorcerer', grants: [] },
-                { optionId: 'warlock', featureId: 'feat-magic-initiate-warlock', grants: [] },
                 { optionId: 'wizard', featureId: 'feat-magic-initiate-wizard', grants: [] },
               ],
             },
@@ -2609,7 +2606,7 @@ describe('collapsed repeatable feat resolver integration', () => {
         const optionIds = pending.options.map((o) => o.optionId);
         expect(optionIds).toContain('wizard');
         expect(optionIds).toContain('cleric');
-        expect(optionIds).toHaveLength(6);
+        expect(optionIds).toHaveLength(3);
       }
     });
 
