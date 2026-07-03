@@ -29,6 +29,9 @@ import type { GrantBundle, SourceTag } from '@/types/sources';
 import { getItemNameKey } from '@/lib/sources/items';
 import { getSourceDisplayName } from '@/lib/source-display';
 import { getSpellDisplayMeta } from '@/lib/spell-display';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('pdf-field-map');
 
 /** Gamedata i18n translator. All user-facing text in the export comes from i18n — ids are never user-facing. */
 export type GamedataT = TFunction<'gamedata'>;
@@ -480,7 +483,7 @@ export function buildFieldValues(
     );
 
     if (allSpells.length > PDF_SPELL_ROWS) {
-      console.warn(
+      logger.warn(
         `PDF export: ${allSpells.length - PDF_SPELL_ROWS} spell(s) dropped — sheet capacity is ${PDF_SPELL_ROWS}`
       );
     }
