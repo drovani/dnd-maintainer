@@ -1440,4 +1440,31 @@ describe('Aasimar Celestial Revelation surfacing by character level (#289)', () 
       expect(pending.options).toHaveLength(3);
     }
   });
+
+  it('emits no warnings for a plain Aasimar build (species feature-choice is a known origin)', () => {
+    for (const numLevels of [1, 2, 3]) {
+      const { warnings } = collectBundles(aasimarFighterBuild(numLevels));
+      const revelationWarnings = warnings.filter((w) => w.includes('feature-choice:species:aasimar:0'));
+      expect(revelationWarnings, `unexpected warning at level ${numLevels}: ${revelationWarnings.join('; ')}`).toEqual(
+        []
+      );
+    }
+  });
+
+  it('does not grant the chosen revelation feature below level 3 (e.g. after a level-down)', () => {
+    const buildWithChoice = (numLevels: number): CharacterBuild => ({
+      ...aasimarFighterBuild(numLevels),
+      choices: {
+        [revelationKey]: { type: 'feature-choice', optionId: 'inner-radiance' } as ChoiceDecision,
+      },
+    });
+    const featureIdsAt = (numLevels: number): string[] =>
+      collectBundles(buildWithChoice(numLevels))
+        .bundles.flatMap((b) => b.grants)
+        .filter((g) => g.type === 'feature')
+        .map((g) => (g.type === 'feature' ? g.feature.id : ''));
+
+    expect(featureIdsAt(2)).not.toContain('aasimar-celestial-revelation-inner-radiance');
+    expect(featureIdsAt(3)).toContain('aasimar-celestial-revelation-inner-radiance');
+  });
 });
