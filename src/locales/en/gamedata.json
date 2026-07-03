@@ -2339,7 +2339,7 @@
     },
     "magic-initiate": {
       "name": "Magic Initiate",
-      "description": "Choose a class: Bard, Cleric, Druid, Sorcerer, Warlock, or Wizard. You learn two cantrips and one 1st-level spell from that class's spell list. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Your spellcasting ability for these spells is the same as the chosen class."
+      "description": "Choose a class: Bard, Cleric, Druid, Sorcerer, Warlock, or Wizard. You learn two cantrips and one 1st-level spell from that class's spell list. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. When you take this feat, choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells."
     },
     "musician": {
       "name": "Musician",

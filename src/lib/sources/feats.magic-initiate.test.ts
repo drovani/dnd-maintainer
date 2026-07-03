@@ -9,6 +9,7 @@ import gamedata from '@/locales/en/gamedata.json';
 // longer hardcode a single class-tied ability.
 
 const features = gamedata.features as Record<string, { name: string; description: string }>;
+const feats = gamedata.feats as Record<string, { name: string; description?: string }>;
 
 function magicInitiateFeatureIds(): readonly string[] {
   const feat = FEAT_SOURCES.find((f) => f.id === 'magic-initiate');
@@ -33,5 +34,13 @@ describe('Magic Initiate spellcasting ability (#286)', () => {
   it.each(featureIds)('%s description does not hardcode a single class-tied ability', (featureId) => {
     const { description } = features[featureId];
     expect(description).not.toMatch(/(Intelligence|Wisdom|Charisma) is your spellcasting ability/);
+  });
+
+  it('top-level feats.magic-initiate description offers the Int/Wis/Cha choice', () => {
+    const description = feats['magic-initiate']?.description;
+    expect(description, 'missing gamedata description for feats.magic-initiate').toBeDefined();
+    expect(description).toContain('Intelligence, Wisdom, or Charisma');
+    // must not tie the ability to the chosen class (the #286 bug)
+    expect(description).not.toMatch(/spellcasting ability for these spells is the same as the chosen class/);
   });
 });
