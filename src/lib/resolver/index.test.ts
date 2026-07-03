@@ -681,7 +681,6 @@ describe('Human Fighter L5 integration', () => {
       'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       // Human Versatile origin feat choice (2024 PHB)
       'feat-choice:species:human:0': { type: 'feat-choice', featId: 'alert' },
       [subclassKey]: { type: 'subclass' as const, subclassId: 'champion' as SubclassId },
@@ -760,7 +759,6 @@ describe('Human Fighter L5 integration', () => {
       'skill-choice:class:fighter:0': { type: 'skill-choice' as const, skills: ['athletics', 'perception'] as const },
       'language-choice:species:human:0': { type: 'language-choice' as const, languages: ['elvish'] as const },
       'tool-choice:background:soldier:0': { type: 'tool-choice' as const, tools: ['gaming-set-dice'] as const },
-      'language-choice:background:soldier:0': { type: 'language-choice' as const, languages: ['dwarvish'] as const },
     };
     const result = resolveCharacter({ ...input, choices: incompleteChoices });
     const pendingTypes = result.pendingChoices.map((c) => c.type);
@@ -1666,7 +1664,6 @@ describe('Weapon mastery resolver', () => {
       'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
       'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
       'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-      'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       'bundle-choice:class:fighter:0': { type: 'bundle-choice', bundleId: 'fighter-chainmail', slotPicks: {} },
       'bundle-choice:class:fighter:1': {
         type: 'bundle-choice',
@@ -1710,7 +1707,6 @@ describe('Weapon mastery resolver', () => {
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       levels: [{ classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null }],
       feats: [],
@@ -1743,7 +1739,6 @@ describe('Weapon mastery resolver', () => {
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
         'subclass:class:barbarian:0': { type: 'subclass', subclassId: 'berserker' as SubclassId },
       },
       levels: [
@@ -1818,7 +1813,6 @@ describe('Weapon mastery resolver', () => {
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       levels: [{ classId: 'paladin' as ClassId, classLevel: 1, hpRoll: null }],
       feats: [],
@@ -1850,7 +1844,6 @@ describe('Weapon mastery resolver', () => {
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       levels: [{ classId: 'ranger' as ClassId, classLevel: 1, hpRoll: null }],
       feats: [],
@@ -1885,7 +1878,6 @@ describe('Weapon mastery resolver', () => {
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'asi:background:soldier:0': { type: 'asi', allocation: { str: 2, con: 1 } },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       levels: [{ classId: 'rogue' as ClassId, classLevel: 1, hpRoll: null }],
       feats: [],
@@ -1945,7 +1937,6 @@ describe('Weapon mastery resolver', () => {
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'asi:background:soldier:0': { type: 'asi', allocation: { int: 2, con: 1 } },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       levels: [
         { classId: 'wizard' as ClassId, classLevel: 1, hpRoll: null },
