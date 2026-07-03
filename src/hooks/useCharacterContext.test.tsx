@@ -1236,7 +1236,6 @@ describe('CharacterProvider', () => {
         'fighting-style-choice:class:fighter:0': { type: 'fighting-style-choice', styles: ['dueling'] },
         'language-choice:species:human:0': { type: 'language-choice', languages: ['elvish'] },
         'tool-choice:background:soldier:0': { type: 'tool-choice', tools: ['gaming-set-dice'] },
-        'language-choice:background:soldier:0': { type: 'language-choice', languages: ['dwarvish'] },
       },
       deleted_at: null,
     };
