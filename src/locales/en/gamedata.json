@@ -425,27 +425,27 @@
     },
     "feat-magic-initiate-bard": {
       "name": "Magic Initiate (Bard)",
-      "description": "Learn two Bard cantrips and one 1st-level Bard spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Charisma is your spellcasting ability for these spells."
+      "description": "Learn two Bard cantrips and one 1st-level Bard spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells when you take this feat."
     },
     "feat-magic-initiate-cleric": {
       "name": "Magic Initiate (Cleric)",
-      "description": "Learn two Cleric cantrips and one 1st-level Cleric spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Wisdom is your spellcasting ability for these spells."
+      "description": "Learn two Cleric cantrips and one 1st-level Cleric spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells when you take this feat."
     },
     "feat-magic-initiate-druid": {
       "name": "Magic Initiate (Druid)",
-      "description": "Learn two Druid cantrips and one 1st-level Druid spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Wisdom is your spellcasting ability for these spells."
+      "description": "Learn two Druid cantrips and one 1st-level Druid spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells when you take this feat."
     },
     "feat-magic-initiate-sorcerer": {
       "name": "Magic Initiate (Sorcerer)",
-      "description": "Learn two Sorcerer cantrips and one 1st-level Sorcerer spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Charisma is your spellcasting ability for these spells."
+      "description": "Learn two Sorcerer cantrips and one 1st-level Sorcerer spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells when you take this feat."
     },
     "feat-magic-initiate-warlock": {
       "name": "Magic Initiate (Warlock)",
-      "description": "Learn two Warlock cantrips and one 1st-level Warlock spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Charisma is your spellcasting ability for these spells."
+      "description": "Learn two Warlock cantrips and one 1st-level Warlock spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells when you take this feat."
     },
     "feat-magic-initiate-wizard": {
       "name": "Magic Initiate (Wizard)",
-      "description": "Learn two Wizard cantrips and one 1st-level Wizard spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Intelligence is your spellcasting ability for these spells."
+      "description": "Learn two Wizard cantrips and one 1st-level Wizard spell. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells when you take this feat."
     },
     "feat-elemental-adept-acid": {
       "name": "Elemental Adept (Acid)",
@@ -2339,7 +2339,7 @@
     },
     "magic-initiate": {
       "name": "Magic Initiate",
-      "description": "Choose a class: Bard, Cleric, Druid, Sorcerer, Warlock, or Wizard. You learn two cantrips and one 1st-level spell from that class's spell list. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. Your spellcasting ability for these spells is the same as the chosen class."
+      "description": "Choose a class: Bard, Cleric, Druid, Sorcerer, Warlock, or Wizard. You learn two cantrips and one 1st-level spell from that class's spell list. You can cast the 1st-level spell once without a spell slot, regaining the ability to do so on a Long Rest. When you take this feat, choose Intelligence, Wisdom, or Charisma as your spellcasting ability for these spells."
     },
     "musician": {
       "name": "Musician",
