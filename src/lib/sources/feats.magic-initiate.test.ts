@@ -18,6 +18,39 @@ function magicInitiateFeatureIds(): readonly string[] {
   return featureChoice.options.map((o) => o.featureId);
 }
 
+function magicInitiateOptionIds(): readonly string[] {
+  const feat = FEAT_SOURCES.find((f) => f.id === 'magic-initiate');
+  const featureChoice = feat?.grants.find((g) => g.type === 'feature-choice');
+  if (featureChoice?.type !== 'feature-choice') return [];
+  return featureChoice.options.map((o) => o.optionId);
+}
+
+// Regression coverage for #288: in the 2024 PHB the Magic Initiate origin feat
+// offers only the Cleric, Druid, or Wizard spell lists. Bard, Sorcerer, and
+// Warlock are 2014 holdovers and must not be selectable.
+describe('Magic Initiate class options (#288)', () => {
+  it('offers exactly Cleric, Druid, and Wizard', () => {
+    expect([...magicInitiateOptionIds()].sort()).toEqual(['cleric', 'druid', 'wizard']);
+  });
+
+  it.each(['bard', 'sorcerer', 'warlock'])('does not offer %s', (optionId) => {
+    expect(magicInitiateOptionIds()).not.toContain(optionId);
+  });
+
+  it.each(['feat-magic-initiate-bard', 'feat-magic-initiate-sorcerer', 'feat-magic-initiate-warlock'])(
+    'has no gamedata description for the removed %s variant',
+    (featureId) => {
+      expect(features[featureId]).toBeUndefined();
+    }
+  );
+
+  it('top-level description lists only Cleric, Druid, or Wizard', () => {
+    const description = feats['magic-initiate']?.description ?? '';
+    expect(description).toContain('Cleric, Druid, or Wizard');
+    expect(description).not.toMatch(/Bard|Sorcerer|Warlock/);
+  });
+});
+
 describe('Magic Initiate spellcasting ability (#286)', () => {
   const featureIds = magicInitiateFeatureIds();
 

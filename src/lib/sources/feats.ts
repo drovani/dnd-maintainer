@@ -49,13 +49,9 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
       {
         type: 'feature-choice',
         key: createChoiceKey('feature-choice', 'feat', 'magic-initiate', 0),
+        // 2024 PHB: Magic Initiate offers only the Cleric, Druid, or Wizard spell
+        // lists (Bard/Sorcerer/Warlock are 2014 holdovers and are not valid).
         options: [
-          {
-            optionId: 'bard',
-            featureId: 'feat-magic-initiate-bard',
-            // TODO(#82): spell grants deferred — spell catalog not yet built
-            grants: [],
-          },
           {
             optionId: 'cleric',
             featureId: 'feat-magic-initiate-cleric',
@@ -65,18 +61,6 @@ export const FEAT_SOURCES: readonly FeatSource[] = [
           {
             optionId: 'druid',
             featureId: 'feat-magic-initiate-druid',
-            // TODO(#82): spell grants deferred — spell catalog not yet built
-            grants: [],
-          },
-          {
-            optionId: 'sorcerer',
-            featureId: 'feat-magic-initiate-sorcerer',
-            // TODO(#82): spell grants deferred — spell catalog not yet built
-            grants: [],
-          },
-          {
-            optionId: 'warlock',
-            featureId: 'feat-magic-initiate-warlock',
             // TODO(#82): spell grants deferred — spell catalog not yet built
             grants: [],
           },
