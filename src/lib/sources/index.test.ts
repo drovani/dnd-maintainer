@@ -1377,6 +1377,45 @@ describe('gateGrantsByMinClassLevel (issue #189)', () => {
   });
 });
 
+describe('Barbarian weapon masteries are melee-only (#290)', () => {
+  const RANGED_MASTERY_WEAPONS = ['shortbow', 'longbow', 'light-crossbow', 'heavy-crossbow', 'hand-crossbow'];
+
+  const masteryChoiceFrom = (build: CharacterBuild, choiceKey: ChoiceKey): readonly string[] => {
+    const { bundles, expandedFeats } = collectBundles(build);
+    const result = resolveCharacter({
+      baseAbilities: build.baseAbilities,
+      level: build.levels.length,
+      bundles,
+      choices: build.choices,
+      levels: build.levels,
+      expandedFeats,
+    });
+    const pending = result.pendingChoices.find((c) => c.type === 'weapon-mastery-choice' && c.choiceKey === choiceKey);
+    return pending?.type === 'weapon-mastery-choice' ? pending.from : [];
+  };
+
+  it('excludes ranged weapons from a Barbarian mastery choice but keeps melee ones', () => {
+    const barbarianBuild: CharacterBuild = {
+      ...humanFighterL1Build,
+      levels: [{ classId: 'barbarian' as ClassId, classLevel: 1, hpRoll: null }],
+    };
+    const from = masteryChoiceFrom(barbarianBuild, createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 0));
+    expect(from.length).toBeGreaterThan(0);
+    for (const ranged of RANGED_MASTERY_WEAPONS) {
+      expect(from, `barbarian must not be able to master ranged weapon "${ranged}"`).not.toContain(ranged);
+    }
+    expect(from).toContain('greataxe'); // a martial melee weapon with a mastery
+  });
+
+  it('still allows ranged weapons for a Fighter mastery choice (no range restriction)', () => {
+    const from = masteryChoiceFrom(
+      humanFighterL1Build,
+      createChoiceKey('weapon-mastery-choice', 'class', 'fighter', 0)
+    );
+    expect(from).toContain('longbow');
+  });
+});
+
 describe('gateGrantsByMinCharacterLevel (#289)', () => {
   const speciesSource = { origin: 'species', id: 'aasimar' } as const;
   const bundleWith = (grants: GrantBundle['grants']): GrantBundle => ({ source: speciesSource, grants });

@@ -415,6 +415,18 @@ describe('Barbarian class grant structures', () => {
     }
   });
 
+  // Regression for #290: Barbarian weapon masteries are restricted to melee weapons.
+  it('every barbarian weapon-mastery-choice grant restricts range to melee', () => {
+    const masteryGrants =
+      source?.levels.flatMap((lvl) => lvl.grants.filter((g) => g.type === 'weapon-mastery-choice')) ?? [];
+    expect(masteryGrants.length).toBeGreaterThan(0);
+    for (const grant of masteryGrants) {
+      if (grant.type === 'weapon-mastery-choice') {
+        expect(grant.range, `grant ${grant.key} should be melee-only`).toBe('melee');
+      }
+    }
+  });
+
   it('level 4 has an ASI (index 0)', () => {
     const grant = source?.levels[3].grants.find((g) => g.type === 'asi');
     expect(grant?.type).toBe('asi');

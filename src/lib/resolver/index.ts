@@ -11,7 +11,7 @@ import type { ChoiceKey, ChoiceDecision } from '@/types/choices';
 import type { ResolvedCharacter, PendingChoice, ResolvedSkill } from '@/types/resolved';
 import type { HitDie, ExpertiseChoiceGrant } from '@/types/grants';
 import { mapNonEmpty } from '@/lib/non-empty';
-import type { WeaponMasteryId } from '@/types/items';
+import type { WeaponMasteryId, WeaponRange } from '@/types/items';
 import { collectGrantsByType, getClassLevel } from '@/lib/resolver/helpers';
 import { resolveAbilities } from '@/lib/resolver/abilities';
 import { resolveSavingThrows, resolveSkills, resolveProficiencies } from '@/lib/resolver/proficiencies';
@@ -270,9 +270,12 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
 
   // Aggregate weapon mastery choices — eligible weapons are those the character is proficient with that have a mastery
   const weaponProfSet = new Set(proficiencies.weapon.map((p) => p.value));
-  const eligibleMasteryWeapons = WEAPON_CATALOG.filter(
+  const eligibleMasteryDefs = WEAPON_CATALOG.filter(
     (w) => w.mastery !== undefined && (weaponProfSet.has(w.category) || weaponProfSet.has(w.weaponProficiencyId))
-  ).map((w) => w.id);
+  );
+  // A grant may restrict eligibility by weapon range (#290: Barbarian is melee-only).
+  const eligibleWeaponsForGrant = (range: WeaponRange | undefined): string[] =>
+    eligibleMasteryDefs.filter((w) => range === undefined || w.range === range).map((w) => w.id);
 
   // Emit pending choices for underfilled grants; build resolved weaponMasteries.
   // Iterate grants in stable order (collectGrantsByType preserves bundle/level order from collectBundles).
@@ -283,6 +286,7 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   for (const { grant, source } of weaponMasteryGrants) {
     const decision = choices[grant.key];
     const rawIds = decision?.type === 'weapon-mastery-choice' ? decision.weaponIds : [];
+    const eligibleMasteryWeapons = eligibleWeaponsForGrant(grant.range);
 
     // Dedupe within the decision, filter to eligible, exclude already claimed by earlier grants
     const seenInDecision = new Set<string>();

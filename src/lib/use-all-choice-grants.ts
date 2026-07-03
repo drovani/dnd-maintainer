@@ -96,9 +96,12 @@ export function collectChoiceGrantsFromGrants(
       case 'weapon-mastery-choice': {
         if (alreadyClaimedMasteries !== undefined) {
           const weaponProfSet = new Set<string>(resolvedWeaponProficiencies?.map((p) => p.value) ?? []);
+          // A grant may restrict eligibility by weapon range (#290: Barbarian is melee-only).
           const eligibleMasteryWeapons = WEAPON_CATALOG.filter(
             (w) =>
-              w.mastery !== undefined && (weaponProfSet.has(w.category) || weaponProfSet.has(w.weaponProficiencyId))
+              w.mastery !== undefined &&
+              (weaponProfSet.has(w.category) || weaponProfSet.has(w.weaponProficiencyId)) &&
+              (grant.range === undefined || w.range === grant.range)
           ).map((w) => w.id);
 
           const decision = choices[grant.key];
