@@ -9,6 +9,9 @@ import type { PendingChoice } from '@/types/resolved';
 import type { Grant } from '@/types/grants';
 import type { SourceTag } from '@/types/sources';
 import type { FightingStyleId } from '@/lib/dnd-helpers';
+import { getLogger } from '@/lib/logger';
+
+const logger = getLogger('use-all-choice-grants');
 
 /**
  * Context passed to `collectChoiceGrantsFromGrants` to enable cross-bundle
@@ -120,7 +123,7 @@ export function collectChoiceGrantsFromGrants(
           });
           for (const id of validWeaponIds) alreadyClaimedMasteries.add(id);
         } else {
-          console.warn(
+          logger.warn(
             'collectChoiceGrantsFromGrants: weapon-mastery-choice grant skipped — alreadyClaimedMasteries context not provided'
           );
         }
@@ -223,7 +226,7 @@ export function collectChoiceGrantsFromGrants(
             from: grant.from,
           });
         } else {
-          console.warn(
+          logger.warn(
             `collectChoiceGrantsFromGrants: unhandled proficiency-choice category "${grant.category}" — no PendingChoice emitted`
           );
         }
