@@ -69,6 +69,8 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           {
             type: 'weapon-mastery-choice',
             key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 0),
+            // 2024 PHB: Barbarian may only master Simple or Martial melee weapons (#290).
+            range: 'melee',
             count: 2,
           },
           {
@@ -105,6 +107,8 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           {
             type: 'weapon-mastery-choice',
             key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 1),
+            // 2024 PHB: Barbarian may only master Simple or Martial melee weapons (#290).
+            range: 'melee',
             count: 1,
           },
         ],
@@ -129,6 +133,8 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           {
             type: 'weapon-mastery-choice',
             key: createChoiceKey('weapon-mastery-choice', 'class', 'barbarian', 2),
+            // 2024 PHB: Barbarian may only master Simple or Martial melee weapons (#290).
+            range: 'melee',
             count: 1,
           },
         ],

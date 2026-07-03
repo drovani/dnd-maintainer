@@ -11,7 +11,7 @@ import type {
   SpeciesId,
 } from '@/lib/dnd-helpers';
 import type { ChoiceKey } from '@/types/choices';
-import type { BundleCategory } from '@/types/items';
+import type { BundleCategory, WeaponRange } from '@/types/items';
 import type { FeatCategory } from '@/types/sources';
 import type { SpellDef } from '@/types/spells';
 
@@ -248,6 +248,10 @@ export interface WeaponMasteryChoiceGrant {
   readonly type: 'weapon-mastery-choice';
   readonly key: ChoiceKey;
   readonly count: number;
+  // Optional weapon-range restriction. When set, eligible weapons are limited to those with the
+  // given range. The Barbarian may only choose masteries of Simple or Martial *melee* weapons
+  // (`range: 'melee'`), #290. When omitted, weapons of any range are eligible (e.g. Fighter).
+  readonly range?: WeaponRange;
 }
 
 export interface DamageTypeChoiceGrant {
