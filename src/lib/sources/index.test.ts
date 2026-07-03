@@ -100,8 +100,8 @@ describe('getBackgroundSource', () => {
     const source = getBackgroundSource('soldier' as BackgroundId);
     expect(source).toBeDefined();
     expect(source?.id).toBe('soldier');
-    // 1 asi + 2 skill + 1 tool-choice + 1 language-choice + 1 feat = 6
-    expect(source?.grants).toHaveLength(6);
+    // 1 asi + 2 skill + 1 tool-choice + 1 feat = 5 (2024 backgrounds grant no languages, #287)
+    expect(source?.grants).toHaveLength(5);
   });
 });
 
