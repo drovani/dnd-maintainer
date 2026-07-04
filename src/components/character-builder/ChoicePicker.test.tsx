@@ -778,3 +778,54 @@ describe('ChoicePicker saving-throw-choice', () => {
     expect(onClear).toHaveBeenCalledWith(SAVE_CHOICE.choiceKey);
   });
 });
+
+// ---------------------------------------------------------------------------
+// ChoicePicker — lineage-choice branch (Dragonborn table, #292)
+// ---------------------------------------------------------------------------
+
+const DRAGONBORN_LINEAGE_CHOICE: PendingChoice & { type: 'lineage-choice' } = {
+  type: 'lineage-choice',
+  choiceKey: 'lineage-choice:species:dragonborn:0' as ChoiceKey,
+  source: { origin: 'species', id: 'dragonborn' },
+  speciesId: 'dragonborn',
+  from: ['chromatic-black', 'metallic-gold'],
+};
+
+describe('ChoicePicker lineage-choice (Dragonborn table)', () => {
+  it('renders a table (not a flat radio list) for Dragonborn', () => {
+    render(
+      <ChoicePicker choice={DRAGONBORN_LINEAGE_CHOICE} currentDecision={undefined} onDecide={vi.fn()} onClear={vi.fn()} />
+    );
+    expect(screen.getByRole('table')).toBeTruthy();
+    // damage-type cells present (segment-returning mock yields the damageTypes.<id> tail)
+    expect(screen.getByText('acid')).toBeTruthy(); // chromatic-black
+    expect(screen.getByText('fire')).toBeTruthy(); // metallic-gold
+  });
+
+  it('selecting a row calls onDecide with the lineageId', () => {
+    const onDecide = vi.fn();
+    render(
+      <ChoicePicker choice={DRAGONBORN_LINEAGE_CHOICE} currentDecision={undefined} onDecide={onDecide} onClear={vi.fn()} />
+    );
+    fireEvent.click(screen.getAllByRole('radio')[0]);
+    expect(onDecide).toHaveBeenCalledWith(DRAGONBORN_LINEAGE_CHOICE.choiceKey, {
+      type: 'lineage-choice',
+      lineageId: 'chromatic-black',
+    });
+  });
+
+  it('offers a clear button once a lineage is selected', () => {
+    const onClear = vi.fn();
+    const currentDecision: ChoiceDecision = { type: 'lineage-choice', lineageId: 'metallic-gold' };
+    render(
+      <ChoicePicker
+        choice={DRAGONBORN_LINEAGE_CHOICE}
+        currentDecision={currentDecision}
+        onDecide={vi.fn()}
+        onClear={onClear}
+      />
+    );
+    fireEvent.click(screen.getByText('clearSelection'));
+    expect(onClear).toHaveBeenCalledWith(DRAGONBORN_LINEAGE_CHOICE.choiceKey);
+  });
+});
