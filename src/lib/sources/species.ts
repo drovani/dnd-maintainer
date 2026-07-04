@@ -1,5 +1,5 @@
 import type { SpeciesSource } from '@/types/sources';
-import type { Grant } from '@/types/grants';
+import type { DamageTypeId, Grant } from '@/types/grants';
 import type { SpeciesId } from '@/lib/dnd-helpers';
 import { createChoiceKey } from '@/types/choices';
 
@@ -57,6 +57,16 @@ export const DRAGONBORN_LINEAGE_GRANTS: Readonly<Partial<Record<string, readonly
     { type: 'feature', feature: { id: 'dragonborn-breath-metallic-silver' } },
   ],
 } as const;
+
+// Damage type per Dragonborn lineage, derived from each lineage's `resistance` grant — the
+// single source of truth (in the 2024 PHB, a Dragonborn's Breath Weapon and Damage Resistance
+// share the ancestry's damage type). Used to render the lineage table (#292).
+export const DRAGONBORN_LINEAGE_DAMAGE: Readonly<Record<string, DamageTypeId>> = Object.fromEntries(
+  Object.entries(DRAGONBORN_LINEAGE_GRANTS).flatMap(([id, grants]) => {
+    const resistance = grants?.find((g) => g.type === 'resistance');
+    return resistance && resistance.type === 'resistance' ? [[id, resistance.damageType] as const] : [];
+  })
+);
 
 // Per-ancestry sub-grants for Goliath. Keyed by giant ancestry ID.
 export const GOLIATH_ANCESTRY_GRANTS: Readonly<Partial<Record<string, readonly Grant[]>>> = {

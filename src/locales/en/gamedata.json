@@ -2271,18 +2271,22 @@
     "pack": "Pack",
     "gear": "Gear"
   },
+  "dragonKinds": {
+    "chromatic": "Chromatic",
+    "metallic": "Metallic"
+  },
   "lineages": {
     "dragonborn": {
-      "chromatic-black": "Chromatic (Black)",
-      "chromatic-blue": "Chromatic (Blue)",
-      "chromatic-green": "Chromatic (Green)",
-      "chromatic-red": "Chromatic (Red)",
-      "chromatic-white": "Chromatic (White)",
-      "metallic-brass": "Metallic (Brass)",
-      "metallic-bronze": "Metallic (Bronze)",
-      "metallic-copper": "Metallic (Copper)",
-      "metallic-gold": "Metallic (Gold)",
-      "metallic-silver": "Metallic (Silver)"
+      "chromatic-black": "Black",
+      "chromatic-blue": "Blue",
+      "chromatic-green": "Green",
+      "chromatic-red": "Red",
+      "chromatic-white": "White",
+      "metallic-brass": "Brass",
+      "metallic-bronze": "Bronze",
+      "metallic-copper": "Copper",
+      "metallic-gold": "Gold",
+      "metallic-silver": "Silver"
     },
     "tiefling": {
       "abyssal": "Abyssal",
