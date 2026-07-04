@@ -1503,3 +1503,57 @@ describe('Aasimar Celestial Revelation by character level (#289, #301)', () => {
     }
   });
 });
+
+// Regression for #303: Barbarian Primal Champion's fixed +4 str/+4 con (cap 24) through the real
+// collectBundles → resolveCharacter seam, not just hand-built bundles.
+describe('level-20 Barbarian: Primal Champion fixed ability-score increases (#303)', () => {
+  const level20BarbarianBuild: CharacterBuild = {
+    speciesId: 'human' as SpeciesId,
+    backgroundId: 'soldier' as BackgroundId,
+    // Already at the normal cap so the raised max is the only thing that can move the total further.
+    baseAbilities: { str: 20, dex: 10, con: 20, int: 10, wis: 10, cha: 10 },
+    abilityMethod: 'standard-array',
+    levels: Array.from({ length: 20 }, (_, i) => ({
+      classId: 'barbarian' as ClassId,
+      classLevel: i + 1,
+      hpRoll: i === 0 ? null : 7,
+    })),
+    choices: {},
+    feats: [],
+    activeItems: [],
+  };
+
+  it('collectBundles includes the two ability-score-increase grants sourced from barbarian level 20', () => {
+    const { bundles } = collectBundles(level20BarbarianBuild);
+    const barbarianL20Bundle = bundles.find(
+      (b) => b.source.origin === 'class' && b.source.id === 'barbarian' && b.source.level === 20
+    );
+    expect(barbarianL20Bundle).toBeDefined();
+    const increaseGrants = barbarianL20Bundle?.grants.filter((g) => g.type === 'ability-score-increase') ?? [];
+    expect(increaseGrants).toHaveLength(2);
+    for (const grant of increaseGrants) {
+      if (grant.type === 'ability-score-increase') {
+        expect(grant.amount).toBe(4);
+        expect(grant.max).toBe(24);
+      }
+    }
+    const abilities = increaseGrants.map((g) => (g.type === 'ability-score-increase' ? g.ability : null));
+    expect(abilities).toContain('str');
+    expect(abilities).toContain('con');
+  });
+
+  it('resolveCharacter reflects the raised cap: str/con reach 24, dex stays unaffected', () => {
+    const { bundles, expandedFeats } = collectBundles(level20BarbarianBuild);
+    const result = resolveCharacter({
+      baseAbilities: level20BarbarianBuild.baseAbilities,
+      level: level20BarbarianBuild.levels.length,
+      bundles,
+      choices: level20BarbarianBuild.choices,
+      levels: level20BarbarianBuild.levels,
+      expandedFeats,
+    });
+    expect(result.abilities.str.total).toBe(24); // base 20 + 4, raised cap 24
+    expect(result.abilities.con.total).toBe(24); // base 20 + 4, raised cap 24
+    expect(result.abilities.dex.total).toBe(10); // unaffected
+  });
+});

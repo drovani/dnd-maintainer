@@ -534,5 +534,22 @@ describe('resolveAbilities', () => {
       expect(result.str.bonuses[0].value).toBe(4);
       expect(result.str.bonuses[0].source).toEqual(source);
     });
+
+    it('two increases on the same ability sum additively and use the higher of the two caps', () => {
+      const highBase = { ...BASE, str: 20 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'item', id: 'test-increase-source-1' },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 2, max: 22 }],
+        },
+        {
+          source: { origin: 'item', id: 'test-increase-source-2' },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const result = resolveAbilities(highBase, bundles, NO_CHOICES);
+      // raw 20 + 2 + 4 = 26, clamped to the higher of the two caps (24), not the lower (22)
+      expect(result.str.total).toBe(24);
+    });
   });
 });
