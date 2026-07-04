@@ -168,7 +168,10 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
   }
 
   // Unresolved or invalid ASI grants
-  for (const { grant, source } of collectGrantsByType(bundles, 'asi')) {
+  const asiGrants = collectGrantsByType(bundles, 'asi');
+  const asiGrantKeys = new Set(asiGrants.map(({ grant }) => grant.key));
+  const featChoiceGrantKeys = new Set(collectGrantsByType(bundles, 'feat-choice').map(({ grant }) => grant.key));
+  for (const { grant, source } of asiGrants) {
     const decision = choices[grant.key];
     const totalAllocated =
       decision?.type === 'asi' ? Object.values(decision.allocation).reduce((sum, v) => sum + (v ?? 0), 0) : 0;
@@ -183,11 +186,18 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       return true;
     })();
     if (!isValid) {
-      // Either-or suppression: if the companion feat-choice is satisfied, skip ASI pending
+      // Either-or suppression: if the companion feat-choice grant exists AND is satisfied,
+      // skip ASI pending. Guard on the grant's presence, not just the choices map — a
+      // persisted decision at this key may be stale from before a source data change that
+      // removed the companion grant (#302), so a satisfied-looking decision without a live
+      // companion grant must never suppress this pending choice.
       const parsed = parseChoiceKey(grant.key);
       const companionFeatKey = createChoiceKey('feat-choice', parsed.origin, parsed.id, parsed.index);
       const companionFeatDecision = choices[companionFeatKey];
-      const featSatisfied = companionFeatDecision?.type === 'feat-choice' && companionFeatDecision.featId.length > 0;
+      const featSatisfied =
+        featChoiceGrantKeys.has(companionFeatKey) &&
+        companionFeatDecision?.type === 'feat-choice' &&
+        companionFeatDecision.featId.length > 0;
       if (!featSatisfied) {
         pendingChoices.push({
           type: 'asi',
@@ -204,7 +214,9 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
       const companionFeatKey = createChoiceKey('feat-choice', parsed.origin, parsed.id, parsed.index);
       const companionFeatDecision = choices[companionFeatKey];
       const featAlsoSatisfied =
-        companionFeatDecision?.type === 'feat-choice' && companionFeatDecision.featId.length > 0;
+        featChoiceGrantKeys.has(companionFeatKey) &&
+        companionFeatDecision?.type === 'feat-choice' &&
+        companionFeatDecision.featId.length > 0;
       if (featAlsoSatisfied) {
         logger.warn(
           `BUG: both ASI "${grant.key}" and feat-choice "${companionFeatKey}" are satisfied for the same origin — this should never happen`
@@ -358,11 +370,16 @@ export function resolveCharacter(input: ResolverInput): ResolvedCharacter {
     const decision = choices[grant.key];
     const resolvedFeat = decision?.type === 'feat-choice' ? getFeatSource(decision.featId) : undefined;
     if (!decision || decision.type !== 'feat-choice' || !resolvedFeat) {
-      // Either-or suppression: if the companion ASI is satisfied, skip feat-choice pending
+      // Either-or suppression: if the companion ASI grant exists AND is satisfied, skip
+      // feat-choice pending. Guard on the grant's presence, not just the choices map — a
+      // persisted decision at this key may be stale from before a source data change that
+      // removed the companion grant (#302), so a satisfied-looking decision without a live
+      // companion grant must never suppress this pending choice.
       const parsed = parseChoiceKey(grant.key);
       const companionAsiKey = createChoiceKey('asi', parsed.origin, parsed.id, parsed.index);
       const companionAsiDecision = choices[companionAsiKey];
       const asiSatisfied =
+        asiGrantKeys.has(companionAsiKey) &&
         companionAsiDecision?.type === 'asi' &&
         Object.values(companionAsiDecision.allocation).reduce((sum, v) => sum + (v ?? 0), 0) > 0;
       if (!asiSatisfied) {

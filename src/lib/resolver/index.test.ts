@@ -571,6 +571,30 @@ describe('Resolver either-or ASI ↔ feat-choice suppression', () => {
     const featPending = result.pendingChoices.find((c) => c.type === 'feat-choice');
     expect(featPending).toBeDefined();
   });
+
+  // Regression for #302: cleric/druid/sorcerer/warlock/wizard's L19 Epic Boon
+  // feat-choice reuses the index-4 key that used to belong to a paired ASI
+  // grant. A character persisted before the fix could still carry a satisfied
+  // 'asi:class:cleric:4' decision even though the bundle no longer grants an
+  // ASI at that key — the either-or suppression must not key off a stale
+  // choices-map entry when there is no companion asi *grant* in the bundle.
+  it('does NOT suppress a solo epicBoon feat-choice via a stale companion ASI decision', () => {
+    const soloFeatKey = createChoiceKey('feat-choice', 'class', 'cleric', 4);
+    const staleAsiKey = createChoiceKey('asi', 'class', 'cleric', 4);
+    const bundlesWithSoloFeatChoice: readonly GrantBundle[] = [
+      {
+        source: { origin: 'class', id: 'cleric', level: 19 },
+        grants: [{ type: 'feat-choice', key: soloFeatKey, from: null, category: 'epicBoon' }],
+      },
+    ];
+    const result = resolveCharacter({
+      ...baseInput,
+      bundles: bundlesWithSoloFeatChoice,
+      choices: { [staleAsiKey]: { type: 'asi', allocation: { str: 2 } } as const },
+    });
+    const featPending = result.pendingChoices.find((c) => c.type === 'feat-choice' && c.choiceKey === soloFeatKey);
+    expect(featPending).toMatchObject({ category: 'epicBoon' });
+  });
 });
 
 describe('Human Fighter L1 equipment integration', () => {

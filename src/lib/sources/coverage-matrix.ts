@@ -22,6 +22,7 @@
 import { CLASS_SOURCES, SPECIES_SOURCES, BACKGROUND_SOURCES, SUBCLASS_SOURCES } from '@/lib/sources';
 import { SUBCLASS_IDS_BY_CLASS } from '@/lib/sources/subclasses';
 import { DND_CLASSES, DND_SPECIES, DND_BACKGROUNDS } from '@/lib/dnd-helpers';
+import type { LevelUp } from '@/types/sources';
 
 export type EntryStatus = 'missing' | 'stub' | 'partial' | 'complete';
 
@@ -120,6 +121,19 @@ function missingLevels(have: readonly number[], expected: readonly number[]): nu
   return expected.filter((lv) => !set.has(lv));
 }
 
+/**
+ * True when the class's level-19 slot ({@link EPIC_BOON_LEVEL}) carries a solo
+ * feat-choice grant with category 'epicBoon' — the only shape the 2024 rules
+ * allow there. Exported standalone (rather than inlined in
+ * {@link computeClassCoverage}) so the detector can be unit-tested directly
+ * against synthetic level arrays, independent of the real CLASS_SOURCES data.
+ */
+export function hasL19EpicBoonGrant(levels: readonly LevelUp[]): boolean {
+  return (levels[EPIC_BOON_LEVEL - 1]?.grants ?? []).some(
+    (g) => g.type === 'feat-choice' && g.category === 'epicBoon'
+  );
+}
+
 export function computeClassCoverage(): ForkCoverage {
   const sourceById = new Map(CLASS_SOURCES.map((c) => [c.id, c]));
   const entries: CoverageEntry[] = DND_CLASSES.map((c) => {
@@ -140,10 +154,7 @@ export function computeClassCoverage(): ForkCoverage {
 
     // Level 19 is the Epic Boon slot in 2024: every class must carry a solo
     // feat-choice grant with category 'epicBoon' there — there is no ASI alternative.
-    const hasL19EpicBoon = (src.levels[EPIC_BOON_LEVEL - 1]?.grants ?? []).some(
-      (g) => g.type === 'feat-choice' && g.category === 'epicBoon'
-    );
-    if (!hasL19EpicBoon) problems.push(`missing Epic Boon feat-choice at level ${EPIC_BOON_LEVEL}`);
+    if (!hasL19EpicBoonGrant(src.levels)) problems.push(`missing Epic Boon feat-choice at level ${EPIC_BOON_LEVEL}`);
 
     const status: EntryStatus = problems.length === 0 ? 'complete' : 'partial';
     return {
