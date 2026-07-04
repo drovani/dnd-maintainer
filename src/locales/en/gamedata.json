@@ -813,7 +813,7 @@
     },
     "collegeglamour-mantle-of-inspiration": {
       "name": "Mantle of Inspiration",
-      "description": "As a Bonus Action, you expend one use of your Bardic Inspiration and choose a number of creatures within 60 feet equal to your CHA modifier (minimum 1). Each creature gains Temporary Hit Points equal to your Bardic Inspiration die roll, plus a free Reaction to move up to their speed without provoking Opportunity Attacks."
+      "description": "As a Bonus Action, you expend one use of your Bardic Inspiration and choose a number of creatures within 60 feet equal to your Charisma modifier (minimum 1). Each creature gains Temporary Hit Points equal to twice the number rolled on your Bardic Inspiration die, and can immediately use its Reaction to move up to its Speed without provoking Opportunity Attacks."
     },
     "collegeglamour-enthralling-performance": {
       "name": "Enthralling Performance",
@@ -821,7 +821,7 @@
     },
     "collegeglamour-mantle-of-majesty": {
       "name": "Mantle of Majesty",
-      "description": "As a Bonus Action, you cast Command on yourself without expending a spell slot, and it requires no Concentration. For 1 minute, you can cast Command as a Bonus Action on each of your turns without expending a spell slot, and the targets are automatically charmed by you for the duration. Once you use this feature, you can't use it again until you finish a Long Rest, unless you expend a spell slot of 3rd level or higher to use it again."
+      "description": "You always have the Command spell prepared. As a Bonus Action, you cast Command without expending a spell slot to start the effect, which lasts up to 1 minute and requires Concentration. During that time, you can cast Command as a Bonus Action on each of your turns without a spell slot, and any creature Charmed by you automatically fails its saving throw against these castings. Once you use this feature, you can't use it again until you finish a Long Rest, unless you expend a level 3+ spell slot to use it again."
     },
     "collegelore-cutting-words": {
       "name": "Cutting Words",
@@ -837,7 +837,7 @@
     },
     "collegevalor-extra-attack": {
       "name": "Extra Attack",
-      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+      "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn. You can also replace one of those attacks with a casting of a cantrip that has a casting time of an action."
     },
     "human-resourceful": {
       "name": "Resourceful",
@@ -1165,23 +1165,23 @@
     },
     "bard-font-of-inspiration": {
       "name": "Font of Inspiration",
-      "description": "You regain all of your expended uses of Bardic Inspiration when you finish a short or long rest."
+      "description": "You regain all of your expended uses of Bardic Inspiration when you finish a Short or Long Rest. In addition, you can expend a spell slot (no action required) to regain one expended use of Bardic Inspiration."
     },
     "bard-countercharm": {
       "name": "Countercharm",
-      "description": "You gain the ability to use musical notes or words of power to disrupt mind-influencing effects."
+      "description": "As a Reaction when a creature you can see within 30 feet of you (including yourself) fails a saving throw against being Frightened or Charmed, you can cause that creature to reroll the save with Advantage."
     },
     "bard-magical-secrets": {
       "name": "Magical Secrets",
-      "description": "You have plundered magical knowledge from a wide spectrum of disciplines. Choose two spells from any classes."
+      "description": "You have learned magical secrets from many traditions. Whenever you gain or change your prepared spells, you can choose the spells from the Bard, Cleric, Druid, and Wizard spell lists (in addition to the Bard list). Any spell you prepare this way counts as a Bard spell for you."
     },
     "bard-superior-inspiration": {
       "name": "Superior Inspiration",
-      "description": "When you roll initiative and have no uses of Bardic Inspiration left, you regain one use."
+      "description": "When you roll Initiative, you regain expended uses of Bardic Inspiration until you have two, if you have fewer than that."
     },
     "bard-words-of-creation": {
       "name": "Words of Creation",
-      "description": "You have mastered the Words of Creation, the primordial language of the universe."
+      "description": "You have mastered two of the Words of Creation: you always have the Power Word Heal and Power Word Kill spells prepared."
     },
     "bard-epic-boon": {
       "name": "Epic Boon",
