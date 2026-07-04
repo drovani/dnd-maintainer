@@ -143,6 +143,22 @@ describe('Fighter class levels 2–10 grant structures', () => {
     }
   });
 
+  it('level 19 grants a solo Epic Boon feat-choice (index 3)', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'fighter', 3));
+      expect(grant.category).toBe('epicBoon');
+    }
+  });
+
+  it('level 20 has no grants (empty stub)', () => {
+    const level20 = source?.levels[19];
+    expect(level20?.grants).toHaveLength(0);
+  });
+
   it('still has 20 levels total', () => {
     expect(source?.levels).toHaveLength(20);
   });
@@ -274,9 +290,21 @@ describe('Rogue class grant structures', () => {
     }
   });
 
-  it('levels 11–20 are EMPTY_LEVEL', () => {
+  it('levels 11–18 and 20 are EMPTY_LEVEL', () => {
     for (let i = 10; i < 20; i++) {
+      if (i === 18) continue;
       expect(source?.levels[i].grants).toHaveLength(0);
+    }
+  });
+
+  it('level 19 grants a solo Epic Boon feat-choice (index 3)', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'rogue', 3));
+      expect(grant.category).toBe('epicBoon');
     }
   });
 
@@ -462,6 +490,17 @@ describe('Barbarian class grant structures', () => {
     }
   });
 
+  it('level 19 grants a solo Epic Boon feat-choice (index 4)', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'barbarian', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+  });
+
   it('level 20 has primal-champion feature', () => {
     const grant = source?.levels[19].grants.find((g) => g.type === 'feature');
     expect(grant?.type).toBe('feature');
@@ -561,6 +600,21 @@ describe('Bard class grant structures', () => {
       }
     });
   });
+
+  it('level 19 grants a solo Epic Boon feat-choice (index 4)', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'bard', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+  });
+
+  it('level 20 has no grants (empty stub)', () => {
+    expect(source?.levels[19].grants).toHaveLength(0);
+  });
 });
 
 describe('Cleric class grant structures', () => {
@@ -626,6 +680,18 @@ describe('Cleric class grant structures', () => {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'cleric', 0));
       expect(grant.points).toBe(2);
     }
+  });
+
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'cleric', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
   });
 
   it('level 20 has greater-divine-intervention feature', () => {
@@ -741,6 +807,18 @@ describe('Druid class grant structures', () => {
     expect(featureIds).toContain('druid-improved-elemental-fury');
   });
 
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'druid', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
+  });
+
   it('level 20 has archdruid feature', () => {
     const featureIds = source?.levels[19].grants
       .filter((g) => g.type === 'feature')
@@ -814,11 +892,20 @@ describe('Monk class grant structures', () => {
     expect(featureIds).toContain('monk-slow-fall');
   });
 
-  it('level 20 has epic-boon feature', () => {
-    const featureIds = source?.levels[19].grants
-      .filter((g) => g.type === 'feature')
-      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
-    expect(featureIds).toContain('monk-epic-boon');
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'monk', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
+  });
+
+  it('level 20 has no grants (empty stub)', () => {
+    expect(source?.levels[19].grants).toHaveLength(0);
   });
 });
 
@@ -887,11 +974,20 @@ describe('Paladin class grant structures', () => {
     expect(featureIds).toContain('paladin-aura-of-protection');
   });
 
-  it('level 20 has epic-boon feature', () => {
-    const featureIds = source?.levels[19].grants
-      .filter((g) => g.type === 'feature')
-      .map((g) => (g.type === 'feature' ? g.feature.id : ''));
-    expect(featureIds).toContain('paladin-epic-boon');
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'paladin', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
+  });
+
+  it('level 20 has no grants (empty stub)', () => {
+    expect(source?.levels[19].grants).toHaveLength(0);
   });
 });
 
@@ -981,6 +1077,22 @@ describe('Ranger class grant structures', () => {
       ])
     );
   });
+
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'ranger', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
+  });
+
+  it('level 20 has no grants (empty stub)', () => {
+    expect(source?.levels[19].grants).toHaveLength(0);
+  });
 });
 
 describe('Sorcerer class grant structures', () => {
@@ -1029,6 +1141,18 @@ describe('Sorcerer class grant structures', () => {
       expect(grant.key).toBe(createChoiceKey('asi', 'class', 'sorcerer', 0));
       expect(grant.points).toBe(2);
     }
+  });
+
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'sorcerer', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
   });
 
   it('level 20 has sorcerous-restoration feature', () => {
@@ -1109,6 +1233,18 @@ describe('Warlock class grant structures', () => {
     expect(featureIds).toContain('warlock-mystic-arcanum-6');
   });
 
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'warlock', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
+  });
+
   it('level 20 has eldritch-master feature', () => {
     const featureIds = source?.levels[19].grants
       .filter((g) => g.type === 'feature')
@@ -1170,6 +1306,18 @@ describe('Wizard class grant structures', () => {
       .filter((g) => g.type === 'feature')
       .map((g) => (g.type === 'feature' ? g.feature.id : ''));
     expect(featureIds).toContain('wizard-spell-mastery');
+  });
+
+  it('level 19 grants a solo Epic Boon feat-choice (index 4) and no ASI', () => {
+    const level19 = source?.levels[18];
+    expect(level19?.grants).toHaveLength(1);
+    const grant = level19?.grants[0];
+    expect(grant?.type).toBe('feat-choice');
+    if (grant?.type === 'feat-choice') {
+      expect(grant.key).toBe(createChoiceKey('feat-choice', 'class', 'wizard', 4));
+      expect(grant.category).toBe('epicBoon');
+    }
+    expect(level19?.grants.find((g) => g.type === 'asi')).toBeUndefined();
   });
 
   it('level 20 has signature-spells feature', () => {

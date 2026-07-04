@@ -79,11 +79,12 @@ export const SUBCLASS_MILESTONES_BY_CLASS: Readonly<Record<string, readonly numb
  * 2024 PHB Ability Score Improvement levels common to every class. Level 19 is
  * NOT here: in the 2024 rules every class gains an Epic Boon at level 19 instead
  * of a regular ASI ({@link EPIC_BOON_LEVEL}), so that slot is checked separately
- * and accepts either grant shape.
+ * and requires a `feat-choice` grant with `category: 'epicBoon'` — there is no
+ * ASI alternative.
  */
 export const EXPECTED_ASI_LEVELS: readonly number[] = [4, 8, 12, 16] as const;
 
-/** 2024 PHB level at which every class gains an Epic Boon feat in place of an ASI. */
+/** 2024 PHB level at which every class gains an Epic Boon feat-choice in place of an ASI. */
 export const EPIC_BOON_LEVEL = 19 as const;
 
 /**
@@ -137,25 +138,18 @@ export function computeClassCoverage(): ForkCoverage {
     const missingAsi = missingLevels(asiLevels, EXPECTED_ASI_LEVELS);
     if (missingAsi.length > 0) problems.push(`missing ASI at level(s) ${missingAsi.join(', ')}`);
 
-    // Level 19 is the Epic Boon slot in 2024: accept either an ASI grant or an
-    // Epic Boon feature (id ending `-epic-boon`) / epic-boon feat grant. Most class
-    // tables still model it as a plain ASI; only those carrying an actual epic-boon
-    // grant are reported as "Epic Boon@19" so the matrix doesn't overstate coverage.
+    // Level 19 is the Epic Boon slot in 2024: every class must carry a solo
+    // feat-choice grant with category 'epicBoon' there — there is no ASI alternative.
     const hasL19EpicBoon = (src.levels[EPIC_BOON_LEVEL - 1]?.grants ?? []).some(
-      (g) =>
-        (g.type === 'feature' && g.feature.id.endsWith('-epic-boon')) ||
-        (g.type === 'feat' && g.featId.endsWith('-epic-boon'))
+      (g) => g.type === 'feat-choice' && g.category === 'epicBoon'
     );
-    // Reuse the asiLevels scan above rather than re-detecting an ASI grant at level 19.
-    const hasL19Asi = asiLevels.includes(EPIC_BOON_LEVEL);
-    if (!hasL19EpicBoon && !hasL19Asi) problems.push(`missing ASI or Epic Boon at level ${EPIC_BOON_LEVEL}`);
-    const l19Label = hasL19EpicBoon ? 'Epic Boon@19' : 'ASI@19';
+    if (!hasL19EpicBoon) problems.push(`missing Epic Boon feat-choice at level ${EPIC_BOON_LEVEL}`);
 
     const status: EntryStatus = problems.length === 0 ? 'complete' : 'partial';
     return {
       id: c.id,
       status,
-      detail: problems.length === 0 ? `20 levels, subclass@3, ASI@4/8/12/16, ${l19Label}` : problems.join('; '),
+      detail: problems.length === 0 ? '20 levels, subclass@3, ASI@4/8/12/16, Epic Boon@19' : problems.join('; '),
       goldenVerified: GOLDEN_VERIFIED.has(c.id),
     };
   });

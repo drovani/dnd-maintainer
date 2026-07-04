@@ -1768,7 +1768,7 @@ describe('Weapon mastery resolver', () => {
     expect(ragePool).toMatchObject({ max: 3, regen: 'long-rest' });
   });
 
-  it('L19 Barbarian gains an Epic Boon feature and only four ASIs (no spurious 5th)', () => {
+  it('L19 Barbarian gains an Epic Boon feat-choice and only four ASIs (no spurious 5th)', () => {
     const levels = Array.from({ length: 19 }, (_, i) => ({
       classId: 'barbarian' as ClassId,
       classLevel: i + 1,
@@ -1792,7 +1792,10 @@ describe('Weapon mastery resolver', () => {
       choices: barbarianL19Build.choices,
       levels: barbarianL19Build.levels,
     });
-    expect(result.features.map((f) => f.feature.id)).toContain('barbarian-epic-boon');
+    const epicBoonChoice = result.pendingChoices.find(
+      (c) => c.type === 'feat-choice' && c.choiceKey === 'feat-choice:class:barbarian:4'
+    );
+    expect(epicBoonChoice).toMatchObject({ category: 'epicBoon' });
     const asiKeys = result.pendingChoices.filter((c) => c.type === 'asi').map((c) => c.choiceKey);
     // Four class ASIs (L4/8/12/16) — the old L19 ASI is now the Epic Boon.
     expect(asiKeys).toContain('asi:class:barbarian:3');
