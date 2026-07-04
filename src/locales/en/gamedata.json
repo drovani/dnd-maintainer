@@ -1169,7 +1169,7 @@
     },
     "bard-countercharm": {
       "name": "Countercharm",
-      "description": "As a Reaction when a creature you can see within 30 feet of you (including yourself) fails a saving throw against being Frightened or Charmed, you can cause that creature to reroll the save with Advantage."
+      "description": "As a Reaction when a creature within 30 feet of you (including yourself) fails a saving throw against being Frightened or Charmed, you can cause that creature to reroll the save with Advantage."
     },
     "bard-magical-secrets": {
       "name": "Magical Secrets",
