@@ -169,7 +169,12 @@
       "featureChoice": "Choose an option",
       "unsupported": "Choice not yet supported: {{type}}",
       "remaining": "remaining",
-      "fromSource": "from {{source}}"
+      "fromSource": "from {{source}}",
+      "lineageTable": {
+        "dragon": "Dragon",
+        "damageType": "Damage Type",
+        "kind": "Kind"
+      }
     },
     "finalizeBlockers": {
       "title": "Before you can finalize:",

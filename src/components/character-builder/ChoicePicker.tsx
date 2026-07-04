@@ -25,6 +25,7 @@ import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { BundleSlot, ItemDef, SlotFilter } from '@/types/items';
 import type { PendingChoice } from '@/types/resolved';
 import { getGrantIcon } from '@/lib/class-icons';
+import { DragonbornLineageTable } from './DragonbornLineageTable';
 import type { TFunction } from 'i18next';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -279,6 +280,25 @@ export function ChoicePicker({
   if (choice.type === 'lineage-choice') {
     const { speciesId, from } = choice;
     const currentLineageId = currentDecision?.type === 'lineage-choice' ? currentDecision.lineageId : undefined;
+
+    // Dragonborn: render the color / damage type / kind table (#292), consistent with the builder.
+    if (speciesId === 'dragonborn') {
+      return (
+        <div className="space-y-2">
+          <DragonbornLineageTable
+            choiceKey={choice.choiceKey}
+            from={from}
+            currentLineageId={currentLineageId}
+            onSelect={(lineageId) => onDecide(choice.choiceKey, { type: 'lineage-choice', lineageId })}
+          />
+          {currentLineageId !== undefined && (
+            <Button variant="ghost" size="sm" onClick={() => onClear(choice.choiceKey)}>
+              {tc('characterBuilder.equipment.clearSelection')}
+            </Button>
+          )}
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-2">

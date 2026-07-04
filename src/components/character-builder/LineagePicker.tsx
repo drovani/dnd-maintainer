@@ -5,7 +5,9 @@ import type { ChoiceDecision, ChoiceKey } from '@/types/choices';
 import type { PendingChoice } from '@/types/resolved';
 import type { GrantBundle } from '@/types/sources';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 import { ChoicePicker } from './ChoicePicker';
+import { DragonbornLineageTable } from './DragonbornLineageTable';
 
 interface LineagePickerProps {
   readonly race: SpeciesId;
@@ -29,6 +31,29 @@ export function LineagePicker({ race, bundles, build, makeChoice, clearChoice }:
     return <p className="text-sm text-muted-foreground">{tc('characterBuilder.hints.loadingLineage')}</p>;
   }
 
+  const decision = build?.choices[lineageTag.grant.key];
+  const currentLineageId = decision?.type === 'lineage-choice' ? decision.lineageId : undefined;
+
+  // Dragonborn: render a table of dragon color / damage type / kind (#292).
+  if (race === 'dragonborn') {
+    return (
+      <div className="space-y-2">
+        <DragonbornLineageTable
+          choiceKey={lineageTag.grant.key}
+          from={lineageTag.grant.from}
+          currentLineageId={currentLineageId}
+          onSelect={(lineageId) => makeChoice(lineageTag.grant.key, { type: 'lineage-choice', lineageId })}
+        />
+        {currentLineageId !== undefined && (
+          <Button variant="ghost" size="sm" onClick={() => clearChoice(lineageTag.grant.key)}>
+            {tc('characterBuilder.equipment.clearSelection')}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // Other species: flat radio list via the shared ChoicePicker.
   const lineageChoice: PendingChoice & { type: 'lineage-choice' } = {
     type: 'lineage-choice',
     choiceKey: lineageTag.grant.key,
@@ -36,7 +61,6 @@ export function LineagePicker({ race, bundles, build, makeChoice, clearChoice }:
     speciesId: race,
     from: lineageTag.grant.from,
   };
-  const decision = build?.choices[lineageTag.grant.key];
 
   return (
     <div className="mt-2">

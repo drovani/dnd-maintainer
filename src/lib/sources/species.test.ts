@@ -3,6 +3,7 @@ import { getSpeciesSource } from '@/lib/sources';
 import {
   SPECIES_SOURCES,
   DRAGONBORN_LINEAGE_GRANTS,
+  DRAGONBORN_LINEAGE_DAMAGE,
   GOLIATH_ANCESTRY_GRANTS,
   TIEFLING_LINEAGE_GRANTS,
   ELF_LINEAGE_GRANTS,
@@ -473,6 +474,30 @@ describe('Dragonborn species source (2024 PHB)', () => {
       expect(features).toHaveLength(2);
       const featureIds = features.map((g) => g.type === 'feature' && g.feature.id);
       expect(featureIds).toContain(`dragonborn-breath-${lineageId}`);
+    }
+  });
+
+  // #292: damage-type map used by the lineage table, derived from each lineage's resistance grant.
+  it('DRAGONBORN_LINEAGE_DAMAGE maps every lineage to its 2024 PHB damage type', () => {
+    expect(DRAGONBORN_LINEAGE_DAMAGE).toEqual({
+      'chromatic-black': 'acid',
+      'chromatic-blue': 'lightning',
+      'chromatic-green': 'poison',
+      'chromatic-red': 'fire',
+      'chromatic-white': 'cold',
+      'metallic-brass': 'fire',
+      'metallic-bronze': 'lightning',
+      'metallic-copper': 'acid',
+      'metallic-gold': 'fire',
+      'metallic-silver': 'cold',
+    });
+  });
+
+  it('DRAGONBORN_LINEAGE_DAMAGE damage type matches each lineage resistance grant', () => {
+    for (const [lineageId, grants] of Object.entries(DRAGONBORN_LINEAGE_GRANTS)) {
+      const resistance = grants!.find((g) => g.type === 'resistance');
+      const damageType = resistance?.type === 'resistance' ? resistance.damageType : undefined;
+      expect(DRAGONBORN_LINEAGE_DAMAGE[lineageId]).toBe(damageType);
     }
   });
 
