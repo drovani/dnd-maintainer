@@ -1197,11 +1197,11 @@
     },
     "cleric-channel-divinity": {
       "name": "Channel Divinity",
-      "description": "You gain the ability to channel divine energy directly from your deity, using that energy to fuel magical effects."
+      "description": "You can channel divine energy to fuel magical effects, choosing an option each time you use it. Divine Spark: as a Magic action, point your Holy Symbol at a creature within 30 feet and roll a d8 (plus another d8 at Cleric levels 7, 13, and 18); either restore Hit Points equal to the roll + your Wisdom modifier, or force a Constitution save for Radiant or Necrotic damage (your choice) equal to the roll + your Wisdom modifier, taking half on a success. Turn Undead: as a Magic action, present your Holy Symbol and each Undead of your choice within 30 feet that can see or hear you must make a Wisdom save or be Frightened and Incapacitated for 1 minute, moving as far from you as it can each turn; the effect ends on a creature if it takes damage or if you're Incapacitated or die. You regain one expended use on a Short Rest and all uses on a Long Rest."
     },
     "cleric-smite-undead": {
-      "name": "Smite Undead",
-      "description": "You can cause your Turn Undead feature to smite the undead. When you use Turn Undead, you can expend a spell slot to deal Radiant damage to undead that fail their saving throws."
+      "name": "Sear Undead",
+      "description": "When you use Turn Undead, you can roll a number of d8s equal to your Wisdom modifier (minimum 1) and deal that much Radiant damage to each Undead that fails its saving throw, without ending the Turn Undead effect."
     },
     "cleric-blessed-strikes-divine-strike": {
       "name": "Blessed Strikes: Divine Strike",
@@ -1213,7 +1213,7 @@
     },
     "cleric-divine-intervention": {
       "name": "Divine Intervention",
-      "description": "You can call on your deity to intervene on your behalf. As an action, describe the assistance you seek, and roll percentile dice."
+      "description": "Once per Long Rest, as a Magic action, you can cast any Cleric spell of level 5 or lower that doesn't require a Reaction to cast, without expending a spell slot or providing Material components."
     },
     "cleric-channel-divinity-3": {
       "name": "Channel Divinity (3/Rest)",
@@ -1221,7 +1221,7 @@
     },
     "cleric-greater-divine-intervention": {
       "name": "Greater Divine Intervention",
-      "description": "Your Divine Intervention now always succeeds. Once you use it, you can't use it again until 2d4 days have passed."
+      "description": "You can cast the Wish spell as your Divine Intervention. If you do so, you can't use Divine Intervention again until 2d4 days have passed."
     },
     "lifedomain-domain-spells": {
       "name": "Life Domain Spells",
@@ -1253,11 +1253,11 @@
     },
     "lightdomain-radiance-of-the-dawn": {
       "name": "Radiance of the Dawn",
-      "description": "As a Magic action, you present your holy symbol and any magical darkness within 30 feet of you is dispelled. Additionally, each hostile creature within 30 feet of you must make a Constitution saving throw. A creature takes 2d10 + your Cleric level Radiant damage on a failed save, or half as much damage on a successful one. A creature that has total cover from you is not affected."
+      "description": "As a Magic action, you present your Holy Symbol, and any magical Darkness within 30 feet of you is dispelled. Additionally, each creature of your choice within 30 feet must make a Constitution saving throw, taking 2d10 + your Cleric level Radiant damage on a failed save, or half as much on a success. Total cover does not protect a creature from this effect."
     },
     "lightdomain-improved-warding-flare": {
       "name": "Improved Warding Flare",
-      "description": "You can also use your Warding Flare when a creature that you can see within 30 feet of you attacks a target other than you."
+      "description": "You regain all expended uses of Warding Flare when you finish a Short or Long Rest. In addition, when you use Warding Flare, the target of the triggering attack gains Temporary Hit Points equal to 2d6 + your Wisdom modifier."
     },
     "trickerydomain-domain-spells": {
       "name": "Trickery Domain Spells",
@@ -1269,11 +1269,11 @@
     },
     "trickerydomain-invoke-duplicity": {
       "name": "Invoke Duplicity",
-      "description": "As a Bonus Action, you create a perfect illusory duplicate of yourself in an unoccupied space you can see within 30 feet of you. The duplicate lasts for 1 minute, until you are Incapacitated, or until you end it as a Bonus Action. While the duplicate persists, you can cast spells as though you were in its space, and you and the duplicate can flank the same target."
+      "description": "As a Bonus Action, you create a perfect illusory duplicate of yourself in an unoccupied space you can see within 30 feet. It lasts 1 minute, until you're Incapacitated, or until you end it (no action required). You can cast spells as though you were in the duplicate's space, and while you and the duplicate are both within 5 feet of a creature, you have Advantage on attack rolls against that creature. As a Bonus Action, you can move the duplicate up to 30 feet to a space you can see, as long as it stays within 120 feet of you."
     },
     "trickerydomain-tricksters-transposition": {
       "name": "Trickster's Transposition",
-      "description": "Whenever you create your illusory duplicate, you can swap places with it once on each of your turns as a Bonus Action."
+      "description": "Whenever you create your illusory duplicate, and whenever you move it, you can swap places with it, teleporting to its former space. You can do this once on each of your turns as a Bonus Action."
     },
     "wardomain-domain-spells": {
       "name": "War Domain Spells",
@@ -1281,15 +1281,15 @@
     },
     "wardomain-war-priest": {
       "name": "War Priest",
-      "description": "Your deity empowers your assaults. Whenever you use the Attack action, you can make one extra weapon attack as a Bonus Action. You can use this feature a number of times equal to your Wisdom modifier (minimum once), and you regain all expended uses when you finish a Short or Long Rest."
+      "description": "As a Bonus Action, you can make one weapon attack (or an Unarmed Strike); you do not need to take the Attack action first. You can use this feature a number of times equal to your Wisdom modifier (minimum once), and you regain all expended uses when you finish a Long Rest."
     },
     "wardomain-guided-strike": {
       "name": "Guided Strike",
-      "description": "When you or a creature within 30 feet of you misses with an attack roll, you can expend one use of your Channel Divinity and give that roll a +10 bonus, potentially turning the miss into a hit. You can use this feature before or after the d20 is rolled."
+      "description": "When you or a creature within 30 feet of you misses with an attack roll, you can take a Reaction to expend one use of your Channel Divinity and give that roll a +10 bonus, potentially turning the miss into a hit. You can use this before or after the d20 is rolled."
     },
     "wardomain-war-gods-blessing": {
       "name": "War God's Blessing",
-      "description": "You can use your Reaction to expend one use of your Channel Divinity and give an attack roll made by a creature within 30 feet of you a +10 bonus. You make this choice after you see the roll but before the DM says whether it hits or misses."
+      "description": "You can cast Shield of Faith or Spiritual Weapon by expending one use of your Channel Divinity instead of a spell slot. Cast this way, the spell lasts for 1 minute without requiring Concentration, ending early only if you cast that spell again, become Incapacitated, or die."
     },
     "druid-primal-order-magician": {
       "name": "Primal Order: Magician",
