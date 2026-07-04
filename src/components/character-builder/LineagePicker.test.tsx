@@ -126,6 +126,25 @@ describe('LineagePicker — Dragonborn table (#292)', () => {
     expect(goldRadio?.checked).toBe(true);
   });
 
+  it('offers a clear button once a lineage is selected and wires it to clearChoice', () => {
+    const clearChoice = vi.fn();
+    render(
+      <LineagePicker
+        race="dragonborn"
+        bundles={dragonbornBundles()}
+        build={{
+          choices: {
+            [DRAGONBORN_LINEAGE_KEY]: { type: 'lineage-choice', lineageId: 'chromatic-red' } as ChoiceDecision,
+          },
+        }}
+        makeChoice={vi.fn()}
+        clearChoice={clearChoice}
+      />
+    );
+    fireEvent.click(screen.getByText('clearSelection'));
+    expect(clearChoice).toHaveBeenCalledWith(DRAGONBORN_LINEAGE_KEY);
+  });
+
   it('does not render a table for a non-dragonborn species (falls back to radio list)', () => {
     const elfBundles: GrantBundle[] = [
       {
