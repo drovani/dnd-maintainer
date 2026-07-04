@@ -139,6 +139,10 @@ export interface ExpertiseChoiceGrant {
 export interface FeatureGrant {
   readonly type: 'feature';
   readonly feature: FeatureDef;
+  // Optional total-character-level gate (see FeatureChoiceGrant.minCharacterLevel). Suppresses the
+  // feature until the character reaches this level — e.g. the Aasimar Celestial Revelation options
+  // are all granted at character level 3 (#301). Gated generically in collectBundles.
+  readonly minCharacterLevel?: number;
 }
 
 export type SpeedMode = 'walk' | 'fly' | 'swim' | 'climb' | 'burrow';

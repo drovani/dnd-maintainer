@@ -373,40 +373,41 @@ describe('Aasimar species source (2024 PHB)', () => {
     );
   });
 
-  it('grants darkvision, celestial-resistance, healing-hands, light-bearer features', () => {
-    const features = source?.grants.filter((g) => g.type === 'feature');
-    expect(features).toHaveLength(4);
-    const featureIds = features?.map((g) => g.type === 'feature' && g.feature.id);
-    expect(featureIds).toEqual(
-      expect.arrayContaining([
-        'aasimar-darkvision',
-        'aasimar-celestial-resistance',
-        'aasimar-healing-hands',
-        'aasimar-light-bearer',
-      ])
-    );
-  });
-
-  // Regression for #289: Celestial Revelation is a level-3 choice of three transformations,
-  // not a flat feature granted at level 1.
-  it('offers Celestial Revelation as a level-3 feature-choice with three options', () => {
-    const choice = source?.grants.find((g) => g.type === 'feature-choice');
-    expect(choice).toBeDefined();
-    if (choice?.type === 'feature-choice') {
-      expect(choice.minCharacterLevel).toBe(3);
-      expect(choice.key).toBe(createChoiceKey('feature-choice', 'species', 'aasimar', 0));
-      expect(choice.options.map((o) => o.optionId).sort()).toEqual([
-        'heavenly-wings',
-        'inner-radiance',
-        'necrotic-shroud',
-      ]);
+  it('grants the four base features ungated at level 1', () => {
+    const base = [
+      'aasimar-darkvision',
+      'aasimar-celestial-resistance',
+      'aasimar-healing-hands',
+      'aasimar-light-bearer',
+    ];
+    for (const id of base) {
+      const grant = source?.grants.find((g) => g.type === 'feature' && g.feature.id === id);
+      expect(grant, `missing base feature ${id}`).toBeDefined();
+      if (grant?.type === 'feature') {
+        expect(grant.minCharacterLevel, `${id} should not be level-gated`).toBeUndefined();
+      }
     }
   });
 
-  it('does not grant Celestial Revelation as a flat feature', () => {
-    const features = source?.grants.filter((g) => g.type === 'feature');
-    const ids = features?.map((g) => (g.type === 'feature' ? g.feature.id : ''));
-    expect(ids).not.toContain('aasimar-celestial-revelation');
+  // Regression for #289 + #301: Celestial Revelation grants ALL THREE transformations (chosen per
+  // use, not a one-time build choice), as informational features gated to character level 3 — NOT
+  // a feature-choice.
+  it('does not model Celestial Revelation as a feature-choice', () => {
+    const choice = source?.grants.find((g) => g.type === 'feature-choice');
+    expect(choice).toBeUndefined();
+  });
+
+  it('grants all three Celestial Revelation transformations (plus overview) gated at character level 3', () => {
+    const celestial = ['heavenly-wings', 'inner-radiance', 'necrotic-shroud'].map(
+      (o) => `aasimar-celestial-revelation-${o}`
+    );
+    for (const id of [...celestial, 'aasimar-celestial-revelation']) {
+      const grant = source?.grants.find((g) => g.type === 'feature' && g.feature.id === id);
+      expect(grant, `missing celestial feature ${id}`).toBeDefined();
+      if (grant?.type === 'feature') {
+        expect(grant.minCharacterLevel, `${id} should be gated to level 3`).toBe(3);
+      }
+    }
   });
 });
 

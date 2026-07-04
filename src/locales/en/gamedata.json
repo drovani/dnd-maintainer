@@ -889,7 +889,7 @@
     },
     "aasimar-celestial-revelation": {
       "name": "Celestial Revelation",
-      "description": "When you reach character level 3, choose one Celestial Revelation. You can transform as a Bonus Action, and the transformation lasts for 1 minute or until you end it (no action required). Once you transform, you can't do so again until you finish a Long Rest."
+      "description": "When you reach character level 3, you gain all three Celestial Revelation transformations below. As a Bonus Action you can transform, choosing which revelation to use each time you do so. A transformation lasts 1 minute or until you end it (no action required). Once you transform, you can't do so again until you finish a Long Rest."
     },
     "aasimar-celestial-revelation-heavenly-wings": {
       "name": "Celestial Revelation: Heavenly Wings",
