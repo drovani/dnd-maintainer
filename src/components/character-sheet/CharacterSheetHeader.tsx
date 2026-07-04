@@ -45,6 +45,22 @@ export function CharacterSheetHeader({
     return decision.type === 'lineage-choice' ? decision.lineageId : null;
   })();
 
+  // Display label for the lineage. For Dragonborn the label is just the dragon color
+  // (e.g. "Black"), so append the chromatic/metallic kind to keep that context on the
+  // sheet — the builder shows it as a separate column (#292).
+  const lineageLabel: string | null = (() => {
+    if (!lineageId || !character.species) return null;
+    const base = t(`lineages.${character.species}.${lineageId}`, { defaultValue: lineageId });
+    if (character.species === 'dragonborn') {
+      const kind = lineageId.split('-')[0];
+      const kindLabel = t(`dragonKinds.${kind}` as 'dragonKinds.chromatic' | 'dragonKinds.metallic', {
+        defaultValue: '',
+      });
+      return kindLabel ? `${base} (${kindLabel})` : base;
+    }
+    return base;
+  })();
+
   // Origin feat: derive badge info from the background source's grants.
   // deriveOriginFeatInfo handles both shapes (feat grant and direct feat-magic-initiate-* feature).
   const originFeatInfo = (() => {
@@ -125,11 +141,7 @@ export function CharacterSheetHeader({
           <p className="text-foreground font-semibold">
             {character.species ? t(`species.${character.species}`, { defaultValue: character.species }) : ''}
           </p>
-          {lineageId && character.species && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {t(`lineages.${character.species}.${lineageId}`, { defaultValue: lineageId })}
-            </p>
-          )}
+          {lineageLabel && <p className="text-xs text-muted-foreground mt-0.5">{lineageLabel}</p>}
         </div>
         <div>
           <span className="text-muted-foreground">{tc('characterSheet.fields.background')}</span>
