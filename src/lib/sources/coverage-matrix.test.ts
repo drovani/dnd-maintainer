@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { computeCoverageMatrix, renderCoverageMarkdown, type ForkCoverage } from '@/lib/sources/coverage-matrix';
+import {
+  computeCoverageMatrix,
+  renderCoverageMarkdown,
+  hasL19EpicBoonGrant,
+  type ForkCoverage,
+} from '@/lib/sources/coverage-matrix';
+import { createChoiceKey } from '@/types/choices';
+import type { LevelUp } from '@/types/sources';
 
 /**
  * Coverage gate for the 2024 PHB source data.
@@ -75,5 +82,41 @@ describe('2024 PHB coverage matrix', () => {
       }
       expect(committed, 'docs/coverage-matrix.md is stale — run `npm run coverage:matrix`').toBe(rendered);
     });
+  });
+});
+
+describe('hasL19EpicBoonGrant', () => {
+  // Synthetic level array: 18 empty levels (indices 0-17) followed by the level-19 slot
+  // (index 18) under test — computeClassCoverage isn't parameterizable with a synthetic
+  // ClassSource, so this exercises the extracted detector directly against a minimal
+  // LevelUp array instead of the full CLASS_SOURCES data.
+  function levelsWithL19(l19Grants: LevelUp['grants']): readonly LevelUp[] {
+    const emptyLevels: LevelUp[] = Array.from({ length: 18 }, () => ({ grants: [] }));
+    return [...emptyLevels, { grants: l19Grants }];
+  }
+
+  it('returns false when level 19 has only an ASI grant', () => {
+    const levels = levelsWithL19([
+      { type: 'asi', key: createChoiceKey('asi', 'class', 'cleric', 4), points: 2, from: null },
+    ]);
+    expect(hasL19EpicBoonGrant(levels)).toBe(false);
+  });
+
+  it('returns false when level 19 has a feat-choice grant with category "general"', () => {
+    const levels = levelsWithL19([
+      { type: 'feat-choice', key: createChoiceKey('feat-choice', 'class', 'cleric', 4), from: null, category: 'general' },
+    ]);
+    expect(hasL19EpicBoonGrant(levels)).toBe(false);
+  });
+
+  it('returns false when level 19 has no grants', () => {
+    expect(hasL19EpicBoonGrant(levelsWithL19([]))).toBe(false);
+  });
+
+  it('returns true when level 19 has a solo feat-choice grant with category "epicBoon"', () => {
+    const levels = levelsWithL19([
+      { type: 'feat-choice', key: createChoiceKey('feat-choice', 'class', 'cleric', 4), from: null, category: 'epicBoon' },
+    ]);
+    expect(hasL19EpicBoonGrant(levels)).toBe(true);
   });
 });
