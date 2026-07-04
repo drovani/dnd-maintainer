@@ -741,7 +741,7 @@
     },
     "berserker-frenzy": {
       "name": "Frenzy",
-      "description": "While raging, you can use a Bonus Action on each of your turns to make one melee attack with a weapon or an Unarmed Strike. When your Rage ends, you have 1 Exhaustion level."
+      "description": "If you use Reckless Attack while your Rage is active, you deal extra damage to the first target you hit on your turn with a Strength-based attack. To determine the extra damage, roll a number of d6s equal to your Rage Damage bonus and add them together. The damage has the same type as the weapon or Unarmed Strike used for the attack."
     },
     "berserker-mindless-rage": {
       "name": "Mindless Rage",
@@ -757,23 +757,23 @@
     },
     "wildheart-rage-of-the-wilds": {
       "name": "Rage of the Wilds",
-      "description": "When you activate your Rage, you choose a Beast Spirit (Bear, Eagle, Elk, Tiger, or Wolf) and gain its associated benefit for the duration of your Rage."
+      "description": "When you activate your Rage, choose one animal's benefit for the duration of the Rage: Bear — you have Resistance to every damage type except Force, Necrotic, Psychic, and Radiant; Eagle — you can take the Disengage and Dash actions as a Bonus Action (including as part of the Bonus Action you use to enter your Rage); or Wolf — your allies have Advantage on attack rolls against any enemy of yours within 5 feet of you."
     },
     "wildheart-aspect-of-the-wilds": {
       "name": "Aspect of the Wilds",
-      "description": "You gain an ongoing benefit based on the Beast Spirit you chose at level 3; this benefit can be changed on a Long Rest. Bear: resistance to one damage type. Eagle: you don't need to sleep and can't be forced to sleep. Elk: your Speed increases by 15 feet. Tiger: add d6 to one damage roll per turn. Wolf: knock a creature prone when you hit it with an opportunity attack."
+      "description": "When you finish a Long Rest, choose one animal aspect: Owl — your Darkvision range increases by 60 feet; Panther — you have a Climb Speed equal to your Speed; or Salmon — you have a Swim Speed equal to your Speed."
     },
     "worldtree-vitality-of-the-tree": {
       "name": "Vitality of the Tree",
-      "description": "When you activate your Rage, you gain Temporary Hit Points equal to your Barbarian level plus your CON modifier. As a Bonus Action while raging, you can grant 1d6 Temporary Hit Points to one creature within 60 feet of you."
+      "description": "When you activate your Rage, you gain Temporary Hit Points equal to your Barbarian level (Vitality Surge). In addition, at the start of each of your turns while your Rage is active, one other creature of your choice within 10 feet of you gains Temporary Hit Points equal to a roll of a number of d6s equal to your Rage Damage bonus (Life-Giving Force), until your Rage ends."
     },
     "worldtree-branches-of-the-tree": {
       "name": "Branches of the Tree",
-      "description": "When a creature hits you with an attack roll, you can use your Reaction to teleport that creature to an unoccupied space you can see within 10 feet of you."
+      "description": "While your Rage is active, you can use a Reaction when a creature you can see starts its turn within 30 feet of you to force it to make a Strength saving throw (DC 8 + your Strength modifier + your Proficiency Bonus). On a failed save, you teleport the creature to an unoccupied space you can see within 5 feet of you or the nearest unoccupied space you can see, and its Speed is 0 until the end of your current turn."
     },
     "worldtree-battering-roots": {
       "name": "Battering Roots",
-      "description": "Your reach increases by 10 feet for melee weapon attacks. When you hit a creature with a melee weapon attack while raging, you can knock the target Prone, push it up to 15 feet away from you, or grapple it."
+      "description": "On your turn, when you attack with a Heavy or Versatile melee weapon, your reach with it increases by 10 feet. When you hit a creature with such a weapon, you can activate its Push or Topple mastery property in addition to a different mastery property the weapon has, if any."
     },
     "zealot-divine-fury-radiant": {
       "name": "Divine Fury (Radiant)",
@@ -785,7 +785,7 @@
     },
     "zealot-warrior-of-the-gods": {
       "name": "Warrior of the Gods",
-      "description": "Revival spells cast on you require no Material components. In addition, if such a spell would normally have you return with 1 Hit Point, you return with hit points equal to half your Hit Point maximum."
+      "description": "You have a pool of four d12s that you can use to heal yourself. As a Bonus Action, you can expend any number of these dice, roll them, and regain a number of Hit Points equal to the total rolled. The pool increases to five d12s at Barbarian level 6, six at level 12, and seven at level 17. You regain all expended dice when you finish a Long Rest."
     },
     "zealot-fanatical-focus": {
       "name": "Fanatical Focus",
@@ -793,7 +793,7 @@
     },
     "zealot-zealous-presence": {
       "name": "Zealous Presence",
-      "description": "As a Bonus Action, you unleash a battle cry infused with divine energy. Up to 10 creatures of your choice within 60 feet of you gain Advantage on attack rolls and saving throws until the start of your next turn. Once you use this feature, you can't use it again until you finish a Long Rest."
+      "description": "As a Bonus Action, you unleash a battle cry infused with divine energy. Up to 10 creatures of your choice within 60 feet of you gain Advantage on attack rolls and saving throws until the start of your next turn. Once you use this feature, you can't use it again until you finish a Long Rest, unless you expend a use of your Rage (no action required) to use it again."
     },
     "collegedance-inspirational-dance": {
       "name": "Inspirational Dance",
@@ -1097,11 +1097,11 @@
     },
     "barbarian-reckless-attack": {
       "name": "Reckless Attack",
-      "description": "You can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly."
+      "description": "You can throw aside all concern for defense to attack with fierce desperation. When you make your first attack roll on your turn, you can decide to attack recklessly: until the start of your next turn, you have Advantage on Strength-based attack rolls, but attack rolls against you also have Advantage during that time."
     },
     "barbarian-danger-sense": {
       "name": "Danger Sense",
-      "description": "You gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger."
+      "description": "You have an uncanny sense of when things nearby aren't as they should be. You have Advantage on Dexterity saving throws unless you have the Incapacitated condition."
     },
     "barbarian-extra-attack": {
       "name": "Extra Attack",
@@ -1113,7 +1113,7 @@
     },
     "barbarian-feral-instinct": {
       "name": "Feral Instinct",
-      "description": "Your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."
+      "description": "Your instincts are so honed that you have advantage on initiative rolls."
     },
     "barbarian-instinctive-pounce": {
       "name": "Instinctive Pounce",
@@ -1121,23 +1121,23 @@
     },
     "barbarian-brutal-strike": {
       "name": "Brutal Strike",
-      "description": "If you use Reckless Attack, you can forgo advantage on one Strength-based attack roll and instead have that attack deal extra damage."
+      "description": "If you use Reckless Attack, you can forgo any Advantage on one Strength-based attack roll of your choice on your turn (the chosen roll must not have Disadvantage). If that attack hits, the target takes an extra 1d10 damage of the same type dealt by the weapon or Unarmed Strike, and you can cause one Brutal Strike effect: Forceful Blow — the target is pushed 15 feet straight away from you, then you can move up to half your Speed straight toward it without provoking Opportunity Attacks; or Hamstring Blow — the target's Speed is reduced by 15 feet until the start of your next turn (only one target can be affected by this effect at a time). You can also choose neither effect."
     },
     "barbarian-relentless-rage": {
       "name": "Relentless Rage",
-      "description": "Your rage can keep you fighting despite grievous wounds. If you drop to 0 hit points while you're raging and don't die outright, you can make a DC 10 Constitution saving throw."
+      "description": "Your Rage can keep you fighting despite grievous wounds. If you drop to 0 Hit Points while raging and don't die outright, you can make a DC 10 Constitution saving throw; on a success, your Hit Points instead change to twice your Barbarian level. Each time you use this feature after the first, the DC increases by 5. When you finish a Short or Long Rest, the DC resets to 10."
     },
     "barbarian-improved-brutal-strike": {
       "name": "Improved Brutal Strike",
-      "description": "Your Brutal Strike feature improves, granting additional effects when you forgo advantage."
+      "description": "You gain two additional Brutal Strike effects, one of which you can use in place of a Forceful Blow or Hamstring Blow when you use Brutal Strike: Staggering Blow — the target has Disadvantage on its next saving throw and can't make Opportunity Attacks until the start of your next turn; or Sundering Blow — before the start of your next turn, the next attack roll made by another creature against the target gets a +5 bonus (a creature can benefit from only one Sundering Blow at a time)."
     },
     "barbarian-persistent-rage": {
       "name": "Persistent Rage",
-      "description": "Your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."
+      "description": "Your Rage is so fierce that it ends early only if you fall Unconscious or choose to end it — it no longer ends early if you don't attack a hostile creature or take damage. In addition, when you roll Initiative, you can regain all expended uses of Rage; once you do so, you can't again until you finish a Long Rest. Your Rage still ends early if you don Heavy armor."
     },
     "barbarian-improved-brutal-strike-2": {
       "name": "Improved Brutal Strike (Greater)",
-      "description": "Your Brutal Strike feature improves further."
+      "description": "Your Brutal Strike grows mightier: the extra damage from Brutal Strike increases to 2d10, and when you use Brutal Strike you can use two of its effects instead of one."
     },
     "barbarian-indomitable-might": {
       "name": "Indomitable Might",
