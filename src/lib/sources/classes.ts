@@ -157,7 +157,13 @@ export const CLASS_SOURCES: readonly ClassSource[] = [
           },
         ],
       },
-      { grants: [{ type: 'feature', feature: { id: 'barbarian-primal-champion' } }] },
+      {
+        grants: [
+          { type: 'feature', feature: { id: 'barbarian-primal-champion' } },
+          { type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 },
+          { type: 'ability-score-increase', ability: 'con', amount: 4, max: 24 },
+        ],
+      },
     ],
   },
 

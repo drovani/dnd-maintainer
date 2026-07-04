@@ -216,6 +216,14 @@ export interface AsiGrant {
   readonly from: readonly AbilityKey[] | null;
 }
 
+export interface AbilityScoreIncreaseGrant {
+  readonly type: 'ability-score-increase';
+  readonly ability: AbilityKey;
+  readonly amount: number;
+  /** Raised per-ability cap this increase enables (e.g. 24 for Barbarian Primal Champion). */
+  readonly max: number;
+}
+
 export interface FeatGrant {
   readonly type: 'feat';
   readonly featId: FeatId;
@@ -397,6 +405,7 @@ export type Grant =
   | SpellcastingGrant
   | SpellGrant
   | AsiGrant
+  | AbilityScoreIncreaseGrant
   | SubclassGrant
   | AbilityCheckBonusGrant
   | FightingStyleChoiceGrant

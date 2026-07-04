@@ -67,12 +67,19 @@ export function resolveAbilities(
     }
   }
 
+  const maxByAbility: Partial<Record<AbilityKey, number>> = {};
+  for (const { grant, source } of collectGrantsByType(bundles, 'ability-score-increase')) {
+    bonusList[grant.ability].push({ value: grant.amount, source });
+    maxByAbility[grant.ability] = Math.max(maxByAbility[grant.ability] ?? 20, grant.max);
+  }
+
   const result = {} as Record<AbilityKey, ResolvedAbility>;
   for (const key of keys) {
     const base = baseAbilities[key];
     const bonuses = bonusList[key];
     const rawTotal = base + bonuses.reduce((sum, b) => sum + b.value, 0);
-    const total = Math.min(rawTotal, 20);
+    const max = maxByAbility[key] ?? 20;
+    const total = Math.min(rawTotal, max);
     result[key] = {
       base,
       bonuses,
