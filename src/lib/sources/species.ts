@@ -294,31 +294,14 @@ export const SPECIES_SOURCES: readonly SpeciesSource[] = [
       { type: 'resistance', damageType: 'radiant' },
       { type: 'feature', feature: { id: 'aasimar-healing-hands' } },
       { type: 'feature', feature: { id: 'aasimar-light-bearer' } },
-      // Celestial Revelation: at character level 3, choose one transformation (2024 PHB). #289
-      {
-        type: 'feature-choice',
-        key: createChoiceKey('feature-choice', 'species', 'aasimar', 0),
-        minCharacterLevel: 3,
-        options: [
-          {
-            optionId: 'heavenly-wings',
-            featureId: 'aasimar-celestial-revelation-heavenly-wings',
-            // Transformation-only fly speed (1 min, Bonus Action); the engine does not model
-            // transient activated speeds, so the mechanics live in the feature description.
-            grants: [],
-          },
-          {
-            optionId: 'inner-radiance',
-            featureId: 'aasimar-celestial-revelation-inner-radiance',
-            grants: [],
-          },
-          {
-            optionId: 'necrotic-shroud',
-            featureId: 'aasimar-celestial-revelation-necrotic-shroud',
-            grants: [],
-          },
-        ],
-      },
+      // Celestial Revelation (2024 PHB): at character level 3 you gain ALL THREE transformations and
+      // choose which to use each time you activate the feature (once per Long Rest) — not a one-time
+      // build choice (#301). Granted as informational features gated to character level 3 (#289);
+      // the transformations are transient/activated effects the engine does not otherwise model.
+      { type: 'feature', minCharacterLevel: 3, feature: { id: 'aasimar-celestial-revelation' } },
+      { type: 'feature', minCharacterLevel: 3, feature: { id: 'aasimar-celestial-revelation-heavenly-wings' } },
+      { type: 'feature', minCharacterLevel: 3, feature: { id: 'aasimar-celestial-revelation-inner-radiance' } },
+      { type: 'feature', minCharacterLevel: 3, feature: { id: 'aasimar-celestial-revelation-necrotic-shroud' } },
     ],
   },
   // Dragonborn (2024 PHB) — lineage choice from 10 options (5 chromatic, 5 metallic)
