@@ -412,4 +412,144 @@ describe('resolveAbilities', () => {
       expect(result.cha.total).toBe(10); // unaffected
     });
   });
+
+  describe('ability-score-increase grants', () => {
+    it('applies fixed str/con increases', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [
+            { type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 },
+            { type: 'ability-score-increase', ability: 'con', amount: 4, max: 24 },
+          ],
+        },
+      ];
+      const result = resolveAbilities(BASE, bundles, NO_CHOICES);
+      expect(result.str.total).toBe(14);
+      expect(result.con.total).toBe(14);
+      expect(result.dex.total).toBe(10);
+    });
+
+    it('raises the cap past 20 — base 20 + grant reaches 24, not clamped to 20', () => {
+      const highBase = { ...BASE, str: 20 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const result = resolveAbilities(highBase, bundles, NO_CHOICES);
+      expect(result.str.total).toBe(24);
+      expect(result.str.modifier).toBe(7);
+    });
+
+    it('caps at the raised max — base 22 + 4 raw 26 clamps to 24', () => {
+      const highBase = { ...BASE, str: 22 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const result = resolveAbilities(highBase, bundles, NO_CHOICES);
+      expect(result.str.total).toBe(24);
+    });
+
+    it('low base score still gets the full amount', () => {
+      const lowBase = { ...BASE, str: 8 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const result = resolveAbilities(lowBase, bundles, NO_CHOICES);
+      expect(result.str.total).toBe(12);
+    });
+
+    it('stacks additively with a player ASI on the same ability', () => {
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'fighter', level: 4 },
+          grants: [{ type: 'asi', key: 'asi:class:fighter:0', points: 2, from: null }],
+        },
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:class:fighter:0': { type: 'asi', allocation: { str: 2 } },
+      };
+      const result = resolveAbilities(BASE, bundles, choices);
+      expect(result.str.total).toBe(16); // 10 + 2 (asi) + 4 (increase)
+    });
+
+    it('stacks with ASI on a high base and clamps at the raised max', () => {
+      const highBase = { ...BASE, str: 18 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'fighter', level: 4 },
+          grants: [{ type: 'asi', key: 'asi:class:fighter:0', points: 2, from: null }],
+        },
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const choices: Readonly<Record<ChoiceKey, ChoiceDecision>> = {
+        'asi:class:fighter:0': { type: 'asi', allocation: { str: 2 } },
+      };
+      const result = resolveAbilities(highBase, bundles, choices);
+      expect(result.str.total).toBe(24); // raw 18 + 2 + 4 = 24, at cap
+    });
+
+    it('per-ability cap only raises the granted ability — other abilities still clamp at 20', () => {
+      const highBase = { ...BASE, str: 20, dex: 18 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'class', id: 'barbarian', level: 20 },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+        {
+          source: { origin: 'species', id: 'human' },
+          grants: [{ type: 'ability-bonus', ability: 'dex', bonus: 5 }],
+        },
+      ];
+      const result = resolveAbilities(highBase, bundles, NO_CHOICES);
+      expect(result.str.total).toBe(24);
+      expect(result.dex.total).toBe(20); // raw 23, no raised cap for dex — clamps at 20
+    });
+
+    it('tracks bonus sources', () => {
+      const source = { origin: 'class' as const, id: 'barbarian' as const, level: 20 };
+      const bundles: GrantBundle[] = [
+        {
+          source,
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const result = resolveAbilities(BASE, bundles, NO_CHOICES);
+      expect(result.str.bonuses).toHaveLength(1);
+      expect(result.str.bonuses[0].value).toBe(4);
+      expect(result.str.bonuses[0].source).toEqual(source);
+    });
+
+    it('two increases on the same ability sum additively and use the higher of the two caps', () => {
+      const highBase = { ...BASE, str: 20 };
+      const bundles: GrantBundle[] = [
+        {
+          source: { origin: 'item', id: 'test-increase-source-1' },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 2, max: 22 }],
+        },
+        {
+          source: { origin: 'item', id: 'test-increase-source-2' },
+          grants: [{ type: 'ability-score-increase', ability: 'str', amount: 4, max: 24 }],
+        },
+      ];
+      const result = resolveAbilities(highBase, bundles, NO_CHOICES);
+      // raw 20 + 2 + 4 = 26, clamped to the higher of the two caps (24), not the lower (22)
+      expect(result.str.total).toBe(24);
+    });
+  });
 });

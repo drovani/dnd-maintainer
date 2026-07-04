@@ -508,6 +508,21 @@ describe('Barbarian class grant structures', () => {
       expect(grant.feature.id).toBe('barbarian-primal-champion');
     }
   });
+
+  // Regression for #303: Primal Champion also grants fixed +4 str/+4 con with a raised cap of 24.
+  it('level 20 has exactly two ability-score-increase grants for str and con, max 24', () => {
+    const increaseGrants = source?.levels[19].grants.filter((g) => g.type === 'ability-score-increase') ?? [];
+    expect(increaseGrants).toHaveLength(2);
+    for (const grant of increaseGrants) {
+      if (grant.type === 'ability-score-increase') {
+        expect(grant.amount).toBe(4);
+        expect(grant.max).toBe(24);
+      }
+    }
+    const abilities = increaseGrants.map((g) => (g.type === 'ability-score-increase' ? g.ability : null));
+    expect(abilities).toContain('str');
+    expect(abilities).toContain('con');
+  });
 });
 
 describe('Bard class grant structures', () => {
